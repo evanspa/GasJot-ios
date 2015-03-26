@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<http-response statusCode="503">
+  <annotation name="Account Creation (server busy)"
+              host="localhost"
+              port="4040"
+              scheme="http"
+              uri-path="/fp/users"
+              request-method="POST">503 (server busy) received from server.</annotation>
+  <headers>
+    <header name="Content-Length" value="0" />
+    <header name="Retry-After" value="90" />
+  </headers>
+  <cookies />
+  <body />
+</http-response>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<http-response statusCode="201">
+  <annotation name="New Fuel Station Remote Sync (success - Exxon)"
+    host="localhost"
+    port="4040"
+    scheme="http"
+    uri-path="/fp/users/9201934123409/fuelstations"
+    request-method="POST">Successful remote sync of newly-added Exxon station.</annotation>
+  <headers>
+    <header name="Location" value="http://localhost:4040/fp/users/9201934123409/fuelstations/FS001" />
+    <header name="Cache-Control" value="no-cache" />
+    <header name="Vary" value="Accept, Accept-Charset, Accept-Language" />
+    <header name="fp-auth-token" value="23409582345-093284590-2345LKJDFLSDFLK" />
+    <header name="Last-Modified" value="Fri, 06 Sep 2014 10:34:22 GMT" />
+    <header name="Content-Type" value="application/vnd.name.paulevans.fuelstation+json" />
+  </headers>
+  <body>
+    <![CDATA[
+      { "fpfuelstation/name": "Exxon Station @Piper Glen",
+        "fpfuelstation/city": "Charlotte",
+        "fpfuelstation/state": "NC",
+        "fpfuelstation/zip": "28277",
+        "fpfuelstation/dateAdded": "Sun, 05 Oct 2014 09:52:22 GMT" }
+    ]]>
+  </body>
+</http-response>

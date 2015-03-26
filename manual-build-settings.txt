@@ -1,0 +1,21 @@
++ Because CocoaPods does not understand that the "fuelpurchase-dev" target has
+  a hard, automatic dependency on the "fuelpurchase" target, it doesn't know to
+  ignore dependencies for the dev target that overlap with dependencies for the
+  main target.  The way the current Podfile is configured, fuelpurchase-dev will
+  link with fuelpurchase.a (which links with libPods.a which links with
+  libPods-objc-commons.a).  This linking is natural, correct and unavoidable.
+  fuelpurchase-dev ALSO links against libPods-fuelpurchase-dev.a which
+  links with, among other things, libPods-fuelpurchase-dev-objc-commons.a.  So,
+  fuelpurchase-dev.a has duplicate symbol definitions for objc-commons.  The
+  fix is that libPods-fuelpurchase-dev-objc-commons.a should not be linked
+  with libPods-fuelpurchase-dev.a.  This has to be done manually after the
+  Pods have been installed (or updated).  So, again, the manual config change is to
+  navigate to the Pods-fuelpurchase-dev target, and remove the reference
+  to "libPods-fuelpurchase-dev-objc-commons.a" from the "Link Binary" step
+  of the build phases.  After pod install/update,
+  it will also have to be manually removed from the "Link Binary" step
+  of the Pods-fuelpurchase-dev target.
+
++ In fuelpurchase and fuelpurchase-dev targets, you need to manually add an
+entry to the "Copy Bundle Resources" build phase.  You need to add:
+"Pods/IQKeyboardManager/IQKeyboardManager bundle to it

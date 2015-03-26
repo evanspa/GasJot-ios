@@ -1,0 +1,145 @@
+//
+//  PEAddViewEditController.h
+//  fuelpurchase
+//
+//  Created by Evans, Paul on 9/30/14.
+//  Copyright (c) 2014 Paul Evans. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import <objc-commons/PEUIToolkit.h>
+#import <iFuelPurchase-Core/PELMMainSupport.h>
+
+@class PEAddViewEditController;
+typedef UIView *(^PEEntityPanelMakerBlk)(PEAddViewEditController *);
+typedef void (^PEPanelToEntityBinderBlk)(UIView *, id);
+typedef void (^PEEntityToPanelBinderBlk)(id, UIView *);
+typedef void (^PEEnableDisablePanelBlk)(UIView *, BOOL);
+typedef BOOL (^PEEntityEditPreparerBlk)(PEAddViewEditController *, id);
+typedef void (^PEEntityEditCancelerBlk)(PEAddViewEditController *, id);
+typedef void (^PEEntityAddCancelerBlk)(PEAddViewEditController *);
+typedef id   (^PEEntityMakerBlk)(UIView *);
+typedef void (^PESaveEntityBlk)(id<UITableViewDataSource>, PEAddViewEditController *, id);
+typedef void (^PEMarkAsDoneEditingBlk)(id);
+typedef void (^PESaveNewEntityBlk)(UIView *, id);
+typedef void (^PEItemAddedBlk)(PEAddViewEditController *, id);
+typedef void (^PEItemChangedBlk)(id, NSIndexPath *);
+typedef void (^PEPrepareUIForUserInteractionBlk)(UIView *);
+typedef void (^PEViewDidAppearBlk)(UIView *);
+typedef NSArray *(^PEEntityValidatorBlk)(UIView *);
+
+@interface PEAddViewEditController : UIViewController <MBProgressHUDDelegate>
+
+#pragma mark - Initializers
+
+- (id)initWithEntity:(PELMMainSupport *)entity
+               isAdd:(BOOL)isAdd
+           indexPath:(NSIndexPath *)indexPath
+           uitoolkit:(PEUIToolkit *)uitoolkit
+        itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
+      itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
+syncInitiatedNotifName:(NSString *)syncInitiatedNotifName
+     syncedNotifName:(NSString *)syncedNotifName
+ syncFailedNotifName:(NSString *)syncFailedNotifName
+entityRemotelyDeletedNotifName:(NSString *)entityRemotelyDeletedNotifName
+entityLocallyUpdatedNotifNames:(NSArray *)entityLocallyUpdatedNotifNames
+entityRemotelyUpdatedNotifName:(NSString *)entityRemotelyUpdatedNotifName
+    entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
+ entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
+ panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
+      addEntityTitle:(NSString *)addEntityTitle
+     viewEntityTitle:(NSString *)viewEntityTitle
+     editEntityTitle:(NSString *)editEntityTitle
+panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
+   entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
+  entityEditPreparer:(PEEntityEditPreparerBlk)entityEditPreparer
+  entityEditCanceler:(PEEntityEditCancelerBlk)entityEditCanceler
+         entityMaker:(PEEntityMakerBlk)entityMaker
+         entitySaver:(PESaveEntityBlk)entitySaver
+      newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
+doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
+prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
+    viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
+     entityValidator:(PEEntityValidatorBlk)entityValidator
+  listViewDataSource:(id<UITableViewDataSource>)listViewDataSource
+foregroundEditActorId:(NSNumber *)foregroundEditActorId
+entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
+entityUpdatedNotificationToPost:(NSString *)entityUpdatedNotificationToPost
+getterForNotification:(SEL)getterForNotification;
+
+#pragma mark - Factory functions
+
++ (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
+                                            itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
+                                        entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
+                                     entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
+                                     panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
+                                          addEntityTitle:(NSString *)addEntityTitle
+                                       entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
+                                             entityMaker:(PEEntityMakerBlk)entityMaker
+                                          newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
+                          prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
+                                        viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
+                                         entityValidator:(PEEntityValidatorBlk)entityValidator
+                                      listViewDataSource:(id<UITableViewDataSource>)listViewDataSource
+                                   foregroundEditActorId:(NSNumber *)foregroundEditActorId
+                           entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost;
+
++ (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
+                                            itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
+                                        entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
+                                     entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
+                                     panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
+                                          addEntityTitle:(NSString *)addEntityTitle
+                                       entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
+                                             entityMaker:(PEEntityMakerBlk)entityMaker
+                                          newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
+                          prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
+                                        viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
+                                         entityValidator:(PEEntityValidatorBlk)entityValidator
+                                      listViewDataSource:(id<UITableViewDataSource>)listViewDataSource
+                                   foregroundEditActorId:(NSNumber *)foregroundEditActorId
+                           entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
+                                   getterForNotification:(SEL)getterForNotification;
+
++ (PEAddViewEditController *)viewEntityCtrlrWithEntity:(PELMMainSupport *)entity
+                                       entityIndexPath:(NSIndexPath *)entityIndexPath
+                                             uitoolkit:(PEUIToolkit *)uitoolkit
+                                        itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
+                                syncInitiatedNotifName:(NSString *)syncInitiatedNotifName
+                                       syncedNotifName:(NSString *)syncedNotifName
+                                   syncFailedNotifName:(NSString *)syncFailedNotifName
+                        entityRemotelyDeletedNotifName:(NSString *)entityRemotelyDeletedNotifName
+                        entityLocallyUpdatedNotifNames:(NSArray *)entityLocallyUpdatedNotifNames
+                        entityRemotelyUpdatedNotifName:(NSString *)entityRemotelyUpdatedNotifName
+                                      entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
+                                   entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
+                                   panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
+                                       viewEntityTitle:(NSString *)viewEntityTitle
+                                       editEntityTitle:(NSString *)editEntityTitle
+                                  panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
+                                     entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
+                                    entityEditPreparer:(PEEntityEditPreparerBlk)entityEditPreparer
+                                    entityEditCanceler:(PEEntityEditCancelerBlk)entityEditCanceler
+                                           entitySaver:(PESaveEntityBlk)entitySaver
+                               doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
+                        prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
+                                      viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
+                                       entityValidator:(PEEntityValidatorBlk)entityValidator
+                                    listViewDataSource:(id<UITableViewDataSource>)listViewDataSource
+                                 foregroundEditActorId:(NSNumber *)foregroundEditActorId
+                       entityUpdatedNotificationToPost:(NSString *)entityUpdatedNotificationToPost;
+
+#pragma mark - Properties
+
+@property (readonly, nonatomic) id<UITableViewDataSource> listViewDataSource;
+
+@property (readonly, nonatomic) PELMMainSupport *entity;
+
+@property (readonly, nonatomic) PEUIToolkit *uitoolkit;
+
+@property (readonly, nonatomic) PEEntityToPanelBinderBlk entityToPanelBinder;
+
+@property (nonatomic) UIView *entityPanel;
+
+@end

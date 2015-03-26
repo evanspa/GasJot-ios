@@ -1,0 +1,3 @@
+{ "_links": {
+  "users": { "href": "http://localhost:4040/fp/users" },
+  "login": { "href": "http://localhost:4040/fp/login" }}}

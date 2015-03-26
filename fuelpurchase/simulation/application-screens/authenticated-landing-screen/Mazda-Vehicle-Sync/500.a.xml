@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<http-response statusCode="500">
+  <annotation name="Existing Vehicle Remote Sync - Mazda (failure)"
+    host="localhost"
+    port="4040"
+    scheme="http"
+    uri-path="/fp/users/9201934123409/vehicles/V429"
+    request-method="PUT">Unsuccessful remote sync of edited Mazda.</annotation>
+  <headers>
+    <header name="Cache-Control" value="no-cache" />
+    <header name="Vary" value="Accept, Accept-Charset, Accept-Language" />
+  </headers>
+  <body />
+</http-response>

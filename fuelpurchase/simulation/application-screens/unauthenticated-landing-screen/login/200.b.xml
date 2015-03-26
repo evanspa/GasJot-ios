@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<http-response statusCode="200">
+  <annotation name="Login - 1"
+    host="localhost"
+    port="4040"
+    scheme="http"
+    uri-path="/fp/users?usernameOrEmail=evansp2"
+    request-method="GET">Successful login w/20 vehicles.</annotation>
+  <headers>
+    <header name="Location" value="http://localhost:4040/fp/users/9201934123409" />
+    <header name="Cache-Control" value="no-cache" />
+    <header name="Vary" value="Accept, Accept-Charset, Accept-Language" />
+    <header name="fp-auth-token" value="23409582345-093284590-2345LKJDFLSDFLK" />
+    <header name="Last-Modified" value="Tue, 02 Sep 2014 8:03:12 GMT" />
+    <header name="Content-Type" value="application/vnd.name.paulevans.user+json" />
+  </headers>
+  <cookies />
+  <body>
+    <![CDATA[
+      { "fpuser/name": "Paul Evans",
+        "fpuser/email": "evansp2@gmail.com",
+        "fpuser/username": "evansp2",
+        "fpuser/creationDate": "Tue, 02 Sep 2014 8:03:12 GMT",
+        "_links": {
+          "vehicles": {
+            "href": "http://example.com/fp/users/U1123409100/vehicles",
+            "type": "application/vnd.name.paulevans.vehicle+json"}},
+        "_embedded": [
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V20",
+            "last-modified": "Fri, 06 Sep 2014 10:34:22 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 20",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:22 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V19",
+            "last-modified": "Fri, 06 Sep 2014 10:34:21 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 19",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:21 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V18",
+            "last-modified": "Fri, 06 Sep 2014 10:34:20 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 18",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:20 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V17",
+            "last-modified": "Fri, 06 Sep 2014 10:34:19 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 17",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:19 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V16",
+            "last-modified": "Fri, 06 Sep 2014 10:34:18 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 16",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:18 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V15",
+            "last-modified": "Fri, 06 Sep 2014 10:34:17 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 15",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:17 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V14",
+            "last-modified": "Fri, 06 Sep 2014 10:34:16 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 14",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:16 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V13",
+            "last-modified": "Fri, 06 Sep 2014 10:34:15 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 13",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:15 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V12",
+            "last-modified": "Fri, 06 Sep 2014 10:34:14 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 12",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:14 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V11",
+            "last-modified": "Fri, 06 Sep 2014 10:34:13 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 11",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:13 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V10",
+            "last-modified": "Fri, 06 Sep 2014 10:34:12 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 10",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:12 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V9",
+            "last-modified": "Fri, 06 Sep 2014 10:34:11 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 9",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:11 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V8",
+            "last-modified": "Fri, 06 Sep 2014 10:34:10 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 8",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:10 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V7",
+            "last-modified": "Fri, 06 Sep 2014 10:34:09 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 7",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:09 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V6",
+            "last-modified": "Fri, 06 Sep 2014 10:34:08 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 6",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:08 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V5",
+            "last-modified": "Fri, 06 Sep 2014 10:34:07 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 5",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:07 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V4",
+            "last-modified": "Fri, 06 Sep 2014 10:34:06 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 4",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:06 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V3",
+            "last-modified": "Fri, 06 Sep 2014 10:34:05 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 3",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:05 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V2",
+            "last-modified": "Fri, 06 Sep 2014 10:34:04 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 2",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:04 GMT"}},
+          { "media-type": "application/vnd.name.paulevans.vehicle+json",
+            "location": "http://example.com/fp/users/U1123409100/vehicles/V1",
+            "last-modified": "Fri, 06 Sep 2014 10:34:03 GMT",
+            "payload": {
+              "fpvehicle/name": "Vehicle 1",
+              "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:03 GMT"}}]}
+    ]]>
+  </body>
+</http-response>

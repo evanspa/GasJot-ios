@@ -1,0 +1,91 @@
+################################################################################
+Story: Server (for ANY web service call) informs that the auth token is no
+longer valid
+################################################################################
+A process that runs on a seperate thread (i.e., a thread other than the main
+thread), for example, the transaction logger, upon receipt of a server response
+indicating the auth token is bad, should have the following effect: (1) the txn
+logger thread shuts down its timer, and (2) notifies its delegate that the auth
+token is bad (there needs to be a protocol that delegates can conform to).  In
+our case the delegate will most likely be the app delegate.  The app delegate --
+upon being told of the bad auth token -- should shutdown the timers associated
+with any other timer-based background jobs that invoke a web service, and,
+should set its state-flag: "authToken invalid" to true.  This state flag should
+be written to user-defaults.  Upon next startup, this flag should be consulted
+to determine if the user should be prompted to login.  QUESTION: when should the
+local core data store be emptied?  How about when the user explicitly taps the
+"logout" button?  But, what if there is data that is yet to be sync'd from the
+local core data store to the server?  How about to just warn the user?  And give
+them a 'sync now' button to hit before logging out?  (boy, what a pain in the
+ass this all is)
+
+################################################################################
+Story: App startup; fetching latest edits from server when made from a different
+device; new auth token received; auth token always valid.
+################################################################################
+App launches, we read the auth token from the keychain, and if found, bring user
+to authenticated landing page.  In a background thread (GCD or operation queue),
+issue a GET request to fetch latest edits (these would be edits made by the user
+from a different device than the one they're currently on).  Any edits received
+need to be written into the local core-data data store; and, raise a
+notification so that the app/main thread can take any action it needs to take.
+
+Axiom: the only time we care about the auth token is for deciding what to do
+when the application launches.
+
+Axiom: a new auth token could arrive on any HTTP response; when it does, it
+should replace the current auth token stored in the application's key chain.
+The "store" abstraction should NOT hold a reference to an AppDelegate so that it
+could store new auth tokens on it; instead, there should be a protocol modeling
+a new "New Auth Token Listener"; the store should hold a reference to it and
+notify it when a new auth token arrives.  The AppDelegate can conform to that
+protocol and register itself with the store.
+
+On app launch (assume we have an auth token in the key chain), we make that GET
+request to fetch latest edits --- the server, as a side-effect of fulfilling the
+request, will record the fact this request happened to serve as an indicator the
+user is currently "in-session" on a particular device (the auth token from the
+fetch-edits GET request will be linked to a particular device in the server data
+store, so, we'll know what device the user is using while using the app
+[in-session]).  Now, let's assume the user pulls out another device (or, their
+laptop), and, while using the app on their first device, starts using the
+app/website on another device, and makes an edit.  In order to keep the first
+device in-sync, the server will send it (and any other devices of the user that
+are currently "in-session") a push notification.  Upon receipt, the app can
+issue a "GET" (the same GET that it does at startup) to fetch the latest edits.
+
+But, if we pull up a bit, let's think about what's really going on here.  The
+above push notification is a tap on the shoulder to let us know our app should
+transition to a new state.  That new state is: "server has edits not downloaded
+by the app".  The question is, how is our app going to react to this new state
+transition?  Answer: issue GET request in background thread to fetch the edits.
+When the GET succeeds, and the app's local data store contains the edits, the
+app now transitions to a new state: "app has all latast user edits".  The point
+being, it's always important to remember that fundamentally, we break things
+down into a state machine.  It provides a nice formalism to reason about the
+system.  But wait, what if there is an error attempting to fetch the latest
+edits (like say we get a 500 from the server; or we timeout)?  Well, we need to
+have a boolean (or something) to capture this state on the app delegate.
+Something like, "server edits available for fetch attempted failed."  Perhaps we
+display some sort of visual indicator about this fact in the app, and perhaps
+provide a screen to allow the user to manually try again (by tapping some 'sync'
+button).  Or, perhaps we do nothing, and the background thread that attempted
+the fetch in the first place simply tries again at a later date (i.e., we have
+an NSTimer involved in this; 99% of the time, the timer only needs to fire once
+to fetch the edits, and we're done; only in case of failure would the timer fire
+again; we should record the attempt-count, and, after N number of failed
+attempts to fetch the server edits, perhaps we stop trying, place a visual
+indicator in the app, and inform the user that the "app team is investigating
+the issue", and, by virtue of the fact that transaction logs are (hopefully)
+being uploaded, the "team" can manually investigate the error.
+
+Back to implementation.  So, what if the user doesn't have push notifications
+enabled?  2 options: (1) Provide some sort of explicit "sync" button in the app
+the user can tap so that he/she can always do a "fetch edits" from the server.
+Of course, the user will never really know when to tap this button, and, a real
+risk is that the user may abuse the button; misunderstand the button; and
+always and frequently tap it needlessly (generating lots of unnecessary load on
+the server, etc).  Not a great option.  (2) Do nothing.  No "sync" button.
+Instead, the next time the user fires-up the app, the "GET" request will occur,
+and it'll get those edits.  Besides, the chances the user will be using 2
+devices simultaneously is very unlikely anyway.

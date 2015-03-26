@@ -1,0 +1,3 @@
+{ "_links": {
+  "users": { "href": "https://fprest.paulevans.name/fp/users" },
+  "login": { "href": "https://fprest.paulevans.name/fp/login" }}}

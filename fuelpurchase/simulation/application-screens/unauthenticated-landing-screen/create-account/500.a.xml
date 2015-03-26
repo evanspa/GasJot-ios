@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<http-response statusCode="500">
+  <annotation name="Account Creation (general server error)"
+    host="localhost"
+    port="4040"
+    scheme="http"
+    uri-path="/fp/users"
+    request-method="POST">500 error received from server.</annotation>
+  <headers>
+    <header name="fp-error-mask" value="1" />
+  </headers>
+  <cookies>
+  </cookies>
+  <body></body>
+</http-response>

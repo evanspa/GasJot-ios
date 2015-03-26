@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>${PRODUCT_NAME}</string>
+	<key>CFBundleExecutable</key>
+	<string>${EXECUTABLE_NAME}</string>
+	<key>CFBundleIdentifier</key>
+	<string>name.paulevans.${PRODUCT_NAME:rfc1034identifier}</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>${PRODUCT_NAME}</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>FP Authentication Strength for Login Token</key>
+	<real>0.3</real>
+	<key>FP Authentication scheme</key>
+	<string>fp-auth</string>
+	<key>FP Authentication token param name</key>
+	<string>fp-token</string>
+	<key>FP REST service preferred charset</key>
+	<string>UTF-8</string>
+	<key>FP REST service preferred format</key>
+	<string>json</string>
+	<key>FP REST service preferred language</key>
+	<string>en-US</string>
+	<key>FP REST service timeout</key>
+	<integer>20</integer>
+	<key>FP REST service mt-version</key>
+	<string>0.0.1</string>
+	<key>FP Txns REST service mt-version</key>
+	<string>0.0.1</string>
+	<key>FP Txns REST service mt-subtype-prefix</key>
+	<string>vnd.fp.</string>
+	<key>FP auth token response header name</key>
+	<string>fp-auth-token</string>
+	<key>FP establish session header name</key>
+	<string>fp-establish-session</string>
+	<key>FP error mask header name</key>
+	<string>fp-error-mask</string>
+	<key>FP time interval for flush to remote master</key>
+	<integer>20</integer>
+	<key>FP time interval for transactions flush to remote</key>
+	<integer>20</integer>
+	<key>FP timeout for main thread coordinator dao operations</key>
+	<integer>60</integer>
+	<key>FP transaction id header name</key>
+	<string>fp-apptxn-id</string>
+	<key>FP user agent device make header name</key>
+	<string>fp-useragent-device-make</string>
+	<key>FP user agent device os header name</key>
+	<string>fp-useragent-device-os</string>
+	<key>FP user agent device os version header name</key>
+	<string>fp-useragent-device-os-version</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We use your location in order to simplify fuel station selection when recording a fuel purchase log.</string>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>armv7</string>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict/>
+	</array>
+</dict>
+</plist>

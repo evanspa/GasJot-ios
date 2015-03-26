@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<http-response statusCode="201">
+  <annotation name="New Vehicle Remote Sync (success - BMW)"
+    host="localhost"
+    port="4040"
+    scheme="http"
+    uri-path="/fp/users/9201934123409/vehicles"
+    request-method="POST">Successful remote sync of newly-added BMW.</annotation>
+  <headers>
+    <header name="Location" value="http://localhost:4040/fp/users/9201934123409/vehicles/V431" />
+    <header name="Cache-Control" value="no-cache" />
+    <header name="Vary" value="Accept, Accept-Charset, Accept-Language" />
+    <header name="fp-auth-token" value="23409582345-093284590-2345LKJDFLSDFLK" />
+    <header name="Last-Modified" value="Fri, 06 Sep 2014 10:34:22 GMT" />
+    <header name="Content-Type" value="application/vnd.name.paulevans.vehicle+json" />
+  </headers>
+  <body>
+    <![CDATA[
+      { "fpvehicle/name": "My Black 328i",
+        "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:22 GMT",
+        "_links": {}}}
+    ]]>
+  </body>
+</http-response>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<http-response statusCode="200">
+  <annotation name="Login - 4 (no vehicles)"
+    host="localhost"
+    port="4040"
+    scheme="http"
+    uri-path="/fp/users?usernameOrEmail=evansp2"
+    request-method="GET">Successful login with no vehicles.</annotation>
+  <headers>
+    <header name="Location" value="http://localhost:4040/fp/users/9201934123409" />
+    <header name="Cache-Control" value="no-cache" />
+    <header name="Vary" value="Accept, Accept-Charset, Accept-Language" />
+    <header name="fp-auth-token" value="23409582345-093284590-2345LKJDFLSDFLK" />
+    <header name="Last-Modified" value="Tue, 02 Sep 2014 8:03:12 GMT" />
+    <header name="Content-Type" value="application/vnd.name.paulevans.user+json" />
+  </headers>
+  <body>
+    <![CDATA[
+      { "fpuser/name": "Paul Evans",
+        "fpuser/email": "evansp2@gmail.com",
+        "fpuser/username": "evansp2",
+        "fpuser/creationDate": "Tue, 02 Sep 2014 8:03:12 GMT",
+        "_links": {
+          "vehicles": {
+            "href": "http://localhost:4040/fp/users/9201934123409/vehicles",
+            "type": "application/vnd.name.paulevans.vehicle+json"},
+          "fuelstations": {
+            "href": "http://localhost:4040/fp/users/9201934123409/fuelstations",
+            "type": "application/vnd.name.paulevans.fuelstation+json"},
+          "fuelpurchase-logs": {
+            "href": "http://example.com/fp/users/9201934123409/fplogs",
+            "type": "application/vnd.name.paulevans.fplog+json"},
+          "environment-logs": {
+            "href": "http://example.com/fp/users/9201934123409/envlogs",
+            "type": "application/vnd.name.paulevans.envlog+json"}},
+        "_embedded": []}
+    ]]>
+  </body>
+</http-response>

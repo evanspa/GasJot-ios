@@ -1,0 +1,155 @@
+/***************************************************************
+ * Labels for DEV Console
+ ***************************************************************/
+"devconsole.screens.btn.txt" = "Screens";
+"devconsole.simulations.btn.txt" = "Simulations";
+
+/***************************************************************
+ * Tab Bar labels
+ ***************************************************************/
+
+/***************************************************************
+ * Start Screen - Unauthenticated Space labels
+ ***************************************************************/
+"unauth.start.signin.hdr" = "Fuel Purchase Sign-in";
+"unauth.start.signin.emailusernmtf.pht" = "E-mail or Username";
+"unauth.start.signin.pwdtf.pht" = "Password";
+"unauth.start.signin.btn.txt" = "Sign In";
+"unauth.start.ca.hdr1" = "New User?";
+"unauth.start.ca.hdr2" = "Sign Up!";
+"unauth.start.ca.fullnametf.pht" = "Full name";
+"unauth.start.ca.emailtf.pht" = "Email";
+"unauth.start.ca.pwdtf.pht" = "Password";
+"unauth.start.ca.btn.txt" = "Create your Account";
+"unauth.start.tempNotification.signinsuccess" = "Login successful.";
+"unauth.start.tempNotification.acctcreationsuccess" = "User account creation successful.";
+
+/***************************************************************
+ * Misc labels
+ ***************************************************************/
+"prevBtn" = "Previous";
+"nextBtn" = "Next";
+"okayMsg" = "Okay";
+"oopsMsg" = "Oops!";
+
+/***************************************************************
+ * REST service invocation common error messages
+ ***************************************************************/
+"nsurlerr.serverdown" = "The remote FuelPurchase services appear to be unavailable at the moment.";
+"nsurlerr.noinetconn" = "You do not appear to have a working internet connection.  Unable to connect to remote FuelPurchase services.";
+"nsurlerr.dnslkupfailed" = "There was a problem attempting to resolve the location of the remote FuelPurchase services.";
+"nsurlerr.timeout" = "It took too long to connect to the remote FuelPurchase services.";
+"nsurlerr.inetconnlost" = "Your internet connection appears to have been lost while attempting to connect to the remote FuelPurchase services.";
+"nsurlerr.unknownerr" = "An unknown error has occured while attemting to communicate with the remote FuelPurchase services.";
+
+/***************************************************************
+ * Messages for URL Loading System Error Codes.  See:
+ * https://developer.apple.com/library/mac/documentation/Cocoa/Reference/
+ * Foundation/Miscellaneous/Foundation_Constants/Reference/
+ * reference.html#jumpTo_88
+ ***************************************************************/
+"FPConnFailureErrorDomain.-1" = "Unknown URL-loading related error.";
+"FPConnFailureErrorDomain.-999" = "Loading of URL cancelled.";
+"FPConnFailureErrorDomain.-1000" = "Bad URL.";
+"FPConnFailureErrorDomain.-1001" = "Connection timed out.";
+"FPConnFailureErrorDomain.-1002" = "Unsupported URL.";
+"FPConnFailureErrorDomain.-1003" = "Cannot find URL host.";
+"FPConnFailureErrorDomain.-1004" = "Cannot connect to URL host.";
+"FPConnFailureErrorDomain.-1103" = "URL data length exceeds maximum.";
+"FPConnFailureErrorDomain.-1005" = "URL connection lost.";
+"FPConnFailureErrorDomain.-1006" = "DNS lookup failed.";
+"FPConnFailureErrorDomain.-1007" = "Too many HTTP redirects.";
+"FPConnFailureErrorDomain.-1008" = "Resource unavailable.";
+"FPConnFailureErrorDomain.-1009" = "Not connected to the Internet.";
+"FPConnFailureErrorDomain.-1010" = "Redirect to non-existent location.";
+"FPConnFailureErrorDomain.-1011" = "Bad server response.";
+"FPConnFailureErrorDomain.-1012" = "User cancelled authentication.";
+"FPConnFailureErrorDomain.-1013" = "User authentication required.";
+"FPConnFailureErrorDomain.-1014" = "Zero-byte resource.";
+"FPConnFailureErrorDomain.-1015" = "Cannot decode raw data.";
+"FPConnFailureErrorDomain.-1016" = "Cannot decode content data.";
+"FPConnFailureErrorDomain.-1017" = "Cannot parse response.";
+"FPConnFailureErrorDomain.-1018" = "International roaming off.";
+"FPConnFailureErrorDomain.-1019" = "Call is active.";
+"FPConnFailureErrorDomain.-1020" = "Data not allowed.";
+"FPConnFailureErrorDomain.-1021" = "Request body stream exhausted.";
+"FPConnFailureErrorDomain.-1100" = "File does not exist.";
+"FPConnFailureErrorDomain.-1101" = "File is directory.";
+"FPConnFailureErrorDomain.-1102" = "No permissions to read file.";
+"FPConnFailureErrorDomain.-1200" = "Secure URL connection failed.";
+"FPConnFailureErrorDomain.-1201" = "Server certificate has bad date.";
+"FPConnFailureErrorDomain.-1202" = "Server certificate is untrusted.";
+"FPConnFailureErrorDomain.-1203" = "Server certificate has unknown root.";
+"FPConnFailureErrorDomain.-1204" = "Server certificate is not yet valid.";
+"FPConnFailureErrorDomain.-1205" = "Client certificate rejected.";
+"FPConnFailureErrorDomain.-1206" = "Client certificate required.";
+"FPConnFailureErrorDomain.-2000" = "Cannot load from network.";
+"FPConnFailureErrorDomain.-3000" = "Cannot create file.";
+"FPConnFailureErrorDomain.-3001" = "Cannot open file.";
+"FPConnFailureErrorDomain.-3002" = "Cannot close file.";
+"FPConnFailureErrorDomain.-3003" = "Cannot write to file.";
+"FPConnFailureErrorDomain.-3004" = "Cannote remove file.";
+"FPConnFailureErrorDomain.-3005" = "Cannot move file.";
+"FPConnFailureErrorDomain.-3006" = "Download decoding failed mid-stream.";
+"FPConnFailureErrorDomain.-3007" = "Download decoding failed to complete.";
+
+/***************************************************************
+ * 'Create User' error messages
+ ***************************************************************/
+"createusr.name-notprovided" = "'Name' cannot be empty";
+"createusr.name-invalid" = "Invalid name";
+"createusr.email-invalid" = "Invalid email address";
+"createusr.username-invalid" = "Invalid username";
+"createusr.identifier-notprovided.email" = "Email must be provided";
+"createusr.password-notprovided" = "Password cannot be empty";
+"createusr.email-already-registered" = "An account with this email address already exists.";
+
+/***************************************************************
+ * 'Sign In' error messages
+ ***************************************************************/
+"signin.username-or-email-notprovided" = "'Username' (or Email) must be provided";
+"signin.password-notprovided" = "'Password' must be provided";
+"signin.credentials-invalid" = "Credentials invalid";
+
+/***************************************************************
+ * Start Screen - Authenticated Space labels
+ ***************************************************************/
+"auth.start.title.txt" = "Quick Action Menu";
+"auth.start.log-fp.btn.txt" = "Log Fuel\nPurchase";
+"auth.start.log-env.btn.txt" = "Log\nEnvironment";
+"auth.start.reports.btn.txt" = "Reports";
+"auth.start.randreport.btn.txt" = "Random\nReport";
+"auth.start.vehicles.btn.txt" = "Vehicles";
+"auth.start.fuelstations.btn.txt" = "Fuel\nStations";
+
+/***************************************************************
+ * List Vehicles Screen labels
+ ***************************************************************/
+"auth.listvehicles.title.txt" = "Vehicles";
+
+/***************************************************************
+ * Add / Edit Vehicle Screen labels
+ ***************************************************************/
+
+/***************************************************************
+ * Alert message labels
+ ***************************************************************/
+"vieweditentity.headsup.whileviewing.remotelydeleted.msg1" = "I received a notification from the server indicating this record has been deleted.";
+"vieweditentity.headsup.whileviewing.remotelydeleted.msg2" = "If you tap to go back, you won't be able to return to this record.";
+"vieweditentity.headsup.whileviewing.remotelydeleted.msg3" = "If you tap to edit and save, you'll later have to resolve this record using the conflict resolver.";
+
+"vieweditentity.headsup.whileediting.editfailed.remotelydeleted.msg1" = "While you were attempting to edit this record, \
+I received a notification from the server indicating this record has been deleted.";
+"vieweditentity.headsup.whileediting.editfailed.remotelydeleted.msg2" = "If you cancel editing and tap to go back, you won't be able to return to this record.";
+"vieweditentity.headsup.whileediting.editfailed.remotelydeleted.msg3" = "If you continue to edit and save, you'll later have to resolve this record using the conflict resolver.";
+
+"vieweditentity.headsup.whileediting.editsucceeded.remotelydeleted.msg1" = "While you were editing this record, \
+I received a notification from the server indicating this record has been deleted.";
+"vieweditentity.headsup.whileediting.editsucceeded.remotelydeleted.msg2" = "You'll later have to resolve this record using the conflict resolver.";
+
+"vieweditentity.headsup.whileediting.editcanceled.remotelydeleted.msg1" = "While you were editing this record, \
+I received a notification from the server indicating this record has been deleted.";
+"vieweditentity.headsup.whileediting.editcanceled.remotelydeleted.msg2" = "If you tap to go back, you won't be able to return to this record.";
+"vieweditentity.headsup.whileediting.editcanceled.remotelydeleted.msg3" = "If you try to edit and save, you'll later have to resolve this record using the conflict resolver.";
+
+

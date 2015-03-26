@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<http-response statusCode="200">
+  <annotation name="Existing Vehicle Remote Sync - Mazda (success)"
+    host="localhost"
+    port="4040"
+    scheme="http"
+    uri-path="/fp/users/9201934123409/vehicles/V429"
+    request-method="PUT">Successful remote sync of edited Mazda.</annotation>
+  <headers>
+    <header name="Cache-Control" value="no-cache" />
+    <header name="Vary" value="Accept, Accept-Charset, Accept-Language" />
+    <header name="fp-auth-token" value="23409582345-093284590-2345LKJDFLSDFLK" />
+    <header name="Last-Modified" value="Fri, 06 Sep 2014 10:34:22 GMT" />
+    <header name="Content-Type" value="application/vnd.name.paulevans.vehicle+json" />
+  </headers>
+  <body>
+    <![CDATA[
+      { "fpvehicle/name": "My Updated Mazda",
+        "fpvehicle/dateAdded": "Fri, 06 Sep 2014 10:34:22 GMT",
+        "_links": {}}
+    ]]>
+  </body>
+</http-response>

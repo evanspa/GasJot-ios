@@ -1,0 +1,962 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		18010C5A180E4752005F5CEB /* FPQuickActionMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18010C59180E4752005F5CEB /* FPQuickActionMenuController.m */; };
+		1801698418108269007C0EC1 /* FPQuickActionMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18010C59180E4752005F5CEB /* FPQuickActionMenuController.m */; };
+		180EDA3019C7C2D200C782A6 /* FPSettingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 180EDA2F19C7C2D200C782A6 /* FPSettingsController.m */; };
+		180EDA3119C7C2D200C782A6 /* FPSettingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 180EDA2F19C7C2D200C782A6 /* FPSettingsController.m */; };
+		180EDA3519C7C89B00C782A6 /* FPEditsInProgressController.m in Sources */ = {isa = PBXBuildFile; fileRef = 180EDA3419C7C89B00C782A6 /* FPEditsInProgressController.m */; };
+		180EDA3619C7C89B00C782A6 /* FPEditsInProgressController.m in Sources */ = {isa = PBXBuildFile; fileRef = 180EDA3419C7C89B00C782A6 /* FPEditsInProgressController.m */; };
+		181003AF1A6E1CB800FB6C55 /* FPEditActors.m in Sources */ = {isa = PBXBuildFile; fileRef = 181003AE1A6E1CB800FB6C55 /* FPEditActors.m */; };
+		181003B01A6E1CEE00FB6C55 /* FPEditActors.m in Sources */ = {isa = PBXBuildFile; fileRef = 181003AE1A6E1CB800FB6C55 /* FPEditActors.m */; };
+		1822308D1A7042FC00884600 /* NSMutableArray+MoveObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 1822308C1A7042FC00884600 /* NSMutableArray+MoveObject.m */; };
+		1822308E1A70430200884600 /* NSMutableArray+MoveObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 1822308C1A7042FC00884600 /* NSMutableArray+MoveObject.m */; };
+		182F651F1A244E2700A769E4 /* IQKeyboardManager.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 182F651E1A244E2700A769E4 /* IQKeyboardManager.bundle */; };
+		183E13A518009F9F009E9085 /* fpapi-resource.json in Resources */ = {isa = PBXBuildFile; fileRef = 183E13A418009F9F009E9085 /* fpapi-resource.json */; };
+		183E1416180237A2009E9085 /* FPUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 183E1415180237A2009E9085 /* FPUtils.m */; };
+		183E1485180245D6009E9085 /* NSDictionary+FuelPurchase.m in Sources */ = {isa = PBXBuildFile; fileRef = 183E1484180245D6009E9085 /* NSDictionary+FuelPurchase.m */; };
+		183E148B1803CB3A009E9085 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 183E148A1803CB3A009E9085 /* MobileCoreServices.framework */; };
+		183E148C1803CB40009E9085 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 183E14871803CA54009E9085 /* SystemConfiguration.framework */; };
+		184601A219BFF6EC001C1B3A /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 184601A119BFF6EC001C1B3A /* libsqlite3.dylib */; };
+		184601A319BFF707001C1B3A /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 184601A119BFF6EC001C1B3A /* libsqlite3.dylib */; };
+		18512F59181856B00023E2BF /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18512F58181856B00023E2BF /* libPods.a */; };
+		1865B7D919FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1865B7D819FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m */; };
+		1865B7DA19FDFCB600E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1865B7D819FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m */; };
+		186ADB3219E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 186ADB3119E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.m */; };
+		186ADB3319E3A1BB003AD788 /* FPFuelStationCoordinatesTableDataSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 186ADB3119E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.m */; };
+		186E0B7C19CD237B00CE4B3A /* PEListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 186E0B7B19CD237B00CE4B3A /* PEListViewController.m */; };
+		186E0B8B19CD29B000CE4B3A /* PEListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 186E0B7B19CD237B00CE4B3A /* PEListViewController.m */; };
+		1870B025180482AF0078ABF7 /* UIFont+FuelPurchase.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CFE17F680BB009DF2CE /* UIFont+FuelPurchase.m */; };
+		1870B026180482AF0078ABF7 /* FPAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18D6DFBB17F68005006B300D /* FPAppDelegate.m */; };
+		1870B027180482AF0078ABF7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 18D6DFB717F68005006B300D /* main.m */; };
+		1870B028180482AF0078ABF7 /* FPNames.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CF317F680AC009DF2CE /* FPNames.m */; };
+		1870B02B180482AF0078ABF7 /* FPUnauthStartController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CF717F680AC009DF2CE /* FPUnauthStartController.m */; };
+		1870B02C180482AF0078ABF7 /* UIColor+FuelPurchase.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CFC17F680BB009DF2CE /* UIColor+FuelPurchase.m */; };
+		1870B02F180482AF0078ABF7 /* FPUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 183E1415180237A2009E9085 /* FPUtils.m */; };
+		1870B030180482AF0078ABF7 /* NSDictionary+FuelPurchase.m in Sources */ = {isa = PBXBuildFile; fileRef = 183E1484180245D6009E9085 /* NSDictionary+FuelPurchase.m */; };
+		1870B033180482AF0078ABF7 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 183E14871803CA54009E9085 /* SystemConfiguration.framework */; };
+		1870B034180482AF0078ABF7 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 183E148A1803CB3A009E9085 /* MobileCoreServices.framework */; };
+		1870B035180482AF0078ABF7 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18D6DFAD17F68005006B300D /* CoreGraphics.framework */; };
+		1870B036180482AF0078ABF7 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18D6DFAF17F68005006B300D /* UIKit.framework */; };
+		1870B037180482AF0078ABF7 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18D6DFAB17F68005006B300D /* Foundation.framework */; };
+		1870B03A180482AF0078ABF7 /* fpapi-resource.json in Resources */ = {isa = PBXBuildFile; fileRef = 183E13A418009F9F009E9085 /* fpapi-resource.json */; };
+		1870B03B180482AF0078ABF7 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 18D6DFB417F68005006B300D /* InfoPlist.strings */; };
+		1870B03C180482AF0078ABF7 /* en.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 18CC2D0117F68117009DF2CE /* en.lproj */; };
+		1870B03D180482AF0078ABF7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18D6DFBD17F68005006B300D /* Images.xcassets */; };
+		1899260E18B3071600B61772 /* simulation in Resources */ = {isa = PBXBuildFile; fileRef = 1899260D18B3071600B61772 /* simulation */; };
+		1899260F18B3096A00B61772 /* simulation in Resources */ = {isa = PBXBuildFile; fileRef = 1899260D18B3071600B61772 /* simulation */; };
+		189AC7561A78034500A6CFE3 /* FPLogEnvLogComposite.m in Sources */ = {isa = PBXBuildFile; fileRef = 189AC7551A78034500A6CFE3 /* FPLogEnvLogComposite.m */; };
+		189AC7571A78034500A6CFE3 /* FPLogEnvLogComposite.m in Sources */ = {isa = PBXBuildFile; fileRef = 189AC7551A78034500A6CFE3 /* FPLogEnvLogComposite.m */; };
+		18A7E2DC196103C300C107DF /* NSObject+appdelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A7E2DB196103C300C107DF /* NSObject+appdelegate.m */; };
+		18A7E2DD196103C300C107DF /* NSObject+appdelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A7E2DB196103C300C107DF /* NSObject+appdelegate.m */; };
+		18AC0722181ACC8C001FF24E /* FPLogging.m in Sources */ = {isa = PBXBuildFile; fileRef = 18AC0721181ACC8C001FF24E /* FPLogging.m */; };
+		18AC0723181ACC8C001FF24E /* FPLogging.m in Sources */ = {isa = PBXBuildFile; fileRef = 18AC0721181ACC8C001FF24E /* FPLogging.m */; };
+		18B17D5719DAE696001D2BF6 /* PEAddViewEditController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18B17D5619DAE696001D2BF6 /* PEAddViewEditController.m */; };
+		18C3CD7419DC3B440092C002 /* FPPanelToolkit.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C3CD7319DC3B440092C002 /* FPPanelToolkit.m */; };
+		18C3CD7519DC3EEA0092C002 /* FPPanelToolkit.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C3CD7319DC3B440092C002 /* FPPanelToolkit.m */; };
+		18C3CD7619DC41A90092C002 /* PEAddViewEditController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18B17D5619DAE696001D2BF6 /* PEAddViewEditController.m */; };
+		18CC2CF817F680AC009DF2CE /* FPNames.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CF317F680AC009DF2CE /* FPNames.m */; };
+		18CC2CFA17F680AC009DF2CE /* FPUnauthStartController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CF717F680AC009DF2CE /* FPUnauthStartController.m */; };
+		18CC2CFF17F680BB009DF2CE /* UIColor+FuelPurchase.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CFC17F680BB009DF2CE /* UIColor+FuelPurchase.m */; };
+		18CC2D0017F680BB009DF2CE /* UIFont+FuelPurchase.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CFE17F680BB009DF2CE /* UIFont+FuelPurchase.m */; };
+		18CC2D0217F68117009DF2CE /* en.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 18CC2D0117F68117009DF2CE /* en.lproj */; };
+		18CF523219C9D9C90020FC94 /* FPScreenToolkit.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CF523119C9D9C90020FC94 /* FPScreenToolkit.m */; };
+		18CF523319C9E54D0020FC94 /* FPScreenToolkit.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CF523119C9D9C90020FC94 /* FPScreenToolkit.m */; };
+		18D2F90C19F20CCE002D9869 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18D2F90B19F20CCE002D9869 /* CoreLocation.framework */; };
+		18D2F90D19F20CD7002D9869 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18D2F90B19F20CCE002D9869 /* CoreLocation.framework */; };
+		18D6DFAC17F68005006B300D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18D6DFAB17F68005006B300D /* Foundation.framework */; };
+		18D6DFAE17F68005006B300D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18D6DFAD17F68005006B300D /* CoreGraphics.framework */; };
+		18D6DFB017F68005006B300D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18D6DFAF17F68005006B300D /* UIKit.framework */; };
+		18D6DFB617F68005006B300D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 18D6DFB417F68005006B300D /* InfoPlist.strings */; };
+		18D6DFB817F68005006B300D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 18D6DFB717F68005006B300D /* main.m */; };
+		18D6DFBC17F68005006B300D /* FPAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18D6DFBB17F68005006B300D /* FPAppDelegate.m */; };
+		18D6DFBE17F68005006B300D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18D6DFBD17F68005006B300D /* Images.xcassets */; };
+		18E5C9841A6B8BB000EE8606 /* fpapi-resource.localdev.json in Resources */ = {isa = PBXBuildFile; fileRef = 18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */; };
+		18E62B801AA02D60002811E3 /* UIScrollView+PEAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */; };
+		18EC863019EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18EC862F19EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m */; };
+		18EC863119EBF704006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18EC862F19EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m */; };
+		18F61A891A96133000BA631A /* UIScrollView+PEAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */; };
+		D5F03BF5DC104B09B5F2E6AD /* libPods-fuelpurchase-dev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C1FEBEB6E7DB4F50A4FCEA3D /* libPods-fuelpurchase-dev.a */; };
+		F17D7730E485443DAEE57677 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 91349E0025D9467DBE585F0F /* libPods.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		18010C58180E4752005F5CEB /* FPQuickActionMenuController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPQuickActionMenuController.h; sourceTree = "<group>"; };
+		18010C59180E4752005F5CEB /* FPQuickActionMenuController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPQuickActionMenuController.m; sourceTree = "<group>"; };
+		180EDA2E19C7C2D200C782A6 /* FPSettingsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPSettingsController.h; sourceTree = "<group>"; };
+		180EDA2F19C7C2D200C782A6 /* FPSettingsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPSettingsController.m; sourceTree = "<group>"; };
+		180EDA3319C7C89B00C782A6 /* FPEditsInProgressController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPEditsInProgressController.h; sourceTree = "<group>"; };
+		180EDA3419C7C89B00C782A6 /* FPEditsInProgressController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPEditsInProgressController.m; sourceTree = "<group>"; };
+		181003AD1A6E1CB800FB6C55 /* FPEditActors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPEditActors.h; sourceTree = "<group>"; };
+		181003AE1A6E1CB800FB6C55 /* FPEditActors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPEditActors.m; sourceTree = "<group>"; };
+		1822308B1A7042FC00884600 /* NSMutableArray+MoveObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableArray+MoveObject.h"; sourceTree = "<group>"; };
+		1822308C1A7042FC00884600 /* NSMutableArray+MoveObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableArray+MoveObject.m"; sourceTree = "<group>"; };
+		182F651E1A244E2700A769E4 /* IQKeyboardManager.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = IQKeyboardManager.bundle; path = Pods/IQKeyboardManager/IQKeyBoardManager/Resources/IQKeyboardManager.bundle; sourceTree = "<group>"; };
+		183E13A418009F9F009E9085 /* fpapi-resource.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "fpapi-resource.json"; sourceTree = "<group>"; };
+		183E1414180237A2009E9085 /* FPUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPUtils.h; sourceTree = "<group>"; };
+		183E1415180237A2009E9085 /* FPUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPUtils.m; sourceTree = "<group>"; };
+		183E1483180245D6009E9085 /* NSDictionary+FuelPurchase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+FuelPurchase.h"; sourceTree = "<group>"; };
+		183E1484180245D6009E9085 /* NSDictionary+FuelPurchase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+FuelPurchase.m"; sourceTree = "<group>"; };
+		183E14871803CA54009E9085 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		183E148A1803CB3A009E9085 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		184601A119BFF6EC001C1B3A /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
+		18512F58181856B00023E2BF /* libPods.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libPods.a; path = "Pods/build/Debug-iphoneos/libPods.a"; sourceTree = "<group>"; };
+		1865B7D719FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPEnvLogVehicleAndDateDataSourceDelegate.h; sourceTree = "<group>"; };
+		1865B7D819FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPEnvLogVehicleAndDateDataSourceDelegate.m; sourceTree = "<group>"; };
+		186ADB3019E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPFuelStationCoordinatesTableDataSource.h; sourceTree = "<group>"; };
+		186ADB3119E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPFuelStationCoordinatesTableDataSource.m; sourceTree = "<group>"; };
+		186E0B7A19CD237B00CE4B3A /* PEListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PEListViewController.h; sourceTree = "<group>"; };
+		186E0B7B19CD237B00CE4B3A /* PEListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PEListViewController.m; sourceTree = "<group>"; };
+		1870B042180482AF0078ABF7 /* FP (dev).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FP (dev).app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1899260D18B3071600B61772 /* simulation */ = {isa = PBXFileReference; lastKnownFileType = folder; path = simulation; sourceTree = "<group>"; };
+		189AC7541A78034500A6CFE3 /* FPLogEnvLogComposite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPLogEnvLogComposite.h; sourceTree = "<group>"; };
+		189AC7551A78034500A6CFE3 /* FPLogEnvLogComposite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPLogEnvLogComposite.m; sourceTree = "<group>"; };
+		18A7E2DA196103C300C107DF /* NSObject+appdelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+appdelegate.h"; sourceTree = "<group>"; };
+		18A7E2DB196103C300C107DF /* NSObject+appdelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+appdelegate.m"; sourceTree = "<group>"; };
+		18AC0720181ACC8C001FF24E /* FPLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPLogging.h; sourceTree = "<group>"; };
+		18AC0721181ACC8C001FF24E /* FPLogging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPLogging.m; sourceTree = "<group>"; };
+		18B17D5519DAE696001D2BF6 /* PEAddViewEditController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PEAddViewEditController.h; sourceTree = "<group>"; };
+		18B17D5619DAE696001D2BF6 /* PEAddViewEditController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PEAddViewEditController.m; sourceTree = "<group>"; };
+		18C3CD7219DC3B440092C002 /* FPPanelToolkit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPPanelToolkit.h; sourceTree = "<group>"; };
+		18C3CD7319DC3B440092C002 /* FPPanelToolkit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPPanelToolkit.m; sourceTree = "<group>"; };
+		18CC2CF217F680AC009DF2CE /* FPNames.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPNames.h; sourceTree = "<group>"; };
+		18CC2CF317F680AC009DF2CE /* FPNames.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPNames.m; sourceTree = "<group>"; };
+		18CC2CF617F680AC009DF2CE /* FPUnauthStartController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPUnauthStartController.h; sourceTree = "<group>"; };
+		18CC2CF717F680AC009DF2CE /* FPUnauthStartController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPUnauthStartController.m; sourceTree = "<group>"; };
+		18CC2CFB17F680BB009DF2CE /* UIColor+FuelPurchase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+FuelPurchase.h"; sourceTree = "<group>"; };
+		18CC2CFC17F680BB009DF2CE /* UIColor+FuelPurchase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+FuelPurchase.m"; sourceTree = "<group>"; };
+		18CC2CFD17F680BB009DF2CE /* UIFont+FuelPurchase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIFont+FuelPurchase.h"; sourceTree = "<group>"; };
+		18CC2CFE17F680BB009DF2CE /* UIFont+FuelPurchase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIFont+FuelPurchase.m"; sourceTree = "<group>"; };
+		18CC2D0117F68117009DF2CE /* en.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = en.lproj; sourceTree = "<group>"; };
+		18CF523019C9D9C90020FC94 /* FPScreenToolkit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPScreenToolkit.h; sourceTree = "<group>"; };
+		18CF523119C9D9C90020FC94 /* FPScreenToolkit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPScreenToolkit.m; sourceTree = "<group>"; };
+		18D2F90B19F20CCE002D9869 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		18D6DFA817F68005006B300D /* Fuel Purchase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Fuel Purchase.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		18D6DFAB17F68005006B300D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		18D6DFAD17F68005006B300D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		18D6DFAF17F68005006B300D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		18D6DFB317F68005006B300D /* fuelpurchase-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "fuelpurchase-Info.plist"; sourceTree = "<group>"; };
+		18D6DFB517F68005006B300D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		18D6DFB717F68005006B300D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		18D6DFB917F68005006B300D /* fuelpurchase-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "fuelpurchase-Prefix.pch"; sourceTree = "<group>"; };
+		18D6DFBA17F68005006B300D /* FPAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FPAppDelegate.h; sourceTree = "<group>"; };
+		18D6DFBB17F68005006B300D /* FPAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FPAppDelegate.m; sourceTree = "<group>"; };
+		18D6DFBD17F68005006B300D /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		18D6DFC417F68005006B300D /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "fpapi-resource.localdev.json"; sourceTree = "<group>"; };
+		18EC862E19EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPFpLogVehicleFuelStationDateDataSourceAndDelegate.h; sourceTree = "<group>"; };
+		18EC862F19EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m; sourceTree = "<group>"; };
+		18F61A871A96133000BA631A /* UIScrollView+PEAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIScrollView+PEAdditions.h"; sourceTree = "<group>"; };
+		18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIScrollView+PEAdditions.m"; sourceTree = "<group>"; };
+		1DF684FBAD9D439284549BB5 /* libPods-fuelpurchaseTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fuelpurchaseTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		53B27AF448D379D8E88BB2E8 /* Pods-fuelpurchase-dev.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fuelpurchase-dev.debug.xcconfig"; path = "Pods/Target Support Files/Pods-fuelpurchase-dev/Pods-fuelpurchase-dev.debug.xcconfig"; sourceTree = "<group>"; };
+		91349E0025D9467DBE585F0F /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		A7513CEBA98F31861824A014 /* Pods-fuelpurchase-dev.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fuelpurchase-dev.release.xcconfig"; path = "Pods/Target Support Files/Pods-fuelpurchase-dev/Pods-fuelpurchase-dev.release.xcconfig"; sourceTree = "<group>"; };
+		AC2AAEDFF2F94B76A9D41E6C /* libPods-fuelpurchase-tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fuelpurchase-tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1FEBEB6E7DB4F50A4FCEA3D /* libPods-fuelpurchase-dev.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fuelpurchase-dev.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C620C668F12CED8B0A128354 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		E12E20B44758C744FA39A49C /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1870B032180482AF0078ABF7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				18D2F90C19F20CCE002D9869 /* CoreLocation.framework in Frameworks */,
+				184601A319BFF707001C1B3A /* libsqlite3.dylib in Frameworks */,
+				18512F59181856B00023E2BF /* libPods.a in Frameworks */,
+				1870B033180482AF0078ABF7 /* SystemConfiguration.framework in Frameworks */,
+				1870B034180482AF0078ABF7 /* MobileCoreServices.framework in Frameworks */,
+				1870B035180482AF0078ABF7 /* CoreGraphics.framework in Frameworks */,
+				1870B036180482AF0078ABF7 /* UIKit.framework in Frameworks */,
+				1870B037180482AF0078ABF7 /* Foundation.framework in Frameworks */,
+				D5F03BF5DC104B09B5F2E6AD /* libPods-fuelpurchase-dev.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		18D6DFA517F68005006B300D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				18D2F90D19F20CD7002D9869 /* CoreLocation.framework in Frameworks */,
+				184601A219BFF6EC001C1B3A /* libsqlite3.dylib in Frameworks */,
+				183E148C1803CB40009E9085 /* SystemConfiguration.framework in Frameworks */,
+				183E148B1803CB3A009E9085 /* MobileCoreServices.framework in Frameworks */,
+				18D6DFAE17F68005006B300D /* CoreGraphics.framework in Frameworks */,
+				18D6DFB017F68005006B300D /* UIKit.framework in Frameworks */,
+				18D6DFAC17F68005006B300D /* Foundation.framework in Frameworks */,
+				F17D7730E485443DAEE57677 /* libPods.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08DB50AF6B2DED35218E1824 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				E12E20B44758C744FA39A49C /* Pods.debug.xcconfig */,
+				C620C668F12CED8B0A128354 /* Pods.release.xcconfig */,
+				53B27AF448D379D8E88BB2E8 /* Pods-fuelpurchase-dev.debug.xcconfig */,
+				A7513CEBA98F31861824A014 /* Pods-fuelpurchase-dev.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		18010C54180E46D0005F5CEB /* Unauthenticated */ = {
+			isa = PBXGroup;
+			children = (
+				18010C55180E46E0005F5CEB /* Landing Screen */,
+			);
+			name = Unauthenticated;
+			sourceTree = "<group>";
+		};
+		18010C55180E46E0005F5CEB /* Landing Screen */ = {
+			isa = PBXGroup;
+			children = (
+				18CC2CF617F680AC009DF2CE /* FPUnauthStartController.h */,
+				18CC2CF717F680AC009DF2CE /* FPUnauthStartController.m */,
+			);
+			name = "Landing Screen";
+			sourceTree = "<group>";
+		};
+		18010C56180E46F7005F5CEB /* Authenticated */ = {
+			isa = PBXGroup;
+			children = (
+				180EDA3219C7C87E00C782A6 /* Edits in Progress Screen */,
+				180EDA2D19C7C2AB00C782A6 /* Settings Screen */,
+				18010C57180E470C005F5CEB /* Quick Action Menu Screen */,
+			);
+			name = Authenticated;
+			sourceTree = "<group>";
+		};
+		18010C57180E470C005F5CEB /* Quick Action Menu Screen */ = {
+			isa = PBXGroup;
+			children = (
+				18010C58180E4752005F5CEB /* FPQuickActionMenuController.h */,
+				18010C59180E4752005F5CEB /* FPQuickActionMenuController.m */,
+			);
+			name = "Quick Action Menu Screen";
+			sourceTree = "<group>";
+		};
+		180EDA2D19C7C2AB00C782A6 /* Settings Screen */ = {
+			isa = PBXGroup;
+			children = (
+				180EDA2E19C7C2D200C782A6 /* FPSettingsController.h */,
+				180EDA2F19C7C2D200C782A6 /* FPSettingsController.m */,
+			);
+			name = "Settings Screen";
+			sourceTree = "<group>";
+		};
+		180EDA3219C7C87E00C782A6 /* Edits in Progress Screen */ = {
+			isa = PBXGroup;
+			children = (
+				180EDA3319C7C89B00C782A6 /* FPEditsInProgressController.h */,
+				180EDA3419C7C89B00C782A6 /* FPEditsInProgressController.m */,
+			);
+			name = "Edits in Progress Screen";
+			sourceTree = "<group>";
+		};
+		181003AC1A6E1CA400FB6C55 /* Edit actors */ = {
+			isa = PBXGroup;
+			children = (
+				181003AD1A6E1CB800FB6C55 /* FPEditActors.h */,
+				181003AE1A6E1CB800FB6C55 /* FPEditActors.m */,
+			);
+			name = "Edit actors";
+			sourceTree = "<group>";
+		};
+		18456CE719D39D840023A2A7 /* Panel Toolkit */ = {
+			isa = PBXGroup;
+			children = (
+				186ADB2F19E3A1A7003AD788 /* Table Data Sources */,
+				18C3CD7219DC3B440092C002 /* FPPanelToolkit.h */,
+				18C3CD7319DC3B440092C002 /* FPPanelToolkit.m */,
+			);
+			name = "Panel Toolkit";
+			sourceTree = "<group>";
+		};
+		185D38CC1815952B0007587A /* App Delegate */ = {
+			isa = PBXGroup;
+			children = (
+				18D6DFBA17F68005006B300D /* FPAppDelegate.h */,
+				18D6DFBB17F68005006B300D /* FPAppDelegate.m */,
+			);
+			name = "App Delegate";
+			sourceTree = "<group>";
+		};
+		1865B7D619FDEA0200E98D26 /* Env Log Vehicle and Date Selection */ = {
+			isa = PBXGroup;
+			children = (
+				1865B7D719FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.h */,
+				1865B7D819FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m */,
+			);
+			name = "Env Log Vehicle and Date Selection";
+			sourceTree = "<group>";
+		};
+		186ADB2F19E3A1A7003AD788 /* Table Data Sources */ = {
+			isa = PBXGroup;
+			children = (
+				1865B7D619FDEA0200E98D26 /* Env Log Vehicle and Date Selection */,
+				18EC862D19EBF571006C104A /* Fp Log Vehicle, Fuel Station and Date Selection */,
+				18EC862C19EB0769006C104A /* Fuel Station Coordinates */,
+			);
+			name = "Table Data Sources";
+			sourceTree = "<group>";
+		};
+		186E0B7819CD1BDD00CE4B3A /* UI Commons */ = {
+			isa = PBXGroup;
+			children = (
+				18F61A821A96129E00BA631A /* Categories */,
+				186E0B7919CD1BEA00CE4B3A /* Pull-to-Refresh List View Controller */,
+			);
+			name = "UI Commons";
+			sourceTree = "<group>";
+		};
+		186E0B7919CD1BEA00CE4B3A /* Pull-to-Refresh List View Controller */ = {
+			isa = PBXGroup;
+			children = (
+				18B17D5419DAE640001D2BF6 /* Add / View / Edit Entity Controller */,
+				186E0B7A19CD237B00CE4B3A /* PEListViewController.h */,
+				186E0B7B19CD237B00CE4B3A /* PEListViewController.m */,
+			);
+			name = "Pull-to-Refresh List View Controller";
+			sourceTree = "<group>";
+		};
+		189AC7521A78030D00A6CFE3 /* model */ = {
+			isa = PBXGroup;
+			children = (
+				189AC7531A78032400A6CFE3 /* Fp Env Log Composite */,
+			);
+			name = model;
+			sourceTree = "<group>";
+		};
+		189AC7531A78032400A6CFE3 /* Fp Env Log Composite */ = {
+			isa = PBXGroup;
+			children = (
+				189AC7541A78034500A6CFE3 /* FPLogEnvLogComposite.h */,
+				189AC7551A78034500A6CFE3 /* FPLogEnvLogComposite.m */,
+			);
+			name = "Fp Env Log Composite";
+			sourceTree = "<group>";
+		};
+		18AB99F917F68304002A8A69 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				18CC2CFB17F680BB009DF2CE /* UIColor+FuelPurchase.h */,
+				18CC2CFC17F680BB009DF2CE /* UIColor+FuelPurchase.m */,
+				18CC2CFD17F680BB009DF2CE /* UIFont+FuelPurchase.h */,
+				18CC2CFE17F680BB009DF2CE /* UIFont+FuelPurchase.m */,
+				183E1483180245D6009E9085 /* NSDictionary+FuelPurchase.h */,
+				183E1484180245D6009E9085 /* NSDictionary+FuelPurchase.m */,
+				18A7E2DA196103C300C107DF /* NSObject+appdelegate.h */,
+				18A7E2DB196103C300C107DF /* NSObject+appdelegate.m */,
+				1822308B1A7042FC00884600 /* NSMutableArray+MoveObject.h */,
+				1822308C1A7042FC00884600 /* NSMutableArray+MoveObject.m */,
+			);
+			name = Categories;
+			sourceTree = "<group>";
+		};
+		18AB99FA17F6831C002A8A69 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				183E1414180237A2009E9085 /* FPUtils.h */,
+				183E1415180237A2009E9085 /* FPUtils.m */,
+			);
+			name = Utils;
+			sourceTree = "<group>";
+		};
+		18AB99FB17F6832C002A8A69 /* View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				18CF522F19C9D9990020FC94 /* Screen Toolkit */,
+				18010C56180E46F7005F5CEB /* Authenticated */,
+				18010C54180E46D0005F5CEB /* Unauthenticated */,
+			);
+			name = "View Controllers";
+			sourceTree = "<group>";
+		};
+		18AC071F181AC784001FF24E /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				18AC0720181ACC8C001FF24E /* FPLogging.h */,
+				18AC0721181ACC8C001FF24E /* FPLogging.m */,
+			);
+			name = Logging;
+			sourceTree = "<group>";
+		};
+		18B17D5419DAE640001D2BF6 /* Add / View / Edit Entity Controller */ = {
+			isa = PBXGroup;
+			children = (
+				18B17D5519DAE696001D2BF6 /* PEAddViewEditController.h */,
+				18B17D5619DAE696001D2BF6 /* PEAddViewEditController.m */,
+			);
+			name = "Add / View / Edit Entity Controller";
+			sourceTree = "<group>";
+		};
+		18CF522F19C9D9990020FC94 /* Screen Toolkit */ = {
+			isa = PBXGroup;
+			children = (
+				18CF523019C9D9C90020FC94 /* FPScreenToolkit.h */,
+				18CF523119C9D9C90020FC94 /* FPScreenToolkit.m */,
+			);
+			name = "Screen Toolkit";
+			sourceTree = "<group>";
+		};
+		18D6DF9F17F68005006B300D = {
+			isa = PBXGroup;
+			children = (
+				182F651E1A244E2700A769E4 /* IQKeyboardManager.bundle */,
+				18D6DFB117F68005006B300D /* fuelpurchase */,
+				18D6DFAA17F68005006B300D /* Frameworks */,
+				18D6DFA917F68005006B300D /* Products */,
+				08DB50AF6B2DED35218E1824 /* Pods */,
+			);
+			sourceTree = "<group>";
+		};
+		18D6DFA917F68005006B300D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				18D6DFA817F68005006B300D /* Fuel Purchase.app */,
+				1870B042180482AF0078ABF7 /* FP (dev).app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		18D6DFAA17F68005006B300D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				18D2F90B19F20CCE002D9869 /* CoreLocation.framework */,
+				184601A119BFF6EC001C1B3A /* libsqlite3.dylib */,
+				18512F58181856B00023E2BF /* libPods.a */,
+				183E148A1803CB3A009E9085 /* MobileCoreServices.framework */,
+				183E14871803CA54009E9085 /* SystemConfiguration.framework */,
+				18D6DFAB17F68005006B300D /* Foundation.framework */,
+				18D6DFAD17F68005006B300D /* CoreGraphics.framework */,
+				18D6DFAF17F68005006B300D /* UIKit.framework */,
+				18D6DFC417F68005006B300D /* XCTest.framework */,
+				91349E0025D9467DBE585F0F /* libPods.a */,
+				C1FEBEB6E7DB4F50A4FCEA3D /* libPods-fuelpurchase-dev.a */,
+				AC2AAEDFF2F94B76A9D41E6C /* libPods-fuelpurchase-tests.a */,
+				1DF684FBAD9D439284549BB5 /* libPods-fuelpurchaseTests.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		18D6DFB117F68005006B300D /* fuelpurchase */ = {
+			isa = PBXGroup;
+			children = (
+				181003AC1A6E1CA400FB6C55 /* Edit actors */,
+				186E0B7819CD1BDD00CE4B3A /* UI Commons */,
+				185D38CC1815952B0007587A /* App Delegate */,
+				189AC7521A78030D00A6CFE3 /* model */,
+				18456CE719D39D840023A2A7 /* Panel Toolkit */,
+				18AB99FB17F6832C002A8A69 /* View Controllers */,
+				18AB99FA17F6831C002A8A69 /* Utils */,
+				18AB99F917F68304002A8A69 /* Categories */,
+				18AC071F181AC784001FF24E /* Logging */,
+				18D6DFB217F68005006B300D /* Supporting Files */,
+				18D6DFBD17F68005006B300D /* Images.xcassets */,
+			);
+			path = fuelpurchase;
+			sourceTree = "<group>";
+		};
+		18D6DFB217F68005006B300D /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				1899260D18B3071600B61772 /* simulation */,
+				18CC2D0117F68117009DF2CE /* en.lproj */,
+				18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */,
+				183E13A418009F9F009E9085 /* fpapi-resource.json */,
+				18D6DFB317F68005006B300D /* fuelpurchase-Info.plist */,
+				18D6DFB417F68005006B300D /* InfoPlist.strings */,
+				18D6DFB717F68005006B300D /* main.m */,
+				18CC2CF217F680AC009DF2CE /* FPNames.h */,
+				18CC2CF317F680AC009DF2CE /* FPNames.m */,
+				18D6DFB917F68005006B300D /* fuelpurchase-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		18EC862C19EB0769006C104A /* Fuel Station Coordinates */ = {
+			isa = PBXGroup;
+			children = (
+				186ADB3019E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.h */,
+				186ADB3119E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.m */,
+			);
+			name = "Fuel Station Coordinates";
+			sourceTree = "<group>";
+		};
+		18EC862D19EBF571006C104A /* Fp Log Vehicle, Fuel Station and Date Selection */ = {
+			isa = PBXGroup;
+			children = (
+				18EC862E19EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.h */,
+				18EC862F19EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m */,
+			);
+			name = "Fp Log Vehicle, Fuel Station and Date Selection";
+			sourceTree = "<group>";
+		};
+		18F61A821A96129E00BA631A /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				18F61A831A9612A600BA631A /* UIScrollView */,
+			);
+			name = Categories;
+			sourceTree = "<group>";
+		};
+		18F61A831A9612A600BA631A /* UIScrollView */ = {
+			isa = PBXGroup;
+			children = (
+				18F61A871A96133000BA631A /* UIScrollView+PEAdditions.h */,
+				18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */,
+			);
+			name = UIScrollView;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1870B022180482AF0078ABF7 /* fuelpurchase-dev */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1870B03F180482AF0078ABF7 /* Build configuration list for PBXNativeTarget "fuelpurchase-dev" */;
+			buildPhases = (
+				1870B023180482AF0078ABF7 /* Check Pods Manifest.lock */,
+				1870B024180482AF0078ABF7 /* Sources */,
+				1870B032180482AF0078ABF7 /* Frameworks */,
+				1870B039180482AF0078ABF7 /* Resources */,
+				1870B03E180482AF0078ABF7 /* Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "fuelpurchase-dev";
+			productName = fuelpurchase;
+			productReference = 1870B042180482AF0078ABF7 /* FP (dev).app */;
+			productType = "com.apple.product-type.application";
+		};
+		18D6DFA717F68005006B300D /* fuelpurchase */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 18D6DFD417F68005006B300D /* Build configuration list for PBXNativeTarget "fuelpurchase" */;
+			buildPhases = (
+				7595B694D7984311A9A052AB /* Check Pods Manifest.lock */,
+				18D6DFA417F68005006B300D /* Sources */,
+				18D6DFA517F68005006B300D /* Frameworks */,
+				18D6DFA617F68005006B300D /* Resources */,
+				5A314A635D3C4E149517F500 /* Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = fuelpurchase;
+			productName = fuelpurchase;
+			productReference = 18D6DFA817F68005006B300D /* Fuel Purchase.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		18D6DFA017F68005006B300D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = FP;
+				LastUpgradeCheck = 0510;
+				ORGANIZATIONNAME = "Paul Evans";
+				TargetAttributes = {
+					1870B022180482AF0078ABF7 = {
+						DevelopmentTeam = N939KU5DFM;
+					};
+					18D6DFA717F68005006B300D = {
+						DevelopmentTeam = N939KU5DFM;
+					};
+				};
+			};
+			buildConfigurationList = 18D6DFA317F68005006B300D /* Build configuration list for PBXProject "fuelpurchase" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 18D6DF9F17F68005006B300D;
+			productRefGroup = 18D6DFA917F68005006B300D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				18D6DFA717F68005006B300D /* fuelpurchase */,
+				1870B022180482AF0078ABF7 /* fuelpurchase-dev */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1870B039180482AF0078ABF7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				182F651F1A244E2700A769E4 /* IQKeyboardManager.bundle in Resources */,
+				18E5C9841A6B8BB000EE8606 /* fpapi-resource.localdev.json in Resources */,
+				1870B03A180482AF0078ABF7 /* fpapi-resource.json in Resources */,
+				1899260F18B3096A00B61772 /* simulation in Resources */,
+				1870B03B180482AF0078ABF7 /* InfoPlist.strings in Resources */,
+				1870B03C180482AF0078ABF7 /* en.lproj in Resources */,
+				1870B03D180482AF0078ABF7 /* Images.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		18D6DFA617F68005006B300D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				183E13A518009F9F009E9085 /* fpapi-resource.json in Resources */,
+				1899260E18B3071600B61772 /* simulation in Resources */,
+				18D6DFB617F68005006B300D /* InfoPlist.strings in Resources */,
+				18CC2D0217F68117009DF2CE /* en.lproj in Resources */,
+				18D6DFBE17F68005006B300D /* Images.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		1870B023180482AF0078ABF7 /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		1870B03E180482AF0078ABF7 /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-fuelpurchase-dev/Pods-fuelpurchase-dev-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5A314A635D3C4E149517F500 /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7595B694D7984311A9A052AB /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1870B024180482AF0078ABF7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				180EDA3119C7C2D200C782A6 /* FPSettingsController.m in Sources */,
+				18A7E2DD196103C300C107DF /* NSObject+appdelegate.m in Sources */,
+				186ADB3319E3A1BB003AD788 /* FPFuelStationCoordinatesTableDataSource.m in Sources */,
+				1870B025180482AF0078ABF7 /* UIFont+FuelPurchase.m in Sources */,
+				18E62B801AA02D60002811E3 /* UIScrollView+PEAdditions.m in Sources */,
+				1870B026180482AF0078ABF7 /* FPAppDelegate.m in Sources */,
+				1870B027180482AF0078ABF7 /* main.m in Sources */,
+				180EDA3619C7C89B00C782A6 /* FPEditsInProgressController.m in Sources */,
+				1870B028180482AF0078ABF7 /* FPNames.m in Sources */,
+				1822308E1A70430200884600 /* NSMutableArray+MoveObject.m in Sources */,
+				18CF523319C9E54D0020FC94 /* FPScreenToolkit.m in Sources */,
+				18EC863119EBF704006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m in Sources */,
+				181003B01A6E1CEE00FB6C55 /* FPEditActors.m in Sources */,
+				18AC0723181ACC8C001FF24E /* FPLogging.m in Sources */,
+				1870B02B180482AF0078ABF7 /* FPUnauthStartController.m in Sources */,
+				1870B02C180482AF0078ABF7 /* UIColor+FuelPurchase.m in Sources */,
+				18C3CD7519DC3EEA0092C002 /* FPPanelToolkit.m in Sources */,
+				189AC7571A78034500A6CFE3 /* FPLogEnvLogComposite.m in Sources */,
+				1870B02F180482AF0078ABF7 /* FPUtils.m in Sources */,
+				1870B030180482AF0078ABF7 /* NSDictionary+FuelPurchase.m in Sources */,
+				1801698418108269007C0EC1 /* FPQuickActionMenuController.m in Sources */,
+				1865B7DA19FDFCB600E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m in Sources */,
+				186E0B8B19CD29B000CE4B3A /* PEListViewController.m in Sources */,
+				18C3CD7619DC41A90092C002 /* PEAddViewEditController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		18D6DFA417F68005006B300D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				180EDA3019C7C2D200C782A6 /* FPSettingsController.m in Sources */,
+				18A7E2DC196103C300C107DF /* NSObject+appdelegate.m in Sources */,
+				186ADB3219E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.m in Sources */,
+				18CC2D0017F680BB009DF2CE /* UIFont+FuelPurchase.m in Sources */,
+				18B17D5719DAE696001D2BF6 /* PEAddViewEditController.m in Sources */,
+				18F61A891A96133000BA631A /* UIScrollView+PEAdditions.m in Sources */,
+				18D6DFBC17F68005006B300D /* FPAppDelegate.m in Sources */,
+				18D6DFB817F68005006B300D /* main.m in Sources */,
+				180EDA3519C7C89B00C782A6 /* FPEditsInProgressController.m in Sources */,
+				1822308D1A7042FC00884600 /* NSMutableArray+MoveObject.m in Sources */,
+				18CC2CF817F680AC009DF2CE /* FPNames.m in Sources */,
+				18EC863019EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m in Sources */,
+				181003AF1A6E1CB800FB6C55 /* FPEditActors.m in Sources */,
+				18CF523219C9D9C90020FC94 /* FPScreenToolkit.m in Sources */,
+				18CC2CFA17F680AC009DF2CE /* FPUnauthStartController.m in Sources */,
+				186E0B7C19CD237B00CE4B3A /* PEListViewController.m in Sources */,
+				18CC2CFF17F680BB009DF2CE /* UIColor+FuelPurchase.m in Sources */,
+				189AC7561A78034500A6CFE3 /* FPLogEnvLogComposite.m in Sources */,
+				18010C5A180E4752005F5CEB /* FPQuickActionMenuController.m in Sources */,
+				183E1416180237A2009E9085 /* FPUtils.m in Sources */,
+				18AC0722181ACC8C001FF24E /* FPLogging.m in Sources */,
+				1865B7D919FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m in Sources */,
+				18C3CD7419DC3B440092C002 /* FPPanelToolkit.m in Sources */,
+				183E1485180245D6009E9085 /* NSDictionary+FuelPurchase.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		18D6DFB417F68005006B300D /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				18D6DFB517F68005006B300D /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		1870B040180482AF0078ABF7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 53B27AF448D379D8E88BB2E8 /* Pods-fuelpurchase-dev.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "fuelpurchase/fuelpurchase-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"COCOAPODS=1",
+					"FP_DEV=1",
+				);
+				INFOPLIST_FILE = "$(SRCROOT)/fuelpurchase/fuelpurchase-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				PRODUCT_NAME = "FP (dev)";
+				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		1870B041180482AF0078ABF7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A7513CEBA98F31861824A014 /* Pods-fuelpurchase-dev.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "fuelpurchase/fuelpurchase-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"COCOAPODS=1",
+					"FP_DEV=1",
+				);
+				INFOPLIST_FILE = "$(SRCROOT)/fuelpurchase/fuelpurchase-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				PRODUCT_NAME = "FP (dev)";
+				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		18D6DFD217F68005006B300D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "Fuel Purchase";
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		18D6DFD317F68005006B300D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				PRODUCT_NAME = "Fuel Purchase";
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		18D6DFD517F68005006B300D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E12E20B44758C744FA39A49C /* Pods.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "fuelpurchase/fuelpurchase-Prefix.pch";
+				INFOPLIST_FILE = "fuelpurchase/fuelpurchase-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				PRODUCT_NAME = "Fuel Purchase";
+				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		18D6DFD617F68005006B300D /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C620C668F12CED8B0A128354 /* Pods.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "fuelpurchase/fuelpurchase-Prefix.pch";
+				INFOPLIST_FILE = "fuelpurchase/fuelpurchase-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				PRODUCT_NAME = "Fuel Purchase";
+				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1870B03F180482AF0078ABF7 /* Build configuration list for PBXNativeTarget "fuelpurchase-dev" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1870B040180482AF0078ABF7 /* Debug */,
+				1870B041180482AF0078ABF7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		18D6DFA317F68005006B300D /* Build configuration list for PBXProject "fuelpurchase" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				18D6DFD217F68005006B300D /* Debug */,
+				18D6DFD317F68005006B300D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		18D6DFD417F68005006B300D /* Build configuration list for PBXNativeTarget "fuelpurchase" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				18D6DFD517F68005006B300D /* Debug */,
+				18D6DFD617F68005006B300D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 18D6DFA017F68005006B300D /* Project object */;
+}
