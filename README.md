@@ -43,6 +43,7 @@ src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPur
 #### Account Creation / Login
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-acct-login.png">
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-acct-login.png"
+height="418px" width="532px">
 
 ### Logging in & Account Creation
