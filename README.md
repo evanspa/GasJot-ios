@@ -7,6 +7,21 @@ PE* suite of libraries.
 The PE* library suite is a set of iOS libraries to aid in the development of
 applications.
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Dependency Graph](#dependency-graph)
+- [PE* iOS Library Suite](#pe-ios-library-suite)
+- [Other Libraries used by PEFuelPurchase-App](#other-libraries-used-by-pefuelpurchase-app)
+- [Screenshots](#screenshots)
+    - [Account Creation / Login](#account-creation--login)
+    - [Quick Action Menu (home screen)](#quick-action-menu-home-screen)
+    - [Adding a Vehicle](#adding-a-vehicle)
+    - [Adding a Fuel Station](#adding-a-fuel-station)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Dependency Graph
 
 The following diagram illustrates the main components of the fuel purchase
@@ -59,4 +74,21 @@ after a login has occured.
 
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/quick-action-menu.png"
+height="418px" width="237px">
+
+#### Adding a Vehicle
+
+Adding a vehicle (which is needed in order to log fuel purchases).
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/add-vehicle.png"
+height="418px" width="237px">
+
+
+#### Adding a Fuel Station
+
+Adding a fuel station (which is needed in order to log fuel purchases).
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/add-fuelstation.png"
 height="418px" width="237px">
