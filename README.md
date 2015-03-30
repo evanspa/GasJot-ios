@@ -19,6 +19,8 @@ applications.
     - [Quick Action Menu (home screen)](#quick-action-menu-home-screen)
     - [Adding a Vehicle](#adding-a-vehicle)
     - [Adding a Fuel Station](#adding-a-fuel-station)
+    - [Adding a Fuel Purchase Log](#adding-a-fuel-purchase-log)
+    - [Adding an Environment Log](#adding-an-environment-log)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -54,6 +56,9 @@ src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPur
   logic of the application.
 
 ## Screenshots
+
+To give a sense for what the fuel purchase app is about, below is a sample of
+actual screenshots.
 
 #### Account Creation / Login
 
@@ -92,3 +97,25 @@ Adding a fuel station (which is needed in order to log fuel purchases).
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/add-fuelstation.png"
 height="418px" width="237px">
+
+#### Adding a Fuel Purchase Log
+
+Adding a fuel purchase log requires the user to pick the associated vehicle and
+fuel station.
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/add-fplog.png"
+height="418px" width="237px">
+
+#### Adding an Environment Log
+
+We can also log things about the "environment" vis-a-vis one of our vehicles.
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/add-envlog.png"
+height="418px" width="237px">
+
+## Not Yet Implemented
+
+As of this writing, none of the reporting functionality has been implemented
+yet (but will be in the future).  Currently all you can do is log data.
