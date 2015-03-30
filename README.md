@@ -1,5 +1,7 @@
 # PEFuelPurchase-App
 
+[![Build Status](https://travis-ci.org/evanspa/PEFuelPurchase-App.svg)](https://travis-ci.org/evanspa/PEFuelPurchase-App)
+
 PEFuelPurchase-App is an iOS application for collecting fuel purchase data.
 Its primary purpose is to serve as a reference application for leveraging the
 PE* suite of libraries.
@@ -44,6 +46,8 @@ src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPur
   simplifying working with XML.
 + **[PEObjc-Commons](https://github.com/evanspa/PEObjc-Commons)**: a library
   providing a set of generic helper functionality.
++ **[PEAppTransaction-Logger](https://github.com/evanspa/PEAppTransaction-Logger)**: a
+  library client for the PEAppTransaction Logging Framework.
 + **[PEDev-Console](https://github.com/evanspa/PEDev-Console)**: a library
   aiding in the functional testing of iOS applications.
 + **[PESimu-Select](https://github.com/evanspa/PESimu-Select)**: a library
