@@ -42,8 +42,21 @@ src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPur
 
 #### Account Creation / Login
 
+Unfortunately the fuel purchase app suffers from the
+[login barrier anti-pattern](http://blog.codinghorror.com/removing-the-login-barrier/).
+No worries though, as this app is meant to serve as a reference to using the PE*
+library suite, and is not meant for general user adoption.
+
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-acct-login.png"
 height="418px" width="237px">
 
 #### Quick Action Menu (home screen)
+
+Main menu screen.  This is the screen that appears after logging in or creating
+account.  It's also the default authenticated screen when launching the app
+after a login has occured.
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/quick-action-menu.png"
+height="418px" width="237px">

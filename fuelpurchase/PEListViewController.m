@@ -9,7 +9,6 @@
 #import "PEListViewController.h"
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
-//#import <SVPullToRefresh/SVPullToRefresh.h>
 #import <PEFuelPurchase-Model/PELMNotificationUtils.h>
 #import "NSMutableArray+MoveObject.h"
 #import "UIScrollView+PEAdditions.h"
