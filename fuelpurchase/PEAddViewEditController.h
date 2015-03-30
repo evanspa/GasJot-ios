@@ -7,8 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <objc-commons/PEUIToolkit.h>
-#import <iFuelPurchase-Core/PELMMainSupport.h>
+#import <PEObjc-Commons/PEUIToolkit.h>
+#import <PEFuelPurchase-Model/PELMMainSupport.h>
 
 @class PEAddViewEditController;
 typedef UIView *(^PEEntityPanelMakerBlk)(PEAddViewEditController *);

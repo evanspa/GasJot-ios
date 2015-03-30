@@ -46,4 +46,4 @@ src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPur
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-acct-login.png"
 height="418px" width="237px">
 
-### Logging in & Account Creation
+#### Quick Action Menu (home screen)

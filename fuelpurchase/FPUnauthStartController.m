@@ -21,9 +21,9 @@
 #import <ReactiveCocoa/UITextField+RACSignalSupport.h>
 #import <ReactiveCocoa/RACSubscriptingAssignmentTrampoline.h>
 #import <ReactiveCocoa/RACSignal+Operations.h>
-#import <objc-commons/PEUIUtils.h>
-#import <fuelpurchase-common/FPTransactionCodes.h>
-#import <iFuelPurchase-Core/FPErrorDomainsAndCodes.h>
+#import <PEObjc-Commons/PEUIUtils.h>
+#import <PEFuelPurchase-Common/FPTransactionCodes.h>
+#import <PEFuelPurchase-Model/FPErrorDomainsAndCodes.h>
 #import "FPUnauthStartController.h"
 #import "FPAuthenticationAssertionSerializer.h"
 #import "FPUserSerializer.h"
@@ -33,7 +33,7 @@
 #import "NSObject+appdelegate.h"
 
 #ifdef FP_DEV
-  #import <dev-console/UIViewController+devconsole.h>
+  #import <PEDev-Console/UIViewController+devconsole.h>
 #endif
 
 @interface FPUnauthStartController ()

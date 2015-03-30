@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <iFuelPurchase-Core/FPUser.h>
+#import <PEFuelPurchase-Model/FPUser.h>
 
 /**
  This abstraction has a dual purpose with an RPC feel to it.  It is used to

@@ -19,10 +19,10 @@
 // IN THE SOFTWARE.
 
 #import "FPUtils.h"
-#import <objc-commons/PEUIUtils.h>
-#import <iFuelPurchase-Core/FPErrorDomainsAndCodes.h>
-#import <hateoas-client/HCRelation.h>
-#import <hateoas-client/HCResource.h>
+#import <PEObjc-Commons/PEUIUtils.h>
+#import <PEFuelPurchase-Model/FPErrorDomainsAndCodes.h>
+#import <PEHateoas-Client/HCRelation.h>
+#import <PEHateoas-Client/HCResource.h>
 
 @implementation FPUtils
 

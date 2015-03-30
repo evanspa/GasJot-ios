@@ -7,10 +7,10 @@
 //
 
 #import "FPSettingsController.h"
-#import <objc-commons/PEUIUtils.h>
+#import <PEObjc-Commons/PEUIUtils.h>
 
 #ifdef FP_DEV
-  #import <dev-console/UIViewController+devconsole.h>
+  #import <PEDev-Console/UIViewController+devconsole.h>
 #endif
 
 @implementation FPSettingsController {

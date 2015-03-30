@@ -21,9 +21,9 @@
 #import <Foundation/Foundation.h>
 #import <AFNetworking/AFHTTPRequestOperationManager.h>
 #import <MBProgressHUD/MBProgressHUD.h>
-#import <iFuelPurchase-Core/FPUser.h>
-#import <iFuelPurchase-Core/PELMUtils.h>
-#import <transaction-logger/TLTransactionManager.h>
+#import <PEFuelPurchase-Model/FPUser.h>
+#import <PEFuelPurchase-Model/PELMUtils.h>
+#import <PEAppTransaction-Logger/TLTransactionManager.h>
 
 typedef NSArray * (^ErrMsgsMaker)(NSInteger errCode);
 

@@ -7,9 +7,9 @@
 //
 
 #import "PEAddViewEditController.h"
-#import <iFuelPurchase-Core/PELMNotificationUtils.h>
-#import <objc-commons/PEUIUtils.h>
-#import <objc-commons/PEUtils.h>
+#import <PEFuelPurchase-Model/PELMNotificationUtils.h>
+#import <PEObjc-Commons/PEUIUtils.h>
+#import <PEObjc-Commons/PEUtils.h>
 #import "FPEditActors.h"
 
 @implementation PEAddViewEditController {

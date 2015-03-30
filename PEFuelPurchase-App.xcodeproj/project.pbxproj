@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1627E98A634C0C94B378A89E /* libPods-PEFuelPurchase-App-dev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C8F7D920AF4FE86756CE0393 /* libPods-PEFuelPurchase-App-dev.a */; };
 		18010C5A180E4752005F5CEB /* FPQuickActionMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18010C59180E4752005F5CEB /* FPQuickActionMenuController.m */; };
 		1801698418108269007C0EC1 /* FPQuickActionMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18010C59180E4752005F5CEB /* FPQuickActionMenuController.m */; };
 		180EDA3019C7C2D200C782A6 /* FPSettingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 180EDA2F19C7C2D200C782A6 /* FPSettingsController.m */; };
@@ -141,10 +142,10 @@
 		18D6DFAB17F68005006B300D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		18D6DFAD17F68005006B300D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		18D6DFAF17F68005006B300D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		18D6DFB317F68005006B300D /* fuelpurchase-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "fuelpurchase-Info.plist"; sourceTree = "<group>"; };
+		18D6DFB317F68005006B300D /* PEFuelPurchase-App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "PEFuelPurchase-App-Info.plist"; sourceTree = "<group>"; };
 		18D6DFB517F68005006B300D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		18D6DFB717F68005006B300D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		18D6DFB917F68005006B300D /* fuelpurchase-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "fuelpurchase-Prefix.pch"; sourceTree = "<group>"; };
+		18D6DFB917F68005006B300D /* PEFuelPurchase-App-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PEFuelPurchase-App-Prefix.pch"; sourceTree = "<group>"; };
 		18D6DFBA17F68005006B300D /* FPAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FPAppDelegate.h; sourceTree = "<group>"; };
 		18D6DFBB17F68005006B300D /* FPAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FPAppDelegate.m; sourceTree = "<group>"; };
 		18D6DFBD17F68005006B300D /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
@@ -155,12 +156,11 @@
 		18F61A871A96133000BA631A /* UIScrollView+PEAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIScrollView+PEAdditions.h"; sourceTree = "<group>"; };
 		18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIScrollView+PEAdditions.m"; sourceTree = "<group>"; };
 		1DF684FBAD9D439284549BB5 /* libPods-fuelpurchaseTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fuelpurchaseTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		53B27AF448D379D8E88BB2E8 /* Pods-fuelpurchase-dev.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fuelpurchase-dev.debug.xcconfig"; path = "Pods/Target Support Files/Pods-fuelpurchase-dev/Pods-fuelpurchase-dev.debug.xcconfig"; sourceTree = "<group>"; };
 		91349E0025D9467DBE585F0F /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		A7513CEBA98F31861824A014 /* Pods-fuelpurchase-dev.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fuelpurchase-dev.release.xcconfig"; path = "Pods/Target Support Files/Pods-fuelpurchase-dev/Pods-fuelpurchase-dev.release.xcconfig"; sourceTree = "<group>"; };
 		AC2AAEDFF2F94B76A9D41E6C /* libPods-fuelpurchase-tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fuelpurchase-tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1FEBEB6E7DB4F50A4FCEA3D /* libPods-fuelpurchase-dev.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fuelpurchase-dev.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C620C668F12CED8B0A128354 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		C8F7D920AF4FE86756CE0393 /* libPods-PEFuelPurchase-App-dev.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PEFuelPurchase-App-dev.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E12E20B44758C744FA39A49C /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -178,6 +178,7 @@
 				1870B036180482AF0078ABF7 /* UIKit.framework in Frameworks */,
 				1870B037180482AF0078ABF7 /* Foundation.framework in Frameworks */,
 				D5F03BF5DC104B09B5F2E6AD /* libPods-fuelpurchase-dev.a in Frameworks */,
+				1627E98A634C0C94B378A89E /* libPods-PEFuelPurchase-App-dev.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -204,8 +205,6 @@
 			children = (
 				E12E20B44758C744FA39A49C /* Pods.debug.xcconfig */,
 				C620C668F12CED8B0A128354 /* Pods.release.xcconfig */,
-				53B27AF448D379D8E88BB2E8 /* Pods-fuelpurchase-dev.debug.xcconfig */,
-				A7513CEBA98F31861824A014 /* Pods-fuelpurchase-dev.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -414,7 +413,7 @@
 			isa = PBXGroup;
 			children = (
 				182F651E1A244E2700A769E4 /* IQKeyboardManager.bundle */,
-				18D6DFB117F68005006B300D /* fuelpurchase */,
+				18D6DFB117F68005006B300D /* PEFuelPurchase-App */,
 				18D6DFAA17F68005006B300D /* Frameworks */,
 				18D6DFA917F68005006B300D /* Products */,
 				08DB50AF6B2DED35218E1824 /* Pods */,
@@ -446,11 +445,12 @@
 				C1FEBEB6E7DB4F50A4FCEA3D /* libPods-fuelpurchase-dev.a */,
 				AC2AAEDFF2F94B76A9D41E6C /* libPods-fuelpurchase-tests.a */,
 				1DF684FBAD9D439284549BB5 /* libPods-fuelpurchaseTests.a */,
+				C8F7D920AF4FE86756CE0393 /* libPods-PEFuelPurchase-App-dev.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		18D6DFB117F68005006B300D /* fuelpurchase */ = {
+		18D6DFB117F68005006B300D /* PEFuelPurchase-App */ = {
 			isa = PBXGroup;
 			children = (
 				181003AC1A6E1CA400FB6C55 /* Edit actors */,
@@ -465,6 +465,7 @@
 				18D6DFB217F68005006B300D /* Supporting Files */,
 				18D6DFBD17F68005006B300D /* Images.xcassets */,
 			);
+			name = "PEFuelPurchase-App";
 			path = fuelpurchase;
 			sourceTree = "<group>";
 		};
@@ -475,12 +476,12 @@
 				18CC2D0117F68117009DF2CE /* en.lproj */,
 				18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */,
 				183E13A418009F9F009E9085 /* fpapi-resource.json */,
-				18D6DFB317F68005006B300D /* fuelpurchase-Info.plist */,
+				18D6DFB317F68005006B300D /* PEFuelPurchase-App-Info.plist */,
 				18D6DFB417F68005006B300D /* InfoPlist.strings */,
 				18D6DFB717F68005006B300D /* main.m */,
 				18CC2CF217F680AC009DF2CE /* FPNames.h */,
 				18CC2CF317F680AC009DF2CE /* FPNames.m */,
-				18D6DFB917F68005006B300D /* fuelpurchase-Prefix.pch */,
+				18D6DFB917F68005006B300D /* PEFuelPurchase-App-Prefix.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -523,9 +524,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1870B022180482AF0078ABF7 /* fuelpurchase-dev */ = {
+		1870B022180482AF0078ABF7 /* PEFuelPurchase-App-dev */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1870B03F180482AF0078ABF7 /* Build configuration list for PBXNativeTarget "fuelpurchase-dev" */;
+			buildConfigurationList = 1870B03F180482AF0078ABF7 /* Build configuration list for PBXNativeTarget "PEFuelPurchase-App-dev" */;
 			buildPhases = (
 				1870B023180482AF0078ABF7 /* Check Pods Manifest.lock */,
 				1870B024180482AF0078ABF7 /* Sources */,
@@ -537,14 +538,14 @@
 			);
 			dependencies = (
 			);
-			name = "fuelpurchase-dev";
+			name = "PEFuelPurchase-App-dev";
 			productName = fuelpurchase;
 			productReference = 1870B042180482AF0078ABF7 /* FP (dev).app */;
 			productType = "com.apple.product-type.application";
 		};
-		18D6DFA717F68005006B300D /* fuelpurchase */ = {
+		18D6DFA717F68005006B300D /* PEFuelPurchase-App */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 18D6DFD417F68005006B300D /* Build configuration list for PBXNativeTarget "fuelpurchase" */;
+			buildConfigurationList = 18D6DFD417F68005006B300D /* Build configuration list for PBXNativeTarget "PEFuelPurchase-App" */;
 			buildPhases = (
 				7595B694D7984311A9A052AB /* Check Pods Manifest.lock */,
 				18D6DFA417F68005006B300D /* Sources */,
@@ -556,7 +557,7 @@
 			);
 			dependencies = (
 			);
-			name = fuelpurchase;
+			name = "PEFuelPurchase-App";
 			productName = fuelpurchase;
 			productReference = 18D6DFA817F68005006B300D /* Fuel Purchase.app */;
 			productType = "com.apple.product-type.application";
@@ -579,7 +580,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 18D6DFA317F68005006B300D /* Build configuration list for PBXProject "fuelpurchase" */;
+			buildConfigurationList = 18D6DFA317F68005006B300D /* Build configuration list for PBXProject "PEFuelPurchase-App" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -591,8 +592,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				18D6DFA717F68005006B300D /* fuelpurchase */,
-				1870B022180482AF0078ABF7 /* fuelpurchase-dev */,
+				18D6DFA717F68005006B300D /* PEFuelPurchase-App */,
+				1870B022180482AF0078ABF7 /* PEFuelPurchase-App-dev */,
 			);
 		};
 /* End PBXProject section */
@@ -654,7 +655,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-fuelpurchase-dev/Pods-fuelpurchase-dev-resources.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-PEFuelPurchase-App-dev/Pods-PEFuelPurchase-App-dev-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		5A314A635D3C4E149517F500 /* Copy Pods Resources */ = {
@@ -768,7 +769,7 @@
 /* Begin XCBuildConfiguration section */
 		1870B040180482AF0078ABF7 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 53B27AF448D379D8E88BB2E8 /* Pods-fuelpurchase-dev.debug.xcconfig */;
+			baseConfigurationReference = E12E20B44758C744FA39A49C /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -781,7 +782,7 @@
 					"COCOAPODS=1",
 					"FP_DEV=1",
 				);
-				INFOPLIST_FILE = "$(SRCROOT)/fuelpurchase/fuelpurchase-Info.plist";
+				INFOPLIST_FILE = "fuelpurchase/PEFuelPurchase-App-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				PRODUCT_NAME = "FP (dev)";
 				PROVISIONING_PROFILE = "";
@@ -792,7 +793,7 @@
 		};
 		1870B041180482AF0078ABF7 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A7513CEBA98F31861824A014 /* Pods-fuelpurchase-dev.release.xcconfig */;
+			baseConfigurationReference = C620C668F12CED8B0A128354 /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -805,7 +806,7 @@
 					"COCOAPODS=1",
 					"FP_DEV=1",
 				);
-				INFOPLIST_FILE = "$(SRCROOT)/fuelpurchase/fuelpurchase-Info.plist";
+				INFOPLIST_FILE = "fuelpurchase/PEFuelPurchase-App-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				PRODUCT_NAME = "FP (dev)";
 				PROVISIONING_PROFILE = "";
@@ -816,6 +817,7 @@
 		};
 		18D6DFD217F68005006B300D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E12E20B44758C744FA39A49C /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -856,6 +858,7 @@
 		};
 		18D6DFD317F68005006B300D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C620C668F12CED8B0A128354 /* Pods.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -897,8 +900,8 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "fuelpurchase/fuelpurchase-Prefix.pch";
-				INFOPLIST_FILE = "fuelpurchase/fuelpurchase-Info.plist";
+				GCC_PREFIX_HEADER = "fuelpurchase/PEFuelPurchase-App-Prefix.pch";
+				INFOPLIST_FILE = "fuelpurchase/PEFuelPurchase-App-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				PRODUCT_NAME = "Fuel Purchase";
 				PROVISIONING_PROFILE = "";
@@ -916,8 +919,8 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "fuelpurchase/fuelpurchase-Prefix.pch";
-				INFOPLIST_FILE = "fuelpurchase/fuelpurchase-Info.plist";
+				GCC_PREFIX_HEADER = "fuelpurchase/PEFuelPurchase-App-Prefix.pch";
+				INFOPLIST_FILE = "fuelpurchase/PEFuelPurchase-App-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				PRODUCT_NAME = "Fuel Purchase";
 				PROVISIONING_PROFILE = "";
@@ -929,7 +932,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1870B03F180482AF0078ABF7 /* Build configuration list for PBXNativeTarget "fuelpurchase-dev" */ = {
+		1870B03F180482AF0078ABF7 /* Build configuration list for PBXNativeTarget "PEFuelPurchase-App-dev" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1870B040180482AF0078ABF7 /* Debug */,
@@ -938,7 +941,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		18D6DFA317F68005006B300D /* Build configuration list for PBXProject "fuelpurchase" */ = {
+		18D6DFA317F68005006B300D /* Build configuration list for PBXProject "PEFuelPurchase-App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				18D6DFD217F68005006B300D /* Debug */,
@@ -947,7 +950,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		18D6DFD417F68005006B300D /* Build configuration list for PBXNativeTarget "fuelpurchase" */ = {
+		18D6DFD417F68005006B300D /* Build configuration list for PBXNativeTarget "PEFuelPurchase-App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				18D6DFD517F68005006B300D /* Debug */,

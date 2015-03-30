@@ -9,7 +9,7 @@
 #import "FPEditsInProgressController.h"
 
 #ifdef FP_DEV
-  #import <dev-console/UIViewController+devconsole.h>
+  #import <PEDev-Console/UIViewController+devconsole.h>
 #endif
 
 @implementation FPEditsInProgressController {

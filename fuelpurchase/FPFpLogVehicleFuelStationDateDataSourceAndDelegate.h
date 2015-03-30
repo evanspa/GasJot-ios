@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <iFuelPurchase-Core/FPCoordinatorDao.h>
+#import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 #import "FPScreenToolkit.h"
 
 @interface FPFpLogVehicleFuelStationDateDataSourceAndDelegate : NSObject

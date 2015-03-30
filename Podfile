@@ -1,9 +1,8 @@
-source 'ssh://git@bitbucket.org/evanspa/evans-cocoapod-specs.git'
 source 'https://github.com/CocoaPods/Specs.git'
 
 platform :ios, '8.1'
 
-pod 'iFuelPurchase-Core', '~> 1.0.0'
+pod 'PEFuelPurchase-Model', '~> 1.0.1'
 pod 'SVPullToRefresh', '~> 0.4.1'
 pod 'ReactiveCocoa', '~> 2.4.7'
 pod 'AFNetworking', '~> 2.5.1'
@@ -14,6 +13,6 @@ pod 'UICKeyChainStore', '~> 2.0.4'
 pod 'IQKeyboardManager', '~> 3.2.1.1'
 pod 'BlocksKit', '~> 2.2.5'
 
-target :'fuelpurchase-dev',:exclusive => false do
+target :'PEFuelPurchase-App-dev',:exclusive => false do
   pod 'PEDev-Console', '~> 1.0.1'
 end

@@ -7,9 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <iFuelPurchase-Core/FPCoordinatorDao.h>
-#import <transaction-logger/TLTransactionManager.h>
-#import <objc-commons/PEUIToolkit.h>
+#import <PEFuelPurchase-Model/FPCoordinatorDao.h>
+#import <PEAppTransaction-Logger/TLTransactionManager.h>
+#import <PEObjc-Commons/PEUIToolkit.h>
 #import "PEListViewController.h"
 #import "PEAddViewEditController.h"
 

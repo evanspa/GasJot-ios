@@ -7,9 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <iFuelPurchase-Core/FPFuelPurchaseLog.h>
-#import <iFuelPurchase-Core/FPEnvironmentLog.h>
-#import <iFuelPurchase-Core/FPCoordinatorDao.h>
+#import <PEFuelPurchase-Model/FPFuelPurchaseLog.h>
+#import <PEFuelPurchase-Model/FPEnvironmentLog.h>
+#import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 
 @interface FPLogEnvLogComposite : NSObject
 

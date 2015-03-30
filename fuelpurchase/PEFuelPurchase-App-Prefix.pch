@@ -36,7 +36,10 @@
     #import <Foundation/Foundation.h>
     #import <SystemConfiguration/SystemConfiguration.h>
     #import <MobileCoreServices/MobileCoreServices.h>
-    #import <CocoaLumberjack/CocoaLumberjack.h>
+    //#import <CocoaLumberjack/CocoaLumberjack.h>
+    #import <CocoaLumberjack/DDLog.h>
+    #import <CocoaLumberjack/DDASLLogger.h>
+    #import <CocoaLumberjack/DDTTYLogger.h>
 
     #ifdef DEBUG
         static const int ddLogLevel = LOG_LEVEL_VERBOSE;

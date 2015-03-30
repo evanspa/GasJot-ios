@@ -7,10 +7,10 @@
 //
 
 #import "FPFpLogVehicleFuelStationDateDataSourceAndDelegate.h"
-#import <objc-commons/PEUIUtils.h>
-#import <objc-commons/PEUtils.h>
-#import <iFuelPurchase-Core/PELMNotificationUtils.h>
-#import <iFuelPurchase-Core/FPNotificationNames.h>
+#import <PEObjc-Commons/PEUIUtils.h>
+#import <PEObjc-Commons/PEUtils.h>
+#import <PEFuelPurchase-Model/PELMNotificationUtils.h>
+#import <PEFuelPurchase-Model/FPNotificationNames.h>
 
 @implementation FPFpLogVehicleFuelStationDateDataSourceAndDelegate {
   FPCoordinatorDao *_coordDao;

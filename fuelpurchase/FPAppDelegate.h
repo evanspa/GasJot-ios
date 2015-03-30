@@ -20,14 +20,14 @@
 
 #import <UIKit/UIKit.h>
 #import <MBProgressHUD/MBProgressHUD.h>
-#import <fuelpurchase-common/FPAuthTokenDelegate.h>
-#import <iFuelPurchase-Core/FPRemoteStoreSyncConflictDelegate.h>
-#import <iFuelPurchase-Core/FPCoordinatorDao.h>
-#import <transaction-logger/TLTransactionManager.h>
-#import <objc-commons/PEUIToolkit.h>
+#import <PEFuelPurchase-Common/FPAuthTokenDelegate.h>
+#import <PEFuelPurchase-Model/FPRemoteStoreSyncConflictDelegate.h>
+#import <PEFuelPurchase-Model/FPCoordinatorDao.h>
+#import <PEAppTransaction-Logger/TLTransactionManager.h>
+#import <PEObjc-Commons/PEUIToolkit.h>
 
 #ifdef FP_DEV
-  #import <dev-console/PDVDevEnabled.h>
+  #import <PEDev-Console/PDVDevEnabled.h>
 #endif
 
 /**

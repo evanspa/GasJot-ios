@@ -19,14 +19,14 @@
 // IN THE SOFTWARE.
 
 #import <FlatUIKit/UIColor+FlatUI.h>
-#import <objc-commons/PEUIUtils.h>
+#import <PEObjc-Commons/PEUIUtils.h>
 #import "FPQuickActionMenuController.h"
 #import "FPScreenToolkit.h"
 #import "FPEditActors.h"
 #import "FPUtils.h"
 
 #ifdef FP_DEV
-  #import <dev-console/UIViewController+devconsole.h>
+  #import <PEDev-Console/UIViewController+devconsole.h>
 #endif
 
 @implementation FPQuickActionMenuController {
