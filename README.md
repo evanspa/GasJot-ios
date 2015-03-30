@@ -21,6 +21,7 @@ applications.
     - [Adding a Fuel Station](#adding-a-fuel-station)
     - [Adding a Fuel Purchase Log](#adding-a-fuel-purchase-log)
     - [Adding an Environment Log](#adding-an-environment-log)
+- [Not Yet Implemented](#not-yet-implemented)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
