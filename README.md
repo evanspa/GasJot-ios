@@ -45,7 +45,7 @@ src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPur
 + **[PEXML-Utils](https://github.com/evanspa/PEXML-Utils)**: a library
   simplifying working with XML.
 + **[PEObjc-Commons](https://github.com/evanspa/PEObjc-Commons)**: a library
-  providing a set of generic helper functionality.
+  providing a set of everyday helper functionality.
 + **[PEAppTransaction-Logger](https://github.com/evanspa/PEAppTransaction-Logger)**: a
   library client for the PEAppTransaction Logging Framework.
 + **[PEDev-Console](https://github.com/evanspa/PEDev-Console)**: a library
