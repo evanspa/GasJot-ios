@@ -38,8 +38,8 @@ src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPur
 ## PE* iOS Library Suite
 *(Each library is implemented as a CocoaPod-enabled iOS static library.)*
 + **[PEHateoas-Client](https://github.com/evanspa/PEHateoas-Client)**: a library
-  for consuming hypermedia REST APIs.  I.e., those that adhere to the *Hypermedia
-  As The Engine Of Application State* (HATEOAS) constraint.
+  for consuming hypermedia REST APIs.  I.e. those that adhere to the *Hypermedia
+  As The Engine Of Application State* ([HATEOAS](http://en.wikipedia.org/wiki/HATEOAS)) constraint.
 + **[PEWire-Control](https://github.com/evanspa/PEWire-Control)**: a library for
   controlling Cocoa's NSURL loading system using simple XML files.
 + **[PEXML-Utils](https://github.com/evanspa/PEXML-Utils)**: a library
