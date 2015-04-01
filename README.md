@@ -40,7 +40,7 @@ src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPur
 + **[PEObjc-Commons](https://github.com/evanspa/PEObjc-Commons)**: a library
   providing a set of everyday helper functionality.
 + **[PEXML-Utils](https://github.com/evanspa/PEXML-Utils)**: a library
-  simplifying working with XML.
+  simplifying working with XML.  Built on top of [KissXML](https://github.com/robbiehanson/KissXML).
 + **[PEHateoas-Client](https://github.com/evanspa/PEHateoas-Client)**: a library
   for consuming hypermedia REST APIs.  I.e. those that adhere to the *Hypermedia
   As The Engine Of Application State ([HATEOAS](http://en.wikipedia.org/wiki/HATEOAS))* constraint.  Built on top of [AFNetworking](https://github.com/AFNetworking/AFNetworking).
