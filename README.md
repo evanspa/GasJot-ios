@@ -47,7 +47,7 @@ src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPur
 + **[PEObjc-Commons](https://github.com/evanspa/PEObjc-Commons)**: a library
   providing a set of everyday helper functionality.
 + **[PEAppTransaction-Logger](https://github.com/evanspa/PEAppTransaction-Logger)**: a
-  library client for the PEAppTransaction Logging Framework.
+  library client for the PEAppTransaction Logging Framework.  Clojure-based libraries exist implementing the server-side [core data access](https://github.com/evanspa/pe-apptxn-core) and [REST API functionality](https://github.com/evanspa/pe-apptxn-restsupport).
 + **[PEDev-Console](https://github.com/evanspa/PEDev-Console)**: a library
   aiding in the functional testing of iOS applications.
 + **[PESimu-Select](https://github.com/evanspa/PESimu-Select)**: a library
