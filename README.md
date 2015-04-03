@@ -23,7 +23,7 @@ applications.
     - [Adding a Fuel Station](#adding-a-fuel-station)
     - [Adding a Fuel Purchase Log](#adding-a-fuel-purchase-log)
     - [Adding an Environment Log](#adding-an-environment-log)
-- [Not Yet Implemented](#not-yet-implemented)
+    - [Not Yet Implemented](#not-yet-implemented)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -120,7 +120,7 @@ We can also log things about the "environment" vis-a-vis one of our vehicles.
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/add-envlog.png"
 height="418px" width="237px">
 
-## Not Yet Implemented
+#### Not Yet Implemented
 
 As of this writing, none of the reporting functionality has been implemented
 yet (but will be in the future).  Currently all you can do is log data.
