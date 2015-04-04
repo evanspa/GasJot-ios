@@ -82,11 +82,23 @@ events within your applications.  It is comprised of 3 main tiers: (1)
 [the web service layer](https://github.com/evanspa/pe-apptxn-restsupport)
 and (3) client libraries ([currently only iOS](https://github.com/evanspa/PEAppTransaction-Logger)).
 
-This repository, *PEAppTransaction-Logger*, represents an iOS client library to the framework.
+The PELF provides a small set of functions to log what are termed "application
+transactions."  An application transaction is not a transaction in a database
+sense; it is meant more to model application-level actions.  For example, a user
+creating a new purchase order within your application would be termed as an
+application transaction.  A user signing in to your application would be an
+application transaction.  A user signing out, another.
 
-The PELF provides a small set of functions to log what are termed "application transactions."  An application transaction is not a transaction in a database sense; it is meant more to model application-level actions.  For example, a user creating a new purchase order within your application would be termed as an application transaction.  A user signing in to your application would be an application transaction.  A user signing out, another.
-
-The PELF provides both client-side and server-side libraries.  PELF client-side libraries are used by applications (*such as this one*) to locally record user-initiated application transactions and transaction events.  Transaction events are simply timestamped events associated with an application transaction.  E.g., if "create a fuel purchase log" is an application transaction, a transaction event might be: "user clicks 'New Fuel Purchase Log' button to initiate transaction."  Another event might be: "web service request initiated to submit new fp log data to server".  And another: "web service response received".  All of this log data is saved locally on the client, and then later pushed to the server for permanent storage (and offline analysis).
+The PELF provides both client-side and server-side libraries.  PELF client-side
+libraries are used by applications (*such as this one*) to locally record
+user-initiated application transactions and transaction events.  Transaction
+events are simply timestamped events associated with an application transaction.
+E.g., if "create a fuel purchase log" is an application transaction, a
+transaction event might be: "user clicks 'New Fuel Purchase Log' button to
+initiate transaction."  Another event might be: "web service request initiated
+to submit new fp log data to server".  And another: "web service response
+received".  All of this log data is saved locally on the client, and then later
+pushed to the server for permanent storage (and offline analysis).
 
 ### Motivation
 
