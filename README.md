@@ -42,8 +42,8 @@ src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPur
 
 ## Deep Dependency Graph
 
-The following diagram attempts to illustrates the main components of the fuel purchase
-application, along with showing the dependencies to the PE* suite of libraries.
+The following diagram attempts to illustrates the dependencies among the main
+components of the fuel purchase application.
 
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPurchase-App-Dependency-Graph.png">
