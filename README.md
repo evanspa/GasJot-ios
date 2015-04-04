@@ -13,7 +13,8 @@ applications.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Dependency Graph](#dependency-graph)
+- [Component Layering](#component-layering)
+- [Deep Dependency Graph](#deep-dependency-graph)
 - [App-specific Libraries used by PEFuelPurchase-App](#app-specific-libraries)
 - [PE* iOS Library Suite](#pe-ios-library-suite)
 - [PEAppTransaction Logging Framework](#peapptransaction-logging-framework)
@@ -29,9 +30,16 @@ applications.
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Dependency Graph
+## Component Layering
 
-The following diagram illustrates the main components of the fuel purchase
+The following diagram attempts to illustrate the layered architecture of the
+fuel purchase application.  The [fuel purchase model](#app-specific-libraries)
+appears largest because it encapsulates the bulk of the application; the core
+logic, model and data access functionality.
+
+## Deep Dependency Graph
+
+The following diagram attempts to illustrates the main components of the fuel purchase
 application, along with showing the dependencies to the PE* suite of libraries.
 
 <img
@@ -43,7 +51,7 @@ src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPur
   contains *application agnostic* constant definitions.
 + **[PEFuelPurchase-Model](https://github.com/evanspa/PEFuelPurchase-Model)**:
   encapsulates the object model, local data access, web service access and core
-  logic of the application.  This library effectively implements the *core* of the fuel purchase application domain.  The fuel purchase iOS application (*this repo*) is dependent on it for all its core logic, model and data access / persistence functionality.  This library for example, could be used to create a command-line version of the fuel purchase application.  
+  logic of the application.  This library effectively implements the *core* of the fuel purchase application domain.  The fuel purchase iOS application (*this repo*) is dependent on it for all its core logic, model and data access / persistence functionality.  This library for example, could be used to create a command-line version of the fuel purchase application.
 
 ## PE* iOS Library Suite
 *(Each library is implemented as a CocoaPod-enabled iOS static library.)*
@@ -73,7 +81,7 @@ and (3) client libraries ([currently only iOS](https://github.com/evanspa/PEAppT
 
 This repository, *PEAppTransaction-Logger*, represents an iOS client library to the framework.
 
-The PELF provides a small set of functions to log what are termed "application transactions."  An application transaction is not a transaction in a database sense; it is meant more to model application-level actions.  For example, a user creating a new purchase order within your application would be termed as an application transaction.  A user signing in to your application would be an application transaction.  A user signing out, another.  
+The PELF provides a small set of functions to log what are termed "application transactions."  An application transaction is not a transaction in a database sense; it is meant more to model application-level actions.  For example, a user creating a new purchase order within your application would be termed as an application transaction.  A user signing in to your application would be an application transaction.  A user signing out, another.
 
 The PELF provides both client-side and server-side libraries.  PELF client-side libraries are used by applications (*such as this one*) to locally record user-initiated application transactions and transaction events.  Transaction events are simply timestamped events associated with an application transaction.  E.g., if "create a fuel purchase log" is an application transaction, a transaction event might be: "user clicks 'New Fuel Purchase Log' button to initiate transaction."  Another event might be: "web service request initiated to submit new fp log data to server".  And another: "web service response received".  All of this log data is saved locally on the client, and then later pushed to the server for permanent storage (and offline analysis).
 
