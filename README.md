@@ -37,6 +37,9 @@ fuel purchase application.  The [fuel purchase model](#app-specific-libraries)
 appears largest because it encapsulates the bulk of the application; the core
 logic, model and data access functionality.
 
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPurchase-App-layers.png">
+
 ## Deep Dependency Graph
 
 The following diagram attempts to illustrates the main components of the fuel purchase
