@@ -38,7 +38,7 @@ appears largest because it encapsulates the bulk of the application; the core
 logic, model and data access functionality.
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPurchase-App-layers.png">
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPurchase-App-Component-Layers.png">
 
 ## Deep Dependency Graph
 
