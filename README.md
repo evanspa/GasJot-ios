@@ -14,8 +14,8 @@ applications.
 **Table of Contents**
 
 - [Dependency Graph](#dependency-graph)
+- [App-specific Libraries used by PEFuelPurchase-App](#app-specific-libraries)
 - [PE* iOS Library Suite](#pe-ios-library-suite)
-- [Other Libraries used by PEFuelPurchase-App](#other-libraries-used-by-pefuelpurchase-app)
 - [PEAppTransaction Logging Framework](#peapptransaction-logging-framework)
   - [Motivation](#motivation)
 - [Screenshots](#screenshots)
@@ -37,6 +37,14 @@ application, along with showing the dependencies to the PE* suite of libraries.
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPurchase-App-Dependency-Graph.png">
 
+## App Specific Libraries
+*(The following libraries are specific to the fuel purchase application domain, but are not GUI-related.)*
++ **[PEFuelPurchase-Common](https://github.com/evanspa/PEFuelPurchase-Common)**:
+  contains *application agnostic* constant definitions.
++ **[PEFuelPurchase-Model](https://github.com/evanspa/PEFuelPurchase-Model)**:
+  encapsulates the object model, local data access, web service access and core
+  logic of the application.  This library effectively implements the *core* of the fuel purchase application domain.  The fuel purchase iOS application (*this repo*) is dependent on it for all its core logic, model and data access / persistence functionality.  This library for example, could be used to create a command-line version of the fuel purchase application.  
+
 ## PE* iOS Library Suite
 *(Each library is implemented as a CocoaPod-enabled iOS static library.)*
 + **[PEObjc-Commons](https://github.com/evanspa/PEObjc-Commons)**: a library
@@ -54,13 +62,6 @@ src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPur
   aiding in the functional testing of web service enabled iOS applications.
 + **[PEDev-Console](https://github.com/evanspa/PEDev-Console)**: a library
   aiding in the functional testing of iOS applications.
-
-## Other Libraries used by PEFuelPurchase-App
-+ **[PEFuelPurchase-Common](https://github.com/evanspa/PEFuelPurchase-Common)**:
-  contains *application agnostic* constant definitions.
-+ **[PEFuelPurchase-Model](https://github.com/evanspa/PEFuelPurchase-Model)**:
-  encapsulates the object model, local data access, web service access and core
-  logic of the application.
 
 ## PEAppTransaction Logging Framework
 
