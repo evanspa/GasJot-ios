@@ -14,7 +14,7 @@ applications.
 **Table of Contents**
 
 - [Component Layering](#component-layering)
-- [Deep Dependency Graph](#deep-dependency-graph)
+- [Dependency Graph](#dependency-graph)
 - [App-specific Libraries used by PEFuelPurchase-App](#app-specific-libraries)
 - [PE* iOS Library Suite](#pe-ios-library-suite)
 - [PEAppTransaction Logging Framework](#peapptransaction-logging-framework)
@@ -30,20 +30,36 @@ applications.
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+## About the Fuel Purchase System
+
+The fuel purchase system, in its present form, is not meant to be terribly
+useful.  It exists more as a reference implementation for a set of libraries.
+The fuel purchase system is a client/server one.  This repo,
+*PEFuelPurchase-App*, represents a client-side application of the fuel purchase
+system.  The libraries it uses are generic, and thus are not coupled to the fuel
+purchase system.  These libraries are the
+[PE* iOS library suite](#pe-ios-library-suite).
+
+### Server-side Application
+
+The server-side application of the fuel purchase system provides a REST API
+endpoint (*written in Clojure*) for the client applications to consume:
+[pe-fp-app](https://github.com/evanspa/pe-fp-app).
+
 ## Component Layering
 
 The following diagram attempts to illustrate the layered architecture of the
-fuel purchase application.  The [fuel purchase model](#app-specific-libraries)
+fuel purchase iOS client application.  The [fuel purchase model](#app-specific-libraries)
 appears largest because it encapsulates the bulk of the application; the core
 logic, model and data access functionality.
 
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPurchase-App-Component-Layers.png">
 
-## Deep Dependency Graph
+## Dependency Graph
 
 The following diagram attempts to illustrates the dependencies among the main
-components of the fuel purchase application.
+components of the fuel purchase iOS client application.
 
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPurchase-App-Dependency-Graph.png">
