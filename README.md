@@ -13,6 +13,8 @@ applications.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
+- [About the Fuel Purchase System](#about-the-fuel-purchase-system)
+  - [Server-side Application](#server-side-application)
 - [Component Layering](#component-layering)
 - [Dependency Graph](#dependency-graph)
 - [App-specific Libraries used by PEFuelPurchase-App](#app-specific-libraries)
