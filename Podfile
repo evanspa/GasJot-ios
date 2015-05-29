@@ -13,6 +13,6 @@ pod 'UICKeyChainStore', '~> 2.0.4'
 pod 'IQKeyboardManager', '~> 3.2.1.1'
 pod 'BlocksKit', '~> 2.2.5'
 
-target :'PEFuelPurchase-App-dev',:exclusive => false do
+target :'PEFuelPurchase-App-dev', :exclusive => false do
   pod 'PEDev-Console', '~> 1.0.1'
 end
