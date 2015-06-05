@@ -19,7 +19,7 @@ applications.
 - [Dependency Graph](#dependency-graph)
 - [App-specific Libraries used by PEFuelPurchase-App](#app-specific-libraries)
 - [PE* iOS Library Suite](#pe-ios-library-suite)
-- [PEAppTransaction Logging Framework](#peapptransaction-logging-framework)
+- [Analytics](#analytics)
   - [Motivation](#motivation)
 - [Screenshots](#screenshots)
     - [Account Creation / Login](#account-creation--login)
@@ -92,46 +92,17 @@ src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPur
 + **[PEDev-Console](https://github.com/evanspa/PEDev-Console)**: a library
   aiding in the functional testing of iOS applications.
 
-## PEAppTransaction Logging Framework
+## Analytics
 
-The PEAppTransaction Logging Framework (PELF) is a framework for capturing important
-events within your applications.  It is comprised of 3 main tiers: (1)
+The fuel purchase app used to leverage the  PEAppTransaction Logging Framework
+(PELF) for capturing application events / logs; but going forward will leverage
+Google Analytics.
+
+*The PELF is comprised of 3 main tiers: (1)
 [the core data layer](https://github.com/evanspa/pe-apptxn-core), (2)
 [the web service layer](https://github.com/evanspa/pe-apptxn-restsupport)
-and (3) client libraries ([currently only iOS](https://github.com/evanspa/PEAppTransaction-Logger)).
-
-The PELF provides a small set of functions to log what are termed "application
-transactions."  An application transaction is not a transaction in a database
-sense; it is meant more to model application-level actions.  For example, a user
-creating a new purchase order within your application would be termed as an
-application transaction.  A user signing in to your application would be an
-application transaction.  A user signing out, another.
-
-The PELF provides both client-side and server-side libraries.  PELF client-side
-libraries are used by applications (*such as this one*) to locally record
-user-initiated application transactions and transaction events.  Transaction
-events are simply timestamped events associated with an application transaction.
-E.g., if "create a fuel purchase log" is an application transaction, a
-transaction event might be: "user clicks 'New Fuel Purchase Log' button to
-initiate transaction."  Another event might be: "web service request initiated
-to submit new fp log data to server".  And another: "web service response
-received".  All of this log data is saved locally on the client, and then later
-pushed to the server for permanent storage (and offline analysis).
-
-### Motivation
-
-The motivation behind the creation of the PEAppTransaction logging framework is
-simple: to systematically track important events about the goings-on within an
-application (*an end-user application or otherwise*).  You can use the framework
-to record information about your application, such as:
-+ How long a user takes to fill-out a form.
-+ What the round-trip time is for making web service calls.
-+ How often a user leaves a screen in your app without fulfilling the
-call-to-action.
-
-The set of use cases for which to use the framework to log metadata is
-open-ended.  You can use it for basic A/B testing, tracking performance-related
-metrics and many more.
+and (3) client libraries
+([currently only iOS](https://github.com/evanspa/PEAppTransaction-Logger)).*
 
 ## Screenshots
 
