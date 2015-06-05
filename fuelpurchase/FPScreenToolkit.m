@@ -25,12 +25,12 @@
 #import "FPEnvLogVehicleAndDateDataSourceDelegate.h"
 #import "FPEditActors.h"
 #import "FPLogEnvLogComposite.h"
+#import "FPNames.h"
 
 NSInteger const PAGINATION_PAGE_SIZE = 30;
 
 @implementation FPScreenToolkit {
   FPCoordinatorDao *_coordDao;
-  TLTransactionManager *_txnMgr;
   FPPanelToolkit *_panelToolkit;
   PELMDaoErrorBlk _errorBlk;
 }
@@ -38,13 +38,11 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
 #pragma mark - Initializers
 
 - (id)initWithCoordinatorDao:(FPCoordinatorDao *)coordDao
-          transactionManager:(TLTransactionManager *)txnMgr
                    uitoolkit:(PEUIToolkit *)uitoolkit
                        error:(PELMDaoErrorBlk)errorBlk {
   self = [super init];
   if (self) {
     _coordDao = coordDao;
-    _txnMgr = txnMgr;
     _uitoolkit = uitoolkit;
     _panelToolkit = [[FPPanelToolkit alloc] initWithCoordinatorDao:coordDao
                                                      screenToolkit:self
@@ -211,7 +209,6 @@ the background-processor is currently attempting to edit this record.  Try again
     return [[FPEditsInProgressController alloc]
               initWithStoreCoordinator:_coordDao
                                   user:user
-                    transactionManager:_txnMgr
                              uitoolkit:_uitoolkit
                          screenToolkit:self];
   };
@@ -224,13 +221,25 @@ the background-processor is currently attempting to edit this record.  Try again
     return [[FPSettingsController alloc]
               initWithStoreCoordinator:_coordDao
                                   user:user
-                    transactionManager:_txnMgr
                              uitoolkit:_uitoolkit
                          screenToolkit:self];
   };
 }
 
 #pragma mark - Vehicle Screens
+
++ (NSInteger)indexOfVehicle:(FPVehicle *)vehicle inVehicles:(NSArray *)vehicles {
+  NSInteger index = 0;
+  NSInteger count = 0;
+  for (FPVehicle *v in vehicles) {
+    if ([v isEqualToVehicle:vehicle]) {
+      index = count;
+      break;
+    }
+    count++;
+  }
+  return index;
+}
 
 - (FPAuthScreenMaker)newViewVehiclesScreenMaker {
   return ^ UIViewController *(FPUser *user) {
@@ -249,7 +258,6 @@ the background-processor is currently attempting to edit this record.  Try again
                                                                    id dataObject,
                                                                    NSIndexPath *indexPath,
                                                                    PEItemChangedBlk itemChangedBlk) {
-      //[_coordDao reloadVehicle:dataObject error:[FPUtils localFetchErrorHandlerMaker]()];
       return [self newVehicleDetailScreenMakerWithVehicle:dataObject
                                          vehicleIndexPath:indexPath
                                            itemChangedBlk:itemChangedBlk
@@ -257,22 +265,17 @@ the background-processor is currently attempting to edit this record.  Try again
     };
     PEPageLoaderBlk pageLoader = ^ NSArray * (FPVehicle *lastVehicle) {
       return [_coordDao vehiclesForUser:user
-                               pageSize:PAGINATION_PAGE_SIZE
-                        beforeDateAdded:[lastVehicle dateAdded]
                                   error:[FPUtils localFetchErrorHandlerMaker]()];
     };
     NSArray *initialVehicles = [_coordDao vehiclesForUser:user
-                                                 pageSize:PAGINATION_PAGE_SIZE
                                                     error:[FPUtils localFetchErrorHandlerMaker]()];
     PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
-      FPVehicle *vehicle = (FPVehicle *)entity;
-      return [_coordDao numVehiclesForUser:user
-                                 newerThan:[vehicle dateAdded]
-                                     error:[FPUtils localFetchErrorHandlerMaker]()];
+      return [FPScreenToolkit indexOfVehicle:(FPVehicle *)entity inVehicles:pageLoader(nil)];
     };
     return [[PEListViewController alloc]
               initWithClassOfDataSourceObjects:[FPVehicle class]
                                          title:@"Vehicles"
+                         isPaginatedDataSource:NO
                                tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPVehicle *vehicle) {return [vehicle name];}]
                             itemSelectedAction:nil
                            initialSelectedItem:nil
@@ -311,22 +314,17 @@ the background-processor is currently attempting to edit this record.  Try again
     };
     PEPageLoaderBlk pageLoader = ^ NSArray * (FPVehicle *lastVehicle) {
       return [_coordDao vehiclesForUser:user
-                               pageSize:PAGINATION_PAGE_SIZE
-                        beforeDateAdded:[lastVehicle dateAdded]
                                   error:[FPUtils localFetchErrorHandlerMaker]()];
     };
     NSArray *initialVehicles = [_coordDao vehiclesForUser:user
-                                                 pageSize:PAGINATION_PAGE_SIZE
                                                     error:[FPUtils localFetchErrorHandlerMaker]()];
     PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
-      FPVehicle *vehicle = (FPVehicle *)entity;
-      return [_coordDao numVehiclesForUser:user
-                                 newerThan:[vehicle dateAdded]
-                                     error:[FPUtils localFetchErrorHandlerMaker]()];
+      return [FPScreenToolkit indexOfVehicle:(FPVehicle *)entity inVehicles:pageLoader(nil)];
     };
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPVehicle class]
                                         title:@"Choose Vehicle"
+                        isPaginatedDataSource:NO
                               tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPVehicle *vehicle) {return [vehicle name];}]
                            itemSelectedAction:itemSelectedAction
                           initialSelectedItem:initialSelectedVehicle
@@ -460,6 +458,19 @@ the background-processor is currently attempting to edit this record.  Try again
 
 #pragma mark - Fuel Station Screens
 
++ (NSInteger)indexOfFuelStation:(FPFuelStation *)fuelstation inFuelStations:(NSArray *)fuelstations {
+  NSInteger index = 0;
+  NSInteger count = 0;
+  for (FPFuelStation *fs in fuelstations) {
+    if ([fs isEqualToFuelStation:fuelstation]) {
+      index = count;
+      break;
+    }
+    count++;
+  }
+  return index;
+}
+
 - (FPAuthScreenMaker)newViewFuelStationsScreenMaker {
   return ^ UIViewController *(FPUser *user) {
     void (^addFuelStationAction)(PEListViewController *, PEItemAddedBlk) =
@@ -482,23 +493,18 @@ the background-processor is currently attempting to edit this record.  Try again
                                                listViewController:listViewCtlr](user);
     };
     PEPageLoaderBlk pageLoader = ^ NSArray * (id lastObject) {
-      FPFuelStation *lastFuelStation = (FPFuelStation *)lastObject;
       return [_coordDao fuelStationsForUser:user
-                                   pageSize:PAGINATION_PAGE_SIZE
-                            beforeDateAdded:[lastFuelStation dateAdded]
                                       error:[FPUtils localFetchErrorHandlerMaker]()];
     };
     NSArray *initialFuelStations =
-      [_coordDao fuelStationsForUser:user pageSize:PAGINATION_PAGE_SIZE error:[FPUtils localFetchErrorHandlerMaker]()];
+      [_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];
     PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
-      FPFuelStation *fuelStation = (FPFuelStation *)entity;
-      return [_coordDao numFuelStationsForUser:user
-                                     newerThan:[fuelStation dateAdded]
-                                         error:[FPUtils localFetchErrorHandlerMaker]()];
+      return [FPScreenToolkit indexOfFuelStation:(FPFuelStation *)entity inFuelStations:pageLoader(nil)];
     };
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPFuelStation class]
                                         title:@"Fuel Stations"
+                        isPaginatedDataSource:NO
                               tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}]
                            itemSelectedAction:nil
                           initialSelectedItem:nil
@@ -539,24 +545,18 @@ the background-processor is currently attempting to edit this record.  Try again
                                 completion:nil];
     };
     PEPageLoaderBlk pageLoader = ^ NSArray * (id lastObject) {
-      FPFuelStation *lastFuelStation = (FPFuelStation *)lastObject;
       return [_coordDao fuelStationsForUser:user
-                                   pageSize:PAGINATION_PAGE_SIZE
-                            beforeDateAdded:[lastFuelStation dateAdded]
                                       error:[FPUtils localFetchErrorHandlerMaker]()];
     };
     NSArray *initialFuelStations = [_coordDao fuelStationsForUser:user
-                                                         pageSize:PAGINATION_PAGE_SIZE
                                                             error:[FPUtils localFetchErrorHandlerMaker]()];
     PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
-      FPFuelStation *fuelStation = (FPFuelStation *)entity;
-      return [_coordDao numFuelStationsForUser:user
-                                     newerThan:[fuelStation dateAdded]
-                                         error:[FPUtils localFetchErrorHandlerMaker]()];
+      return [FPScreenToolkit indexOfFuelStation:(FPFuelStation *)entity inFuelStations:pageLoader(nil)];
     };
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPFuelStation class]
                                         title:@"Choose Fuel Station"
+                        isPaginatedDataSource:NO
                               tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}]
                            itemSelectedAction:itemSelectedAction
                           initialSelectedItem:initialSelectedFuelStation
@@ -895,7 +895,7 @@ the background-processor is currently attempting to edit this record.  Try again
                            fuelPurchaseLogPanelMakerWithUser:user
                                       defaultSelectedVehicle:[_coordDao vehicleForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()]
                                   defaultSelectedFuelStation:[_coordDao fuelStationForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()]
-                                        defaultPickedLogDate:[fpLog logDate]]
+                                        defaultPickedLogDate:[fpLog purchasedAt]]
                    entityToPanelBinder:[_panelToolkit fuelPurchaseLogToFuelPurchaseLogPanelBinder]
                    panelToEntityBinder:[_panelToolkit fuelPurchaseLogPanelToFuelPurchaseLogBinder]
                        viewEntityTitle:@"Fuel Purchase Log"
@@ -948,7 +948,7 @@ the background-processor is currently attempting to edit this record.  Try again
     PEPageLoaderBlk pageLoader = ^ NSArray * (FPFuelPurchaseLog *lastFpLog) {
       return [_coordDao fuelPurchaseLogsForVehicle:vehicle
                                           pageSize:PAGINATION_PAGE_SIZE
-                                  beforeDateLogged:[lastFpLog logDate]
+                                  beforeDateLogged:[lastFpLog purchasedAt]
                                              error:[FPUtils localFetchErrorHandlerMaker]()];
     };
     NSArray *initialFpLogs = [_coordDao fuelPurchaseLogsForVehicle:vehicle
@@ -963,13 +963,14 @@ the background-processor is currently attempting to edit this record.  Try again
     PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
       FPFuelPurchaseLog *fpLog = (FPFuelPurchaseLog *)entity;
       return [_coordDao numFuelPurchaseLogsForVehicle:vehicle
-                                            newerThan:[fpLog logDate]
+                                            newerThan:[fpLog purchasedAt]
                                                 error:[FPUtils localFetchErrorHandlerMaker]()];
     };
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
                                         title:@"Fuel Purchase Logs"
-                              tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog){return [PEUtils stringFromDate:[fpLog logDate] withPattern:@"MM/dd/YYYY"];}]
+                        isPaginatedDataSource:YES
+                              tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog){return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];}]
                            itemSelectedAction:nil
                           initialSelectedItem:nil
                                 addItemAction:addFpLogAction
@@ -1024,7 +1025,7 @@ the background-processor is currently attempting to edit this record.  Try again
     PEPageLoaderBlk pageLoader = ^ NSArray * (FPFuelPurchaseLog *lastFpLog) {
       return [_coordDao fuelPurchaseLogsForFuelStation:fuelStation
                                               pageSize:PAGINATION_PAGE_SIZE
-                                      beforeDateLogged:[lastFpLog logDate]
+                                      beforeDateLogged:[lastFpLog purchasedAt]
                                                  error:[FPUtils localFetchErrorHandlerMaker]()];
     };
     NSArray *initialFpLogs = [_coordDao fuelPurchaseLogsForFuelStation:fuelStation
@@ -1039,13 +1040,14 @@ the background-processor is currently attempting to edit this record.  Try again
     PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
       FPFuelPurchaseLog *fpLog = (FPFuelPurchaseLog *)entity;
       return [_coordDao numFuelPurchaseLogsForFuelStation:fuelStation
-                                                newerThan:[fpLog logDate]
+                                                newerThan:[fpLog purchasedAt]
                                                     error:[FPUtils localFetchErrorHandlerMaker]()];
     };
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
                                         title:@"Fuel Purchase Logs"
-                              tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog) {return [PEUtils stringFromDate:[fpLog logDate] withPattern:@"MM/dd/YYYY"];}]
+                        isPaginatedDataSource:YES
+                              tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog) {return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];}]
                            itemSelectedAction:nil
                           initialSelectedItem:nil
                                 addItemAction:addFpLogAction
@@ -1265,6 +1267,7 @@ the background-processor is currently attempting to edit this record.  Try again
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPEnvironmentLog class]
                                         title:@"Environment Logs"
+                        isPaginatedDataSource:YES
                               tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPEnvironmentLog *envLog) {return [PEUtils stringFromDate:[envLog logDate] withPattern:@"MM/dd/YYYY"];}]
                            itemSelectedAction:nil
                           initialSelectedItem:nil
@@ -1298,7 +1301,6 @@ the background-processor is currently attempting to edit this record.  Try again
               initWithStoreCoordinator:_coordDao
                                   user:user
                       tempNotification:tempNotification
-                    transactionManager:_txnMgr
                              uitoolkit:_uitoolkit
                          screenToolkit:self];
   };
@@ -1311,7 +1313,6 @@ the background-processor is currently attempting to edit this record.  Try again
     return [[FPUnauthStartController alloc]
               initWithStoreCoordinator:_coordDao
                       tempNotification:msgOrKey
-                    transactionManager:_txnMgr
                              uitoolkit:_uitoolkit
                          screenToolkit:self];
   };

@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import <PEFuelPurchase-Model/PELMMainSupport.h>
+#import <MBProgressHUD/MBProgressHUD.h>
 
 @class PEAddViewEditController;
 typedef UIView *(^PEEntityPanelMakerBlk)(PEAddViewEditController *);

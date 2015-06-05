@@ -23,7 +23,6 @@
 #import <PEFuelPurchase-Common/FPAuthTokenDelegate.h>
 #import <PEFuelPurchase-Model/FPRemoteStoreSyncConflictDelegate.h>
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
-#import <PEAppTransaction-Logger/TLTransactionManager.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 
 #ifdef FP_DEV

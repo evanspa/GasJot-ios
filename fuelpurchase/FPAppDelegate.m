@@ -22,7 +22,6 @@
 #import <PEObjc-Commons/PEUtils.h>
 #import <FlatUIKit/UIColor+FlatUI.h>
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
-#import <PEAppTransaction-Logger/TLTransactionManager.h>
 #import <UICKeyChainStore/UICKeyChainStore.h>
 #import "FPAppDelegate.h"
 #import <PEFuelPurchase-Model/FPUser.h>
@@ -36,6 +35,7 @@
 #import "FPEditsInProgressController.h"
 #import "FPScreenToolkit.h"
 #import "FPEditActors.h"
+#import "FPLogging.h"
 
 #ifdef FP_DEV
   #import <PEDev-Console/PDVScreen.h>
@@ -74,7 +74,6 @@ NSString * const FPUserAgentDeviceOsVersionHeaderNameKey = @"FP user agent devic
 NSString * const FPAuthTokenResponseHeaderNameKey = @"FP auth token response header name";
 NSString * const FPTimeoutForCoordDaoMainThreadOps = @"FP timeout for main thread coordinator dao operations";
 NSString * const FPTimeIntervalForFlushToRemoteMaster = @"FP time interval for flush to remote master";
-NSString * const FPTimeIntervalForTxnFlushToRemote = @"FP time interval for transactions flush to remote";
 
 #ifdef FP_DEV
   NSString * const FPAPIResourceFileName             = @"fpapi-resource.localdev";
@@ -83,7 +82,6 @@ NSString * const FPTimeIntervalForTxnFlushToRemote = @"FP time interval for tran
 #endif
 NSString * const FPDataFileExtension               = @"data";
 NSString * const FPLocalSqlLiteDataFileName        = @"local-sqlite-datafile";
-NSString * const FPTransactionsSqlLiteDataFileName = @"transactions-sqlite-datafile";
 
 // Keychain service names
 NSString * const FPAppKeychainService = @"fp-app";
@@ -93,12 +91,9 @@ NSString * const FPAppKeychainService = @"fp-app";
   MBProgressHUD *_HUD;
   NSString *_authToken;
   FPCoordinatorDao *_coordDao;
-  TLTransactionManager *_txnMgr;
   PEUIToolkit *_uitoolkit;
   NSTimer *_timerForRemoteMasterFlush;
-  NSTimer *_timerForTransactionFlush;
   NSTimer * (^_startRemoteMasterFlushTimer)(FPCoordinatorDao *, NSTimer *);
-  NSTimer * (^_startTransactionFlushTimer)(TLTransactionManager *, NSTimer *);
   FPScreenToolkit *_screenToolkit;
   CLLocationManager *_locationManager;
   NSMutableArray *_locations;
@@ -161,14 +156,12 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
 didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [self initializeLocationTracking];
   [FPLogging initializeLogging];
-  [self initializeTransactionManager];
   [self initializeStoreCoordinator];
   [_coordDao pruneAllSyncedEntitiesWithError:[FPUtils localSaveErrorHandlerMaker]()];
   FPUser *user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
   _authToken = [FPAppDelegate storedAuthenticationTokenForUser:user];
   _uitoolkit = [FPAppDelegate defaultUIToolkit];
   _screenToolkit = [[FPScreenToolkit alloc] initWithCoordinatorDao:_coordDao
-                                                transactionManager:_txnMgr
                                                          uitoolkit:_uitoolkit
                                                              error:[FPUtils localFetchErrorHandlerMaker]()];
   _startRemoteMasterFlushTimer = ^ NSTimer * (FPCoordinatorDao *coordDao, NSTimer *oldTimer) {
@@ -177,18 +170,11 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                                          interval:intBundleVal(FPTimeIntervalForFlushToRemoteMaster)
                                          oldTimer:oldTimer];
   };
-  _startTransactionFlushTimer = ^ NSTimer * (TLTransactionManager *txnMgr, NSTimer *oldTimer) {
-    return [PEUtils startNewTimerWithTargetObject:txnMgr
-                                         selector:@selector(asynchronousFlushTxnsToRemoteStore:)
-                                         interval:intBundleVal(FPTimeIntervalForTxnFlushToRemote)
-                                         oldTimer:oldTimer];
-  };
   #ifdef FP_DEV
     self.window =
       [[PDVUIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    _pdvUtils = [PDVUtils utilsWithBaseResourceFolderOfSimulations:@"simulation/application-screens"
-                                                 applicationWindow:[self window]
-                                                      screenGroups:[self screenGroups]];
+    _pdvUtils = [[PDVUtils alloc] initWithBaseResourceFolderOfSimulations:@"simulation/application-screens"
+                                                             screenGroups:[self screenGroups]];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(devShake:)
                                                  name:PdvShakeGesture
@@ -200,8 +186,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   if (_authToken) {
     DDLogVerbose(@"User is authenticated.");
     [_coordDao setAuthToken:_authToken];
-    [_txnMgr setAuthToken:_authToken];
-    [FPUtils setTxnStoreUriForTxnManager:_txnMgr withUser:user];
     [[self window] setRootViewController:[_screenToolkit newTabBarAuthHomeLandingScreenMakerWithTempNotification:@"Welcome Back"](user)];
   } else {
     DDLogVerbose(@"User is NOT authenticated.");
@@ -209,45 +193,39 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   }
   [_coordDao globalCancelSyncInProgressWithError:[FPUtils localSaveErrorHandlerMaker]()];
   _timerForRemoteMasterFlush = _startRemoteMasterFlushTimer(_coordDao, _timerForRemoteMasterFlush);
-  _timerForTransactionFlush = _startTransactionFlushTimer(_txnMgr, _timerForTransactionFlush);
   [self.window setBackgroundColor:[UIColor whiteColor]];
   [self.window makeKeyAndVisible];
   return YES;
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
-  DDLogDebug(@"Will resign active. Stopping remote-master and txn flush timers.");
+  DDLogDebug(@"Will resign active. Stopping remote-master flush timer.");
   [PEUtils stopTimer:_timerForRemoteMasterFlush];
-  [PEUtils stopTimer:_timerForTransactionFlush];
   [_locationManager stopUpdatingLocation];
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
-  DDLogDebug(@"Did enter background. Stopping remote-master and txn flush timers.");
+  DDLogDebug(@"Did enter background. Stopping remote-master flush timer.");
   [PEUtils stopTimer:_timerForRemoteMasterFlush];
-  [PEUtils stopTimer:_timerForTransactionFlush];
   [_locationManager stopUpdatingLocation];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
-  DDLogDebug(@"Will enter foreground. Starting remote-master and txn flush timers.");
+  DDLogDebug(@"Will enter foreground. Starting remote-master flush timer.");
   _timerForRemoteMasterFlush = _startRemoteMasterFlushTimer(_coordDao, _timerForRemoteMasterFlush);
-  _timerForTransactionFlush = _startTransactionFlushTimer(_txnMgr, _timerForTransactionFlush);
   [_locationManager startUpdatingLocation];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
-  DDLogDebug(@"Did become active. Starting remote-master and txn flush timers.");
+  DDLogDebug(@"Did become active. Starting remote-master flush timer.");
   _timerForRemoteMasterFlush = _startRemoteMasterFlushTimer(_coordDao, _timerForRemoteMasterFlush);
-  _timerForTransactionFlush = _startTransactionFlushTimer(_txnMgr, _timerForTransactionFlush);
   [_locationManager startUpdatingLocation];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
-  DDLogDebug(@"Will terminate. Stopping remote-master and txn flush timers.  Performing system prune.");
+  DDLogDebug(@"Will terminate. Stopping remote-master flush timer.  Performing system prune.");
   [_coordDao pruneAllSyncedEntitiesWithError:[FPUtils localSaveErrorHandlerMaker]()];
   [PEUtils stopTimer:_timerForRemoteMasterFlush];
-  [PEUtils stopTimer:_timerForTransactionFlush];
   [_locationManager stopUpdatingLocation];
 }
 
@@ -280,36 +258,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                                  description:@"UTF-8"];
 }
 
-- (void)initializeTransactionManager {
-  HCRelationExecutor *relExecutor =
-    [[HCRelationExecutor alloc]
-            initWithDefaultAcceptCharset:[HCCharset UTF8]
-                   defaultAcceptLanguage:[FPAppDelegate language]
-               defaultContentTypeCharset:[HCCharset UTF8]
-                allowInvalidCertificates:YES];
-  NSFileManager *fileMgr = [NSFileManager defaultManager];
-  NSURL *txnsSqlLiteDataFileUrl =
-    [[fileMgr URLForDirectory:NSLibraryDirectory
-                    inDomain:NSUserDomainMask
-            appropriateForURL:nil
-                       create:YES
-                        error:nil]
-	  URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@", FPTransactionsSqlLiteDataFileName, FPDataFileExtension]];
-  DDLogDebug(@"About to load local app-transactions database from: [%@]", [txnsSqlLiteDataFileUrl absoluteString]);
-  _txnMgr = [[TLTransactionManager alloc]
-                   initWithDataFilePath:[txnsSqlLiteDataFileUrl absoluteString]
-                    userAgentDeviceMake:[PEUtils deviceMake]
-                      userAgentDeviceOS:[[UIDevice currentDevice] systemName]
-               userAgentDeviceOSVersion:[[UIDevice currentDevice] systemVersion]
-                       relationExecutor:relExecutor
-                             authScheme:bundleVal(FPAuthenticationScheme)
-                     authTokenParamName:bundleVal(FPAuthenticationTokenName)
-                     contentTypeCharset:[HCCharset UTF8]
-                     apptxnResMtVersion:bundleVal(FPTxnsRestServiceMtVersion)
-               apptxnMediaSubtypePrefix:bundleVal(FPTxnsRestServiceMtSubtypePrefix)
-                                  error:[FPUtils localErrorHandlerForBackgroundProcessingMaker]()];
-}
-
 - (void)initializeStoreCoordinator {
   NSBundle *mainBundle = [NSBundle mainBundle];
   NSFileManager *fileMgr = [NSFileManager defaultManager];
@@ -335,13 +283,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
               authTokenParamName:bundleVal(FPAuthenticationTokenName)
                        authToken:nil
              errorMaskHeaderName:bundleVal(FPErrorMaskHeaderNameKey)
-                 txnIdHeaderName:bundleVal(FPTransactionIdHeaderNameKey)
-   userAgentDeviceMakeHeaderName:bundleVal(FPUserAgentDeviceMakeHeaderNameKey)
-     userAgentDeviceOSHeaderName:bundleVal(FPUserAgentDeviceOsHeaderNameKey)
-userAgentDeviceOSVersionHeaderName:bundleVal(FPUserAgentDeviceOsVersionHeaderNameKey)
-             userAgentDeviceMake:[PEUtils deviceMake]
-               userAgentDeviceOS:[[UIDevice currentDevice] systemName]
-        userAgentDeviceOSVersion:[[UIDevice currentDevice] systemVersion]
       establishSessionHeaderName:bundleVal(FPEstablishSessionHeaderNameKey)
      authTokenResponseHeaderName:bundleVal(FPAuthTokenResponseHeaderNameKey)
     bundleHoldingApiJsonResource:mainBundle
@@ -352,7 +293,6 @@ userAgentDeviceOSVersionHeaderName:bundleVal(FPUserAgentDeviceOsVersionHeaderNam
          fuelStationResMtVersion:bundleVal(FPRestServiceMtVersion)
      fuelPurchaseLogResMtVersion:bundleVal(FPRestServiceMtVersion)
       environmentLogResMtVersion:bundleVal(FPRestServiceMtVersion)
-              transactionManager:_txnMgr
       remoteSyncConflictDelegate:self
                authTokenDelegate:self
  errorBlkForBackgroundProcessing:[FPUtils localErrorHandlerForBackgroundProcessingMaker]()
@@ -396,7 +336,6 @@ userAgentDeviceOSVersionHeaderName:bundleVal(FPUserAgentDeviceOsVersionHeaderNam
 keychain under key: [%@].",
              authToken, usernameOrEmail);
   [UICKeyChainStore setString:authToken forKey:usernameOrEmail];
-  [_txnMgr setAuthToken:authToken];
   // FYI, the reason we don't set the authToken on our _coordDao object is because
   // it is doing it itself; i.e., because the auth token is received THROUGH the
   // _coordDao, the _coordDao updates itself as it arrives.

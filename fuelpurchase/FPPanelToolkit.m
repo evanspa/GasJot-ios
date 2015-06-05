@@ -14,6 +14,7 @@
 #import "FPEnvLogVehicleAndDateDataSourceDelegate.h"
 #import <BlocksKit/UIControl+BlocksKit.h>
 #import "FPLogEnvLogComposite.h"
+#import "FPNames.h"
 
 NSString * const FPFpLogEntityMakerFpLogEntry = @"FPFpLogEntityMakerFpLogEntry";
 NSString * const FPFpLogEntityMakerVehicleEntry = @"FPFpLogEntityMakerVehicleEntry";
@@ -124,9 +125,9 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
 - (PEEntityMakerBlk)vehicleMaker {
   return ^ PELMModelSupport * (UIView *panel) {
     return [_coordDao
-              vehicleWithName:[PEUIUtils stringFromTextFieldWithTag:FPVehicleTagName
-                                                           fromView:panel]
-                    dateAdded:[NSDate date]];
+              vehicleWithName:[PEUIUtils stringFromTextFieldWithTag:FPVehicleTagName fromView:panel]
+                defaultOctane:nil
+                 fuelCapacity:nil];
   };
 }
 
@@ -348,8 +349,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                     state:tfstr(FPFuelStationTagState)
                                       zip:tfstr(FPFuelStationTagZip)
                                  latitude:[ds latitude]
-                                longitude:[ds longitude]
-                                dateAdded:[NSDate date]];
+                                longitude:[ds longitude]];
   };
 }
 
@@ -469,8 +469,8 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     binddecToEnvLogs(FPEnvLogTagReportedAvgMpg, @selector(setReportedAvgMpg:));
     binddecToEnvLogs(FPEnvLogTagReportedAvgMph, @selector(setReportedAvgMph:));
     bindnumToEnvLogs(FPEnvLogTagReportedOutsideTemp, @selector(setReportedOutsideTemp:));
-    [[fpEnvLogComposite preFillupEnvLog] setLogDate:[[fpEnvLogComposite fpLog] logDate]];
-    [[fpEnvLogComposite postFillupEnvLog] setLogDate:[[fpEnvLogComposite fpLog] logDate]];
+    [[fpEnvLogComposite preFillupEnvLog] setLogDate:[[fpEnvLogComposite fpLog] purchasedAt]];
+    [[fpEnvLogComposite postFillupEnvLog] setLogDate:[[fpEnvLogComposite fpLog] purchasedAt]];
   };
 }
 
@@ -689,7 +689,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
       (UITableView *)[panel viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
     FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
       (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehicleFuelStationDateTableView dataSource];
-    [fpLog setLogDate:[ds pickedLogDate]];
+    [fpLog setPurchasedAt:[ds pickedLogDate]];
   };
 }
 
@@ -708,12 +708,12 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     UISwitch *gotCarWasSwitch = (UISwitch *)[panel viewWithTag:FPFpLogTagGotCarWash];
     [gotCarWasSwitch setOn:[fpLog gotCarWash] animated:YES];
     
-    if ([fpLog logDate]) {
+    if ([fpLog purchasedAt]) {
       UITableView *vehicleFuelStationDateTableView =
         (UITableView *)[panel viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
       FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
         (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehicleFuelStationDateTableView dataSource];
-      [ds setPickedLogDate:[fpLog logDate]];
+      [ds setPickedLogDate:[fpLog purchasedAt]];
       [vehicleFuelStationDateTableView reloadData];
     }
   };

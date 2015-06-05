@@ -24,15 +24,15 @@
 #import "FPScreenToolkit.h"
 #import "FPEditActors.h"
 #import "FPUtils.h"
+#import "FPNames.h"
 
 #ifdef FP_DEV
-  #import <PEDev-Console/UIViewController+devconsole.h>
+  #import <PEDev-Console/UIViewController+PEDevConsole.h>
 #endif
 
 @implementation FPQuickActionMenuController {
   FPCoordinatorDao *_coordDao;
   PEUIToolkit *_uitoolkit;
-  TLTransactionManager *_txnMgr;
   NSString *_notificationMsgOrKey;
   FPUser *_user;
   FPScreenToolkit *_screenToolkit;
@@ -44,7 +44,6 @@
 - (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
                           user:(FPUser *)user
               tempNotification:(NSString *)notificationMsgOrKey
-            transactionManager:(TLTransactionManager *)txnMgr
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit {
   self = [super initWithNibName:nil bundle:nil];
@@ -52,7 +51,6 @@
     _user = user;
     _notificationMsgOrKey = notificationMsgOrKey;
     _coordDao = coordDao;
-    _txnMgr = txnMgr;
     _uitoolkit = uitoolkit;
     _screenToolkit = screenToolkit;
     _junkQueue = dispatch_queue_create("name.paulevans.fuelpurchase.debug.computecoord",
@@ -78,7 +76,6 @@
     btnMaker(LS(@"auth.start.fuelstations.btn.txt"), self, @selector(presentFuelStations))
 #ifdef FP_DEV
     ,btnMaker(@"Remote Sync", self, @selector(remoteSync)),
-    btnMaker(@"Txn Flush", self, @selector(txnFlush)),
     btnMaker(@"System Prune", self, @selector(systemPrune))
 #endif
   ];
@@ -105,11 +102,6 @@
 }
 
 #pragma mark - Button Event Handlers
-
-- (void)txnFlush {
-  [_txnMgr synchronousFlushTxnsToRemoteStoreWithRemoteStoreBusyBlock:nil];
-  [PEUIUtils displayTempNotification:@"Txn flush to remote done." forController:self uitoolkit:_uitoolkit];
-}
 
 - (void)geoCoordCompute {
   dispatch_async(_junkQueue, ^{

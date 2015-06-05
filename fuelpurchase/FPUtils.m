@@ -23,29 +23,9 @@
 #import <PEFuelPurchase-Model/FPErrorDomainsAndCodes.h>
 #import <PEHateoas-Client/HCRelation.h>
 #import <PEHateoas-Client/HCResource.h>
+#import "FPLogging.h"
 
 @implementation FPUtils
-
-+ (void)setTxnStoreUriForTxnManager:(TLTransactionManager *)txnMgr
-                           withUser:(FPUser *)user {
-  NSDictionary *userRels = [user relations];
-  if (userRels) {
-    HCRelation *apptxnsetRel = [user relations][FPAppTransactionSetRelation];
-    if (apptxnsetRel) {
-      HCResource *apptxnsetRes = [apptxnsetRel target];
-      if (apptxnsetRes) {
-        [txnMgr setTxnStoreResourceUri:[apptxnsetRes uri]];
-        DDLogDebug(@"inside setTxnStoreUriForTxnManager, store URI set with: [%@]", [apptxnsetRes uri]);
-      } else {
-        DDLogDebug(@"inside setTxnStoreUriForTxnManager, apptxnsetRes is nil");
-      }
-    } else {
-      DDLogDebug(@"inside setTxnStoreUriForTxnManager, apptxnsetRel is nil");
-    }
-  } else {
-    DDLogDebug(@"inside setTxnStoreUriForTxnManager, userRels is nil");
-  }
-}
 
 + (ServerBusyHandlerMaker)serverBusyHandlerMakerForUI {
   return ^(MBProgressHUD *HUD) {

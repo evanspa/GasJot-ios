@@ -11,7 +11,6 @@
 #import <UIKit/UIKit.h>
 #import <PEFuelPurchase-Model/FPUser.h>
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
-#import <PEAppTransaction-Logger/TLTransactionManager.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
 
@@ -21,7 +20,6 @@
 
 - (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
                           user:(FPUser *)user
-            transactionManager:(TLTransactionManager *)txnMgr
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit;
 

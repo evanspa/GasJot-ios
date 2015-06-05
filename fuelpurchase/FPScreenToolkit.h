@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
-#import <PEAppTransaction-Logger/TLTransactionManager.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "PEListViewController.h"
 #import "PEAddViewEditController.h"
@@ -24,7 +23,6 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id, NSString
 #pragma mark - Initializers
 
 - (id)initWithCoordinatorDao:(FPCoordinatorDao *)coordDao
-          transactionManager:(TLTransactionManager *)txnMgr
                    uitoolkit:(PEUIToolkit *)uitoolkit
                        error:(PELMDaoErrorBlk)errorBlk;
 

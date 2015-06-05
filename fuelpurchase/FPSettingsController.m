@@ -10,14 +10,13 @@
 #import <PEObjc-Commons/PEUIUtils.h>
 
 #ifdef FP_DEV
-  #import <PEDev-Console/UIViewController+devconsole.h>
+  #import <PEDev-Console/UIViewController+PEDevConsole.h>
 #endif
 
 @implementation FPSettingsController {
   FPCoordinatorDao *_coordDao;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
-  TLTransactionManager *_txnMgr;
   FPUser *_user;
 }
 
@@ -25,14 +24,12 @@
 
 - (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
                           user:(FPUser *)user
-            transactionManager:(TLTransactionManager *)txnMgr
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit {
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
     _user = user;
     _coordDao = coordDao;
-    _txnMgr = txnMgr;
     _uitoolkit = uitoolkit;
     _screenToolkit = screenToolkit;
   }
@@ -86,7 +83,6 @@
                      buttonTitle:@"Cancel"];
   };
   [_coordDao logoutUser:_user error:errorBlk];
-  [_txnMgr deleteAllTransactionsInTxnWithError:errorBlk];
   if (!wasError) {
     UIViewController *unauthHome =
       [_screenToolkit newUnauthLandingScreenMakerWithTempNotification:@"Logout Successful"]();

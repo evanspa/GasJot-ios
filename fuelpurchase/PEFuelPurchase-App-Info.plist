@@ -49,19 +49,9 @@
 	<key>FP error mask header name</key>
 	<string>fp-error-mask</string>
 	<key>FP time interval for flush to remote master</key>
-	<integer>20</integer>
-	<key>FP time interval for transactions flush to remote</key>
-	<integer>20</integer>
+	<integer>2</integer>
 	<key>FP timeout for main thread coordinator dao operations</key>
 	<integer>60</integer>
-	<key>FP transaction id header name</key>
-	<string>fp-apptxn-id</string>
-	<key>FP user agent device make header name</key>
-	<string>fp-useragent-device-make</string>
-	<key>FP user agent device os header name</key>
-	<string>fp-useragent-device-os</string>
-	<key>FP user agent device os version header name</key>
-	<string>fp-useragent-device-os-version</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>

@@ -23,7 +23,6 @@
 #import <MBProgressHUD/MBProgressHUD.h>
 #import <PEFuelPurchase-Model/FPUser.h>
 #import <PEFuelPurchase-Model/PELMUtils.h>
-#import <PEAppTransaction-Logger/TLTransactionManager.h>
 
 typedef NSArray * (^ErrMsgsMaker)(NSInteger errCode);
 
@@ -39,9 +38,6 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
  A set of (usually) context-agnostic helper functions.
  */
 @interface FPUtils : NSObject
-
-+ (void)setTxnStoreUriForTxnManager:(TLTransactionManager *)txnMgr
-                           withUser:(FPUser *)user;
 
 + (ServerBusyHandlerMaker)serverBusyHandlerMakerForUI;
 

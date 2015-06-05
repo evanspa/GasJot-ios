@@ -9,14 +9,13 @@
 #import "FPEditsInProgressController.h"
 
 #ifdef FP_DEV
-  #import <PEDev-Console/UIViewController+devconsole.h>
+  #import <PEDev-Console/UIViewController+PEDevConsole.h>
 #endif
 
 @implementation FPEditsInProgressController {
   FPCoordinatorDao *_coordDao;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
-  TLTransactionManager *_txnMgr;
   FPUser *_user;
   BOOL _isAdd;
 }
@@ -25,14 +24,12 @@
 
 - (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
                           user:(FPUser *)user
-            transactionManager:(TLTransactionManager *)txnMgr
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit {
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
     _user = user;
     _coordDao = coordDao;
-    _txnMgr = txnMgr;
     _uitoolkit = uitoolkit;
     _screenToolkit = screenToolkit;
   }

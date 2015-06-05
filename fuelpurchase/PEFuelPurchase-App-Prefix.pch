@@ -41,11 +41,11 @@
     #import <CocoaLumberjack/DDASLLogger.h>
     #import <CocoaLumberjack/DDTTYLogger.h>
 
-    #ifdef DEBUG
-        static const int ddLogLevel = LOG_LEVEL_VERBOSE;
-    #else
-        static const int ddLogLevel = LOG_LEVEL_INFO;
-    #endif
+//    #ifdef DEBUG
+  //      static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+   // #else
+    //    static const int ddLogLevel = LOG_LEVEL_INFO;
+    //#endif
 
     #import "FPNames.h"
     #import "FPLogging.h"

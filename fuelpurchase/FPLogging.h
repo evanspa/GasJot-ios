@@ -19,6 +19,15 @@
 // IN THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
+#import <CocoaLumberjack/DDLog.h>
+#import <CocoaLumberjack/DDASLLogger.h>
+#import <CocoaLumberjack/DDTTYLogger.h>
+
+#ifdef FP_DEV
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+#else
+static const int ddLogLevel = LOG_LEVEL_INFO;
+#endif
 
 /**
  A set of convenient logging functions.

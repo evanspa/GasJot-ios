@@ -12,6 +12,7 @@
 #import <PEFuelPurchase-Model/PELMNotificationUtils.h>
 #import "NSMutableArray+MoveObject.h"
 #import "UIScrollView+PEAdditions.h"
+#import "FPLogging.h"
 
 @implementation PEListViewController {
   Class _classOfDataSourceObjects;
@@ -33,12 +34,14 @@
   NSIndexPath *_indexPathOfRemovedEntity;
   PEDoesEntityBelongToListView _doesEntityBelongToThisListView;
   PEWouldBeIndexOfEntity _wouldBeIndexOfEntity;
+  BOOL _isPaginatedDataSource;
 }
 
 #pragma mark - Initializers
 
 - (id)initWithClassOfDataSourceObjects:(Class)classOfDataSourceObjects
                                  title:(NSString *)title
+                 isPaginatedDataSource:(BOOL)isPaginatedDataSource
                        tableCellStyler:(PEStyleTableCellContentView)tableCellStyler
                     itemSelectedAction:(PEItemSelectedAction)itemSelectedAction
                    initialSelectedItem:(id)initialSelectedItem
@@ -60,6 +63,7 @@
   if (self) {
     _classOfDataSourceObjects = classOfDataSourceObjects;
     _title = title;
+    _isPaginatedDataSource = isPaginatedDataSource;
     _tableCellStyler = tableCellStyler;
     _itemSelectedAction = itemSelectedAction;
     _initialSelectedItem = initialSelectedItem;
@@ -361,7 +365,6 @@
     //NSLog(@"we are at the top");
   //} else
   if ([scrollView isAtBottom]) {
-    //NSLog(@"we are at the bottom");
     [self addRowsToBottom];
   }
 }
@@ -401,6 +404,7 @@
 
 - (void)addRowsToBottom {
   //@synchronized(self) {
+  if (_isPaginatedDataSource) {
     NSUInteger dataSourceCount = [_dataSource count];
     id lastItem = [_dataSource lastObject];
     NSArray *nextPage = [self truncateInitialSelectedItemFromItems:_pageLoaderBlk(lastItem)];
@@ -417,6 +421,13 @@
                         withRowAnimation:UITableViewRowAnimationTop];
       [_tableView endUpdates];
     }
+  } else {
+    //[_tableView beginUpdates];
+    [_dataSource removeAllObjects];
+    [_dataSource addObjectsFromArray:_pageLoaderBlk(nil)];
+    [_tableView reloadData];
+    //[_tableView endUpdates];
+  }
     //[_tableView.infiniteScrollingView stopAnimating];
   //}
 }

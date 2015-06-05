@@ -26,6 +26,7 @@ UITableViewDelegate>
 
 - (id)initWithClassOfDataSourceObjects:(Class)classOfDataSourceObjects
                                  title:(NSString *)title
+                 isPaginatedDataSource:(BOOL)isPaginatedDataSource
                        tableCellStyler:(PEStyleTableCellContentView)tableCellStyler
                     itemSelectedAction:(PEItemSelectedAction)itemSelectedAction
                    initialSelectedItem:(id)initialSelectedItem

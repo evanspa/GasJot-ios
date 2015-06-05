@@ -21,7 +21,6 @@
 #import <UIKit/UIKit.h>
 #import <MBProgressHUD/MBProgressHUD.h>
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
-#import <PEAppTransaction-Logger/TLTransactionManager.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
 
@@ -35,7 +34,6 @@
 
 - (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
               tempNotification:(NSString *)notificationMsgOrKey
-            transactionManager:(TLTransactionManager *)txnMgr
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit;
 

@@ -31,9 +31,10 @@
 #import "FPQuickActionMenuController.h"
 #import "FPUtils.h"
 #import "NSObject+appdelegate.h"
+#import "FPNames.h"
 
 #ifdef FP_DEV
-  #import <PEDev-Console/UIViewController+devconsole.h>
+  #import <PEDev-Console/UIViewController+PEDevConsole.h>
 #endif
 
 @interface FPUnauthStartController ()
@@ -42,7 +43,6 @@
 @end
 
 @implementation FPUnauthStartController {
-  TLTransactionManager *_txnMgr;
   NSString *_notificationMsgOrKey;
   FPCoordinatorDao *_coordDao;
   UITextField *_siUsernameOrEmailTf;
@@ -62,14 +62,12 @@
 
 - (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
               tempNotification:(NSString *)notificationMsgOrKey
-            transactionManager:(TLTransactionManager *)txnMgr
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit {
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
     _coordDao = coordDao;
     _notificationMsgOrKey = notificationMsgOrKey;
-    _txnMgr = txnMgr;
     _uitoolkit = uitoolkit;
     _screenToolkit = screenToolkit;
   }
@@ -298,10 +296,7 @@
     _HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     _HUD.delegate = self;
     _HUD.labelText = @"Authenticating...";
-    TLTransaction *txn = [_txnMgr transactionWithUsecase:@(FPTxnLogin)
-                                                   error:[FPUtils localSaveErrorHandlerMaker]()];
     void (^successBlock)(FPUser *) = ^(FPUser *user){
-      [FPUtils setTxnStoreUriForTxnManager:_txnMgr withUser:user];
       [PEUIUtils displayController:[_screenToolkit newTabBarAuthHomeLandingScreenMakerWithTempNotification:@"Login Successful"](user)
                     fromController:self
                           animated:YES];
@@ -311,7 +306,6 @@
     };
     [_coordDao loginWithUsernameOrEmail:[_siUsernameOrEmailTf text]
                                password:[_siPasswordTf text]
-                            transaction:txn
                         remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](_HUD)
                       completionHandler:[FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](_HUD,successBlock)
                   localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](_HUD)];
@@ -330,12 +324,8 @@
     FPUser *user = [_coordDao userWithName:[_caFullNameTf text]
                                      email:[_caEmailTf text]
                                   username:nil
-                                  password:[_caPasswordTf text]
-                              creationDate:[NSDate date]];
-    TLTransaction *txn = [_txnMgr transactionWithUsecase:@(FPTxnCreateAccount)
-                                                   error:[FPUtils localSaveErrorHandlerMaker]()];
+                                  password:[_caPasswordTf text]];
     void (^successBlock)(FPUser *) = ^(FPUser *newUser){
-      [FPUtils setTxnStoreUriForTxnManager:_txnMgr withUser:newUser];
       [PEUIUtils displayController:[_screenToolkit newTabBarAuthHomeLandingScreenMakerWithTempNotification:@"Account Creation Successful"](newUser)
                     fromController:self
                           animated:YES];
@@ -345,7 +335,6 @@
     };
     [_coordDao
       immediateRemoteSyncSaveNewUser:user
-                         transaction:txn
                      remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](_HUD)
                    completionHandler:[FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](_HUD, successBlock)
                localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](_HUD)];

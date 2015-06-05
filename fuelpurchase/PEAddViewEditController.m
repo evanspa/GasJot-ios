@@ -11,6 +11,7 @@
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import "FPEditActors.h"
+#import "FPLogging.h"
 
 @implementation PEAddViewEditController {
   BOOL _isAdd;
