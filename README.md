@@ -20,7 +20,6 @@ applications.
 - [App-specific Libraries used by PEFuelPurchase-App](#app-specific-libraries)
 - [PE* iOS Library Suite](#pe-ios-library-suite)
 - [Analytics](#analytics)
-  - [Motivation](#motivation)
 - [Screenshots](#screenshots)
     - [Account Creation / Login](#account-creation--login)
     - [Quick Action Menu (home screen)](#quick-action-menu-home-screen)
@@ -94,7 +93,7 @@ src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPur
 
 ## Analytics
 
-The fuel purchase app used to leverage the  PEAppTransaction Logging Framework
+The fuel purchase app **used** to leverage the  PEAppTransaction Logging Framework
 (PELF) for capturing application events / logs; but going forward will leverage
 Google Analytics.
 
