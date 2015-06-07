@@ -1331,18 +1331,18 @@ the background-processor is currently attempting to edit this record.  Try again
                                      [PEUIUtils navControllerWithRootController:quickActionMenuCtrl
                                                             navigationBarHidden:NO
                                                                 tabBarItemTitle:@"Quick Action Menu"
-                                                                tabBarItemImage:nil
-                                                        tabBarItemSelectedImage:nil],
+                                                                tabBarItemImage:[UIImage imageNamed:@"tab-home"]
+                                                        tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-home"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]],
                                      [PEUIUtils navControllerWithRootController:settingsMenuCtrl
                                                             navigationBarHidden:NO
                                                                 tabBarItemTitle:@"Settings"
-                                                                tabBarItemImage:nil
-                                                        tabBarItemSelectedImage:nil],
+                                                                tabBarItemImage:[UIImage imageNamed:@"tab-settings"]
+                                                        tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-settings"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]],
                                      [PEUIUtils navControllerWithRootController:draftsCtrl
                                                             navigationBarHidden:NO
                                                                 tabBarItemTitle:@"Drafts"
-                                                                tabBarItemImage:nil
-                                                        tabBarItemSelectedImage:nil]]];
+                                                                tabBarItemImage:[UIImage imageNamed:@"tab-drafts"]
+                                                        tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-drafts"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]]]];
     [tabBarCtrl setSelectedIndex:0];
     return tabBarCtrl;
   };

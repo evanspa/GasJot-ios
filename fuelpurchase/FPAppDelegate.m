@@ -377,8 +377,11 @@ keystore under key: [%@]", authToken, usernameOrEmail);
 #pragma mark - UI Toolkit maker
 
 + (PEUIToolkit *)defaultUIToolkit {
+  UIColor *fpBlue = [UIColor colorFromHexCode:@"0E51A7"];
+  [[UITabBarItem appearance] setTitleTextAttributes:@{ NSForegroundColorAttributeName : fpBlue }
+                                           forState:UIControlStateSelected];
   return [[PEUIToolkit alloc]
-           initWithColorForContentPanels:[UIColor colorFromHexCode:@"0E51A7"] // (blue-ish)
+           initWithColorForContentPanels:fpBlue
               colorForNotificationPanels:[UIColor orangeColor]
                          colorForWindows:[UIColor cloudsColor]
         topBottomPaddingForContentPanels:15

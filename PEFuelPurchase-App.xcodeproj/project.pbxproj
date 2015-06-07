@@ -431,6 +431,7 @@
 		18D6DFB217F68005006B300D /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				CAD9D8FA1B24A08B00164CE4 /* Tab bar icons */,
 				1899260D18B3071600B61772 /* simulation */,
 				18CC2D0117F68117009DF2CE /* en.lproj */,
 				18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */,
@@ -478,6 +479,13 @@
 				18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */,
 			);
 			name = UIScrollView;
+			sourceTree = "<group>";
+		};
+		CAD9D8FA1B24A08B00164CE4 /* Tab bar icons */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Tab bar icons";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -659,6 +667,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				PRODUCT_NAME = "Fuel Purchase";
+				PROVISIONING_PROFILE = "0889e851-aaf0-45b3-ad8e-f5eef21ff25c";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -677,8 +686,8 @@
 				INFOPLIST_FILE = "fuelpurchase/PEFuelPurchase-App-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				PRODUCT_NAME = "Fuel Purchase";
-				PROVISIONING_PROFILE = "";
-				TARGETED_DEVICE_FAMILY = "1,2";
+				PROVISIONING_PROFILE = "91539923-6643-4775-b330-3f093b6b45c5";
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -739,7 +748,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				PRODUCT_NAME = "Fuel Purchase";
 				PROVISIONING_PROFILE = "";
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;

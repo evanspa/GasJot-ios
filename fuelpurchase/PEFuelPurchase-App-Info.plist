@@ -17,17 +17,19 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>1.2</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.2</string>
 	<key>FP Authentication Strength for Login Token</key>
 	<real>0.3</real>
 	<key>FP Authentication scheme</key>
 	<string>fp-auth</string>
 	<key>FP Authentication token param name</key>
 	<string>fp-token</string>
+	<key>FP REST service mt-version</key>
+	<string>0.0.1</string>
 	<key>FP REST service preferred charset</key>
 	<string>UTF-8</string>
 	<key>FP REST service preferred format</key>
@@ -36,18 +38,16 @@
 	<string>en-US</string>
 	<key>FP REST service timeout</key>
 	<integer>20</integer>
-	<key>FP REST service mt-version</key>
-	<string>0.0.1</string>
-	<key>FP Txns REST service mt-version</key>
-	<string>0.0.1</string>
 	<key>FP Txns REST service mt-subtype-prefix</key>
 	<string>vnd.fp.</string>
+	<key>FP Txns REST service mt-version</key>
+	<string>0.0.1</string>
 	<key>FP auth token response header name</key>
 	<string>fp-auth-token</string>
-	<key>FP establish session header name</key>
-	<string>fp-establish-session</string>
 	<key>FP error mask header name</key>
 	<string>fp-error-mask</string>
+	<key>FP establish session header name</key>
+	<string>fp-establish-session</string>
 	<key>FP time interval for flush to remote master</key>
 	<integer>2</integer>
 	<key>FP timeout for main thread coordinator dao operations</key>
@@ -63,6 +63,9 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UTImportedTypeDeclarations</key>
 	<array>
