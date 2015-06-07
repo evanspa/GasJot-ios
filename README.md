@@ -4,7 +4,7 @@
 
 PEFuelPurchase-App is an iOS application for collecting fuel purchase data.
 Its primary purpose is to serve as a reference application for leveraging the
-PE* suite of libraries, including the [PEAppTransaction Logging Framework](#peapptransaction-logging-framework).
+PE* suite of libraries.
 
 The PE* library suite is a set of iOS libraries to aid in the development of
 applications.
