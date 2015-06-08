@@ -22,7 +22,6 @@
 #import <ReactiveCocoa/RACSubscriptingAssignmentTrampoline.h>
 #import <ReactiveCocoa/RACSignal+Operations.h>
 #import <PEObjc-Commons/PEUIUtils.h>
-#import <PEFuelPurchase-Common/FPTransactionCodes.h>
 #import <PEFuelPurchase-Model/FPErrorDomainsAndCodes.h>
 #import "FPUnauthStartController.h"
 #import "FPAuthenticationAssertionSerializer.h"
@@ -230,11 +229,8 @@
                                NSString *email,
                                NSString *password) {
         NSUInteger createUsrErrMask = 0;
-        if ([fullName length] == 0) {
-          createUsrErrMask = FPSaveUsrNameNotProvided | FPSaveUsrAnyIssues;
-        }
         if ([email length] == 0) {
-          createUsrErrMask = createUsrErrMask | FPSaveUsrIdentifierNotProvided
+          createUsrErrMask = createUsrErrMask | FPSaveUsrUsernameAndEmailNotProvided
               | FPSaveUsrAnyIssues;
         }
         if ([password length] == 0) {
@@ -250,20 +246,14 @@
 
 - (NSArray *)computeCreateUsrErrMsgs:(NSUInteger)createUsrErrMask {
   NSMutableArray *errMsgs = [NSMutableArray arrayWithCapacity:1];
-  if (createUsrErrMask & FPSaveUsrNameNotProvided) {
-    [errMsgs addObject:LS(@"createusr.name-notprovided")];
-  }
-  if (createUsrErrMask & FPSaveUsrInvalidName) {
-    [errMsgs addObject:LS(@"createusr.name-invalid")];
-  }
   if (createUsrErrMask & FPSaveUsrInvalidEmail) {
     [errMsgs addObject:LS(@"createusr.email-invalid")];
   }
-  if (createUsrErrMask & FPSaveUsrInvalidUsername) {
-    [errMsgs addObject:LS(@"createusr.username-invalid")];
+  if (createUsrErrMask & FPSaveUsrUsernameAndEmailNotProvided) {
+    [errMsgs addObject:LS(@"createusr.username-and-email-notprovided")];
   }
-  if (createUsrErrMask & FPSaveUsrIdentifierNotProvided) {
-    [errMsgs addObject:LS(@"createusr.identifier-notprovided.email")];
+  if (createUsrErrMask & FPSaveUsrUsernameAlreadyRegistered) {
+    [errMsgs addObject:LS(@"createusr.username-already-registered")];
   }
   if (createUsrErrMask & FPSaveUsrPasswordNotProvided) {
     [errMsgs addObject:LS(@"createusr.password-notprovided")];

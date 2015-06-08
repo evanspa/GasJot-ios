@@ -56,11 +56,25 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     TaggedTextfieldMaker tfMaker =
       [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:vehiclePanel];
     UITextField *vehicleNameTf = tfMaker(@"Vehicle name", FPVehicleTagName);
+    UITextField *vehicleDefaultOctaneTf = tfMaker(@"Default octane", FPVehicleTagDefaultOctane);
+    UITextField *vehicleFuelCapacityTf = tfMaker(@"Fuel capacity", FPVehicleTagFuelCapacity);
     [PEUIUtils placeView:vehicleNameTf
                  atTopOf:vehiclePanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:15
                 hpadding:0];
+    [PEUIUtils placeView:vehicleDefaultOctaneTf
+                   below:vehicleNameTf
+                    onto:vehiclePanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:vehicleFuelCapacityTf
+                   below:vehicleDefaultOctaneTf
+                    onto:vehiclePanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
     // View Fuel Purchase Logs button
     UIButton *viewFpLogsBtn = [_uitoolkit systemButtonMaker](@"Fuel Purchase Logs", nil, nil);
     [PEUIUtils setFrameWidthOfView:viewFpLogsBtn ofWidth:1.0 relativeTo:vehiclePanel];
@@ -72,7 +86,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
       [PEUIUtils displayController:fpLogsScreenMaker(vehicle) fromController:parentViewController animated:YES];
     } forControlEvents:UIControlEventTouchUpInside];
     [PEUIUtils placeView:viewFpLogsBtn
-                   below:vehicleNameTf
+                   below:vehicleFuelCapacityTf
                     onto:vehiclePanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:30
@@ -103,6 +117,14 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
            withStringSetter:@selector(setName:)
        fromTextfieldWithTag:FPVehicleTagName
                    fromView:panel];
+    [PEUIUtils bindToEntity:vehicle
+           withNumberSetter:@selector(setDefaultOctane:)
+       fromTextfieldWithTag:FPVehicleTagDefaultOctane
+                   fromView:panel];
+    [PEUIUtils bindToEntity:vehicle
+          withDecimalSetter:@selector(setFuelCapacity:)
+       fromTextfieldWithTag:FPVehicleTagFuelCapacity
+                   fromView:panel];
   };
 }
 
@@ -112,13 +134,28 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                fromView:panel
                              fromEntity:vehicle
                              withGetter:@selector(name)];
+    [PEUIUtils bindToTextControlWithTag:FPVehicleTagDefaultOctane
+                               fromView:panel
+                             fromEntity:vehicle
+                             withGetter:@selector(defaultOctane)];
+    [PEUIUtils bindToTextControlWithTag:FPVehicleTagFuelCapacity
+                               fromView:panel
+                             fromEntity:vehicle
+                             withGetter:@selector(fuelCapacity)];
   };
 }
 
 - (PEEnableDisablePanelBlk)vehiclePanelEnablerDisabler {
   return ^ (UIView *panel, BOOL enable) {
     [PEUIUtils enableControlWithTag:FPVehicleTagName
-                           fromView:panel enable:enable];
+                           fromView:panel
+                             enable:enable];
+    [PEUIUtils enableControlWithTag:FPVehicleTagDefaultOctane
+                           fromView:panel
+                             enable:enable];
+    [PEUIUtils enableControlWithTag:FPVehicleTagFuelCapacity
+                           fromView:panel
+                             enable:enable];
   };
 }
 
@@ -126,8 +163,8 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
   return ^ PELMModelSupport * (UIView *panel) {
     return [_coordDao
               vehicleWithName:[PEUIUtils stringFromTextFieldWithTag:FPVehicleTagName fromView:panel]
-                defaultOctane:nil
-                 fuelCapacity:nil];
+                defaultOctane:[PEUIUtils numberFromTextFieldWithTag:FPVehicleTagDefaultOctane fromView:panel]
+                 fuelCapacity:[PEUIUtils decimalNumberFromTextFieldWithTag:FPVehicleTagFuelCapacity fromView:panel]];
   };
 }
 
@@ -603,30 +640,26 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     UISwitch *gotCarWashSwitch =
       [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
     [gotCarWashSwitch setTag:FPFpLogTagGotCarWash];
-    [PEUIUtils placeView:numGallonsTf
+    
+    [PEUIUtils placeView:octaneTf
                    below:vehicleFuelStationDateTableView
                     onto:fpLogPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:0.0
+                vpadding:5.0
                 hpadding:0.0];
     [PEUIUtils placeView:pricePerGallonTf
-                   below:numGallonsTf
-                    onto:fpLogPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
-    [PEUIUtils placeView:octaneTf
-                   below:pricePerGallonTf
-                    onto:fpLogPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
-    [PEUIUtils placeView:carWashPerGallonDiscountTf
                    below:octaneTf
                     onto:fpLogPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
+    [PEUIUtils placeView:carWashPerGallonDiscountTf
+                   below:pricePerGallonTf
+                    onto:fpLogPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    
     UIView *gotCarWashPanel =
       [PEUIUtils panelWithWidthOf:1.0
                    relativeToView:fpLogPanel
@@ -649,12 +682,20 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                     onto:gotCarWashPanel
            withAlignment:PEUIVerticalAlignmentTypeCenter
                 hpadding:15.0];
+    
     [PEUIUtils placeView:gotCarWashPanel
                    below:carWashPerGallonDiscountTf
                     onto:fpLogPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
+    [PEUIUtils placeView:numGallonsTf
+                   below:gotCarWashPanel
+                    onto:fpLogPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:0.0
+                hpadding:0.0];
+    
     /*UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fpLogPanel frame]];
     [scrollView setContentSize:CGSizeMake(fpLogPanel.frame.size.width, 1.3 * fpLogPanel.frame.size.height)];
     [scrollView addSubview:fpLogPanel];

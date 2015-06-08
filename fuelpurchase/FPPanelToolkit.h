@@ -13,11 +13,13 @@
 #import "FPScreenToolkit.h"
 
 typedef NS_ENUM (NSInteger, FPVehicleTag) {
-  FPVehicleTagName = 1
+  FPVehicleTagName = 1,
+  FPVehicleTagDefaultOctane = 2,
+  FPVehicleTagFuelCapacity = 3
 };
 
 typedef NS_ENUM (NSInteger, FPFuelStationTag) {
-  FPFuelStationTagName = 2,
+  FPFuelStationTagName = 4,
   FPFuelStationTagStreet,
   FPFuelStationTagCity,
   FPFuelStationTagState,
@@ -28,12 +30,12 @@ typedef NS_ENUM (NSInteger, FPFuelStationTag) {
 };
 
 typedef NS_ENUM (NSInteger, FPFpEnvLogCompositeTag) {
-  FPFpEnvLogCompositeTagPreFillupReportedDte = 10,
+  FPFpEnvLogCompositeTagPreFillupReportedDte = 12,
   FPFpEnvLogCompositeTagPostFillupReportedDte
 };
 
 typedef NS_ENUM (NSInteger, FPFpLogTag) {
-  FPFpLogTagVehicleFuelStationAndDate = 12,
+  FPFpLogTagVehicleFuelStationAndDate = 14,
   FPFpLogTagNumGallons,
   FPFpLogTagPricePerGallon,
   FPFpLogTagOctane,
@@ -43,7 +45,7 @@ typedef NS_ENUM (NSInteger, FPFpLogTag) {
 };
 
 typedef NS_ENUM (NSInteger, FPEnvLogTag) {
-  FPEnvLogTagVehicleAndDate = 19,
+  FPEnvLogTagVehicleAndDate = 21,
   FPEnvLogTagOdometer,
   FPEnvLogTagReportedAvgMpg,
   FPEnvLogTagReportedAvgMph,

@@ -97,6 +97,7 @@ NSString * const FPAppKeychainService = @"fp-app";
   FPScreenToolkit *_screenToolkit;
   CLLocationManager *_locationManager;
   NSMutableArray *_locations;
+  UICKeyChainStore *_keychainStore;
 
   #ifdef FP_DEV
     PDVUtils *_pdvUtils;
@@ -159,7 +160,8 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [self initializeStoreCoordinator];
   [_coordDao pruneAllSyncedEntitiesWithError:[FPUtils localSaveErrorHandlerMaker]()];
   FPUser *user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
-  _authToken = [FPAppDelegate storedAuthenticationTokenForUser:user];
+  _keychainStore = [UICKeyChainStore keyChainStoreWithService:@"name.paulevans.fpauth-token"];
+  _authToken = [self storedAuthenticationTokenForUser:user];
   _uitoolkit = [FPAppDelegate defaultUIToolkit];
   _screenToolkit = [[FPScreenToolkit alloc] initWithCoordinatorDao:_coordDao
                                                          uitoolkit:_uitoolkit
@@ -335,7 +337,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   DDLogDebug(@"Received new authentication token: [%@].  About to store in \
 keychain under key: [%@].",
              authToken, usernameOrEmail);
-  [UICKeyChainStore setString:authToken forKey:usernameOrEmail];
+  [_keychainStore setString:authToken forKey:usernameOrEmail];
   // FYI, the reason we don't set the authToken on our _coordDao object is because
   // it is doing it itself; i.e., because the auth token is received THROUGH the
   // _coordDao, the _coordDao updates itself as it arrives.
@@ -348,22 +350,22 @@ keychain under key: [%@].",
   // blow away the token from the keychain.
   DDLogDebug(@"authRequired: invoked.  In response, I'm going to blow-away \
 contents of keychain (thus deleting user's stale auth token)");
-  [UICKeyChainStore removeAllItems]; // meh, we'll use a big stick, 'cause, why not?
+  [_keychainStore removeAllItems];
 }
 
 -(void)invalidateTokenForUsernameOrEmail:(NSString *)usernameOrEmail {
   DDLogDebug(@"invalidateTokenForUsernameOrEmail: invoked for usernameOrEmail: \
 [%@]", usernameOrEmail);
-  [UICKeyChainStore removeItemForKey:usernameOrEmail];
+  [_keychainStore removeItemForKey:usernameOrEmail];
 }
 
 #pragma mark - Security and User-related
 
-+ (NSString *)storedAuthenticationTokenForUser:(FPUser *)user {
+- (NSString *)storedAuthenticationTokenForUser:(FPUser *)user {
   NSString *usernameOrEmail = [user usernameOrEmail];
   NSString *authToken = nil;
   if (usernameOrEmail) {
-    authToken = [UICKeyChainStore stringForKey:usernameOrEmail];
+    authToken = [_keychainStore stringForKey:usernameOrEmail];
   }
   DDLogDebug(@"About to return authentication token: [%@] obtained from \
 keystore under key: [%@]", authToken, usernameOrEmail);
