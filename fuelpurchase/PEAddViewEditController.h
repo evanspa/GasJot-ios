@@ -21,7 +21,7 @@ typedef BOOL (^PEEntityEditPreparerBlk)(PEAddViewEditController *, id);
 typedef void (^PEEntityEditCancelerBlk)(PEAddViewEditController *, id);
 typedef void (^PEEntityAddCancelerBlk)(PEAddViewEditController *);
 typedef id   (^PEEntityMakerBlk)(UIView *);
-typedef void (^PESaveEntityBlk)(id<UITableViewDataSource>, PEAddViewEditController *, id);
+typedef void (^PESaveEntityBlk)(PEAddViewEditController *, id);
 typedef void (^PEMarkAsDoneEditingBlk)(id);
 typedef void (^PESaveNewEntityBlk)(UIView *, id);
 typedef void (^PEItemAddedBlk)(PEAddViewEditController *, id);
@@ -63,7 +63,6 @@ doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
 prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
      entityValidator:(PEEntityValidatorBlk)entityValidator
-  listViewDataSource:(id<UITableViewDataSource>)listViewDataSource
 foregroundEditActorId:(NSNumber *)foregroundEditActorId
 entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
 entityUpdatedNotificationToPost:(NSString *)entityUpdatedNotificationToPost
@@ -83,7 +82,6 @@ getterForNotification:(SEL)getterForNotification;
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
-                                      listViewDataSource:(id<UITableViewDataSource>)listViewDataSource
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost;
 
@@ -99,7 +97,6 @@ getterForNotification:(SEL)getterForNotification;
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
-                                      listViewDataSource:(id<UITableViewDataSource>)listViewDataSource
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
                                    getterForNotification:(SEL)getterForNotification;
@@ -128,13 +125,10 @@ getterForNotification:(SEL)getterForNotification;
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator
-                                    listViewDataSource:(id<UITableViewDataSource>)listViewDataSource
                                  foregroundEditActorId:(NSNumber *)foregroundEditActorId
                        entityUpdatedNotificationToPost:(NSString *)entityUpdatedNotificationToPost;
 
 #pragma mark - Properties
-
-@property (readonly, nonatomic) id<UITableViewDataSource> listViewDataSource;
 
 @property (readonly, nonatomic) PELMMainSupport *entity;
 

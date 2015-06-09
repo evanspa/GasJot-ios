@@ -180,6 +180,7 @@
 		18010C56180E46F7005F5CEB /* Authenticated */ = {
 			isa = PBXGroup;
 			children = (
+				CAC238871B275D190096B963 /* Account Settings */,
 				180EDA3219C7C87E00C782A6 /* Edits in Progress Screen */,
 				180EDA2D19C7C2AB00C782A6 /* Settings Screen */,
 				18010C57180E470C005F5CEB /* Quick Action Menu Screen */,
@@ -479,6 +480,13 @@
 				18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */,
 			);
 			name = UIScrollView;
+			sourceTree = "<group>";
+		};
+		CAC238871B275D190096B963 /* Account Settings */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Account Settings";
 			sourceTree = "<group>";
 		};
 		CAD9D8FA1B24A08B00164CE4 /* Tab bar icons */ = {

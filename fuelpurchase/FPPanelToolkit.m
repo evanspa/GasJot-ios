@@ -45,6 +45,88 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
   return self;
 }
 
+#pragma mark - User Account Panel
+
+- (PEEntityPanelMakerBlk)userAccountPanelMaker {
+  return ^ UIView * (PEAddViewEditController *parentViewController) {
+    UIView *parentView = [parentViewController view];
+    UIView *userAccountPanel = [PEUIUtils panelWithWidthOf:1.0
+                                               andHeightOf:1.0
+                                            relativeToView:parentView];
+    TaggedTextfieldMaker tfMaker =
+    [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:userAccountPanel];
+    UITextField *nameTf = tfMaker(@"Name", FPUserTagName);
+    UITextField *usernameTf = tfMaker(@"Username", FPUserTagUsername);
+    UITextField *emailTf = tfMaker(@"Email", FPUserTagEmail);
+    [PEUIUtils placeView:nameTf
+                 atTopOf:userAccountPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:15
+                hpadding:0];
+    [PEUIUtils placeView:usernameTf
+                   below:nameTf
+                    onto:userAccountPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:emailTf
+                   below:usernameTf
+                    onto:userAccountPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    return userAccountPanel;
+  };
+}
+
+- (PEPanelToEntityBinderBlk)userAccountPanelToUserAccountBinder {
+  return ^ void (UIView *panel, FPUser *userAccount) {
+    [PEUIUtils bindToEntity:userAccount
+           withStringSetter:@selector(setName:)
+       fromTextfieldWithTag:FPUserTagName
+                   fromView:panel];
+    [PEUIUtils bindToEntity:userAccount
+           withStringSetter:@selector(setUsername:)
+       fromTextfieldWithTag:FPUserTagUsername
+                   fromView:panel];
+    [PEUIUtils bindToEntity:userAccount
+           withStringSetter:@selector(setEmail:)
+       fromTextfieldWithTag:FPUserTagEmail
+                   fromView:panel];
+  };
+}
+
+- (PEEntityToPanelBinderBlk)userAccountToUserAccountPanelBinder {
+  return ^ void (FPUser *userAccount, UIView *panel) {
+    [PEUIUtils bindToTextControlWithTag:FPUserTagName
+                               fromView:panel
+                             fromEntity:userAccount
+                             withGetter:@selector(name)];
+    [PEUIUtils bindToTextControlWithTag:FPUserTagUsername
+                               fromView:panel
+                             fromEntity:userAccount
+                             withGetter:@selector(username)];
+    [PEUIUtils bindToTextControlWithTag:FPUserTagEmail
+                               fromView:panel
+                             fromEntity:userAccount
+                             withGetter:@selector(email)];
+  };
+}
+
+- (PEEnableDisablePanelBlk)userAccountPanelEnablerDisabler {
+  return ^ (UIView *panel, BOOL enable) {
+    [PEUIUtils enableControlWithTag:FPUserTagName
+                           fromView:panel
+                             enable:enable];
+    [PEUIUtils enableControlWithTag:FPUserTagUsername
+                           fromView:panel
+                             enable:enable];
+    [PEUIUtils enableControlWithTag:FPUserTagEmail
+                           fromView:panel
+                             enable:enable];
+  };
+}
+
 #pragma mark - Vehicle Panel
 
 - (PEEntityPanelMakerBlk)vehiclePanelMaker {

@@ -45,6 +45,10 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id, NSString
 
 - (FPAuthScreenMaker)newViewSettingsScreenMaker;
 
+#pragma mark - User Account Screens
+
+- (FPAuthScreenMaker)newUserAccountDetailScreenMaker;
+
 #pragma mark - Vehicle Screens
 
 - (FPAuthScreenMaker)newViewVehiclesScreenMaker;
@@ -52,17 +56,21 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id, NSString
 - (FPAuthScreenMaker)newVehiclesForSelectionScreenMakerWithItemSelectedAction:(PEItemSelectedAction)itemSelectedAction
                                                        initialSelectedVehicle:(FPVehicle *)initialSelectedVehicle;
 
-- (FPAuthScreenMaker)newAddVehicleScreenMakerWithDelegate:(PEItemAddedBlk)itemAddedBlk
-                                       listViewController:(PEListViewController *)listViewController;
+- (FPAuthScreenMaker)newAddVehicleScreenMakerWithDelegate:(PEItemAddedBlk)itemAddedBlk;
 
 - (FPAuthScreenMaker)newVehicleDetailScreenMakerWithVehicle:(FPVehicle *)vehicle
                                            vehicleIndexPath:(NSIndexPath *)vehicleIndexPath
-                                             itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
-                                         listViewController:(PEListViewController *)listViewController;
+                                             itemChangedBlk:(PEItemChangedBlk)itemChangedBlk;
 
 #pragma mark - Fuel Station Screens
 
 - (void)addDistanceInfoToTopOfCellContentView:(UIView *)contentView
+                          withVerticalPadding:(CGFloat)verticalPadding
+                            horizontalPadding:(CGFloat)horizontalPadding
+                              withFuelstation:(FPFuelStation *)fuelstation;
+
+- (void)addDistanceInfoToTopOfCellContentView:(UIView *)contentView
+                      withHorizontalAlignment:(PEUIHorizontalAlignmentType)horizontalAlignment
                           withVerticalPadding:(CGFloat)verticalPadding
                             horizontalPadding:(CGFloat)horizontalPadding
                               withFuelstation:(FPFuelStation *)fuelstation;
@@ -72,20 +80,17 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id, NSString
 - (FPAuthScreenMaker)newFuelStationsForSelectionScreenMakerWithItemSelectedAction:(PEItemSelectedAction)itemSelectedAction
                                                        initialSelectedFuelStation:(FPFuelStation *)initialSelectedFuelStation;
 
-- (FPAuthScreenMaker)newAddFuelStationScreenMakerWithBlk:(PEItemAddedBlk)itemAddedBlk
-                                      listViewController:(PEListViewController *)listViewController;
+- (FPAuthScreenMaker)newAddFuelStationScreenMakerWithBlk:(PEItemAddedBlk)itemAddedBlk;
 
 - (FPAuthScreenMaker)newFuelStationDetailScreenMakerWithFuelStation:(FPFuelStation *)fuelStation
                                                fuelStationIndexPath:(NSIndexPath *)fuelStationIndexPath
-                                                     itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
-                                                 listViewController:(PEListViewController *)listViewController;
+                                                     itemChangedBlk:(PEItemChangedBlk)itemChangedBlk;
 
 #pragma mark - Fuel Purchase Log Screens
 
 - (FPAuthScreenMaker)newAddFuelPurchaseLogScreenMakerWithBlk:(PEItemAddedBlk)itemAddedBlk
                                       defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
-                                  defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
-                                          listViewController:(PEListViewController *)listViewController;
+                                  defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation;
 
 - (FPAuthScreenMaker)newViewFuelPurchaseLogsScreenMakerForVehicleInCtx;
 
@@ -94,8 +99,7 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id, NSString
 #pragma mark - Environment Log Screens
 
 - (FPAuthScreenMaker)newAddEnvironmentLogScreenMakerWithBlk:(PEItemAddedBlk)itemAddedBlk
-                                     defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
-                                         listViewController:(PEListViewController *)listViewController;
+                                     defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle;
 
 //- (FPAuthScreenMaker)newViewEnvironmentLogsScreenMaker;
 

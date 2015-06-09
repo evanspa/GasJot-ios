@@ -12,6 +12,14 @@
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 #import "FPScreenToolkit.h"
 
+typedef NS_ENUM (NSInteger, FPUserTag) {
+  FPUserTagName = 1,
+  FPUserTagEmail = 2,
+  FPUserTagUsername = 3,
+  FPUserTagPassword = 4,
+  FPUserTagConfirmPassword = 5
+};
+
 typedef NS_ENUM (NSInteger, FPVehicleTag) {
   FPVehicleTagName = 1,
   FPVehicleTagDefaultOctane = 2,
@@ -65,6 +73,16 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
                screenToolkit:(FPScreenToolkit *)screenToolkit
                    uitoolkit:(PEUIToolkit *)uitoolkit
                        error:(PELMDaoErrorBlk)errorBlk;
+
+#pragma mark - User Account Panel
+
+- (PEEntityPanelMakerBlk)userAccountPanelMaker;
+
+- (PEPanelToEntityBinderBlk)userAccountPanelToUserAccountBinder;
+
+- (PEEntityToPanelBinderBlk)userAccountToUserAccountPanelBinder;
+
+- (PEEnableDisablePanelBlk)userAccountPanelEnablerDisabler;
 
 #pragma mark - Vehicle Panel
 

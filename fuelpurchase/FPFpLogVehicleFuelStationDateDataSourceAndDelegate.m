@@ -178,22 +178,9 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
   }
 }
 
-#pragma mark - Table view data source
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-  return 3;
-}
-
-- (NSInteger)tableView:(UITableView *)tableView
- numberOfRowsInSection:(NSInteger)section {
-  return 1;
-}
-
-- (UITableViewCell *)tableView:(UITableView *)tableView
-         cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  UITableViewCell *cell =
-    [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1
-                           reuseIdentifier:nil];
+- (void)tableView:(UITableView *)tableView
+  willDisplayCell:(UITableViewCell *)cell
+forRowAtIndexPath:(NSIndexPath *)indexPath {
   switch ([indexPath section]) {
     case 0:
       [[cell textLabel] setText:@"Vehicle"];
@@ -216,16 +203,17 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
           CLLocation *latestCurrentLocation = [APP latestLocation];
           if (latestCurrentLocation) {
             distanceInfoVPadding = 7.0;
-            [PEUIUtils placeView:title atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:7.0 hpadding:37.0];
+            [PEUIUtils placeView:title atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:7.0 hpadding:5];
           } else {
-            [PEUIUtils placeView:title atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:2.0 hpadding:37.0];
+            [PEUIUtils placeView:title atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:2.0 hpadding:5];
           }
         } else {
-          [PEUIUtils placeView:title atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:2.0 hpadding:37.0];
+          [PEUIUtils placeView:title atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:2.0 hpadding:5];
         }
         [_screenToolkit addDistanceInfoToTopOfCellContentView:contentView
+                                      withHorizontalAlignment:PEUIHorizontalAlignmentTypeRight
                                           withVerticalPadding:(title.frame.size.height + distanceInfoVPadding)
-                                            horizontalPadding:205.0
+                                            horizontalPadding:5.0
                                               withFuelstation:_selectedFuelStation];
       } else {
         [[cell detailTextLabel] setText:@"(no fuel stations found)"];
@@ -236,6 +224,25 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
       [[cell detailTextLabel] setText:[PEUtils stringFromDate:_pickedLogDate withPattern:@"MM/dd/YYYY"]];
       break;
   }
+  [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
+}
+
+#pragma mark - Table view data source
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+  return 3;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView
+ numberOfRowsInSection:(NSInteger)section {
+  return 1;
+}
+
+-(UITableViewCell *)tableView:(UITableView *)tableView
+         cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+  UITableViewCell *cell =
+    [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1
+                           reuseIdentifier:nil];
   [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
   return cell;
 }

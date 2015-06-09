@@ -151,8 +151,7 @@
                                                                                                             error:[FPUtils localFetchErrorHandlerMaker]()]
                                  defaultSelectedFuelStation:[_coordDao defaultFuelStationForNewFuelPurchaseLogForUser:_user
                                                                                                       currentLocation:[APP latestLocation]
-                                                                                                                error:[FPUtils localFetchErrorHandlerMaker]()]
-                                         listViewController:nil](_user);
+                                                                                                                error:[FPUtils localFetchErrorHandlerMaker]()]](_user);
   [self presentViewController:[PEUIUtils navigationControllerWithController:addFpLogCtrl
                                                         navigationBarHidden:NO]
                      animated:YES
@@ -169,8 +168,7 @@
   };
   UIViewController *addEnvLogCtrl =
     [_screenToolkit newAddEnvironmentLogScreenMakerWithBlk:itemAddedBlk
-                                    defaultSelectedVehicle:[_coordDao defaultVehicleForNewEnvironmentLogForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
-                                        listViewController:nil](_user);
+                                    defaultSelectedVehicle:[_coordDao defaultVehicleForNewEnvironmentLogForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]](_user);
   [self presentViewController:[PEUIUtils navigationControllerWithController:addEnvLogCtrl
                                                         navigationBarHidden:NO]
                      animated:YES

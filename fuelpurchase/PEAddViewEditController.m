@@ -83,7 +83,6 @@ doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
 prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
      entityValidator:(PEEntityValidatorBlk)entityValidator
-  listViewDataSource:(id<UITableViewDataSource>)listViewDataSource
 foregroundEditActorId:(NSNumber *)foregroundEditActorId
 entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
 entityUpdatedNotificationToPost:(NSString *)entityUpdatedNotificationToPost
@@ -123,7 +122,6 @@ getterForNotification:(SEL)getterForNotification {
     _prepareUIForUserInteractionBlk = prepareUIForUserInteractionBlk;
     _viewDidAppearBlk = viewDidAppearBlk;
     _entityValidator = entityValidator;
-    _listViewDataSource = listViewDataSource;
     _foregroundEditActorId = foregroundEditActorId;
     _entityAddedNotificationToPost = entityAddedNotificationToPost;
     _entityUpdatedNotificationToPost = entityUpdatedNotificationToPost;
@@ -146,7 +144,6 @@ getterForNotification:(SEL)getterForNotification {
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
-                                      listViewDataSource:(id<UITableViewDataSource>)listViewDataSource
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost {
   return [PEAddViewEditController addEntityCtrlrWithUitoolkit:uitoolkit
@@ -161,7 +158,6 @@ getterForNotification:(SEL)getterForNotification {
                                prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                                              viewDidAppearBlk:viewDidAppearBlk
                                               entityValidator:entityValidator
-                                           listViewDataSource:listViewDataSource
                                         foregroundEditActorId:foregroundEditActorId
                                 entityAddedNotificationToPost:entityAddedNotificationToPost
                                         getterForNotification:nil];
@@ -179,7 +175,6 @@ getterForNotification:(SEL)getterForNotification {
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
-                                      listViewDataSource:(id<UITableViewDataSource>)listViewDataSource
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
                                    getterForNotification:(SEL)getterForNotification {
@@ -213,7 +208,6 @@ entityRemotelyUpdatedNotifName:nil
 prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
          viewDidAppearBlk:viewDidAppearBlk
           entityValidator:entityValidator
-          listViewDataSource:listViewDataSource
           foregroundEditActorId:foregroundEditActorId
 entityAddedNotificationToPost:entityAddedNotificationToPost
 entityUpdatedNotificationToPost:nil
@@ -245,7 +239,6 @@ getterForNotification:getterForNotification];
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator
-                                    listViewDataSource:(id<UITableViewDataSource>)listViewDataSource
                                  foregroundEditActorId:(NSNumber *)foregroundEditActorId
                        entityUpdatedNotificationToPost:(NSString *)entityUpdatedNotificationToPost {
   return [[PEAddViewEditController alloc]
@@ -278,7 +271,6 @@ entityRemotelyUpdatedNotifName:entityRemotelyUpdatedNotifName
 prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
         viewDidAppearBlk:viewDidAppearBlk
           entityValidator:entityValidator
-       listViewDataSource:listViewDataSource
     foregroundEditActorId:foregroundEditActorId
 entityAddedNotificationToPost:nil
 entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
@@ -560,7 +552,7 @@ entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
   } else {
     if ([self validEntityUserInput]) {
       _panelToEntityBinder(_entityPanel, _entity);
-      _entitySaver(_listViewDataSource, self, _entity);
+      _entitySaver(self, _entity);
       _doneEditingEntityMarker(_entity);
       displayHeadsUpIfRemoteDeletionOccured(@[LS(@"vieweditentity.headsup.whileediting.editsucceeded.remotelydeleted.msg1"),
                                               LS(@"vieweditentity.headsup.whileediting.editsucceeded.remotelydeleted.msg2")]);
@@ -576,7 +568,9 @@ entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
       return; // we want to short-circuit out if validation fails
     }
   }
-  _itemChangedBlk(_entity, _entityIndexPath);
+  if (_itemChangedBlk) {
+    _itemChangedBlk(_entity, _entityIndexPath);
+  }
   [[self navigationItem] setLeftBarButtonItem:_backButton];
   [[self navigationItem] setRightBarButtonItem:[self editButtonItem]];
   [[self navigationItem] setTitle:_viewEntityTitle];

@@ -8,6 +8,7 @@
 
 #import "FPSettingsController.h"
 #import <PEObjc-Commons/PEUIUtils.h>
+#import <BlocksKit/UIControl+BlocksKit.h>
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
@@ -57,14 +58,34 @@
 
 - (void)makeMainPanel {
   ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
-  UIButton *logoutBtn = buttonMaker(@"Logout", self, @selector(logout));
-  [[logoutBtn layer] setCornerRadius:0.0];
-  [PEUIUtils placeView:logoutBtn
+  
+  
+  UIButton *accountSettingsBtn = [_uitoolkit systemButtonMaker](@"Account Settings", nil, nil);
+  [[accountSettingsBtn layer] setCornerRadius:0.0];
+  [PEUIUtils setFrameWidthOfView:accountSettingsBtn ofWidth:1.0 relativeTo:[self view]];
+  [PEUIUtils addDisclosureIndicatorToButton:accountSettingsBtn];
+  [accountSettingsBtn bk_addEventHandler:^(id sender) {
+    //[PEUIUtils displayController:envLogsScreenMaker(vehicle) fromController:parentViewController animated:YES];
+    
+    [PEUIUtils displayController:[_screenToolkit newUserAccountDetailScreenMaker](_user) fromController:self animated:YES];
+    
+    
+  } forControlEvents:UIControlEventTouchUpInside];
+  [PEUIUtils placeView:accountSettingsBtn
                atTopOf:[self view]
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:100
               hpadding:0];
-    [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:[self view]];
+  
+  UIButton *logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
+  [[logoutBtn layer] setCornerRadius:0.0];
+  [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:[self view]];
+  [PEUIUtils placeView:logoutBtn
+                 below:accountSettingsBtn
+                  onto:[self view]
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:10.0
+              hpadding:0.0];
 }
 
 #pragma mark - Logout
