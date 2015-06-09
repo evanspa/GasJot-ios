@@ -91,11 +91,28 @@ the background-processor is currently attempting to edit this record.  Try again
 }
 
 - (PEStyleTableCellContentView)standardTableCellStylerWithTitleBlk:(NSString *(^)(id))titleBlk {
+  return [self standardTableCellStylerWithTitleBlk:titleBlk alwaysTopifyTitleLabel:NO];
+}
+
+- (PEStyleTableCellContentView)standardTableCellStylerWithTitleBlk:(NSString *(^)(id))titleBlk
+                                            alwaysTopifyTitleLabel:(BOOL)alwaysTopifyTitleLabel {
+  NSString * (^titleText)(id) = ^NSString *(id dataObject) {
+    NSInteger maxLength = 35;
+    NSString *title = titleBlk(dataObject);
+    if ([title length] > maxLength) {
+      title = [[title substringToIndex:maxLength] stringByAppendingString:@"..."];
+    }
+    return title;
+  };
+  void (^setTitleText)(UILabel *, id) = ^(UILabel *titleLbl, id dataObject) {
+    [titleLbl setText:titleText(dataObject)];
+  };
   return ^(UIView *contentView, id dataObject) {
     PELMMainSupport *entity = (PELMMainSupport *)dataObject;
     NSInteger titleNameTag = 1;
     NSInteger subTitleTag = 2;
     NSString *subTitleMsg = nil;
+    CGFloat vpaddingForTopifiedTitle = 8.0;
     if ([entity editInProgress]) {
       if ([[entity editActorId] isEqualToNumber:@(FPForegroundActorId)]) {
         subTitleMsg = @"Edit in progress.";
@@ -121,13 +138,13 @@ the background-processor is currently attempting to edit this record.  Try again
       [PEUIUtils placeView:titleLbl
                    atTopOf:contentView
              withAlignment:PEUIHorizontalAlignmentTypeLeft
-                  vpadding:10.0
+                  vpadding:vpaddingForTopifiedTitle
                   hpadding:15.0];
     };
     if (titleLbl) {
-      [titleLbl setText:titleBlk(dataObject)];
+      setTitleText(titleLbl, dataObject);
       subTitleLbl = (UILabel *)[contentView viewWithTag:subTitleTag];
-      if (subTitleMsg) {
+      if (subTitleMsg || alwaysTopifyTitleLabel) {
         if (!subTitleLbl) {
           // first, let's remove the title label and re-add so it's properly
           // aligned at the top
@@ -151,16 +168,18 @@ the background-processor is currently attempting to edit this record.  Try again
         subTitleLbl = (UILabel *)[contentView viewWithTag:subTitleTag];
         if (subTitleLbl) {
           [subTitleLbl removeFromSuperview];
-          // because subTitleLbl is NOT nil, then titleLbl is currently placed
-          // at the top of the cell; this is bad; it should be centered.  So
-          // we'll remove it and re-add it.
-          removeAndCenterLabel(titleLbl);
+          if (!alwaysTopifyTitleLabel) {
+            // because subTitleLbl is NOT nil, then titleLbl is currently placed
+            // at the top of the cell; this is bad; it should be centered.  So
+            // we'll remove it and re-add it.
+            removeAndCenterLabel(titleLbl);
+          }
         }
       }
     } else {
       LabelMaker tableCellTitleMaker = [_uitoolkit tableCellTitleMaker];
       LabelMaker tableCellSubtitleMaker = [_uitoolkit tableCellSubtitleMaker];
-      titleLbl = tableCellTitleMaker(titleBlk(dataObject));
+      titleLbl = tableCellTitleMaker(titleText(dataObject));
       [titleLbl setTag:titleNameTag];
       [PEUIUtils setFrameWidthOfView:titleLbl
                              ofWidth:1.0
@@ -169,7 +188,7 @@ the background-processor is currently attempting to edit this record.  Try again
         [PEUIUtils placeView:titleLbl
                      atTopOf:contentView
                withAlignment:PEUIHorizontalAlignmentTypeLeft
-                    vpadding:10.0
+                    vpadding:vpaddingForTopifiedTitle
                     hpadding:15.0];
         subTitleLbl = tableCellSubtitleMaker(subTitleMsg);
         [subTitleLbl setTag:subTitleTag];
@@ -183,10 +202,18 @@ the background-processor is currently attempting to edit this record.  Try again
                     vpadding:2.0
                     hpadding:0.0];
       } else {
-        [PEUIUtils placeView:titleLbl
-                  inMiddleOf:contentView
-               withAlignment:PEUIHorizontalAlignmentTypeLeft
-                    hpadding:15.0];
+        if (alwaysTopifyTitleLabel) {
+          [PEUIUtils placeView:titleLbl
+                       atTopOf:contentView
+                 withAlignment:PEUIHorizontalAlignmentTypeLeft
+                      vpadding:vpaddingForTopifiedTitle
+                      hpadding:15.0];
+        } else {
+          [PEUIUtils placeView:titleLbl
+                    inMiddleOf:contentView
+                 withAlignment:PEUIHorizontalAlignmentTypeLeft
+                      hpadding:15.0];
+        }
       }
     }
   };
@@ -458,6 +485,48 @@ the background-processor is currently attempting to edit this record.  Try again
 
 #pragma mark - Fuel Station Screens
 
+- (void)addDistanceInfoToTopOfCellContentView:(UIView *)contentView
+                          withVerticalPadding:(CGFloat)verticalPadding
+                            horizontalPadding:(CGFloat)horizontalPadding
+                              withFuelstation:(FPFuelStation *)fuelstation {
+  UILabel * (^compressLabel)(UILabel *) = ^UILabel *(UILabel *label) {
+    [PEUIUtils setTextAndResize:[label text] forLabel:label];
+    return label;
+  };
+  UILabel * (^asRed)(UILabel *) = ^UILabel *(UILabel *label) {
+    [label setTextColor:[UIColor redColor]];
+    return label;
+  };
+  void (^placeEm)(UILabel *, UILabel *, UILabel *) = ^(UILabel *distanceLabel, UILabel *distance, UILabel *awayLabel) {
+    [PEUIUtils placeView:awayLabel atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:verticalPadding hpadding:horizontalPadding];
+    [PEUIUtils placeView:distance toTheLeftOf:awayLabel onto:contentView withAlignment:PEUIVerticalAlignmentTypeCenter hpadding:0.0];
+    [PEUIUtils placeView:distanceLabel toTheLeftOf:distance onto:contentView withAlignment:PEUIVerticalAlignmentTypeCenter hpadding:0.0];
+  };
+  LabelMaker cellSubtitleMaker = [_uitoolkit tableCellSubtitleMaker];
+  CLLocation *fuelStationLocation = [fuelstation location];
+  if (fuelStationLocation) {
+    CLLocation *latestCurrentLocation = [APP latestLocation];
+    if (latestCurrentLocation) {
+      UILabel *distanceLabel = cellSubtitleMaker(@"Distance: ");
+      UILabel *distance = cellSubtitleMaker(@"12.2 miles");
+      UILabel *awayLabel = cellSubtitleMaker(@"");
+      placeEm(distanceLabel, distance, awayLabel);
+    } else {
+      UILabel *distanceLabel = asRed(compressLabel(cellSubtitleMaker(@"Distance: ")));
+      UILabel *distance = asRed(compressLabel(cellSubtitleMaker(@"?")));
+      UILabel *unknownReason = compressLabel(cellSubtitleMaker(@"(current location unknown)"));
+      placeEm(distanceLabel, distance, compressLabel(cellSubtitleMaker(@"")));
+      [PEUIUtils placeView:unknownReason below:distance onto:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:0.0 hpadding:0.0];
+    }
+  } else {
+    UILabel *distanceLabel = asRed(compressLabel(cellSubtitleMaker(@"Distance: ")));
+    UILabel *distance = asRed(compressLabel(cellSubtitleMaker(@"?")));
+    UILabel *unknownReason = compressLabel(cellSubtitleMaker(@"(fuel station location unknown)"));
+    placeEm(distanceLabel, distance, compressLabel(cellSubtitleMaker(@"")));
+    [PEUIUtils placeView:unknownReason below:distance onto:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:0.0 hpadding:0.0];
+  }
+}
+
 + (NSInteger)indexOfFuelStation:(FPFuelStation *)fuelstation inFuelStations:(NSArray *)fuelstations {
   NSInteger index = 0;
   NSInteger count = 0;
@@ -553,11 +622,25 @@ the background-processor is currently attempting to edit this record.  Try again
     PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
       return [FPScreenToolkit indexOfFuelStation:(FPFuelStation *)entity inFuelStations:pageLoader(nil)];
     };
+    PEStyleTableCellContentView tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
+      [self standardTableCellStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
+                         alwaysTopifyTitleLabel:YES](contentView, fuelstation);
+      CGFloat distanceInfoVPadding = 25.5;
+      if ([fuelstation location]) {
+        if ([APP latestLocation]) {
+          distanceInfoVPadding = 28.5;
+        }
+      }
+      [self addDistanceInfoToTopOfCellContentView:contentView
+                              withVerticalPadding:distanceInfoVPadding
+                                horizontalPadding:45.0
+                                  withFuelstation:fuelstation];
+    };
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPFuelStation class]
                                         title:@"Choose Fuel Station"
                         isPaginatedDataSource:NO
-                              tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}]
+                              tableCellStyler:tableCellStyler
                            itemSelectedAction:itemSelectedAction
                           initialSelectedItem:initialSelectedFuelStation
                                 addItemAction:addFuelStationAction

@@ -12,6 +12,7 @@
 #import <MBProgressHUD/MBProgressHUD.h>
 
 @class PEAddViewEditController;
+typedef NSDictionary *(^PEComponentsMakerBlk)(UIViewController *);
 typedef UIView *(^PEEntityPanelMakerBlk)(PEAddViewEditController *);
 typedef void (^PEPanelToEntityBinderBlk)(UIView *, id);
 typedef void (^PEEntityToPanelBinderBlk)(id, UIView *);

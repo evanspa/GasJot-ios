@@ -11,6 +11,7 @@
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "PEListViewController.h"
 #import "PEAddViewEditController.h"
+#import <PEObjc-Commons/PEUIUtils.h>
 
 typedef UIViewController * (^FPUnauthScreenMaker)(void);
 
@@ -60,6 +61,11 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id, NSString
                                          listViewController:(PEListViewController *)listViewController;
 
 #pragma mark - Fuel Station Screens
+
+- (void)addDistanceInfoToTopOfCellContentView:(UIView *)contentView
+                          withVerticalPadding:(CGFloat)verticalPadding
+                            horizontalPadding:(CGFloat)horizontalPadding
+                              withFuelstation:(FPFuelStation *)fuelstation;
 
 - (FPAuthScreenMaker)newViewFuelStationsScreenMaker;
 

@@ -17,11 +17,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.2</string>
+	<string>1.3</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.2</string>
+	<string>1.3</string>
 	<key>FP Authentication Strength for Login Token</key>
 	<real>0.3</real>
 	<key>FP Authentication scheme</key>
@@ -38,10 +38,6 @@
 	<string>en-US</string>
 	<key>FP REST service timeout</key>
 	<integer>20</integer>
-	<key>FP Txns REST service mt-subtype-prefix</key>
-	<string>vnd.fp.</string>
-	<key>FP Txns REST service mt-version</key>
-	<string>0.0.1</string>
 	<key>FP auth token response header name</key>
 	<string>fp-auth-token</string>
 	<key>FP error mask header name</key>

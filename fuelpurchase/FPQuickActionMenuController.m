@@ -147,8 +147,11 @@
   };
   UIViewController *addFpLogCtrl =
     [_screenToolkit newAddFuelPurchaseLogScreenMakerWithBlk:itemAddedBlk
-                                     defaultSelectedVehicle:[_coordDao defaultVehicleForNewFuelPurchaseLogForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
-                                 defaultSelectedFuelStation:[_coordDao defaultFuelStationForNewFuelPurchaseLogForUser:_user currentLocation:[APP latestLocation] error:[FPUtils localFetchErrorHandlerMaker]()]
+                                     defaultSelectedVehicle:[_coordDao defaultVehicleForNewFuelPurchaseLogForUser:_user
+                                                                                                            error:[FPUtils localFetchErrorHandlerMaker]()]
+                                 defaultSelectedFuelStation:[_coordDao defaultFuelStationForNewFuelPurchaseLogForUser:_user
+                                                                                                      currentLocation:[APP latestLocation]
+                                                                                                                error:[FPUtils localFetchErrorHandlerMaker]()]
                                          listViewController:nil](_user);
   [self presentViewController:[PEUIUtils navigationControllerWithController:addFpLogCtrl
                                                         navigationBarHidden:NO]

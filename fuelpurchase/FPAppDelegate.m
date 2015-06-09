@@ -55,33 +55,31 @@ int (^intBundleVal)(NSString *) = ^(NSString *key) {
 };
 
 // Keys in app plist
-NSString * const FPRestServiceTimeoutKey        = @"timeout";
-NSString * const FPRestServicePreferredCharset  = @"FP REST service preferred charset";
-NSString * const FPRestServicePreferredLanguage = @"FP REST service preferred language";
-NSString * const FPRestServicePreferredFormat   = @"FP REST service preferred format";
-NSString * const FPRestServiceMtVersion         = @"FP REST service mt-version";
-NSString * const FPTxnsRestServiceMtBaseSubtype = @"FP Txns REST service mt-base-subtype";
-NSString * const FPTxnsRestServiceMtVersion     = @"FP Txns REST service mt-version";
-NSString * const FPTxnsRestServiceMtSubtypePrefix = @"FP Txns REST service mt-subtype-prefix";
-NSString * const FPAuthenticationScheme         = @"FP Authentication scheme";
-NSString * const FPAuthenticationTokenName      = @"FP Authentication token param name";
-NSString * const FPErrorMaskHeaderNameKey       = @"FP error mask header name";
-NSString * const FPTransactionIdHeaderNameKey   = @"FP transaction id header name";
-NSString * const FPEstablishSessionHeaderNameKey = @"FP establish session header name";
-NSString * const FPUserAgentDeviceMakeHeaderNameKey = @"FP user agent device make header name";
-NSString * const FPUserAgentDeviceOsHeaderNameKey = @"FP user agent device os header name";
+NSString * const FPRestServiceTimeoutKey                 = @"timeout";
+NSString * const FPRestServicePreferredCharset           = @"FP REST service preferred charset";
+NSString * const FPRestServicePreferredLanguage          = @"FP REST service preferred language";
+NSString * const FPRestServicePreferredFormat            = @"FP REST service preferred format";
+NSString * const FPRestServiceMtVersion                  = @"FP REST service mt-version";
+NSString * const FPAuthenticationScheme                  = @"FP Authentication scheme";
+NSString * const FPAuthenticationTokenName               = @"FP Authentication token param name";
+NSString * const FPErrorMaskHeaderNameKey                = @"FP error mask header name";
+NSString * const FPTransactionIdHeaderNameKey            = @"FP transaction id header name";
+NSString * const FPEstablishSessionHeaderNameKey         = @"FP establish session header name";
+NSString * const FPUserAgentDeviceMakeHeaderNameKey      = @"FP user agent device make header name";
+NSString * const FPUserAgentDeviceOsHeaderNameKey        = @"FP user agent device os header name";
 NSString * const FPUserAgentDeviceOsVersionHeaderNameKey = @"FP user agent device os version header name";
-NSString * const FPAuthTokenResponseHeaderNameKey = @"FP auth token response header name";
-NSString * const FPTimeoutForCoordDaoMainThreadOps = @"FP timeout for main thread coordinator dao operations";
-NSString * const FPTimeIntervalForFlushToRemoteMaster = @"FP time interval for flush to remote master";
+NSString * const FPAuthTokenResponseHeaderNameKey        = @"FP auth token response header name";
+NSString * const FPTimeoutForCoordDaoMainThreadOps       = @"FP timeout for main thread coordinator dao operations";
+NSString * const FPTimeIntervalForFlushToRemoteMaster    = @"FP time interval for flush to remote master";
 
 #ifdef FP_DEV
-  NSString * const FPAPIResourceFileName             = @"fpapi-resource.localdev";
+  NSString * const FPAPIResourceFileName = @"fpapi-resource.localdev";
 #else
-  NSString * const FPAPIResourceFileName             = @"fpapi-resource";
+  NSString * const FPAPIResourceFileName = @"fpapi-resource";
 #endif
-NSString * const FPDataFileExtension               = @"data";
-NSString * const FPLocalSqlLiteDataFileName        = @"local-sqlite-datafile";
+
+NSString * const FPDataFileExtension = @"data";
+NSString * const FPLocalSqlLiteDataFileName = @"local-sqlite-datafile";
 
 // Keychain service names
 NSString * const FPAppKeychainService = @"fp-app";
