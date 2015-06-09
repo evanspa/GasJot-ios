@@ -438,6 +438,10 @@
 didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
   if (_itemSelectedAction) {
     _itemSelectedAction(_dataSource[[indexPath row]], indexPath, self);
+  } else if (_detailViewMaker) {
+    [PEUIUtils displayController:_detailViewMaker(self, _dataSource[indexPath.row], indexPath, ^(id dataObject, NSIndexPath *indexRow) {})
+                  fromController:self
+                        animated:YES];
   } else {
     [_tableView deselectRowAtIndexPath:[_tableView indexPathForSelectedRow]
                               animated:YES];
@@ -450,17 +454,10 @@ heightForRowAtIndexPath:(NSIndexPath *)indexPath {
 }
 
 - (void)tableView:(UITableView *)tableView
-accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath {
-  PEItemChangedBlk itemChangedBlk = ^(id dataObject, NSIndexPath *indexRow) {
-    /*NSIndexPath *indexPathOfRemovedEntity = [self indexPathOfRemovedEntity];
-    if (!(indexPathOfRemovedEntity && [indexPathOfRemovedEntity isEqual:indexPath])) {
-      [_dataSource replaceObjectAtIndex:[indexPath row] withObject:dataObject];
-      [_tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:YES];
-    }*/
-  };
-  [PEUIUtils displayController:_detailViewMaker(self, _dataSource[indexPath.row], indexPath, itemChangedBlk)
-                fromController:self
-                      animated:YES];
+  willDisplayCell:(UITableViewCell *)cell
+forRowAtIndexPath:(NSIndexPath *)indexPath {
+  id dataObject = _dataSource[indexPath.row];
+  _tableCellStyler([cell contentView], dataObject);
 }
 
 #pragma mark - Table view data source
@@ -476,7 +473,7 @@ accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath {
   UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:_cellIdentifier
                                                           forIndexPath:indexPath];
   if (_detailViewMaker) {
-    [cell setAccessoryType:UITableViewCellAccessoryDetailDisclosureButton];
+    [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
   }
   if (_initialSelectedItem) {
     if ([_initialSelectedItem isEqual:dataObject]) {
@@ -485,7 +482,6 @@ accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath {
       [cell setAccessoryType:UITableViewCellAccessoryNone];
     }
   }
-  _tableCellStyler([cell contentView], dataObject);
   return cell;
 }
 

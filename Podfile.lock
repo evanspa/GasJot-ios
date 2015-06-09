@@ -40,7 +40,7 @@ PODS:
   - CocoaLumberjack/Core (1.9.2)
   - CocoaLumberjack/Extensions (1.9.2):
     - CocoaLumberjack/Core
-  - FlatUIKit (1.6.1)
+  - FlatUIKit (1.6.2)
   - FMDB (2.5):
     - FMDB/standard (= 2.5)
   - FMDB/common (2.5)
@@ -93,7 +93,7 @@ DEPENDENCIES:
   - AFNetworking (~> 2.5.1)
   - BlocksKit (~> 2.2.5)
   - CocoaLumberjack (~> 1.9)
-  - FlatUIKit (~> 1.6)
+  - FlatUIKit (~> 1.6.2)
   - IQKeyboardManager (~> 3.2.1.1)
   - MBProgressHUD (~> 0.9.1)
   - PEDev-Console (~> 1.0.1)
@@ -108,7 +108,7 @@ SPEC CHECKSUMS:
   AFNetworking: 05edc0ac4c4c8cf57bcf4b84be5b0744b6d8e71e
   BlocksKit: 7f422b971407001178d181a43b99014ea2591fe6
   CocoaLumberjack: 628fca2e88ef06f7cf6817309aa405f325d9a6fa
-  FlatUIKit: c602127a0c4a347e0632b2c5aef5c8c5f386f2cf
+  FlatUIKit: 1b41f0d4952ce8d970d8479ce79df54a960242c4
   FMDB: 96e8f1bcc1329e269330f99770ad4285d9003e52
   IQKeyboardManager: 4adcd7cc9c17440a7cb74755f6f6c8389919c6bf
   KissXML: ce643413d618ad69886d0d43c3792b7dedfe476e

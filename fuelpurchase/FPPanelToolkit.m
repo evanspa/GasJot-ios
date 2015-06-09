@@ -422,6 +422,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                        defaultSelectedFuelStation:defaultSelectedFuelStation
                                              defaultPickedLogDate:defaultPickedLogDate](parentViewController);
     UITableView *vehicleFuelStationDateTableView = fplogComponents[@(FPFpLogTagVehicleFuelStationAndDate)];
+    //[PEUIUtils applyBorderToView:vehicleFuelStationDateTableView withColor:[UIColor yellowColor]];
     UITextField *numGallonsTf = fplogComponents[@(FPFpLogTagNumGallons)];
     UITextField *pricePerGallonTf = fplogComponents[@(FPFpLogTagPricePerGallon)];
     UITextField *octaneTf = fplogComponents[@(FPFpLogTagOctane)];
@@ -436,7 +437,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                    below:vehicleFuelStationDateTableView
                     onto:fpEnvCompPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:0.0
+                vpadding:5.0
                 hpadding:0.0];
     [PEUIUtils placeView:preFillupReportedDteTf
                    below:octaneTf
@@ -619,7 +620,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     [vehicleFuelStationDateTableView setScrollEnabled:NO];
     [vehicleFuelStationDateTableView setTag:FPFpLogTagVehicleFuelStationAndDate];
     [PEUIUtils setFrameWidthOfView:vehicleFuelStationDateTableView ofWidth:1.0 relativeTo:parentView];
-    [PEUIUtils setFrameHeightOfView:vehicleFuelStationDateTableView ofHeight:.27 relativeTo:parentView];
+    [PEUIUtils setFrameHeightOfView:vehicleFuelStationDateTableView ofHeight:.28 relativeTo:parentView];
     vehicleFuelStationDateTableView.sectionHeaderHeight = 2.0;
     vehicleFuelStationDateTableView.sectionFooterHeight = 2.0;
     components[@(FPFpLogTagVehicleFuelStationAndDate)] = vehicleFuelStationDateTableView;
@@ -743,7 +744,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                    below:vehicleFuelStationDateTableView
                     onto:fpLogPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:0.0
+                vpadding:5.0
                 hpadding:0.0];
     [PEUIUtils placeView:pricePerGallonTf
                    below:octaneTf

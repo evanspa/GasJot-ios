@@ -26,6 +26,7 @@
 #import "FPEditActors.h"
 #import "FPLogEnvLogComposite.h"
 #import "FPNames.h"
+#import <FlatUIKit/UIColor+FlatUI.h>
 
 NSInteger const PAGINATION_PAGE_SIZE = 30;
 
@@ -493,38 +494,48 @@ the background-processor is currently attempting to edit this record.  Try again
     [PEUIUtils setTextAndResize:[label text] forLabel:label];
     return label;
   };
-  UILabel * (^asRed)(UILabel *) = ^UILabel *(UILabel *label) {
-    [label setTextColor:[UIColor redColor]];
-    return label;
-  };
-  void (^placeEm)(UILabel *, UILabel *, UILabel *) = ^(UILabel *distanceLabel, UILabel *distance, UILabel *awayLabel) {
-    [PEUIUtils placeView:awayLabel atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:verticalPadding hpadding:horizontalPadding];
-    [PEUIUtils placeView:distance toTheLeftOf:awayLabel onto:contentView withAlignment:PEUIVerticalAlignmentTypeCenter hpadding:0.0];
-    [PEUIUtils placeView:distanceLabel toTheLeftOf:distance onto:contentView withAlignment:PEUIVerticalAlignmentTypeCenter hpadding:0.0];
-  };
+  //[PEUIUtils applyBorderToView:contentView withColor:[UIColor yellowColor]];
+  NSInteger distanceTag = 10;
+  NSInteger unknownReasonTag = 11;
+  [[contentView viewWithTag:distanceTag] removeFromSuperview];
+  [[contentView viewWithTag:unknownReasonTag] removeFromSuperview];
   LabelMaker cellSubtitleMaker = [_uitoolkit tableCellSubtitleMaker];
   CLLocation *fuelStationLocation = [fuelstation location];
+  UILabel *distance = nil;
+  UILabel *unknownReason = nil;
   if (fuelStationLocation) {
     CLLocation *latestCurrentLocation = [APP latestLocation];
     if (latestCurrentLocation) {
-      UILabel *distanceLabel = cellSubtitleMaker(@"Distance: ");
-      UILabel *distance = cellSubtitleMaker(@"12.2 miles");
-      UILabel *awayLabel = cellSubtitleMaker(@"");
-      placeEm(distanceLabel, distance, awayLabel);
+      CLLocationDistance distanceVal = [latestCurrentLocation distanceFromLocation:fuelStationLocation];
+      NSString *distanceUom = @"m";
+      BOOL isNearby = NO;
+      if (distanceVal < 150.0) {
+        isNearby = YES;
+      }
+      if (distanceVal > 1000) {
+        distanceUom = @"km";
+        distanceVal = distanceVal / 1000.0;
+      }
+      distance = cellSubtitleMaker([NSString stringWithFormat:@"%.1f %@ away", distanceVal, distanceUom]);
+      if (isNearby) {
+        [distance setTextColor:[UIColor greenSeaColor]];
+      }
+      [PEUIUtils placeView:distance atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:verticalPadding hpadding:horizontalPadding];
     } else {
-      UILabel *distanceLabel = asRed(compressLabel(cellSubtitleMaker(@"Distance: ")));
-      UILabel *distance = asRed(compressLabel(cellSubtitleMaker(@"?")));
-      UILabel *unknownReason = compressLabel(cellSubtitleMaker(@"(current location unknown)"));
-      placeEm(distanceLabel, distance, compressLabel(cellSubtitleMaker(@"")));
+      distance = compressLabel(cellSubtitleMaker(@"? away"));
+      unknownReason = compressLabel(cellSubtitleMaker(@"(current loc. unknown)"));
+      [PEUIUtils placeView:distance atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:verticalPadding hpadding:horizontalPadding];
       [PEUIUtils placeView:unknownReason below:distance onto:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:0.0 hpadding:0.0];
     }
   } else {
-    UILabel *distanceLabel = asRed(compressLabel(cellSubtitleMaker(@"Distance: ")));
-    UILabel *distance = asRed(compressLabel(cellSubtitleMaker(@"?")));
-    UILabel *unknownReason = compressLabel(cellSubtitleMaker(@"(fuel station location unknown)"));
-    placeEm(distanceLabel, distance, compressLabel(cellSubtitleMaker(@"")));
+    distance = compressLabel(cellSubtitleMaker(@"? away"));
+    unknownReason = compressLabel(cellSubtitleMaker(@"(fuel station loc. unknown)"));
+    [PEUIUtils placeView:distance atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:verticalPadding hpadding:horizontalPadding];
     [PEUIUtils placeView:unknownReason below:distance onto:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:0.0 hpadding:0.0];
   }
+  //[PEUIUtils applyBorderToView:distance withColor:[UIColor blueColor]];
+  [distance setTag:distanceTag];
+  [unknownReason setTag:unknownReasonTag];
 }
 
 + (NSInteger)indexOfFuelStation:(FPFuelStation *)fuelstation inFuelStations:(NSArray *)fuelstations {
@@ -555,26 +566,42 @@ the background-processor is currently attempting to edit this record.  Try again
                                                                        id dataObject,
                                                                        NSIndexPath *indexPath,
                                                                        PEItemChangedBlk itemChangedBlk) {
-      //[_coordDao reloadFuelStation:dataObject error:[FPUtils localFetchErrorHandlerMaker]()];
       return [self newFuelStationDetailScreenMakerWithFuelStation:dataObject
                                              fuelStationIndexPath:indexPath
                                                    itemChangedBlk:itemChangedBlk
                                                listViewController:listViewCtlr](user);
     };
     PEPageLoaderBlk pageLoader = ^ NSArray * (id lastObject) {
-      return [_coordDao fuelStationsForUser:user
-                                      error:[FPUtils localFetchErrorHandlerMaker]()];
+      NSArray *fuelstations = [_coordDao fuelStationsForUser:user
+                                                       error:[FPUtils localFetchErrorHandlerMaker]()];
+      fuelstations = [FPUtils sortFuelstations:fuelstations inAscOrderByDistanceFrom:[APP latestLocation]];
+      return fuelstations;
     };
     NSArray *initialFuelStations =
       [_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];
+    initialFuelStations = [FPUtils sortFuelstations:initialFuelStations inAscOrderByDistanceFrom:[APP latestLocation]];
     PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
       return [FPScreenToolkit indexOfFuelStation:(FPFuelStation *)entity inFuelStations:pageLoader(nil)];
+    };
+    PEStyleTableCellContentView tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
+      [self standardTableCellStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
+                         alwaysTopifyTitleLabel:YES](contentView, fuelstation);
+      CGFloat distanceInfoVPadding = 25.5;
+      if ([fuelstation location]) {
+        if ([APP latestLocation]) {
+          distanceInfoVPadding = 28.5;
+        }
+      }
+      [self addDistanceInfoToTopOfCellContentView:contentView
+                              withVerticalPadding:distanceInfoVPadding
+                                horizontalPadding:205.0
+                                  withFuelstation:fuelstation];
     };
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPFuelStation class]
                                         title:@"Fuel Stations"
                         isPaginatedDataSource:NO
-                              tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}]
+                              tableCellStyler:tableCellStyler //[self standardTableCellStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}]
                            itemSelectedAction:nil
                           initialSelectedItem:nil
                                 addItemAction:addFuelStationAction
@@ -614,11 +641,14 @@ the background-processor is currently attempting to edit this record.  Try again
                                 completion:nil];
     };
     PEPageLoaderBlk pageLoader = ^ NSArray * (id lastObject) {
-      return [_coordDao fuelStationsForUser:user
-                                      error:[FPUtils localFetchErrorHandlerMaker]()];
+      NSArray *fuelstations = [_coordDao fuelStationsForUser:user
+                                                       error:[FPUtils localFetchErrorHandlerMaker]()];
+      fuelstations = [FPUtils sortFuelstations:fuelstations inAscOrderByDistanceFrom:[APP latestLocation]];
+      return fuelstations;
     };
-    NSArray *initialFuelStations = [_coordDao fuelStationsForUser:user
-                                                            error:[FPUtils localFetchErrorHandlerMaker]()];
+    NSArray *initialFuelStations =
+    [_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];
+    initialFuelStations = [FPUtils sortFuelstations:initialFuelStations inAscOrderByDistanceFrom:[APP latestLocation]];
     PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
       return [FPScreenToolkit indexOfFuelStation:(FPFuelStation *)entity inFuelStations:pageLoader(nil)];
     };
@@ -633,7 +663,7 @@ the background-processor is currently attempting to edit this record.  Try again
       }
       [self addDistanceInfoToTopOfCellContentView:contentView
                               withVerticalPadding:distanceInfoVPadding
-                                horizontalPadding:45.0
+                                horizontalPadding:200.0
                                   withFuelstation:fuelstation];
     };
     return [[PEListViewController alloc]

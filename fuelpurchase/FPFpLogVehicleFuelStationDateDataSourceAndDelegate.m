@@ -128,13 +128,13 @@
 heightForRowAtIndexPath:(NSIndexPath *)indexPath {
   switch ([indexPath section]) {
     case 0:  // vehicle
-      return 35;
+      return 45;
       break;
     case 1:  // fuel station
       return 50;
       break;
     default: // log date
-      return 35;
+      return 45;
       break;
   }
 }
@@ -142,7 +142,7 @@ heightForRowAtIndexPath:(NSIndexPath *)indexPath {
 - (CGFloat)tableView:(UITableView *)tableView
 heightForHeaderInSection:(NSInteger)section {
   if (section == 0) {
-    return 15;
+    return 5;
   }
   return 0;
 }
@@ -209,6 +209,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
           name = [[name substringToIndex:20] stringByAppendingString:@"..."];
         }
         UILabel *title = cellTitleMaker(name);
+        [title setTextColor:[UIColor grayColor]];
         CLLocation *fuelStationLocation = [_selectedFuelStation location];
         CGFloat distanceInfoVPadding = 2.0;
         if (fuelStationLocation) {
@@ -224,7 +225,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         }
         [_screenToolkit addDistanceInfoToTopOfCellContentView:contentView
                                           withVerticalPadding:(title.frame.size.height + distanceInfoVPadding)
-                                            horizontalPadding:37.0
+                                            horizontalPadding:205.0
                                               withFuelstation:_selectedFuelStation];
       } else {
         [[cell detailTextLabel] setText:@"(no fuel stations found)"];

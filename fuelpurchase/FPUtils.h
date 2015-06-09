@@ -53,4 +53,7 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
 
 + (LocalDatabaseErrorHandlerMaker)localDatabaseCreationErrorHandlerMaker;
 
++ (NSArray *)sortFuelstations:(NSArray *)fuelstations
+     inAscOrderByDistanceFrom:(CLLocation *)location;
+
 @end
