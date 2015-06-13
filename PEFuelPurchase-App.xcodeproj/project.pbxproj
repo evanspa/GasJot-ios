@@ -44,6 +44,7 @@
 		18EC863019EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18EC862F19EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m */; };
 		18F61A891A96133000BA631A /* UIScrollView+PEAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */; };
 		CA920C121B21F48900A848EA /* fpapi-resource.localdev.json in Resources */ = {isa = PBXBuildFile; fileRef = 18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */; };
+		CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = CAD8AE501B2B291000276F4F /* PELMUIUtils.m */; };
 		F17D7730E485443DAEE57677 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 91349E0025D9467DBE585F0F /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -129,6 +130,8 @@
 		CA6203EC1B21D9DE00CF9C91 /* libPods-PEFuelPurchase-App-dev-PEXML-Utils.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libPods-PEFuelPurchase-App-dev-PEXML-Utils.a"; path = "Pods/../build/Debug-iphoneos/libPods-PEFuelPurchase-App-dev-PEXML-Utils.a"; sourceTree = "<group>"; };
 		CA6203ED1B21D9DE00CF9C91 /* libPods.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libPods.a; path = "Pods/../build/Debug-iphoneos/libPods.a"; sourceTree = "<group>"; };
 		CA6203F51B21EDBD00CF9C91 /* libPods.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libPods.a; path = "Pods/../build/Debug-iphoneos/libPods.a"; sourceTree = "<group>"; };
+		CAD8AE4F1B2B291000276F4F /* PELMUIUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PELMUIUtils.h; sourceTree = "<group>"; };
+		CAD8AE501B2B291000276F4F /* PELMUIUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PELMUIUtils.m; sourceTree = "<group>"; };
 		E12E20B44758C744FA39A49C /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -265,6 +268,7 @@
 		186E0B7819CD1BDD00CE4B3A /* UI Commons */ = {
 			isa = PBXGroup;
 			children = (
+				CAD8AE4E1B2B28E200276F4F /* Local Data UI Utils */,
 				18F61A821A96129E00BA631A /* Categories */,
 				186E0B7919CD1BEA00CE4B3A /* Pull-to-Refresh List View Controller */,
 			);
@@ -489,6 +493,15 @@
 			name = "Account Settings";
 			sourceTree = "<group>";
 		};
+		CAD8AE4E1B2B28E200276F4F /* Local Data UI Utils */ = {
+			isa = PBXGroup;
+			children = (
+				CAD8AE4F1B2B291000276F4F /* PELMUIUtils.h */,
+				CAD8AE501B2B291000276F4F /* PELMUIUtils.m */,
+			);
+			name = "Local Data UI Utils";
+			sourceTree = "<group>";
+		};
 		CAD9D8FA1B24A08B00164CE4 /* Tab bar icons */ = {
 			isa = PBXGroup;
 			children = (
@@ -607,6 +620,7 @@
 				180EDA3019C7C2D200C782A6 /* FPSettingsController.m in Sources */,
 				18A7E2DC196103C300C107DF /* NSObject+appdelegate.m in Sources */,
 				186ADB3219E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.m in Sources */,
+				CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */,
 				18CC2D0017F680BB009DF2CE /* UIFont+FuelPurchase.m in Sources */,
 				18B17D5719DAE696001D2BF6 /* PEAddViewEditController.m in Sources */,
 				18F61A891A96133000BA631A /* UIScrollView+PEAdditions.m in Sources */,

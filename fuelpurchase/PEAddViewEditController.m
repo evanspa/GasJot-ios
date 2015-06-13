@@ -18,8 +18,6 @@
   BOOL _isEdit;
   BOOL _isView;
   BOOL _isEditCanceled;
-  BOOL _entityRemotelyDeletedWhileEditing;
-  BOOL _entityRemotelyUpdatedWhileEditing;
   NSString *_entityRemotelyDeletedNotifName;
   NSArray *_entityLocallyUpdatedNotifNames;
   NSString *_entityRemotelyUpdatedNotifName;
@@ -313,39 +311,6 @@ entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
   }
 }
 
-- (void)dataObjectRemotelyUpdated:(NSNotification *)notification {
-  NSNumber *indexOfNotifEntity =
-    [PELMNotificationUtils indexOfEntityRef:_entity notification:notification];
-  if (indexOfNotifEntity) {
-    if ([self isEditing]) {
-      _entityRemotelyUpdatedWhileEditing = YES;
-      [PEUIUtils displayTempNotification:@"Record remotely updated."
-                           forController:self
-                               uitoolkit:_uitoolkit];
-    } else {
-      [self displayHeadsUpAlertWithMsgs:@[LS(@"vieweditentity.headsup.whileviewing.remotelyupdated.msg1"),
-                                          LS(@"vieweditentity.headsup.whileviewing.remotelyupdated.msg2")]];
-    }
-  }
-}
-
-- (void)dataObjectRemotelyDeleted:(NSNotification *)notification {
-  NSNumber *indexOfNotifEntity =
-    [PELMNotificationUtils indexOfEntityRef:_entity notification:notification];
-  if (indexOfNotifEntity) {
-    if ([self isEditing]) {
-      _entityRemotelyDeletedWhileEditing = YES;
-      [PEUIUtils displayTempNotification:@"Record remotely deleted."
-                           forController:self
-                               uitoolkit:_uitoolkit];
-    } else {
-      [self displayHeadsUpAlertWithMsgs:@[LS(@"vieweditentity.headsup.whileviewing.remotelydeleted.msg1"),
-                                          LS(@"vieweditentity.headsup.whileviewing.remotelydeleted.msg2"),
-                                          LS(@"vieweditentity.headsup.whileviewing.remotelydeleted.msg3")]];
-    }
-  }
-}
-
 - (void)dataObjectSyncInitiated:(NSNotification *)notification {
   NSNumber *indexOfNotifEntity =
     [PELMNotificationUtils indexOfEntityRef:_entity notification:notification];
@@ -420,9 +385,6 @@ entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
   [PEUtils observeIfNotNilNotificationName:_syncFailedNotifName
                                   observer:self
                                   selector:@selector(dataObjectSyncFailed:)];
-  [PEUtils observeIfNotNilNotificationName:_entityRemotelyDeletedNotifName
-                                  observer:self
-                                  selector:@selector(dataObjectRemotelyDeleted:)];
   if (_entityLocallyUpdatedNotifNames) {
     for (NSString *entityLocallyUpdatedNotifName in _entityLocallyUpdatedNotifNames) {
       [PEUtils observeIfNotNilNotificationName:entityLocallyUpdatedNotifName
@@ -430,9 +392,6 @@ entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
                                       selector:@selector(dataObjectLocallyUpdated:)];
     }
   }
-  [PEUtils observeIfNotNilNotificationName:_entityRemotelyUpdatedNotifName
-                                  observer:self
-                                  selector:@selector(dataObjectRemotelyUpdated:)];
   _entityPanel = _entityPanelMaker(self);
   [self setEdgesForExtendedLayout:UIRectEdgeNone];
   [PEUIUtils placeView:_entityPanel
@@ -493,21 +452,13 @@ entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
       }
     }
   } else {
-    [super setEditing:flag animated:animated];
-    [self stopEditing];
+    if ([self stopEditing]) {
+      [super setEditing:flag animated:animated];
+    }
   }
 }
 
 #pragma mark - UI state changes
-
-- (BOOL)validEntityUserInput {
-  NSArray *errMsgs = _entityValidator(_entityPanel);
-  if (errMsgs && [errMsgs count] > 0) {
-    [PEUIUtils showAlertWithMsgs:errMsgs title:@"Oops" buttonTitle:@"Okay"];
-    return NO;
-  }
-  return YES;
-}
 
 - (BOOL)prepareForEditing {
   BOOL editPrepareSuccess = YES;
@@ -525,47 +476,25 @@ entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
   return editPrepareSuccess;
 }
 
-- (void)stopEditing {
-  void (^displayHeadsUpIfRemoteDeletionOccured)(NSArray *msgs) = ^(NSArray *msgs) {
-    if (_entityRemotelyDeletedWhileEditing) {
-      [self displayHeadsUpAlertWithMsgs:msgs];
-      _entityRemotelyDeletedWhileEditing = NO;
-    }
-  };
-  void (^displayHeadsUpIfRemoteUpdateOccured)(NSArray *msgs) = ^(NSArray *msgs) {
-    if (_entityRemotelyUpdatedWhileEditing) {
-      [self displayHeadsUpAlertWithMsgs:msgs];
-      _entityRemotelyUpdatedWhileEditing = NO;
-    }
-  };
+- (BOOL)stopEditing {
   if (_isEditCanceled) {
     _entityEditCanceler(self, _entity);
     [[self navigationItem] setRightBarButtonItem:[self editButtonItem]];
     _entityToPanelBinder(_entity, _entityPanel);
     _isEditCanceled = NO;
-    displayHeadsUpIfRemoteDeletionOccured(@[LS(@"vieweditentity.headsup.whileediting.editcanceled.remotelydeleted.msg1"),
-                                            LS(@"vieweditentity.headsup.whileediting.editcanceled.remotelydeleted.msg2"),
-                                            LS(@"vieweditentity.headsup.whileediting.editcanceled.remotelydeleted.msg3")]);
-    displayHeadsUpIfRemoteUpdateOccured(@[LS(@"vieweditentity.headsup.whileediting.editcanceled.remotelyupdated.msg1"),
-                                          LS(@"vieweditentity.headsup.whileediting.editcanceled.remotelyupdated.msg2"),
-                                          LS(@"vieweditentity.headsup.whileediting.editcanceled.remotelyupdated.msg3")]);
   } else {
-    if ([self validEntityUserInput]) {
+    NSArray *errMsgs = _entityValidator(_entityPanel);
+    BOOL isValidEntity = YES;
+    if (errMsgs && [errMsgs count] > 0) {
+      isValidEntity = NO;
+    }
+    if (isValidEntity) {
       _panelToEntityBinder(_entityPanel, _entity);
       _entitySaver(self, _entity);
       _doneEditingEntityMarker(_entity);
-      displayHeadsUpIfRemoteDeletionOccured(@[LS(@"vieweditentity.headsup.whileediting.editsucceeded.remotelydeleted.msg1"),
-                                              LS(@"vieweditentity.headsup.whileediting.editsucceeded.remotelydeleted.msg2")]);
-      displayHeadsUpIfRemoteUpdateOccured(@[LS(@"vieweditentity.headsup.whileediting.editsucceeded.remotelyupdated.msg1"),
-                                            LS(@"vieweditentity.headsup.whileediting.editsucceeded.remotelyupdated.msg2")]);
     } else {
-      displayHeadsUpIfRemoteDeletionOccured(@[LS(@"vieweditentity.headsup.whileediting.editfailed.remotelydeleted.msg1"),
-                                              LS(@"vieweditentity.headsup.whileediting.editfailed.remotelydeleted.msg2"),
-                                              LS(@"vieweditentity.headsup.whileediting.editfailed.remotelydeleted.msg3")]);
-      displayHeadsUpIfRemoteUpdateOccured(@[LS(@"vieweditentity.headsup.whileediting.editfailed.remotelyupdated.msg1"),
-                                            LS(@"vieweditentity.headsup.whileediting.editfailed.remotelyupdated.msg2"),
-                                            LS(@"vieweditentity.headsup.whileediting.editfailed.remotelyupdated.msg3")]);
-      return; // we want to short-circuit out if validation fails
+      [PEUIUtils showAlertWithMsgs:errMsgs title:@"Oops" buttonTitle:@"Okay"];
+      return NO;
     }
   }
   if (_itemChangedBlk) {
@@ -577,6 +506,7 @@ entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
   _panelEnablerDisabler(_entityPanel, NO);
   [PELMNotificationUtils postNotificationWithName:_entityUpdatedNotificationToPost
                                            entity:_entity];
+  return YES;
 }
 
 - (void)doneWithEdit {
@@ -584,7 +514,12 @@ entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
 }
 
 - (void)doneWithAdd {
-  if ([self validEntityUserInput]) {
+  NSArray *errMsgs = _entityValidator(_entityPanel);
+  BOOL isValidEntity = YES;
+  if (errMsgs && [errMsgs count] > 0) {
+    isValidEntity = NO;
+  }
+  if (isValidEntity) {
     id newEntity = _entityMaker(_entityPanel);
     _newEntitySaver(_entityPanel, newEntity);
     _itemAddedBlk(self, newEntity);
@@ -598,6 +533,8 @@ entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
     }
     [PELMNotificationUtils postNotificationWithName:_entityAddedNotificationToPost
                                              entity:newEntityForNotification];
+  } else {
+    [PEUIUtils showAlertWithMsgs:errMsgs title:@"Oops" buttonTitle:@"Okay"];
   }
 }
 

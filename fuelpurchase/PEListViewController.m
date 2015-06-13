@@ -18,7 +18,7 @@
   Class _classOfDataSourceObjects;
   NSString *_title;
   UITableView *_tableView;
-  PEStyleTableCellContentView _tableCellStyler;
+  PESyncViewStyler _tableCellStyler;
   PEItemSelectedAction _itemSelectedAction;
   id _initialSelectedItem;
   void (^_addItemAction)(PEListViewController *, PEItemAddedBlk);
@@ -42,7 +42,7 @@
 - (id)initWithClassOfDataSourceObjects:(Class)classOfDataSourceObjects
                                  title:(NSString *)title
                  isPaginatedDataSource:(BOOL)isPaginatedDataSource
-                       tableCellStyler:(PEStyleTableCellContentView)tableCellStyler
+                       tableCellStyler:(PESyncViewStyler)tableCellStyler
                     itemSelectedAction:(PEItemSelectedAction)itemSelectedAction
                    initialSelectedItem:(id)initialSelectedItem
                          addItemAction:(void(^)(PEListViewController *, PEItemAddedBlk))addItemActionBlk

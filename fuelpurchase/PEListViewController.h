@@ -13,7 +13,7 @@
 
 typedef NSArray *(^PEPageRefresherBlk)(id);
 typedef NSArray *(^PEPageLoaderBlk)(id);
-typedef void (^PEStyleTableCellContentView)(UIView *, id);
+typedef void (^PESyncViewStyler)(UIView *, id);
 typedef void (^PEItemSelectedAction)(id, NSIndexPath *, UIViewController *);
 typedef UIViewController *(^FPDetailViewMaker)(PEListViewController *, id, NSIndexPath *, PEItemChangedBlk);
 typedef BOOL (^PEDoesEntityBelongToListView)(PELMMainSupport *);
@@ -27,7 +27,7 @@ UITableViewDelegate>
 - (id)initWithClassOfDataSourceObjects:(Class)classOfDataSourceObjects
                                  title:(NSString *)title
                  isPaginatedDataSource:(BOOL)isPaginatedDataSource
-                       tableCellStyler:(PEStyleTableCellContentView)tableCellStyler
+                       tableCellStyler:(PESyncViewStyler)tableCellStyler
                     itemSelectedAction:(PEItemSelectedAction)itemSelectedAction
                    initialSelectedItem:(id)initialSelectedItem
                          addItemAction:(void(^)(PEListViewController *, PEItemAddedBlk))addItemActionBlk 

@@ -54,14 +54,18 @@ int (^intBundleVal)(NSString *) = ^(NSString *key) {
   return [(NSNumber *)bundleVal(key) intValue];
 };
 
+BOOL (^boolBundleVal)(NSString *) = ^(NSString *key) {
+  return [bundleVal(key) boolValue];
+};
+
 // Keys in app plist
 NSString * const FPRestServiceTimeoutKey                 = @"timeout";
-NSString * const FPRestServicePreferredCharset           = @"FP REST service preferred charset";
-NSString * const FPRestServicePreferredLanguage          = @"FP REST service preferred language";
-NSString * const FPRestServicePreferredFormat            = @"FP REST service preferred format";
-NSString * const FPRestServiceMtVersion                  = @"FP REST service mt-version";
-NSString * const FPAuthenticationScheme                  = @"FP Authentication scheme";
-NSString * const FPAuthenticationTokenName               = @"FP Authentication token param name";
+NSString * const FPRestServicePreferredCharsetKey        = @"FP REST service preferred charset";
+NSString * const FPRestServicePreferredLanguageKey       = @"FP REST service preferred language";
+NSString * const FPRestServicePreferredFormatKey         = @"FP REST service preferred format";
+NSString * const FPRestServiceMtVersionKey               = @"FP REST service mt-version";
+NSString * const FPAuthenticationSchemeKey               = @"FP Authentication scheme";
+NSString * const FPAuthenticationTokenNameKey            = @"FP Authentication token param name";
 NSString * const FPErrorMaskHeaderNameKey                = @"FP error mask header name";
 NSString * const FPTransactionIdHeaderNameKey            = @"FP transaction id header name";
 NSString * const FPEstablishSessionHeaderNameKey         = @"FP establish session header name";
@@ -69,8 +73,9 @@ NSString * const FPUserAgentDeviceMakeHeaderNameKey      = @"FP user agent devic
 NSString * const FPUserAgentDeviceOsHeaderNameKey        = @"FP user agent device os header name";
 NSString * const FPUserAgentDeviceOsVersionHeaderNameKey = @"FP user agent device os version header name";
 NSString * const FPAuthTokenResponseHeaderNameKey        = @"FP auth token response header name";
-NSString * const FPTimeoutForCoordDaoMainThreadOps       = @"FP timeout for main thread coordinator dao operations";
-NSString * const FPTimeIntervalForFlushToRemoteMaster    = @"FP time interval for flush to remote master";
+NSString * const FPTimeoutForCoordDaoMainThreadOpsKey    = @"FP timeout for main thread coordinator dao operations";
+NSString * const FPTimeIntervalForFlushToRemoteMasterKey = @"FP time interval for flush to remote master";
+NSString * const FPLocalOnlyKey                          = @"FP Local Only";
 
 #ifdef FP_DEV
   NSString * const FPAPIResourceFileName = @"fpapi-resource.localdev";
@@ -96,6 +101,7 @@ NSString * const FPAppKeychainService = @"fp-app";
   CLLocationManager *_locationManager;
   NSMutableArray *_locations;
   UICKeyChainStore *_keychainStore;
+  BOOL _isLocalOnly;
 
   #ifdef FP_DEV
     PDVUtils *_pdvUtils;
@@ -155,6 +161,7 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
 didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [self initializeLocationTracking];
   [FPLogging initializeLogging];
+  _isLocalOnly = boolBundleVal(FPLocalOnlyKey);
   [self initializeStoreCoordinator];
   [_coordDao pruneAllSyncedEntitiesWithError:[FPUtils localSaveErrorHandlerMaker]()];
   FPUser *user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
@@ -167,7 +174,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   _startRemoteMasterFlushTimer = ^ NSTimer * (FPCoordinatorDao *coordDao, NSTimer *oldTimer) {
     return [PEUtils startNewTimerWithTargetObject:coordDao
                                          selector:@selector(asynchronousWork:)
-                                         interval:intBundleVal(FPTimeIntervalForFlushToRemoteMaster)
+                                         interval:intBundleVal(FPTimeIntervalForFlushToRemoteMasterKey)
                                          oldTimer:oldTimer];
   };
   #ifdef FP_DEV
@@ -250,7 +257,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 }
 
 + (NSString *)language {
-  return bundleVal(FPRestServicePreferredLanguage);
+  return bundleVal(FPRestServicePreferredLanguageKey);
 }
 
 + (HCCharset *)charset {
@@ -275,24 +282,24 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [[FPCoordinatorDao alloc]
       initWithSqliteDataFilePath:[localSqlLiteDataFileUrl absoluteString]
       localDatabaseCreationError:[FPUtils localDatabaseCreationErrorHandlerMaker]()
-  timeoutForMainThreadOperations:intBundleVal(FPTimeoutForCoordDaoMainThreadOps)
+  timeoutForMainThreadOperations:intBundleVal(FPTimeoutForCoordDaoMainThreadOpsKey)
                    acceptCharset:[HCCharset UTF8]
                   acceptLanguage:[FPAppDelegate language]
               contentTypeCharset:[HCCharset UTF8]
-                      authScheme:bundleVal(FPAuthenticationScheme)
-              authTokenParamName:bundleVal(FPAuthenticationTokenName)
+                      authScheme:bundleVal(FPAuthenticationSchemeKey)
+              authTokenParamName:bundleVal(FPAuthenticationTokenNameKey)
                        authToken:nil
              errorMaskHeaderName:bundleVal(FPErrorMaskHeaderNameKey)
       establishSessionHeaderName:bundleVal(FPEstablishSessionHeaderNameKey)
      authTokenResponseHeaderName:bundleVal(FPAuthTokenResponseHeaderNameKey)
     bundleHoldingApiJsonResource:mainBundle
        nameOfApiJsonResourceFile:FPAPIResourceFileName
-                 apiResMtVersion:bundleVal(FPRestServiceMtVersion)
-                userResMtVersion:bundleVal(FPRestServiceMtVersion)
-             vehicleResMtVersion:bundleVal(FPRestServiceMtVersion)
-         fuelStationResMtVersion:bundleVal(FPRestServiceMtVersion)
-     fuelPurchaseLogResMtVersion:bundleVal(FPRestServiceMtVersion)
-      environmentLogResMtVersion:bundleVal(FPRestServiceMtVersion)
+                 apiResMtVersion:bundleVal(FPRestServiceMtVersionKey)
+                userResMtVersion:bundleVal(FPRestServiceMtVersionKey)
+             vehicleResMtVersion:bundleVal(FPRestServiceMtVersionKey)
+         fuelStationResMtVersion:bundleVal(FPRestServiceMtVersionKey)
+     fuelPurchaseLogResMtVersion:bundleVal(FPRestServiceMtVersionKey)
+      environmentLogResMtVersion:bundleVal(FPRestServiceMtVersionKey)
       remoteSyncConflictDelegate:self
                authTokenDelegate:self
  errorBlkForBackgroundProcessing:[FPUtils localErrorHandlerForBackgroundProcessingMaker]()
@@ -331,11 +338,12 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 #pragma mark - FPAuthTokenDelegate protocol
 
 - (void)didReceiveNewAuthToken:(NSString *)authToken
-            forUsernameOrEmail:(NSString *)usernameOrEmail {
+       forUserGlobalIdentifier:(NSString *)userGlobalIdentifier {
+            //forUsernameOrEmail:(NSString *)usernameOrEmail {
   DDLogDebug(@"Received new authentication token: [%@].  About to store in \
 keychain under key: [%@].",
-             authToken, usernameOrEmail);
-  [_keychainStore setString:authToken forKey:usernameOrEmail];
+             authToken, userGlobalIdentifier);
+  [_keychainStore setString:authToken forKey:userGlobalIdentifier];
   // FYI, the reason we don't set the authToken on our _coordDao object is because
   // it is doing it itself; i.e., because the auth token is received THROUGH the
   // _coordDao, the _coordDao updates itself as it arrives.
@@ -351,22 +359,23 @@ contents of keychain (thus deleting user's stale auth token)");
   [_keychainStore removeAllItems];
 }
 
--(void)invalidateTokenForUsernameOrEmail:(NSString *)usernameOrEmail {
-  DDLogDebug(@"invalidateTokenForUsernameOrEmail: invoked for usernameOrEmail: \
-[%@]", usernameOrEmail);
-  [_keychainStore removeItemForKey:usernameOrEmail];
+//-(void)invalidateTokenForUsernameOrEmail:(NSString *)usernameOrEmail {
+-(void)invalidateTokenForUserGlobalIdentifier:(NSString *)userGlobalIdentifier {
+  DDLogDebug(@"invalidateTokenForUserGlobalIdentifier: invoked for userGlobalIdentifier: \
+[%@]", userGlobalIdentifier);
+  [_keychainStore removeItemForKey:userGlobalIdentifier];
 }
 
 #pragma mark - Security and User-related
 
 - (NSString *)storedAuthenticationTokenForUser:(FPUser *)user {
-  NSString *usernameOrEmail = [user usernameOrEmail];
+  NSString *globalIdentifier = [user globalIdentifier];
   NSString *authToken = nil;
-  if (usernameOrEmail) {
-    authToken = [_keychainStore stringForKey:usernameOrEmail];
+  if (globalIdentifier) {
+    authToken = [_keychainStore stringForKey:globalIdentifier];
   }
   DDLogDebug(@"About to return authentication token: [%@] obtained from \
-keystore under key: [%@]", authToken, usernameOrEmail);
+keystore under key: [%@]", authToken, globalIdentifier);
   return authToken;
 }
 
@@ -388,7 +397,7 @@ keystore under key: [%@]", authToken, usernameOrEmail);
                              accentColor:[UIColor colorFromHexCode:@"FFBF40"]
                           fontForButtons:[UIFont systemFontOfSize:[UIFont buttonFontSize]]
                   cornerRadiusForButtons:3
-               verticalPaddingForButtons:20
+               verticalPaddingForButtons:30
              horizontalPaddingForButtons:25
                 bgColorForWarningButtons:[UIColor carrotColor]
               textColorForWarningButtons:[UIColor whiteColor]

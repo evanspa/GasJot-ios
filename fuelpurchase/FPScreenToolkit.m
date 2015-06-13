@@ -24,8 +24,10 @@
 #import "FPFpLogVehicleFuelStationDateDataSourceAndDelegate.h"
 #import "FPEnvLogVehicleAndDateDataSourceDelegate.h"
 #import "FPEditActors.h"
+#import "NSString+PEAdditions.h"
 #import "FPLogEnvLogComposite.h"
 #import "FPNames.h"
+#import "PELMUIUtils.h"
 #import <FlatUIKit/UIColor+FlatUI.h>
 
 NSInteger const PAGINATION_PAGE_SIZE = 30;
@@ -91,135 +93,6 @@ the background-processor is currently attempting to edit this record.  Try again
   };
 }
 
-- (PEStyleTableCellContentView)standardTableCellStylerWithTitleBlk:(NSString *(^)(id))titleBlk {
-  return [self standardTableCellStylerWithTitleBlk:titleBlk alwaysTopifyTitleLabel:NO];
-}
-
-- (PEStyleTableCellContentView)standardTableCellStylerWithTitleBlk:(NSString *(^)(id))titleBlk
-                                            alwaysTopifyTitleLabel:(BOOL)alwaysTopifyTitleLabel {
-  NSString * (^titleText)(id) = ^NSString *(id dataObject) {
-    NSInteger maxLength = 35;
-    NSString *title = titleBlk(dataObject);
-    if ([title length] > maxLength) {
-      title = [[title substringToIndex:maxLength] stringByAppendingString:@"..."];
-    }
-    return title;
-  };
-  void (^setTitleText)(UILabel *, id) = ^(UILabel *titleLbl, id dataObject) {
-    [titleLbl setText:titleText(dataObject)];
-  };
-  return ^(UIView *contentView, id dataObject) {
-    PELMMainSupport *entity = (PELMMainSupport *)dataObject;
-    NSInteger titleNameTag = 1;
-    NSInteger subTitleTag = 2;
-    NSString *subTitleMsg = nil;
-    CGFloat vpaddingForTopifiedTitle = 8.0;
-    if ([entity editInProgress]) {
-      if ([[entity editActorId] isEqualToNumber:@(FPForegroundActorId)]) {
-        subTitleMsg = @"Edit in progress.";
-      } else {
-        subTitleMsg = @"Edit in progress (by background-processor)";
-      }
-    } else if ([entity syncInProgress]) {
-      subTitleMsg = @"Sync in progress.";
-    } else if (![entity globalIdentifier] || ([entity editCount] > 0)) {
-      subTitleMsg = @"Sync pending.";
-    }
-    UILabel *titleLbl = (UILabel *)[contentView viewWithTag:titleNameTag];
-    UILabel *subTitleLbl = nil;
-    void (^removeAndCenterLabel)(UILabel *) = ^(UILabel *lbl) {
-      [lbl removeFromSuperview];
-      [PEUIUtils placeView:titleLbl
-                inMiddleOf:contentView
-             withAlignment:PEUIHorizontalAlignmentTypeLeft
-                  hpadding:15.0];
-    };
-    void (^removeAndTopifyLabel)(UILabel *) = ^(UILabel *lbl) {
-      [lbl removeFromSuperview];
-      [PEUIUtils placeView:titleLbl
-                   atTopOf:contentView
-             withAlignment:PEUIHorizontalAlignmentTypeLeft
-                  vpadding:vpaddingForTopifiedTitle
-                  hpadding:15.0];
-    };
-    if (titleLbl) {
-      setTitleText(titleLbl, dataObject);
-      subTitleLbl = (UILabel *)[contentView viewWithTag:subTitleTag];
-      if (subTitleMsg || alwaysTopifyTitleLabel) {
-        if (!subTitleLbl) {
-          // first, let's remove the title label and re-add so it's properly
-          // aligned at the top
-          removeAndTopifyLabel(titleLbl);
-          LabelMaker tableCellSubtitleMaker = [_uitoolkit tableCellSubtitleMaker];
-          subTitleLbl = tableCellSubtitleMaker(subTitleMsg);
-          [subTitleLbl setTag:subTitleTag];
-          [PEUIUtils setFrameWidthOfView:subTitleLbl
-                                 ofWidth:1.0
-                              relativeTo:contentView];
-          [PEUIUtils placeView:subTitleLbl
-                         below:titleLbl
-                          onto:contentView
-                 withAlignment:PEUIHorizontalAlignmentTypeLeft
-                      vpadding:2.0
-                      hpadding:0.0];
-        } else {
-          [subTitleLbl setText:subTitleMsg];
-        }
-      } else {
-        subTitleLbl = (UILabel *)[contentView viewWithTag:subTitleTag];
-        if (subTitleLbl) {
-          [subTitleLbl removeFromSuperview];
-          if (!alwaysTopifyTitleLabel) {
-            // because subTitleLbl is NOT nil, then titleLbl is currently placed
-            // at the top of the cell; this is bad; it should be centered.  So
-            // we'll remove it and re-add it.
-            removeAndCenterLabel(titleLbl);
-          }
-        }
-      }
-    } else {
-      LabelMaker tableCellTitleMaker = [_uitoolkit tableCellTitleMaker];
-      LabelMaker tableCellSubtitleMaker = [_uitoolkit tableCellSubtitleMaker];
-      titleLbl = tableCellTitleMaker(titleText(dataObject));
-      [titleLbl setTag:titleNameTag];
-      [PEUIUtils setFrameWidthOfView:titleLbl
-                             ofWidth:1.0
-                          relativeTo:contentView];
-      if (subTitleMsg) {
-        [PEUIUtils placeView:titleLbl
-                     atTopOf:contentView
-               withAlignment:PEUIHorizontalAlignmentTypeLeft
-                    vpadding:vpaddingForTopifiedTitle
-                    hpadding:15.0];
-        subTitleLbl = tableCellSubtitleMaker(subTitleMsg);
-        [subTitleLbl setTag:subTitleTag];
-        [PEUIUtils setFrameWidthOfView:subTitleLbl
-                               ofWidth:1.0
-                            relativeTo:contentView];
-        [PEUIUtils placeView:subTitleLbl
-                       below:titleLbl
-                        onto:contentView
-               withAlignment:PEUIHorizontalAlignmentTypeLeft
-                    vpadding:2.0
-                    hpadding:0.0];
-      } else {
-        if (alwaysTopifyTitleLabel) {
-          [PEUIUtils placeView:titleLbl
-                       atTopOf:contentView
-                 withAlignment:PEUIHorizontalAlignmentTypeLeft
-                      vpadding:vpaddingForTopifiedTitle
-                      hpadding:15.0];
-        } else {
-          [PEUIUtils placeView:titleLbl
-                    inMiddleOf:contentView
-                 withAlignment:PEUIHorizontalAlignmentTypeLeft
-                      hpadding:15.0];
-        }
-      }
-    }
-  };
-}
-
 #pragma mark - Generic Screens
 
 - (FPAuthScreenMaker)newDatePickerScreenMakerWithTitle:(NSString *)title
@@ -259,9 +132,12 @@ the background-processor is currently attempting to edit this record.  Try again
 - (PEEntityValidatorBlk)newUserAccountValidator {
   return ^NSArray *(UIView *userAccountPanel) {
     NSMutableArray *errMsgs = [NSMutableArray array];
-    PEMessageCollector cannotBeBlankCollector =
-      [PEUIUtils newTfCannotBeEmptyBlkForMsgs:errMsgs entityPanel:userAccountPanel];
-    cannotBeBlankCollector(FPVehicleTagName, @"Name cannot be empty.");
+    //NSString *name = [((UITextField *)[userAccountPanel viewWithTag:FPUserTagName]) text];
+    NSString *email = [((UITextField *)[userAccountPanel viewWithTag:FPUserTagEmail]) text];
+    NSString *username = [((UITextField *)[userAccountPanel viewWithTag:FPUserTagUsername]) text];
+    if ([email isBlank] && [username isBlank]) {
+      [errMsgs addObject:@"Email and Username cannot both be blank."];
+    }
     return errMsgs;
   };
 }
@@ -375,7 +251,7 @@ the background-processor is currently attempting to edit this record.  Try again
               initWithClassOfDataSourceObjects:[FPVehicle class]
                                          title:@"Vehicles"
                          isPaginatedDataSource:NO
-                               tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPVehicle *vehicle) {return [vehicle name];}]
+                               tableCellStyler:[PELMUIUtils syncViewStylerWithTitleBlk:^(FPVehicle *vehicle) {return [vehicle name];} alwaysTopifyTitleLabel:NO uitoolkit:_uitoolkit foregroundActorId:FPForegroundActorId subtitleLeftHPadding:15.0]
                             itemSelectedAction:nil
                            initialSelectedItem:nil
                                  addItemAction:addVehicleAction
@@ -424,7 +300,7 @@ the background-processor is currently attempting to edit this record.  Try again
              initWithClassOfDataSourceObjects:[FPVehicle class]
                                         title:@"Choose Vehicle"
                         isPaginatedDataSource:NO
-                              tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPVehicle *vehicle) {return [vehicle name];}]
+                              tableCellStyler:[PELMUIUtils syncViewStylerWithTitleBlk:^(FPVehicle *vehicle) {return [vehicle name];} alwaysTopifyTitleLabel:NO uitoolkit:_uitoolkit foregroundActorId:FPForegroundActorId subtitleLeftHPadding:15.0]
                            itemSelectedAction:itemSelectedAction
                           initialSelectedItem:initialSelectedVehicle
                                 addItemAction:addVehicleAction
@@ -661,9 +537,12 @@ the background-processor is currently attempting to edit this record.  Try again
     PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
       return [FPScreenToolkit indexOfFuelStation:(FPFuelStation *)entity inFuelStations:pageLoader(nil)];
     };
-    PEStyleTableCellContentView tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
-      [self standardTableCellStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
-                         alwaysTopifyTitleLabel:YES](contentView, fuelstation);
+    PESyncViewStyler tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
+      [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
+                       alwaysTopifyTitleLabel:YES
+                                    uitoolkit:_uitoolkit
+                            foregroundActorId:FPForegroundActorId
+                         subtitleLeftHPadding:15.0](contentView, fuelstation);
       CGFloat distanceInfoVPadding = 25.5;
       if ([fuelstation location]) {
         if ([APP latestLocation]) {
@@ -680,7 +559,7 @@ the background-processor is currently attempting to edit this record.  Try again
              initWithClassOfDataSourceObjects:[FPFuelStation class]
                                         title:@"Fuel Stations"
                         isPaginatedDataSource:NO
-                              tableCellStyler:tableCellStyler //[self standardTableCellStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}]
+                              tableCellStyler:tableCellStyler
                            itemSelectedAction:nil
                           initialSelectedItem:nil
                                 addItemAction:addFuelStationAction
@@ -731,9 +610,12 @@ the background-processor is currently attempting to edit this record.  Try again
     PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
       return [FPScreenToolkit indexOfFuelStation:(FPFuelStation *)entity inFuelStations:pageLoader(nil)];
     };
-    PEStyleTableCellContentView tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
-      [self standardTableCellStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
-                         alwaysTopifyTitleLabel:YES](contentView, fuelstation);
+    PESyncViewStyler tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
+      [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
+                       alwaysTopifyTitleLabel:YES
+                                    uitoolkit:_uitoolkit
+                            foregroundActorId:FPForegroundActorId
+                         subtitleLeftHPadding:15.0](contentView, fuelstation);
       CGFloat distanceInfoVPadding = 25.5;
       if ([fuelstation location]) {
         if ([APP latestLocation]) {
@@ -1152,7 +1034,7 @@ the background-processor is currently attempting to edit this record.  Try again
              initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
                                         title:@"Fuel Purchase Logs"
                         isPaginatedDataSource:YES
-                              tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog){return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];}]
+                              tableCellStyler:[PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog) {return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];} alwaysTopifyTitleLabel:NO uitoolkit:_uitoolkit foregroundActorId:FPForegroundActorId subtitleLeftHPadding:15.0]
                            itemSelectedAction:nil
                           initialSelectedItem:nil
                                 addItemAction:addFpLogAction
@@ -1226,7 +1108,7 @@ the background-processor is currently attempting to edit this record.  Try again
              initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
                                         title:@"Fuel Purchase Logs"
                         isPaginatedDataSource:YES
-                              tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog) {return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];}]
+                              tableCellStyler:[PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog) {return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];} alwaysTopifyTitleLabel:NO uitoolkit:_uitoolkit foregroundActorId:FPForegroundActorId subtitleLeftHPadding:15.0]
                            itemSelectedAction:nil
                           initialSelectedItem:nil
                                 addItemAction:addFpLogAction
@@ -1440,7 +1322,7 @@ the background-processor is currently attempting to edit this record.  Try again
              initWithClassOfDataSourceObjects:[FPEnvironmentLog class]
                                         title:@"Environment Logs"
                         isPaginatedDataSource:YES
-                              tableCellStyler:[self standardTableCellStylerWithTitleBlk:^(FPEnvironmentLog *envLog) {return [PEUtils stringFromDate:[envLog logDate] withPattern:@"MM/dd/YYYY"];}]
+                              tableCellStyler:[PELMUIUtils syncViewStylerWithTitleBlk:^(FPEnvironmentLog *envLog) {return [PEUtils stringFromDate:[envLog logDate] withPattern:@"MM/dd/YYYY"];} alwaysTopifyTitleLabel:NO uitoolkit:_uitoolkit foregroundActorId:FPForegroundActorId subtitleLeftHPadding:15.0]
                            itemSelectedAction:nil
                           initialSelectedItem:nil
                                 addItemAction:addEnvLogAction

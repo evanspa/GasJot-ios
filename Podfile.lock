@@ -55,12 +55,12 @@ PODS:
   - PEDev-Console (1.0.1):
     - PEObjc-Commons (~> 1.0.1)
     - PESimu-Select (~> 1.0.1)
-  - PEFuelPurchase-Common (1.0.5):
+  - PEFuelPurchase-Common (1.0.7):
     - PEHateoas-Client (~> 1.0.2)
-  - PEFuelPurchase-Model (1.0.7):
+  - PEFuelPurchase-Model (1.0.12):
     - CocoaLumberjack (~> 1.9)
     - FMDB (~> 2.5)
-    - PEFuelPurchase-Common (~> 1.0.5)
+    - PEFuelPurchase-Common (~> 1.0.7)
     - PEHateoas-Client (~> 1.0.2)
     - PEObjc-Commons (~> 1.0.6)
     - UICKeyChainStore (~> 2.0.4)
@@ -68,7 +68,7 @@ PODS:
     - AFNetworking (~> 2.5.1)
     - CocoaLumberjack (~> 1.9)
     - PEObjc-Commons (~> 1.0.1)
-  - PEObjc-Commons (1.0.6)
+  - PEObjc-Commons (1.0.7)
   - PESimu-Select (1.0.1):
     - PEObjc-Commons (~> 1.0.1)
     - PEWire-Control (~> 1.0.1)
@@ -97,9 +97,9 @@ DEPENDENCIES:
   - IQKeyboardManager (~> 3.2.1.1)
   - MBProgressHUD (~> 0.9.1)
   - PEDev-Console (~> 1.0.1)
-  - PEFuelPurchase-Common (~> 1.0.5)
-  - PEFuelPurchase-Model (~> 1.0.7)
-  - PEObjc-Commons (~> 1.0.6)
+  - PEFuelPurchase-Common (~> 1.0.7)
+  - PEFuelPurchase-Model (~> 1.0.12)
+  - PEObjc-Commons (~> 1.0.7)
   - ReactiveCocoa (~> 2.4.7)
   - SVPullToRefresh (~> 0.4.1)
   - UICKeyChainStore (~> 2.0.5)
@@ -115,10 +115,10 @@ SPEC CHECKSUMS:
   MBProgressHUD: c47f2c166c126cf2ce36498d80f33e754d4e93ad
   OHHTTPStubs: 8cf0cfe6f34f13fc88fdf5b2a1b2c2536e8c0261
   PEDev-Console: 63b20d7ef16aada4dcd236dccef8edb18fdf3035
-  PEFuelPurchase-Common: 9fdfbb16b0ac5de59959e0d1b6e23b48c629a578
-  PEFuelPurchase-Model: 7f4a73e51423159aa936c9b210ecb9641272303c
+  PEFuelPurchase-Common: b0104a33bb4582b52cd8e382de77f0e82707d680
+  PEFuelPurchase-Model: 2080d8d53ebd97c9b933d92da3081633937fff14
   PEHateoas-Client: 9729b1e9099a9626c644e730f6ab7c37f0e55ccd
-  PEObjc-Commons: 5c56cc7702e02cc0aa4d1ba6caada373d3f840a9
+  PEObjc-Commons: 310e709bb64499edff0d6538ac2506028e14349b
   PESimu-Select: 58c14dfadbefdbfa996cfd94987aa1b74946b483
   PEWire-Control: 408b26f34312ef844d9682c5dc8c8e42ba9c84ff
   PEXML-Utils: f7e0759b8e4e2ec3a39c781b362d7fb233fc8421
