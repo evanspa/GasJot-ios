@@ -2,7 +2,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 platform :ios, '8.3'
 
-pod 'PEFuelPurchase-Model', '~> 1.0.12'
+pod 'PEFuelPurchase-Model', '~> 1.0.16'
 pod 'PEFuelPurchase-Common', '~> 1.0.7'
 pod 'PEObjc-Commons', '~> 1.0.7'
 pod 'SVPullToRefresh', '~> 0.4.1'

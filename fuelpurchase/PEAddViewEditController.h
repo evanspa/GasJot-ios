@@ -22,7 +22,11 @@ typedef void (^PEEntityEditCancelerBlk)(PEAddViewEditController *, id);
 typedef void (^PEEntityAddCancelerBlk)(PEAddViewEditController *);
 typedef id   (^PEEntityMakerBlk)(UIView *);
 typedef void (^PESaveEntityBlk)(PEAddViewEditController *, id);
-typedef void (^PEMarkAsDoneEditingBlk)(id);
+typedef void (^PESyncImmediateSuccessBlk)(void);
+typedef void (^PESyncImmediateFailedBlk)(NSError *);
+typedef void (^PESyncImmediateRetryAfterBlk)(NSDate *);
+typedef void (^PEEntitySyncCancelerBlk)(PELMMainSupport *, NSError *, NSNumber *);
+typedef void (^PEMarkAsDoneEditingBlk)(id, PESyncImmediateSuccessBlk, PESyncImmediateFailedBlk, PESyncImmediateRetryAfterBlk);
 typedef void (^PESaveNewEntityBlk)(UIView *, id);
 typedef void (^PEItemAddedBlk)(PEAddViewEditController *, id);
 typedef void (^PEItemChangedBlk)(id, NSIndexPath *);
@@ -60,6 +64,13 @@ panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
          entitySaver:(PESaveEntityBlk)entitySaver
       newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
 doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
+syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
+syncImmediateCompleteMsg:(NSString *)syncImmediateCompleteMsg
+syncImmediateFailedMsg:(NSString *)syncImmediateFailedMsg
+syncImmediateRetryAfterMsg:(NSString *)syncImmediateRetryAfterMsg
+  entitySyncCanceler:(PEEntitySyncCancelerBlk)entitySyncCanceler
+isEntityConfiguredForBackgroundSync:(BOOL)isEntityConfiguredForBackgroundSync
 prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
      entityValidator:(PEEntityValidatorBlk)entityValidator
@@ -122,6 +133,13 @@ getterForNotification:(SEL)getterForNotification;
                                     entityEditCanceler:(PEEntityEditCancelerBlk)entityEditCanceler
                                            entitySaver:(PESaveEntityBlk)entitySaver
                                doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
+                          syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+                             syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
+                              syncImmediateCompleteMsg:(NSString *)syncImmediateCompleteMsg
+                                syncImmediateFailedMsg:(NSString *)syncImmediateFailedMsg
+                            syncImmediateRetryAfterMsg:(NSString *)syncImmediateRetryAfterMsg
+                                    entitySyncCanceler:(PEEntitySyncCancelerBlk)entitySyncCanceler
+                   isEntityConfiguredForBackgroundSync:(BOOL)isEntityConfiguredForBackgroundSync
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator

@@ -172,10 +172,14 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                                                          uitoolkit:_uitoolkit
                                                              error:[FPUtils localFetchErrorHandlerMaker]()];
   _startRemoteMasterFlushTimer = ^ NSTimer * (FPCoordinatorDao *coordDao, NSTimer *oldTimer) {
+    #ifdef FP_DEV
+    return nil;
+    #else
     return [PEUtils startNewTimerWithTargetObject:coordDao
                                          selector:@selector(asynchronousWork:)
                                          interval:intBundleVal(FPTimeIntervalForFlushToRemoteMasterKey)
                                          oldTimer:oldTimer];
+    #endif
   };
   #ifdef FP_DEV
     self.window =
@@ -306,6 +310,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                    bgEditActorId:@(FPBackgroundActorId)
         allowInvalidCertificates:YES];
   [_coordDao initializeLocalDatabaseWithError:[FPUtils localSaveErrorHandlerMaker]()];
+  [_coordDao setIncludeUserInBackgroundFlush:NO];
 }
 
 #pragma mark - FPRemoteStoreSyncConflictDelegate protocol

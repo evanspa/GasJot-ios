@@ -47,7 +47,7 @@
 	<key>FP establish session header name</key>
 	<string>fp-establish-session</string>
 	<key>FP time interval for flush to remote master</key>
-	<integer>10</integer>
+	<integer>2</integer>
 	<key>FP timeout for main thread coordinator dao operations</key>
 	<integer>60</integer>
 	<key>LSRequiresIPhoneOS</key>

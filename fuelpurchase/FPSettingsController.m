@@ -56,14 +56,10 @@
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Settings"];
-  [navItem setRightBarButtonItem:[[UIBarButtonItem alloc]
-                                  initWithBarButtonSystemItem:UIBarButtonSystemItemEdit
-                                                       target:self
-                                                       action:@selector(putInEditMode)]];
   [self makeMainPanel];
   
   /* Setup Notification observing */
-  [PEUtils observeIfNotNilNotificationName:FPUserSyncInitiated
+  /*[PEUtils observeIfNotNilNotificationName:FPUserSyncInitiated
                                   observer:self
                                   selector:@selector(dataObjectSyncInitiated:)];
   [PEUtils observeIfNotNilNotificationName:FPUserSynced
@@ -71,7 +67,7 @@
                                   selector:@selector(dataObjectSynced:)];
   [PEUtils observeIfNotNilNotificationName:FPUserSyncFailed
                                   observer:self
-                                  selector:@selector(dataObjectSyncFailed:)];
+                                  selector:@selector(dataObjectSyncFailed:)];*/
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -82,7 +78,7 @@
 
 #pragma mark - Notification Observing
 
-- (void)dataObjectSyncInitiated:(NSNotification *)notification {
+/*- (void)dataObjectSyncInitiated:(NSNotification *)notification {
   NSNumber *indexOfNotifEntity =
   [PELMNotificationUtils indexOfEntityRef:_user notification:notification];
   if (indexOfNotifEntity) {
@@ -116,7 +112,7 @@
     _user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
     _syncViewStyler(_accountSettingsBtnOverlay, _user);
   }
-}
+}*/
 
 #pragma mark - Panels
 
