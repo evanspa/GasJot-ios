@@ -201,7 +201,7 @@ the background-processor is currently attempting to edit this record.  Try again
                         viewEntityTitle:@"User Account"
                         editEntityTitle:@"Edit User Account"
                    panelEnablerDisabler:[_panelToolkit userAccountPanelEnablerDisabler]
-                      entityAddCanceler:nil //^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
+                      entityAddCanceler:nil
                      entityEditPreparer:userEditPreparer
                      entityEditCanceler:userEditCanceler
                             entitySaver:userSaver
@@ -215,6 +215,7 @@ the background-processor is currently attempting to edit this record.  Try again
          prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                        viewDidAppearBlk:nil
                         entityValidator:[self newUserAccountValidator]
+                        messageComputer:^(NSInteger errMask){return [FPUtils computeSaveUsrErrMsgs:errMask];}
                   foregroundEditActorId:@(FPForegroundActorId)
         entityUpdatedNotificationToPost:FPUserUpdated];
   };
@@ -400,6 +401,7 @@ the background-processor is currently attempting to edit this record.  Try again
           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                         viewDidAppearBlk:nil
                          entityValidator:[self newVehicleValidator]
+                         messageComputer:^(NSInteger errMask){return [FPUtils computeSaveVehicleErrMsgs:errMask];}
                    foregroundEditActorId:@(FPForegroundActorId)
            entityAddedNotificationToPost:FPVehicleAdded
             syncImmediateWhenDoneEditing:YES
@@ -484,6 +486,7 @@ the background-processor is currently attempting to edit this record.  Try again
         prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                       viewDidAppearBlk:nil
                        entityValidator:[self newVehicleValidator]
+                       messageComputer:^(NSInteger errMask){return [FPUtils computeSaveVehicleErrMsgs:errMask];}
                  foregroundEditActorId:@(FPForegroundActorId)
        entityUpdatedNotificationToPost:FPVehicleUpdated];
   };
@@ -771,6 +774,7 @@ the background-processor is currently attempting to edit this record.  Try again
           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                         viewDidAppearBlk:nil
                          entityValidator:[self newFuelStationValidator]
+                         messageComputer:^(NSInteger errMask){return @[];}
                    foregroundEditActorId:@(FPForegroundActorId)
            entityAddedNotificationToPost:FPFuelStationAdded
             syncImmediateWhenDoneEditing:NO
@@ -853,6 +857,7 @@ the background-processor is currently attempting to edit this record.  Try again
         prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                       viewDidAppearBlk:nil
                        entityValidator:[self newFuelStationValidator]
+                       messageComputer:^(NSInteger errMask){return @[];}
                  foregroundEditActorId:@(FPForegroundActorId)
        entityUpdatedNotificationToPost:FPFuelStationUpdated];
   };
@@ -990,6 +995,7 @@ the background-processor is currently attempting to edit this record.  Try again
           prepareUIForUserInteractionBlk:nil
                         viewDidAppearBlk:viewDidAppearBlk
                          entityValidator:[self newFpEnvLogCompositeValidator]
+                         messageComputer:^(NSInteger errMask){return @[];}
                    foregroundEditActorId:@(FPForegroundActorId)
             entityAddedNotificationToPost:FPFuelPurchaseLogAdded
             syncImmediateWhenDoneEditing:NO
@@ -1099,6 +1105,7 @@ the background-processor is currently attempting to edit this record.  Try again
         prepareUIForUserInteractionBlk:nil
                       viewDidAppearBlk:nil
                        entityValidator:[self newFuelPurchaseLogValidator]
+                       messageComputer:^(NSInteger errMask){return @[];}
                  foregroundEditActorId:@(FPForegroundActorId)
        entityUpdatedNotificationToPost:FPFuelPurchaseLogUpdated];
   };
@@ -1326,6 +1333,7 @@ the background-processor is currently attempting to edit this record.  Try again
            prepareUIForUserInteractionBlk:nil
                          viewDidAppearBlk:viewDidAppearBlk
                           entityValidator:[self newEnvironmentLogValidator]
+                          messageComputer:^(NSInteger errMask){return @[];}
                     foregroundEditActorId:@(FPForegroundActorId)
             entityAddedNotificationToPost:FPEnvironmentLogAdded
              syncImmediateWhenDoneEditing:NO
@@ -1422,6 +1430,7 @@ the background-processor is currently attempting to edit this record.  Try again
                                prepareUIForUserInteractionBlk:nil
                                              viewDidAppearBlk:nil
                                               entityValidator:[self newEnvironmentLogValidator]
+                                              messageComputer:^(NSInteger errMask){return @[];}
                                         foregroundEditActorId:@(FPForegroundActorId)
                               entityUpdatedNotificationToPost:FPEnvironmentLogUpdated];
   };

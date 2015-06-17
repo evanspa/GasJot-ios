@@ -467,13 +467,16 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
       (UITableView *)[panel viewWithTag:FPFuelStationTagLocationCoordinates];
     FPFuelStationCoordinatesTableDataSource *ds =
       [coordinatesTableView dataSource];
-    return [_coordDao fuelStationWithName:tfstr(FPFuelStationTagName)
-                                   street:tfstr(FPFuelStationTagStreet)
-                                     city:tfstr(FPFuelStationTagCity)
-                                    state:tfstr(FPFuelStationTagState)
-                                      zip:tfstr(FPFuelStationTagZip)
-                                 latitude:[ds latitude]
-                                longitude:[ds longitude]];
+    
+    FPFuelStation *newFuelstation = [_coordDao fuelStationWithName:tfstr(FPFuelStationTagName)
+                                                            street:tfstr(FPFuelStationTagStreet)
+                                                              city:tfstr(FPFuelStationTagCity)
+                                                             state:tfstr(FPFuelStationTagState)
+                                                               zip:tfstr(FPFuelStationTagZip)
+                                                          latitude:[ds latitude]
+                                                         longitude:[ds longitude]];
+    [newFuelstation setEditActorId:@(FPForegroundActorId)];
+    return newFuelstation;
   };
 }
 
@@ -674,19 +677,23 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
       (UITableView *)[panel viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
     FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
       (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehicleFuelStationDateTableView dataSource];
-    return [[FPLogEnvLogComposite alloc] initWithNumGallons:tfdec(FPFpLogTagNumGallons)
-                                                     octane:tfnum(FPFpLogTagOctane)
-                                                gallonPrice:tfdec(FPFpLogTagPricePerGallon)
-                                                 gotCarWash:[gotCarWashSwitch isOn]
-                                   carWashPerGallonDiscount:tfdec(FPFpLogTagCarWashPerGallonDiscount)
-                                                   odometer:tfdec(FPEnvLogTagOdometer)
-                                             reportedAvgMpg:tfdec(FPEnvLogTagReportedAvgMpg)
-                                             reportedAvgMph:tfdec(FPEnvLogTagReportedAvgMph)
-                                        reportedOutsideTemp:tfnum(FPEnvLogTagReportedOutsideTemp)
-                                       preFillupReportedDte:tfnum(FPFpEnvLogCompositeTagPreFillupReportedDte)
-                                      postFillupReportedDte:tfnum(FPFpEnvLogCompositeTagPostFillupReportedDte)
-                                                    logDate:[ds pickedLogDate]
-                                                   coordDao:_coordDao];
+    FPLogEnvLogComposite *composite = [[FPLogEnvLogComposite alloc] initWithNumGallons:tfdec(FPFpLogTagNumGallons)
+                                                                                octane:tfnum(FPFpLogTagOctane)
+                                                                           gallonPrice:tfdec(FPFpLogTagPricePerGallon)
+                                                                            gotCarWash:[gotCarWashSwitch isOn]
+                                                              carWashPerGallonDiscount:tfdec(FPFpLogTagCarWashPerGallonDiscount)
+                                                                              odometer:tfdec(FPEnvLogTagOdometer)
+                                                                        reportedAvgMpg:tfdec(FPEnvLogTagReportedAvgMpg)
+                                                                        reportedAvgMph:tfdec(FPEnvLogTagReportedAvgMph)
+                                                                   reportedOutsideTemp:tfnum(FPEnvLogTagReportedOutsideTemp)
+                                                                  preFillupReportedDte:tfnum(FPFpEnvLogCompositeTagPreFillupReportedDte)
+                                                                 postFillupReportedDte:tfnum(FPFpEnvLogCompositeTagPostFillupReportedDte)
+                                                                               logDate:[ds pickedLogDate]
+                                                                              coordDao:_coordDao];
+    [[composite fpLog] setEditActorId:@(FPForegroundActorId)];
+    [[composite preFillupEnvLog] setEditActorId:@(FPForegroundActorId)];
+    [[composite postFillupEnvLog] setEditActorId:@(FPForegroundActorId)];
+    return composite;
   };
 }
 
@@ -1146,12 +1153,15 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
       (UITableView *)[panel viewWithTag:FPEnvLogTagVehicleAndDate];
     FPEnvLogVehicleAndDateDataSourceDelegate *ds =
       (FPEnvLogVehicleAndDateDataSourceDelegate *)[vehicleAndDateTableView dataSource];
-    return [_coordDao environmentLogWithOdometer:tfdec(FPEnvLogTagOdometer)
-                                  reportedAvgMpg:tfdec(FPEnvLogTagReportedAvgMpg)
-                                  reportedAvgMph:tfdec(FPEnvLogTagReportedAvgMph)
-                             reportedOutsideTemp:tfnum(FPEnvLogTagReportedOutsideTemp)
-                                         logDate:[ds pickedLogDate]
-                                     reportedDte:tfnum(FPEnvLogTagReportedDte)];
+    
+    FPEnvironmentLog *envlog = [_coordDao environmentLogWithOdometer:tfdec(FPEnvLogTagOdometer)
+                                                      reportedAvgMpg:tfdec(FPEnvLogTagReportedAvgMpg)
+                                                      reportedAvgMph:tfdec(FPEnvLogTagReportedAvgMph)
+                                                 reportedOutsideTemp:tfnum(FPEnvLogTagReportedOutsideTemp)
+                                                             logDate:[ds pickedLogDate]
+                                                         reportedDte:tfnum(FPEnvLogTagReportedDte)];
+    [envlog setEditActorId:@(FPForegroundActorId)];
+    return envlog;
   };
 }
 

@@ -47,6 +47,7 @@ typedef void (^PEItemChangedBlk)(id, NSIndexPath *);
 typedef void (^PEPrepareUIForUserInteractionBlk)(UIView *);
 typedef void (^PEViewDidAppearBlk)(UIView *);
 typedef NSArray *(^PEEntityValidatorBlk)(UIView *);
+typedef NSArray *(^PEMessagesFromErrMask)(NSInteger);
 
 @interface PEAddViewEditController : UIViewController <MBProgressHUDDelegate>
 
@@ -87,6 +88,7 @@ isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
 prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
      entityValidator:(PEEntityValidatorBlk)entityValidator
+     messageComputer:(PEMessagesFromErrMask)messageComputer
 foregroundEditActorId:(NSNumber *)foregroundEditActorId
 entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
 entityUpdatedNotificationToPost:(NSString *)entityUpdatedNotificationToPost
@@ -106,6 +108,7 @@ getterForNotification:(SEL)getterForNotification;
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
+                                         messageComputer:(PEMessagesFromErrMask)messageComputer
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
@@ -123,6 +126,7 @@ getterForNotification:(SEL)getterForNotification;
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
+                                         messageComputer:(PEMessagesFromErrMask)messageComputer
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
@@ -159,6 +163,7 @@ getterForNotification:(SEL)getterForNotification;
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator
+                                       messageComputer:(PEMessagesFromErrMask)messageComputer
                                  foregroundEditActorId:(NSNumber *)foregroundEditActorId
                        entityUpdatedNotificationToPost:(NSString *)entityUpdatedNotificationToPost;
 

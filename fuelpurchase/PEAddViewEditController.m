@@ -56,6 +56,7 @@
   NSString *_syncImmediateRetryAfterMsg;*/
   BOOL _isEntityAppropriateForBackgroundSync;
   id _newEntity;
+  PEMessagesFromErrMask _messageComputer;
 }
 
 #pragma mark - Initializers
@@ -95,6 +96,7 @@ syncImmediateCompleteMsg:(NSString *)syncImmediateCompleteMsg
   prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
      entityValidator:(PEEntityValidatorBlk)entityValidator
+     messageComputer:(PEMessagesFromErrMask)messageComputer
 foregroundEditActorId:(NSNumber *)foregroundEditActorId
 entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
 entityUpdatedNotificationToPost:(NSString *)entityUpdatedNotificationToPost
@@ -140,6 +142,7 @@ getterForNotification:(SEL)getterForNotification {
     _prepareUIForUserInteractionBlk = prepareUIForUserInteractionBlk;
     _viewDidAppearBlk = viewDidAppearBlk;
     _entityValidator = entityValidator;
+    _messageComputer = messageComputer;
     _foregroundEditActorId = foregroundEditActorId;
     _entityAddedNotificationToPost = entityAddedNotificationToPost;
     _entityUpdatedNotificationToPost = entityUpdatedNotificationToPost;
@@ -162,6 +165,7 @@ getterForNotification:(SEL)getterForNotification {
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
+                                         messageComputer:(PEMessagesFromErrMask)messageComputer
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
@@ -178,6 +182,7 @@ getterForNotification:(SEL)getterForNotification {
                                prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                                              viewDidAppearBlk:viewDidAppearBlk
                                               entityValidator:entityValidator
+                                              messageComputer:messageComputer
                                         foregroundEditActorId:foregroundEditActorId
                                 entityAddedNotificationToPost:entityAddedNotificationToPost
                                  syncImmediateWhenDoneEditing:syncImmediateWhenDoneEditing
@@ -197,6 +202,7 @@ getterForNotification:(SEL)getterForNotification {
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
+                                         messageComputer:(PEMessagesFromErrMask)messageComputer
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
@@ -237,6 +243,7 @@ getterForNotification:(SEL)getterForNotification {
                           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:viewDidAppearBlk
                                          entityValidator:entityValidator
+                                         messageComputer:messageComputer
                                    foregroundEditActorId:foregroundEditActorId
                            entityAddedNotificationToPost:entityAddedNotificationToPost
                          entityUpdatedNotificationToPost:nil
@@ -273,6 +280,7 @@ getterForNotification:(SEL)getterForNotification {
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator
+                                       messageComputer:(PEMessagesFromErrMask)messageComputer
                                  foregroundEditActorId:(NSNumber *)foregroundEditActorId
                        entityUpdatedNotificationToPost:(NSString *)entityUpdatedNotificationToPost {
   return [[PEAddViewEditController alloc] initWithEntity:entity
@@ -310,6 +318,7 @@ getterForNotification:(SEL)getterForNotification {
                           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:viewDidAppearBlk
                                          entityValidator:entityValidator
+                                         messageComputer:messageComputer
                                    foregroundEditActorId:foregroundEditActorId
                            entityAddedNotificationToPost:nil
                          entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
@@ -689,17 +698,6 @@ getterForNotification:(SEL)getterForNotification {
       return NO;
     }
   }
-
-  /*if (_itemChangedBlk) {
-    _itemChangedBlk(_entity, _entityIndexPath);
-  }
-  [[self navigationItem] setLeftBarButtonItem:_backButton];
-  [[self navigationItem] setRightBarButtonItem:[self editButtonItem]];
-  [[self navigationItem] setTitle:_viewEntityTitle];
-  _panelEnablerDisabler(_entityPanel, NO);
-  [PELMNotificationUtils postNotificationWithName:_entityUpdatedNotificationToPost
-                                           entity:_entity];*/
-
   return YES;
 }
 
@@ -799,15 +797,25 @@ getterForNotification:(SEL)getterForNotification {
       void (^syncServerError)(NSInteger) = ^(NSInteger errorMask) {
         dispatch_async(dispatch_get_main_queue(), ^{
           [_HUD hide:YES afterDelay:0];
+          NSArray *msgs = _messageComputer(errorMask);
+          NSString *errorMessage;
+          if ([msgs count] == 0) {
+            errorMessage = @"There was a problem saving your\nrecord.  There are no details from\nthe server though.  Sorry.";
+          } else if ([msgs count] == 1) {
+            errorMessage = @"There was a problem saving your\nrecord.  The message from\nthe server is:\n\n";
+          } else {
+            errorMessage = @"There was a problem saving your\nrecord.  The messages from\nthe server are:\n\n";
+          }
+          errorMessage = [errorMessage stringByAppendingString:[PEUtils concat:msgs]];
           UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error"
-                                                                         message:@"There was a problem saving your record.  The error message from the server is:"
+                                                                         message:errorMessage
                                                                   preferredStyle:UIAlertControllerStyleAlert];
-          UIAlertAction *fixNow = [UIAlertAction actionWithTitle:@"Okay - I'll try to fix it now"
+          UIAlertAction *fixNow = [UIAlertAction actionWithTitle:@"I'll fix it now."
                                                         style:UIAlertActionStyleDefault
                                                       handler:^(UIAlertAction *action) {
                                                         reenableScreen();
                                                       }];
-          UIAlertAction *fixLater = [UIAlertAction actionWithTitle:@"I'll fix the issues later"
+          UIAlertAction *fixLater = [UIAlertAction actionWithTitle:@"I'll fix the issues later."
                                                         style:UIAlertActionStyleDefault
                                                       handler:^(UIAlertAction *action) {
                                                         notificationSenderForAdd(_newEntity);

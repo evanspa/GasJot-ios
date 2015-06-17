@@ -211,7 +211,8 @@
           [_dataSource removeObjectAtIndex:i];
           [_tableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:i inSection:0]]
                             withRowAnimation:UITableViewRowAnimationFade];
-          entityRemoved = YES;
+          //entityRemoved = YES; // because we're in the "removing a dude in the nils-path", I don't want this function to return "YES", because then a stupid "entity removed" temp-notification will appear, which I don't want because the entity was never truly ADDED to begin with.
+          break;
         }
       }
       if (!entityRemoved) {

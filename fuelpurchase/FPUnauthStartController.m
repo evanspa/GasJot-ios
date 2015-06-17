@@ -244,26 +244,6 @@
 
 #pragma mark - Helpers
 
-- (NSArray *)computeCreateUsrErrMsgs:(NSUInteger)createUsrErrMask {
-  NSMutableArray *errMsgs = [NSMutableArray arrayWithCapacity:1];
-  if (createUsrErrMask & FPSaveUsrInvalidEmail) {
-    [errMsgs addObject:LS(@"createusr.email-invalid")];
-  }
-  if (createUsrErrMask & FPSaveUsrUsernameAndEmailNotProvided) {
-    [errMsgs addObject:LS(@"createusr.username-and-email-notprovided")];
-  }
-  if (createUsrErrMask & FPSaveUsrUsernameAlreadyRegistered) {
-    [errMsgs addObject:LS(@"createusr.username-already-registered")];
-  }
-  if (createUsrErrMask & FPSaveUsrPasswordNotProvided) {
-    [errMsgs addObject:LS(@"createusr.password-notprovided")];
-  }
-  if (createUsrErrMask & FPSaveUsrEmailAlreadyRegistered) {
-    [errMsgs addObject:LS(@"createusr.email-already-registered")];
-  }
-  return errMsgs;
-}
-
 - (NSArray *)computeSignInErrMsgs:(NSUInteger)signInErrMask {
   NSMutableArray *errMsgs = [NSMutableArray arrayWithCapacity:1];
   if (signInErrMask & FPSignInUsernameOrEmailNotProvided) {
@@ -321,7 +301,7 @@
                           animated:YES];
     };
     ErrMsgsMaker errMsgsMaker = ^ NSArray * (NSInteger errCode) {
-      return [self computeCreateUsrErrMsgs:errCode];
+      return [FPUtils computeSaveUsrErrMsgs:errCode];
     };
     [_coordDao
       immediateRemoteSyncSaveNewUser:user
@@ -330,7 +310,7 @@
                localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](_HUD)];
   } else {
     NSArray *errMsgs =
-      [self computeCreateUsrErrMsgs:_formStateMaskForAcctCreation];
+      [FPUtils computeSaveUsrErrMsgs:_formStateMaskForAcctCreation];
     [PEUIUtils showAlertWithMsgs:errMsgs title:@"oopsMsg" buttonTitle:@"okayMsg"];
   }
 }

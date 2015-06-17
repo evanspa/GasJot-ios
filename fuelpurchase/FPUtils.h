@@ -39,6 +39,21 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
  */
 @interface FPUtils : NSObject
 
+#pragma mark - User Helpers
+
++ (NSArray *)computeSaveUsrErrMsgs:(NSInteger)saveUsrErrMask;
+
+#pragma mark - Vehicle Helpers
+
++ (NSArray *)computeSaveVehicleErrMsgs:(NSInteger)saveVehicleErrMask;
+
+#pragma mark - Fuel Station Helpers
+
++ (NSArray *)sortFuelstations:(NSArray *)fuelstations
+     inAscOrderByDistanceFrom:(CLLocation *)location;
+
+#pragma mark - Various Error Handler Helpers
+
 + (ServerBusyHandlerMaker)serverBusyHandlerMakerForUI;
 
 + (SynchUnitOfWorkHandlerMaker)synchUnitOfWorkHandlerMakerWithErrMsgsMaker:(ErrMsgsMaker)errMsgsMaker;
@@ -52,8 +67,5 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
 + (LocalDatabaseErrorHandlerMaker)localErrorHandlerForBackgroundProcessingMaker;
 
 + (LocalDatabaseErrorHandlerMaker)localDatabaseCreationErrorHandlerMaker;
-
-+ (NSArray *)sortFuelstations:(NSArray *)fuelstations
-     inAscOrderByDistanceFrom:(CLLocation *)location;
 
 @end

@@ -28,6 +28,73 @@
 
 @implementation FPUtils
 
+#pragma mark - User Helpers
+
++ (NSArray *)computeSaveUsrErrMsgs:(NSInteger)saveUsrErrMask {
+  NSMutableArray *errMsgs = [NSMutableArray array];
+  if (saveUsrErrMask & FPSaveUsrInvalidEmail) {
+    [errMsgs addObject:LS(@"saveusr.email-invalid")];
+  }
+  if (saveUsrErrMask & FPSaveUsrUsernameAndEmailNotProvided) {
+    [errMsgs addObject:LS(@"saveusr.username-and-email-notprovided")];
+  }
+  if (saveUsrErrMask & FPSaveUsrUsernameAlreadyRegistered) {
+    [errMsgs addObject:LS(@"saveusr.username-already-registered")];
+  }
+  if (saveUsrErrMask & FPSaveUsrPasswordNotProvided) {
+    [errMsgs addObject:LS(@"saveusr.password-notprovided")];
+  }
+  if (saveUsrErrMask & FPSaveUsrEmailAlreadyRegistered) {
+    [errMsgs addObject:LS(@"saveusr.email-already-registered")];
+  }
+  return errMsgs;
+}
+
+#pragma mark - Vehicle Helpers
+
++ (NSArray *)computeSaveVehicleErrMsgs:(NSInteger)saveVehicleErrMask {
+  NSMutableArray *errMsgs = [NSMutableArray array];
+  if (saveVehicleErrMask & FPSaveVehicleNameNotProvided) {
+    [errMsgs addObject:LS(@"savevehicle.name-notprovided")];
+  }
+  if (saveVehicleErrMask & FPSaveVehicleVehicleAlreadyExists) {
+    [errMsgs addObject:LS(@"savevehicle.vehicle-already-exists")];
+  }  
+  return errMsgs;
+}
+
+#pragma mark - Fuel Station Helpers
+
++ (NSArray *)sortFuelstations:(NSArray *)fuelstations
+     inAscOrderByDistanceFrom:(CLLocation *)location {
+  return [fuelstations sortedArrayUsingComparator:^NSComparisonResult(FPFuelStation *fs1, FPFuelStation *fs2) {
+    CLLocation *latestCurrentLocation = [APP latestLocation];
+    CLLocation *fs1Location = [fs1 location];
+    CLLocation *fs2Location = [fs2 location];
+    if (!fs1Location && !fs2Location) {
+      return NSOrderedSame;
+    }
+    if (fs1Location && !fs2Location) {
+      return NSOrderedAscending;
+    }
+    if (fs2Location && !fs1Location) {
+      return NSOrderedDescending;
+    }
+    if (latestCurrentLocation) {
+      CLLocationDistance fs1Distance = [latestCurrentLocation distanceFromLocation:fs1Location];
+      CLLocationDistance fs2Distance = [latestCurrentLocation distanceFromLocation:fs2Location];
+      if (fs1Distance < fs2Distance) {
+        return NSOrderedAscending;
+      } else {
+        return NSOrderedDescending;
+      }
+    }
+    return NSOrderedSame; // should never get here
+  }];
+}
+
+#pragma mark - Various Error Handler Helpers
+
 + (ServerBusyHandlerMaker)serverBusyHandlerMakerForUI {
   return ^(MBProgressHUD *HUD) {
     return (^(NSDate *retryAfter) {
@@ -111,34 +178,6 @@ Error message: %@", [error localizedDescription]]]
       DDLogError(@"There was a problem attempting to create the local database.  Error message: %@", [error localizedDescription]);
     });
   };
-}
-
-+ (NSArray *)sortFuelstations:(NSArray *)fuelstations
-     inAscOrderByDistanceFrom:(CLLocation *)location {
-  return [fuelstations sortedArrayUsingComparator:^NSComparisonResult(FPFuelStation *fs1, FPFuelStation *fs2) {
-    CLLocation *latestCurrentLocation = [APP latestLocation];
-    CLLocation *fs1Location = [fs1 location];
-    CLLocation *fs2Location = [fs2 location];
-    if (!fs1Location && !fs2Location) {
-      return NSOrderedSame;
-    }
-    if (fs1Location && !fs2Location) {
-      return NSOrderedAscending;
-    }
-    if (fs2Location && !fs1Location) {
-      return NSOrderedDescending;
-    }
-    if (latestCurrentLocation) {
-      CLLocationDistance fs1Distance = [latestCurrentLocation distanceFromLocation:fs1Location];
-      CLLocationDistance fs2Distance = [latestCurrentLocation distanceFromLocation:fs2Location];
-      if (fs1Distance < fs2Distance) {
-        return NSOrderedAscending;
-      } else {
-        return NSOrderedDescending;
-      }
-    }
-    return NSOrderedSame; // should never get here
-  }];
 }
 
 @end
