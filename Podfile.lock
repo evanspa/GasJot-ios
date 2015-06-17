@@ -57,7 +57,7 @@ PODS:
     - PESimu-Select (~> 1.0.1)
   - PEFuelPurchase-Common (1.0.7):
     - PEHateoas-Client (~> 1.0.2)
-  - PEFuelPurchase-Model (1.0.16):
+  - PEFuelPurchase-Model (1.0.20):
     - CocoaLumberjack (~> 1.9)
     - FMDB (~> 2.5)
     - PEFuelPurchase-Common (~> 1.0.7)
@@ -68,7 +68,7 @@ PODS:
     - AFNetworking (~> 2.5.1)
     - CocoaLumberjack (~> 1.9)
     - PEObjc-Commons (~> 1.0.1)
-  - PEObjc-Commons (1.0.7)
+  - PEObjc-Commons (1.0.8)
   - PESimu-Select (1.0.1):
     - PEObjc-Commons (~> 1.0.1)
     - PEWire-Control (~> 1.0.1)
@@ -87,7 +87,7 @@ PODS:
   - ReactiveCocoa/UI (2.4.7):
     - ReactiveCocoa/Core
   - SVPullToRefresh (0.4.1)
-  - UICKeyChainStore (2.0.5)
+  - UICKeyChainStore (2.0.6)
 
 DEPENDENCIES:
   - AFNetworking (~> 2.5.1)
@@ -98,8 +98,8 @@ DEPENDENCIES:
   - MBProgressHUD (~> 0.9.1)
   - PEDev-Console (~> 1.0.1)
   - PEFuelPurchase-Common (~> 1.0.7)
-  - PEFuelPurchase-Model (~> 1.0.16)
-  - PEObjc-Commons (~> 1.0.7)
+  - PEFuelPurchase-Model (~> 1.0.20)
+  - PEObjc-Commons (~> 1.0.8)
   - ReactiveCocoa (~> 2.4.7)
   - SVPullToRefresh (~> 0.4.1)
   - UICKeyChainStore (~> 2.0.5)
@@ -116,14 +116,14 @@ SPEC CHECKSUMS:
   OHHTTPStubs: 8cf0cfe6f34f13fc88fdf5b2a1b2c2536e8c0261
   PEDev-Console: 63b20d7ef16aada4dcd236dccef8edb18fdf3035
   PEFuelPurchase-Common: b0104a33bb4582b52cd8e382de77f0e82707d680
-  PEFuelPurchase-Model: 233ffaa03836695af66950723acca57aacdc5947
+  PEFuelPurchase-Model: d2107f3f0d11bf3a92c1ed0ef4250f3b2833ba80
   PEHateoas-Client: 9729b1e9099a9626c644e730f6ab7c37f0e55ccd
-  PEObjc-Commons: 310e709bb64499edff0d6538ac2506028e14349b
+  PEObjc-Commons: c40bea2ce7f44ed636a74b7c78cd7a2753120d4e
   PESimu-Select: 58c14dfadbefdbfa996cfd94987aa1b74946b483
   PEWire-Control: 408b26f34312ef844d9682c5dc8c8e42ba9c84ff
   PEXML-Utils: f7e0759b8e4e2ec3a39c781b362d7fb233fc8421
   ReactiveCocoa: eb38dee0a0e698f73a9b25e5c1faea2bb4c79240
   SVPullToRefresh: ba2e718695a43253d8bea6852d2960097dc15d8c
-  UICKeyChainStore: a389515ca090d4d49780fd563fec961571caa92b
+  UICKeyChainStore: c5719c814e8bd69e74e4a0fc09daf8f4d6257a59
 
 COCOAPODS: 0.37.2

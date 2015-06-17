@@ -19,15 +19,29 @@ typedef void (^PEEntityToPanelBinderBlk)(id, UIView *);
 typedef void (^PEEnableDisablePanelBlk)(UIView *, BOOL);
 typedef BOOL (^PEEntityEditPreparerBlk)(PEAddViewEditController *, id);
 typedef void (^PEEntityEditCancelerBlk)(PEAddViewEditController *, id);
-typedef void (^PEEntityAddCancelerBlk)(PEAddViewEditController *);
+typedef void (^PEEntityAddCancelerBlk)(PEAddViewEditController *, id);
 typedef id   (^PEEntityMakerBlk)(UIView *);
 typedef void (^PESaveEntityBlk)(PEAddViewEditController *, id);
 typedef void (^PESyncImmediateSuccessBlk)(void);
-typedef void (^PESyncImmediateFailedBlk)(NSError *);
+typedef void (^PESyncImmediateServerTempErrorBlk)(void);
+typedef void (^PESyncImmediateServerErrorBlk)(NSInteger);
+typedef void (^PESyncImmediateAuthRequiredBlk)(void);
 typedef void (^PESyncImmediateRetryAfterBlk)(NSDate *);
 typedef void (^PEEntitySyncCancelerBlk)(PELMMainSupport *, NSError *, NSNumber *);
-typedef void (^PEMarkAsDoneEditingBlk)(id, PESyncImmediateSuccessBlk, PESyncImmediateFailedBlk, PESyncImmediateRetryAfterBlk);
-typedef void (^PESaveNewEntityBlk)(UIView *, id);
+typedef void (^PEMarkAsDoneEditingBlk)(PEAddViewEditController *,
+                                       id,
+                                       PESyncImmediateSuccessBlk,
+                                       PESyncImmediateRetryAfterBlk,
+                                       PESyncImmediateServerTempErrorBlk,
+                                       PESyncImmediateServerErrorBlk,
+                                       PESyncImmediateAuthRequiredBlk);
+typedef void (^PESaveNewEntityBlk)(UIView *,
+                                   id,
+                                   PESyncImmediateSuccessBlk,
+                                   PESyncImmediateRetryAfterBlk,
+                                   PESyncImmediateServerTempErrorBlk,
+                                   PESyncImmediateServerErrorBlk,
+                                   PESyncImmediateAuthRequiredBlk);
 typedef void (^PEItemAddedBlk)(PEAddViewEditController *, id);
 typedef void (^PEItemChangedBlk)(id, NSIndexPath *);
 typedef void (^PEPrepareUIForUserInteractionBlk)(UIView *);
@@ -65,12 +79,11 @@ panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
       newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
 doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
 syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
-syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
+/*syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
 syncImmediateCompleteMsg:(NSString *)syncImmediateCompleteMsg
 syncImmediateFailedMsg:(NSString *)syncImmediateFailedMsg
-syncImmediateRetryAfterMsg:(NSString *)syncImmediateRetryAfterMsg
-  entitySyncCanceler:(PEEntitySyncCancelerBlk)entitySyncCanceler
-isEntityConfiguredForBackgroundSync:(BOOL)isEntityConfiguredForBackgroundSync
+syncImmediateRetryAfterMsg:(NSString *)syncImmediateRetryAfterMsg*/
+isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
 prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
      entityValidator:(PEEntityValidatorBlk)entityValidator
@@ -94,7 +107,9 @@ getterForNotification:(SEL)getterForNotification;
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
-                           entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost;
+                           entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
+                            syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+                    isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync;
 
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
                                             itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
@@ -110,6 +125,8 @@ getterForNotification:(SEL)getterForNotification;
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
+                            syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+                    isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
                                    getterForNotification:(SEL)getterForNotification;
 
 + (PEAddViewEditController *)viewEntityCtrlrWithEntity:(PELMMainSupport *)entity
@@ -134,12 +151,11 @@ getterForNotification:(SEL)getterForNotification;
                                            entitySaver:(PESaveEntityBlk)entitySaver
                                doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
                           syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
-                             syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
+                             /*syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
                               syncImmediateCompleteMsg:(NSString *)syncImmediateCompleteMsg
                                 syncImmediateFailedMsg:(NSString *)syncImmediateFailedMsg
-                            syncImmediateRetryAfterMsg:(NSString *)syncImmediateRetryAfterMsg
-                                    entitySyncCanceler:(PEEntitySyncCancelerBlk)entitySyncCanceler
-                   isEntityConfiguredForBackgroundSync:(BOOL)isEntityConfiguredForBackgroundSync
+                            syncImmediateRetryAfterMsg:(NSString *)syncImmediateRetryAfterMsg*/
+                   isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator

@@ -29,6 +29,7 @@
 #import "FPNames.h"
 #import "PELMUIUtils.h"
 #import <FlatUIKit/UIColor+FlatUI.h>
+#import "FPEditActors.h"
 
 NSInteger const PAGINATION_PAGE_SIZE = 30;
 
@@ -163,25 +164,21 @@ the background-processor is currently attempting to edit this record.  Try again
               editActorId:@(FPForegroundActorId)
                     error:[FPUtils localSaveErrorHandlerMaker]()];
     };
-    PEMarkAsDoneEditingBlk doneEditingUserMarker = ^(FPUser *user,
+    PEMarkAsDoneEditingBlk doneEditingUserMarker = ^(PEAddViewEditController *ctrl,
+                                                     FPUser *user,
                                                      PESyncImmediateSuccessBlk successBlk,
-                                                     PESyncImmediateFailedBlk failedBlk,
-                                                     PESyncImmediateRetryAfterBlk retryAFterBlk) {
-      [_coordDao markAsDoneEditingAndSyncUserImmediate:user editActorId:@(FPForegroundActorId) successBlk:^{
-        successBlk();
-      } remoteErrorBlk:^(NSError *err) {
-        failedBlk(err);
-      } remoteStoreBusyBlk:^(NSDate *retryAfter) {
-        retryAFterBlk(retryAfter);
-      } error:[FPUtils localSaveErrorHandlerMaker]()];
-    };
-    PEEntitySyncCancelerBlk syncCanceler = ^(PELMMainSupport *entity, NSError *err, NSNumber *httpStatusCode) {
-      [[_coordDao localDao] cancelSyncForUser:(FPUser *)entity
-                                 httpRespCode:httpStatusCode
-                                    errorMask:nil
-                                      retryAt:nil
-                                  editActorId:@(FPForegroundActorId)
-                                        error:[FPUtils localSaveErrorHandlerMaker]()];
+                                                     PESyncImmediateRetryAfterBlk retryAfterBlk,
+                                                     PESyncImmediateServerTempErrorBlk tempErrBlk,
+                                                     PESyncImmediateServerErrorBlk errBlk,
+                                                     PESyncImmediateAuthRequiredBlk authReqdBlk) {
+      [_coordDao markAsDoneEditingAndSyncUserImmediate:user
+                                           editActorId:@(FPForegroundActorId)
+                                            successBlk:^{successBlk();}
+                                    remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(retryAfter);}
+                                    tempRemoteErrorBlk:tempErrBlk
+                                        remoteErrorBlk:errBlk
+                                       authRequiredBlk:authReqdBlk
+                                                 error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
       UITextField *userNameTf = (UITextField *)[entityPanel viewWithTag:FPUserTagName];
@@ -204,18 +201,17 @@ the background-processor is currently attempting to edit this record.  Try again
                         viewEntityTitle:@"User Account"
                         editEntityTitle:@"Edit User Account"
                    panelEnablerDisabler:[_panelToolkit userAccountPanelEnablerDisabler]
-                      entityAddCanceler:^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
+                      entityAddCanceler:nil //^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
                      entityEditPreparer:userEditPreparer
                      entityEditCanceler:userEditCanceler
                             entitySaver:userSaver
                 doneEditingEntityMarker:doneEditingUserMarker
            syncImmediateWhenDoneEditing:YES
-              syncImmediateInitiatedMsg:@"Saving User"
+              /*syncImmediateInitiatedMsg:@"Saving User"
                syncImmediateCompleteMsg:@"Complete"
                  syncImmediateFailedMsg:@"Saved Failed"
-             syncImmediateRetryAfterMsg:@"Server temporarily unavailable."
-                     entitySyncCanceler:syncCanceler
-    isEntityConfiguredForBackgroundSync:NO
+             syncImmediateRetryAfterMsg:@"Server temporarily unavailable."*/
+    isEntityAppropriateForBackgroundSync:NO
          prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                        viewDidAppearBlk:nil
                         entityValidator:[self newUserAccountValidator]
@@ -358,15 +354,38 @@ the background-processor is currently attempting to edit this record.  Try again
 
 - (FPAuthScreenMaker)newAddVehicleScreenMakerWithDelegate:(PEItemAddedBlk)itemAddedBlk {
   return ^ UIViewController * (FPUser *user) {
-    PESaveNewEntityBlk newVehicleSaver = ^(UIView *entityPanel, id newEntity) {
-      FPVehicle *newVehicle = (FPVehicle *)newEntity;
-      [_coordDao saveNewVehicle:newVehicle
-                        forUser:user
-                          error:[FPUtils localSaveErrorHandlerMaker]()];
+    PESaveNewEntityBlk newVehicleSaver = ^(UIView *entityPanel,
+                                           FPVehicle *newVehicle,
+                                           PESyncImmediateSuccessBlk successBlk,
+                                           PESyncImmediateRetryAfterBlk retryAfterBlk,
+                                           PESyncImmediateServerTempErrorBlk tempErrBlk,
+                                           PESyncImmediateServerErrorBlk errBlk,
+                                           PESyncImmediateAuthRequiredBlk authReqdBlk) {
+       [_coordDao saveNewAndSyncImmediateVehicle:newVehicle
+                                         forUser:user
+                                      successBlk:^{successBlk();}
+                              remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(retryAfter);}
+                              tempRemoteErrorBlk:tempErrBlk
+                                  remoteErrorBlk:errBlk
+                                 authRequiredBlk:authReqdBlk
+                                           error:[FPUtils localSaveErrorHandlerMaker]()];
+      
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
       UITextField *vehicleNameTf = (UITextField *)[entityPanel viewWithTag:FPVehicleTagName];
       [vehicleNameTf becomeFirstResponder];
+    };
+    PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, FPVehicle *newVehicle) {
+      if (newVehicle) {
+        // delete the unwanted record (probably from when user attempt to sync it, got an app error, and chose to 'forget it, cancel')
+        [newVehicle setEditInProgress:YES];
+        [_coordDao cancelEditOfVehicle:newVehicle
+                           editActorId:@(FPForegroundActorId)
+                                 error:[FPUtils localSaveErrorHandlerMaker]()];
+        [PELMNotificationUtils postNotificationWithName:FPVehicleDeleted
+                                                 entity:newVehicle];
+      }
+      [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
     };
     return [PEAddViewEditController
              addEntityCtrlrWithUitoolkit:_uitoolkit
@@ -375,14 +394,16 @@ the background-processor is currently attempting to edit this record.  Try again
                      entityToPanelBinder:[_panelToolkit vehicleToVehiclePanelBinder]
                      panelToEntityBinder:[_panelToolkit vehiclePanelToVehicleBinder]
                           addEntityTitle:@"Add Vehicle"
-                       entityAddCanceler:^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
+                       entityAddCanceler:addCanceler
                              entityMaker:[_panelToolkit vehicleMaker]
                           newEntitySaver:newVehicleSaver
           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                         viewDidAppearBlk:nil
                          entityValidator:[self newVehicleValidator]
                    foregroundEditActorId:@(FPForegroundActorId)
-            entityAddedNotificationToPost:FPVehicleAdded];
+           entityAddedNotificationToPost:FPVehicleAdded
+            syncImmediateWhenDoneEditing:YES
+    isEntityAppropriateForBackgroundSync:YES];
   };
 }
 
@@ -410,13 +431,23 @@ the background-processor is currently attempting to edit this record.  Try again
                  editActorId:@(FPForegroundActorId)
                        error:[FPUtils localSaveErrorHandlerMaker]()];
     };
-    PEMarkAsDoneEditingBlk doneEditingVehicleMarker = ^(FPVehicle *vehicle,
+    PEMarkAsDoneEditingBlk doneEditingVehicleMarker = ^(PEAddViewEditController *ctrl,
+                                                        FPVehicle *vehicle,
                                                         PESyncImmediateSuccessBlk successBlk,
-                                                        PESyncImmediateFailedBlk failedBlk,
-                                                        PESyncImmediateRetryAfterBlk retryAFterBlk) {
-      [_coordDao markAsDoneEditingVehicle:vehicle
-                              editActorId:@(FPForegroundActorId)
-                                    error:[FPUtils localSaveErrorHandlerMaker]()];
+                                                        PESyncImmediateRetryAfterBlk retryAfterBlk,
+                                                        PESyncImmediateServerTempErrorBlk tempErrBlk,
+                                                        PESyncImmediateServerErrorBlk errBlk,
+                                                        PESyncImmediateAuthRequiredBlk authReqdBlk) {
+      [_coordDao markAsDoneEditingAndSyncVehicleImmediate:vehicle
+                                                  forUser:user
+                                              editActorId:@(FPForegroundActorId)
+                                               successBlk:^{successBlk();}
+                                       remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(retryAfter);}
+                                       tempRemoteErrorBlk:tempErrBlk
+                                           remoteErrorBlk:errBlk
+                                          authRequiredBlk:authReqdBlk
+                                                    error:[FPUtils localSaveErrorHandlerMaker]()];
+      
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
       UITextField *vehicleNameTf = (UITextField *)[entityPanel viewWithTag:FPVehicleTagName];
@@ -439,18 +470,17 @@ the background-processor is currently attempting to edit this record.  Try again
                        viewEntityTitle:@"Vehicle"
                        editEntityTitle:@"Edit Vehicle"
                   panelEnablerDisabler:[_panelToolkit vehiclePanelEnablerDisabler]
-                     entityAddCanceler:^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
+                     entityAddCanceler:nil //^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
                     entityEditPreparer:vehicleEditPreparer
                     entityEditCanceler:vehicleEditCanceler
                            entitySaver:vehicleSaver
                doneEditingEntityMarker:doneEditingVehicleMarker
-          syncImmediateWhenDoneEditing:NO
-             syncImmediateInitiatedMsg:nil
+          syncImmediateWhenDoneEditing:YES
+             /*syncImmediateInitiatedMsg:nil
               syncImmediateCompleteMsg:nil
                 syncImmediateFailedMsg:nil
-            syncImmediateRetryAfterMsg:nil
-                    entitySyncCanceler:nil
-   isEntityConfiguredForBackgroundSync:YES
+            syncImmediateRetryAfterMsg:nil*/
+   isEntityAppropriateForBackgroundSync:YES
         prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                       viewDidAppearBlk:nil
                        entityValidator:[self newVehicleValidator]
@@ -703,7 +733,13 @@ the background-processor is currently attempting to edit this record.  Try again
 
 - (FPAuthScreenMaker)newAddFuelStationScreenMakerWithBlk:(PEItemAddedBlk)itemAddedBlk {
   return ^ UIViewController * (FPUser *user) {
-    PESaveNewEntityBlk newFuelStationSaver = ^(UIView *entityPanel, FPFuelStation *newFuelStation) {
+    PESaveNewEntityBlk newFuelStationSaver = ^(UIView *entityPanel,
+                                               FPFuelStation *newFuelStation,
+                                               PESyncImmediateSuccessBlk successBlk,
+                                               PESyncImmediateRetryAfterBlk retryAfterBlk,
+                                               PESyncImmediateServerTempErrorBlk tempErrBlk,
+                                               PESyncImmediateServerErrorBlk errBlk,
+                                               PESyncImmediateAuthRequiredBlk authReqdBlk) {
       [_coordDao saveNewFuelStation:newFuelStation
                             forUser:user
                               error:[FPUtils localSaveErrorHandlerMaker]()];
@@ -712,6 +748,16 @@ the background-processor is currently attempting to edit this record.  Try again
       UITextField *nameTf = (UITextField *)[entityPanel viewWithTag:FPFuelStationTagName];
       [nameTf becomeFirstResponder];
     };
+    PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, FPFuelStation *newFuelStation) {
+      if (newFuelStation) {
+        // delete the unwanted record (probably from when user attempt to sync it, got an app error, and chose to 'forget it, cancel'
+        [newFuelStation setEditInProgress:YES];
+        [_coordDao cancelEditOfFuelStation:newFuelStation
+                               editActorId:@(FPForegroundActorId)
+                                     error:[FPUtils localSaveErrorHandlerMaker]()];
+      }
+      [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
+    };
     return [PEAddViewEditController
              addEntityCtrlrWithUitoolkit:_uitoolkit
                             itemAddedBlk:itemAddedBlk
@@ -719,14 +765,16 @@ the background-processor is currently attempting to edit this record.  Try again
                      entityToPanelBinder:[_panelToolkit fuelStationToFuelStationPanelBinder]
                      panelToEntityBinder:[_panelToolkit fuelStationPanelToFuelStationBinder]
                           addEntityTitle:@"Add Fuel Station"
-                       entityAddCanceler:^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
+                       entityAddCanceler:addCanceler
                              entityMaker:[_panelToolkit fuelStationMaker]
                           newEntitySaver:newFuelStationSaver
           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                         viewDidAppearBlk:nil
                          entityValidator:[self newFuelStationValidator]
                    foregroundEditActorId:@(FPForegroundActorId)
-            entityAddedNotificationToPost:FPFuelStationAdded];
+           entityAddedNotificationToPost:FPFuelStationAdded
+            syncImmediateWhenDoneEditing:NO
+    isEntityAppropriateForBackgroundSync:YES];
   };
 }
 
@@ -757,10 +805,13 @@ the background-processor is currently attempting to edit this record.  Try again
                      editActorId:@(FPForegroundActorId)
                            error:[FPUtils localSaveErrorHandlerMaker]()];
     };
-    PEMarkAsDoneEditingBlk doneEditingFuelStationMarker = ^(PELMModelSupport *entity,
+    PEMarkAsDoneEditingBlk doneEditingFuelStationMarker = ^(PEAddViewEditController *ctrl,
+                                                            PELMModelSupport *entity,
                                                             PESyncImmediateSuccessBlk successBlk,
-                                                            PESyncImmediateFailedBlk failedBlk,
-                                                            PESyncImmediateRetryAfterBlk retryAFterBlk) {
+                                                            PESyncImmediateRetryAfterBlk retryAfterBlk,
+                                                            PESyncImmediateServerTempErrorBlk tempErrBlk,
+                                                            PESyncImmediateServerErrorBlk errBlk,
+                                                            PESyncImmediateAuthRequiredBlk authReqdBlk) {
       FPFuelStation *fuelStation = (FPFuelStation *)entity;
       [_coordDao markAsDoneEditingFuelStation:fuelStation
                                   editActorId:@(FPForegroundActorId)
@@ -788,18 +839,17 @@ the background-processor is currently attempting to edit this record.  Try again
                        viewEntityTitle:@"Fuel Station"
                        editEntityTitle:@"Edit Fuel Station"
                   panelEnablerDisabler:[_panelToolkit fuelStationPanelEnablerDisabler]
-                     entityAddCanceler:^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
+                     entityAddCanceler:nil //^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
                     entityEditPreparer:fuelStationEditPreparer
                     entityEditCanceler:fuelStationEditCanceler
                            entitySaver:fuelStationSaver
                doneEditingEntityMarker:doneEditingFuelStationMarker
           syncImmediateWhenDoneEditing:NO
-             syncImmediateInitiatedMsg:nil
+             /*syncImmediateInitiatedMsg:nil
               syncImmediateCompleteMsg:nil
                 syncImmediateFailedMsg:nil
-            syncImmediateRetryAfterMsg:nil
-                    entitySyncCanceler:nil
-   isEntityConfiguredForBackgroundSync:YES
+            syncImmediateRetryAfterMsg:nil*/
+   isEntityAppropriateForBackgroundSync:YES
         prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                       viewDidAppearBlk:nil
                        entityValidator:[self newFuelStationValidator]
@@ -850,7 +900,13 @@ the background-processor is currently attempting to edit this record.  Try again
                                       defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
                                   defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation {
   return ^ UIViewController * (FPUser *user) {
-    PESaveNewEntityBlk newFuelPurchaseLogSaver = ^(UIView *entityPanel, FPLogEnvLogComposite *fpEnvLogComposite) {
+    PESaveNewEntityBlk newFuelPurchaseLogSaver = ^(UIView *entityPanel,
+                                                   FPLogEnvLogComposite *fpEnvLogComposite,
+                                                   PESyncImmediateSuccessBlk successBlk,
+                                                   PESyncImmediateRetryAfterBlk retryAfterBlk,
+                                                   PESyncImmediateServerTempErrorBlk tempErrBlk,
+                                                   PESyncImmediateServerErrorBlk errBlk,
+                                                   PESyncImmediateAuthRequiredBlk authReqdBlk) {
       FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
         (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)
           [(UITableView *)[entityPanel viewWithTag:FPFpLogTagVehicleFuelStationAndDate] dataSource];
@@ -908,6 +964,16 @@ the background-processor is currently attempting to edit this record.  Try again
                                                animated:YES];
       }
     };
+    PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, FPFuelPurchaseLog *newFpLog) {
+      if (newFpLog) {
+        // delete the unwanted record (probably from when user attempt to sync it, got an app error, and chose to 'forget it, cancel'
+        [newFpLog setEditInProgress:YES];
+        [_coordDao cancelEditOfFuelPurchaseLog:newFpLog
+                                   editActorId:@(FPForegroundActorId)
+                                         error:[FPUtils localSaveErrorHandlerMaker]()];
+      }
+      [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
+    };
     return [PEAddViewEditController
              addEntityCtrlrWithUitoolkit:_uitoolkit
                             itemAddedBlk:itemAddedBlk
@@ -918,7 +984,7 @@ the background-processor is currently attempting to edit this record.  Try again
                      entityToPanelBinder:[_panelToolkit fpEnvLogCompositeToFpEnvLogCompositePanelBinder]
                      panelToEntityBinder:[_panelToolkit fpEnvLogCompositePanelToFpEnvLogCompositeBinder]
                           addEntityTitle:@"Add Fuel Purchase Log"
-                       entityAddCanceler:^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
+                       entityAddCanceler:addCanceler
                              entityMaker:[_panelToolkit fpEnvLogCompositeMaker]
                           newEntitySaver:newFuelPurchaseLogSaver
           prepareUIForUserInteractionBlk:nil
@@ -926,6 +992,8 @@ the background-processor is currently attempting to edit this record.  Try again
                          entityValidator:[self newFpEnvLogCompositeValidator]
                    foregroundEditActorId:@(FPForegroundActorId)
             entityAddedNotificationToPost:FPFuelPurchaseLogAdded
+            syncImmediateWhenDoneEditing:NO
+    isEntityAppropriateForBackgroundSync:YES
                    getterForNotification:@selector(fpLog)];
   };
 }
@@ -984,10 +1052,13 @@ the background-processor is currently attempting to edit this record.  Try again
                          editActorId:@(FPForegroundActorId)
                                error:[FPUtils localSaveErrorHandlerMaker]()];
     };
-    PEMarkAsDoneEditingBlk doneEditingFuelPurchaseLogMarker = ^(FPFuelPurchaseLog *fpLog,
+    PEMarkAsDoneEditingBlk doneEditingFuelPurchaseLogMarker = ^(PEAddViewEditController *ctrl,
+                                                                FPFuelPurchaseLog *fpLog,
                                                                 PESyncImmediateSuccessBlk successBlk,
-                                                                PESyncImmediateFailedBlk failedBlk,
-                                                                PESyncImmediateRetryAfterBlk retryAFterBlk) {
+                                                                PESyncImmediateRetryAfterBlk retryAfterBlk,
+                                                                PESyncImmediateServerTempErrorBlk tempErrBlk,
+                                                                PESyncImmediateServerErrorBlk errBlk,
+                                                                PESyncImmediateAuthRequiredBlk authReqdBlk) {
       [_coordDao markAsDoneEditingFuelPurchaseLog:fpLog
                                       editActorId:@(FPForegroundActorId)
                                             error:[FPUtils localSaveErrorHandlerMaker]()];
@@ -1014,18 +1085,17 @@ the background-processor is currently attempting to edit this record.  Try again
                        viewEntityTitle:@"Fuel Purchase Log"
                        editEntityTitle:@"Edit Fuel Purchase Log"
                   panelEnablerDisabler:[_panelToolkit fuelPurchaseLogPanelEnablerDisabler]
-                     entityAddCanceler:^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
+                     entityAddCanceler:nil //^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
                     entityEditPreparer:fpLogEditPreparer
                     entityEditCanceler:fpLogEditCanceler
                            entitySaver:fpLogSaver
                doneEditingEntityMarker:doneEditingFuelPurchaseLogMarker
           syncImmediateWhenDoneEditing:NO
-             syncImmediateInitiatedMsg:nil
+             /*syncImmediateInitiatedMsg:nil
               syncImmediateCompleteMsg:nil
                 syncImmediateFailedMsg:nil
-            syncImmediateRetryAfterMsg:nil
-                    entitySyncCanceler:nil
-   isEntityConfiguredForBackgroundSync:YES
+            syncImmediateRetryAfterMsg:nil*/
+   isEntityAppropriateForBackgroundSync:YES
         prepareUIForUserInteractionBlk:nil
                       viewDidAppearBlk:nil
                        entityValidator:[self newFuelPurchaseLogValidator]
@@ -1207,7 +1277,13 @@ the background-processor is currently attempting to edit this record.  Try again
 - (FPAuthScreenMaker)newAddEnvironmentLogScreenMakerWithBlk:(PEItemAddedBlk)itemAddedBlk
                                      defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle {
   return ^ UIViewController * (FPUser *user) {
-    PESaveNewEntityBlk newEnvironmentLogSaver = ^(UIView *entityPanel, FPEnvironmentLog *envLog) {
+    PESaveNewEntityBlk newEnvironmentLogSaver = ^(UIView *entityPanel,
+                                                  FPEnvironmentLog *envLog,
+                                                  PESyncImmediateSuccessBlk successBlk,
+                                                  PESyncImmediateRetryAfterBlk retryAfterBlk,
+                                                  PESyncImmediateServerTempErrorBlk tempErrBlk,
+                                                  PESyncImmediateServerErrorBlk errBlk,
+                                                  PESyncImmediateAuthRequiredBlk authReqdBlk) {
       FPEnvLogVehicleAndDateDataSourceDelegate *ds =
         (FPEnvLogVehicleAndDateDataSourceDelegate *)
         [(UITableView *)[entityPanel viewWithTag:FPEnvLogTagVehicleAndDate] dataSource];
@@ -1225,6 +1301,16 @@ the background-processor is currently attempting to edit this record.  Try again
                                     animated:YES];
       }
     };
+    PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, FPEnvironmentLog *newEnvLog) {
+      if (newEnvLog) {
+        // delete the unwanted record (probably from when user attempt to sync it, got an app error, and chose to 'forget it, cancel'
+        [newEnvLog setEditInProgress:YES];
+        [_coordDao cancelEditOfEnvironmentLog:newEnvLog
+                                  editActorId:@(FPForegroundActorId)
+                                        error:[FPUtils localSaveErrorHandlerMaker]()];
+      }
+      [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
+    };
     return [PEAddViewEditController
               addEntityCtrlrWithUitoolkit:_uitoolkit
                              itemAddedBlk:itemAddedBlk
@@ -1234,14 +1320,16 @@ the background-processor is currently attempting to edit this record.  Try again
                       entityToPanelBinder:[_panelToolkit environmentLogToEnvironmentLogPanelBinder]
                       panelToEntityBinder:[_panelToolkit environmentLogPanelToEnvironmentLogBinder]
                            addEntityTitle:@"Add Environment Log"
-                        entityAddCanceler:^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
+                        entityAddCanceler:addCanceler
                               entityMaker:[_panelToolkit environmentLogMaker]
                            newEntitySaver:newEnvironmentLogSaver
            prepareUIForUserInteractionBlk:nil
                          viewDidAppearBlk:viewDidAppearBlk
                           entityValidator:[self newEnvironmentLogValidator]
                     foregroundEditActorId:@(FPForegroundActorId)
-            entityAddedNotificationToPost:FPEnvironmentLogAdded];
+            entityAddedNotificationToPost:FPEnvironmentLogAdded
+             syncImmediateWhenDoneEditing:NO
+     isEntityAppropriateForBackgroundSync:YES];
   };
 }
 
@@ -1290,10 +1378,13 @@ the background-processor is currently attempting to edit this record.  Try again
                         editActorId:@(FPForegroundActorId)
                               error:[FPUtils localSaveErrorHandlerMaker]()];
     };
-    PEMarkAsDoneEditingBlk doneEditingEnvironmentLogMarker = ^(FPEnvironmentLog *envLog,
+    PEMarkAsDoneEditingBlk doneEditingEnvironmentLogMarker = ^(PEAddViewEditController *ctrl,
+                                                               FPEnvironmentLog *envLog,
                                                                PESyncImmediateSuccessBlk successBlk,
-                                                               PESyncImmediateFailedBlk failedBlk,
-                                                               PESyncImmediateRetryAfterBlk retryAFterBlk) {
+                                                               PESyncImmediateRetryAfterBlk retryAfterBlk,
+                                                               PESyncImmediateServerTempErrorBlk tempErrBlk,
+                                                               PESyncImmediateServerErrorBlk errBlk,
+                                                               PESyncImmediateAuthRequiredBlk authReqdBlk) {
       [_coordDao markAsDoneEditingEnvironmentLog:envLog
                                      editActorId:@(FPForegroundActorId)
                                            error:[FPUtils localSaveErrorHandlerMaker]()];
@@ -1317,18 +1408,17 @@ the background-processor is currently attempting to edit this record.  Try again
                                               viewEntityTitle:@"Environment Log"
                                               editEntityTitle:@"Edit Environment Log"
                                          panelEnablerDisabler:[_panelToolkit environmentLogPanelEnablerDisabler]
-                                            entityAddCanceler:^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
+                                            entityAddCanceler:nil
                                            entityEditPreparer:envLogEditPreparer
                                            entityEditCanceler:envLogEditCanceler
                                                   entitySaver:envLogSaver
                                       doneEditingEntityMarker:doneEditingEnvironmentLogMarker
                                  syncImmediateWhenDoneEditing:NO
-                                    syncImmediateInitiatedMsg:nil
+                                    /*syncImmediateInitiatedMsg:nil
                                      syncImmediateCompleteMsg:nil
                                        syncImmediateFailedMsg:nil
-                                   syncImmediateRetryAfterMsg:nil
-                                           entitySyncCanceler:nil
-                          isEntityConfiguredForBackgroundSync:YES
+                                   syncImmediateRetryAfterMsg:nil*/
+                         isEntityAppropriateForBackgroundSync:YES
                                prepareUIForUserInteractionBlk:nil
                                              viewDidAppearBlk:nil
                                               entityValidator:[self newEnvironmentLogValidator]

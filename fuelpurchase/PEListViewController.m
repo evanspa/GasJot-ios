@@ -174,6 +174,8 @@
           [_dataSource insertObject:updatedEntity atIndex:wouldBeIndex];
           insertAtTableIndex(wouldBeIndex);
           DDLogDebug(@"PELVC/hUE, belongs, wasn't here, but is now inserted.");
+        } else {
+          DDLogDebug(@"PELVC/hUE, belongs, wasn't here, but not taking any action because its would-be index is larger than the data source count.");
         }
         // otherwise, the updatedEntity will become visible when the user scrolls
         // and older entities are loaded
@@ -191,22 +193,55 @@
 }
 
 - (BOOL)handleRemovedEntity:(PELMMainSupport *)removedEntity {
+  BOOL entityRemoved = NO;
+  DDLogDebug(@"=== begin === in PELVC/handleRemovedEntity: (hRE) =============================");
+  DDLogDebug(@"hRE, removedEntity's localMainIdentifier: %@", [removedEntity localMainIdentifier]);
+  DDLogDebug(@"hRE, removedEntity's localMasterIdentifier: %@", [removedEntity localMasterIdentifier]);
+  DDLogDebug(@"hRE, removedEntity's globalIdentifier: %@", [removedEntity globalIdentifier]);
   if ([removedEntity isKindOfClass:_classOfDataSourceObjects]) {
-    // Is it currently here?
-    NSNumber *indexOfEntity = [self indexOfEntity:removedEntity];
-    if (indexOfEntity) {
-      [_dataSource removeObjectAtIndex:[indexOfEntity integerValue]];
-      [_tableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:[indexOfEntity integerValue] inSection:0]]
-                        withRowAnimation:UITableViewRowAnimationFade];
-      return YES;
+    if (([removedEntity localMainIdentifier] == nil) && ([removedEntity localMasterIdentifier] == nil)) {
+      DDLogDebug(@"PELVC/hRE, removedEntity's IDs are nil.  So, we're going to check if any entities here match that.");
+      NSUInteger dsCount = [_dataSource count];
+      PELMMainSupport *entity;
+      for (NSInteger i = 0; i < dsCount; i++) {
+        entity = _dataSource[i];
+        if (([entity localMainIdentifier] == nil && [entity localMasterIdentifier] == nil) ||
+            [entity deleted]) {
+          DDLogDebug(@"PELVC/hRE, entity at index [%ld] has nil IDs, so we'll remove it.", (long)i);
+          [_dataSource removeObjectAtIndex:i];
+          [_tableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:i inSection:0]]
+                            withRowAnimation:UITableViewRowAnimationFade];
+          entityRemoved = YES;
+        }
+      }
+      if (!entityRemoved) {
+        DDLogDebug(@"PELVC/hRE, couldn't find any entities with nil IDs.");
+      }
+    } else {
+      // Is it currently here?
+      DDLogDebug(@"PELVC/hRE, check 1/2 passed.");
+      NSNumber *idxOfExistingEntity = [self indexOfEntity:removedEntity];
+      DDLogDebug(@"PELVC/hRE, idxOfExistingEntity: %@", idxOfExistingEntity);
+      if (idxOfExistingEntity) {
+        DDLogDebug(@"PELVC/hRE, removedEntity is here.  Proceeding to remove it.");
+        [_dataSource removeObjectAtIndex:[idxOfExistingEntity integerValue]];
+        [_tableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:[idxOfExistingEntity integerValue] inSection:0]]
+                          withRowAnimation:UITableViewRowAnimationFade];
+        entityRemoved = YES;
+      } else {
+        DDLogDebug(@"PELVC/hRE, removedEntity is not here.");
+      }
     }
+  } else {
+    DDLogDebug(@"PELVC/hRE, removedEntity is of a different class than the entities here.");
   }
-  return NO;
+  DDLogDebug(@"=== end === in PELVC/handleRemovedEntity: (hRE) =============================");
+  return entityRemoved;
 }
 
 - (BOOL)handleAddedEntity:(PELMMainSupport *)addedEntity {
   BOOL entityAdded = NO;
-  DDLogDebug(@"begin in PELVC/handleAddedEntity: (hAE)");
+  DDLogDebug(@"=== begin === in PELVC/handleAddedEntity: (hAE)");
   if ([addedEntity isKindOfClass:_classOfDataSourceObjects]) {
     DDLogDebug(@"PELVC/hAE, check 1/2 passed.");
     BOOL doesEntityBelong = _doesEntityBelongToThisListView(addedEntity);
@@ -218,27 +253,37 @@
       };
       // So it belongs.  But, should we take any action?  I.e., we need to compute
       // its would-be index to see if it should even be visible given the current
-      // state of the table view.
-      NSInteger wouldBeIndex = _wouldBeIndexOfEntity(addedEntity);
-      DDLogDebug(@"PELVC/hAE, wouldBeIndex: %ld", (long)wouldBeIndex);
-      DDLogDebug(@"PELVC/hAE, FYI, dataSource count: %lu", (unsigned long)[_dataSource count]);
-      if (wouldBeIndex == [_dataSource count]) {
-        // Add (i.e., append to the end of the data source).
-        [_dataSource addObject:addedEntity];
-        insertAtTableIndex(wouldBeIndex);
-        DDLogDebug(@"PELVC/hAE, appended entity.");
-      } else if (wouldBeIndex < [_dataSource count]) {
-        // Insert.
-        [_dataSource insertObject:addedEntity atIndex:wouldBeIndex];
-        insertAtTableIndex(wouldBeIndex);
-        DDLogDebug(@"PELVC/hAE, inserted entity.");
+      // state of the table view.  But even before that, we should check to see
+      // if it's already here!
+      NSNumber *indexOfExistingEntity = [self indexOfEntity:addedEntity];
+      DDLogDebug(@"PELVC/hUA, idxOfExistingEntity: %@", indexOfExistingEntity);
+      if (indexOfExistingEntity) {
+        DDLogDebug(@"PELVC/hUA, the entity is already here.  Taking no action then.");
       } else {
-        // wouldBeIndex is larger than [_dataSource count], so we needn't take
-        // action.  I.e., it shouldn't be visible yet.
-        DDLogDebug(@"PELVC/hAE, no action taken.");
+        NSInteger wouldBeIndex = _wouldBeIndexOfEntity(addedEntity);
+        DDLogDebug(@"PELVC/hAE, wouldBeIndex: %ld", (long)wouldBeIndex);
+        DDLogDebug(@"PELVC/hAE, FYI, dataSource count: %lu", (unsigned long)[_dataSource count]);
+        if (wouldBeIndex == [_dataSource count]) {
+          // Add (i.e., append to the end of the data source).
+          [_dataSource addObject:addedEntity];
+          insertAtTableIndex(wouldBeIndex);
+          DDLogDebug(@"PELVC/hAE, appended entity.");
+          entityAdded = YES;
+        } else if (wouldBeIndex < [_dataSource count]) {
+          // Insert.
+          [_dataSource insertObject:addedEntity atIndex:wouldBeIndex];
+          insertAtTableIndex(wouldBeIndex);
+          DDLogDebug(@"PELVC/hAE, inserted entity.");
+          entityAdded = YES;
+        } else {
+          // wouldBeIndex is larger than [_dataSource count], so we needn't take
+          // action.  I.e., it shouldn't be visible yet.
+          DDLogDebug(@"PELVC/hAE, no action taken.");
+        }
       }
     }
   }
+  DDLogDebug(@"=== end === in PELVC/handleAddedEntity: (hAE)");
   return entityAdded;
 }
 

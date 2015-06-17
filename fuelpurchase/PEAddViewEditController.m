@@ -50,12 +50,12 @@
   NSString *_entityAddedNotificationToPost;
   NSString *_entityUpdatedNotificationToPost;
   SEL _getterForNotification;
-  NSString *_syncImmediateInitiatedMsg;
+  /*NSString *_syncImmediateInitiatedMsg;
   NSString *_syncImmediateCompleteMsg;
   NSString *_syncImmediateFailedMsg;
-  NSString *_syncImmediateRetryAfterMsg;
-  PEEntitySyncCancelerBlk _entitySyncCanceler;
-  BOOL _isEntityConfiguredForBackgroundSync;
+  NSString *_syncImmediateRetryAfterMsg;*/
+  BOOL _isEntityAppropriateForBackgroundSync;
+  id _newEntity;
 }
 
 #pragma mark - Initializers
@@ -65,7 +65,7 @@
            indexPath:(NSIndexPath *)indexPath
            uitoolkit:(PEUIToolkit *)uitoolkit
         itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
-       itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
+      itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
 syncInitiatedNotifName:(NSString *)syncInitiatedNotifName
      syncedNotifName:(NSString *)syncedNotifName
  syncFailedNotifName:(NSString *)syncFailedNotifName
@@ -73,27 +73,26 @@ entityRemotelyDeletedNotifName:(NSString *)entityRemotelyDeletedNotifName
 entityLocallyUpdatedNotifNames:(NSArray *)entityLocallyUpdatedNotifNames
 entityRemotelyUpdatedNotifName:(NSString *)entityRemotelyUpdatedNotifName
     entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
- entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
+        entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
  panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
-      addEntityTitle:(NSString *)addEntityTitle
-     viewEntityTitle:(NSString *)viewEntityTitle
+   addEntityTitle:(NSString *)addEntityTitle
+  viewEntityTitle:(NSString *)viewEntityTitle
      editEntityTitle:(NSString *)editEntityTitle
-panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
-   entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
-  entityEditPreparer:(PEEntityEditPreparerBlk)entityEditPreparer
-  entityEditCanceler:(PEEntityEditCancelerBlk)entityEditCanceler
-         entityMaker:(PEEntityMakerBlk)entityMaker
-         entitySaver:(PESaveEntityBlk)entitySaver
+  panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
+  entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
+      entityEditPreparer:(PEEntityEditPreparerBlk)entityEditPreparer
+          entityEditCanceler:(PEEntityEditCancelerBlk)entityEditCanceler
+   entityMaker:(PEEntityMakerBlk)entityMaker
+     entitySaver:(PESaveEntityBlk)entitySaver
       newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
 doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
-syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
-syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
+    syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+    /*syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
 syncImmediateCompleteMsg:(NSString *)syncImmediateCompleteMsg
-syncImmediateFailedMsg:(NSString *)syncImmediateFailedMsg
-syncImmediateRetryAfterMsg:(NSString *)syncImmediateRetryAfterMsg
-entitySyncCanceler:(PEEntitySyncCancelerBlk)entitySyncCanceler
-isEntityConfiguredForBackgroundSync:(BOOL)isEntityConfiguredForBackgroundSync
-prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
+            syncImmediateFailedMsg:(NSString *)syncImmediateFailedMsg
+     syncImmediateRetryAfterMsg:(NSString *)syncImmediateRetryAfterMsg*/
+        isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
+  prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
      entityValidator:(PEEntityValidatorBlk)entityValidator
 foregroundEditActorId:(NSNumber *)foregroundEditActorId
@@ -133,12 +132,11 @@ getterForNotification:(SEL)getterForNotification {
     _newEntitySaver = newEntitySaver;
     _doneEditingEntityMarker = doneEditingEntityMarker;
     _syncImmediateWhenDoneEditing = syncImmediateWhenDoneEditing;
-    _syncImmediateInitiatedMsg = syncImmediateInitiatedMsg;
+    /*_syncImmediateInitiatedMsg = syncImmediateInitiatedMsg;
     _syncImmediateCompleteMsg = syncImmediateCompleteMsg;
     _syncImmediateRetryAfterMsg = syncImmediateRetryAfterMsg;
-    _syncImmediateFailedMsg = syncImmediateFailedMsg;
-    _entitySyncCanceler = entitySyncCanceler;
-    _isEntityConfiguredForBackgroundSync = isEntityConfiguredForBackgroundSync;
+    _syncImmediateFailedMsg = syncImmediateFailedMsg;*/
+    _isEntityAppropriateForBackgroundSync = isEntityAppropriateForBackgroundSync;
     _prepareUIForUserInteractionBlk = prepareUIForUserInteractionBlk;
     _viewDidAppearBlk = viewDidAppearBlk;
     _entityValidator = entityValidator;
@@ -165,7 +163,9 @@ getterForNotification:(SEL)getterForNotification {
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
-                           entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost {
+                           entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
+                            syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+                    isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync {
   return [PEAddViewEditController addEntityCtrlrWithUitoolkit:uitoolkit
                                                  itemAddedBlk:itemAddedBlk
                                              entityPanelMaker:entityPanelMaker
@@ -180,6 +180,8 @@ getterForNotification:(SEL)getterForNotification {
                                               entityValidator:entityValidator
                                         foregroundEditActorId:foregroundEditActorId
                                 entityAddedNotificationToPost:entityAddedNotificationToPost
+                                 syncImmediateWhenDoneEditing:syncImmediateWhenDoneEditing
+                         isEntityAppropriateForBackgroundSync:isEntityAppropriateForBackgroundSync
                                         getterForNotification:nil];
 }
 
@@ -197,50 +199,49 @@ getterForNotification:(SEL)getterForNotification {
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
+                            syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+                    isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
                                    getterForNotification:(SEL)getterForNotification {
-  return [[PEAddViewEditController alloc]
-           initWithEntity:nil
-                    isAdd:YES
-                indexPath:nil
-                uitoolkit:uitoolkit
-        itemAddedBlk:itemAddedBlk
-       itemChangedBlk:nil
-   syncInitiatedNotifName:nil
-          syncedNotifName:nil
-      syncFailedNotifName:nil
-entityRemotelyDeletedNotifName:nil
-    entityLocallyUpdatedNotifNames:nil
-entityRemotelyUpdatedNotifName:nil
-         entityPanelMaker:entityPanelMaker
-      entityToPanelBinder:entityToPanelBinder
-      panelToEntityBinder:panelToEntityBinder
-           addEntityTitle:addEntityTitle
-          viewEntityTitle:nil
-          editEntityTitle:nil
-     panelEnablerDisabler:nil
-          entityAddCanceler:entityAddCanceler
-       entityEditPreparer:nil
-       entityEditCanceler:nil
-              entityMaker:entityMaker
-              entitySaver:nil
-           newEntitySaver:newEntitySaver
-  doneEditingEntityMarker:nil
-syncImmediateWhenDoneEditing:NO
-syncImmediateInitiatedMsg:nil
- syncImmediateCompleteMsg:nil
-   syncImmediateFailedMsg:nil
-syncImmediateRetryAfterMsg:nil
-        entitySyncCanceler:nil
-          isEntityConfiguredForBackgroundSync:NO
-prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
-         viewDidAppearBlk:viewDidAppearBlk
-          entityValidator:entityValidator
-          foregroundEditActorId:foregroundEditActorId
-entityAddedNotificationToPost:entityAddedNotificationToPost
-entityUpdatedNotificationToPost:nil
-getterForNotification:getterForNotification];
+  return [[PEAddViewEditController alloc] initWithEntity:nil
+                                                   isAdd:YES
+                                               indexPath:nil
+                                               uitoolkit:uitoolkit
+                                            itemAddedBlk:itemAddedBlk
+                                          itemChangedBlk:nil
+                                  syncInitiatedNotifName:nil
+                                         syncedNotifName:nil
+                                     syncFailedNotifName:nil
+                          entityRemotelyDeletedNotifName:nil
+                          entityLocallyUpdatedNotifNames:nil
+                          entityRemotelyUpdatedNotifName:nil
+                                        entityPanelMaker:entityPanelMaker
+                                     entityToPanelBinder:entityToPanelBinder
+                                     panelToEntityBinder:panelToEntityBinder
+                                          addEntityTitle:addEntityTitle
+                                         viewEntityTitle:nil
+                                         editEntityTitle:nil
+                                    panelEnablerDisabler:nil
+                                       entityAddCanceler:entityAddCanceler
+                                      entityEditPreparer:nil
+                                      entityEditCanceler:nil
+                                             entityMaker:entityMaker
+                                             entitySaver:nil
+                                          newEntitySaver:newEntitySaver
+                                 doneEditingEntityMarker:nil
+                            syncImmediateWhenDoneEditing:syncImmediateWhenDoneEditing
+                               /*syncImmediateInitiatedMsg:nil
+                                syncImmediateCompleteMsg:nil
+                                  syncImmediateFailedMsg:nil
+                              syncImmediateRetryAfterMsg:nil*/
+                     isEntityAppropriateForBackgroundSync:isEntityAppropriateForBackgroundSync
+                          prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
+                                        viewDidAppearBlk:viewDidAppearBlk
+                                         entityValidator:entityValidator
+                                   foregroundEditActorId:foregroundEditActorId
+                           entityAddedNotificationToPost:entityAddedNotificationToPost
+                         entityUpdatedNotificationToPost:nil
+                                   getterForNotification:getterForNotification];
 }
-
 
 + (PEAddViewEditController *)viewEntityCtrlrWithEntity:(PELMMainSupport *)entity
                                        entityIndexPath:(NSIndexPath *)entityIndexPath
@@ -264,58 +265,55 @@ getterForNotification:getterForNotification];
                                            entitySaver:(PESaveEntityBlk)entitySaver
                                doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
                           syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
-                             syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
+                             /*syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
                               syncImmediateCompleteMsg:(NSString *)syncImmediateCompleteMsg
                                 syncImmediateFailedMsg:(NSString *)syncImmediateFailedMsg
-                            syncImmediateRetryAfterMsg:(NSString *)syncImmediateRetryAfterMsg
-                                    entitySyncCanceler:(PEEntitySyncCancelerBlk)entitySyncCanceler
-                   isEntityConfiguredForBackgroundSync:(BOOL)isEntityConfiguredForBackgroundSync
+                            syncImmediateRetryAfterMsg:(NSString *)syncImmediateRetryAfterMsg*/
+                   isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator
                                  foregroundEditActorId:(NSNumber *)foregroundEditActorId
                        entityUpdatedNotificationToPost:(NSString *)entityUpdatedNotificationToPost {
-  return [[PEAddViewEditController alloc]
-          initWithEntity:entity
-                   isAdd:NO
-               indexPath:entityIndexPath
-               uitoolkit:uitoolkit
-           itemAddedBlk:nil
-          itemChangedBlk:itemChangedBlk
-  syncInitiatedNotifName:syncInitiatedNotifName
-         syncedNotifName:syncedNotifName
-     syncFailedNotifName:syncFailedNotifName
-entityRemotelyDeletedNotifName:entityRemotelyDeletedNotifName
-entityLocallyUpdatedNotifNames:entityLocallyUpdatedNotifNames
-entityRemotelyUpdatedNotifName:entityRemotelyUpdatedNotifName
-        entityPanelMaker:entityPanelMaker
-     entityToPanelBinder:entityToPanelBinder
-     panelToEntityBinder:panelToEntityBinder
-          addEntityTitle:nil
-         viewEntityTitle:viewEntityTitle
-         editEntityTitle:editEntityTitle
-    panelEnablerDisabler:panelEnablerDisabler
-          entityAddCanceler:entityAddCanceler
-      entityEditPreparer:entityEditPreparer
-      entityEditCanceler:entityEditCanceler
-             entityMaker:nil
-             entitySaver:entitySaver
-          newEntitySaver:nil
- doneEditingEntityMarker:doneEditingEntityMarker
-syncImmediateWhenDoneEditing:syncImmediateWhenDoneEditing
-syncImmediateInitiatedMsg:syncImmediateInitiatedMsg
- syncImmediateCompleteMsg:syncImmediateCompleteMsg
-  syncImmediateFailedMsg:syncImmediateFailedMsg
-syncImmediateRetryAfterMsg:syncImmediateRetryAfterMsg
-      entitySyncCanceler:entitySyncCanceler
-isEntityConfiguredForBackgroundSync:isEntityConfiguredForBackgroundSync
-prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
-        viewDidAppearBlk:viewDidAppearBlk
-          entityValidator:entityValidator
-    foregroundEditActorId:foregroundEditActorId
-entityAddedNotificationToPost:nil
-entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
-  getterForNotification:nil];
+  return [[PEAddViewEditController alloc] initWithEntity:entity
+                                                   isAdd:NO
+                                               indexPath:entityIndexPath
+                                               uitoolkit:uitoolkit
+                                            itemAddedBlk:nil
+                                          itemChangedBlk:itemChangedBlk
+                                  syncInitiatedNotifName:syncInitiatedNotifName
+                                         syncedNotifName:syncedNotifName
+                                     syncFailedNotifName:syncFailedNotifName
+                          entityRemotelyDeletedNotifName:entityRemotelyDeletedNotifName
+                          entityLocallyUpdatedNotifNames:entityLocallyUpdatedNotifNames
+                          entityRemotelyUpdatedNotifName:entityRemotelyUpdatedNotifName
+                                        entityPanelMaker:entityPanelMaker
+                                     entityToPanelBinder:entityToPanelBinder
+                                     panelToEntityBinder:panelToEntityBinder
+                                          addEntityTitle:nil
+                                         viewEntityTitle:viewEntityTitle
+                                         editEntityTitle:editEntityTitle
+                                    panelEnablerDisabler:panelEnablerDisabler
+                                       entityAddCanceler:entityAddCanceler
+                                      entityEditPreparer:entityEditPreparer
+                                      entityEditCanceler:entityEditCanceler
+                                             entityMaker:nil
+                                             entitySaver:entitySaver
+                                          newEntitySaver:nil
+                                 doneEditingEntityMarker:doneEditingEntityMarker
+                            syncImmediateWhenDoneEditing:syncImmediateWhenDoneEditing
+                               /*syncImmediateInitiatedMsg:syncImmediateInitiatedMsg
+                                syncImmediateCompleteMsg:syncImmediateCompleteMsg
+                                  syncImmediateFailedMsg:syncImmediateFailedMsg
+                              syncImmediateRetryAfterMsg:syncImmediateRetryAfterMsg*/
+                     isEntityAppropriateForBackgroundSync:isEntityAppropriateForBackgroundSync
+                          prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
+                                        viewDidAppearBlk:viewDidAppearBlk
+                                         entityValidator:entityValidator
+                                   foregroundEditActorId:foregroundEditActorId
+                           entityAddedNotificationToPost:nil
+                         entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
+                                   getterForNotification:nil];
 }
 
 #pragma mark - Helpers
@@ -526,11 +524,27 @@ entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
 }
 
 - (BOOL)stopEditing {
+  
+  void (^postEditActivities)(void) = ^{
+    if (_itemChangedBlk) {
+      _itemChangedBlk(_entity, _entityIndexPath);
+    }
+    [self.navigationItem setHidesBackButton:NO animated:YES];
+    [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
+    [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+    [[self navigationItem] setLeftBarButtonItem:_backButton];
+    [[self navigationItem] setRightBarButtonItem:[self editButtonItem]];
+    [[self navigationItem] setTitle:_viewEntityTitle];
+    _panelEnablerDisabler(_entityPanel, NO);
+    [PELMNotificationUtils postNotificationWithName:_entityUpdatedNotificationToPost
+                                             entity:_entity];
+  };
+  
   if (_isEditCanceled) {
     _entityEditCanceler(self, _entity);
-    [[self navigationItem] setRightBarButtonItem:[self editButtonItem]];
     _entityToPanelBinder(_entity, _entityPanel);
     _isEditCanceled = NO;
+    postEditActivities();
   } else {
     NSArray *errMsgs = _entityValidator(_entityPanel);
     BOOL isValidEntity = YES;
@@ -540,124 +554,152 @@ entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
     if (isValidEntity) {
       _panelToEntityBinder(_entityPanel, _entity);
       _entitySaver(self, _entity);
-      
-      
+
       if (_syncImmediateWhenDoneEditing) {
-        void (^reenableScreen)(void) = ^{
-          [self.navigationItem setHidesBackButton:NO animated:YES];
-          [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
-          [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
-        };
-/*        void (^comeBackLaterBlk)(void) = ^{
-          //[self dismissViewControllerAnimated:YES completion:nil];
-          [[self navigationController] popViewControllerAnimated:YES];
-        };*/
         MBProgressHUD *_HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         [self.navigationItem setHidesBackButton:YES animated:YES];
         [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
         [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
         _HUD.delegate = self;
-        _HUD.labelText = _syncImmediateInitiatedMsg;
+        _HUD.labelText = @"Attempting to sync edits to server.";
         void(^syncSuccessBlk)(void) = ^{
           dispatch_async(dispatch_get_main_queue(), ^{
-            [_HUD setLabelText:_syncImmediateCompleteMsg];
+            [_HUD setLabelText:@"Success!"];
+            [_HUD setDetailsLabelText:@"Your edits were synced to the server."];
             __block UIImageView *imageView;
             UIImage *image = [UIImage imageNamed:@"hud-complete"];
             imageView = [[UIImageView alloc] initWithImage:image];
             [_HUD setCustomView:imageView];
             _HUD.mode = MBProgressHUDModeCustomView;
-            [_HUD hide:YES afterDelay:0.85];
-            reenableScreen();
+            [_HUD hide:YES afterDelay:1.30];
+            postEditActivities();
           });
         };
-        void(^syncFailedBlk)(NSError *) = ^(NSError *err) {
-          //_entitySyncCanceler(_entity, err, nil);
+        void (^genericTempFailureHandler)(void) = ^{
           dispatch_async(dispatch_get_main_queue(), ^{
             [_HUD hide:YES afterDelay:0];
-            if (_isEntityConfiguredForBackgroundSync) { // for now, this is unreachable
-              // configure alert message to indicate that entity-sync can
-              // occur in background.  Give 4 options:
-              // 0. Do background sync (we'll let you know when you're edits have synced)
-              // 1. Retry Now (nah; nix this idea)
-              // 2. Come back later and retry (the edits you've made will not be lost) - i.e., leave in edit-in-progress mode
-              // 3. Cancel Edits - invoke: [self cancelAddEdit]; return NO;
-              UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Oops"
-                                                                             message:_syncImmediateFailedMsg
+            if (_isEntityAppropriateForBackgroundSync) {
+              UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Temporary Connection Issue"
+                                                                             message:@"We're sorry, but there was a problem communicating with the server.  We are currently working on the problem.  You can sync this edit (and all other edits) later from the main 'Quick Launch' screen or from the 'Settings' screen." //_syncImmediateFailedMsg
                                                                       preferredStyle:UIAlertControllerStyleAlert];
-              UIAlertAction *syncLater = [UIAlertAction actionWithTitle:@"I'll sync this for you automatically later."
+              UIAlertAction *syncLater = [UIAlertAction actionWithTitle:@"I'll sync this later."
                                                                   style:UIAlertActionStyleDefault
-                                                                handler:^(UIAlertAction *action) {reenableScreen();}];
+                                                                handler:^(UIAlertAction *action) { [[self navigationController] popViewControllerAnimated:YES]; }];
+              UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Forget it.  Just cancel these edits."
+                                                               style:UIAlertActionStyleDestructive
+                                                             handler:^(UIAlertAction *action) {
+                                                               [_entity setEditInProgress:YES]; // needed so that canceler can be called w/out its consistency-check blowing-up
+                                                               _entityEditCanceler(self, _entity);
+                                                               [[self navigationController] popViewControllerAnimated:YES];
+                                                             }];
               [alert addAction:syncLater];
+              [alert addAction:cancel];
               [self presentViewController:alert animated:YES completion:nil];
             } else {
-              // offer the following options:
-              // 1. Retry Now (nah; nix this idea)
-              // 2. Come back later and retry (the edits you've made will not be lost) - i.e., leave in edit-in-progress mode
-              // 3. Cancel Edits (you'll lose your changes) - invoke: invoke: [self cancelAddEdit]; return NO;
-              UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Connection Error"
-                                                                             message:@"We're sorry, but there was a problem communicating with the server.  We are currently working on the problem." //_syncImmediateFailedMsg
+              UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Temporary Connection Issue"
+                                                                             message:@"We're sorry, but there was a problem communicating with the server.  We are currently working on the problem."
                                                                       preferredStyle:UIAlertControllerStyleAlert];
               UIAlertAction *comeBackLater = [UIAlertAction actionWithTitle:@"Come back later and try again."
                                                                       style:UIAlertActionStyleDefault
                                                                     handler:^(UIAlertAction *action) {
-                                                                      [_entity setEditInProgress:YES]; // hack needed so that canceler can be called w/out its consistency-check blowing-up
+                                                                      [_entity setEditInProgress:YES]; // needed so that canceler can be called w/out its consistency-check blowing-up
                                                                       _entityEditCanceler(self, _entity);
-                                                                      //_entityEditPreparer(self, _entity);
                                                                       [[self navigationController] popViewControllerAnimated:YES];
-                                                                      //comeBackLaterBlk();
-                                                                      //reenableScreen();
-                                                                      //[self dismissViewControllerAnimated:YES completion:nil];
-                                                                      //[self setEditing:YES animated:YES];
-              }];
-              /*UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Cancel edits"
-                                                               style:UIAlertActionStyleDestructive
-                                                             handler:^(UIAlertAction *action) {
-                //reenableScreen();
-                                                               _entityEditCanceler(self, _entity);
-                                                               [self dismissViewControllerAnimated:YES completion:nil];
-              }];*/
+                                                                    }];
               [alert addAction:comeBackLater];
-              //[alert addAction:cancel];
               [self presentViewController:alert animated:YES completion:nil];
             }
           });
         };
         void(^syncRetryAfterBlk)(NSDate *) = ^(NSDate *retryAfter) {
-          //_entitySyncCanceler(_entity, nil, nil);
+          genericTempFailureHandler();
+        };
+        void (^syncServerTempError)(void) = ^{
+          genericTempFailureHandler();
+        };
+        void (^syncServerError)(NSInteger) = ^(NSInteger errorMask) {
           dispatch_async(dispatch_get_main_queue(), ^{
-            [_HUD hide:YES afterDelay:1];
-            reenableScreen();
-            //[PEUIUtils showAlertWithMsgs:@[_syncImmediateRetryAfterMsg]
-            //                       title:@"Server Temporarily Unavailable"
-            //                 buttonTitle:@"Okay"];
+            [_HUD hide:YES afterDelay:0];
+            
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error"
+                                                                           message:@"There was a problem saving your edits.  The error message from the server is:"
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *fixNow = [UIAlertAction actionWithTitle:@"Okay.  I'll fix them now."
+                                                             style:UIAlertActionStyleDefault
+                                                           handler:^(UIAlertAction *action) {
+                                                             _entityEditPreparer(self, _entity);
+                                                             [super setEditing:YES animated:NO];
+                                                             [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
+                                                             //postEditActivities();
+                                                           }];
+            UIAlertAction *fixLater = [UIAlertAction actionWithTitle:@"I'll fix them later."
+                                                               style:UIAlertActionStyleDefault
+                                                             handler:^(UIAlertAction *action) {
+                                                               postEditActivities();
+                                                             }];
+            UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Forget it.  Just cancel these edits."
+                                                             style:UIAlertActionStyleDestructive
+                                                           handler:^(UIAlertAction *action) {
+                                                             [_entity setEditInProgress:YES]; // needed so that canceler can be called w/out its consistency-check blowing-up
+                                                             _entityEditCanceler(self, _entity);
+                                                             _entityToPanelBinder(_entity, _entityPanel);
+                                                             _isEditCanceled = NO; // reset this to NO
+                                                             postEditActivities();
+                                                           }];
+            [alert addAction:fixNow];
+            [alert addAction:fixLater];
+            [alert addAction:cancel];
+            /*UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error"
+                                                                           message:@"There was a problem saving your record.  The error message from the server is:"
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *ack = [UIAlertAction actionWithTitle:@"Okay"
+                                                          style:UIAlertActionStyleDefault
+                                                        handler:^(UIAlertAction *action) {
+                                                          reenableScreen();
+                                                        }];
+            [alert addAction:ack];*/
+            [self presentViewController:alert animated:YES completion:nil];
+          });
+        };
+        void(^syncAuthReqdBlk)(void) = ^{
+          dispatch_async(dispatch_get_main_queue(), ^{
+            [_HUD hide:YES afterDelay:0];
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Authentication Error"
+                                                                           message:@"It would seem you're no longer authenticated.  Please sign-in."
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *ack = [UIAlertAction actionWithTitle:@"Okay"
+                                                          style:UIAlertActionStyleDefault
+                                                        handler:^(UIAlertAction *action) {
+                                                          //reenableScreen();
+                                                          postEditActivities();
+                                                        }];
+            [alert addAction:ack];
+            [self presentViewController:alert animated:YES completion:nil];
           });
         };
         dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-          _doneEditingEntityMarker(_entity, syncSuccessBlk, syncFailedBlk, syncRetryAfterBlk);
+          _doneEditingEntityMarker(self, _entity, syncSuccessBlk, syncRetryAfterBlk, syncServerTempError, syncServerError, syncAuthReqdBlk);
         });
       } else {
-        _doneEditingEntityMarker(_entity, nil, nil, nil);
+        _doneEditingEntityMarker(self, _entity, nil, nil, nil, nil, nil);
+        postEditActivities();
       }
-      
-      
     } else {
       [PEUIUtils showAlertWithMsgs:errMsgs title:@"Oops" buttonTitle:@"Okay"];
       return NO;
     }
   }
 
-  if (_itemChangedBlk) {
+  /*if (_itemChangedBlk) {
     _itemChangedBlk(_entity, _entityIndexPath);
   }
-  
   [[self navigationItem] setLeftBarButtonItem:_backButton];
   [[self navigationItem] setRightBarButtonItem:[self editButtonItem]];
   [[self navigationItem] setTitle:_viewEntityTitle];
-  
   _panelEnablerDisabler(_entityPanel, NO);
   [PELMNotificationUtils postNotificationWithName:_entityUpdatedNotificationToPost
-                                           entity:_entity];
-  
+                                           entity:_entity];*/
+
   return YES;
 }
 
@@ -672,19 +714,140 @@ entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
     isValidEntity = NO;
   }
   if (isValidEntity) {
-    id newEntity = _entityMaker(_entityPanel);
-    _newEntitySaver(_entityPanel, newEntity);
-    _itemAddedBlk(self, newEntity);
+    _newEntity = _entityMaker(_entityPanel);
     
-    id newEntityForNotification = newEntity;
-    if (_getterForNotification) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-        newEntityForNotification = [newEntity performSelector:_getterForNotification];
-#pragma clang diagnostic pop
+    void (^notificationSenderForAdd)(id) = ^(id theNewEntity) {
+      id newEntityForNotification = theNewEntity;
+      if (_getterForNotification) {
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+        newEntityForNotification = [theNewEntity performSelector:_getterForNotification];
+        #pragma clang diagnostic pop
+      }
+      [PELMNotificationUtils postNotificationWithName:_entityAddedNotificationToPost
+                                               entity:newEntityForNotification];
+    };
+    if (_syncImmediateWhenDoneEditing) {
+      void (^reenableScreen)(void) = ^{        
+        [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
+        [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+      };
+      MBProgressHUD *_HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+      [self.navigationItem setHidesBackButton:YES animated:YES];
+      [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
+      [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+      _HUD.delegate = self;
+      _HUD.labelText = @"Attempting to sync record to server.";
+      void(^syncSuccessBlk)(void) = ^{
+        notificationSenderForAdd(_newEntity);
+        dispatch_async(dispatch_get_main_queue(), ^{
+          [_HUD setLabelText:@"Success!"];
+          [_HUD setDetailsLabelText:@"Your record was synced to the server."];
+          __block UIImageView *imageView;
+          UIImage *image = [UIImage imageNamed:@"hud-complete"];
+          imageView = [[UIImageView alloc] initWithImage:image];
+          [_HUD setCustomView:imageView];
+          _HUD.mode = MBProgressHUDModeCustomView;
+          [_HUD hide:YES afterDelay:1.30];
+          dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            _itemAddedBlk(self, _newEntity);  // this is what causes this controller to be dismissed
+          });
+        });
+      };
+      void (^genericTempFailureHandler)(void) = ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+          [_HUD hide:YES afterDelay:0];
+          if (_isEntityAppropriateForBackgroundSync) {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Temporary Connection Issue"
+                                                                           message:@"We're sorry, but there was a problem communicating with the server.  We are currently working on the problem.  You can sync this record (and all other edits) later from the main 'Quick Launch' screen or from the 'Settings' screen." //_syncImmediateFailedMsg
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *syncLater = [UIAlertAction actionWithTitle:@"I'll sync this later."
+                                                                style:UIAlertActionStyleDefault
+                                                              handler:^(UIAlertAction *action) {
+                                                                _itemAddedBlk(self, _newEntity);
+                                                                notificationSenderForAdd(_newEntity);
+                                                              }];
+            UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Forget it.  Just cancel this record."
+                                                             style:UIAlertActionStyleDestructive
+                                                           handler:^(UIAlertAction *action) {
+                                                             _entityAddCanceler(self, _newEntity); // should cause controller to be dismissed
+                                                           }];
+            [alert addAction:syncLater];
+            [alert addAction:cancel];
+            [self presentViewController:alert animated:YES completion:nil];
+          } else {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Temporary Connection Issue"
+                                                                           message:@"We're sorry, but there was a problem communicating with the server.  We are currently working on the problem."
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *comeBackLater = [UIAlertAction actionWithTitle:@"Come back later and try again."
+                                                                    style:UIAlertActionStyleDefault
+                                                                  handler:^(UIAlertAction *action) {
+                                                                    _entityAddCanceler(self, _newEntity); // should cause controller to be dismissed
+                                                                    notificationSenderForAdd(_newEntity);
+                                                                  }];
+            [alert addAction:comeBackLater];
+            [self presentViewController:alert animated:YES completion:nil];
+          }
+        });
+      };
+      void(^syncRetryAfterBlk)(NSDate *) = ^(NSDate *retryAfter) {
+        genericTempFailureHandler();
+      };
+      void (^syncServerTempError)(void) = ^{
+        genericTempFailureHandler();
+      };
+      void (^syncServerError)(NSInteger) = ^(NSInteger errorMask) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+          [_HUD hide:YES afterDelay:0];
+          UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error"
+                                                                         message:@"There was a problem saving your record.  The error message from the server is:"
+                                                                  preferredStyle:UIAlertControllerStyleAlert];
+          UIAlertAction *fixNow = [UIAlertAction actionWithTitle:@"Okay - I'll try to fix it now"
+                                                        style:UIAlertActionStyleDefault
+                                                      handler:^(UIAlertAction *action) {
+                                                        reenableScreen();
+                                                      }];
+          UIAlertAction *fixLater = [UIAlertAction actionWithTitle:@"I'll fix the issues later"
+                                                        style:UIAlertActionStyleDefault
+                                                      handler:^(UIAlertAction *action) {
+                                                        notificationSenderForAdd(_newEntity);
+                                                        _itemAddedBlk(self, _newEntity); // causes screen to be dismissed
+                                                      }];
+          UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Forget it.  Just cancel this record."
+                                                           style:UIAlertActionStyleDestructive
+                                                         handler:^(UIAlertAction *action) {
+                                                           _entityAddCanceler(self, _newEntity); // should cause controller to be dismissed
+                                                         }];
+          [alert addAction:fixNow];
+          [alert addAction:fixLater];
+          [alert addAction:cancel];
+          [self presentViewController:alert animated:YES completion:nil];
+        });
+      };
+      void(^syncAuthReqdBlk)(void) = ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+          [_HUD hide:YES afterDelay:0];
+          UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Authentication Error"
+                                                                         message:@"It would seem you're no longer authenticated.  Please sign-in."
+                                                                  preferredStyle:UIAlertControllerStyleAlert];
+          UIAlertAction *ack = [UIAlertAction actionWithTitle:@"Okay"
+                                                        style:UIAlertActionStyleDefault
+                                                      handler:^(UIAlertAction *action) {
+                                                        //notificationSenderForAdd(_newEntity);
+                                                        reenableScreen();
+                                                      }];
+          [alert addAction:ack];
+          [self presentViewController:alert animated:YES completion:nil];
+        });
+      };
+      dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+        _newEntitySaver(_entityPanel, _newEntity, syncSuccessBlk, syncRetryAfterBlk, syncServerTempError, syncServerError, syncAuthReqdBlk);
+      });
+    } else {
+      _newEntitySaver(_entityPanel, _newEntity, nil, nil, nil, nil, nil);
+      _itemAddedBlk(self, _newEntity);  // this is what causes this controller to be dismissed
+      notificationSenderForAdd(_newEntity);
     }
-    [PELMNotificationUtils postNotificationWithName:_entityAddedNotificationToPost
-                                             entity:newEntityForNotification];
   } else {
     [PEUIUtils showAlertWithMsgs:errMsgs title:@"Oops" buttonTitle:@"Okay"];
   }
@@ -694,7 +857,8 @@ entityUpdatedNotificationToPost:entityUpdatedNotificationToPost
 
 - (void)cancelAddEdit {
   if (_isAdd) {
-    _entityAddCanceler(self);
+    _entityAddCanceler(self, _newEntity);
+    _newEntity = nil;
   } else {
     _isEditCanceled = YES;
     [self setEditing:NO animated:YES]; // to get 'Done' button to turn to 'Edit'

@@ -31,7 +31,9 @@
   NSInteger titleTag = 89;
   NSInteger subtitleTag = 90;
   NSInteger warningIconTag = 91;
-  CGFloat vpaddingForTopifiedTitle = 8.0;
+  
+  CGFloat vpaddingForTopifiedTitleToFitNeedFixIcon = 8.0;
+  CGFloat vpaddingForTopifiedTitleToFitSubtitle = 11.0;
   
   void (^removeView)(NSInteger, UIView *) = ^(NSInteger tag, UIView *view) {
     [[view viewWithTag:tag] removeFromSuperview];
@@ -55,7 +57,7 @@
     NSString *subTitleMsg = nil;
     BOOL syncWarningNeedsFix = NO;
     BOOL syncWarningTemporary = NO;
-    
+    CGFloat vpaddingForTopification = vpaddingForTopifiedTitleToFitSubtitle;
     if ([entity editInProgress]) {
       if ([[entity editActorId] isEqualToNumber:@(foregroundActorId)]) {
         subTitleMsg = @"Edit in progress.";
@@ -68,6 +70,7 @@
       if ([entity syncErrMask] && ([entity syncErrMask].integerValue > 0)) {
         syncWarningNeedsFix = YES;
         subTitleMsg = @"Needs fixing.";
+        vpaddingForTopification = vpaddingForTopifiedTitleToFitNeedFixIcon;
       } else if ([entity syncHttpRespCode] || ([entity syncErrMask] && ([entity syncErrMask].integerValue <= 0))) {
         syncWarningTemporary = YES;
         subTitleMsg = @"Temporary sync problem.";
@@ -86,13 +89,21 @@
         [PEUIUtils placeView:titleLabel
                      atTopOf:view
                withAlignment:PEUIHorizontalAlignmentTypeLeft
-                    vpadding:vpaddingForTopifiedTitle
+                    vpadding:vpaddingForTopification
                     hpadding:15.0];
       } else {
-        [PEUIUtils placeView:titleLabel
-                  inMiddleOf:view
-               withAlignment:PEUIHorizontalAlignmentTypeLeft
-                    hpadding:15.0];
+        if (subTitleMsg) {
+          [PEUIUtils placeView:titleLabel
+                       atTopOf:view
+                 withAlignment:PEUIHorizontalAlignmentTypeLeft
+                      vpadding:vpaddingForTopification
+                      hpadding:15.0];
+        } else {
+          [PEUIUtils placeView:titleLabel
+                    inMiddleOf:view
+                 withAlignment:PEUIHorizontalAlignmentTypeLeft
+                      hpadding:15.0];
+        }
       }
     }
     

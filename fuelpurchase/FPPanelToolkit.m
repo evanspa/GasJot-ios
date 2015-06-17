@@ -15,6 +15,7 @@
 #import <BlocksKit/UIControl+BlocksKit.h>
 #import "FPLogEnvLogComposite.h"
 #import "FPNames.h"
+#import "FPEditActors.h"
 
 NSString * const FPFpLogEntityMakerFpLogEntry = @"FPFpLogEntityMakerFpLogEntry";
 NSString * const FPFpLogEntityMakerVehicleEntry = @"FPFpLogEntityMakerVehicleEntry";
@@ -245,10 +246,12 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
 
 - (PEEntityMakerBlk)vehicleMaker {
   return ^ PELMModelSupport * (UIView *panel) {
-    return [_coordDao
-              vehicleWithName:[PEUIUtils stringFromTextFieldWithTag:FPVehicleTagName fromView:panel]
-                defaultOctane:[PEUIUtils numberFromTextFieldWithTag:FPVehicleTagDefaultOctane fromView:panel]
-                 fuelCapacity:[PEUIUtils decimalNumberFromTextFieldWithTag:FPVehicleTagFuelCapacity fromView:panel]];
+    FPVehicle *newVehicle =
+      [_coordDao vehicleWithName:[PEUIUtils stringFromTextFieldWithTag:FPVehicleTagName fromView:panel]
+                   defaultOctane:[PEUIUtils numberFromTextFieldWithTag:FPVehicleTagDefaultOctane fromView:panel]
+                    fuelCapacity:[PEUIUtils decimalNumberFromTextFieldWithTag:FPVehicleTagFuelCapacity fromView:panel]];
+    [newVehicle setEditActorId:@(FPForegroundActorId)];
+    return newVehicle;
   };
 }
 
