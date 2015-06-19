@@ -285,12 +285,12 @@
 			name = "Pull-to-Refresh List View Controller";
 			sourceTree = "<group>";
 		};
-		189AC7521A78030D00A6CFE3 /* model */ = {
+		189AC7521A78030D00A6CFE3 /* Model */ = {
 			isa = PBXGroup;
 			children = (
 				189AC7531A78032400A6CFE3 /* Fp Env Log Composite */,
 			);
-			name = model;
+			name = Model;
 			sourceTree = "<group>";
 		};
 		189AC7531A78032400A6CFE3 /* Fp Env Log Composite */ = {
@@ -420,7 +420,7 @@
 				181003AC1A6E1CA400FB6C55 /* Edit actors */,
 				186E0B7819CD1BDD00CE4B3A /* UI Commons */,
 				185D38CC1815952B0007587A /* App Delegate */,
-				189AC7521A78030D00A6CFE3 /* model */,
+				189AC7521A78030D00A6CFE3 /* Model */,
 				18456CE719D39D840023A2A7 /* Panel Toolkit */,
 				18AB99FB17F6832C002A8A69 /* View Controllers */,
 				18AB99FA17F6831C002A8A69 /* Utils */,

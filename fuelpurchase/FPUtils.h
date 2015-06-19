@@ -49,6 +49,8 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
 
 #pragma mark - Fuel Station Helpers
 
++ (NSArray *)computeSaveFuelStationErrMsgs:(NSInteger)saveFuelStationErrMask;
+
 + (NSArray *)sortFuelstations:(NSArray *)fuelstations
      inAscOrderByDistanceFrom:(CLLocation *)location;
 

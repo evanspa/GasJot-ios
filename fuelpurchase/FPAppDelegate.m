@@ -76,6 +76,7 @@ NSString * const FPAuthTokenResponseHeaderNameKey        = @"FP auth token respo
 NSString * const FPTimeoutForCoordDaoMainThreadOpsKey    = @"FP timeout for main thread coordinator dao operations";
 NSString * const FPTimeIntervalForFlushToRemoteMasterKey = @"FP time interval for flush to remote master";
 NSString * const FPLocalOnlyKey                          = @"FP Local Only";
+NSString * const FPAuthenticationRequiredAtKey           = @"FP Authentication required at";
 
 #ifdef FP_DEV
   NSString * const FPAPIResourceFileName = @"fpapi-resource.localdev";
@@ -344,7 +345,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 - (void)didReceiveNewAuthToken:(NSString *)authToken
        forUserGlobalIdentifier:(NSString *)userGlobalIdentifier {
-            //forUsernameOrEmail:(NSString *)usernameOrEmail {
   DDLogDebug(@"Received new authentication token: [%@].  About to store in \
 keychain under key: [%@].",
              authToken, userGlobalIdentifier);
@@ -355,23 +355,29 @@ keychain under key: [%@].",
 }
 
 - (void)authRequired:(HCAuthentication *)authentication {
-  // since we're being told that auth is required, then, we can deduce that IF
-  // we currently have an auth token in the keychain, THEN, it must no longer
-  // be valid (otherwise we'd never get this method invoked), THEREFORE we'll
-  // blow away the token from the keychain.
-  DDLogDebug(@"authRequired: invoked.  In response, I'm going to blow-away \
-contents of keychain (thus deleting user's stale auth token)");
-  [_keychainStore removeAllItems];
-}
-
-//-(void)invalidateTokenForUsernameOrEmail:(NSString *)usernameOrEmail {
--(void)invalidateTokenForUserGlobalIdentifier:(NSString *)userGlobalIdentifier {
-  DDLogDebug(@"invalidateTokenForUserGlobalIdentifier: invoked for userGlobalIdentifier: \
-[%@]", userGlobalIdentifier);
-  [_keychainStore removeItemForKey:userGlobalIdentifier];
+  DDLogDebug(@"Notified that 'auth required' from some remote operation.  Therefore \
+I'm going to insert this knowledge into the keychian so the app knows it's currently \
+in an unauthenticated state.");
+  [_keychainStore setString:[[NSDate date] description] forKey:FPAuthenticationRequiredAtKey];
 }
 
 #pragma mark - Security and User-related
+
+- (void)logoutUser:(FPUser *)user {
+  __block BOOL wasError = NO;
+  PELMDaoErrorBlk errorBlk = ^(NSError *err, int code, NSString *msg) {
+    wasError = YES;
+    [PEUIUtils showAlertWithMsgs:@[[err localizedDescription]]
+                           title:@"Error Attempting to Logout"
+                     buttonTitle:@"Cancel"];
+  };
+  [_coordDao logoutUser:user error:errorBlk];
+  [_keychainStore removeAllItems];
+  if (!wasError) {
+    UIViewController *unauthHome = [_screenToolkit newUnauthLandingScreenMakerWithTempNotification:@"Logout Successful"]();
+    [[self window] setRootViewController:unauthHome];
+  }
+}
 
 - (NSString *)storedAuthenticationTokenForUser:(FPUser *)user {
   NSString *globalIdentifier = [user globalIdentifier];

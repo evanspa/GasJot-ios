@@ -55,12 +55,12 @@ PODS:
   - PEDev-Console (1.0.1):
     - PEObjc-Commons (~> 1.0.1)
     - PESimu-Select (~> 1.0.1)
-  - PEFuelPurchase-Common (1.0.7):
+  - PEFuelPurchase-Common (1.0.8):
     - PEHateoas-Client (~> 1.0.2)
-  - PEFuelPurchase-Model (1.0.20):
+  - PEFuelPurchase-Model (1.0.24):
     - CocoaLumberjack (~> 1.9)
     - FMDB (~> 2.5)
-    - PEFuelPurchase-Common (~> 1.0.7)
+    - PEFuelPurchase-Common (~> 1.0.8)
     - PEHateoas-Client (~> 1.0.2)
     - PEObjc-Commons (~> 1.0.6)
     - UICKeyChainStore (~> 2.0.4)
@@ -97,8 +97,8 @@ DEPENDENCIES:
   - IQKeyboardManager (~> 3.2.1.1)
   - MBProgressHUD (~> 0.9.1)
   - PEDev-Console (~> 1.0.1)
-  - PEFuelPurchase-Common (~> 1.0.7)
-  - PEFuelPurchase-Model (~> 1.0.20)
+  - PEFuelPurchase-Common (~> 1.0.8)
+  - PEFuelPurchase-Model (~> 1.0.24)
   - PEObjc-Commons (~> 1.0.8)
   - ReactiveCocoa (~> 2.4.7)
   - SVPullToRefresh (~> 0.4.1)
@@ -115,8 +115,8 @@ SPEC CHECKSUMS:
   MBProgressHUD: c47f2c166c126cf2ce36498d80f33e754d4e93ad
   OHHTTPStubs: 8cf0cfe6f34f13fc88fdf5b2a1b2c2536e8c0261
   PEDev-Console: 63b20d7ef16aada4dcd236dccef8edb18fdf3035
-  PEFuelPurchase-Common: b0104a33bb4582b52cd8e382de77f0e82707d680
-  PEFuelPurchase-Model: d2107f3f0d11bf3a92c1ed0ef4250f3b2833ba80
+  PEFuelPurchase-Common: 315cd43955e69e5be94373405f1b55b6723d30b6
+  PEFuelPurchase-Model: b0bda91c7a8a898e1b61e3bcbccd1be9ccb73445
   PEHateoas-Client: 9729b1e9099a9626c644e730f6ab7c37f0e55ccd
   PEObjc-Commons: c40bea2ce7f44ed636a74b7c78cd7a2753120d4e
   PESimu-Select: 58c14dfadbefdbfa996cfd94987aa1b74946b483

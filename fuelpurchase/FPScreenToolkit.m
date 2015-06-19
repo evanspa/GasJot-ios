@@ -171,13 +171,15 @@ the background-processor is currently attempting to edit this record.  Try again
                                                      PESyncImmediateServerTempErrorBlk tempErrBlk,
                                                      PESyncImmediateServerErrorBlk errBlk,
                                                      PESyncImmediateAuthRequiredBlk authReqdBlk) {
+      NSString *mainMsgFragment = @"saving user account";
+      NSString *recordTitle = @"User account";
       [_coordDao markAsDoneEditingAndSyncUserImmediate:user
                                            editActorId:@(FPForegroundActorId)
-                                            successBlk:^{successBlk();}
-                                    remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(retryAfter);}
-                                    tempRemoteErrorBlk:tempErrBlk
-                                        remoteErrorBlk:errBlk
-                                       authRequiredBlk:authReqdBlk
+                                            successBlk:^{successBlk(1, mainMsgFragment, recordTitle);}
+                                    remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
+                                    tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
+                                        remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                                       authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
@@ -207,6 +209,7 @@ the background-processor is currently attempting to edit this record.  Try again
                             entitySaver:userSaver
                 doneEditingEntityMarker:doneEditingUserMarker
            syncImmediateWhenDoneEditing:YES
+         syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
               /*syncImmediateInitiatedMsg:@"Saving User"
                syncImmediateCompleteMsg:@"Complete"
                  syncImmediateFailedMsg:@"Saved Failed"
@@ -362,15 +365,16 @@ the background-processor is currently attempting to edit this record.  Try again
                                            PESyncImmediateServerTempErrorBlk tempErrBlk,
                                            PESyncImmediateServerErrorBlk errBlk,
                                            PESyncImmediateAuthRequiredBlk authReqdBlk) {
-       [_coordDao saveNewAndSyncImmediateVehicle:newVehicle
-                                         forUser:user
-                                      successBlk:^{successBlk();}
-                              remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(retryAfter);}
-                              tempRemoteErrorBlk:tempErrBlk
-                                  remoteErrorBlk:errBlk
-                                 authRequiredBlk:authReqdBlk
-                                           error:[FPUtils localSaveErrorHandlerMaker]()];
-      
+      NSString *mainMsgFragment = @"saving vehicle";
+      NSString *recordTitle = @"Vehicle";
+     [_coordDao saveNewAndSyncImmediateVehicle:newVehicle
+                                       forUser:user
+                                    successBlk:^{successBlk(1, mainMsgFragment, recordTitle);}
+                            remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
+                            tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
+                                remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                               authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
+                                         error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
       UITextField *vehicleNameTf = (UITextField *)[entityPanel viewWithTag:FPVehicleTagName];
@@ -405,6 +409,7 @@ the background-processor is currently attempting to edit this record.  Try again
                    foregroundEditActorId:@(FPForegroundActorId)
            entityAddedNotificationToPost:FPVehicleAdded
             syncImmediateWhenDoneEditing:YES
+          syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
     isEntityAppropriateForBackgroundSync:YES];
   };
 }
@@ -440,16 +445,18 @@ the background-processor is currently attempting to edit this record.  Try again
                                                         PESyncImmediateServerTempErrorBlk tempErrBlk,
                                                         PESyncImmediateServerErrorBlk errBlk,
                                                         PESyncImmediateAuthRequiredBlk authReqdBlk) {
+      NSString *mainMsgFragment = @"saving vehicle";
+      NSString *recordTitle = @"Vehicle";
       [_coordDao markAsDoneEditingAndSyncVehicleImmediate:vehicle
                                                   forUser:user
                                               editActorId:@(FPForegroundActorId)
-                                               successBlk:^{successBlk();}
-                                       remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(retryAfter);}
-                                       tempRemoteErrorBlk:tempErrBlk
-                                           remoteErrorBlk:errBlk
-                                          authRequiredBlk:authReqdBlk
+                                               successBlk:^{successBlk(1, mainMsgFragment, recordTitle);}
+                                       remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
+                                       tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
+                                           remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                                          authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
                                                     error:[FPUtils localSaveErrorHandlerMaker]()];
-      
+
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
       UITextField *vehicleNameTf = (UITextField *)[entityPanel viewWithTag:FPVehicleTagName];
@@ -472,12 +479,13 @@ the background-processor is currently attempting to edit this record.  Try again
                        viewEntityTitle:@"Vehicle"
                        editEntityTitle:@"Edit Vehicle"
                   panelEnablerDisabler:[_panelToolkit vehiclePanelEnablerDisabler]
-                     entityAddCanceler:nil //^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
+                     entityAddCanceler:nil
                     entityEditPreparer:vehicleEditPreparer
                     entityEditCanceler:vehicleEditCanceler
                            entitySaver:vehicleSaver
                doneEditingEntityMarker:doneEditingVehicleMarker
           syncImmediateWhenDoneEditing:YES
+        syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
              /*syncImmediateInitiatedMsg:nil
               syncImmediateCompleteMsg:nil
                 syncImmediateFailedMsg:nil
@@ -639,7 +647,7 @@ the background-processor is currently attempting to edit this record.  Try again
                       entityUpdatedNotifNames:@[FPFuelStationUpdated,
                                                 FPFuelStationRemotelyUpdated,
                                                 FPFuelStationSynced,
-                                                FPFuelStationSyncInitiated,
+                                                //FPFuelStationSyncInitiated,
                                                 FPFuelStationSyncFailed,
                                                 FPFuelStationCoordinateComputeInitiated,
                                                 FPFuelStationCoordinateComputeSuccess,
@@ -712,7 +720,7 @@ the background-processor is currently attempting to edit this record.  Try again
                       entityUpdatedNotifNames:@[FPFuelStationUpdated,
                                                 FPFuelStationRemotelyUpdated,
                                                 FPFuelStationSynced,
-                                                FPFuelStationSyncInitiated,
+                                                //FPFuelStationSyncInitiated,
                                                 FPFuelStationSyncFailed,
                                                 FPFuelStationCoordinateComputeInitiated,
                                                 FPFuelStationCoordinateComputeSuccess,
@@ -743,9 +751,16 @@ the background-processor is currently attempting to edit this record.  Try again
                                                PESyncImmediateServerTempErrorBlk tempErrBlk,
                                                PESyncImmediateServerErrorBlk errBlk,
                                                PESyncImmediateAuthRequiredBlk authReqdBlk) {
-      [_coordDao saveNewFuelStation:newFuelStation
-                            forUser:user
-                              error:[FPUtils localSaveErrorHandlerMaker]()];
+      NSString *mainMsgFragment = @"saving fuel station";
+      NSString *recordTitle = @"Fuel station";
+      [_coordDao saveNewAndSyncImmediateFuelStation:newFuelStation
+                                            forUser:user
+                                         successBlk:^{successBlk(1, mainMsgFragment, recordTitle);}
+                                 remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
+                                 tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
+                                     remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                                    authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
+                                              error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
       UITextField *nameTf = (UITextField *)[entityPanel viewWithTag:FPFuelStationTagName];
@@ -758,6 +773,8 @@ the background-processor is currently attempting to edit this record.  Try again
         [_coordDao cancelEditOfFuelStation:newFuelStation
                                editActorId:@(FPForegroundActorId)
                                      error:[FPUtils localSaveErrorHandlerMaker]()];
+        [PELMNotificationUtils postNotificationWithName:FPFuelStationDeleted
+                                                 entity:newFuelStation];
       }
       [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
     };
@@ -774,10 +791,11 @@ the background-processor is currently attempting to edit this record.  Try again
           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                         viewDidAppearBlk:nil
                          entityValidator:[self newFuelStationValidator]
-                         messageComputer:^(NSInteger errMask){return @[];}
+                         messageComputer:^(NSInteger errMask){return [FPUtils computeSaveFuelStationErrMsgs:errMask];}
                    foregroundEditActorId:@(FPForegroundActorId)
            entityAddedNotificationToPost:FPFuelStationAdded
-            syncImmediateWhenDoneEditing:NO
+            syncImmediateWhenDoneEditing:YES
+          syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
     isEntityAppropriateForBackgroundSync:YES];
   };
 }
@@ -816,10 +834,18 @@ the background-processor is currently attempting to edit this record.  Try again
                                                             PESyncImmediateServerTempErrorBlk tempErrBlk,
                                                             PESyncImmediateServerErrorBlk errBlk,
                                                             PESyncImmediateAuthRequiredBlk authReqdBlk) {
+      NSString *mainMsgFragment = @"saving fuel station";
+      NSString *recordTitle = @"Fuel station";
       FPFuelStation *fuelStation = (FPFuelStation *)entity;
-      [_coordDao markAsDoneEditingFuelStation:fuelStation
-                                  editActorId:@(FPForegroundActorId)
-                                        error:[FPUtils localSaveErrorHandlerMaker]()];
+      [_coordDao markAsDoneEditingAndSyncFuelStationImmediate:fuelStation
+                                                      forUser:user
+                                                  editActorId:@(FPForegroundActorId)
+                                                   successBlk:^{successBlk(1, mainMsgFragment, recordTitle);}
+                                           remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
+                                           tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
+                                               remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                                              authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
+                                                        error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
       UITextField *nameTf = (UITextField *)[entityPanel viewWithTag:FPFuelStationTagName];
@@ -843,12 +869,13 @@ the background-processor is currently attempting to edit this record.  Try again
                        viewEntityTitle:@"Fuel Station"
                        editEntityTitle:@"Edit Fuel Station"
                   panelEnablerDisabler:[_panelToolkit fuelStationPanelEnablerDisabler]
-                     entityAddCanceler:nil //^(PEAddViewEditController *ctrl){[[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];}
+                     entityAddCanceler:nil
                     entityEditPreparer:fuelStationEditPreparer
                     entityEditCanceler:fuelStationEditCanceler
                            entitySaver:fuelStationSaver
                doneEditingEntityMarker:doneEditingFuelStationMarker
-          syncImmediateWhenDoneEditing:NO
+          syncImmediateWhenDoneEditing:YES
+        syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
              /*syncImmediateInitiatedMsg:nil
               syncImmediateCompleteMsg:nil
                 syncImmediateFailedMsg:nil
@@ -857,7 +884,7 @@ the background-processor is currently attempting to edit this record.  Try again
         prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                       viewDidAppearBlk:nil
                        entityValidator:[self newFuelStationValidator]
-                       messageComputer:^(NSInteger errMask){return @[];}
+                       messageComputer:^(NSInteger errMask){return [FPUtils computeSaveFuelStationErrMsgs:errMask];}
                  foregroundEditActorId:@(FPForegroundActorId)
        entityUpdatedNotificationToPost:FPFuelStationUpdated];
   };
@@ -901,6 +928,27 @@ the background-processor is currently attempting to edit this record.  Try again
   };
 }
 
+- (NSArray *)shouldSavePrePostFillupEnvLogs:(FPLogEnvLogComposite *)fpEnvLogComposite {
+  BOOL (^isEnvLogEmpty)(FPEnvironmentLog *) = ^BOOL(FPEnvironmentLog *envLog) {
+    return ![envLog odometer] &&
+    ![envLog reportedAvgMpg] &&
+    ![envLog reportedAvgMph] &&
+    ![envLog reportedOutsideTemp] &&
+    ![envLog reportedDte];
+  };
+  BOOL shouldSavePreFillupEnvLog = NO;
+  BOOL shouldSavePostFillupEnvLog = NO;
+  shouldSavePreFillupEnvLog = [[fpEnvLogComposite preFillupEnvLog] reportedDte] && !isEnvLogEmpty([fpEnvLogComposite preFillupEnvLog]);
+  shouldSavePostFillupEnvLog = [[fpEnvLogComposite postFillupEnvLog] reportedDte] && !isEnvLogEmpty([fpEnvLogComposite postFillupEnvLog]);
+  if (!shouldSavePreFillupEnvLog && !shouldSavePostFillupEnvLog) {
+    if (!isEnvLogEmpty([fpEnvLogComposite postFillupEnvLog])) {
+      shouldSavePostFillupEnvLog = YES;
+    }
+  }
+  return @[[NSNumber numberWithBool:shouldSavePreFillupEnvLog],
+           [NSNumber numberWithBool:shouldSavePostFillupEnvLog]];
+}
+
 - (FPAuthScreenMaker)newAddFuelPurchaseLogScreenMakerWithBlk:(PEItemAddedBlk)itemAddedBlk
                                       defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
                                   defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation {
@@ -917,18 +965,71 @@ the background-processor is currently attempting to edit this record.  Try again
           [(UITableView *)[entityPanel viewWithTag:FPFpLogTagVehicleFuelStationAndDate] dataSource];
       FPVehicle *selectedVehicle = [ds selectedVehicle];
       FPFuelStation *selectedFuelStation = [ds selectedFuelStation];
-      [_coordDao saveNewFuelPurchaseLog:[fpEnvLogComposite fpLog]
-                                forUser:user
-                                vehicle:selectedVehicle
-                            fuelStation:selectedFuelStation
-                                  error:[FPUtils localSaveErrorHandlerMaker]()];
-      BOOL (^isEnvLogEmpty)(FPEnvironmentLog *) = ^BOOL(FPEnvironmentLog *envLog) {
-        return ![envLog odometer] &&
-               ![envLog reportedAvgMpg] &&
-               ![envLog reportedAvgMph] &&
-               ![envLog reportedOutsideTemp] &&
-               ![envLog reportedDte];
-      };
+      NSArray *shouldSavePrePostFillupEnvLogs = [self shouldSavePrePostFillupEnvLogs:fpEnvLogComposite];
+      BOOL shouldSavePreFillupEnvLog = [shouldSavePrePostFillupEnvLogs[0] boolValue];
+      BOOL shouldSavePostFillupEnvLog = [shouldSavePrePostFillupEnvLogs[1] boolValue];
+      float saveFpLogPercentComplete = 0;
+      float savePreFillupEnvLogPercentComplete = 0;
+      float savePostFillupEnvLogPercentComplete = 0;
+      if (shouldSavePreFillupEnvLog) {
+        if (shouldSavePostFillupEnvLog) {
+          saveFpLogPercentComplete = 0.4;
+          savePreFillupEnvLogPercentComplete = 0.3;
+          savePostFillupEnvLogPercentComplete = 0.3;
+        } else {
+          saveFpLogPercentComplete = 0.5;
+          savePreFillupEnvLogPercentComplete = 0.5;
+        }
+      } else if (shouldSavePostFillupEnvLog) {
+        saveFpLogPercentComplete = 0.5;
+        savePostFillupEnvLogPercentComplete = 0.5;
+      } else {
+        saveFpLogPercentComplete = 1.0;
+      }
+      [[fpEnvLogComposite fpLog] setVehicleGlobalIdentifier:[selectedVehicle globalIdentifier]];
+      [[fpEnvLogComposite fpLog] setFuelStationGlobalIdentifier:[selectedFuelStation globalIdentifier]];
+      NSString *mainMsgFragment = @"saving fuel purchase log";
+      if (savePreFillupEnvLogPercentComplete || savePostFillupEnvLogPercentComplete) {
+        mainMsgFragment = @"saving fuel purchase and environment logs";
+      }
+      NSString *recordTitle = @"Fuel purchase log";
+      [_coordDao saveNewAndSyncImmediateFuelPurchaseLog:[fpEnvLogComposite fpLog]
+                                                forUser:user
+                                                vehicle:selectedVehicle
+                                            fuelStation:selectedFuelStation
+                                             successBlk:^{successBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle);}
+                                     remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, retryAfter);}
+                                     tempRemoteErrorBlk:^{tempErrBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle);}
+                                         remoteErrorBlk:^(NSInteger errMask) {errBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, errMask);}
+                                        authRequiredBlk:^{authReqdBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle);}
+                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
+      if (savePreFillupEnvLogPercentComplete) {
+        recordTitle = @"Pre-fillup environment log";
+        [[fpEnvLogComposite preFillupEnvLog] setVehicleGlobalIdentifier:[selectedVehicle globalIdentifier]];
+        [_coordDao saveNewAndSyncImmediateEnvironmentLog:[fpEnvLogComposite preFillupEnvLog]
+                                                 forUser:user
+                                                 vehicle:selectedVehicle
+                                              successBlk:^{successBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle);}
+                                      remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter);}
+                                      tempRemoteErrorBlk:^{tempErrBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle);}
+                                          remoteErrorBlk:^(NSInteger errMask) {errBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, errMask);}
+                                         authRequiredBlk:^{authReqdBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle);}
+                                                   error:[FPUtils localSaveErrorHandlerMaker]()];
+      }
+      if (savePostFillupEnvLogPercentComplete) {
+        recordTitle = @"Post-fillup environment log";
+        [[fpEnvLogComposite postFillupEnvLog] setVehicleGlobalIdentifier:[selectedVehicle globalIdentifier]];
+        [_coordDao saveNewAndSyncImmediateEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
+                                                 forUser:user
+                                                 vehicle:selectedVehicle
+                                              successBlk:^{successBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle);}
+                                      remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter);}
+                                      tempRemoteErrorBlk:^{tempErrBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle);}
+                                          remoteErrorBlk:^(NSInteger errMask) {errBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, errMask);}
+                                         authRequiredBlk:^{authReqdBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle);}
+                                                   error:[FPUtils localSaveErrorHandlerMaker]()];
+      }
+      /*
       // 3 possible outcomes: (1) we save 2 envlog records because the user gave
       // both pre and post DTE values.  (2) we save a single envlog record because
       // the user only gave a single DTE value, or none at all.  The below logic
@@ -936,17 +1037,27 @@ the background-processor is currently attempting to edit this record.  Try again
       // hasn't provided any env log data
       if ([[fpEnvLogComposite preFillupEnvLog] reportedDte]) {
         if (!isEnvLogEmpty([fpEnvLogComposite preFillupEnvLog])) {
-          [_coordDao saveNewEnvironmentLog:[fpEnvLogComposite preFillupEnvLog]
-                                   forUser:user
-                                   vehicle:selectedVehicle
-                                     error:[FPUtils localSaveErrorHandlerMaker]()];
+          [_coordDao saveNewAndSyncImmediateEnvironmentLog:[fpEnvLogComposite preFillupEnvLog]
+                                                   forUser:user
+                                                   vehicle:selectedVehicle
+                                                successBlk:^{successBlk(percentComplete);}
+                                        remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(percentComplete, retryAfter);}
+                                        tempRemoteErrorBlk:^{tempErrBlk(percentComplete);}
+                                            remoteErrorBlk:^(NSInteger errMask) {errBlk(percentComplete, errMask);}
+                                           authRequiredBlk:^{authReqdBlk(percentComplete);}
+                                                     error:[FPUtils localSaveErrorHandlerMaker]()];
         }
         if ([[fpEnvLogComposite postFillupEnvLog] reportedDte]) {
           if (!isEnvLogEmpty([fpEnvLogComposite postFillupEnvLog])) {
-            [_coordDao saveNewEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
-                                     forUser:user
-                                     vehicle:selectedVehicle
-                                       error:[FPUtils localSaveErrorHandlerMaker]()];
+            [_coordDao saveNewAndSyncImmediateEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
+                                                     forUser:user
+                                                     vehicle:selectedVehicle
+                                                  successBlk:^{successBlk(percentComplete);}
+                                          remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(percentComplete, retryAfter);}
+                                          tempRemoteErrorBlk:^{tempErrBlk(percentComplete);}
+                                              remoteErrorBlk:^(NSInteger errMask) {errBlk(percentComplete, errMask);}
+                                             authRequiredBlk:^{authReqdBlk(percentComplete);}
+                                                       error:[FPUtils localSaveErrorHandlerMaker]()];
           }
         }
       } else {
@@ -954,12 +1065,17 @@ the background-processor is currently attempting to edit this record.  Try again
         // very well be that its 'reportedDte' value is nil; that doesn't matter
         // because even if it's nil, we want to record an envlog record.
         if (!isEnvLogEmpty([fpEnvLogComposite postFillupEnvLog])) {
-          [_coordDao saveNewEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
-                                   forUser:user
-                                   vehicle:selectedVehicle
-                                     error:[FPUtils localSaveErrorHandlerMaker]()];
+          [_coordDao saveNewAndSyncImmediateEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
+                                                   forUser:user
+                                                   vehicle:selectedVehicle
+                                                successBlk:^{successBlk(percentComplete);}
+                                        remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(percentComplete, retryAfter);}
+                                        tempRemoteErrorBlk:^{tempErrBlk(percentComplete);}
+                                            remoteErrorBlk:^(NSInteger errMask) {errBlk(percentComplete, errMask);}
+                                           authRequiredBlk:^{authReqdBlk(percentComplete);}
+                                                     error:[FPUtils localSaveErrorHandlerMaker]()];
         }
-      }
+      }*/
     };
     PEViewDidAppearBlk viewDidAppearBlk = ^(UIView *entityPanel) {
       UITableView *vehicleFuelStationTable =
@@ -969,13 +1085,28 @@ the background-processor is currently attempting to edit this record.  Try again
                                                animated:YES];
       }
     };
-    PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, FPFuelPurchaseLog *newFpLog) {
-      if (newFpLog) {
-        // delete the unwanted record (probably from when user attempt to sync it, got an app error, and chose to 'forget it, cancel'
-        [newFpLog setEditInProgress:YES];
-        [_coordDao cancelEditOfFuelPurchaseLog:newFpLog
+    PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, FPLogEnvLogComposite *fpEnvLogComposite) {
+      if (fpEnvLogComposite) {
+        FPFuelPurchaseLog *fpLog = [fpEnvLogComposite fpLog];
+        [fpLog setEditInProgress:YES];
+        [_coordDao cancelEditOfFuelPurchaseLog:fpLog
                                    editActorId:@(FPForegroundActorId)
                                          error:[FPUtils localSaveErrorHandlerMaker]()];
+        NSArray *shouldSavePrePostFillupEnvLogs = [self shouldSavePrePostFillupEnvLogs:fpEnvLogComposite];
+        BOOL shouldSavePreFillupEnvLog = [shouldSavePrePostFillupEnvLogs[0] boolValue];
+        BOOL shouldSavePostFillupEnvLog = [shouldSavePrePostFillupEnvLogs[1] boolValue];
+        if (shouldSavePreFillupEnvLog) {
+          [[fpEnvLogComposite preFillupEnvLog] setEditInProgress:YES];
+          [_coordDao cancelEditOfEnvironmentLog:[fpEnvLogComposite preFillupEnvLog]
+                                    editActorId:@(FPForegroundActorId)
+                                          error:[FPUtils localSaveErrorHandlerMaker]()];
+        }
+        if (shouldSavePostFillupEnvLog) {
+          [[fpEnvLogComposite postFillupEnvLog] setEditInProgress:YES];
+          [_coordDao cancelEditOfEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
+                                    editActorId:@(FPForegroundActorId)
+                                          error:[FPUtils localSaveErrorHandlerMaker]()];
+        }
       }
       [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
     };
@@ -998,7 +1129,8 @@ the background-processor is currently attempting to edit this record.  Try again
                          messageComputer:^(NSInteger errMask){return @[];}
                    foregroundEditActorId:@(FPForegroundActorId)
             entityAddedNotificationToPost:FPFuelPurchaseLogAdded
-            syncImmediateWhenDoneEditing:NO
+            syncImmediateWhenDoneEditing:YES
+          syncImmediateMBProgressHUDMode:MBProgressHUDModeDeterminate
     isEntityAppropriateForBackgroundSync:YES
                    getterForNotification:@selector(fpLog)];
   };
@@ -1097,6 +1229,7 @@ the background-processor is currently attempting to edit this record.  Try again
                            entitySaver:fpLogSaver
                doneEditingEntityMarker:doneEditingFuelPurchaseLogMarker
           syncImmediateWhenDoneEditing:NO
+        syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
              /*syncImmediateInitiatedMsg:nil
               syncImmediateCompleteMsg:nil
                 syncImmediateFailedMsg:nil
@@ -1337,6 +1470,7 @@ the background-processor is currently attempting to edit this record.  Try again
                     foregroundEditActorId:@(FPForegroundActorId)
             entityAddedNotificationToPost:FPEnvironmentLogAdded
              syncImmediateWhenDoneEditing:NO
+           syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
      isEntityAppropriateForBackgroundSync:YES];
   };
 }
@@ -1422,6 +1556,7 @@ the background-processor is currently attempting to edit this record.  Try again
                                                   entitySaver:envLogSaver
                                       doneEditingEntityMarker:doneEditingEnvironmentLogMarker
                                  syncImmediateWhenDoneEditing:NO
+                               syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
                                     /*syncImmediateInitiatedMsg:nil
                                      syncImmediateCompleteMsg:nil
                                        syncImmediateFailedMsg:nil

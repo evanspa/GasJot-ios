@@ -11,6 +11,7 @@
 #import <BlocksKit/UIControl+BlocksKit.h>
 #import "PELMUIUtils.h"
 #import "FPEditActors.h"
+#import "FPNames.h"
 #import "FPUtils.h"
 #import <PEFuelPurchase-Model/PELMNotificationUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
@@ -149,25 +150,12 @@
 
 #pragma mark - Logout
 
-- (void)logout {
-  
+- (void)logout {  
   // TODO - check to see if there are any unsynced records in main_* tables, and
   // if any exist, alert the user, as a logout would blow them away, and his/her
   // edits would be lost  
   
-  __block BOOL wasError = NO;
-  PELMDaoErrorBlk errorBlk = ^(NSError *err, int code, NSString *msg) {
-    wasError = YES;
-    [PEUIUtils showAlertWithMsgs:@[[err localizedDescription]]
-                           title:@"Error Attempting to Logout"
-                     buttonTitle:@"Cancel"];
-  };
-  [_coordDao logoutUser:_user error:errorBlk];
-  if (!wasError) {
-    UIViewController *unauthHome =
-      [_screenToolkit newUnauthLandingScreenMakerWithTempNotification:@"Logout Successful"]();
-    [[[[UIApplication sharedApplication] delegate] window] setRootViewController:unauthHome];
-  }
+  [APP logoutUser:_user];
 }
 
 #pragma mark - Edit Mode

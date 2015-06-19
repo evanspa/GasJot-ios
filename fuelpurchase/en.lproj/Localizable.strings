@@ -94,6 +94,11 @@
 "FPConnFailureErrorDomain.-3007" = "Download decoding failed to complete.";
 
 /***************************************************************
+ * 'Save Fuel Station' error messages
+ ***************************************************************/
+"savefuelstation.name-notprovided" = "Name cannot be empty.";
+
+/***************************************************************
  * 'Save Vehicle' error messages
  ***************************************************************/
 "savevehicle.name-notprovided" = "Name cannot be empty.";

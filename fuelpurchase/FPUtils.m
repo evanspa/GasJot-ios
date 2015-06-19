@@ -65,6 +65,14 @@
 
 #pragma mark - Fuel Station Helpers
 
++ (NSArray *)computeSaveFuelStationErrMsgs:(NSInteger)saveFuelStationErrMask {
+  NSMutableArray *errMsgs = [NSMutableArray array];
+  if (saveFuelStationErrMask & FPSaveFuelStationNameNotProvided) {
+    [errMsgs addObject:LS(@"savefuelstation.name-notprovided")];
+  }
+  return errMsgs;
+}
+
 + (NSArray *)sortFuelstations:(NSArray *)fuelstations
      inAscOrderByDistanceFrom:(CLLocation *)location {
   return [fuelstations sortedArrayUsingComparator:^NSComparisonResult(FPFuelStation *fs1, FPFuelStation *fs2) {

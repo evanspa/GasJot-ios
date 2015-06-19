@@ -22,11 +22,11 @@ typedef void (^PEEntityEditCancelerBlk)(PEAddViewEditController *, id);
 typedef void (^PEEntityAddCancelerBlk)(PEAddViewEditController *, id);
 typedef id   (^PEEntityMakerBlk)(UIView *);
 typedef void (^PESaveEntityBlk)(PEAddViewEditController *, id);
-typedef void (^PESyncImmediateSuccessBlk)(void);
-typedef void (^PESyncImmediateServerTempErrorBlk)(void);
-typedef void (^PESyncImmediateServerErrorBlk)(NSInteger);
-typedef void (^PESyncImmediateAuthRequiredBlk)(void);
-typedef void (^PESyncImmediateRetryAfterBlk)(NSDate *);
+typedef void (^PESyncImmediateSuccessBlk)(float, NSString *, NSString *);
+typedef void (^PESyncImmediateServerTempErrorBlk)(float, NSString *, NSString *);
+typedef void (^PESyncImmediateServerErrorBlk)(float, NSString *, NSString *, NSInteger);
+typedef void (^PESyncImmediateAuthRequiredBlk)(float, NSString *, NSString *);
+typedef void (^PESyncImmediateRetryAfterBlk)(float, NSString *, NSString *, NSDate *);
 typedef void (^PEEntitySyncCancelerBlk)(PELMMainSupport *, NSError *, NSNumber *);
 typedef void (^PEMarkAsDoneEditingBlk)(PEAddViewEditController *,
                                        id,
@@ -80,6 +80,7 @@ panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
       newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
 doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
 syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
 /*syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
 syncImmediateCompleteMsg:(NSString *)syncImmediateCompleteMsg
 syncImmediateFailedMsg:(NSString *)syncImmediateFailedMsg
@@ -112,6 +113,7 @@ getterForNotification:(SEL)getterForNotification;
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+                          syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                     isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync;
 
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
@@ -130,6 +132,7 @@ getterForNotification:(SEL)getterForNotification;
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+                          syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                     isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
                                    getterForNotification:(SEL)getterForNotification;
 
@@ -155,6 +158,7 @@ getterForNotification:(SEL)getterForNotification;
                                            entitySaver:(PESaveEntityBlk)entitySaver
                                doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
                           syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+                        syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                              /*syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
                               syncImmediateCompleteMsg:(NSString *)syncImmediateCompleteMsg
                                 syncImmediateFailedMsg:(NSString *)syncImmediateFailedMsg

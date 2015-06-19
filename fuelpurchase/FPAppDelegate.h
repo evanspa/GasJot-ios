@@ -42,6 +42,10 @@
 #endif
 >
 
+#pragma mark - Security and User-related
+
+-(void)logoutUser:(FPUser *)user;
+
 #pragma mark - Properties
 
 /** The application window. */
