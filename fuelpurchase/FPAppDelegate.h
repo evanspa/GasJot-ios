@@ -44,7 +44,11 @@
 
 #pragma mark - Security and User-related
 
--(void)logoutUser:(FPUser *)user;
+- (void)clearKeychain;
+
+- (BOOL)isUserLoggedIn;
+
+- (BOOL)doesUserHaveValidAuthToken;
 
 #pragma mark - Properties
 

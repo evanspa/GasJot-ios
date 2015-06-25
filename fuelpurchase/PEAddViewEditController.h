@@ -68,9 +68,7 @@ entityRemotelyUpdatedNotifName:(NSString *)entityRemotelyUpdatedNotifName
     entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
  entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
  panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
-      addEntityTitle:(NSString *)addEntityTitle
-     viewEntityTitle:(NSString *)viewEntityTitle
-     editEntityTitle:(NSString *)editEntityTitle
+         entityTitle:(NSString *)entityTitle
 panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
    entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
   entityEditPreparer:(PEEntityEditPreparerBlk)entityEditPreparer
@@ -80,11 +78,8 @@ panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
       newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
 doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
 syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+      isUserLoggedIn:(BOOL)isUserLoggedIn
 syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-/*syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
-syncImmediateCompleteMsg:(NSString *)syncImmediateCompleteMsg
-syncImmediateFailedMsg:(NSString *)syncImmediateFailedMsg
-syncImmediateRetryAfterMsg:(NSString *)syncImmediateRetryAfterMsg*/
 isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
 prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
@@ -102,7 +97,7 @@ getterForNotification:(SEL)getterForNotification;
                                         entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
                                      entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                      panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
-                                          addEntityTitle:(NSString *)addEntityTitle
+                                             entityTitle:(NSString *)entityTitle
                                        entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
                                              entityMaker:(PEEntityMakerBlk)entityMaker
                                           newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
@@ -113,6 +108,7 @@ getterForNotification:(SEL)getterForNotification;
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+                                          isUserLoggedIn:(BOOL)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                     isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync;
 
@@ -121,7 +117,7 @@ getterForNotification:(SEL)getterForNotification;
                                         entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
                                      entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                      panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
-                                          addEntityTitle:(NSString *)addEntityTitle
+                                             entityTitle:(NSString *)entityTitle
                                        entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
                                              entityMaker:(PEEntityMakerBlk)entityMaker
                                           newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
@@ -132,6 +128,7 @@ getterForNotification:(SEL)getterForNotification;
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+                                          isUserLoggedIn:(BOOL)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                     isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
                                    getterForNotification:(SEL)getterForNotification;
@@ -149,8 +146,7 @@ getterForNotification:(SEL)getterForNotification;
                                       entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
                                    entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                    panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
-                                       viewEntityTitle:(NSString *)viewEntityTitle
-                                       editEntityTitle:(NSString *)editEntityTitle
+                                           entityTitle:(NSString *)entityTitle
                                   panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
                                      entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
                                     entityEditPreparer:(PEEntityEditPreparerBlk)entityEditPreparer
@@ -158,12 +154,9 @@ getterForNotification:(SEL)getterForNotification;
                                            entitySaver:(PESaveEntityBlk)entitySaver
                                doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
                           syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+                                        isUserLoggedIn:(BOOL)isUserLoggedIn
                         syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-                             /*syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
-                              syncImmediateCompleteMsg:(NSString *)syncImmediateCompleteMsg
-                                syncImmediateFailedMsg:(NSString *)syncImmediateFailedMsg
-                            syncImmediateRetryAfterMsg:(NSString *)syncImmediateRetryAfterMsg*/
-                   isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
+                  isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator

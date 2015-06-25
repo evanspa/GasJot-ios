@@ -28,12 +28,12 @@
  Presents a GUI representing the start-state of the application for an
  unauthenticated user.
  */
-@interface FPUnauthStartController : UIViewController <MBProgressHUDDelegate>
+@interface FPCreateAccountController : UIViewController <MBProgressHUDDelegate>
 
 #pragma mark - Initializers
 
 - (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
-              tempNotification:(NSString *)notificationMsgOrKey
+                     localUser:(FPUser *)localUser
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit;
 

@@ -33,7 +33,6 @@
 @implementation FPQuickActionMenuController {
   FPCoordinatorDao *_coordDao;
   PEUIToolkit *_uitoolkit;
-  NSString *_notificationMsgOrKey;
   FPUser *_user;
   FPScreenToolkit *_screenToolkit;
   dispatch_queue_t _junkQueue;
@@ -43,13 +42,11 @@
 
 - (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
                           user:(FPUser *)user
-              tempNotification:(NSString *)notificationMsgOrKey
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit {
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
     _user = user;
-    _notificationMsgOrKey = notificationMsgOrKey;
     _coordDao = coordDao;
     _uitoolkit = uitoolkit;
     _screenToolkit = screenToolkit;
@@ -96,9 +93,6 @@
             inMiddleOf:[self view]
          withAlignment:PEUIHorizontalAlignmentTypeCenter
               hpadding:0];
-  [PEUIUtils displayTempNotification:_notificationMsgOrKey
-                       forController:self
-                           uitoolkit:_uitoolkit];
 }
 
 #pragma mark - Button Event Handlers

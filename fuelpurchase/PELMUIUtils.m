@@ -59,11 +59,7 @@
     BOOL syncWarningTemporary = NO;
     CGFloat vpaddingForTopification = vpaddingForTopifiedTitleToFitSubtitle;
     if ([entity editInProgress]) {
-      if ([[entity editActorId] isEqualToNumber:@(foregroundActorId)]) {
-        subTitleMsg = @"Edit in progress.";
-      } else {
-        subTitleMsg = @"Edit in progress (by background-processor)";
-      }
+      subTitleMsg = @"Edit in progress.";
     } else if ([entity syncInProgress]) {
       subTitleMsg = @"Sync in progress.";
     } else if (![entity globalIdentifier] || ([entity editCount] > 0)) {

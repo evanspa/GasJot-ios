@@ -17,7 +17,7 @@ typedef UIViewController * (^FPUnauthScreenMaker)(void);
 
 typedef UIViewController * (^FPAuthScreenMaker)(id);
 
-typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id, NSString *);
+typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id);
 
 @interface FPScreenToolkit : NSObject
 
@@ -109,12 +109,8 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id, NSString
 
 - (FPAuthScreenMakerWithTempNotification)newQuickActionMenuScreenMaker;
 
-#pragma mark - Unauthenticated Landing Screen
-
-- (FPUnauthScreenMaker)newUnauthLandingScreenMakerWithTempNotification:(NSString *)msgOrKey;
-
 #pragma mark - Tab-bar Authenticated Landing Screen
 
-- (FPAuthScreenMaker)newTabBarAuthHomeLandingScreenMakerWithTempNotification:(NSString *)msgOrKey;
+- (FPAuthScreenMaker)newTabBarHomeLandingScreenMaker;
 
 @end

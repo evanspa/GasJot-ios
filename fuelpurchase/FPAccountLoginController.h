@@ -19,22 +19,21 @@
 // IN THE SOFTWARE.
 
 #import <UIKit/UIKit.h>
-#import <PEFuelPurchase-Model/FPUser.h>
+#import <MBProgressHUD/MBProgressHUD.h>
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
 
 /**
  Presents a GUI representing the start-state of the application for an
- authenticated user.  This can also be thought of as presenting the 'main
- menu' state of the application.
+ unauthenticated user.
  */
-@interface FPQuickActionMenuController : UIViewController
+@interface FPAccountLoginController : UIViewController <MBProgressHUDDelegate>
 
 #pragma mark - Initializers
 
 - (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
-                          user:(FPUser *)user
+                     localUser:(FPUser *)localUser
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit;
 

@@ -12,7 +12,7 @@
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
 
-@interface FPSettingsController : UIViewController
+@interface FPSettingsController : UIViewController <MBProgressHUDDelegate>
 
 #pragma mark - Initializers
 

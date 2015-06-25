@@ -18,7 +18,7 @@
 "unauth.start.ca.hdr1" = "New User?";
 "unauth.start.ca.hdr2" = "Sign Up!";
 "unauth.start.ca.fullnametf.pht" = "Full name";
-"unauth.start.ca.emailtf.pht" = "Email";
+"unauth.start.ca.emailorusernametf.pht" = "E-mail or Username";
 "unauth.start.ca.pwdtf.pht" = "Password";
 "unauth.start.ca.btn.txt" = "Create your Account";
 "unauth.start.tempNotification.signinsuccess" = "Login successful.";

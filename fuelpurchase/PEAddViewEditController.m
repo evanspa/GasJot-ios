@@ -11,7 +11,6 @@
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import <MBProgressHUD/MBProgressHUD.h>
-#import "FPEditActors.h"
 #import "FPLogging.h"
 
 @implementation PEAddViewEditController {
@@ -31,9 +30,7 @@
   NSString *_syncFailedNotifName;
   PEEntityPanelMakerBlk _entityPanelMaker;
   PEPanelToEntityBinderBlk _panelToEntityBinder;
-  NSString *_addEntityTitle;
-  NSString *_viewEntityTitle;
-  NSString *_editEntityTitle;
+  NSString *_entityTitle;
   PEEnableDisablePanelBlk _panelEnablerDisabler;
   PEEntityEditPreparerBlk _entityEditPreparer;
   PEEntityEditCancelerBlk _entityEditCanceler;
@@ -62,6 +59,8 @@
   MBProgressHUDMode _syncImmediateMBProgressHUDMode;
   NSMutableArray *_errorsForAdd;
   NSMutableArray *_successMessageTitlesForAdd;
+  BOOL _receivedAuthReqdErrorOnSyncAttempt;
+  BOOL _isUserLoggedIn;
 }
 
 #pragma mark - Initializers
@@ -81,9 +80,7 @@ entityRemotelyUpdatedNotifName:(NSString *)entityRemotelyUpdatedNotifName
     entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
         entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
  panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
-   addEntityTitle:(NSString *)addEntityTitle
-  viewEntityTitle:(NSString *)viewEntityTitle
-     editEntityTitle:(NSString *)editEntityTitle
+   entityTitle:(NSString *)entityTitle
   panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
   entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
       entityEditPreparer:(PEEntityEditPreparerBlk)entityEditPreparer
@@ -93,11 +90,8 @@ entityRemotelyUpdatedNotifName:(NSString *)entityRemotelyUpdatedNotifName
       newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
 doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
     syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+      isUserLoggedIn:(BOOL)isUserLoggedIn
   syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-    /*syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
-syncImmediateCompleteMsg:(NSString *)syncImmediateCompleteMsg
-            syncImmediateFailedMsg:(NSString *)syncImmediateFailedMsg
-     syncImmediateRetryAfterMsg:(NSString *)syncImmediateRetryAfterMsg*/
         isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
   prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
@@ -111,7 +105,7 @@ getterForNotification:(SEL)getterForNotification {
   if (self) {
     _isAdd = isAdd;
     if (!isAdd) {
-      _isEdit = ([entity editInProgress] && ([[entity editActorId] isEqualToNumber:foregroundEditActorId]));
+      _isEdit = [entity editInProgress];
       _isView = !_isEdit;
     }
     _entity = entity;
@@ -128,9 +122,7 @@ getterForNotification:(SEL)getterForNotification {
     _entityPanelMaker = entityPanelMaker;
     _entityToPanelBinder = entityToPanelBinder;
     _panelToEntityBinder = panelToEntityBinder;
-    _addEntityTitle = addEntityTitle;
-    _viewEntityTitle = viewEntityTitle;
-    _editEntityTitle = editEntityTitle;
+    _entityTitle = entityTitle;
     _panelEnablerDisabler = panelEnablerDisabler;
     _entityAddCanceler = entityAddCanceler;
     _entityEditPreparer = entityEditPreparer;
@@ -140,6 +132,7 @@ getterForNotification:(SEL)getterForNotification {
     _newEntitySaver = newEntitySaver;
     _doneEditingEntityMarker = doneEditingEntityMarker;
     _syncImmediateWhenDoneEditing = syncImmediateWhenDoneEditing;
+    _isUserLoggedIn = isUserLoggedIn;
     _syncImmediateMBProgressHUDMode = syncImmediateMBProgressHUDMode;
     /*_syncImmediateInitiatedMsg = syncImmediateInitiatedMsg;
     _syncImmediateCompleteMsg = syncImmediateCompleteMsg;
@@ -167,7 +160,7 @@ getterForNotification:(SEL)getterForNotification {
                                         entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
                                      entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                      panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
-                                          addEntityTitle:(NSString *)addEntityTitle
+                                             entityTitle:(NSString *)entityTitle
                                        entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
                                              entityMaker:(PEEntityMakerBlk)entityMaker
                                           newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
@@ -178,6 +171,7 @@ getterForNotification:(SEL)getterForNotification {
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+                                          isUserLoggedIn:(BOOL)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                     isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync {
   return [PEAddViewEditController addEntityCtrlrWithUitoolkit:uitoolkit
@@ -185,7 +179,7 @@ getterForNotification:(SEL)getterForNotification {
                                              entityPanelMaker:entityPanelMaker
                                           entityToPanelBinder:entityToPanelBinder
                                           panelToEntityBinder:panelToEntityBinder
-                                               addEntityTitle:addEntityTitle
+                                                  entityTitle:entityTitle
                                             entityAddCanceler:entityAddCanceler
                                                   entityMaker:entityMaker
                                                newEntitySaver:newEntitySaver
@@ -196,6 +190,7 @@ getterForNotification:(SEL)getterForNotification {
                                         foregroundEditActorId:foregroundEditActorId
                                 entityAddedNotificationToPost:entityAddedNotificationToPost
                                  syncImmediateWhenDoneEditing:syncImmediateWhenDoneEditing
+                                               isUserLoggedIn:isUserLoggedIn
                                syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
                          isEntityAppropriateForBackgroundSync:isEntityAppropriateForBackgroundSync
                                         getterForNotification:nil];
@@ -206,7 +201,7 @@ getterForNotification:(SEL)getterForNotification {
                                         entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
                                      entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                      panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
-                                          addEntityTitle:(NSString *)addEntityTitle
+                                             entityTitle:(NSString *)entityTitle
                                        entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
                                              entityMaker:(PEEntityMakerBlk)entityMaker
                                           newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
@@ -217,6 +212,7 @@ getterForNotification:(SEL)getterForNotification {
                                    foregroundEditActorId:(NSNumber *)foregroundEditActorId
                            entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+                                          isUserLoggedIn:(BOOL)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                     isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
                                    getterForNotification:(SEL)getterForNotification {
@@ -235,9 +231,7 @@ getterForNotification:(SEL)getterForNotification {
                                         entityPanelMaker:entityPanelMaker
                                      entityToPanelBinder:entityToPanelBinder
                                      panelToEntityBinder:panelToEntityBinder
-                                          addEntityTitle:addEntityTitle
-                                         viewEntityTitle:nil
-                                         editEntityTitle:nil
+                                             entityTitle:entityTitle
                                     panelEnablerDisabler:nil
                                        entityAddCanceler:entityAddCanceler
                                       entityEditPreparer:nil
@@ -247,6 +241,7 @@ getterForNotification:(SEL)getterForNotification {
                                           newEntitySaver:newEntitySaver
                                  doneEditingEntityMarker:nil
                             syncImmediateWhenDoneEditing:syncImmediateWhenDoneEditing
+                                          isUserLoggedIn:isUserLoggedIn
                           syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
                                /*syncImmediateInitiatedMsg:nil
                                 syncImmediateCompleteMsg:nil
@@ -276,8 +271,7 @@ getterForNotification:(SEL)getterForNotification {
                                       entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
                                    entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                    panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
-                                       viewEntityTitle:(NSString *)viewEntityTitle
-                                       editEntityTitle:(NSString *)editEntityTitle
+                                           entityTitle:(NSString *)entityTitle
                                   panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
                                      entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
                                     entityEditPreparer:(PEEntityEditPreparerBlk)entityEditPreparer
@@ -285,6 +279,7 @@ getterForNotification:(SEL)getterForNotification {
                                            entitySaver:(PESaveEntityBlk)entitySaver
                                doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
                           syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
+                                        isUserLoggedIn:(BOOL)isUserLoggedIn
                         syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                              /*syncImmediateInitiatedMsg:(NSString *)syncImmediateInitiatedMsg
                               syncImmediateCompleteMsg:(NSString *)syncImmediateCompleteMsg
@@ -312,9 +307,7 @@ getterForNotification:(SEL)getterForNotification {
                                         entityPanelMaker:entityPanelMaker
                                      entityToPanelBinder:entityToPanelBinder
                                      panelToEntityBinder:panelToEntityBinder
-                                          addEntityTitle:nil
-                                         viewEntityTitle:viewEntityTitle
-                                         editEntityTitle:editEntityTitle
+                                             entityTitle:entityTitle
                                     panelEnablerDisabler:panelEnablerDisabler
                                        entityAddCanceler:entityAddCanceler
                                       entityEditPreparer:entityEditPreparer
@@ -324,6 +317,7 @@ getterForNotification:(SEL)getterForNotification {
                                           newEntitySaver:nil
                                  doneEditingEntityMarker:doneEditingEntityMarker
                             syncImmediateWhenDoneEditing:syncImmediateWhenDoneEditing
+                                          isUserLoggedIn:isUserLoggedIn
                           syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
                                /*syncImmediateInitiatedMsg:syncImmediateInitiatedMsg
                                 syncImmediateCompleteMsg:syncImmediateCompleteMsg
@@ -362,10 +356,7 @@ getterForNotification:(SEL)getterForNotification {
     // the thing is, THIS view controller will raise 'object updated' notifications
     // associated with _entity, and so will receive them!  So, we do a reference-compare;
     // if the notification is for the entity in our context, we can safely ignore it.
-    if (!((_entity == locallyUpdatedEntity) ||
-          ([_entity doesHaveEqualIdentifiers:locallyUpdatedEntity] &&
-           ([locallyUpdatedEntity editActorId] &&
-            [[locallyUpdatedEntity editActorId] integerValue] == FPForegroundActorId)))) {
+    if (_entity != locallyUpdatedEntity) {
       [self displayHeadsUpAlertWithMsgs:@[LS(@"vieweditentity.headsup.whileviewing.locallyupdated.msg1"),
                                           LS(@"vieweditentity.headsup.whileviewing.locallyupdated.msg2")]];
       [_entity overwrite:(PELMMainSupport *)locallyUpdatedEntity];
@@ -471,13 +462,15 @@ getterForNotification:(SEL)getterForNotification {
               vpadding:0 // parameterize this value too?
               hpadding:0];
 
-  NSString *title = _addEntityTitle;
+  NSString *title;
   if (_isView) {
-    title = _viewEntityTitle;
+    title = _entityTitle;
     _panelEnablerDisabler(_entityPanel, NO);
   } else if (_isEdit) {
-    title = _editEntityTitle;
+    title = [NSString stringWithFormat:@"Edit %@", _entityTitle];
     [self prepareForEditing];
+  } else {
+    title = [NSString stringWithFormat:@"Add %@", _entityTitle];
   }
   _entityToPanelBinder(_entity, _entityPanel);
 
@@ -538,7 +531,7 @@ getterForNotification:(SEL)getterForNotification {
     editPrepareSuccess = _entityEditPreparer(self, _entity);
   }
   if (editPrepareSuccess) {
-    [[self navigationItem] setTitle:_editEntityTitle];
+    [[self navigationItem] setTitle:[NSString stringWithFormat:@"Edit %@", _entityTitle]];
     [[self navigationItem] setLeftBarButtonItem:[[UIBarButtonItem alloc]
                                                  initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
                                                  target:self
@@ -558,7 +551,7 @@ getterForNotification:(SEL)getterForNotification {
     [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
     [[self navigationItem] setLeftBarButtonItem:_backButton];
     [[self navigationItem] setRightBarButtonItem:[self editButtonItem]];
-    [[self navigationItem] setTitle:_viewEntityTitle];
+    [[self navigationItem] setTitle:_entityTitle];
     _panelEnablerDisabler(_entityPanel, NO);
     [PELMNotificationUtils postNotificationWithName:_entityUpdatedNotificationToPost
                                              entity:_entity];
@@ -728,6 +721,16 @@ getterForNotification:(SEL)getterForNotification {
   return YES;
 }
 
++ (BOOL)areErrorsAllAuthenticationRequired:(NSArray *)errors {
+  for (NSArray *error in errors) {
+    NSNumber *isErrorAuthRequired = error[1];
+    if (![isErrorAuthRequired boolValue]) {
+      return NO;
+    }
+  }
+  return YES;
+}
+
 - (void)doneWithAdd {
   NSArray *errMsgs = _entityValidator(_entityPanel);
   BOOL isValidEntity = YES;
@@ -773,6 +776,7 @@ getterForNotification:(SEL)getterForNotification {
       _HUD.progress = _percentCompleteSavingEntity;
       [_errorsForAdd removeAllObjects];
       [_successMessageTitlesForAdd removeAllObjects];
+      _receivedAuthReqdErrorOnSyncAttempt = NO;
       
       /*void(^syncSuccessBlk)(float) = ^(float percentComplete) {
         _percentCompleteSavingEntity += percentComplete;
@@ -950,6 +954,11 @@ getterForNotification:(SEL)getterForNotification {
                   [message appendFormat:@"\n\t%@", subError];
                 }
               }
+              if (_receivedAuthReqdErrorOnSyncAttempt) {
+                [message appendString:@"\n\nIt appears that you are not longer\n"];
+                [message appendString:@"authenticated.  To re-authenticate, \ngo to "];
+                [message appendString:@"Settings -> Authenticate."];
+              }
               UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
                                                                              message:message
                                                                       preferredStyle:UIAlertControllerStyleAlert];
@@ -1000,6 +1009,11 @@ getterForNotification:(SEL)getterForNotification {
                   [message appendFormat:@"\n%@", subError];
                 }
               }
+              if (_receivedAuthReqdErrorOnSyncAttempt) {
+                [message appendString:@"\n\nIt appears that you are not longer\n"];
+                [message appendString:@"authenticated.  To re-authenticate, go to\n"];
+                [message appendString:@"Settings -> Authenticate."];
+              }
               UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
                                                                              message:message
                                                                       preferredStyle:UIAlertControllerStyleAlert];
@@ -1038,28 +1052,42 @@ getterForNotification:(SEL)getterForNotification {
           _HUD.progress = _percentCompleteSavingEntity;
         });
       };
-      void(^_syncSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete, NSString *mainMsgTitle, NSString *recordTitle) {
+      void(^_syncSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                NSString *mainMsgTitle,
+                                                                NSString *recordTitle) {
         handleHudProgress(percentComplete);
         [_successMessageTitlesForAdd addObject:[NSString stringWithFormat:@"%@ saved", recordTitle]];
         if (_percentCompleteSavingEntity == 1.0) {
           immediateSaveDone(mainMsgTitle);
         }
       };
-      void(^_syncRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete, NSString *mainMsgTitle, NSString *recordTitle, NSDate *retryAfter) {
+      void(^_syncRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete,
+                                                                             NSString *mainMsgTitle,
+                                                                             NSString *recordTitle,
+                                                                             NSDate *retryAfter) {
         handleHudProgress(percentComplete);
-        [_errorsForAdd addObject:@[[NSString stringWithFormat:@"%@ not saved", recordTitle], [NSNumber numberWithBool:NO], @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]]]];
+        [_errorsForAdd addObject:@[[NSString stringWithFormat:@"%@ not saved", recordTitle],
+                                   [NSNumber numberWithBool:NO],
+                                   @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]]]];
         if (_percentCompleteSavingEntity == 1.0) {
           immediateSaveDone(mainMsgTitle);
         }
       };
-      void (^_syncServerTempError)(float, NSString *, NSString *) = ^(float percentComplete, NSString *mainMsgTitle, NSString *recordTitle) {
+      void (^_syncServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                      NSString *mainMsgTitle,
+                                                                      NSString *recordTitle) {
         handleHudProgress(percentComplete);
-        [_errorsForAdd addObject:@[[NSString stringWithFormat:@"%@ not saved", recordTitle], [NSNumber numberWithBool:NO], @[@"Temporary server error."]]];
+        [_errorsForAdd addObject:@[[NSString stringWithFormat:@"%@ not saved", recordTitle],
+                                   [NSNumber numberWithBool:NO],
+                                   @[@"Temporary server error."]]];
         if (_percentCompleteSavingEntity == 1.0) {
           immediateSaveDone(mainMsgTitle);
         }
       };
-      void (^_syncServerError)(float, NSString *, NSString *, NSInteger) = ^(float percentComplete, NSString *mainMsgTitle, NSString *recordTitle, NSInteger errorMask) {
+      void (^_syncServerError)(float, NSString *, NSString *, NSInteger) = ^(float percentComplete,
+                                                                             NSString *mainMsgTitle,
+                                                                             NSString *recordTitle,
+                                                                             NSInteger errorMask) {
         handleHudProgress(percentComplete);
         NSArray *computedErrMsgs = _messageComputer(errorMask);
         BOOL isErrorUserFixable = YES;
@@ -1067,26 +1095,52 @@ getterForNotification:(SEL)getterForNotification {
           computedErrMsgs = @[@"Unknown server error."];
           isErrorUserFixable = NO;
         }
-        [_errorsForAdd addObject:@[[NSString stringWithFormat:@"%@ not saved", recordTitle], [NSNumber numberWithBool:isErrorUserFixable], computedErrMsgs]];
+        [_errorsForAdd addObject:@[[NSString stringWithFormat:@"%@ not saved", recordTitle],
+                                   [NSNumber numberWithBool:isErrorUserFixable],
+                                   computedErrMsgs]];
         if (_percentCompleteSavingEntity == 1.0) {
           immediateSaveDone(mainMsgTitle);
         }
       };
-      void(^_syncAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete, NSString *mainMsgTitle, NSString *recordTitle) {
+      void(^_syncAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                 NSString *mainMsgTitle,
+                                                                 NSString *recordTitle) {
+        _receivedAuthReqdErrorOnSyncAttempt = YES;
         handleHudProgress(percentComplete);
-        [_errorsForAdd addObject:@[[NSString stringWithFormat:@"%@ not saved", recordTitle], [NSNumber numberWithBool:NO], @[@"Authentication required."]]];
+        [_errorsForAdd addObject:@[[NSString stringWithFormat:@"%@ not saved", recordTitle],
+                                   [NSNumber numberWithBool:NO],
+                                   @[@"Authentication required."]]];
         if (_percentCompleteSavingEntity == 1.0) {
           immediateSaveDone(mainMsgTitle);
         }
       };
       
       dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-        _newEntitySaver(_entityPanel, _newEntity, _syncSuccessBlk, _syncRetryAfterBlk, _syncServerTempError, _syncServerError, _syncAuthReqdBlk);
+        _newEntitySaver(_entityPanel,
+                        _newEntity,
+                        _syncSuccessBlk,
+                        _syncRetryAfterBlk,
+                        _syncServerTempError,
+                        _syncServerError,
+                        _syncAuthReqdBlk);
       });
     } else {
       _newEntitySaver(_entityPanel, _newEntity, nil, nil, nil, nil, nil);
-      _itemAddedBlk(self, _newEntity);  // this is what causes this controller to be dismissed
       notificationSenderForAdd(_newEntity);
+      MBProgressHUD *_HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+      _HUD.delegate = self;
+      [_HUD setLabelText:[NSString stringWithFormat:@"%@ Saved", _entityTitle]];
+      if (_isUserLoggedIn) {
+        [_HUD setDetailsLabelText:@"(not synced with server)"];
+      }
+      UIImage *image = [UIImage imageNamed:@"hud-complete"];
+      UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
+      [_HUD setCustomView:imageView];
+      _HUD.mode = MBProgressHUDModeCustomView;
+      [_HUD hide:YES afterDelay:1.30];
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.4 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        _itemAddedBlk(self, _newEntity);  // this is what causes this controller to be dismissed
+      });
     }
   } else {
     // local (i.e., not from server) validation checking failed

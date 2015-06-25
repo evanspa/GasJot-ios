@@ -25,7 +25,6 @@
 #import <UICKeyChainStore/UICKeyChainStore.h>
 #import "FPAppDelegate.h"
 #import <PEFuelPurchase-Model/FPUser.h>
-#import "FPUnauthStartController.h"
 #import "FPQuickActionMenuController.h"
 #import "UIColor+FuelPurchase.h"  // TODO - get rid of this
 #import <IQKeyboardManager/IQKeyboardManager.h>
@@ -34,8 +33,8 @@
 #import "FPSettingsController.h"
 #import "FPEditsInProgressController.h"
 #import "FPScreenToolkit.h"
-#import "FPEditActors.h"
 #import "FPLogging.h"
+#import "FPAppNotificationNames.h"
 
 #ifdef FP_DEV
   #import <PEDev-Console/PDVScreen.h>
@@ -75,8 +74,7 @@ NSString * const FPUserAgentDeviceOsVersionHeaderNameKey = @"FP user agent devic
 NSString * const FPAuthTokenResponseHeaderNameKey        = @"FP auth token response header name";
 NSString * const FPTimeoutForCoordDaoMainThreadOpsKey    = @"FP timeout for main thread coordinator dao operations";
 NSString * const FPTimeIntervalForFlushToRemoteMasterKey = @"FP time interval for flush to remote master";
-NSString * const FPLocalOnlyKey                          = @"FP Local Only";
-NSString * const FPAuthenticationRequiredAtKey           = @"FP Authentication required at";
+NSString * const FPIsUserLoggedInIndicatorKey            = @"FP is user logged in indicator";
 
 #ifdef FP_DEV
   NSString * const FPAPIResourceFileName = @"fpapi-resource.localdev";
@@ -96,13 +94,11 @@ NSString * const FPAppKeychainService = @"fp-app";
   NSString *_authToken;
   FPCoordinatorDao *_coordDao;
   PEUIToolkit *_uitoolkit;
-  NSTimer *_timerForRemoteMasterFlush;
-  NSTimer * (^_startRemoteMasterFlushTimer)(FPCoordinatorDao *, NSTimer *);
   FPScreenToolkit *_screenToolkit;
   CLLocationManager *_locationManager;
   NSMutableArray *_locations;
   UICKeyChainStore *_keychainStore;
-  BOOL _isLocalOnly;
+  UITabBarController *_tabBarController;
 
   #ifdef FP_DEV
     PDVUtils *_pdvUtils;
@@ -162,95 +158,90 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
 didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [self initializeLocationTracking];
   [FPLogging initializeLogging];
-  _isLocalOnly = boolBundleVal(FPLocalOnlyKey);
   [self initializeStoreCoordinator];
-  [_coordDao pruneAllSyncedEntitiesWithError:[FPUtils localSaveErrorHandlerMaker]()];
-  FPUser *user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
-  _keychainStore = [UICKeyChainStore keyChainStoreWithService:@"name.paulevans.fpauth-token"];
-  _authToken = [self storedAuthenticationTokenForUser:user];
   _uitoolkit = [FPAppDelegate defaultUIToolkit];
   _screenToolkit = [[FPScreenToolkit alloc] initWithCoordinatorDao:_coordDao
                                                          uitoolkit:_uitoolkit
                                                              error:[FPUtils localFetchErrorHandlerMaker]()];
-  _startRemoteMasterFlushTimer = ^ NSTimer * (FPCoordinatorDao *coordDao, NSTimer *oldTimer) {
-    #ifdef FP_DEV
-    return nil;
-    #else
-    return [PEUtils startNewTimerWithTargetObject:coordDao
-                                         selector:@selector(asynchronousWork:)
-                                         interval:intBundleVal(FPTimeIntervalForFlushToRemoteMasterKey)
-                                         oldTimer:oldTimer];
-    #endif
-  };
-  #ifdef FP_DEV
-    self.window =
-      [[PDVUIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    _pdvUtils = [[PDVUtils alloc] initWithBaseResourceFolderOfSimulations:@"simulation/application-screens"
-                                                             screenGroups:[self screenGroups]];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(devShake:)
-                                                 name:PdvShakeGesture
-                                               object:nil];
-  #else
-    self.window =
-      [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-  #endif
-  if (_authToken) {
-    DDLogVerbose(@"User is authenticated.");
-    [_coordDao setAuthToken:_authToken];
-    [[self window] setRootViewController:[_screenToolkit newTabBarAuthHomeLandingScreenMakerWithTempNotification:@"Welcome Back"](user)];
-  } else {
-    DDLogVerbose(@"User is NOT authenticated.");
-    [[self window] setRootViewController:[_screenToolkit newUnauthLandingScreenMakerWithTempNotification:nil]()];
-  }
   [_coordDao globalCancelSyncInProgressWithError:[FPUtils localSaveErrorHandlerMaker]()];
-  _timerForRemoteMasterFlush = _startRemoteMasterFlushTimer(_coordDao, _timerForRemoteMasterFlush);
+  [_coordDao pruneAllSyncedEntitiesWithError:[FPUtils localSaveErrorHandlerMaker]()];
+  _keychainStore = [UICKeyChainStore keyChainStoreWithService:@"name.paulevans.fpauth-token"];
+  FPUser *user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
+  if (user) {
+    _authToken = [self storedAuthenticationTokenForUser:user];
+    if (_authToken) {
+      [_coordDao setAuthToken:_authToken];
+    }
+  } else {
+    user = [_coordDao newLocalUserWithError:[FPUtils localSaveErrorHandlerMaker]()];
+  }
+  self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+  // Setup notification observing
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(resetUserInterface)
+                                               name:FPAppDeleteAllDataNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(resetUserInterface)
+                                               name:FPAppLogoutNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(resetUserInterface)
+                                               name:FPAppAccountCreationNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(resetUserInterface)
+                                               name:FPAppLoginNotification
+                                             object:nil];
+  
+  if ([self isUserLoggedIn]) {
+    if ([self doesUserHaveValidAuthToken]) {
+      DDLogVerbose(@"User is logged in and has a valid authentication token.");
+      // present quick menu screen
+      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMaker](user);
+      [[self window] setRootViewController:_tabBarController];
+    } else {
+      DDLogVerbose(@"User is logged in and does NOT have a valid authentication token.");
+      // present login screen (login screen should have an optional "bypass" features to go 'local only')
+    }
+  } else {
+    DDLogVerbose(@"User is NOT logged in.");
+    // present quick menu screen
+     _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMaker](user);
+    [[self window] setRootViewController:_tabBarController];
+  }
   [self.window setBackgroundColor:[UIColor whiteColor]];
   [self.window makeKeyAndVisible];
   return YES;
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
-  DDLogDebug(@"Will resign active. Stopping remote-master flush timer.");
-  [PEUtils stopTimer:_timerForRemoteMasterFlush];
   [_locationManager stopUpdatingLocation];
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
-  DDLogDebug(@"Did enter background. Stopping remote-master flush timer.");
-  [PEUtils stopTimer:_timerForRemoteMasterFlush];
   [_locationManager stopUpdatingLocation];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
-  DDLogDebug(@"Will enter foreground. Starting remote-master flush timer.");
-  _timerForRemoteMasterFlush = _startRemoteMasterFlushTimer(_coordDao, _timerForRemoteMasterFlush);
   [_locationManager startUpdatingLocation];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
-  DDLogDebug(@"Did become active. Starting remote-master flush timer.");
-  _timerForRemoteMasterFlush = _startRemoteMasterFlushTimer(_coordDao, _timerForRemoteMasterFlush);
   [_locationManager startUpdatingLocation];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
-  DDLogDebug(@"Will terminate. Stopping remote-master flush timer.  Performing system prune.");
   [_coordDao pruneAllSyncedEntitiesWithError:[FPUtils localSaveErrorHandlerMaker]()];
-  [PEUtils stopTimer:_timerForRemoteMasterFlush];
   [_locationManager stopUpdatingLocation];
 }
 
-#pragma mark - Handle Dev Shake
+#pragma mark - Reset user interface
 
-#ifdef FP_DEV
-  - (void)devShake:(NSNotification *)shakeNotification {
-    [_coordDao flushToRemoteMasterWithEditActorId:@(FPBackgroundActorId)
-                               remoteStoreBusyBlk:[FPUtils serverBusyHandlerMakerForUI](nil)
-                                            error:[FPUtils localDatabaseErrorHudHandlerMaker](nil)];
-    DDLogDebug(@"Flush to remote master done.");
-  }
-#endif
+- (void)resetUserInterface {
+  UINavigationController *home = [_tabBarController viewControllers][0];
+  [home popToRootViewControllerAnimated:NO];
+}
 
 #pragma mark - Initialization helpers
 
@@ -307,11 +298,8 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
       environmentLogResMtVersion:bundleVal(FPRestServiceMtVersionKey)
       remoteSyncConflictDelegate:self
                authTokenDelegate:self
- errorBlkForBackgroundProcessing:[FPUtils localErrorHandlerForBackgroundProcessingMaker]()
-                   bgEditActorId:@(FPBackgroundActorId)
         allowInvalidCertificates:YES];
   [_coordDao initializeLocalDatabaseWithError:[FPUtils localSaveErrorHandlerMaker]()];
-  [_coordDao setIncludeUserInBackgroundFlush:NO];
 }
 
 #pragma mark - FPRemoteStoreSyncConflictDelegate protocol
@@ -349,6 +337,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 keychain under key: [%@].",
              authToken, userGlobalIdentifier);
   [_keychainStore setString:authToken forKey:userGlobalIdentifier];
+  //[_keychainStore removeItemForKey:FPAuthenticationRequiredAtKey];
   // FYI, the reason we don't set the authToken on our _coordDao object is because
   // it is doing it itself; i.e., because the auth token is received THROUGH the
   // _coordDao, the _coordDao updates itself as it arrives.
@@ -358,25 +347,32 @@ keychain under key: [%@].",
   DDLogDebug(@"Notified that 'auth required' from some remote operation.  Therefore \
 I'm going to insert this knowledge into the keychian so the app knows it's currently \
 in an unauthenticated state.");
-  [_keychainStore setString:[[NSDate date] description] forKey:FPAuthenticationRequiredAtKey];
+  //[_keychainStore setString:[[NSDate date] description] forKey:FPAuthenticationRequiredAtKey];
+  [_keychainStore removeAllItems];
 }
 
 #pragma mark - Security and User-related
 
-- (void)logoutUser:(FPUser *)user {
-  __block BOOL wasError = NO;
-  PELMDaoErrorBlk errorBlk = ^(NSError *err, int code, NSString *msg) {
-    wasError = YES;
-    [PEUIUtils showAlertWithMsgs:@[[err localizedDescription]]
-                           title:@"Error Attempting to Logout"
-                     buttonTitle:@"Cancel"];
-  };
-  [_coordDao logoutUser:user error:errorBlk];
+- (void)clearKeychain {
   [_keychainStore removeAllItems];
-  if (!wasError) {
-    UIViewController *unauthHome = [_screenToolkit newUnauthLandingScreenMakerWithTempNotification:@"Logout Successful"]();
-    [[self window] setRootViewController:unauthHome];
+}
+
+- (BOOL)isUserLoggedIn {
+  FPUser *user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
+  if (user) {
+    if ([user globalIdentifier]) {
+      return YES;
+    }
   }
+  return NO;
+}
+
+- (BOOL)doesUserHaveValidAuthToken {
+  FPUser *user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
+  if ([self storedAuthenticationTokenForUser:user]) {
+    return YES;
+  }
+  return NO;
 }
 
 - (NSString *)storedAuthenticationTokenForUser:(FPUser *)user {
@@ -385,8 +381,6 @@ in an unauthenticated state.");
   if (globalIdentifier) {
     authToken = [_keychainStore stringForKey:globalIdentifier];
   }
-  DDLogDebug(@"About to return authentication token: [%@] obtained from \
-keystore under key: [%@]", authToken, globalIdentifier);
   return authToken;
 }
 
@@ -439,8 +433,7 @@ keystore under key: [%@]", authToken, globalIdentifier);
 
 - (NSDictionary *)screenNamesForViewControllers {
     return @{
-    NSStringFromClass([FPQuickActionMenuController class]) : @"authenticated-landing-screen",
-    NSStringFromClass([FPUnauthStartController class]) : @"unauthenticated-landing-screen"
+    NSStringFromClass([FPQuickActionMenuController class]) : @"authenticated-landing-screen"
   };
 }
 
@@ -455,19 +448,13 @@ keystore under key: [%@]", authToken, globalIdentifier);
     [[PDVScreenGroup alloc]
       initWithName:@"Create Account"
            screens:@[
-      // Create Account / Login screen
-      [[PDVScreen alloc] initWithDisplayName:@"Create Account / Login"
-                                 description:@"Create Account / Login screen."
-                         viewControllerMaker:^{return [_screenToolkit newUnauthLandingScreenMakerWithTempNotification:nil]();}],
       // Authenticated landing screen
       [[PDVScreen alloc] initWithDisplayName:@"Authenticated Landing"
-                                 description:@"Authenticated landing screen of pre-existing user \
-with resident auth token."
-                         viewControllerMaker:^{return [_screenToolkit newTabBarAuthHomeLandingScreenMakerWithTempNotification:@"Welcome Back"]([_coordDao userWithError:nil]);}],
+                                 description:@"Authenticated landing screen of pre-existing user with resident auth token."
+                         viewControllerMaker:^{return [_screenToolkit newTabBarHomeLandingScreenMaker]([_coordDao userWithError:nil]);}],
       [[PDVScreen alloc] initWithDisplayName:@"Authenticated Landing"
-                                 description:@"Authenticated landing screen which \
-occurs when a user creates an account."
-                         viewControllerMaker:^{return [_screenToolkit newTabBarAuthHomeLandingScreenMakerWithTempNotification:@"Account Creation Successful"]([_coordDao userWithError:nil]);}]]];
+                                 description:@"Authenticated landing screen which occurs when a user creates an account."
+                         viewControllerMaker:^{return [_screenToolkit newTabBarHomeLandingScreenMaker]([_coordDao userWithError:nil]);}]]];
   return @[ createAcctScreenGroup ];
 }
 

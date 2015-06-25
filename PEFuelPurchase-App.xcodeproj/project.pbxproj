@@ -10,7 +10,6 @@
 		18010C5A180E4752005F5CEB /* FPQuickActionMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18010C59180E4752005F5CEB /* FPQuickActionMenuController.m */; };
 		180EDA3019C7C2D200C782A6 /* FPSettingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 180EDA2F19C7C2D200C782A6 /* FPSettingsController.m */; };
 		180EDA3519C7C89B00C782A6 /* FPEditsInProgressController.m in Sources */ = {isa = PBXBuildFile; fileRef = 180EDA3419C7C89B00C782A6 /* FPEditsInProgressController.m */; };
-		181003AF1A6E1CB800FB6C55 /* FPEditActors.m in Sources */ = {isa = PBXBuildFile; fileRef = 181003AE1A6E1CB800FB6C55 /* FPEditActors.m */; };
 		1822308D1A7042FC00884600 /* NSMutableArray+MoveObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 1822308C1A7042FC00884600 /* NSMutableArray+MoveObject.m */; };
 		183E13A518009F9F009E9085 /* fpapi-resource.json in Resources */ = {isa = PBXBuildFile; fileRef = 183E13A418009F9F009E9085 /* fpapi-resource.json */; };
 		183E1416180237A2009E9085 /* FPUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 183E1415180237A2009E9085 /* FPUtils.m */; };
@@ -28,7 +27,7 @@
 		18B17D5719DAE696001D2BF6 /* PEAddViewEditController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18B17D5619DAE696001D2BF6 /* PEAddViewEditController.m */; };
 		18C3CD7419DC3B440092C002 /* FPPanelToolkit.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C3CD7319DC3B440092C002 /* FPPanelToolkit.m */; };
 		18CC2CF817F680AC009DF2CE /* FPNames.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CF317F680AC009DF2CE /* FPNames.m */; };
-		18CC2CFA17F680AC009DF2CE /* FPUnauthStartController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CF717F680AC009DF2CE /* FPUnauthStartController.m */; };
+		18CC2CFA17F680AC009DF2CE /* FPCreateAccountController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CF717F680AC009DF2CE /* FPCreateAccountController.m */; };
 		18CC2CFF17F680BB009DF2CE /* UIColor+FuelPurchase.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CFC17F680BB009DF2CE /* UIColor+FuelPurchase.m */; };
 		18CC2D0017F680BB009DF2CE /* UIFont+FuelPurchase.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CFE17F680BB009DF2CE /* UIFont+FuelPurchase.m */; };
 		18CC2D0217F68117009DF2CE /* en.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 18CC2D0117F68117009DF2CE /* en.lproj */; };
@@ -43,6 +42,8 @@
 		18D6DFBE17F68005006B300D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18D6DFBD17F68005006B300D /* Images.xcassets */; };
 		18EC863019EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18EC862F19EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m */; };
 		18F61A891A96133000BA631A /* UIScrollView+PEAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */; };
+		CA7D5A271B383F5A00433581 /* FPAppNotificationNames.m in Sources */ = {isa = PBXBuildFile; fileRef = CA7D5A261B383F5A00433581 /* FPAppNotificationNames.m */; };
+		CA7D5A2E1B3851E200433581 /* FPAccountLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA7D5A2D1B3851E200433581 /* FPAccountLoginController.m */; };
 		CA920C121B21F48900A848EA /* fpapi-resource.localdev.json in Resources */ = {isa = PBXBuildFile; fileRef = 18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */; };
 		CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = CAD8AE501B2B291000276F4F /* PELMUIUtils.m */; };
 		F17D7730E485443DAEE57677 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 91349E0025D9467DBE585F0F /* libPods.a */; };
@@ -55,8 +56,6 @@
 		180EDA2F19C7C2D200C782A6 /* FPSettingsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPSettingsController.m; sourceTree = "<group>"; };
 		180EDA3319C7C89B00C782A6 /* FPEditsInProgressController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPEditsInProgressController.h; sourceTree = "<group>"; };
 		180EDA3419C7C89B00C782A6 /* FPEditsInProgressController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPEditsInProgressController.m; sourceTree = "<group>"; };
-		181003AD1A6E1CB800FB6C55 /* FPEditActors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPEditActors.h; sourceTree = "<group>"; };
-		181003AE1A6E1CB800FB6C55 /* FPEditActors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPEditActors.m; sourceTree = "<group>"; };
 		1822308B1A7042FC00884600 /* NSMutableArray+MoveObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableArray+MoveObject.h"; sourceTree = "<group>"; };
 		1822308C1A7042FC00884600 /* NSMutableArray+MoveObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableArray+MoveObject.m"; sourceTree = "<group>"; };
 		182F651E1A244E2700A769E4 /* IQKeyboardManager.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = IQKeyboardManager.bundle; path = Pods/IQKeyboardManager/IQKeyBoardManager/Resources/IQKeyboardManager.bundle; sourceTree = "<group>"; };
@@ -88,8 +87,8 @@
 		18C3CD7319DC3B440092C002 /* FPPanelToolkit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPPanelToolkit.m; sourceTree = "<group>"; };
 		18CC2CF217F680AC009DF2CE /* FPNames.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPNames.h; sourceTree = "<group>"; };
 		18CC2CF317F680AC009DF2CE /* FPNames.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPNames.m; sourceTree = "<group>"; };
-		18CC2CF617F680AC009DF2CE /* FPUnauthStartController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPUnauthStartController.h; sourceTree = "<group>"; };
-		18CC2CF717F680AC009DF2CE /* FPUnauthStartController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPUnauthStartController.m; sourceTree = "<group>"; };
+		18CC2CF617F680AC009DF2CE /* FPCreateAccountController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPCreateAccountController.h; sourceTree = "<group>"; };
+		18CC2CF717F680AC009DF2CE /* FPCreateAccountController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPCreateAccountController.m; sourceTree = "<group>"; };
 		18CC2CFB17F680BB009DF2CE /* UIColor+FuelPurchase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+FuelPurchase.h"; sourceTree = "<group>"; };
 		18CC2CFC17F680BB009DF2CE /* UIColor+FuelPurchase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+FuelPurchase.m"; sourceTree = "<group>"; };
 		18CC2CFD17F680BB009DF2CE /* UIFont+FuelPurchase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIFont+FuelPurchase.h"; sourceTree = "<group>"; };
@@ -130,6 +129,10 @@
 		CA6203EC1B21D9DE00CF9C91 /* libPods-PEFuelPurchase-App-dev-PEXML-Utils.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libPods-PEFuelPurchase-App-dev-PEXML-Utils.a"; path = "Pods/../build/Debug-iphoneos/libPods-PEFuelPurchase-App-dev-PEXML-Utils.a"; sourceTree = "<group>"; };
 		CA6203ED1B21D9DE00CF9C91 /* libPods.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libPods.a; path = "Pods/../build/Debug-iphoneos/libPods.a"; sourceTree = "<group>"; };
 		CA6203F51B21EDBD00CF9C91 /* libPods.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libPods.a; path = "Pods/../build/Debug-iphoneos/libPods.a"; sourceTree = "<group>"; };
+		CA7D5A251B383F5A00433581 /* FPAppNotificationNames.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPAppNotificationNames.h; sourceTree = "<group>"; };
+		CA7D5A261B383F5A00433581 /* FPAppNotificationNames.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPAppNotificationNames.m; sourceTree = "<group>"; };
+		CA7D5A2C1B3851E200433581 /* FPAccountLoginController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPAccountLoginController.h; sourceTree = "<group>"; };
+		CA7D5A2D1B3851E200433581 /* FPAccountLoginController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPAccountLoginController.m; sourceTree = "<group>"; };
 		CAD8AE4F1B2B291000276F4F /* PELMUIUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PELMUIUtils.h; sourceTree = "<group>"; };
 		CAD8AE501B2B291000276F4F /* PELMUIUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PELMUIUtils.m; sourceTree = "<group>"; };
 		E12E20B44758C744FA39A49C /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
@@ -163,34 +166,6 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
-		18010C54180E46D0005F5CEB /* Unauthenticated */ = {
-			isa = PBXGroup;
-			children = (
-				18010C55180E46E0005F5CEB /* Landing Screen */,
-			);
-			name = Unauthenticated;
-			sourceTree = "<group>";
-		};
-		18010C55180E46E0005F5CEB /* Landing Screen */ = {
-			isa = PBXGroup;
-			children = (
-				18CC2CF617F680AC009DF2CE /* FPUnauthStartController.h */,
-				18CC2CF717F680AC009DF2CE /* FPUnauthStartController.m */,
-			);
-			name = "Landing Screen";
-			sourceTree = "<group>";
-		};
-		18010C56180E46F7005F5CEB /* Authenticated */ = {
-			isa = PBXGroup;
-			children = (
-				CAC238871B275D190096B963 /* Account Settings */,
-				180EDA3219C7C87E00C782A6 /* Edits in Progress Screen */,
-				180EDA2D19C7C2AB00C782A6 /* Settings Screen */,
-				18010C57180E470C005F5CEB /* Quick Action Menu Screen */,
-			);
-			name = Authenticated;
-			sourceTree = "<group>";
-		};
 		18010C57180E470C005F5CEB /* Quick Action Menu Screen */ = {
 			isa = PBXGroup;
 			children = (
@@ -216,15 +191,6 @@
 				180EDA3419C7C89B00C782A6 /* FPEditsInProgressController.m */,
 			);
 			name = "Edits in Progress Screen";
-			sourceTree = "<group>";
-		};
-		181003AC1A6E1CA400FB6C55 /* Edit actors */ = {
-			isa = PBXGroup;
-			children = (
-				181003AD1A6E1CB800FB6C55 /* FPEditActors.h */,
-				181003AE1A6E1CB800FB6C55 /* FPEditActors.m */,
-			);
-			name = "Edit actors";
 			sourceTree = "<group>";
 		};
 		18456CE719D39D840023A2A7 /* Panel Toolkit */ = {
@@ -328,14 +294,16 @@
 			name = Utils;
 			sourceTree = "<group>";
 		};
-		18AB99FB17F6832C002A8A69 /* View Controllers */ = {
+		18AB99FB17F6832C002A8A69 /* Custom Screens */ = {
 			isa = PBXGroup;
 			children = (
-				18CF522F19C9D9990020FC94 /* Screen Toolkit */,
-				18010C56180E46F7005F5CEB /* Authenticated */,
-				18010C54180E46D0005F5CEB /* Unauthenticated */,
+				CA7D5A2B1B384FEE00433581 /* Account Login */,
+				CA7D5A2A1B384FDE00433581 /* Account Creation */,
+				180EDA3219C7C87E00C782A6 /* Edits in Progress Screen */,
+				180EDA2D19C7C2AB00C782A6 /* Settings Screen */,
+				18010C57180E470C005F5CEB /* Quick Action Menu Screen */,
 			);
-			name = "View Controllers";
+			name = "Custom Screens";
 			sourceTree = "<group>";
 		};
 		18AC071F181AC784001FF24E /* Logging */ = {
@@ -417,13 +385,12 @@
 		18D6DFB117F68005006B300D /* PEFuelPurchase-App */ = {
 			isa = PBXGroup;
 			children = (
-				181003AC1A6E1CA400FB6C55 /* Edit actors */,
 				186E0B7819CD1BDD00CE4B3A /* UI Commons */,
-				185D38CC1815952B0007587A /* App Delegate */,
 				189AC7521A78030D00A6CFE3 /* Model */,
-				18456CE719D39D840023A2A7 /* Panel Toolkit */,
-				18AB99FB17F6832C002A8A69 /* View Controllers */,
+				185D38CC1815952B0007587A /* App Delegate */,
+				CA7D5A241B383F4500433581 /* Notifications */,
 				18AB99FA17F6831C002A8A69 /* Utils */,
+				CA7D5A281B384F4000433581 /* User Interface */,
 				18AB99F917F68304002A8A69 /* Categories */,
 				18AC071F181AC784001FF24E /* Logging */,
 				18D6DFB217F68005006B300D /* Supporting Files */,
@@ -486,11 +453,41 @@
 			name = UIScrollView;
 			sourceTree = "<group>";
 		};
-		CAC238871B275D190096B963 /* Account Settings */ = {
+		CA7D5A241B383F4500433581 /* Notifications */ = {
 			isa = PBXGroup;
 			children = (
+				CA7D5A251B383F5A00433581 /* FPAppNotificationNames.h */,
+				CA7D5A261B383F5A00433581 /* FPAppNotificationNames.m */,
 			);
-			name = "Account Settings";
+			name = Notifications;
+			sourceTree = "<group>";
+		};
+		CA7D5A281B384F4000433581 /* User Interface */ = {
+			isa = PBXGroup;
+			children = (
+				18CF522F19C9D9990020FC94 /* Screen Toolkit */,
+				18456CE719D39D840023A2A7 /* Panel Toolkit */,
+				18AB99FB17F6832C002A8A69 /* Custom Screens */,
+			);
+			name = "User Interface";
+			sourceTree = "<group>";
+		};
+		CA7D5A2A1B384FDE00433581 /* Account Creation */ = {
+			isa = PBXGroup;
+			children = (
+				18CC2CF617F680AC009DF2CE /* FPCreateAccountController.h */,
+				18CC2CF717F680AC009DF2CE /* FPCreateAccountController.m */,
+			);
+			name = "Account Creation";
+			sourceTree = "<group>";
+		};
+		CA7D5A2B1B384FEE00433581 /* Account Login */ = {
+			isa = PBXGroup;
+			children = (
+				CA7D5A2C1B3851E200433581 /* FPAccountLoginController.h */,
+				CA7D5A2D1B3851E200433581 /* FPAccountLoginController.m */,
+			);
+			name = "Account Login";
 			sourceTree = "<group>";
 		};
 		CAD8AE4E1B2B28E200276F4F /* Local Data UI Utils */ = {
@@ -630,9 +627,10 @@
 				1822308D1A7042FC00884600 /* NSMutableArray+MoveObject.m in Sources */,
 				18CC2CF817F680AC009DF2CE /* FPNames.m in Sources */,
 				18EC863019EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m in Sources */,
-				181003AF1A6E1CB800FB6C55 /* FPEditActors.m in Sources */,
+				CA7D5A271B383F5A00433581 /* FPAppNotificationNames.m in Sources */,
 				18CF523219C9D9C90020FC94 /* FPScreenToolkit.m in Sources */,
-				18CC2CFA17F680AC009DF2CE /* FPUnauthStartController.m in Sources */,
+				18CC2CFA17F680AC009DF2CE /* FPCreateAccountController.m in Sources */,
+				CA7D5A2E1B3851E200433581 /* FPAccountLoginController.m in Sources */,
 				186E0B7C19CD237B00CE4B3A /* PEListViewController.m in Sources */,
 				18CC2CFF17F680BB009DF2CE /* UIColor+FuelPurchase.m in Sources */,
 				189AC7561A78034500A6CFE3 /* FPLogEnvLogComposite.m in Sources */,
