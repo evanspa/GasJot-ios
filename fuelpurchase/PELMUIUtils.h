@@ -14,13 +14,13 @@ typedef void (^PESyncViewStyler)(UIView *, id);
 @interface PELMUIUtils : NSObject
 
 + (PESyncViewStyler)syncViewStylerWithUitoolkit:(PEUIToolkit *)uitoolkit
-                              foregroundActorId:(NSInteger)foregroundActorId
-                           subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding;
+                           subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
+                                     isLoggedIn:(BOOL)isLoggedIn;
 
 + (PESyncViewStyler)syncViewStylerWithTitleBlk:(NSString *(^)(id))titleBlk
                         alwaysTopifyTitleLabel:(BOOL)alwaysTopifyTitleLabel
                                      uitoolkit:(PEUIToolkit *)uitoolkit
-                             foregroundActorId:(NSInteger)foregroundActorId
-                          subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding;
+                          subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
+                                    isLoggedIn:(BOOL)isLoggedIn;
 
 @end

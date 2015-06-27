@@ -52,12 +52,10 @@
   UITextField *_caPasswordTf;
   UIButton *_caDoCreateAcctBtn;
   CGFloat animatedDistance;
-  MBProgressHUD *_HUD;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_localUser;
-  NSNumber *_preserveExistingLocalEntities;
-  
+  NSNumber *_preserveExistingLocalEntities;  
 }
 
 #pragma mark - Initializers
@@ -147,33 +145,17 @@
   return signInPnl;
 }
 
-#pragma mark - Helpers
-
-- (NSArray *)computeSignInErrMsgs:(NSUInteger)signInErrMask {
-  NSMutableArray *errMsgs = [NSMutableArray arrayWithCapacity:1];
-  if (signInErrMask & FPSignInUsernameOrEmailNotProvided) {
-    [errMsgs addObject:LS(@"signin.username-or-email-notprovided")];
-  }
-  if (signInErrMask & FPSignInPasswordNotProvided) {
-    [errMsgs addObject:LS(@"signin.password-notprovided")];
-  }
-  if (signInErrMask & FPSignInInvalidCredentials) {
-    [errMsgs addObject:LS(@"signin.credentials-invalid")];
-  }
-  return errMsgs;
-}
-
 #pragma mark - Sign-in / Sign-up event handling
 
 - (void)handleSignIn {
   [[self view] endEditing:YES];
   if (!([self formStateMaskForSignIn] & FPSignInAnyIssues)) {
-    _HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    _HUD.delegate = self;
+
+    __block MBProgressHUD *HUD;
     void (^nonLocalSyncSuccessBlk)(FPUser *) = ^(FPUser *user){
       dispatch_async(dispatch_get_main_queue(), ^{
-        [_HUD hide:YES afterDelay:0];
-        NSString *msg = @"You have been successfully signed in.";
+        [HUD hide:YES];
+        NSString *msg = @"You are now logged in.";
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Success"
                                                                        message:msg
                                                                 preferredStyle:UIAlertControllerStyleAlert];
@@ -190,94 +172,98 @@
       });
     };
     ErrMsgsMaker errMsgsMaker = ^ NSArray * (NSInteger errCode) {
-      return [self computeSignInErrMsgs:errCode];
+      return [FPUtils computeSignInErrMsgs:errCode];
     };
     void (^doLogin)(BOOL) = ^ (BOOL syncLocalEntities) {
       void (^successBlk)(FPUser *) = nil;
       if (syncLocalEntities) {
         successBlk = ^(FPUser *remoteUser) {
+          [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
+                                                              object:nil
+                                                            userInfo:nil];
           dispatch_async(dispatch_get_main_queue(), ^{
-            _HUD.labelText = @"Authentication Success!";
-            _HUD.detailsLabelText = @"Proceeding to sync records...";
-            _HUD.mode = MBProgressHUDModeDeterminate;
-            
-            __block NSInteger numEntitiesSynced = 0;
-            __block NSInteger numEntitiesSyncAttempted = 0;
-            __block float overallSyncProgress = 0.0;
-            NSInteger numEntitiesToSync = 0;
-            numEntitiesToSync = [_coordDao flushAllUnsyncedEditsToRemoteForUser:_localUser
-                                                                     successBlk:^(float progress) {
-                                                                       numEntitiesSyncAttempted++;
-                                                                       numEntitiesSynced++;
-                                                                       overallSyncProgress += progress;
-                                                                       [_HUD setProgress:overallSyncProgress];
-                                                                       if (numEntitiesSyncAttempted == numEntitiesToSync) {
-                                                                         // Done syncing
-                                                                         if (numEntitiesSynced == numEntitiesToSync) {
-                                                                           // 100% sync success
-                                                                           dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.4 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-                                                                             UIImage *image = [UIImage imageNamed:@"hud-complete"];
-                                                                             UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
-                                                                             [_HUD setCustomView:imageView];
-                                                                             _HUD.mode = MBProgressHUDModeCustomView;
-                                                                             _HUD.labelText = @"Sync complete!";
-                                                                             _HUD.detailsLabelText = @"";
-                                                                             [_HUD hide:YES afterDelay:1.30];                                                                             
-                                                                           });
-                                                                         } else {
-                                                                           // NOT success (some error(s))
-                                                                         }
-                                                                       }
-                                                                     }
-                                                             remoteStoreBusyBlk:^(float progress, NSDate *retryAfter) {
-                                                               numEntitiesSyncAttempted++;
-                                                               overallSyncProgress += progress;
-                                                               [_HUD setProgress:overallSyncProgress];
-                                                               if (numEntitiesSyncAttempted == numEntitiesToSync) {
-                                                                 // Done syncing with some error(s)
-                                                               }
-                                                             }
-                                                             tempRemoteErrorBlk:^(float progress) {
-                                                               numEntitiesSyncAttempted++;
-                                                               overallSyncProgress += progress;
-                                                               [_HUD setProgress:overallSyncProgress];
-                                                               if (numEntitiesSyncAttempted == numEntitiesToSync) {
-                                                                 // Done syncing with some error(s)
-                                                               }
-                                                             }
-                                                                 remoteErrorBlk:^(float progress, NSInteger errMask) {
-                                                                   numEntitiesSyncAttempted++;
-                                                                   overallSyncProgress += progress;
-                                                                   [_HUD setProgress:overallSyncProgress];
-                                                                   if (numEntitiesSyncAttempted == numEntitiesToSync) {
-                                                                     // Done syncing with some error(s)
-                                                                   }
-                                                                 }
-                                                                authRequiredBlk:^(float progress) {
-                                                                  numEntitiesSyncAttempted++;
-                                                                  overallSyncProgress += progress;
-                                                                  [_HUD setProgress:overallSyncProgress];
-                                                                  if (numEntitiesSyncAttempted == numEntitiesToSync) {
-                                                                    // Done syncing with some error(s)
-                                                                  }
-                                                                }
-                                                                          error:[FPUtils localDatabaseErrorHudHandlerMaker](_HUD)];
+            HUD.labelText = @"You're now logged in.";
+            HUD.detailsLabelText = @"Proceeding to sync records...";
+            HUD.mode = MBProgressHUDModeDeterminate;
           });
+          __block NSInteger numEntitiesSynced = 0;
+          __block NSInteger syncAttemptErrors = 0;
+          __block float overallSyncProgress = 0.0;
+          [_coordDao flushAllUnsyncedEditsToRemoteForUser:_localUser
+                                               successBlk:^(float progress) {
+                                                 numEntitiesSynced++;
+                                                 overallSyncProgress += progress;
+                                                 dispatch_async(dispatch_get_main_queue(), ^{
+                                                   [HUD setProgress:overallSyncProgress];
+                                                 });
+                                               }
+                                       remoteStoreBusyBlk:^(float progress, NSDate *retryAfter) {
+                                         syncAttemptErrors++;
+                                         overallSyncProgress += progress;
+                                         dispatch_async(dispatch_get_main_queue(), ^{
+                                           [HUD setProgress:overallSyncProgress];
+                                         });
+                                       }
+                                       tempRemoteErrorBlk:^(float progress) {
+                                         syncAttemptErrors++;
+                                         overallSyncProgress += progress;
+                                         dispatch_async(dispatch_get_main_queue(), ^{
+                                           [HUD setProgress:overallSyncProgress];
+                                         });
+                                       }
+                                           remoteErrorBlk:^(float progress, NSInteger errMask) {
+                                             syncAttemptErrors++;
+                                             overallSyncProgress += progress;
+                                             dispatch_async(dispatch_get_main_queue(), ^{
+                                               [HUD setProgress:overallSyncProgress];
+                                             });
+                                           }
+                                          authRequiredBlk:^(float progress) {
+                                            syncAttemptErrors++;
+                                            overallSyncProgress += progress;
+                                            dispatch_async(dispatch_get_main_queue(), ^{
+                                              [HUD setProgress:overallSyncProgress];
+                                            });
+                                          }
+                                                  allDone:^{
+                                                    if (syncAttemptErrors == 0) {
+                                                      // 100% sync success
+                                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                                        UIImage *image = [UIImage imageNamed:@"hud-complete"];
+                                                        UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
+                                                        [HUD setCustomView:imageView];
+                                                        HUD.mode = MBProgressHUDModeCustomView;
+                                                        HUD.labelText = @"Sync complete!";
+                                                        HUD.detailsLabelText = @"";
+                                                        [HUD hide:YES afterDelay:1.30];
+                                                      });
+                                                      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.3 * NSEC_PER_SEC),
+                                                                     dispatch_get_main_queue(), ^{
+                                                                       [[self navigationController] popViewControllerAnimated:YES];
+                                                                     });
+                                                    } else {
+                                                      // TODO NOT 100% success (some error(s))
+                                                    }
+                                                  }
+                                                    error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD)];
         };
       } else {
         successBlk = nonLocalSyncSuccessBlk;
       }
+      HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+      HUD.delegate = self;
+      HUD.labelText = @"Logging in...";
       [_coordDao loginWithUsernameOrEmail:[_siUsernameOrEmailTf text]
                                  password:[_siPasswordTf text]
              andLinkRemoteUserToLocalUser:_localUser
             preserveExistingLocalEntities:syncLocalEntities
-                          remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](_HUD)
-                        completionHandler:[FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](_HUD, successBlk)
-                    localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](_HUD)];
+                          remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD)
+                        completionHandler:[FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk)
+                    localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD)];
     };
     if (_preserveExistingLocalEntities == nil) { // first time asked
       if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {
-        NSString *msg = @"It seems you've created some records locally.  Would you like them to be synced to your remote account upon logging in, or would you like them to be deleted?";
+        NSString *msg = @"It seems you've edited some records locally.  Would you like them to be synced to your remote account upon logging in, or would you like them to be deleted?";
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Locally Created Records"
                                                                        message:msg
                                                                 preferredStyle:UIAlertControllerStyleAlert];
@@ -285,30 +271,26 @@
                                                          style:UIAlertActionStyleDefault
                                                        handler:^(UIAlertAction *action) {
                                                          _preserveExistingLocalEntities = [NSNumber numberWithBool:YES];
-                                                         _HUD.labelText = @"Proceeding to authenticate...";
                                                          doLogin(YES);
                                                        }];
         UIAlertAction *delete = [UIAlertAction actionWithTitle:@"Nah.  Just delete them."
                                                          style:UIAlertActionStyleDestructive
                                                        handler:^(UIAlertAction *action) {
                                                          _preserveExistingLocalEntities = [NSNumber numberWithBool:NO];
-                                                         _HUD.labelText = @"Proceeding to authenticate...";
                                                          doLogin(NO);
                                                        }];
         [alert addAction:synced];
         [alert addAction:delete];
         [self presentViewController:alert animated:YES completion:nil];
       } else {
-        _preserveExistingLocalEntities = [NSNumber numberWithBool:YES];
-        _HUD.labelText = @"Authenticating...";
-        doLogin(YES);
+        _preserveExistingLocalEntities = [NSNumber numberWithBool:NO];
+        doLogin(NO);
       }
     } else {
-      _HUD.labelText = @"Authenticating...";
       doLogin([_preserveExistingLocalEntities boolValue]);
     }
   } else {
-    NSArray *errMsgs = [self computeSignInErrMsgs:_formStateMaskForSignIn];
+    NSArray *errMsgs = [FPUtils computeSaveUsrErrMsgs:_formStateMaskForAcctCreation];
     [PEUIUtils showAlertWithMsgs:errMsgs title:@"oopsMsg" buttonTitle:@"okayMsg"];
   }
 }

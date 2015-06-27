@@ -15,7 +15,6 @@
 #import <BlocksKit/UIControl+BlocksKit.h>
 #import "FPLogEnvLogComposite.h"
 #import "FPNames.h"
-#import "FPEditActors.h"
 
 NSString * const FPFpLogEntityMakerFpLogEntry = @"FPFpLogEntityMakerFpLogEntry";
 NSString * const FPFpLogEntityMakerVehicleEntry = @"FPFpLogEntityMakerVehicleEntry";
@@ -250,7 +249,6 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
       [_coordDao vehicleWithName:[PEUIUtils stringFromTextFieldWithTag:FPVehicleTagName fromView:panel]
                    defaultOctane:[PEUIUtils numberFromTextFieldWithTag:FPVehicleTagDefaultOctane fromView:panel]
                     fuelCapacity:[PEUIUtils decimalNumberFromTextFieldWithTag:FPVehicleTagFuelCapacity fromView:panel]];
-    [newVehicle setEditActorId:@(FPForegroundActorId)];
     return newVehicle;
   };
 }
@@ -475,7 +473,6 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                                                zip:tfstr(FPFuelStationTagZip)
                                                           latitude:[ds latitude]
                                                          longitude:[ds longitude]];
-    [newFuelstation setEditActorId:@(FPForegroundActorId)];
     return newFuelstation;
   };
 }
@@ -690,9 +687,6 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                                                  postFillupReportedDte:tfnum(FPFpEnvLogCompositeTagPostFillupReportedDte)
                                                                                logDate:[ds pickedLogDate]
                                                                               coordDao:_coordDao];
-    [[composite fpLog] setEditActorId:@(FPForegroundActorId)];
-    [[composite preFillupEnvLog] setEditActorId:@(FPForegroundActorId)];
-    [[composite postFillupEnvLog] setEditActorId:@(FPForegroundActorId)];
     return composite;
   };
 }
@@ -1160,7 +1154,6 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                                  reportedOutsideTemp:tfnum(FPEnvLogTagReportedOutsideTemp)
                                                              logDate:[ds pickedLogDate]
                                                          reportedDte:tfnum(FPEnvLogTagReportedDte)];
-    [envlog setEditActorId:@(FPForegroundActorId)];
     return envlog;
   };
 }

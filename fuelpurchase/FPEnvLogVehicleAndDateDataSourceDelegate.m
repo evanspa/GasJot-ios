@@ -10,7 +10,6 @@
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEFuelPurchase-Model/PELMNotificationUtils.h>
-#import <PEFuelPurchase-Model/FPNotificationNames.h>
 
 @implementation FPEnvLogVehicleAndDateDataSourceDelegate {
   FPCoordinatorDao *_coordDao;

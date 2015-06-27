@@ -28,9 +28,6 @@
   CGFloat _heightForCells;
   FPDetailViewMaker _detailViewMaker;
   PEUIToolkit *_uitoolkit;
-  NSArray *_entityAddedNotifNames;
-  NSArray *_entityUpdatedNotifNames;
-  NSArray *_entityRemovedNotifNames;
   NSIndexPath *_indexPathOfRemovedEntity;
   PEDoesEntityBelongToListView _doesEntityBelongToThisListView;
   PEWouldBeIndexOfEntity _wouldBeIndexOfEntity;
@@ -52,9 +49,6 @@
                         heightForCells:(CGFloat)heightForCells
                        detailViewMaker:(FPDetailViewMaker)detailViewMaker
                              uitoolkit:(PEUIToolkit *)uitoolkit
-                 entityAddedNotifNames:(NSArray *)entityAddedNotifNames
-               entityUpdatedNotifNames:(NSArray *)entityUpdatedNotifNames
-               entityRemovedNotifNames:(NSArray *)entityRemovedNotifNames
         doesEntityBelongToThisListView:(PEDoesEntityBelongToListView)doesEntityBelongToThisListView
                   wouldBeIndexOfEntity:(PEWouldBeIndexOfEntity)wouldBeIndexOfEntity {
   NSAssert(!(detailViewMaker && initialSelectedItem), @"detailViewMaker and initialSelectedItem cannot BOTH be provided");
@@ -73,9 +67,6 @@
     _heightForCells = heightForCells;
     _detailViewMaker = detailViewMaker;
     _uitoolkit = uitoolkit;
-    _entityAddedNotifNames = entityAddedNotifNames;
-    _entityUpdatedNotifNames = entityUpdatedNotifNames;
-    _entityRemovedNotifNames = entityRemovedNotifNames;
     _dataSource = [NSMutableArray array];
     _indexPathOfRemovedEntity = nil;
     _doesEntityBelongToThisListView = doesEntityBelongToThisListView;
@@ -102,7 +93,7 @@
   return index;
 }
 
-#pragma mark - Notification Observing
+#pragma mark - Entity changed methods
 
 - (BOOL)handleUpdatedEntity:(PELMMainSupport *)updatedEntity {
   BOOL entityUpdated = NO;
@@ -157,8 +148,10 @@
           [_dataSource[indexOfExistingEntityAsInt] overwrite:updatedEntity];
           [_dataSource moveObjectFromIndex:indexOfExistingEntityAsInt
                                    toIndex:wouldBeIndex];
+          [_tableView beginUpdates];
           deleteAtTableIndex(indexOfExistingEntityAsInt);
           insertAtTableIndex(wouldBeIndex);
+          [_tableView endUpdates];
           DDLogDebug(@"PELVC/hUE, moved.");
         } else { // wouldBeIndex >= [_dataSource count]
           // wouldBeIndex is equal to or larger than [_dataSource count], so we need to
@@ -288,61 +281,13 @@
   return entityAdded;
 }
 
-- (void)handleEntitiesNotification:(NSNotification *)notification
-                     entityHandler:(BOOL(^)(PELMMainSupport *))entityHandler
-                  tempNotifPostfix:(NSString *)tempNotifPostfix {
-  @synchronized(self) {
-    NSArray *entities = [PELMNotificationUtils entitiesFromNotification:notification];
-    [_tableView beginUpdates];
-    NSInteger numHandled = 0;
-    for (PELMMainSupport *entity in entities) {
-      if (entityHandler(entity)) {
-        numHandled++;
-      }
-    }
-    [_tableView endUpdates];
-    if (numHandled > 0) {
-      [PEUIUtils displayTempNotification:[NSString stringWithFormat:@"%ld record(s) %@.", (long)numHandled, tempNotifPostfix]
-                           forController:self
-                               uitoolkit:_uitoolkit];
-    }
-  }
-}
-
-- (void)entitiesUpdated:(NSNotification *)notification {
-  [self handleEntitiesNotification:notification
-                     entityHandler:^BOOL(PELMMainSupport *entity){return [self handleUpdatedEntity:entity];}
-                  tempNotifPostfix:@"updated"];
-}
-
-- (void)entitiesRemoved:(NSNotification *)notification {
-  [self handleEntitiesNotification:notification
-                     entityHandler:^BOOL(PELMMainSupport *entity){return [self handleRemovedEntity:entity];}
-                  tempNotifPostfix:@"removed"];
-}
-
-- (void)entitiesAdded:(NSNotification *)notification {
-  [self handleEntitiesNotification:notification
-                     entityHandler:^BOOL(PELMMainSupport *entity){return [self handleAddedEntity:entity];}
-                  tempNotifPostfix:@"added"];
-}
-
 #pragma mark - NSObject
 
 - (void)dealloc {
   _tableView.delegate = nil; // http://stackoverflow.com/a/8381334/1034895
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark - View Controller Lifecycle
-
-- (void)viewWillDisappear:(BOOL)animated {
-  if ([self isMovingFromParentViewController]) {
-    DDLogDebug(@"Removing PELVC as a notification observer.");
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-  }
-  [super viewWillDisappear:animated];
-}
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
@@ -369,18 +314,6 @@
                              target:self
                              action:@selector(addItem)]];
   }
-  
-  /* Setup Notification observing */
-  void (^observeNotifNames)(NSArray *, SEL) = ^(NSArray *notifNames, SEL selector) {
-    for (NSString *notifName in notifNames) {
-      [PEUtils observeIfNotNilNotificationName:notifName
-                                      observer:self
-                                      selector:selector];
-    }
-  };
-  observeNotifNames(_entityAddedNotifNames, @selector(entitiesAdded:));
-  observeNotifNames(_entityUpdatedNotifNames, @selector(entitiesUpdated:));
-  observeNotifNames(_entityRemovedNotifNames, @selector(entitiesRemoved:));
   
   /* Add the table view */
   _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)

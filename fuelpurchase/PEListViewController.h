@@ -37,10 +37,15 @@ UITableViewDelegate>
                         heightForCells:(CGFloat)heightForCells
                        detailViewMaker:(FPDetailViewMaker)detailViewMaker
                              uitoolkit:(PEUIToolkit *)uitoolkit
-                 entityAddedNotifNames:(NSArray *)entityAddedNotifNames
-               entityUpdatedNotifNames:(NSArray *)entityUpdatedNotifNames
-               entityRemovedNotifNames:(NSArray *)entityRemovedNotifNames
         doesEntityBelongToThisListView:(PEDoesEntityBelongToListView)doesEntityBelongToThisListView
                   wouldBeIndexOfEntity:(PEWouldBeIndexOfEntity)wouldBeIndexOfEntity;
+
+#pragma mark - Entity changed methods
+
+- (BOOL)handleUpdatedEntity:(PELMMainSupport *)updatedEntity;
+
+- (BOOL)handleRemovedEntity:(PELMMainSupport *)removedEntity;
+
+- (BOOL)handleAddedEntity:(PELMMainSupport *)addedEntity;
 
 @end

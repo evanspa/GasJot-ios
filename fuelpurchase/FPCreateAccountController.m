@@ -48,10 +48,11 @@
   UITextField *_caEmailOrUsernameTf;
   UITextField *_caPasswordTf;
   CGFloat animatedDistance;
-  MBProgressHUD *_HUD;
+  //MBProgressHUD *_HUD;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_localUser;
+  NSNumber *_preserveExistingLocalEntities;
 }
 
 #pragma mark - Initializers
@@ -144,10 +145,8 @@
 #pragma mark - Event handling
 
 - (void)handleAccountCreation {
+  [[self view] endEditing:YES];
   if (!([self formStateMaskForAcctCreation] & FPSaveUsrAnyIssues)) {
-    _HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    _HUD.delegate = self;
-    _HUD.labelText = @"Creating Account...";
     NSString *emailOrUsername = [_caEmailOrUsernameTf text];
     NSString *email = nil;
     NSString *username = nil;
@@ -160,10 +159,11 @@
     [_localUser setEmail:email];
     [_localUser setUsername:username];
     [_localUser setPassword:[_caPasswordTf text]];
-    void (^successBlock)(FPUser *) = ^(FPUser *newUser){
+    __block MBProgressHUD *HUD;    
+    void (^nonLocalSyncSuccessBlk)(FPUser *) = ^(FPUser *user){
       dispatch_async(dispatch_get_main_queue(), ^{
-        [_HUD hide:YES afterDelay:0];
-        NSString *msg = @"Your account has been created successfully.";
+        [HUD hide:YES];
+        NSString *msg = @"You're account has been successfully created.";
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Success"
                                                                        message:msg
                                                                 preferredStyle:UIAlertControllerStyleAlert];
@@ -182,12 +182,119 @@
     ErrMsgsMaker errMsgsMaker = ^ NSArray * (NSInteger errCode) {
       return [FPUtils computeSaveUsrErrMsgs:errCode];
     };
-    [_coordDao
-      establishRemoteAccountForLocalUser:_localUser
-           preserveExistingLocalEntities:YES
-                         remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](_HUD)
-                       completionHandler:[FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](_HUD, successBlock)
-                   localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](_HUD)];
+    void (^doAccountCreation)(BOOL) = ^ (BOOL syncLocalEntities) {
+      void (^successBlk)(FPUser *) = nil;
+      if (syncLocalEntities) {
+        successBlk = ^(FPUser *remoteUser) {
+          [[NSNotificationCenter defaultCenter] postNotificationName:FPAppAccountCreationNotification
+                                                              object:nil
+                                                            userInfo:nil];
+          dispatch_async(dispatch_get_main_queue(), ^{
+            HUD.labelText = @"Account Creation Success!";
+            HUD.detailsLabelText = @"Proceeding to sync records...";
+            HUD.mode = MBProgressHUDModeDeterminate;
+          });
+          __block NSInteger numEntitiesSynced = 0;
+          __block NSInteger syncAttemptErrors = 0;
+          __block float overallSyncProgress = 0.0;
+          [_coordDao flushAllUnsyncedEditsToRemoteForUser:_localUser
+                                               successBlk:^(float progress) {
+                                                 numEntitiesSynced++;
+                                                 overallSyncProgress += progress;
+                                                 dispatch_async(dispatch_get_main_queue(), ^{
+                                                   [HUD setProgress:overallSyncProgress];
+                                                 });
+                                               }
+                                       remoteStoreBusyBlk:^(float progress, NSDate *retryAfter) {
+                                         syncAttemptErrors++;
+                                         overallSyncProgress += progress;
+                                         dispatch_async(dispatch_get_main_queue(), ^{
+                                           [HUD setProgress:overallSyncProgress];
+                                         });
+                                       }
+                                       tempRemoteErrorBlk:^(float progress) {
+                                         syncAttemptErrors++;
+                                         overallSyncProgress += progress;
+                                         dispatch_async(dispatch_get_main_queue(), ^{
+                                           [HUD setProgress:overallSyncProgress];
+                                         });
+                                       }
+                                           remoteErrorBlk:^(float progress, NSInteger errMask) {
+                                             syncAttemptErrors++;
+                                             overallSyncProgress += progress;
+                                             dispatch_async(dispatch_get_main_queue(), ^{
+                                               [HUD setProgress:overallSyncProgress];
+                                             });
+                                           }
+                                          authRequiredBlk:^(float progress) {
+                                            syncAttemptErrors++;
+                                            overallSyncProgress += progress;
+                                            dispatch_async(dispatch_get_main_queue(), ^{
+                                              [HUD setProgress:overallSyncProgress];
+                                            });
+                                          }
+                                                  allDone:^{
+                                                    if (syncAttemptErrors == 0) {
+                                                      // 100% sync success
+                                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                                        UIImage *image = [UIImage imageNamed:@"hud-complete"];
+                                                        UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
+                                                        [HUD setCustomView:imageView];
+                                                        HUD.mode = MBProgressHUDModeCustomView;
+                                                        HUD.labelText = @"Sync complete!";
+                                                        HUD.detailsLabelText = @"";
+                                                        [HUD hide:YES afterDelay:1.30];
+                                                      });
+                                                      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.3 * NSEC_PER_SEC),
+                                                                     dispatch_get_main_queue(), ^{
+                                                        [[self navigationController] popViewControllerAnimated:YES];
+                                                      });
+                                                    } else {
+                                                      // TODO NOT 100% success (some error(s))
+                                                    }
+                                                  }
+                                                    error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD)];
+        };
+      } else {
+        successBlk = nonLocalSyncSuccessBlk;
+      }
+      HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+      HUD.delegate = self;
+      HUD.labelText = @"Creating account...";
+      [_coordDao establishRemoteAccountForLocalUser:_localUser
+                      preserveExistingLocalEntities:syncLocalEntities
+                                    remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD)
+                                  completionHandler:[FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk)
+                              localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD)];
+    };
+    if (_preserveExistingLocalEntities == nil) { // first time asked
+      if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {
+        NSString *msg = @"It seems you've edited some records locally.  Would you like them to be synced to your remote account upon account creation, or would you like them to be deleted?";
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Locally Created Records"
+                                                                       message:msg
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *synced = [UIAlertAction actionWithTitle:@"Sync them to my remote account."
+                                                         style:UIAlertActionStyleDefault
+                                                       handler:^(UIAlertAction *action) {
+                                                         _preserveExistingLocalEntities = [NSNumber numberWithBool:YES];
+                                                         doAccountCreation(YES);
+                                                       }];
+        UIAlertAction *delete = [UIAlertAction actionWithTitle:@"Nah.  Just delete them."
+                                                         style:UIAlertActionStyleDestructive
+                                                       handler:^(UIAlertAction *action) {
+                                                         _preserveExistingLocalEntities = [NSNumber numberWithBool:NO];
+                                                         doAccountCreation(NO);
+                                                       }];
+        [alert addAction:synced];
+        [alert addAction:delete];
+        [self presentViewController:alert animated:YES completion:nil];
+      } else {
+        _preserveExistingLocalEntities = [NSNumber numberWithBool:NO];
+        doAccountCreation(NO);
+      }
+    } else {
+      doAccountCreation([_preserveExistingLocalEntities boolValue]);
+    }
   } else {
     NSArray *errMsgs = [FPUtils computeSaveUsrErrMsgs:_formStateMaskForAcctCreation];
     [PEUIUtils showAlertWithMsgs:errMsgs title:@"oopsMsg" buttonTitle:@"okayMsg"];

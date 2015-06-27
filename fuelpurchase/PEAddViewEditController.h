@@ -11,6 +11,7 @@
 #import <PEFuelPurchase-Model/PELMMainSupport.h>
 #import <MBProgressHUD/MBProgressHUD.h>
 
+@class PEListViewController;
 @class PEAddViewEditController;
 typedef NSDictionary *(^PEComponentsMakerBlk)(UIViewController *);
 typedef UIView *(^PEEntityPanelMakerBlk)(PEAddViewEditController *);
@@ -27,6 +28,7 @@ typedef void (^PESyncImmediateServerTempErrorBlk)(float, NSString *, NSString *)
 typedef void (^PESyncImmediateServerErrorBlk)(float, NSString *, NSString *, NSInteger);
 typedef void (^PESyncImmediateAuthRequiredBlk)(float, NSString *, NSString *);
 typedef void (^PESyncImmediateRetryAfterBlk)(float, NSString *, NSString *, NSDate *);
+typedef void (^PESyncImmediateDependencyUnsynced)(float, NSString *, NSString *);
 typedef void (^PEEntitySyncCancelerBlk)(PELMMainSupport *, NSError *, NSNumber *);
 typedef void (^PEMarkAsDoneEditingBlk)(PEAddViewEditController *,
                                        id,
@@ -54,17 +56,12 @@ typedef NSArray *(^PEMessagesFromErrMask)(NSInteger);
 #pragma mark - Initializers
 
 - (id)initWithEntity:(PELMMainSupport *)entity
+  listViewController:(PEListViewController *)listViewController
                isAdd:(BOOL)isAdd
            indexPath:(NSIndexPath *)indexPath
            uitoolkit:(PEUIToolkit *)uitoolkit
         itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
       itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
-syncInitiatedNotifName:(NSString *)syncInitiatedNotifName
-     syncedNotifName:(NSString *)syncedNotifName
- syncFailedNotifName:(NSString *)syncFailedNotifName
-entityRemotelyDeletedNotifName:(NSString *)entityRemotelyDeletedNotifName
-entityLocallyUpdatedNotifNames:(NSArray *)entityLocallyUpdatedNotifNames
-entityRemotelyUpdatedNotifName:(NSString *)entityRemotelyUpdatedNotifName
     entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
  entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
  panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
@@ -80,19 +77,17 @@ doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
 syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
       isUserLoggedIn:(BOOL)isUserLoggedIn
 syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
+isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForLaterSync
 prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
      entityValidator:(PEEntityValidatorBlk)entityValidator
      messageComputer:(PEMessagesFromErrMask)messageComputer
-foregroundEditActorId:(NSNumber *)foregroundEditActorId
-entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
-entityUpdatedNotificationToPost:(NSString *)entityUpdatedNotificationToPost
 getterForNotification:(SEL)getterForNotification;
 
 #pragma mark - Factory functions
 
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
+                                      listViewController:(PEListViewController *)listViewController
                                             itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
                                         entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
                                      entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
@@ -105,14 +100,13 @@ getterForNotification:(SEL)getterForNotification;
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
                                          messageComputer:(PEMessagesFromErrMask)messageComputer
-                                   foregroundEditActorId:(NSNumber *)foregroundEditActorId
-                           entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
                                           isUserLoggedIn:(BOOL)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-                    isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync;
+                         isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForBackgroundSync;
 
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
+                                      listViewController:(PEListViewController *)listViewController
                                             itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
                                         entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
                                      entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
@@ -125,24 +119,17 @@ getterForNotification:(SEL)getterForNotification;
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
                                          messageComputer:(PEMessagesFromErrMask)messageComputer
-                                   foregroundEditActorId:(NSNumber *)foregroundEditActorId
-                           entityAddedNotificationToPost:(NSString *)entityAddedNotificationToPost
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
                                           isUserLoggedIn:(BOOL)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-                    isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
+                         isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForBackgroundSync
                                    getterForNotification:(SEL)getterForNotification;
 
 + (PEAddViewEditController *)viewEntityCtrlrWithEntity:(PELMMainSupport *)entity
+                                    listViewController:(PEListViewController *)listViewController
                                        entityIndexPath:(NSIndexPath *)entityIndexPath
                                              uitoolkit:(PEUIToolkit *)uitoolkit
                                         itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
-                                syncInitiatedNotifName:(NSString *)syncInitiatedNotifName
-                                       syncedNotifName:(NSString *)syncedNotifName
-                                   syncFailedNotifName:(NSString *)syncFailedNotifName
-                        entityRemotelyDeletedNotifName:(NSString *)entityRemotelyDeletedNotifName
-                        entityLocallyUpdatedNotifNames:(NSArray *)entityLocallyUpdatedNotifNames
-                        entityRemotelyUpdatedNotifName:(NSString *)entityRemotelyUpdatedNotifName
                                       entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
                                    entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                    panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
@@ -156,13 +143,11 @@ getterForNotification:(SEL)getterForNotification;
                           syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
                                         isUserLoggedIn:(BOOL)isUserLoggedIn
                         syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-                  isEntityAppropriateForBackgroundSync:(BOOL)isEntityAppropriateForBackgroundSync
+                       isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForLaterSync
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator
-                                       messageComputer:(PEMessagesFromErrMask)messageComputer
-                                 foregroundEditActorId:(NSNumber *)foregroundEditActorId
-                       entityUpdatedNotificationToPost:(NSString *)entityUpdatedNotificationToPost;
+                                       messageComputer:(PEMessagesFromErrMask)messageComputer;
 
 #pragma mark - Properties
 

@@ -13,20 +13,20 @@
 @implementation PELMUIUtils
 
 + (PESyncViewStyler)syncViewStylerWithUitoolkit:(PEUIToolkit *)uitoolkit
-                              foregroundActorId:(NSInteger)foregroundActorId
-                           subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding {
+                           subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
+                                     isLoggedIn:(BOOL)isLoggedIn {
   return [self syncViewStylerWithTitleBlk:nil
                    alwaysTopifyTitleLabel:NO
                                 uitoolkit:uitoolkit
-                        foregroundActorId:foregroundActorId
-                     subtitleLeftHPadding:subtitleLeftHPadding];
+                     subtitleLeftHPadding:subtitleLeftHPadding
+                               isLoggedIn:isLoggedIn];
 }
 
 + (PESyncViewStyler)syncViewStylerWithTitleBlk:(NSString *(^)(id))titleBlk
                         alwaysTopifyTitleLabel:(BOOL)alwaysTopifyTitleLabel
                                      uitoolkit:(PEUIToolkit *)uitoolkit
-                             foregroundActorId:(NSInteger)foregroundActorId
-                          subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding {
+                          subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
+                                    isLoggedIn:(BOOL)isLoggedIn {
   
   NSInteger titleTag = 89;
   NSInteger subtitleTag = 90;
@@ -60,20 +60,23 @@
     CGFloat vpaddingForTopification = vpaddingForTopifiedTitleToFitSubtitle;
     if ([entity editInProgress]) {
       subTitleMsg = @"Edit in progress.";
-    } else if ([entity syncInProgress]) {
-      subTitleMsg = @"Sync in progress.";
-    } else if (![entity globalIdentifier] || ([entity editCount] > 0)) {
-      if ([entity syncErrMask] && ([entity syncErrMask].integerValue > 0)) {
-        syncWarningNeedsFix = YES;
-        subTitleMsg = @"Needs fixing.";
-        vpaddingForTopification = vpaddingForTopifiedTitleToFitNeedFixIcon;
-      } else if ([entity syncHttpRespCode] || ([entity syncErrMask] && ([entity syncErrMask].integerValue <= 0))) {
-        syncWarningTemporary = YES;
-        subTitleMsg = @"Temporary sync problem.";
-      } else if ([entity syncRetryAt]) {
-        subTitleMsg = @"Will retry sync later.";
-      } else {
-        subTitleMsg = @"Sync pending.";
+    }
+    if (isLoggedIn) {
+      if ([entity syncInProgress]) {
+        subTitleMsg = @"Sync in progress.";
+      } else if (![entity globalIdentifier] || ([entity editCount] > 0)) {
+        if ([entity syncErrMask] && ([entity syncErrMask].integerValue > 0)) {
+          syncWarningNeedsFix = YES;
+          subTitleMsg = @"Needs fixing.";
+          vpaddingForTopification = vpaddingForTopifiedTitleToFitNeedFixIcon;
+        } /*else if ([entity syncHttpRespCode] || ([entity syncErrMask] && ([entity syncErrMask].integerValue <= 0))) {
+          syncWarningTemporary = YES;
+          subTitleMsg = @"Temporary sync problem.";
+        } else if ([entity syncRetryAt]) {
+          subTitleMsg = @"Will retry sync later.";
+        }*/ else {
+          subTitleMsg = @"Sync needed.";
+        }
       }
     }
     

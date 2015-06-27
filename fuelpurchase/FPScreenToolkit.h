@@ -56,11 +56,13 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id);
 - (FPAuthScreenMaker)newVehiclesForSelectionScreenMakerWithItemSelectedAction:(PEItemSelectedAction)itemSelectedAction
                                                        initialSelectedVehicle:(FPVehicle *)initialSelectedVehicle;
 
-- (FPAuthScreenMaker)newAddVehicleScreenMakerWithDelegate:(PEItemAddedBlk)itemAddedBlk;
+- (FPAuthScreenMaker)newAddVehicleScreenMakerWithDelegate:(PEItemAddedBlk)itemAddedBlk
+                                       listViewController:(PEListViewController *)listViewController;
 
 - (FPAuthScreenMaker)newVehicleDetailScreenMakerWithVehicle:(FPVehicle *)vehicle
                                            vehicleIndexPath:(NSIndexPath *)vehicleIndexPath
-                                             itemChangedBlk:(PEItemChangedBlk)itemChangedBlk;
+                                             itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
+                                         listViewController:(PEListViewController *)listViewController;
 
 #pragma mark - Fuel Station Screens
 
@@ -80,17 +82,20 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id);
 - (FPAuthScreenMaker)newFuelStationsForSelectionScreenMakerWithItemSelectedAction:(PEItemSelectedAction)itemSelectedAction
                                                        initialSelectedFuelStation:(FPFuelStation *)initialSelectedFuelStation;
 
-- (FPAuthScreenMaker)newAddFuelStationScreenMakerWithBlk:(PEItemAddedBlk)itemAddedBlk;
+- (FPAuthScreenMaker)newAddFuelStationScreenMakerWithBlk:(PEItemAddedBlk)itemAddedBlk
+                                      listViewController:(PEListViewController *)listViewController;
 
 - (FPAuthScreenMaker)newFuelStationDetailScreenMakerWithFuelStation:(FPFuelStation *)fuelStation
                                                fuelStationIndexPath:(NSIndexPath *)fuelStationIndexPath
-                                                     itemChangedBlk:(PEItemChangedBlk)itemChangedBlk;
+                                                     itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
+                                                 listViewController:(PEListViewController *)listViewController;
 
 #pragma mark - Fuel Purchase Log Screens
 
 - (FPAuthScreenMaker)newAddFuelPurchaseLogScreenMakerWithBlk:(PEItemAddedBlk)itemAddedBlk
                                       defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
-                                  defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation;
+                                  defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
+                                          listViewController:(PEListViewController *)listViewController;
 
 - (FPAuthScreenMaker)newViewFuelPurchaseLogsScreenMakerForVehicleInCtx;
 
@@ -99,7 +104,8 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id);
 #pragma mark - Environment Log Screens
 
 - (FPAuthScreenMaker)newAddEnvironmentLogScreenMakerWithBlk:(PEItemAddedBlk)itemAddedBlk
-                                     defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle;
+                                     defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
+                                         listViewController:(PEListViewController *)listViewController;
 
 //- (FPAuthScreenMaker)newViewEnvironmentLogsScreenMaker;
 

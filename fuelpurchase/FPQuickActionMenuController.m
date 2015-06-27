@@ -22,7 +22,6 @@
 #import <PEObjc-Commons/PEUIUtils.h>
 #import "FPQuickActionMenuController.h"
 #import "FPScreenToolkit.h"
-#import "FPEditActors.h"
 #import "FPUtils.h"
 #import "FPNames.h"
 
@@ -72,8 +71,7 @@
     btnMaker(LS(@"auth.start.log-env.btn.txt"), self, @selector(presentLogEnvInput)),
     btnMaker(LS(@"auth.start.fuelstations.btn.txt"), self, @selector(presentFuelStations))
 #ifdef FP_DEV
-    ,btnMaker(@"Remote Sync", self, @selector(remoteSync)),
-    btnMaker(@"System Prune", self, @selector(systemPrune))
+    ,btnMaker(@"Clear Keychain", self, @selector(clearKeychain))
 #endif
   ];
   NSArray *rtBtns = @[
@@ -81,7 +79,7 @@
     btnMaker(LS(@"auth.start.randreport.btn.txt"), self, @selector(presentRandomReport)),
     btnMaker(LS(@"auth.start.vehicles.btn.txt"), self, @selector(presentVehicles))
 #ifdef FP_DEV
-    ,btnMaker(@"Geo Coord\nCompute", self, @selector(geoCoordCompute))
+    ,btnMaker(@"System Prune", self, @selector(systemPrune))
 #endif
   ];
   UIView *btnsView =
@@ -97,19 +95,8 @@
 
 #pragma mark - Button Event Handlers
 
-- (void)geoCoordCompute {
-  dispatch_async(_junkQueue, ^{
-    [_coordDao computeOfFuelStationCoordsWithEditActorId:@(FPBackgroundActorId)
-                                                   error:[FPUtils localDatabaseErrorHudHandlerMaker](nil)];
-  });
-  [PEUIUtils displayTempNotification:@"Geo coordinate compute started." forController:self uitoolkit:_uitoolkit];
-}
-
-- (void)remoteSync {
-  [_coordDao flushToRemoteMasterWithEditActorId:@(FPBackgroundActorId)
-                             remoteStoreBusyBlk:[FPUtils serverBusyHandlerMakerForUI](nil)
-                                          error:[FPUtils localDatabaseErrorHudHandlerMaker](nil)];
-  [PEUIUtils displayTempNotification:@"Flush to remote master done." forController:self uitoolkit:_uitoolkit];
+- (void)clearKeychain {
+  [APP clearKeychain];
 }
 
 - (void)systemPrune {
@@ -145,7 +132,8 @@
                                                                                                             error:[FPUtils localFetchErrorHandlerMaker]()]
                                  defaultSelectedFuelStation:[_coordDao defaultFuelStationForNewFuelPurchaseLogForUser:_user
                                                                                                       currentLocation:[APP latestLocation]
-                                                                                                                error:[FPUtils localFetchErrorHandlerMaker]()]](_user);
+                                                                                                                error:[FPUtils localFetchErrorHandlerMaker]()]
+                                         listViewController:nil](_user);
   [self presentViewController:[PEUIUtils navigationControllerWithController:addFpLogCtrl
                                                         navigationBarHidden:NO]
                      animated:YES
@@ -162,7 +150,8 @@
   };
   UIViewController *addEnvLogCtrl =
     [_screenToolkit newAddEnvironmentLogScreenMakerWithBlk:itemAddedBlk
-                                    defaultSelectedVehicle:[_coordDao defaultVehicleForNewEnvironmentLogForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]](_user);
+                                    defaultSelectedVehicle:[_coordDao defaultVehicleForNewEnvironmentLogForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
+                                        listViewController:nil](_user);
   [self presentViewController:[PEUIUtils navigationControllerWithController:addEnvLogCtrl
                                                         navigationBarHidden:NO]
                      animated:YES

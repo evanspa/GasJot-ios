@@ -30,6 +30,20 @@
 
 #pragma mark - User Helpers
 
++ (NSArray *)computeSignInErrMsgs:(NSUInteger)signInErrMask {
+  NSMutableArray *errMsgs = [NSMutableArray arrayWithCapacity:1];
+  if (signInErrMask & FPSignInUsernameOrEmailNotProvided) {
+    [errMsgs addObject:LS(@"signin.username-or-email-notprovided")];
+  }
+  if (signInErrMask & FPSignInPasswordNotProvided) {
+    [errMsgs addObject:LS(@"signin.password-notprovided")];
+  }
+  if (signInErrMask & FPSignInInvalidCredentials) {
+    [errMsgs addObject:LS(@"signin.credentials-invalid")];
+  }
+  return errMsgs;
+}
+
 + (NSArray *)computeSaveUsrErrMsgs:(NSInteger)saveUsrErrMask {
   NSMutableArray *errMsgs = [NSMutableArray array];
   if (saveUsrErrMask & FPSaveUsrInvalidEmail) {
@@ -119,23 +133,25 @@ busy, and asks that you try again at date: %@.", retryAfter]]
 + (SynchUnitOfWorkHandlerMaker)synchUnitOfWorkHandlerMakerWithErrMsgsMaker:(ErrMsgsMaker)errMsgsMaker {
   return ^(MBProgressHUD *hud, void (^successBlock)(FPUser *)) {
     return (^(FPUser *newUser, NSError *error) {
-      [hud hide:YES];
       if (error) {
-        NSString *errorDomain = [error domain];
-        NSInteger errorCode = [error code];
-        NSArray *errMsgs;
-        if ([errorDomain isEqualToString:FPConnFaultedErrorDomain]) {
-          NSString *localizedErrMsgKey =
-            [errorDomain stringByAppendingFormat:@".%ld", (long)errorCode];
-          errMsgs = @[NSLocalizedString(localizedErrMsgKey, nil)];
-        } else if ([errorDomain isEqualToString:FPUserFaultedErrorDomain]) {
-          errMsgs = errMsgsMaker(errorCode);
-        } else {
-          errMsgs = @[[error localizedDescription]];
-        }
-        [PEUIUtils showAlertWithMsgs:errMsgs
-                               title:@"Error"
-                         buttonTitle:@"Okay"];
+        dispatch_async(dispatch_get_main_queue(), ^{
+          [hud hide:YES];
+          NSString *errorDomain = [error domain];
+          NSInteger errorCode = [error code];
+          NSArray *errMsgs;
+          if ([errorDomain isEqualToString:FPConnFaultedErrorDomain]) {
+            NSString *localizedErrMsgKey =
+              [errorDomain stringByAppendingFormat:@".%ld", (long)errorCode];
+            errMsgs = @[NSLocalizedString(localizedErrMsgKey, nil)];
+          } else if ([errorDomain isEqualToString:FPUserFaultedErrorDomain]) {
+            errMsgs = errMsgsMaker(errorCode);
+          } else {
+            errMsgs = @[[error localizedDescription]];
+          }
+          [PEUIUtils showAlertWithMsgs:errMsgs
+                                 title:@"Error"
+                           buttonTitle:@"Okay"];
+        });
       } else {
         successBlock(newUser);
       }

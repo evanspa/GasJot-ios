@@ -202,7 +202,9 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
       [[self window] setRootViewController:_tabBarController];
     } else {
       DDLogVerbose(@"User is logged in and does NOT have a valid authentication token.");
-      // present login screen (login screen should have an optional "bypass" features to go 'local only')
+      // TODO present login screen (login screen should have an optional "bypass" features to go 'local only')
+      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMaker](user);
+      [[self window] setRootViewController:_tabBarController];
     }
   } else {
     DDLogVerbose(@"User is NOT logged in.");

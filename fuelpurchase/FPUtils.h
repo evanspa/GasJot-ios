@@ -41,6 +41,8 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
 
 #pragma mark - User Helpers
 
++ (NSArray *)computeSignInErrMsgs:(NSUInteger)signInErrMask;
+
 + (NSArray *)computeSaveUsrErrMsgs:(NSInteger)saveUsrErrMask;
 
 #pragma mark - Vehicle Helpers

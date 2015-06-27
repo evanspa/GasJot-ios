@@ -175,10 +175,10 @@
   } forControlEvents:UIControlEventTouchUpInside];
   _reauthenticateBtn = [_uitoolkit systemButtonMaker](@"Re-authenticate", nil, nil);
   [[_reauthenticateBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:_accountSettingsBtn ofWidth:1.0 relativeTo:[self view]];
+  [PEUIUtils setFrameWidthOfView:_reauthenticateBtn ofWidth:1.0 relativeTo:[self view]];
   [PEUIUtils addDisclosureIndicatorToButton:_reauthenticateBtn];
   [_reauthenticateBtn bk_addEventHandler:^(id sender) {
-    // TODO
+    [self presentLoginScreen];
   } forControlEvents:UIControlEventTouchUpInside];
   _logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
   [[_logoutBtn layer] setCornerRadius:0.0];
