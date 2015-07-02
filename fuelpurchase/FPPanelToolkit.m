@@ -387,7 +387,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     
     // wrap fuel station panel in scroll view (so everything can "fit")
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelStationPanel frame]];
-    [scrollView setContentSize:CGSizeMake(fuelStationPanel.frame.size.width, 1.15 * fuelStationPanel.frame.size.height)];
+    [scrollView setContentSize:CGSizeMake(fuelStationPanel.frame.size.width, 1.25 * fuelStationPanel.frame.size.height)];
     [scrollView addSubview:fuelStationPanel];
     [scrollView setBounces:NO];
     return scrollView;
@@ -501,7 +501,6 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     [preFillupReportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
     UITextField *postFillupReportedDteTf = tfMaker(@"Post-fillup Reported DTE", FPFpEnvLogCompositeTagPostFillupReportedDte);
     [postFillupReportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
-    
     NSDictionary *fplogComponents = [self fplogComponentsWithUser:user
                                            defaultSelectedVehicle:defaultSelectedVehicle
                                        defaultSelectedFuelStation:defaultSelectedFuelStation
@@ -583,7 +582,13 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                     onto:fpEnvCompPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
-                hpadding:0.0];     
+                hpadding:0.0];
+    
+    NSNumber *defaultOctane = [defaultSelectedVehicle defaultOctane];
+    if (defaultOctane) {
+      [octaneTf setText:[defaultOctane description]];
+    }
+    
     // wrap fuel station panel in scroll view (so everything can "fit")
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fpEnvCompPanel frame]];
     [scrollView setContentSize:CGSizeMake(fpEnvCompPanel.frame.size.width, 1.25 * fpEnvCompPanel.frame.size.height)];
@@ -857,11 +862,11 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                 vpadding:5.0
                 hpadding:0.0];
     
-    /*UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fpLogPanel frame]];
-    [scrollView setContentSize:CGSizeMake(fpLogPanel.frame.size.width, 1.3 * fpLogPanel.frame.size.height)];
-    [scrollView addSubview:fpLogPanel];
-    [scrollView setBounces:NO];
-    return scrollView;*/
+//    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fpLogPanel frame]];
+//    [scrollView setContentSize:CGSizeMake(fpLogPanel.frame.size.width, 1.3 * fpLogPanel.frame.size.height)];
+//    [scrollView addSubview:fpLogPanel];
+//    [scrollView setBounces:NO];
+//    return scrollView;
     return fpLogPanel;
   };
 }
@@ -897,26 +902,28 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
 
 - (PEEntityToPanelBinderBlk)fuelPurchaseLogToFuelPurchaseLogPanelBinder {
   return ^ void (FPFuelPurchaseLog *fpLog, UIView *panel) {
-    void (^bindtt)(NSInteger, SEL) = ^ (NSInteger tag, SEL sel) {
-      [PEUIUtils bindToTextControlWithTag:tag
-                                 fromView:panel
-                               fromEntity:fpLog
-                               withGetter:sel];
-    };
-    bindtt(FPFpLogTagNumGallons, @selector(numGallons));
-    bindtt(FPFpLogTagPricePerGallon, @selector(gallonPrice));
-    bindtt(FPFpLogTagOctane, @selector(octane));
-    bindtt(FPFpLogTagCarWashPerGallonDiscount, @selector(carWashPerGallonDiscount));
-    UISwitch *gotCarWasSwitch = (UISwitch *)[panel viewWithTag:FPFpLogTagGotCarWash];
-    [gotCarWasSwitch setOn:[fpLog gotCarWash] animated:YES];
-    
-    if ([fpLog purchasedAt]) {
-      UITableView *vehicleFuelStationDateTableView =
+    if (fpLog) {
+      void (^bindtt)(NSInteger, SEL) = ^ (NSInteger tag, SEL sel) {
+        [PEUIUtils bindToTextControlWithTag:tag
+                                   fromView:panel
+                                 fromEntity:fpLog
+                                 withGetter:sel];
+      };
+      bindtt(FPFpLogTagNumGallons, @selector(numGallons));
+      bindtt(FPFpLogTagPricePerGallon, @selector(gallonPrice));
+      bindtt(FPFpLogTagOctane, @selector(octane));
+      bindtt(FPFpLogTagCarWashPerGallonDiscount, @selector(carWashPerGallonDiscount));
+      UISwitch *gotCarWasSwitch = (UISwitch *)[panel viewWithTag:FPFpLogTagGotCarWash];
+      [gotCarWasSwitch setOn:[fpLog gotCarWash] animated:YES];
+      
+      if ([fpLog purchasedAt]) {
+        UITableView *vehicleFuelStationDateTableView =
         (UITableView *)[panel viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
-      FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
+        FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
         (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehicleFuelStationDateTableView dataSource];
-      [ds setPickedLogDate:[fpLog purchasedAt]];
-      [vehicleFuelStationDateTableView reloadData];
+        [ds setPickedLogDate:[fpLog purchasedAt]];
+        [vehicleFuelStationDateTableView reloadData];
+      }
     }
   };
 }

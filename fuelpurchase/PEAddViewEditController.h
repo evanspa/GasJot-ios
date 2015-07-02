@@ -28,7 +28,7 @@ typedef void (^PESyncImmediateServerTempErrorBlk)(float, NSString *, NSString *)
 typedef void (^PESyncImmediateServerErrorBlk)(float, NSString *, NSString *, NSInteger);
 typedef void (^PESyncImmediateAuthRequiredBlk)(float, NSString *, NSString *);
 typedef void (^PESyncImmediateRetryAfterBlk)(float, NSString *, NSString *, NSDate *);
-typedef void (^PESyncImmediateDependencyUnsynced)(float, NSString *, NSString *);
+typedef void (^PESyncImmediateDependencyUnsynced)(float, NSString *, NSString *); // TODO
 typedef void (^PEEntitySyncCancelerBlk)(PELMMainSupport *, NSError *, NSNumber *);
 typedef void (^PEMarkAsDoneEditingBlk)(PEAddViewEditController *,
                                        id,
@@ -37,6 +37,13 @@ typedef void (^PEMarkAsDoneEditingBlk)(PEAddViewEditController *,
                                        PESyncImmediateServerTempErrorBlk,
                                        PESyncImmediateServerErrorBlk,
                                        PESyncImmediateAuthRequiredBlk);
+typedef void (^PESyncerBlk)(PEAddViewEditController *,
+                            id,
+                            PESyncImmediateSuccessBlk,
+                            PESyncImmediateRetryAfterBlk,
+                            PESyncImmediateServerTempErrorBlk,
+                            PESyncImmediateServerErrorBlk,
+                            PESyncImmediateAuthRequiredBlk);
 typedef void (^PESaveNewEntityBlk)(UIView *,
                                    id,
                                    PESyncImmediateSuccessBlk,
@@ -82,6 +89,7 @@ prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUse
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
      entityValidator:(PEEntityValidatorBlk)entityValidator
      messageComputer:(PEMessagesFromErrMask)messageComputer
+              syncer:(PESyncerBlk)syncer
 getterForNotification:(SEL)getterForNotification;
 
 #pragma mark - Factory functions
@@ -147,7 +155,8 @@ getterForNotification:(SEL)getterForNotification;
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator
-                                       messageComputer:(PEMessagesFromErrMask)messageComputer;
+                                       messageComputer:(PEMessagesFromErrMask)messageComputer
+                                                syncer:(PESyncerBlk)syncer;
 
 #pragma mark - Properties
 

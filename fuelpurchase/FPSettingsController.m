@@ -255,9 +255,9 @@
 - (void)presentSetupRemoteAccountScreen {
   UIViewController *createAccountController =
   [[FPCreateAccountController alloc] initWithStoreCoordinator:_coordDao
-                                                         localUser:_user
-                                                      uitoolkit:_uitoolkit
-                                                  screenToolkit:_screenToolkit];
+                                                    localUser:_user
+                                                    uitoolkit:_uitoolkit
+                                                screenToolkit:_screenToolkit];
   [[self navigationController] pushViewController:createAccountController
                                          animated:YES];
 }

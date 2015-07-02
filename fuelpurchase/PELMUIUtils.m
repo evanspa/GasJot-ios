@@ -27,18 +27,14 @@
                                      uitoolkit:(PEUIToolkit *)uitoolkit
                           subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
                                     isLoggedIn:(BOOL)isLoggedIn {
-  
   NSInteger titleTag = 89;
   NSInteger subtitleTag = 90;
   NSInteger warningIconTag = 91;
-  
   CGFloat vpaddingForTopifiedTitleToFitNeedFixIcon = 8.0;
   CGFloat vpaddingForTopifiedTitleToFitSubtitle = 11.0;
-  
   void (^removeView)(NSInteger, UIView *) = ^(NSInteger tag, UIView *view) {
     [[view viewWithTag:tag] removeFromSuperview];
   };
-  
   NSString * (^truncatedTitleText)(id) = ^NSString *(id dataObject) {
     NSInteger maxLength = 35;
     NSString *title = titleBlk(dataObject);
@@ -47,12 +43,10 @@
     }
     return title;
   };
-  
   return ^(UIView *view, id dataObject) {
     removeView(titleTag, view);
     removeView(subtitleTag, view);
     removeView(warningIconTag, view);
-    
     PELMMainSupport *entity = (PELMMainSupport *)dataObject;
     NSString *subTitleMsg = nil;
     BOOL syncWarningNeedsFix = NO;
@@ -60,8 +54,7 @@
     CGFloat vpaddingForTopification = vpaddingForTopifiedTitleToFitSubtitle;
     if ([entity editInProgress]) {
       subTitleMsg = @"Edit in progress.";
-    }
-    if (isLoggedIn) {
+    } else if (isLoggedIn) {
       if ([entity syncInProgress]) {
         subTitleMsg = @"Sync in progress.";
       } else if (![entity globalIdentifier] || ([entity editCount] > 0)) {
@@ -69,12 +62,7 @@
           syncWarningNeedsFix = YES;
           subTitleMsg = @"Needs fixing.";
           vpaddingForTopification = vpaddingForTopifiedTitleToFitNeedFixIcon;
-        } /*else if ([entity syncHttpRespCode] || ([entity syncErrMask] && ([entity syncErrMask].integerValue <= 0))) {
-          syncWarningTemporary = YES;
-          subTitleMsg = @"Temporary sync problem.";
-        } else if ([entity syncRetryAt]) {
-          subTitleMsg = @"Will retry sync later.";
-        }*/ else {
+        } else {
           subTitleMsg = @"Sync needed.";
         }
       }

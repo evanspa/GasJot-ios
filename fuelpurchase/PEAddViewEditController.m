@@ -50,6 +50,8 @@
   BOOL _receivedAuthReqdErrorOnSyncAttempt;
   BOOL _isUserLoggedIn;
   PEListViewController *_listViewController;
+  UIBarButtonItem *_syncBarButtonItem;
+  PESyncerBlk _syncer;
 }
 
 #pragma mark - Initializers
@@ -81,6 +83,7 @@ prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUse
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
      entityValidator:(PEEntityValidatorBlk)entityValidator
      messageComputer:(PEMessagesFromErrMask)messageComputer
+              syncer:(PESyncerBlk)syncer
 getterForNotification:(SEL)getterForNotification {
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
@@ -115,6 +118,7 @@ getterForNotification:(SEL)getterForNotification {
     _viewDidAppearBlk = viewDidAppearBlk;
     _entityValidator = entityValidator;
     _messageComputer = messageComputer;
+    _syncer = syncer;
     _getterForNotification = getterForNotification;
     _errorsForSync = [NSMutableArray array];
     _successMessageTitlesForSync = [NSMutableArray array];
@@ -159,7 +163,7 @@ getterForNotification:(SEL)getterForNotification {
                                  syncImmediateWhenDoneEditing:syncImmediateWhenDoneEditing
                                                isUserLoggedIn:isUserLoggedIn
                                syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
-                         isEntityAppropriateForLaterSync:isEntityAppropriateForBackgroundSync
+                              isEntityAppropriateForLaterSync:isEntityAppropriateForBackgroundSync
                                         getterForNotification:nil];
 }
 
@@ -209,6 +213,7 @@ getterForNotification:(SEL)getterForNotification {
                                         viewDidAppearBlk:viewDidAppearBlk
                                          entityValidator:entityValidator
                                          messageComputer:messageComputer
+                                                  syncer:nil
                                    getterForNotification:getterForNotification];
 }
 
@@ -234,7 +239,8 @@ getterForNotification:(SEL)getterForNotification {
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator
-                                       messageComputer:(PEMessagesFromErrMask)messageComputer {
+                                       messageComputer:(PEMessagesFromErrMask)messageComputer
+                                                syncer:(PESyncerBlk)syncer {
   return [[PEAddViewEditController alloc] initWithEntity:entity
                                       listViewController:listViewController
                                                    isAdd:NO
@@ -262,6 +268,7 @@ getterForNotification:(SEL)getterForNotification {
                                         viewDidAppearBlk:viewDidAppearBlk
                                          entityValidator:entityValidator
                                          messageComputer:messageComputer
+                                                  syncer:syncer
                                    getterForNotification:nil];
 }
 
@@ -391,23 +398,32 @@ getterForNotification:(SEL)getterForNotification {
   // Setup the navigation item (left/center/right areas)
   // ---------------------------------------------------------------------------
   [navItem setTitle:title];
+  _syncBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:nil
+                                                        style:UIBarButtonItemStylePlain
+                                                       target:self
+                                                       action:@selector(doSync)];
+  [self setSyncBarButtonState];
   if (_isView) {
-    [navItem setRightBarButtonItem:[self editButtonItem]];
+    [navItem setRightBarButtonItems:@[[self editButtonItem],
+                                      _syncBarButtonItem]
+                           animated:YES];
   } else {
     [navItem setLeftBarButtonItem:[[UIBarButtonItem alloc]
                                    initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
                                    target:self
                                    action:@selector(cancelAddEdit)]];
     if (_isAdd) {
-      [navItem setRightBarButtonItem:[[UIBarButtonItem alloc]
+      [navItem setRightBarButtonItems:@[[[UIBarButtonItem alloc]
                                       initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                       target:self
-                                      action:@selector(doneWithAdd)]];
+                                      action:@selector(doneWithAdd)],
+                                        _syncBarButtonItem]];
     } else {
-      [navItem setRightBarButtonItem:[[UIBarButtonItem alloc]
+      [navItem setRightBarButtonItems:@[[[UIBarButtonItem alloc]
                                       initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                       target:self
-                                      action:@selector(doneWithEdit)]];
+                                      action:@selector(doneWithEdit)],
+                                        _syncBarButtonItem]];
     }
   }
   if ([_entity syncInProgress]) {
@@ -418,16 +434,191 @@ getterForNotification:(SEL)getterForNotification {
   }
 }
 
+#pragma mark - Sync
+
+- (void)setSyncBarButtonState {
+  BOOL enableSyncItem = NO;
+  NSString *syncTitle = @"";
+  if (_entity) {
+    syncTitle = @"";
+    if (_syncer &&
+        _syncImmediateWhenDoneEditing &&
+        [_entity localMainIdentifier] &&
+        ![_entity synced] &&
+        ![_entity editInProgress] &&
+        !([_entity syncErrMask] && ([_entity syncErrMask].integerValue > 0))) {
+      enableSyncItem = YES;
+      syncTitle = @"Sync";
+    }
+  }
+  [_syncBarButtonItem setTitle:syncTitle];
+  [_syncBarButtonItem setEnabled:enableSyncItem];
+}
+
+- (void)doSync {
+  void (^postSyncActivities)(void) = ^{
+    if (_itemChangedBlk) {
+      _itemChangedBlk(_entity, _entityIndexPath);
+    }
+    [self.navigationItem setHidesBackButton:NO animated:YES];
+    [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
+    [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+    [[self navigationItem] setTitle:_entityTitle];
+    _panelEnablerDisabler(_entityPanel, NO);
+    if (_listViewController) {
+      [_listViewController handleUpdatedEntity:_entity];
+    }
+    [self setSyncBarButtonState];
+  };
+  MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+  [self.navigationItem setHidesBackButton:YES animated:YES];
+  [[[self navigationItem] leftBarButtonItem] setEnabled:NO];
+  [_syncBarButtonItem setEnabled:NO];
+  [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
+  [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+  HUD.delegate = self;
+  HUD.mode = _syncImmediateMBProgressHUDMode;
+  HUD.labelText = @"Syncing to server...";
+  _percentCompleteSavingEntity = 0.0;
+  HUD.progress = _percentCompleteSavingEntity;
+  [_errorsForSync removeAllObjects];
+  [_successMessageTitlesForSync removeAllObjects];
+  _receivedAuthReqdErrorOnSyncAttempt = NO;
+  void(^syncDone)(NSString *) = ^(NSString *mainMsgTitle) {
+    if ([_errorsForSync count] == 0) { // success
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [HUD setLabelText:_successMessageTitlesForSync[0]];
+        [HUD setDetailsLabelText:@"(synced with server)"];
+        UIImage *image = [UIImage imageNamed:@"hud-complete"];
+        UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
+        [HUD setCustomView:imageView];
+        HUD.mode = MBProgressHUDModeCustomView;
+        [HUD hide:YES afterDelay:1.30];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.35 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+          postSyncActivities();
+        });
+      });
+    } else { // error
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [HUD hide:YES afterDelay:0];
+        NSString *title;
+        NSString *okayActionTitle = @"Okay.  I'll try again later.";
+        NSMutableString *message = [NSMutableString string];
+        NSArray *subErrors = _errorsForSync[0][2];
+        if ([subErrors count] > 1) {
+          title = [NSString stringWithFormat:@"Errors %@", mainMsgTitle];
+        } else {
+          title = [NSString stringWithFormat:@"Error %@", mainMsgTitle];
+        }
+        for (NSString *subError in subErrors) {
+          [message appendFormat:@"\n%@", subError];
+        }
+        if (_receivedAuthReqdErrorOnSyncAttempt) {
+          [message appendString:@"\n\nIt appears that you are no longer\n"];
+          [message appendString:@"authenticated.  To re-authenticate, go to\n"];
+          [message appendString:@"Settings -> Authenticate."];
+        }
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
+                                                                       message:message
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *okay = [UIAlertAction actionWithTitle:okayActionTitle
+                                                       style:UIAlertActionStyleDefault
+                                                     handler:^(UIAlertAction *action) { postSyncActivities(); }];
+        [alert addAction:okay];
+        [self presentViewController:alert animated:YES completion:nil];
+      });
+    }
+  };
+  void (^handleHudProgress)(float) = ^(float percentComplete) {
+    _percentCompleteSavingEntity += percentComplete;
+    dispatch_async(dispatch_get_main_queue(), ^{
+      HUD.progress = _percentCompleteSavingEntity;
+    });
+  };
+  void(^_syncSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                            NSString *mainMsgTitle,
+                                                            NSString *recordTitle) {
+    handleHudProgress(percentComplete);
+    [_successMessageTitlesForSync addObject:[NSString stringWithFormat:@"%@ synced", recordTitle]];
+    if (_percentCompleteSavingEntity == 1.0) {
+      syncDone(mainMsgTitle);
+    }
+  };
+  void(^_syncRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete,
+                                                                         NSString *mainMsgTitle,
+                                                                         NSString *recordTitle,
+                                                                         NSDate *retryAfter) {
+    handleHudProgress(percentComplete);
+    [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced", recordTitle],
+                                [NSNumber numberWithBool:NO],
+                                @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]]]];
+    if (_percentCompleteSavingEntity == 1.0) {
+      syncDone(mainMsgTitle);
+    }
+  };
+  void (^_syncServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                  NSString *mainMsgTitle,
+                                                                  NSString *recordTitle) {
+    handleHudProgress(percentComplete);
+    [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced", recordTitle],
+                                [NSNumber numberWithBool:NO],
+                                @[@"Temporary server error."]]];
+    if (_percentCompleteSavingEntity == 1.0) {
+      syncDone(mainMsgTitle);
+    }
+  };
+  void (^_syncServerError)(float, NSString *, NSString *, NSInteger) = ^(float percentComplete,
+                                                                         NSString *mainMsgTitle,
+                                                                         NSString *recordTitle,
+                                                                         NSInteger errorMask) {
+    handleHudProgress(percentComplete);
+    NSArray *computedErrMsgs = _messageComputer(errorMask);
+    BOOL isErrorUserFixable = YES;
+    if (!computedErrMsgs || ([computedErrMsgs count] == 0)) {
+      computedErrMsgs = @[@"Unknown server error."];
+      isErrorUserFixable = NO;
+    }
+    [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced", recordTitle],
+                                [NSNumber numberWithBool:isErrorUserFixable],
+                                computedErrMsgs]];
+    if (_percentCompleteSavingEntity == 1.0) {
+      syncDone(mainMsgTitle);
+    }
+  };
+  void(^_syncAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                             NSString *mainMsgTitle,
+                                                             NSString *recordTitle) {
+    _receivedAuthReqdErrorOnSyncAttempt = YES;
+    handleHudProgress(percentComplete);
+    [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced", recordTitle],
+                                [NSNumber numberWithBool:NO],
+                                @[@"Authentication required."]]];
+    if (_percentCompleteSavingEntity == 1.0) {
+      syncDone(mainMsgTitle);
+    }
+  };
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+    _syncer(self,
+            _entity,
+            _syncSuccessBlk,
+            _syncRetryAfterBlk,
+            _syncServerTempError,
+            _syncServerError,
+            _syncAuthReqdBlk);
+  });
+}
+
 #pragma mark - Toggle into edit mode
 
 - (void)setEditing:(BOOL)flag animated:(BOOL)animated {
   if (flag) {
-    _entityCopyBeforeEdit = [_entity copy];
     if ([self prepareForEditing]) {
+      _entityCopyBeforeEdit = [_entity copy];
       [super setEditing:flag animated:animated];
       if (_prepareUIForUserInteractionBlk) {
         _prepareUIForUserInteractionBlk(_entityPanel);
       }
+      [self setSyncBarButtonState];
     }
   } else {
     if ([self stopEditing]) {
@@ -470,6 +661,7 @@ getterForNotification:(SEL)getterForNotification {
     if (_listViewController) {
       [_listViewController handleUpdatedEntity:_entity];
     }
+    [self setSyncBarButtonState];
   };
   if (_isEditCanceled) {
     _entityEditCanceler(self, _entity);
@@ -522,7 +714,7 @@ getterForNotification:(SEL)getterForNotification {
               NSString *dealWithLaterActionTitle;
               NSString *cancelActionTitle;
               NSMutableString *message = [NSMutableString string];
-              NSArray *subErrors = _errorsForSync[0][2]; // because only single-record add, we can skip the "not saved" msg title, and just display the sub-errors
+              NSArray *subErrors = _errorsForSync[0][2]; // because only single-record edit, we can skip the "not saved" msg title, and just display the sub-errors
               if ([subErrors count] > 1) {
                 fixNowActionTitle = @"I'll fix them now.";
                 fixLaterActionTitle = @"I'll fix them later.";
@@ -569,10 +761,15 @@ getterForNotification:(SEL)getterForNotification {
               UIAlertAction *cancel = [UIAlertAction actionWithTitle:cancelActionTitle
                                                                style:UIAlertActionStyleDestructive
                                                              handler:^(UIAlertAction *action) {
-                                                               [_entity setEditInProgress:YES]; // needed so that canceler can be called w/out its consistency-check blowing-up
+                                                               // First, we need to save the copy-before-edit entity to get the database
+                                                               // back to how it was before the user did the editing
+                                                               _entitySaver(self, _entityCopyBeforeEdit);
+                                                               
+                                                               // now we can cancel the edit session as we normally would
+                                                               [_entity overwrite:_entityCopyBeforeEdit];
                                                                _entityEditCanceler(self, _entity);
                                                                _entityToPanelBinder(_entity, _entityPanel);
-                                                               _isEditCanceled = NO; // reset this to NO
+                                                               _isEditCanceled = NO; // reseting this
                                                                postEditActivities();
                                                              }];
               [alert addAction:cancel];
@@ -590,7 +787,7 @@ getterForNotification:(SEL)getterForNotification {
                                                                   NSString *mainMsgTitle,
                                                                   NSString *recordTitle) {
           handleHudProgress(percentComplete);
-          [_successMessageTitlesForSync addObject:[NSString stringWithFormat:@"%@ saved", recordTitle]];
+          [_successMessageTitlesForSync addObject:[NSString stringWithFormat:@"%@ synced", recordTitle]];
           if (_percentCompleteSavingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
@@ -600,7 +797,7 @@ getterForNotification:(SEL)getterForNotification {
                                                                                NSString *recordTitle,
                                                                                NSDate *retryAfter) {
           handleHudProgress(percentComplete);
-          [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not saved", recordTitle],
+          [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced", recordTitle],
                                      [NSNumber numberWithBool:NO],
                                      @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]]]];
           if (_percentCompleteSavingEntity == 1.0) {
@@ -611,7 +808,7 @@ getterForNotification:(SEL)getterForNotification {
                                                                         NSString *mainMsgTitle,
                                                                         NSString *recordTitle) {
           handleHudProgress(percentComplete);
-          [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not saved", recordTitle],
+          [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced", recordTitle],
                                      [NSNumber numberWithBool:NO],
                                      @[@"Temporary server error."]]];
           if (_percentCompleteSavingEntity == 1.0) {
@@ -629,7 +826,7 @@ getterForNotification:(SEL)getterForNotification {
             computedErrMsgs = @[@"Unknown server error."];
             isErrorUserFixable = NO;
           }
-          [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not saved", recordTitle],
+          [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced", recordTitle],
                                      [NSNumber numberWithBool:isErrorUserFixable],
                                      computedErrMsgs]];
           if (_percentCompleteSavingEntity == 1.0) {
@@ -641,7 +838,7 @@ getterForNotification:(SEL)getterForNotification {
                                                                    NSString *recordTitle) {
           _receivedAuthReqdErrorOnSyncAttempt = YES;
           handleHudProgress(percentComplete);
-          [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not saved", recordTitle],
+          [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced", recordTitle],
                                      [NSNumber numberWithBool:NO],
                                      @[@"Authentication required."]]];
           if (_percentCompleteSavingEntity == 1.0) {

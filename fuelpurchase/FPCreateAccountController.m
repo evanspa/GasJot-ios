@@ -39,7 +39,6 @@
 
 @interface FPCreateAccountController ()
 @property (nonatomic) NSUInteger formStateMaskForAcctCreation;
-@property (nonatomic) NSUInteger formStateMaskForSignIn;
 @end
 
 @implementation FPCreateAccountController {
@@ -48,7 +47,6 @@
   UITextField *_caEmailOrUsernameTf;
   UITextField *_caPasswordTf;
   CGFloat animatedDistance;
-  //MBProgressHUD *_HUD;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_localUser;
@@ -73,6 +71,11 @@
 
 #pragma mark - View Controller Lifecyle
 
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  [_caFullNameTf becomeFirstResponder];
+}
+
 - (void)viewDidLoad {
   [super viewDidLoad];
   #ifdef FP_DEV
@@ -89,14 +92,15 @@
   [navItem setRightBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                target:self
                                                                                action:@selector(handleAccountCreation)]];
-  [_caFullNameTf becomeFirstResponder];
 }
 
 #pragma mark - GUI construction (making panels)
 
 - (UIView *)panelForAccountCreation {
-  PanelMaker pnlMaker = [_uitoolkit contentPanelMakerRelativeTo:[self view]];
-  UIView *createAcctPnl = pnlMaker(1.0);
+  UIView *createAcctPnl = [PEUIUtils panelWithWidthOf:1.0
+                                          andHeightOf:1.0
+                                       relativeToView:[self view]];
+  [PEUIUtils setFrameHeightOfView:createAcctPnl ofHeight:0.5 relativeTo:[self view]];
   TextfieldMaker tfMaker =
     [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:createAcctPnl];
   _caFullNameTf = tfMaker(@"unauth.start.ca.fullnametf.pht");
@@ -120,7 +124,6 @@
          withAlignment:PEUIHorizontalAlignmentTypeCenter
               vpadding:5
               hpadding:0];
-
   RAC(self, formStateMaskForAcctCreation) =
     [RACSignal combineLatest:@[_caFullNameTf.rac_textSignal,
                                _caEmailOrUsernameTf.rac_textSignal,

@@ -38,7 +38,6 @@
 #endif
 
 @interface FPAccountLoginController ()
-@property (nonatomic) NSUInteger formStateMaskForAcctCreation;
 @property (nonatomic) NSUInteger formStateMaskForSignIn;
 @end
 
@@ -47,10 +46,6 @@
   UITextField *_siUsernameOrEmailTf;
   UITextField *_siPasswordTf;
   UIButton *_siDoSignInBtn;
-  UITextField *_caFullNameTf;
-  UITextField *_caEmailTf;
-  UITextField *_caPasswordTf;
-  UIButton *_caDoCreateAcctBtn;
   CGFloat animatedDistance;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
@@ -100,9 +95,10 @@
 #pragma mark - GUI construction (making panels)
 
 - (UIView *)panelForSignIn {
-  PanelMaker pnlMaker = [_uitoolkit contentPanelMakerRelativeTo:[self view]];
-  //ButtonMaker btnMaker = [_uitoolkit primaryButtonMaker];
-  UIView *signInPnl = pnlMaker(1.0);
+  UIView *signInPnl = [PEUIUtils panelWithWidthOf:1.0
+                                          andHeightOf:1.0
+                                       relativeToView:[self view]];
+  [PEUIUtils setFrameHeightOfView:signInPnl ofHeight:1.0 relativeTo:[self view]];
   TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:signInPnl];
   _siUsernameOrEmailTf = tfMaker(@"unauth.start.signin.emailusernmtf.pht");
   [PEUIUtils placeView:_siUsernameOrEmailTf
@@ -118,14 +114,6 @@
          withAlignment:PEUIHorizontalAlignmentTypeCenter
               vpadding:5.0
               hpadding:0.0];
-  /*_siDoSignInBtn =
-    btnMaker(@"unauth.start.signin.btn.txt", self, @selector(handleSignIn));
-  [PEUIUtils placeView:_siDoSignInBtn
-                 below:_siPasswordTf
-                  onto:signInPnl
-         withAlignment:PEUIHorizontalAlignmentTypeCenter
-              vpadding:15
-              hpadding:0];*/
   RAC(self, formStateMaskForSignIn) =
     [RACSignal combineLatest:@[_siUsernameOrEmailTf.rac_textSignal,
                                _siPasswordTf.rac_textSignal]
@@ -290,7 +278,7 @@
       doLogin([_preserveExistingLocalEntities boolValue]);
     }
   } else {
-    NSArray *errMsgs = [FPUtils computeSaveUsrErrMsgs:_formStateMaskForAcctCreation];
+    NSArray *errMsgs = [FPUtils computeSaveUsrErrMsgs:_formStateMaskForSignIn];
     [PEUIUtils showAlertWithMsgs:errMsgs title:@"oopsMsg" buttonTitle:@"okayMsg"];
   }
 }

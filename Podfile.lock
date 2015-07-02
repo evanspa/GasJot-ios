@@ -57,7 +57,7 @@ PODS:
     - PESimu-Select (~> 1.0.1)
   - PEFuelPurchase-Common (1.0.8):
     - PEHateoas-Client (~> 1.0.2)
-  - PEFuelPurchase-Model (1.0.42):
+  - PEFuelPurchase-Model (1.0.44):
     - CocoaLumberjack (~> 1.9)
     - FMDB (~> 2.5)
     - PEFuelPurchase-Common (~> 1.0.8)
@@ -69,12 +69,13 @@ PODS:
     - CocoaLumberjack (~> 1.9)
     - PEObjc-Commons (~> 1.0.1)
   - PEObjc-Commons (1.0.8)
-  - PESimu-Select (1.0.1):
-    - PEObjc-Commons (~> 1.0.1)
-    - PEWire-Control (~> 1.0.1)
-  - PEWire-Control (1.0.1):
+  - PESimu-Select (1.0.2):
+    - PEObjc-Commons (~> 1.0.8)
+    - PEWire-Control (~> 1.0.2)
+  - PEWire-Control (1.0.2):
+    - KissXML (~> 5.0)
     - OHHTTPStubs (~> 3.1.10)
-    - PEObjc-Commons (~> 1.0.1)
+    - PEObjc-Commons (~> 1.0.8)
     - PEXML-Utils (~> 1.0.1)
   - PEXML-Utils (1.0.1):
     - KissXML (~> 5.0)
@@ -95,10 +96,11 @@ DEPENDENCIES:
   - CocoaLumberjack (~> 1.9)
   - FlatUIKit (~> 1.6.2)
   - IQKeyboardManager (~> 3.2.1.1)
+  - KissXML (~> 5.0)
   - MBProgressHUD (~> 0.9.1)
   - PEDev-Console (~> 1.0.1)
   - PEFuelPurchase-Common (~> 1.0.8)
-  - PEFuelPurchase-Model (~> 1.0.42)
+  - PEFuelPurchase-Model (~> 1.0.44)
   - PEObjc-Commons (~> 1.0.8)
   - ReactiveCocoa (~> 2.4.7)
   - SVPullToRefresh (~> 0.4.1)
@@ -116,11 +118,11 @@ SPEC CHECKSUMS:
   OHHTTPStubs: 8cf0cfe6f34f13fc88fdf5b2a1b2c2536e8c0261
   PEDev-Console: 63b20d7ef16aada4dcd236dccef8edb18fdf3035
   PEFuelPurchase-Common: 315cd43955e69e5be94373405f1b55b6723d30b6
-  PEFuelPurchase-Model: 99bc7cbaef85da812c456e02d4a3d83d8ad5555c
+  PEFuelPurchase-Model: 1a1e2222f09c137af67c1bd1ec5c6626144686d3
   PEHateoas-Client: 9729b1e9099a9626c644e730f6ab7c37f0e55ccd
   PEObjc-Commons: c40bea2ce7f44ed636a74b7c78cd7a2753120d4e
-  PESimu-Select: 58c14dfadbefdbfa996cfd94987aa1b74946b483
-  PEWire-Control: 408b26f34312ef844d9682c5dc8c8e42ba9c84ff
+  PESimu-Select: a85afca9ae8705991d356f4c0c1ee3d37a1c9650
+  PEWire-Control: 2aeefa4014575adbc52cfbf3206395d9a7c07b22
   PEXML-Utils: f7e0759b8e4e2ec3a39c781b362d7fb233fc8421
   ReactiveCocoa: eb38dee0a0e698f73a9b25e5c1faea2bb4c79240
   SVPullToRefresh: ba2e718695a43253d8bea6852d2960097dc15d8c
