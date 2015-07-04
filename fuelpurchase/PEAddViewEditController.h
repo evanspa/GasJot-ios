@@ -20,7 +20,7 @@ typedef void (^PEEntityToPanelBinderBlk)(id, UIView *);
 typedef void (^PEEnableDisablePanelBlk)(UIView *, BOOL);
 typedef BOOL (^PEEntityEditPreparerBlk)(PEAddViewEditController *, id);
 typedef void (^PEEntityEditCancelerBlk)(PEAddViewEditController *, id);
-typedef void (^PEEntityAddCancelerBlk)(PEAddViewEditController *, id);
+typedef void (^PEEntityAddCancelerBlk)(PEAddViewEditController *, BOOL, id);
 typedef id   (^PEEntityMakerBlk)(UIView *);
 typedef void (^PESaveEntityBlk)(PEAddViewEditController *, id);
 typedef void (^PESyncImmediateSuccessBlk)(float, NSString *, NSString *);
@@ -28,7 +28,7 @@ typedef void (^PESyncImmediateServerTempErrorBlk)(float, NSString *, NSString *)
 typedef void (^PESyncImmediateServerErrorBlk)(float, NSString *, NSString *, NSInteger);
 typedef void (^PESyncImmediateAuthRequiredBlk)(float, NSString *, NSString *);
 typedef void (^PESyncImmediateRetryAfterBlk)(float, NSString *, NSString *, NSDate *);
-typedef void (^PESyncImmediateDependencyUnsynced)(float, NSString *, NSString *); // TODO
+typedef void (^PESyncImmediateDependencyUnsynced)(float, NSString *, NSString *, NSString *);
 typedef void (^PEEntitySyncCancelerBlk)(PELMMainSupport *, NSError *, NSNumber *);
 typedef void (^PEMarkAsDoneEditingBlk)(PEAddViewEditController *,
                                        id,
@@ -36,21 +36,24 @@ typedef void (^PEMarkAsDoneEditingBlk)(PEAddViewEditController *,
                                        PESyncImmediateRetryAfterBlk,
                                        PESyncImmediateServerTempErrorBlk,
                                        PESyncImmediateServerErrorBlk,
-                                       PESyncImmediateAuthRequiredBlk);
+                                       PESyncImmediateAuthRequiredBlk,
+                                       PESyncImmediateDependencyUnsynced);
 typedef void (^PESyncerBlk)(PEAddViewEditController *,
                             id,
                             PESyncImmediateSuccessBlk,
                             PESyncImmediateRetryAfterBlk,
                             PESyncImmediateServerTempErrorBlk,
                             PESyncImmediateServerErrorBlk,
-                            PESyncImmediateAuthRequiredBlk);
+                            PESyncImmediateAuthRequiredBlk,
+                            PESyncImmediateDependencyUnsynced);
 typedef void (^PESaveNewEntityBlk)(UIView *,
                                    id,
                                    PESyncImmediateSuccessBlk,
                                    PESyncImmediateRetryAfterBlk,
                                    PESyncImmediateServerTempErrorBlk,
                                    PESyncImmediateServerErrorBlk,
-                                   PESyncImmediateAuthRequiredBlk);
+                                   PESyncImmediateAuthRequiredBlk,
+                                   PESyncImmediateDependencyUnsynced);
 typedef void (^PEItemAddedBlk)(PEAddViewEditController *, id);
 typedef void (^PEItemChangedBlk)(id, NSIndexPath *);
 typedef void (^PEPrepareUIForUserInteractionBlk)(UIView *);

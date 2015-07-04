@@ -14,6 +14,7 @@ pod 'FlatUIKit', '~> 1.6.2', :inhibit_warnings => true
 pod 'UICKeyChainStore', '~> 2.0.5'
 pod 'IQKeyboardManager', '~> 3.2.1.1'
 pod 'BlocksKit', '~> 2.2.5'
+pod 'JGActionSheet', '~> 1.0.4'
 
 pod 'PEDev-Console', '~> 1.0.1', :configurations => ['Debug']
 pod 'KissXML', '~> 5.0', :configurations => ['Debug'], :inhibit_warnings => true

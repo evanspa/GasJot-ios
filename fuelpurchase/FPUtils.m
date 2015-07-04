@@ -73,7 +73,13 @@
   }
   if (saveVehicleErrMask & FPSaveVehicleVehicleAlreadyExists) {
     [errMsgs addObject:LS(@"savevehicle.vehicle-already-exists")];
-  }  
+  }
+  if (saveVehicleErrMask & (1 << 3)) {
+    [errMsgs addObject:LS(@"savevehicle.vehicle-is-purple")];
+  }
+  if (saveVehicleErrMask & (1 << 4)) {
+    [errMsgs addObject:LS(@"savevehicle.vehicle-is-red")];
+  }
   return errMsgs;
 }
 

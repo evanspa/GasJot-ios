@@ -102,7 +102,9 @@
  * 'Save Vehicle' error messages
  ***************************************************************/
 "savevehicle.name-notprovided" = "Name cannot be empty.";
-"savevehicle.vehicle-already-exists" = "A vehicle with this name already exists.";
+"savevehicle.vehicle-already-exists" = "Vehicle name already in use.";
+"savevehicle.vehicle-is-red" = "A vehicle cannot be red.";
+"savevehicle.vehicle-is-purple" = "A vehicle cannot be purple.";
 
 /***************************************************************
  * 'Save User' error messages

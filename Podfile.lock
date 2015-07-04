@@ -47,6 +47,7 @@ PODS:
   - FMDB/standard (2.5):
     - FMDB/common
   - IQKeyboardManager (3.2.1.2)
+  - JGActionSheet (1.0.4)
   - KissXML (5.0)
   - MBProgressHUD (0.9.1)
   - OHHTTPStubs (3.1.12):
@@ -96,6 +97,7 @@ DEPENDENCIES:
   - CocoaLumberjack (~> 1.9)
   - FlatUIKit (~> 1.6.2)
   - IQKeyboardManager (~> 3.2.1.1)
+  - JGActionSheet
   - KissXML (~> 5.0)
   - MBProgressHUD (~> 0.9.1)
   - PEDev-Console (~> 1.0.1)
@@ -113,6 +115,7 @@ SPEC CHECKSUMS:
   FlatUIKit: 1b41f0d4952ce8d970d8479ce79df54a960242c4
   FMDB: 96e8f1bcc1329e269330f99770ad4285d9003e52
   IQKeyboardManager: 4adcd7cc9c17440a7cb74755f6f6c8389919c6bf
+  JGActionSheet: 7c6a947dca93a5c6031032ab76e157b19087d593
   KissXML: ce643413d618ad69886d0d43c3792b7dedfe476e
   MBProgressHUD: c47f2c166c126cf2ce36498d80f33e754d4e93ad
   OHHTTPStubs: 8cf0cfe6f34f13fc88fdf5b2a1b2c2536e8c0261
