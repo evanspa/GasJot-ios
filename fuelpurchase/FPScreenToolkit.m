@@ -161,7 +161,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                             successBlk:^{successBlk(1, mainMsgFragment, recordTitle);}
                                     remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
                                     tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
-                                        remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                                        remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveUsrErrMsgs:errMask]);}
                                        authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
@@ -192,7 +192,6 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
          prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                        viewDidAppearBlk:nil
                         entityValidator:[self newUserAccountValidator]
-                        messageComputer:^(NSInteger errMask){return [FPUtils computeSaveUsrErrMsgs:errMask];}
                                  syncer:nil];
   };
 }
@@ -343,7 +342,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                        successBlk:^{successBlk(1, mainMsgFragment, recordTitle);}
                                remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
                                tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
-                                   remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                                   remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]);}
                                   authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
                                             error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
@@ -379,7 +378,6 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                         viewDidAppearBlk:nil
                          entityValidator:[self newVehicleValidator]
-                         messageComputer:^(NSInteger errMask){return [FPUtils computeSaveVehicleErrMsgs:errMask];}
             syncImmediateWhenDoneEditing:[APP doesUserHaveValidAuthToken]
                           isUserLoggedIn:[APP isUserLoggedIn]
           syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
@@ -424,7 +422,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                                  successBlk:^{successBlk(1, mainMsgFragment, recordTitle);}
                                          remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
                                          tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
-                                             remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                                             remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]);}
                                             authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
                                                       error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
@@ -447,7 +445,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                 addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle);}
                         addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
                         addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
-                            addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                            addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]);}
                            addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
                                          error:[FPUtils localSaveErrorHandlerMaker]()];
       
@@ -479,7 +477,6 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
         prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                       viewDidAppearBlk:nil
                        entityValidator:[self newVehicleValidator]
-                       messageComputer:^(NSInteger errMask){return [FPUtils computeSaveVehicleErrMsgs:errMask];}
                                 syncer:syncer];
   };
 }
@@ -724,7 +721,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                            successBlk:^{successBlk(1, mainMsgFragment, recordTitle);}
                                    remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
                                    tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
-                                       remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                                       remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]);}
                                       authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
                                                 error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
@@ -762,7 +759,6 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                         viewDidAppearBlk:nil
                          entityValidator:[self newFuelStationValidator]
-                         messageComputer:^(NSInteger errMask){return [FPUtils computeSaveFuelStationErrMsgs:errMask];}
             syncImmediateWhenDoneEditing:[APP doesUserHaveValidAuthToken]
                           isUserLoggedIn:[APP isUserLoggedIn]
           syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
@@ -811,7 +807,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                                      successBlk:^{successBlk(1, mainMsgFragment, recordTitle);}
                                              remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
                                              tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
-                                                 remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                                                 remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]);}
                                                 authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
                                                           error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
@@ -834,7 +830,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                     addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle);}
                             addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
                             addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
-                                addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                                addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]);}
                                addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
                                              error:[FPUtils localSaveErrorHandlerMaker]()];
     };
@@ -865,7 +861,6 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
         prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                       viewDidAppearBlk:nil
                        entityValidator:[self newFuelStationValidator]
-                       messageComputer:^(NSInteger errMask){return [FPUtils computeSaveFuelStationErrMsgs:errMask];}
                                 syncer:syncer];
   };
 }
@@ -970,7 +965,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       }
       NSString *mainMsgFragment = @"syncing fuel purchase log";
       if (savePreFillupEnvLogPercentComplete || savePostFillupEnvLogPercentComplete) {
-        mainMsgFragment = @"syncing fuel purchase and environment logs";
+        mainMsgFragment = @"syncing fuel purchase\nand environment logs";
       }
       NSString *recordTitle = @"Fuel purchase log";
       BOOL doSyncImmediate = [APP doesUserHaveValidAuthToken];
@@ -982,7 +977,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                                successBlk:^{successBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle);}
                                        remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, retryAfter);}
                                        tempRemoteErrorBlk:^{tempErrBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle);}
-                                           remoteErrorBlk:^(NSInteger errMask) {errBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, errMask);}
+                                           remoteErrorBlk:^(NSInteger errMask) {errBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]);}
                                           authRequiredBlk:^{authReqdBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle);}
                              skippedDueToVehicleNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced.");}
                          skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The associated fuel station is not yet synced.");}
@@ -1003,7 +998,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                                 successBlk:^{successBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle);}
                                         remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter);}
                                         tempRemoteErrorBlk:^{tempErrBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle);}
-                                            remoteErrorBlk:^(NSInteger errMask) {errBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, errMask);}
+                                            remoteErrorBlk:^(NSInteger errMask) {errBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]);}
                                            authRequiredBlk:^{authReqdBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle);}
                               skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced.");}
                                                      error:[FPUtils localSaveErrorHandlerMaker]()];
@@ -1022,7 +1017,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                                 successBlk:^{successBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle);}
                                         remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter);}
                                         tempRemoteErrorBlk:^{tempErrBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle);}
-                                            remoteErrorBlk:^(NSInteger errMask) {errBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, errMask);}
+                                            remoteErrorBlk:^(NSInteger errMask) {errBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]);}
                                            authRequiredBlk:^{authReqdBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle);}
                               skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced.");}
                                                      error:[FPUtils localSaveErrorHandlerMaker]()];
@@ -1082,7 +1077,6 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
           prepareUIForUserInteractionBlk:nil
                         viewDidAppearBlk:viewDidAppearBlk
                          entityValidator:[self newFpEnvLogCompositeValidator]
-                         messageComputer:^(NSInteger errMask){return @[];}
             syncImmediateWhenDoneEditing:[APP doesUserHaveValidAuthToken]
                           isUserLoggedIn:[APP isUserLoggedIn]
           syncImmediateMBProgressHUDMode:MBProgressHUDModeDeterminate
@@ -1158,7 +1152,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                                          successBlk:^{successBlk(1, mainMsgFragment, recordTitle);}
                                                  remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
                                                  tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
-                                                     remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                                                     remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]);}
                                                     authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
                                        skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced.");}
                                    skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated fuel station is not yet synced.");}
@@ -1183,7 +1177,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                        addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle);}
                                addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
                                addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
-                                   addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                                   addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]);}
                                   addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
                          skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced.");}
                      skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated fuel station is not yet synced.");}
@@ -1217,7 +1211,6 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
         prepareUIForUserInteractionBlk:nil
                       viewDidAppearBlk:nil
                        entityValidator:[self newFuelPurchaseLogValidator]
-                       messageComputer:^(NSInteger errMask){return @[];}
                                 syncer:syncer];
   };
 }
@@ -1413,7 +1406,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                               successBlk:^{successBlk(1, mainMsgFragment, recordTitle);}
                                       remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
                                       tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
-                                          remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                                          remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]);}
                                          authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
                             skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced.");}
                                                    error:[FPUtils localSaveErrorHandlerMaker]()];
@@ -1459,7 +1452,6 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
            prepareUIForUserInteractionBlk:nil
                          viewDidAppearBlk:viewDidAppearBlk
                           entityValidator:[self newEnvironmentLogValidator]
-                          messageComputer:^(NSInteger errMask){return @[];} // TODO
              syncImmediateWhenDoneEditing:[APP doesUserHaveValidAuthToken]
                            isUserLoggedIn:[APP isUserLoggedIn]
            syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
@@ -1525,7 +1517,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                                          successBlk:^{successBlk(1, mainMsgFragment, recordTitle);}
                                                  remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
                                                  tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
-                                                     remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                                                     remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]);}
                                                     authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
                                        skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced.");}
                                                               error:[FPUtils localSaveErrorHandlerMaker]()];
@@ -1549,7 +1541,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                        addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle);}
                                addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter);}
                                addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle);}
-                                   addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, errMask);}
+                                   addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]);}
                                   addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle);}
                          skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced.");}
                                                 error:[FPUtils localSaveErrorHandlerMaker]()];      
@@ -1579,7 +1571,6 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                prepareUIForUserInteractionBlk:nil
                                              viewDidAppearBlk:nil
                                               entityValidator:[self newEnvironmentLogValidator]
-                                              messageComputer:^(NSInteger errMask){return @[];}
                                                        syncer:syncer];
   };
 }

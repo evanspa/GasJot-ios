@@ -60,6 +60,10 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
 
 + (NSArray *)computeFpLogErrMsgs:(NSInteger)saveFpLogErrMask;
 
+#pragma mark - Environment Log Helpers
+
++ (NSArray *)computeEnvLogErrMsgs:(NSInteger)saveEnvLogErrMask;
+
 #pragma mark - Various Error Handler Helpers
 
 + (ServerBusyHandlerMaker)serverBusyHandlerMakerForUI;

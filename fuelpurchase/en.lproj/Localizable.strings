@@ -100,10 +100,17 @@
 "savefplog.numgallons-notprovided" = "Number of gallons cannot be empty.";
 "savefplog.octane-notprovided" = "Octane cannot be empty.";
 "savefplog.gallonprice-notprovided" = "Gallon price cannot be empty.";
+"savefplog.numgallons-negative" = "Number of gallons cannot be negative.";
+"savefplog.octane-negative" = "Octane cannot be negative.";
+"savefplog.gallonprice-negative" = "Gallon price cannot be negative.";
 
 /***************************************************************
  * 'Save Environment Log' error messages
  ***************************************************************/
+"savenvlog.logdate-notprovided" = "Log date cannot be empty.";
+"savenvlog.odometer-notprovided" = "Odometer cannot be empty.";
+"savenvlog.outside-temp-notprovided" = "Outside temperature cannot be empty.";
+"savenvlog.odometernegative-notprovided" = "Odometer cannot be negative.";
 
 /***************************************************************
  * 'Save Fuel Station' error messages
@@ -115,8 +122,8 @@
  ***************************************************************/
 "savevehicle.name-notprovided" = "Name cannot be empty.";
 "savevehicle.vehicle-already-exists" = "Vehicle name already in use.";
-"savevehicle.vehicle-is-red" = "A vehicle cannot be red.";
-"savevehicle.vehicle-is-purple" = "A vehicle cannot be purple.";
+"savevehicle.vehicle-contains-red" = "Vehicle name cannot contain red.";
+"savevehicle.vehicle-contains-purple" = "Vehicle name cannot contain purple.";
 
 /***************************************************************
  * 'Save User' error messages

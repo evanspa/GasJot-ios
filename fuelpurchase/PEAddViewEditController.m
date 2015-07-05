@@ -45,7 +45,6 @@
   SEL _getterForNotification;
   BOOL _isEntityAppropriateForBackgroundSync;
   id _newEntity;
-  PEMessagesFromErrMask _messageComputer;
   PELMMainSupport *_entityCopyBeforeEdit;
   float _percentCompleteSavingEntity;
   MBProgressHUDMode _syncImmediateMBProgressHUDMode;
@@ -86,7 +85,6 @@ isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForLaterSync // rename 
 prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
      entityValidator:(PEEntityValidatorBlk)entityValidator
-     messageComputer:(PEMessagesFromErrMask)messageComputer
               syncer:(PESyncerBlk)syncer
 getterForNotification:(SEL)getterForNotification {
   self = [super initWithNibName:nil bundle:nil];
@@ -121,7 +119,6 @@ getterForNotification:(SEL)getterForNotification {
     _prepareUIForUserInteractionBlk = prepareUIForUserInteractionBlk;
     _viewDidAppearBlk = viewDidAppearBlk;
     _entityValidator = entityValidator;
-    _messageComputer = messageComputer;
     _syncer = syncer;
     _getterForNotification = getterForNotification;
     _errorsForSync = [NSMutableArray array];
@@ -145,7 +142,6 @@ getterForNotification:(SEL)getterForNotification {
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
-                                         messageComputer:(PEMessagesFromErrMask)messageComputer
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
                                           isUserLoggedIn:(BOOL)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
@@ -163,7 +159,6 @@ getterForNotification:(SEL)getterForNotification {
                                prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                                              viewDidAppearBlk:viewDidAppearBlk
                                               entityValidator:entityValidator
-                                              messageComputer:messageComputer
                                  syncImmediateWhenDoneEditing:syncImmediateWhenDoneEditing
                                                isUserLoggedIn:isUserLoggedIn
                                syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
@@ -184,7 +179,6 @@ getterForNotification:(SEL)getterForNotification {
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
-                                         messageComputer:(PEMessagesFromErrMask)messageComputer
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
                                           isUserLoggedIn:(BOOL)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
@@ -216,7 +210,6 @@ getterForNotification:(SEL)getterForNotification {
                           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:viewDidAppearBlk
                                          entityValidator:entityValidator
-                                         messageComputer:messageComputer
                                                   syncer:nil
                                    getterForNotification:getterForNotification];
 }
@@ -243,7 +236,6 @@ getterForNotification:(SEL)getterForNotification {
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator
-                                       messageComputer:(PEMessagesFromErrMask)messageComputer
                                                 syncer:(PESyncerBlk)syncer {
   return [[PEAddViewEditController alloc] initWithEntity:entity
                                       listViewController:listViewController
@@ -271,7 +263,6 @@ getterForNotification:(SEL)getterForNotification {
                           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:viewDidAppearBlk
                                          entityValidator:entityValidator
-                                         messageComputer:messageComputer
                                                   syncer:syncer
                                    getterForNotification:nil];
 }
@@ -583,12 +574,11 @@ getterForNotification:(SEL)getterForNotification {
       syncDone(mainMsgTitle);
     }
   };
-  void (^_syncServerError)(float, NSString *, NSString *, NSInteger) = ^(float percentComplete,
+  void (^_syncServerError)(float, NSString *, NSString *, NSArray *) = ^(float percentComplete,
                                                                          NSString *mainMsgTitle,
                                                                          NSString *recordTitle,
-                                                                         NSInteger errorMask) {
+                                                                         NSArray *computedErrMsgs) {
     handleHudProgress(percentComplete);
-    NSArray *computedErrMsgs = _messageComputer(errorMask);
     BOOL isErrorUserFixable = YES;
     if (!computedErrMsgs || ([computedErrMsgs count] == 0)) {
       computedErrMsgs = @[@"Unknown server error."];
@@ -846,12 +836,11 @@ getterForNotification:(SEL)getterForNotification {
             immediateSyncDone(mainMsgTitle);
           }
         };
-        void (^_syncServerError)(float, NSString *, NSString *, NSInteger) = ^(float percentComplete,
+        void (^_syncServerError)(float, NSString *, NSString *, NSArray *) = ^(float percentComplete,
                                                                                NSString *mainMsgTitle,
                                                                                NSString *recordTitle,
-                                                                               NSInteger errorMask) {
+                                                                               NSArray *computedErrMsgs) {
           handleHudProgress(percentComplete);
-          NSArray *computedErrMsgs = _messageComputer(errorMask);
           BOOL isErrorUserFixable = YES;
           if (!computedErrMsgs || ([computedErrMsgs count] == 0)) {
             computedErrMsgs = @[@"Unknown server error."];
@@ -1104,7 +1093,7 @@ getterForNotification:(SEL)getterForNotification {
             } else {
               // only error(s)
               NSArray *subErrorPanels;
-              CGFloat contentViewHeight = 150;
+              CGFloat contentViewHeight;
               UIView *contentView = [PEUIUtils panelWithWidthOf:0.905
                                                  relativeToView:[self view]
                                                     fixedHeight:0.0];
@@ -1115,6 +1104,7 @@ getterForNotification:(SEL)getterForNotification {
               NSString *cancelActionTitle;
               NSMutableString *message = [NSMutableString string];
               if (isMultiStepAdd) {
+                contentViewHeight = 145.0;
                 [message appendString:@"\
 Although there were problems syncing your\n\
 edits to the server, they have been saved\n\
@@ -1128,7 +1118,7 @@ locally.  The details are as follows:\n"];
                 subErrorPanels = [NSMutableArray arrayWithCapacity:[_errorsForSync count]];
                 for (NSArray *error in _errorsForSync) {
                   NSArray *subErrors = error[2];
-                  contentViewHeight += (25 + ([subErrors count] * 17));
+                  contentViewHeight += (25 + ([subErrors count] * 19.0));
                   UIView *subErrorPanel = [PEUIUtils panelWithWidthOf:0.9
                                                        relativeToView:contentView
                                                           fixedHeight:0]; // will set later
@@ -1160,7 +1150,7 @@ locally.  The details are as follows:\n"];
                   [(NSMutableArray *)subErrorPanels addObject:subErrorPanel];
                 }
               } else {
-                contentViewHeight = 115.0; // base height needed to fit a single error message
+                contentViewHeight = 120.0;
                 NSArray *subErrors = _errorsForSync[0][2]; // because only single-record add, we can skip the "not saved" msg title, and just display the sub-errors
                 if ([subErrors count] > 1) {
                   contentViewHeight += ([subErrors count] * 17);
@@ -1197,25 +1187,49 @@ Settings -> Authenticate."];
               [PEUIUtils setFrameHeight:contentViewHeight ofView:contentView];
               UILabel *messageLbl = [PEUIUtils labelWithKey:message
                                                        font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                            backgroundColor:[UIColor whiteColor]
+                                            backgroundColor:[UIColor clearColor]
                                                   textColor:[UIColor blackColor]
                                       horizontalTextPadding:3.0
                                         verticalTextPadding:0.0];
-              [messageLbl setNumberOfLines:0];
-              [messageLbl setAutoresizingMask:UIViewAutoresizingFlexibleHeight];
+              [PEUIUtils setFrameHeight:62.0 ofView:messageLbl];
               [messageLbl setLineBreakMode:NSLineBreakByWordWrapping];
+              //NSLog(@"messageLbl.height: %f", messageLbl.frame.size.height);
               
-              [PEUIUtils placeView:messageLbl
+              UILabel *titleLbl = [PEUIUtils labelWithKey:title
+                                                     font:[UIFont boldSystemFontOfSize:18]
+                                          backgroundColor:[UIColor clearColor]
+                                                textColor:[UIColor blackColor]
+                                    horizontalTextPadding:3.0
+                                      verticalTextPadding:0.0];
+              [titleLbl setLineBreakMode:NSLineBreakByWordWrapping];
+              NSLog(@"titleLbl.height: %f", titleLbl.frame.size.height);
+              
+              [PEUIUtils placeView:titleLbl
                            atTopOf:contentView
                      withAlignment:PEUIHorizontalAlignmentTypeLeft
                           vpadding:0.0
                           hpadding:5.0];
+              
+              [PEUIUtils placeView:messageLbl
+                             below:titleLbl
+                              onto:contentView
+                     withAlignment:PEUIHorizontalAlignmentTypeLeft
+                          vpadding:0.0
+                          hpadding:0.0];
+              //[PEUIUtils applyBorderToView:messageLbl withColor:[UIColor yellowColor]];
               UIView *subErrorsPanel = [PEUIUtils panelWithColumnOfViews:subErrorPanels
                                              verticalPaddingBetweenViews:1.0
                                                           viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
               //[PEUIUtils applyBorderToView:subErrorsPanel withColor:[UIColor purpleColor]];
-              [PEUIUtils placeView:subErrorsPanel below:messageLbl onto:contentView withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:5.0 hpadding:0.0];
-              JGActionSheetSection *msgSection = [JGActionSheetSection sectionWithTitle:title message:nil contentView:contentView];
+              [PEUIUtils placeView:subErrorsPanel
+                             below:messageLbl
+                              onto:contentView
+                     withAlignment:PEUIHorizontalAlignmentTypeLeft
+                          vpadding:0.0
+                          hpadding:0.0];
+              JGActionSheetSection *msgSection = [JGActionSheetSection sectionWithTitle:nil
+                                                                                message:nil
+                                                                            contentView:contentView];
               [[msgSection titleLabel] setFont:[UIFont boldSystemFontOfSize:18.0]];
               JGActionSheetSection *buttonsSection;
               void (^buttonsPressedBlock)(JGActionSheet *, NSIndexPath *);
@@ -1336,12 +1350,11 @@ Settings -> Authenticate."];
           immediateSaveDone(mainMsgTitle);
         }
       };
-      void (^_syncServerError)(float, NSString *, NSString *, NSInteger) = ^(float percentComplete,
+      void (^_syncServerError)(float, NSString *, NSString *, NSArray *) = ^(float percentComplete,
                                                                              NSString *mainMsgTitle,
                                                                              NSString *recordTitle,
-                                                                             NSInteger errorMask) {
+                                                                             NSArray *computedErrMsgs) {
         handleHudProgress(percentComplete);
-        NSArray *computedErrMsgs = _messageComputer(errorMask);
         BOOL isErrorUserFixable = YES;
         if (!computedErrMsgs || ([computedErrMsgs count] == 0)) {
           computedErrMsgs = @[@"Unknown server error."];

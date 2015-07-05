@@ -74,11 +74,11 @@
   if (saveVehicleErrMask & FPSaveVehicleVehicleAlreadyExists) {
     [errMsgs addObject:LS(@"savevehicle.vehicle-already-exists")];
   }
-  if (saveVehicleErrMask & (1 << 3)) {
-    [errMsgs addObject:LS(@"savevehicle.vehicle-is-purple")];
+  if (saveVehicleErrMask & FPSaveVehicleNameContainsPurple) {
+    [errMsgs addObject:LS(@"savevehicle.vehicle-contains-purple")];
   }
-  if (saveVehicleErrMask & (1 << 4)) {
-    [errMsgs addObject:LS(@"savevehicle.vehicle-is-red")];
+  if (saveVehicleErrMask & FPSaveVehicleNameContainsRed) {
+    [errMsgs addObject:LS(@"savevehicle.vehicle-contains-red")];
   }
   return errMsgs;
 }
@@ -136,6 +136,34 @@
   }
   if (saveFpLogErrMask & FPSaveFuelPurchaseLogGallonPriceNotProvided) {
     [errMsgs addObject:LS(@"savefplog.gallonprice-notprovided")];
+  }
+  if (saveFpLogErrMask & FPSaveFuelPurchaseLogNumGallonsNegative) {
+    [errMsgs addObject:LS(@"savefplog.numgallons-negative")];
+  }
+  if (saveFpLogErrMask & FPSaveFuelPurchaseLogOctaneNegative) {
+    [errMsgs addObject:LS(@"savefplog.octane-negative")];
+  }
+  if (saveFpLogErrMask & FPSaveFuelPurchaseLogGallonPriceNegative) {
+    [errMsgs addObject:LS(@"savefplog.gallonprice-negative")];
+  }
+  return errMsgs;
+}
+
+#pragma mark - Environment Log Helpers
+
++ (NSArray *)computeEnvLogErrMsgs:(NSInteger)saveEnvLogErrMask {
+  NSMutableArray *errMsgs = [NSMutableArray array];
+  if (saveEnvLogErrMask & FPSaveEnvironmentLogDateNotProvided) {
+    [errMsgs addObject:LS(@"savenvlog.logdate-notprovided")];
+  }
+  if (saveEnvLogErrMask & FPSaveEnvironmentLogOdometerNotProvided) {
+    [errMsgs addObject:LS(@"savenvlog.odometer-notprovided")];
+  }
+  if (saveEnvLogErrMask & FPSaveEnvironmentLogOutsideTempNotProvided) {
+    [errMsgs addObject:LS(@"savenvlog.outside-temp-notprovided")];
+  }
+  if (saveEnvLogErrMask & FPSaveEnvironmentLogOdometerNegative) {
+    [errMsgs addObject:LS(@"savenvlog.odometer-negative")];
   }
   return errMsgs;
 }

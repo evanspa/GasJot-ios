@@ -25,7 +25,7 @@ typedef id   (^PEEntityMakerBlk)(UIView *);
 typedef void (^PESaveEntityBlk)(PEAddViewEditController *, id);
 typedef void (^PESyncImmediateSuccessBlk)(float, NSString *, NSString *);
 typedef void (^PESyncImmediateServerTempErrorBlk)(float, NSString *, NSString *);
-typedef void (^PESyncImmediateServerErrorBlk)(float, NSString *, NSString *, NSInteger);
+typedef void (^PESyncImmediateServerErrorBlk)(float, NSString *, NSString *, NSArray *);
 typedef void (^PESyncImmediateAuthRequiredBlk)(float, NSString *, NSString *);
 typedef void (^PESyncImmediateRetryAfterBlk)(float, NSString *, NSString *, NSDate *);
 typedef void (^PESyncImmediateDependencyUnsynced)(float, NSString *, NSString *, NSString *);
@@ -91,7 +91,6 @@ isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForLaterSync
 prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
      entityValidator:(PEEntityValidatorBlk)entityValidator
-     messageComputer:(PEMessagesFromErrMask)messageComputer
               syncer:(PESyncerBlk)syncer
 getterForNotification:(SEL)getterForNotification;
 
@@ -110,7 +109,6 @@ getterForNotification:(SEL)getterForNotification;
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
-                                         messageComputer:(PEMessagesFromErrMask)messageComputer
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
                                           isUserLoggedIn:(BOOL)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
@@ -129,7 +127,6 @@ getterForNotification:(SEL)getterForNotification;
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
-                                         messageComputer:(PEMessagesFromErrMask)messageComputer
                             syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
                                           isUserLoggedIn:(BOOL)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
@@ -158,7 +155,6 @@ getterForNotification:(SEL)getterForNotification;
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator
-                                       messageComputer:(PEMessagesFromErrMask)messageComputer
                                                 syncer:(PESyncerBlk)syncer;
 
 #pragma mark - Properties
