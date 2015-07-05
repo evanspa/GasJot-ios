@@ -1070,9 +1070,9 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                       listViewController:listViewController
                             itemAddedBlk:itemAddedBlk
                         entityPanelMaker:[_panelToolkit fpEnvLogCompositePanelMakerWithUser:user
-                                                                   defaultSelectedVehicle:defaultSelectedVehicle
-                                                               defaultSelectedFuelStation:defaultSelectedFuelStation
-                                                                     defaultPickedLogDate:[NSDate date]]
+                                                                     defaultSelectedVehicle:defaultSelectedVehicle
+                                                                 defaultSelectedFuelStation:defaultSelectedFuelStation
+                                                                       defaultPickedLogDate:[NSDate date]]
                      entityToPanelBinder:[_panelToolkit fpEnvLogCompositeToFpEnvLogCompositePanelBinder]
                      panelToEntityBinder:[_panelToolkit fpEnvLogCompositePanelToFpEnvLogCompositeBinder]
                              entityTitle:@"Fuel Purchase Log"

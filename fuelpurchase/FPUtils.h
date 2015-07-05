@@ -56,6 +56,10 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
 + (NSArray *)sortFuelstations:(NSArray *)fuelstations
      inAscOrderByDistanceFrom:(CLLocation *)location;
 
+#pragma mark - Fuel Purchase Log Helpers
+
++ (NSArray *)computeFpLogErrMsgs:(NSInteger)saveFpLogErrMask;
+
 #pragma mark - Various Error Handler Helpers
 
 + (ServerBusyHandlerMaker)serverBusyHandlerMakerForUI;

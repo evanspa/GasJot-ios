@@ -966,7 +966,7 @@ getterForNotification:(SEL)getterForNotification {
   [PEUIUtils placeView:errImgView
             inMiddleOf:errorPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              hpadding:7.0];
+              hpadding:0.0];
   [PEUIUtils placeView:errorMsgLbl
           toTheRightOf:errImgView
                   onto:errorPanel
@@ -982,7 +982,7 @@ getterForNotification:(SEL)getterForNotification {
   for (NSString *subError in subErrors) {
     UIView *errorPanel = [self errorPanelWithTitle:subError
                                     forContentView:contentView
-                                            height:35.0
+                                            height:25.0
                                        leftImgIcon:leftImgIcon];
     [subErrorPanels addObject:errorPanel];
   }
@@ -1104,7 +1104,6 @@ getterForNotification:(SEL)getterForNotification {
             } else {
               // only error(s)
               NSArray *subErrorPanels;
-              UIImage *syncErrorImg = [UIImage imageNamed:@"sync-error"];
               CGFloat contentViewHeight = 150;
               UIView *contentView = [PEUIUtils panelWithWidthOf:0.905
                                                  relativeToView:[self view]
@@ -1119,7 +1118,7 @@ getterForNotification:(SEL)getterForNotification {
                 [message appendString:@"\
 Although there were problems syncing your\n\
 edits to the server, they have been saved\n\
-locally.  The errors are as follows:\n"];
+locally.  The details are as follows:\n"];
                 fixNowActionTitle = @"I'll fix them now.";
                 fixLaterActionTitle = @"I'll fix them later.";
                 cancelActionTitle = @"Forget it.  Just cancel them.";
@@ -1130,18 +1129,33 @@ locally.  The errors are as follows:\n"];
                 for (NSArray *error in _errorsForSync) {
                   NSArray *subErrors = error[2];
                   contentViewHeight += (25 + ([subErrors count] * 17));
-                  UIView *subErrorPanel = [PEUIUtils panelWithWidthOf:0.9 relativeToView:contentView fixedHeight:(35.0 * [subErrors count])];
+                  UIView *subErrorPanel = [PEUIUtils panelWithWidthOf:0.9
+                                                       relativeToView:contentView
+                                                          fixedHeight:0]; // will set later
+                  //[PEUIUtils applyBorderToView:subErrorPanel withColor:[UIColor redColor]];
                   UIView *recordMsgTitle = [self errorPanelWithTitle:error[0]
                                                       forContentView:contentView
-                                                              height:35.0
-                                                         leftImgIcon:blackDotImg];
-                  NSArray *recordSubErrorPanels = [self subErrorPanelsForSubErrors:subErrors forContentView:contentView leftImgIcon:syncErrorImg];
-                  [PEUIUtils placeView:recordMsgTitle atTopOf:subErrorPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
-                  [PEUIUtils placeView:[PEUIUtils panelWithColumnOfViews:recordSubErrorPanels verticalPaddingBetweenViews:1.0 viewsAlignment:PEUIHorizontalAlignmentTypeLeft]
+                                                              height:25.0
+                                                         leftImgIcon:syncErrorImg];
+                  //[PEUIUtils applyBorderToView:recordMsgTitle withColor:[UIColor greenColor]];
+                  NSArray *recordSubErrorPanels = [self subErrorPanelsForSubErrors:subErrors
+                                                                    forContentView:contentView
+                                                                       leftImgIcon:blackDotImg];
+                  [PEUIUtils placeView:recordMsgTitle
+                               atTopOf:subErrorPanel
+                         withAlignment:PEUIHorizontalAlignmentTypeLeft
+                              vpadding:0.0
+                              hpadding:0.0];
+                  UIView *columnOfViews = [PEUIUtils panelWithColumnOfViews:recordSubErrorPanels
+                                                verticalPaddingBetweenViews:0.0
+                                                             viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
+                  [PEUIUtils setFrameHeight:(columnOfViews.frame.size.height + recordMsgTitle.frame.size.height) ofView:subErrorPanel];
+                  //[PEUIUtils applyBorderToView:columnOfViews withColor:[UIColor purpleColor]];
+                  [PEUIUtils placeView:columnOfViews
                                  below:recordMsgTitle
                                   onto:subErrorPanel
                          withAlignment:PEUIHorizontalAlignmentTypeLeft
-                              vpadding:5.0
+                              vpadding:0.0
                               hpadding:15.0];
                   [(NSMutableArray *)subErrorPanels addObject:subErrorPanel];
                 }
@@ -1195,7 +1209,7 @@ Settings -> Authenticate."];
                            atTopOf:contentView
                      withAlignment:PEUIHorizontalAlignmentTypeLeft
                           vpadding:0.0
-                          hpadding:10.0];
+                          hpadding:5.0];
               UIView *subErrorsPanel = [PEUIUtils panelWithColumnOfViews:subErrorPanels
                                              verticalPaddingBetweenViews:1.0
                                                           viewsAlignment:PEUIHorizontalAlignmentTypeLeft];

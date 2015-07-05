@@ -94,6 +94,18 @@
 "FPConnFailureErrorDomain.-3007" = "Download decoding failed to complete.";
 
 /***************************************************************
+ * 'Save Fuel Purchase Log' error messages
+ ***************************************************************/
+"savefplog.purchasedate-notprovided" = "Purchase date cannot be empty.";
+"savefplog.numgallons-notprovided" = "Number of gallons cannot be empty.";
+"savefplog.octane-notprovided" = "Octane cannot be empty.";
+"savefplog.gallonprice-notprovided" = "Gallon price cannot be empty.";
+
+/***************************************************************
+ * 'Save Environment Log' error messages
+ ***************************************************************/
+
+/***************************************************************
  * 'Save Fuel Station' error messages
  ***************************************************************/
 "savefuelstation.name-notprovided" = "Name cannot be empty.";

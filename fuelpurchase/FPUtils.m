@@ -121,6 +121,25 @@
   }];
 }
 
+#pragma mark - Fuel Purchase Log Helpers
+
++ (NSArray *)computeFpLogErrMsgs:(NSInteger)saveFpLogErrMask {
+  NSMutableArray *errMsgs = [NSMutableArray array];  
+  if (saveFpLogErrMask & FPSaveFuelPurchaseLogPurchaseDateNotProvided) {
+    [errMsgs addObject:LS(@"savefplog.purchasedate-notprovided")];
+  }
+  if (saveFpLogErrMask & FPSaveFuelPurchaseLogNumGallonsNotProvided) {
+    [errMsgs addObject:LS(@"savefplog.numgallons-notprovided")];
+  }
+  if (saveFpLogErrMask & FPSaveFuelPurchaseLogOctaneNotProvided) {
+    [errMsgs addObject:LS(@"savefplog.octane-notprovided")];
+  }
+  if (saveFpLogErrMask & FPSaveFuelPurchaseLogGallonPriceNotProvided) {
+    [errMsgs addObject:LS(@"savefplog.gallonprice-notprovided")];
+  }
+  return errMsgs;
+}
+
 #pragma mark - Various Error Handler Helpers
 
 + (ServerBusyHandlerMaker)serverBusyHandlerMakerForUI {
