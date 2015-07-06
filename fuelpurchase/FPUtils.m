@@ -212,6 +212,35 @@ busy, and asks that you try again at date: %@.", retryAfter]]
   };
 }
 
++ (SynchUnitOfWorkHandlerMakerZeroArg)synchUnitOfWorkZeroArgHandlerMakerWithErrMsgsMaker:(ErrMsgsMaker)errMsgsMaker {
+  return ^(MBProgressHUD *hud, void (^successBlock)(void)) {
+    return (^(NSError *error) {
+      if (error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+          [hud hide:YES];
+          NSString *errorDomain = [error domain];
+          NSInteger errorCode = [error code];
+          NSArray *errMsgs;
+          if ([errorDomain isEqualToString:FPConnFaultedErrorDomain]) {
+            NSString *localizedErrMsgKey =
+            [errorDomain stringByAppendingFormat:@".%ld", (long)errorCode];
+            errMsgs = @[NSLocalizedString(localizedErrMsgKey, nil)];
+          } else if ([errorDomain isEqualToString:FPUserFaultedErrorDomain]) {
+            errMsgs = errMsgsMaker(errorCode);
+          } else {
+            errMsgs = @[[error localizedDescription]];
+          }
+          [PEUIUtils showAlertWithMsgs:errMsgs
+                                 title:@"Error"
+                           buttonTitle:@"Okay"];
+        });
+      } else {
+        successBlock();
+      }
+    });
+  };
+}
+
 + (LocalDatabaseErrorHandlerMakerWithHUD)localDatabaseErrorHudHandlerMaker {
   return ^(MBProgressHUD *hud) {
     return (^(NSError *error, int code, NSString *msg) {

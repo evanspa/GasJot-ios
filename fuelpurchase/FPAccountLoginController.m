@@ -133,7 +133,7 @@
   return signInPnl;
 }
 
-#pragma mark - Sign-in / Sign-up event handling
+#pragma mark - Login event handling
 
 - (void)handleSignIn {
   [[self view] endEditing:YES];

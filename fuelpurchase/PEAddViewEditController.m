@@ -1311,12 +1311,15 @@ locally.  The error is as follows:\n"];
                                                    forContentView:contentView
                                                      leftImgIcon:syncErrorImg];
               }
+              NSLog(@"yo, I'm here 0");
               if (_receivedAuthReqdErrorOnSyncAttempt) {
+                NSLog(@"now I'm here");
                 [message appendString:@"\n\n\
 It appears that you are not longer\n\
 authenticated.  To re-authenticate, go to\n\
 Settings -> Authenticate."];
               }
+              NSLog(@"here now");
               UILabel *titleLbl = [PEUIUtils labelWithKey:title
                                                      font:[UIFont boldSystemFontOfSize:18]
                                           backgroundColor:[UIColor clearColor]

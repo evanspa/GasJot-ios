@@ -12,5 +12,6 @@ NSString * const FPAppDeleteAllDataNotification   = @"FPAppDeleteAllDataNotifica
 NSString * const FPAppLogoutNotification          = @"FPAppLogoutNotification";
 NSString * const FPAppAccountCreationNotification = @"FPAppAccountCreationNotification";
 NSString * const FPAppLoginNotification           = @"FPAppLoginNotification";
+NSString * const FPAppReauthNotification          = @"FPAppReauthNotification";
 
 

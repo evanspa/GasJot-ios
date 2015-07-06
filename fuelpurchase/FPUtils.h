@@ -30,6 +30,8 @@ typedef void (^(^ServerBusyHandlerMaker)(MBProgressHUD *))(NSDate *);
 
 typedef void (^(^SynchUnitOfWorkHandlerMaker)(MBProgressHUD *, void (^)(FPUser *)))(FPUser *, NSError *);
 
+typedef void (^(^SynchUnitOfWorkHandlerMakerZeroArg)(MBProgressHUD *, void (^)(void)))(NSError *);
+
 typedef void (^(^LocalDatabaseErrorHandlerMakerWithHUD)(MBProgressHUD *))(NSError *, int, NSString *);
 
 typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString *);
@@ -69,6 +71,8 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
 + (ServerBusyHandlerMaker)serverBusyHandlerMakerForUI;
 
 + (SynchUnitOfWorkHandlerMaker)synchUnitOfWorkHandlerMakerWithErrMsgsMaker:(ErrMsgsMaker)errMsgsMaker;
+
++ (SynchUnitOfWorkHandlerMakerZeroArg)synchUnitOfWorkZeroArgHandlerMakerWithErrMsgsMaker:(ErrMsgsMaker)errMsgsMaker;
 
 + (LocalDatabaseErrorHandlerMakerWithHUD)localDatabaseErrorHudHandlerMaker;
 

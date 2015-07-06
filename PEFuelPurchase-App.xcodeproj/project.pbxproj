@@ -46,6 +46,7 @@
 		CA7D5A2E1B3851E200433581 /* FPAccountLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA7D5A2D1B3851E200433581 /* FPAccountLoginController.m */; };
 		CA90F4241B45AB7F005FAB35 /* PEServerSyncActionSheet.m in Sources */ = {isa = PBXBuildFile; fileRef = CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */; };
 		CA920C121B21F48900A848EA /* fpapi-resource.localdev.json in Resources */ = {isa = PBXBuildFile; fileRef = 18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */; };
+		CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */; };
 		CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = CAD8AE501B2B291000276F4F /* PELMUIUtils.m */; };
 		F17D7730E485443DAEE57677 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 91349E0025D9467DBE585F0F /* libPods.a */; };
 /* End PBXBuildFile section */
@@ -136,6 +137,8 @@
 		CA7D5A2D1B3851E200433581 /* FPAccountLoginController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPAccountLoginController.m; sourceTree = "<group>"; };
 		CA90F4221B45AB7F005FAB35 /* PEServerSyncActionSheet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PEServerSyncActionSheet.h; sourceTree = "<group>"; };
 		CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PEServerSyncActionSheet.m; sourceTree = "<group>"; };
+		CAB5E94E1B4B024B00144072 /* FPReauthenticateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPReauthenticateController.h; sourceTree = "<group>"; };
+		CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPReauthenticateController.m; sourceTree = "<group>"; };
 		CAD8AE4F1B2B291000276F4F /* PELMUIUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PELMUIUtils.h; sourceTree = "<group>"; };
 		CAD8AE501B2B291000276F4F /* PELMUIUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PELMUIUtils.m; sourceTree = "<group>"; };
 		E12E20B44758C744FA39A49C /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
@@ -234,7 +237,7 @@
 			name = "Table Data Sources";
 			sourceTree = "<group>";
 		};
-		186E0B7819CD1BDD00CE4B3A /* UI Commons */ = {
+		186E0B7819CD1BDD00CE4B3A /* PE UI Commons */ = {
 			isa = PBXGroup;
 			children = (
 				CA90F4211B45AB4C005FAB35 /* Server Sync Action Sheet */,
@@ -242,7 +245,7 @@
 				18F61A821A96129E00BA631A /* Categories */,
 				186E0B7919CD1BEA00CE4B3A /* Pull-to-Refresh List View Controller */,
 			);
-			name = "UI Commons";
+			name = "PE UI Commons";
 			sourceTree = "<group>";
 		};
 		186E0B7919CD1BEA00CE4B3A /* Pull-to-Refresh List View Controller */ = {
@@ -301,6 +304,7 @@
 		18AB99FB17F6832C002A8A69 /* Custom Screens */ = {
 			isa = PBXGroup;
 			children = (
+				CAB5E94D1B4B007E00144072 /* Re-authenticate */,
 				CA7D5A2B1B384FEE00433581 /* Account Login */,
 				CA7D5A2A1B384FDE00433581 /* Account Creation */,
 				180EDA3219C7C87E00C782A6 /* Edits in Progress Screen */,
@@ -389,7 +393,7 @@
 		18D6DFB117F68005006B300D /* PEFuelPurchase-App */ = {
 			isa = PBXGroup;
 			children = (
-				186E0B7819CD1BDD00CE4B3A /* UI Commons */,
+				186E0B7819CD1BDD00CE4B3A /* PE UI Commons */,
 				189AC7521A78030D00A6CFE3 /* Model */,
 				185D38CC1815952B0007587A /* App Delegate */,
 				CA7D5A241B383F4500433581 /* Notifications */,
@@ -501,6 +505,15 @@
 				CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */,
 			);
 			name = "Server Sync Action Sheet";
+			sourceTree = "<group>";
+		};
+		CAB5E94D1B4B007E00144072 /* Re-authenticate */ = {
+			isa = PBXGroup;
+			children = (
+				CAB5E94E1B4B024B00144072 /* FPReauthenticateController.h */,
+				CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */,
+			);
+			name = "Re-authenticate";
 			sourceTree = "<group>";
 		};
 		CAD8AE4E1B2B28E200276F4F /* Local Data UI Utils */ = {
@@ -646,6 +659,7 @@
 				18CC2CFA17F680AC009DF2CE /* FPCreateAccountController.m in Sources */,
 				CA7D5A2E1B3851E200433581 /* FPAccountLoginController.m in Sources */,
 				186E0B7C19CD237B00CE4B3A /* PEListViewController.m in Sources */,
+				CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */,
 				18CC2CFF17F680BB009DF2CE /* UIColor+FuelPurchase.m in Sources */,
 				189AC7561A78034500A6CFE3 /* FPLogEnvLogComposite.m in Sources */,
 				18010C5A180E4752005F5CEB /* FPQuickActionMenuController.m in Sources */,

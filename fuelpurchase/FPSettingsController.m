@@ -17,6 +17,7 @@
 #import "FPAppNotificationNames.h"
 #import "FPCreateAccountController.h"
 #import "FPAccountLoginController.h"
+#import "FPReauthenticateController.h"
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
@@ -33,8 +34,6 @@
   UIButton *_reauthenticateBtn;
   UIButton *_createAccountBtn;
   UIButton *_deleteAllDataBtn;
-  //PESyncViewStyler _syncViewStyler;
-  //UIView *_accountSettingsBtnOverlay;
 }
 
 #pragma mark - Initializers
@@ -64,17 +63,6 @@
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Settings"];
   [self makeMainPanel];
-  
-  /* Setup Notification observing */
-  /*[PEUtils observeIfNotNilNotificationName:FPUserSyncInitiated
-                                  observer:self
-                                  selector:@selector(dataObjectSyncInitiated:)];
-  [PEUtils observeIfNotNilNotificationName:FPUserSynced
-                                  observer:self
-                                  selector:@selector(dataObjectSynced:)];
-  [PEUtils observeIfNotNilNotificationName:FPUserSyncFailed
-                                  observer:self
-                                  selector:@selector(dataObjectSyncFailed:)];*/
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -124,44 +112,6 @@
   }
 }
 
-#pragma mark - Notification Observing
-
-/*- (void)dataObjectSyncInitiated:(NSNotification *)notification {
-  NSNumber *indexOfNotifEntity =
-  [PELMNotificationUtils indexOfEntityRef:_user notification:notification];
-  if (indexOfNotifEntity) {
-    [PEUIUtils displayTempNotification:@"Sync initiated for this record."
-                         forController:self
-                             uitoolkit:_uitoolkit];
-    _user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
-    _syncViewStyler(_accountSettingsBtnOverlay, _user);
-  }
-}
-
-- (void)dataObjectSynced:(NSNotification *)notification {
-  NSNumber *indexOfNotifEntity =
-  [PELMNotificationUtils indexOfEntityRef:_user notification:notification];
-  if (indexOfNotifEntity) {
-    [PEUIUtils displayTempNotification:@"Sync complete for this record."
-                         forController:self
-                             uitoolkit:_uitoolkit];
-    _user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
-    _syncViewStyler(_accountSettingsBtnOverlay, _user);
-  }
-}
-
-- (void)dataObjectSyncFailed:(NSNotification *)notification {
-  NSNumber *indexOfNotifEntity =
-  [PELMNotificationUtils indexOfEntityRef:_user notification:notification];
-  if (indexOfNotifEntity) {
-    [PEUIUtils displayTempNotification:@"Sync failed for this record."
-                         forController:self
-                             uitoolkit:_uitoolkit];
-    _user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
-    _syncViewStyler(_accountSettingsBtnOverlay, _user);
-  }
-}*/
-
 #pragma mark - Panels
 
 - (void)makeMainPanel {
@@ -178,7 +128,7 @@
   [PEUIUtils setFrameWidthOfView:_reauthenticateBtn ofWidth:1.0 relativeTo:[self view]];
   [PEUIUtils addDisclosureIndicatorToButton:_reauthenticateBtn];
   [_reauthenticateBtn bk_addEventHandler:^(id sender) {
-    [self presentLoginScreen];
+    [self presentReauthenticateScreen];
   } forControlEvents:UIControlEventTouchUpInside];
   _logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
   [[_logoutBtn layer] setCornerRadius:0.0];
@@ -214,12 +164,6 @@
   UIAlertAction *okay = [UIAlertAction actionWithTitle:@"Yes.  Delete my data."
                                                  style:UIAlertActionStyleDestructive
                                                handler:^(UIAlertAction *action) {
-                                                 //[_coordDao cascadeDeleteLocalUser:_user
-                                                 //                            error:[FPUtils localSaveErrorHandlerMaker]()];
-                                                 //FPUser *newUser = [_coordDao newLocalUserWithError:[FPUtils localSaveErrorHandlerMaker]()];
-                                                 //[_user overwrite:newUser];
-                                                 //[_user setLocalMainIdentifier:[newUser localMainIdentifier]];
-                                                 //[_user setLocalMasterIdentifier:[newUser localMasterIdentifier]];
                                                  [_coordDao resetAsLocalUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
                                                  [[NSNotificationCenter defaultCenter] postNotificationName:FPAppDeleteAllDataNotification
                                                                                                      object:nil
@@ -238,14 +182,26 @@
   [self presentViewController:alert animated:YES completion:nil];
 }
 
+#pragma mark - Re-authenticate screen
+
+- (void)presentReauthenticateScreen {
+  UIViewController *reauthController =
+  [[FPReauthenticateController alloc] initWithStoreCoordinator:_coordDao
+                                                          user:_user
+                                                     uitoolkit:_uitoolkit
+                                                 screenToolkit:_screenToolkit];
+  [[self navigationController] pushViewController:reauthController
+                                         animated:YES];
+}
+
 #pragma mark - Present Log In screen
 
 - (void)presentLoginScreen {
   UIViewController *loginController =
   [[FPAccountLoginController alloc] initWithStoreCoordinator:_coordDao
-                                                    localUser:_user
-                                                    uitoolkit:_uitoolkit
-                                                screenToolkit:_screenToolkit];
+                                                   localUser:_user
+                                                   uitoolkit:_uitoolkit
+                                               screenToolkit:_screenToolkit];
   [[self navigationController] pushViewController:loginController
                                          animated:YES];
 }

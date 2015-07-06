@@ -2,7 +2,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 platform :ios, '8.3'
 
-pod 'PEFuelPurchase-Model', '~> 1.0.45'
+pod 'PEFuelPurchase-Model', '~> 1.0.46'
 pod 'PEFuelPurchase-Common', '~> 1.0.8'
 pod 'PEObjc-Commons', '~> 1.0.8'
 pod 'SVPullToRefresh', '~> 0.4.1'
@@ -17,4 +17,4 @@ pod 'BlocksKit', '~> 2.2.5'
 pod 'JGActionSheet', '~> 1.0.4'
 
 pod 'PEDev-Console', '~> 1.0.1', :configurations => ['Debug']
-pod 'KissXML', '~> 5.0', :configurations => ['Debug'], :inhibit_warnings => true
+pod 'KissXML', '~> 5.0', :inhibit_warnings => true

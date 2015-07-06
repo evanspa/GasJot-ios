@@ -12,3 +12,4 @@ FOUNDATION_EXPORT NSString * const FPAppDeleteAllDataNotification;
 FOUNDATION_EXPORT NSString * const FPAppLogoutNotification;
 FOUNDATION_EXPORT NSString * const FPAppAccountCreationNotification;
 FOUNDATION_EXPORT NSString * const FPAppLoginNotification;
+FOUNDATION_EXPORT NSString * const FPAppReauthNotification;
