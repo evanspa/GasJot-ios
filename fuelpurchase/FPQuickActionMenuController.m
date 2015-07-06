@@ -120,11 +120,7 @@
 
 - (void)presentLogFPInput {
   PEItemAddedBlk itemAddedBlk = ^(PEAddViewEditController *addViewEditCtrl, FPFuelPurchaseLog *fpLog) {
-    [[addViewEditCtrl navigationController] dismissViewControllerAnimated:YES completion:^{
-      [PEUIUtils displayTempNotification:@"Fuel Purchase Log Saved Locally"
-                           forController:self
-                               uitoolkit:_uitoolkit];
-    }];
+    [[addViewEditCtrl navigationController] dismissViewControllerAnimated:YES completion:nil];
   };
   UIViewController *addFpLogCtrl =
     [_screenToolkit newAddFuelPurchaseLogScreenMakerWithBlk:itemAddedBlk
@@ -142,11 +138,7 @@
 
 - (void)presentLogEnvInput {
   PEItemAddedBlk itemAddedBlk = ^(PEAddViewEditController *addViewEditCtrl, FPEnvironmentLog *envLog) {
-    [[addViewEditCtrl navigationController] dismissViewControllerAnimated:YES completion:^{
-      [PEUIUtils displayTempNotification:@"Environment Log Saved Locally"
-                           forController:self
-                               uitoolkit:_uitoolkit];
-    }];
+    [[addViewEditCtrl navigationController] dismissViewControllerAnimated:YES completion:nil];
   };
   UIViewController *addEnvLogCtrl =
     [_screenToolkit newAddEnvironmentLogScreenMakerWithBlk:itemAddedBlk

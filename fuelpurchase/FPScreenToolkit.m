@@ -965,7 +965,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       }
       NSString *mainMsgFragment = @"syncing fuel purchase log";
       if (savePreFillupEnvLogPercentComplete || savePostFillupEnvLogPercentComplete) {
-        mainMsgFragment = @"syncing fuel purchase\nand environment logs";
+        mainMsgFragment = @"syncing fuel\npurchase and environment logs";
       }
       NSString *recordTitle = @"Fuel purchase log";
       BOOL doSyncImmediate = [APP doesUserHaveValidAuthToken];

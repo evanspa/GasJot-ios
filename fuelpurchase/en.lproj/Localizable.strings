@@ -110,7 +110,7 @@
 "savenvlog.logdate-notprovided" = "Log date cannot be empty.";
 "savenvlog.odometer-notprovided" = "Odometer cannot be empty.";
 "savenvlog.outside-temp-notprovided" = "Outside temperature cannot be empty.";
-"savenvlog.odometernegative-notprovided" = "Odometer cannot be negative.";
+"savenvlog.odometer-negative" = "Odometer cannot be negative.";
 
 /***************************************************************
  * 'Save Fuel Station' error messages

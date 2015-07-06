@@ -469,8 +469,8 @@
 		CA7D5A281B384F4000433581 /* User Interface */ = {
 			isa = PBXGroup;
 			children = (
-				18CF522F19C9D9990020FC94 /* Screen Toolkit */,
 				18456CE719D39D840023A2A7 /* Panel Toolkit */,
+				18CF522F19C9D9990020FC94 /* Screen Toolkit */,
 				18AB99FB17F6832C002A8A69 /* Custom Screens */,
 			);
 			name = "User Interface";
