@@ -171,20 +171,21 @@
 #pragma mark - Various Error Handler Helpers
 
 + (ServerBusyHandlerMaker)serverBusyHandlerMakerForUI {
-  return ^(MBProgressHUD *HUD) {
+  return ^(MBProgressHUD *HUD, UIView *relativeToView) {
     return (^(NSDate *retryAfter) {
-        [HUD hide:YES];
-        [PEUIUtils
-          showAlertWithMsgs:@[[NSString stringWithFormat:@"The server is \
-busy, and asks that you try again at date: %@.", retryAfter]]
-                      title:@"Server Busy"
-                buttonTitle:@"okayMsg"];
+      [HUD hide:YES];
+      [PEUIUtils showWaitAlertWithMsgs:nil
+                                 title:@"Server Busy."
+                      alertDescription:[[NSAttributedString alloc] initWithString:@"We apologize, but the server is currently\n\
+busy.  Please retry your request shortly."]
+                           buttonTitle:@"Okay."
+                        relativeToView:relativeToView];
     });
   };
 }
 
 + (SynchUnitOfWorkHandlerMaker)synchUnitOfWorkHandlerMakerWithErrMsgsMaker:(ErrMsgsMaker)errMsgsMaker {
-  return ^(MBProgressHUD *hud, void (^successBlock)(FPUser *)) {
+  return ^(MBProgressHUD *hud, void (^successBlock)(FPUser *), UIView *relativeToView) {
     return (^(FPUser *newUser, NSError *error) {
       if (error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -201,9 +202,12 @@ busy, and asks that you try again at date: %@.", retryAfter]]
           } else {
             errMsgs = @[[error localizedDescription]];
           }
-          [PEUIUtils showAlertWithMsgs:errMsgs
-                                 title:@"Error"
-                           buttonTitle:@"Okay"];
+          [PEUIUtils showErrorAlertWithMsgs:errMsgs
+                                      title:@"Oops."
+                           alertDescription:[[NSAttributedString alloc] initWithString:@"An error has occurred.  The details are as\n\
+follows:"]
+                                buttonTitle:@"Okay."
+                             relativeToView:relativeToView];
         });
       } else {
         successBlock(newUser);
@@ -213,7 +217,7 @@ busy, and asks that you try again at date: %@.", retryAfter]]
 }
 
 + (SynchUnitOfWorkHandlerMakerZeroArg)synchUnitOfWorkZeroArgHandlerMakerWithErrMsgsMaker:(ErrMsgsMaker)errMsgsMaker {
-  return ^(MBProgressHUD *hud, void (^successBlock)(void)) {
+  return ^(MBProgressHUD *hud, void (^successBlock)(void), UIView *relativeToView) {
     return (^(NSError *error) {
       if (error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -230,9 +234,12 @@ busy, and asks that you try again at date: %@.", retryAfter]]
           } else {
             errMsgs = @[[error localizedDescription]];
           }
-          [PEUIUtils showAlertWithMsgs:errMsgs
-                                 title:@"Error"
-                           buttonTitle:@"Okay"];
+          [PEUIUtils showErrorAlertWithMsgs:errMsgs
+                                      title:@"Oops."
+                           alertDescription:[[NSAttributedString alloc] initWithString:@"An error has occurred.  The details are as\n\
+follows:"]
+                                buttonTitle:@"Okay."
+                             relativeToView:relativeToView];
         });
       } else {
         successBlock();
@@ -242,14 +249,15 @@ busy, and asks that you try again at date: %@.", retryAfter]]
 }
 
 + (LocalDatabaseErrorHandlerMakerWithHUD)localDatabaseErrorHudHandlerMaker {
-  return ^(MBProgressHUD *hud) {
+  return ^(MBProgressHUD *hud, UIView *relativeToView) {
     return (^(NSError *error, int code, NSString *msg) {
       [hud hide:YES];
-      [PEUIUtils
-       showAlertWithMsgs:@[[NSString stringWithFormat:@"There was a problem interacting with the local database.  \
-Error message: %@", [error localizedDescription]]]
-                   title:@"Local Error"
-             buttonTitle:@"okayMsg"];
+      [PEUIUtils showErrorAlertWithMsgs:@[[error localizedDescription]]
+                                  title:@"This is awkward."
+                       alertDescription:[[NSAttributedString alloc] initWithString:@"An error has occurred attempting to talk\n\
+to the local database.  The details are:"]
+                            buttonTitle:@"Okay."
+                         relativeToView:relativeToView];
     });
   };
 }

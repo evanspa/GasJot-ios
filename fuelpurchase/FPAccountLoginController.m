@@ -231,9 +231,15 @@
                                                                      });
                                                     } else {
                                                       // TODO NOT 100% success (some error(s))
+                                                      // TODO - update PEObjc-Commons/showAlertWithMsgs function such that it uses
+                                                      // new 3rd party action sheet with appropriate icons and aligned text.  For example,
+                                                      // for showAlertWithMsgs, perhaps show yellow checkmark and each message can have a
+                                                      // black-bullet icon.  Make also perhaps a "showErrorWithMsgs" that displays red checkmark
+                                                      // or what have you.
+                                                      
                                                     }
                                                   }
-                                                    error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD)];
+                                                    error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.view)];
         };
       } else {
         successBlk = nonLocalSyncSuccessBlk;
@@ -245,9 +251,9 @@
                                  password:[_siPasswordTf text]
              andLinkRemoteUserToLocalUser:_localUser
             preserveExistingLocalEntities:syncLocalEntities
-                          remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD)
-                        completionHandler:[FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk)
-                    localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD)];
+                          remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.view)
+                        completionHandler:[FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.view)
+                    localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.view)];
     };
     if (_preserveExistingLocalEntities == nil) { // first time asked
       if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {
@@ -279,7 +285,11 @@
     }
   } else {
     NSArray *errMsgs = [FPUtils computeSaveUsrErrMsgs:_formStateMaskForSignIn];
-    [PEUIUtils showAlertWithMsgs:errMsgs title:@"oopsMsg" buttonTitle:@"okayMsg"];
+    [PEUIUtils showWarningAlertWithMsgs:errMsgs
+                                  title:@"Oops"
+                       alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
+                            buttonTitle:@"Okay."
+                         relativeToView:[self view]];
   }
 }
 

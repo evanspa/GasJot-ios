@@ -100,10 +100,8 @@
 }
 
 - (void)systemPrune {
-  [_coordDao pruneAllSyncedEntitiesWithError:[FPUtils localDatabaseErrorHudHandlerMaker](nil)];
-  [PEUIUtils displayTempNotification:@"System prune done."
-                       forController:self
-                           uitoolkit:_uitoolkit];
+  // TODO incorporate a HUD into this
+  [_coordDao pruneAllSyncedEntitiesWithError:[FPUtils localDatabaseErrorHudHandlerMaker](nil, self.view)];  
 }
 
 - (void)presentVehicles {

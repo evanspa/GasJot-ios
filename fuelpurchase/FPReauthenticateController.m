@@ -128,7 +128,7 @@
     __block MBProgressHUD *HUD;
     void (^successBlk)(void) = ^{
       dispatch_async(dispatch_get_main_queue(), ^{
-        [HUD hide:YES];
+        /*[HUD hide:YES];
         NSString *msg = @"You're all set again.  Thank you.";
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Success"
                                                                        message:msg
@@ -139,7 +139,13 @@
                                                        [[self navigationController] popViewControllerAnimated:YES];
                                                      }];
         [alert addAction:okay];
-        [self presentViewController:alert animated:YES completion:nil];
+        [self presentViewController:alert animated:YES completion:nil];*/
+        
+        HUD.labelText = @"You're authenticated again.";
+        HUD.detailsLabelText = @"Proceeding to sync records...";
+        HUD.mode = MBProgressHUDModeDeterminate;
+        
+        
       });
     };
     ErrMsgsMaker errMsgsMaker = ^ NSArray * (NSInteger errCode) {
@@ -150,12 +156,17 @@
     HUD.labelText = @"Re-authenticating...";
     [_coordDao lightLoginForUser:_user
                         password:[_caPasswordTf text]
-                 remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD)
-               completionHandler:[FPUtils synchUnitOfWorkZeroArgHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk)
-           localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD)];
+                 remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.view)
+               completionHandler:[FPUtils synchUnitOfWorkZeroArgHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.view)
+           localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.view)];
   } else {
     NSArray *errMsgs = [FPUtils computeSignInErrMsgs:_formStateMaskForLightLogin];
-    [PEUIUtils showAlertWithMsgs:errMsgs title:@"oopsMsg" buttonTitle:@"okayMsg"];
+    //[PEUIUtils showAlertWithMsgs:errMsgs title:@"oopsMsg" buttonTitle:@"okayMsg"];
+    [PEUIUtils showWarningAlertWithMsgs:errMsgs
+                                  title:@"Oops"
+                       alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
+                            buttonTitle:@"Okay."
+                         relativeToView:[self view]];
   }
 }
 

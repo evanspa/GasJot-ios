@@ -356,9 +356,12 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                        [hud hide:YES];
                      } else if (error) {
                        [hud hide:YES];
-                       [PEUIUtils showAlertWithMsgs:@[@"Sorry, but there was a problem trying to compute the location from the given address entered above."]
-                                              title:@"Oops"
-                                        buttonTitle:@"Okay"];
+                       [PEUIUtils showErrorAlertWithMsgs:nil
+                                                   title:@"Oops."
+                                        alertDescription:[[NSAttributedString alloc] initWithString:@"There was a problem trying to compute the\n\
+location from the given address above."]
+                                             buttonTitle:@"Okay."
+                                          relativeToView:parentView];
                      }
                    }];
     } forControlEvents:UIControlEventTouchUpInside];

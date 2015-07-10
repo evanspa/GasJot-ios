@@ -267,12 +267,6 @@ getterForNotification:(SEL)getterForNotification {
                                    getterForNotification:nil];
 }
 
-#pragma mark - Helpers
-
-- (void)displayHeadsUpAlertWithMsgs:(NSArray *)msgs {
-  [PEUIUtils showAlertWithMsgs:msgs title:@"Heads Up!" buttonTitle:@"Okay"];
-}
-
 #pragma mark - Notification Observing
 
 - (void)dataObjectLocallyUpdated:(NSNotification *)notification {
@@ -290,8 +284,8 @@ getterForNotification:(SEL)getterForNotification {
     // associated with _entity, and so will receive them!  So, we do a reference-compare;
     // if the notification is for the entity in our context, we can safely ignore it.
     if (_entity != locallyUpdatedEntity) {
-      [self displayHeadsUpAlertWithMsgs:@[LS(@"vieweditentity.headsup.whileviewing.locallyupdated.msg1"),
-                                          LS(@"vieweditentity.headsup.whileviewing.locallyupdated.msg2")]];
+      //[self displayHeadsUpAlertWithMsgs:@[LS(@"vieweditentity.headsup.whileviewing.locallyupdated.msg1"),
+      //                                    LS(@"vieweditentity.headsup.whileviewing.locallyupdated.msg2")]];
       [_entity overwrite:(PELMMainSupport *)locallyUpdatedEntity];
       _entityToPanelBinder(_entity, _entityPanel);
     } else {
@@ -429,7 +423,7 @@ getterForNotification:(SEL)getterForNotification {
   }
 }
 
-#pragma mark - JGActionSheetDelegate
+#pragma mark - JGActionSheetDelegate and Alert-related Helpers
 
 - (void)actionSheetWillPresent:(JGActionSheet *)actionSheet {}
 
@@ -438,6 +432,24 @@ getterForNotification:(SEL)getterForNotification {
 - (void)actionSheetWillDismiss:(JGActionSheet *)actionSheet {}
 
 - (void)actionSheetDidDismiss:(JGActionSheet *)actionSheet {}
+
+- (JGActionSheetSection *)becameUnauthenticatedSection {
+  JGActionSheetSection *becameUnauthSection = nil;
+  if (_receivedAuthReqdErrorOnSyncAttempt) {
+    NSString *becameUnauthMessage = @"\
+It appears you are no longer authenticated.\n\
+To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
+    NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
+    NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
+    NSRange unauthMsgAttrsRange = NSMakeRange(72, 26); // 'Settings...Re-authenticate'
+    [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
+    becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
+                                                           title:@"Authentication Failure."
+                                                alertDescription:attrBecameUnauthMessage
+                                                  relativeToView:self.view];
+  }
+  return becameUnauthSection;
+}
 
 #pragma mark - Sync
 
@@ -508,31 +520,42 @@ getterForNotification:(SEL)getterForNotification {
         [HUD hide:YES afterDelay:0];
         NSString *title;
         NSString *okayActionTitle = @"Okay.  I'll try again later.";
-        NSMutableString *message = [NSMutableString string];
+        NSString *message;
         NSArray *subErrors = _errorsForSync[0][2];
         if ([subErrors count] > 1) {
-          [message appendString:@"There were problems syncing to the server.  The errors are as follows:\n"];
+          message = @"There were problems syncing to the server.\n\
+The errors are as follows:";
           title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
         } else {
-          [message appendString:@"There was a problem syncing to the server.  The error is as follows:\n"];
+          message = @"There was a problem syncing to the server.\n\
+The error is as follows:";
           title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
         }
-        for (NSString *subError in subErrors) {
-          [message appendFormat:@"\n%@", subError];
+        JGActionSheetSection *becameUnauthSection = [self becameUnauthenticatedSection];
+        JGActionSheetSection *contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
+                                                                              title:title
+                                                                   alertDescription:[[NSAttributedString alloc] initWithString:message]
+                                                                     relativeToView:self.view];
+        JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
+                                                                              message:nil
+                                                                         buttonTitles:@[okayActionTitle]
+                                                                          buttonStyle:JGActionSheetButtonStyleDefault];
+        JGActionSheet *alertSheet;
+        if (becameUnauthSection) {
+          alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
+        } else {
+          alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
         }
-        if (_receivedAuthReqdErrorOnSyncAttempt) {
-          [message appendString:@"\n\nIt appears that you are no longer\n"];
-          [message appendString:@"authenticated.  To re-authenticate, go to\n"];
-          [message appendString:@"Settings -> Authenticate."];
-        }
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
-                                                                       message:message
-                                                                preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *okay = [UIAlertAction actionWithTitle:okayActionTitle
-                                                       style:UIAlertActionStyleDefault
-                                                     handler:^(UIAlertAction *action) { postSyncActivities(); }];
-        [alert addAction:okay];
-        [self presentViewController:alert animated:YES completion:nil];
+        [alertSheet setDelegate:self];
+        [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
+        [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
+          switch ([indexPath row]) {
+            case 0: // okay
+              postSyncActivities();
+              [sheet dismissAnimated:YES];
+              break;
+          };}];
+        [alertSheet showInView:[self view] animated:YES];
       });
     }
   };
@@ -908,7 +931,12 @@ getterForNotification:(SEL)getterForNotification {
         });
       }
     } else {
-      [PEUIUtils showAlertWithMsgs:errMsgs title:@"Oops" buttonTitle:@"Okay"];
+      //[PEUIUtils showAlertWithMsgs:errMsgs title:@"Oops" buttonTitle:@"Okay"];
+      [PEUIUtils showWarningAlertWithMsgs:errMsgs
+                                    title:@"Oops"
+                         alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
+                              buttonTitle:@"Okay."
+                           relativeToView:[self view]];
       return NO;
     }
   }
@@ -1018,7 +1046,6 @@ getterForNotification:(SEL)getterForNotification {
       [_successMessageTitlesForSync removeAllObjects];
       _receivedAuthReqdErrorOnSyncAttempt = NO;
       void(^immediateSaveDone)(NSString *) = ^(NSString *mainMsgTitle) {
-        UIImage *syncSuccessImg = [UIImage imageNamed:@"sync-success"];
         BOOL isMultiStepAdd = ([_errorsForSync count] + [_successMessageTitlesForSync count]) > 1;
         if ([_errorsForSync count] == 0) {
           dispatch_async(dispatch_get_main_queue(), ^{
@@ -1026,53 +1053,22 @@ getterForNotification:(SEL)getterForNotification {
             if (isMultiStepAdd) {
               [HUD hide:YES afterDelay:0];
               // all successes
-              CGFloat contentViewHeight = 85.0;
-              UIView *contentView = [PEUIUtils panelWithWidthOf:0.905
-                                                 relativeToView:[self view]
-                                                    fixedHeight:0.0];
               NSString *title = [NSString stringWithFormat:@"Success %@.", mainMsgTitle];
-              UILabel *titleLbl = [PEUIUtils labelWithKey:title
-                                                     font:[UIFont boldSystemFontOfSize:18]
-                                          backgroundColor:[UIColor clearColor]
-                                                textColor:[UIColor blackColor]
-                                    horizontalTextPadding:3.0
-                                      verticalTextPadding:0.0];
-              [titleLbl setLineBreakMode:NSLineBreakByWordWrapping];
-              NSArray *successPanels = [self panelsForMessages:_successMessageTitlesForSync
-                                                forContentView:contentView
-                                                   leftImgIcon:syncSuccessImg];
-              UIView *columnOfSuccesses = [PEUIUtils panelWithColumnOfViews:successPanels
-                                                verticalPaddingBetweenViews:0.0
-                                                             viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
-              contentViewHeight += ([_successMessageTitlesForSync count] * 18);
-              // set the height of our content view
-              [PEUIUtils setFrameHeight:contentViewHeight ofView:contentView];
-              // start placing the views
-              [PEUIUtils placeView:titleLbl
-                           atTopOf:contentView
-                     withAlignment:PEUIHorizontalAlignmentTypeLeft
-                          vpadding:0.0
-                          hpadding:5.0];
-              [PEUIUtils placeView:columnOfSuccesses
-                             below:titleLbl
-                              onto:contentView
-                     withAlignment:PEUIHorizontalAlignmentTypeLeft
-                          vpadding:10.0
-                          hpadding:0.0];
-              // create the sheet sections and the sheet
-              JGActionSheetSection *msgSection = [JGActionSheetSection sectionWithTitle:nil
-                                                                                message:nil
-                                                                            contentView:contentView];
+              JGActionSheetSection *contentSection = [PEUIUtils successAlertSectionWithMsgs:_successMessageTitlesForSync
+                                                                                      title:title
+                                                                           alertDescription:[[NSAttributedString alloc] initWithString:@"Your records have been successfully\nsynced."]
+                                                                             relativeToView:[self view]];
               JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
                                                                                     message:nil
                                                                                buttonTitles:@[@"Okay."]
                                                                                 buttonStyle:JGActionSheetButtonStyleDefault];
-              JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:@[msgSection, buttonsSection]];
+              JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
               [alertSheet setDelegate:self];
               [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
               [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
                 switch ([indexPath row]) {
                   case 0: // okay
+                    notificationSenderForAdd(_newEntity);
                     _itemAddedBlk(self, _newEntity);
                     [sheet dismissAnimated:YES];
                     break;
@@ -1094,128 +1090,34 @@ getterForNotification:(SEL)getterForNotification {
           });
         } else {
           // mixed results or only errors
-          UIImage *syncErrorImg = [UIImage imageNamed:@"sync-error"];
-          UIImage *blackDotImg = [UIImage imageNamed:@"black-dot"];
           dispatch_async(dispatch_get_main_queue(), ^{
             [HUD hide:YES afterDelay:0];
+            NSDictionary *messageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0],
+                                            NSForegroundColorAttributeName : [UIColor blueColor] };
+            NSRange messageAttrsRange;
+            NSMutableAttributedString *attrMessage;
             if ([_successMessageTitlesForSync count] > 0) {
               // mixed results
-              CGFloat contentViewHeight = 170.0;
-              UIView *contentView = [PEUIUtils panelWithWidthOf:0.905
-                                                 relativeToView:[self view]
-                                                    fixedHeight:0.0];
               NSString *title = [NSString stringWithFormat:@"Mixed results %@.", mainMsgTitle];
-              NSMutableString *message = [NSMutableString string];
-              [message appendString:@"\
-Because the results are mixed, you need to\n\
-fix the errors on the individual affected\n\
-records.  The successful syncs are:"];
-              UILabel *titleLbl = [PEUIUtils labelWithKey:title
-                                                     font:[UIFont boldSystemFontOfSize:18]
-                                          backgroundColor:[UIColor clearColor]
-                                                textColor:[UIColor blackColor]
-                                    horizontalTextPadding:3.0
-                                      verticalTextPadding:0.0];
-              [titleLbl setLineBreakMode:NSLineBreakByWordWrapping];
-              
-              UILabel *messageLbl = [PEUIUtils labelWithKey:message
-                                                       font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                            backgroundColor:[UIColor clearColor]
-                                                  textColor:[UIColor blackColor]
-                                      horizontalTextPadding:3.0
-                                        verticalTextPadding:0.0];
-              [messageLbl setLineBreakMode:NSLineBreakByWordWrapping];
-              
-              NSArray *successPanels = [self panelsForMessages:_successMessageTitlesForSync
-                                                forContentView:contentView
-                                                   leftImgIcon:syncSuccessImg];
-              UIView *columnOfSuccesses = [PEUIUtils panelWithColumnOfViews:successPanels
-                                                verticalPaddingBetweenViews:0.0
-                                                             viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
-              contentViewHeight += ([_successMessageTitlesForSync count] * 17);
-
-              UILabel *failuresLbl = [PEUIUtils labelWithKey:@"The errors are:"
-                                                       font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                            backgroundColor:[UIColor clearColor]
-                                                  textColor:[UIColor blackColor]
-                                      horizontalTextPadding:3.0
-                                        verticalTextPadding:0.0];
-              
-              NSMutableArray *subErrorPanels = [NSMutableArray arrayWithCapacity:[_errorsForSync count]];
-              for (NSArray *error in _errorsForSync) {
-                NSArray *subErrors = error[2];
-                contentViewHeight += (25 + ([subErrors count] * 19.0));
-                UIView *subErrorPanel = [PEUIUtils panelWithWidthOf:0.9
-                                                     relativeToView:contentView
-                                                        fixedHeight:0]; // will set later
-                UIView *recordMsgTitle = [self errorPanelWithTitle:error[0]
-                                                    forContentView:contentView
-                                                            height:25.0
-                                                       leftImgIcon:syncErrorImg];
-                NSArray *recordSubErrorPanels = [self panelsForMessages:subErrors
-                                                         forContentView:contentView
-                                                            leftImgIcon:blackDotImg];
-                [PEUIUtils placeView:recordMsgTitle
-                             atTopOf:subErrorPanel
-                       withAlignment:PEUIHorizontalAlignmentTypeLeft
-                            vpadding:0.0
-                            hpadding:0.0];
-                UIView *columnOfViews = [PEUIUtils panelWithColumnOfViews:recordSubErrorPanels
-                                              verticalPaddingBetweenViews:0.0
-                                                           viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
-                [PEUIUtils setFrameHeight:(columnOfViews.frame.size.height + recordMsgTitle.frame.size.height) ofView:subErrorPanel];
-                [PEUIUtils placeView:columnOfViews
-                               below:recordMsgTitle
-                                onto:subErrorPanel
-                       withAlignment:PEUIHorizontalAlignmentTypeLeft
-                            vpadding:0.0
-                            hpadding:15.0];
-                [subErrorPanels addObject:subErrorPanel];
-              }
-              UIView *subErrorsPanel = [PEUIUtils panelWithColumnOfViews:subErrorPanels
-                                             verticalPaddingBetweenViews:1.0
-                                                          viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
-              // set the height of our content view
-              [PEUIUtils setFrameHeight:contentViewHeight ofView:contentView];
-              // start placing the views
-              [PEUIUtils placeView:titleLbl
-                           atTopOf:contentView
-                     withAlignment:PEUIHorizontalAlignmentTypeLeft
-                          vpadding:0.0
-                          hpadding:5.0];
-              [PEUIUtils placeView:messageLbl
-                             below:titleLbl
-                              onto:contentView
-                     withAlignment:PEUIHorizontalAlignmentTypeLeft
-                          vpadding:5.0
-                          hpadding:0.0];
-              [PEUIUtils placeView:columnOfSuccesses
-                             below:messageLbl
-                              onto:contentView
-                     withAlignment:PEUIHorizontalAlignmentTypeLeft
-                          vpadding:5.0
-                          hpadding:0.0];
-              [PEUIUtils placeView:failuresLbl
-                             below:columnOfSuccesses
-                              onto:contentView
-                     withAlignment:PEUIHorizontalAlignmentTypeLeft
-                          vpadding:8.0
-                          hpadding:0.0];
-              [PEUIUtils placeView:subErrorsPanel
-                             below:failuresLbl
-                              onto:contentView
-                     withAlignment:PEUIHorizontalAlignmentTypeLeft
-                          vpadding:5.0
-                          hpadding:0.0];
-              // create the sheet sections and the sheet
-              JGActionSheetSection *msgSection = [JGActionSheetSection sectionWithTitle:nil
-                                                                                message:nil
-                                                                            contentView:contentView];
+              NSString *message = @"\
+Some of the edits synced and some did not.\n\
+The ones that did not have been saved\n\
+locally and will need to be fixed individually.\n\
+The successful syncs are:";
+              messageAttrsRange = NSMakeRange(65, 88); // 'have...locally'
+              attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
+              [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
+              JGActionSheetSection *contentSection = [PEUIUtils mixedResultsAlertSectionWithSuccessMsgs:_successMessageTitlesForSync
+                                                                                                  title:title
+                                                                                       alertDescription:attrMessage
+                                                                                    failuresDescription:[[NSAttributedString alloc] initWithString:@"The errors are:"]
+                                                                                               failures:_errorsForSync
+                                                                                         relativeToView:self.view];
               JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
                                                                                     message:nil
                                                                                buttonTitles:@[@"Okay."]
                                                                                 buttonStyle:JGActionSheetButtonStyleDefault];
-              JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:@[msgSection, buttonsSection]];
+              JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
               [alertSheet setDelegate:self];
               [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
               [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
@@ -1229,140 +1131,61 @@ records.  The successful syncs are:"];
               [alertSheet showInView:[self view] animated:YES];
             } else {
               // only error(s)
-              NSArray *subErrorPanels;
-              CGFloat contentViewHeight;
-              UIView *contentView = [PEUIUtils panelWithWidthOf:0.905
-                                                 relativeToView:[self view]
-                                                    fixedHeight:0.0];
               NSString *title;
               NSString *fixNowActionTitle;
               NSString *fixLaterActionTitle;
               NSString *dealWithLaterActionTitle;
               NSString *cancelActionTitle;
-              NSMutableString *message = [NSMutableString string];
+              NSString *message;
+              JGActionSheetSection *contentSection;
               if (isMultiStepAdd) {
-                contentViewHeight = 140.0;
-                [message appendString:@"\
+                message = @"\
 Although there were problems syncing your\n\
 edits to the server, they have been saved\n\
-locally.  The details are as follows:\n"];
+locally.  The details are as follows:";
+                messageAttrsRange = NSMakeRange(69, 23); // 'have...locally'
+                attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
+                [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
                 fixNowActionTitle = @"I'll fix them now.";
                 fixLaterActionTitle = @"I'll fix them later.";
                 cancelActionTitle = @"Forget it.  Just cancel them.";
                 dealWithLaterActionTitle = @"I'll try syncing them later.";
                 title = [NSString stringWithFormat:@"Problems %@.", mainMsgTitle];
-                subErrorPanels = [NSMutableArray arrayWithCapacity:[_errorsForSync count]];
-                for (NSArray *error in _errorsForSync) {
-                  NSArray *subErrors = error[2];
-                  contentViewHeight += (25 + ([subErrors count] * 19.0));
-                  UIView *subErrorPanel = [PEUIUtils panelWithWidthOf:0.9
-                                                       relativeToView:contentView
-                                                          fixedHeight:0]; // will set later
-                  UIView *recordMsgTitle = [self errorPanelWithTitle:error[0]
-                                                      forContentView:contentView
-                                                              height:25.0
-                                                         leftImgIcon:syncErrorImg];
-                  NSArray *recordSubErrorPanels = [self panelsForMessages:subErrors
-                                                                    forContentView:contentView
-                                                                       leftImgIcon:blackDotImg];
-                  [PEUIUtils placeView:recordMsgTitle
-                               atTopOf:subErrorPanel
-                         withAlignment:PEUIHorizontalAlignmentTypeLeft
-                              vpadding:0.0
-                              hpadding:0.0];
-                  UIView *columnOfViews = [PEUIUtils panelWithColumnOfViews:recordSubErrorPanels
-                                                verticalPaddingBetweenViews:0.0
-                                                             viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
-                  [PEUIUtils setFrameHeight:(columnOfViews.frame.size.height + recordMsgTitle.frame.size.height) ofView:subErrorPanel];
-                  [PEUIUtils placeView:columnOfViews
-                                 below:recordMsgTitle
-                                  onto:subErrorPanel
-                         withAlignment:PEUIHorizontalAlignmentTypeLeft
-                              vpadding:0.0
-                              hpadding:15.0];
-                  [(NSMutableArray *)subErrorPanels addObject:subErrorPanel];
-                }
+                contentSection = [PEUIUtils multiErrorAlertSectionWithFailures:_errorsForSync
+                                                                         title:title
+                                                              alertDescription:attrMessage
+                                                                relativeToView:self.view];
               } else {
-                contentViewHeight = 120.0;
+                dealWithLaterActionTitle = @"I'll try syncing it later.";
+                cancelActionTitle = @"Forget it.  Just cancel this.";
                 NSArray *subErrors = _errorsForSync[0][2]; // because only single-record add, we can skip the "not saved" msg title, and just display the sub-errors
                 if ([subErrors count] > 1) {
-                  contentViewHeight += ([subErrors count] * 17);
                   title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
-                  [message appendString:@"\
+                  message = @"\
 Although there were problems syncing your\n\
 edits to the server, they have been saved\n\
-locally.  The errors are as follows:\n"];
+locally.  The errors are as follows:";
+                  messageAttrsRange = NSMakeRange(68, 23); // 'have...locally'
                   fixNowActionTitle = @"I'll fix them now.";
                   fixLaterActionTitle = @"I'll fix them later.";
-                  dealWithLaterActionTitle = @"I'll try syncing it later.";
-                  cancelActionTitle = @"Forget it.  Just cancel this.";
                 } else {
                   title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
-                  [message appendString:@"\
+                  message = @"\
 Although there was a problem syncing your\n\
 edits to the server, they have been saved\n\
-locally.  The error is as follows:\n"];
+locally.  The error is as follows:";
+                  messageAttrsRange = NSMakeRange(68, 23); // 'have...locally'
                   fixLaterActionTitle = @"I'll fix it later.";
                   fixNowActionTitle = @"I'll fix it now.";
-                  dealWithLaterActionTitle = @"I'll try syncing it later.";
-                  cancelActionTitle = @"Forget it.  Just cancel this.";
                 }
-                subErrorPanels = [self panelsForMessages:subErrors
-                                                   forContentView:contentView
-                                                     leftImgIcon:syncErrorImg];
+                attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
+                [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
+                contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
+                                                                title:title
+                                                     alertDescription:attrMessage
+                                                       relativeToView:self.view];
               }
-              NSLog(@"yo, I'm here 0");
-              if (_receivedAuthReqdErrorOnSyncAttempt) {
-                NSLog(@"now I'm here");
-                [message appendString:@"\n\n\
-It appears that you are not longer\n\
-authenticated.  To re-authenticate, go to\n\
-Settings -> Authenticate."];
-              }
-              NSLog(@"here now");
-              UILabel *titleLbl = [PEUIUtils labelWithKey:title
-                                                     font:[UIFont boldSystemFontOfSize:18]
-                                          backgroundColor:[UIColor clearColor]
-                                                textColor:[UIColor blackColor]
-                                    horizontalTextPadding:3.0
-                                      verticalTextPadding:0.0];
-              [titleLbl setLineBreakMode:NSLineBreakByWordWrapping];
-              UILabel *messageLbl = [PEUIUtils labelWithKey:message
-                                                       font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                            backgroundColor:[UIColor clearColor]
-                                                  textColor:[UIColor blackColor]
-                                      horizontalTextPadding:3.0
-                                        verticalTextPadding:0.0];
-              [PEUIUtils setFrameHeight:62.0 ofView:messageLbl];
-              [messageLbl setLineBreakMode:NSLineBreakByWordWrapping];
-              UIView *subErrorsPanel = [PEUIUtils panelWithColumnOfViews:subErrorPanels
-                                             verticalPaddingBetweenViews:1.0
-                                                          viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
-              // set the height of our content view
-              [PEUIUtils setFrameHeight:contentViewHeight ofView:contentView];
-              // start placing the views
-              [PEUIUtils placeView:titleLbl
-                           atTopOf:contentView
-                     withAlignment:PEUIHorizontalAlignmentTypeLeft
-                          vpadding:0.0
-                          hpadding:5.0];
-              [PEUIUtils placeView:messageLbl
-                             below:titleLbl
-                              onto:contentView
-                     withAlignment:PEUIHorizontalAlignmentTypeLeft
-                          vpadding:0.0
-                          hpadding:0.0];
-              [PEUIUtils placeView:subErrorsPanel
-                             below:messageLbl
-                              onto:contentView
-                     withAlignment:PEUIHorizontalAlignmentTypeLeft
-                          vpadding:0.0
-                          hpadding:0.0];
-              
-              // create the sheet sections and the sheet
-              JGActionSheetSection *msgSection = [JGActionSheetSection sectionWithTitle:nil
-                                                                                message:nil
-                                                                            contentView:contentView];
+              JGActionSheetSection *becameUnauthSection = [self becameUnauthenticatedSection];
               JGActionSheetSection *buttonsSection;
               void (^buttonsPressedBlock)(JGActionSheet *, NSIndexPath *);
               if ([PEAddViewEditController areErrorsAllUserFixable:_errorsForSync]) {
@@ -1399,6 +1222,7 @@ Settings -> Authenticate."];
                 buttonsPressedBlock = ^(JGActionSheet *sheet, NSIndexPath *indexPath) {
                   switch ([indexPath row]) {
                     case 0:  // sync/deal-with it later
+                      notificationSenderForAdd(_newEntity);
                       _itemAddedBlk(self, _newEntity);
                       break;
                     case 1:  // cancel
@@ -1408,7 +1232,12 @@ Settings -> Authenticate."];
                   [sheet dismissAnimated:YES];
                 };
               }
-              JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:@[msgSection, buttonsSection]];
+              JGActionSheet *alertSheet;
+              if (becameUnauthSection) {
+                alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
+              } else {
+                alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
+              }
               [alertSheet setDelegate:self];
               [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
               [alertSheet setButtonPressedBlock:buttonsPressedBlock];
@@ -1508,7 +1337,6 @@ Settings -> Authenticate."];
       });
     } else {
       _newEntitySaver(_entityPanel, _newEntity, nil, nil, nil, nil, nil, nil);
-      notificationSenderForAdd(_newEntity);
       [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // cancel btn (so they can't cancel it after we'ved saved and we're displaying the HUD)
       [[[self navigationItem] rightBarButtonItem] setEnabled:NO]; // done btn
       [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
@@ -1524,12 +1352,17 @@ Settings -> Authenticate."];
       HUD.mode = MBProgressHUDModeCustomView;
       [HUD hide:YES afterDelay:1.30];
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.4 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        notificationSenderForAdd(_newEntity);
         _itemAddedBlk(self, _newEntity);  // this is what causes this controller to be dismissed
       });
     }
   } else {
     // local (i.e., not from server) validation checking failed
-    [PEUIUtils showAlertWithMsgs:errMsgs title:@"Oops" buttonTitle:@"Okay"];
+    [PEUIUtils showWarningAlertWithMsgs:errMsgs
+                                  title:@"Oops"
+                       alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
+                            buttonTitle:@"Okay."
+                         relativeToView:[self view]];
   }
 }
 

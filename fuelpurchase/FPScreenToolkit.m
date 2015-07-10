@@ -54,12 +54,13 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
 
 #pragma mark - Helpers
 
-- (void(^)(void))entityBeingSyncedBlk {
+/*- (void(^)(void))entityBeingSyncedBlk {
   return ^{
     [PEUIUtils showAlertWithMsgs:@[[NSString stringWithFormat:@"Sorry, but the \
 remote-synchronizer is currently attempting to sync this record.  Try again in a few moments."]]
                            title:@"Oops."
                      buttonTitle:@"okayMsg"];
+    
   };
 }
 
@@ -79,7 +80,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                            title:@"Oops."
                      buttonTitle:@"okayMsg"];
   };
-}
+}*/
 
 #pragma mark - Generic Screens
 
@@ -134,9 +135,9 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
   return ^ UIViewController * (FPUser *user) {
     PEEntityEditPreparerBlk userEditPreparer = ^BOOL(PEAddViewEditController *ctrl, FPUser *user) {
       return [_coordDao prepareUserForEdit:user
-                         entityBeingSynced:[self entityBeingSyncedBlk]
-                             entityDeleted:[self entityDeletedBlk]
-                          entityInConflict:[self entityInConflictBlk]
+                         entityBeingSynced:nil //[self entityBeingSyncedBlk]
+                             entityDeleted:nil //[self entityDeletedBlk]
+                          entityInConflict:nil //[self entityInConflictBlk]
                                      error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEEntityEditCancelerBlk userEditCanceler = ^(PEAddViewEditController *ctrl, FPUser *user) {
@@ -393,9 +394,9 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
     PEEntityEditPreparerBlk vehicleEditPreparer = ^BOOL(PEAddViewEditController *ctrl, FPVehicle *vehicle) {
       return [_coordDao prepareVehicleForEdit:vehicle
                                       forUser:user
-                            entityBeingSynced:[self entityBeingSyncedBlk]
-                                entityDeleted:[self entityDeletedBlk]
-                             entityInConflict:[self entityInConflictBlk]
+                            entityBeingSynced:nil //[self entityBeingSyncedBlk]
+                                entityDeleted:nil //[self entityDeletedBlk]
+                             entityInConflict:nil //[self entityInConflictBlk]
                                         error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEEntityEditCancelerBlk vehicleEditCanceler = ^(PEAddViewEditController *ctrl, FPVehicle *vehicle) {
@@ -775,9 +776,9 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       FPFuelStation *fuelStation = (FPFuelStation *)entity;
       return [_coordDao prepareFuelStationForEdit:fuelStation
                                           forUser:user
-                                entityBeingSynced:[self entityBeingSyncedBlk]
-                                    entityDeleted:[self entityDeletedBlk]
-                                 entityInConflict:[self entityInConflictBlk]
+                                entityBeingSynced:nil //[self entityBeingSyncedBlk]
+                                    entityDeleted:nil //[self entityDeletedBlk]
+                                 entityInConflict:nil //[self entityInConflictBlk]
                                             error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEEntityEditCancelerBlk fuelStationEditCanceler = ^ (PEAddViewEditController *ctrl, PELMModelSupport *entity) {
@@ -965,7 +966,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       }
       NSString *mainMsgFragment = @"syncing fuel purchase log";
       if (savePreFillupEnvLogPercentComplete || savePostFillupEnvLogPercentComplete) {
-        mainMsgFragment = @"syncing fuel\npurchase and environment logs";
+        mainMsgFragment = @"syncing fuel purchase\nand environment logs";
       }
       NSString *recordTitle = @"Fuel purchase log";
       BOOL doSyncImmediate = [APP doesUserHaveValidAuthToken];
@@ -1106,9 +1107,9 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
     PEEntityEditPreparerBlk fpLogEditPreparer = ^BOOL(PEAddViewEditController *ctrl, FPFuelPurchaseLog *fpLog) {
       BOOL result = [_coordDao prepareFuelPurchaseLogForEdit:fpLog
                                                      forUser:user
-                                           entityBeingSynced:[self entityBeingSyncedBlk]
-                                               entityDeleted:[self entityDeletedBlk]
-                                            entityInConflict:[self entityInConflictBlk]
+                                           entityBeingSynced:nil //[self entityBeingSyncedBlk]
+                                               entityDeleted:nil //[self entityDeletedBlk]
+                                            entityInConflict:nil //[self entityInConflictBlk]
                                                        error:[FPUtils localSaveErrorHandlerMaker]()];
       if (result) {
         // this is needed because the 'prepare' call right above will mutate the currently-selected vehicle
@@ -1477,9 +1478,9 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
     PEEntityEditPreparerBlk envLogEditPreparer = ^BOOL(PEAddViewEditController *ctrl, FPEnvironmentLog *envLog) {
       BOOL result = [_coordDao prepareEnvironmentLogForEdit:envLog
                                                     forUser:user
-                                          entityBeingSynced:[self entityBeingSyncedBlk]
-                                              entityDeleted:[self entityDeletedBlk]
-                                           entityInConflict:[self entityInConflictBlk]
+                                          entityBeingSynced:nil //[self entityBeingSyncedBlk]
+                                              entityDeleted:nil //[self entityDeletedBlk]
+                                           entityInConflict:nil //[self entityInConflictBlk]
                                                       error:[FPUtils localSaveErrorHandlerMaker]()];
       if (result) {
         refreshVehicleTableView(ctrl, envLog);

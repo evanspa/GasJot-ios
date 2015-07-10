@@ -256,7 +256,7 @@
                                                       // TODO NOT 100% success (some error(s))
                                                     }
                                                   }
-                                                    error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD)];
+                                                    error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.view)];
         };
       } else {
         successBlk = nonLocalSyncSuccessBlk;
@@ -266,9 +266,9 @@
       HUD.labelText = @"Creating account...";
       [_coordDao establishRemoteAccountForLocalUser:_localUser
                       preserveExistingLocalEntities:syncLocalEntities
-                                    remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD)
-                                  completionHandler:[FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk)
-                              localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD)];
+                                    remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.view)
+                                  completionHandler:[FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.view)
+                              localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.view)];
     };
     if (_preserveExistingLocalEntities == nil) { // first time asked
       if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {
@@ -300,7 +300,12 @@
     }
   } else {
     NSArray *errMsgs = [FPUtils computeSaveUsrErrMsgs:_formStateMaskForAcctCreation];
-    [PEUIUtils showAlertWithMsgs:errMsgs title:@"oopsMsg" buttonTitle:@"okayMsg"];
+    //[PEUIUtils showAlertWithMsgs:errMsgs title:@"oopsMsg" buttonTitle:@"okayMsg"];
+    [PEUIUtils showWarningAlertWithMsgs:errMsgs
+                                  title:@"Oops"
+                       alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
+                            buttonTitle:@"Okay."
+                         relativeToView:[self view]];
   }
 }
 
