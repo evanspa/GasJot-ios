@@ -750,74 +750,114 @@ The error is as follows:";
           } else { // error
             dispatch_async(dispatch_get_main_queue(), ^{
               [HUD hide:YES afterDelay:0];
+              NSDictionary *messageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0],
+                                              NSForegroundColorAttributeName : [UIColor blueColor] };
+              NSRange messageAttrsRange;
+              NSMutableAttributedString *attrMessage;
               NSString *title;
               NSString *fixNowActionTitle;
               NSString *fixLaterActionTitle;
               NSString *dealWithLaterActionTitle;
               NSString *cancelActionTitle;
-              NSMutableString *message = [NSMutableString string];
+              NSString *message;
               NSArray *subErrors = _errorsForSync[0][2]; // because only single-record edit, we can skip the "not saved" msg title, and just display the sub-errors
               if ([subErrors count] > 1) {
-                [message appendString:@"Although there were problems syncing your edits to the server, they have been saved locally.  The errors are as follows:\n"];
+                message = @"\
+Although there were problems syncing your\n\
+edits to the server, they have been saved\n\
+locally.  The errors are as follows:";
                 fixNowActionTitle = @"I'll fix them now.";
                 fixLaterActionTitle = @"I'll fix them later.";
                 dealWithLaterActionTitle = @"I'll try syncing them later.";
                 cancelActionTitle = @"Forget it.  Just cancel them.";
                 title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
               } else {
-                [message appendString:@"Although there was a problem syncing your edits to the server, they have been saved locally.  The error is as follows:\n"];
+                message = @"\
+Although there was a problem syncing your\n\
+edits to the server, they have been saved\n\
+locally.  The error is as follows:";
                 fixLaterActionTitle = @"I'll fix it later.";
                 fixNowActionTitle = @"I'll fix it now.";
                 dealWithLaterActionTitle = @"I'll try syncing it later.";
                 cancelActionTitle = @"Forget it.  Just cancel it.";
                 title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
               }
-              for (NSString *subError in subErrors) {
-                [message appendFormat:@"\n%@", subError];
-              }
-              if (_receivedAuthReqdErrorOnSyncAttempt) {
-                [message appendString:@"\n\nIt appears that you are no longer\n"];
-                [message appendString:@"authenticated.  To re-authenticate, go to\n"];
-                [message appendString:@"Settings -> Authenticate."];
-              }
-              UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
-                                                                             message:message
-                                                                      preferredStyle:UIAlertControllerStyleAlert];
+              messageAttrsRange = NSMakeRange(68, 23); // 'have...locally'
+              attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
+              [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
+              JGActionSheetSection *becameUnauthSection = [self becameUnauthenticatedSection];
+              JGActionSheetSection *contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
+                                                                                    title:title
+                                                                         alertDescription:attrMessage
+                                                                           relativeToView:self.view];
+              JGActionSheetSection *buttonsSection;
+              void (^buttonsPressedBlock)(JGActionSheet *, NSIndexPath *);
+              // 'fix' buttons here
+              void (^cancelAction)(void) = ^{
+                // First, we need to save the copy-before-edit entity to get the database
+                // back to how it was before the user did the editing
+                _entitySaver(self, _entityCopyBeforeEdit);
+                
+                // now we can cancel the edit session as we normally would
+                [_entity overwrite:_entityCopyBeforeEdit];
+                _entityEditCanceler(self, _entity);
+                _entityToPanelBinder(_entity, _entityPanel);
+                _isEditCanceled = NO; // reseting this
+                postEditActivities();
+              };
               if ([PEAddViewEditController areErrorsAllUserFixable:_errorsForSync]) {
-                UIAlertAction *fixNow = [UIAlertAction actionWithTitle:fixNowActionTitle
-                                                                 style:UIAlertActionStyleDefault
-                                                               handler:^(UIAlertAction *action){
-                                                                 _entityEditPreparer(self, _entity);
-                                                                 [super setEditing:YES animated:NO];
-                                                                 [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
-                                                               }];
-                UIAlertAction *fixLater = [UIAlertAction actionWithTitle:fixLaterActionTitle
-                                                                   style:UIAlertActionStyleDefault
-                                                                 handler:^(UIAlertAction *action) { postEditActivities(); }];
-                [alert addAction:fixNow];
-                [alert addAction:fixLater];
+                buttonsSection = [JGActionSheetSection sectionWithTitle:nil
+                                                                message:nil
+                                                           buttonTitles:@[fixNowActionTitle,
+                                                                          fixLaterActionTitle,
+                                                                          cancelActionTitle]
+                                                            buttonStyle:JGActionSheetButtonStyleDefault];
+                [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:2];
+                buttonsPressedBlock = ^(JGActionSheet *sheet, NSIndexPath *indexPath) {
+                  switch ([indexPath row]) {
+                    case 0: // fix now
+                      _entityEditPreparer(self, _entity);
+                      [super setEditing:YES animated:NO];
+                      [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
+                      break;
+                    case 1: // fix later
+                      postEditActivities();
+                      break;
+                    case 2: // cancel
+                      cancelAction();
+                      break;
+                  }
+                  [sheet dismissAnimated:YES];
+                };
               } else {
-                UIAlertAction *dealWithLater = [UIAlertAction actionWithTitle:dealWithLaterActionTitle
-                                                                        style:UIAlertActionStyleDefault
-                                                                      handler:^(UIAlertAction *action) { postEditActivities(); }];
-                [alert addAction:dealWithLater];
+                buttonsSection = [JGActionSheetSection sectionWithTitle:nil
+                                                                message:nil
+                                                           buttonTitles:@[dealWithLaterActionTitle,
+                                                                          cancelActionTitle]
+                                                            buttonStyle:JGActionSheetButtonStyleDefault];
+                [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:2];
+                buttonsPressedBlock = ^(JGActionSheet *sheet, NSIndexPath *indexPath) {
+                  switch ([indexPath row]) {
+                    case 0: // deal with later
+                      postEditActivities();
+                      break;
+                    case 1: // cancel
+                      cancelAction();
+                      break;
+                  }
+                  [sheet dismissAnimated:YES];
+                };
               }
-              UIAlertAction *cancel = [UIAlertAction actionWithTitle:cancelActionTitle
-                                                               style:UIAlertActionStyleDestructive
-                                                             handler:^(UIAlertAction *action) {
-                                                               // First, we need to save the copy-before-edit entity to get the database
-                                                               // back to how it was before the user did the editing
-                                                               _entitySaver(self, _entityCopyBeforeEdit);
-
-                                                               // now we can cancel the edit session as we normally would
-                                                               [_entity overwrite:_entityCopyBeforeEdit];
-                                                               _entityEditCanceler(self, _entity);
-                                                               _entityToPanelBinder(_entity, _entityPanel);
-                                                               _isEditCanceled = NO; // reseting this
-                                                               postEditActivities();
-                                                             }];
-              [alert addAction:cancel];
-              [self presentViewController:alert animated:YES completion:nil];
+              JGActionSheet *alertSheet;
+              if (becameUnauthSection) {
+                alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
+              } else {
+                alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
+              }
+              [alertSheet setDelegate:self];
+              [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
+              [alertSheet setButtonPressedBlock:buttonsPressedBlock];
+              [alertSheet showInView:[self view] animated:YES];
             });
           }
         };
