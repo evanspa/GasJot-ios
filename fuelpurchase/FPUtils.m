@@ -179,7 +179,46 @@
                       alertDescription:[[NSAttributedString alloc] initWithString:@"We apologize, but the server is currently\n\
 busy.  Please retry your request shortly."]
                            buttonTitle:@"Okay."
+                          buttonAction:nil
                         relativeToView:relativeToView];
+    });
+  };
+}
+
++ (SynchUnitOfWorkHandlerMakerZeroArg)loginHandlerWithErrMsgsMaker:(ErrMsgsMaker)errMsgsMaker {
+  return ^(MBProgressHUD *hud, void (^successBlock)(void), UIView *relativeToView) {
+    return (^(NSError *error) {
+      if (error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+          [hud hide:YES];
+          NSString *errorDomain = [error domain];
+          NSInteger errorCode = [error code];
+          NSArray *errMsgs;
+          if ([errorDomain isEqualToString:FPConnFaultedErrorDomain]) {
+            NSString *localizedErrMsgKey =
+            [errorDomain stringByAppendingFormat:@".%ld", (long)errorCode];
+            errMsgs = @[NSLocalizedString(localizedErrMsgKey, nil)];
+          } else if ([errorDomain isEqualToString:FPUserFaultedErrorDomain]) {
+            errMsgs = errMsgsMaker(errorCode);
+          } else {
+            errMsgs = @[[error localizedDescription]];
+          }
+          NSString *message;
+          if ([errMsgs count] > 1) {
+            message = @"Messages from the server:";
+          } else {
+            message = @"Message from the server:";
+          }
+          [PEUIUtils showErrorAlertWithMsgs:errMsgs
+                                      title:@"Authentication failure."
+                           alertDescription:[[NSAttributedString alloc] initWithString:message]
+                                buttonTitle:@"Okay."
+                               buttonAction:nil
+                             relativeToView:relativeToView];
+        });
+      } else {
+        successBlock();
+      }
     });
   };
 }
@@ -207,6 +246,7 @@ busy.  Please retry your request shortly."]
                            alertDescription:[[NSAttributedString alloc] initWithString:@"An error has occurred.  The details are as\n\
 follows:"]
                                 buttonTitle:@"Okay."
+                               buttonAction:nil
                              relativeToView:relativeToView];
         });
       } else {
@@ -239,6 +279,7 @@ follows:"]
                            alertDescription:[[NSAttributedString alloc] initWithString:@"An error has occurred.  The details are as\n\
 follows:"]
                                 buttonTitle:@"Okay."
+                               buttonAction:nil
                              relativeToView:relativeToView];
         });
       } else {
@@ -257,6 +298,7 @@ follows:"]
                        alertDescription:[[NSAttributedString alloc] initWithString:@"An error has occurred attempting to talk\n\
 to the local database.  The details are:"]
                             buttonTitle:@"Okay."
+                           buttonAction:nil
                          relativeToView:relativeToView];
     });
   };

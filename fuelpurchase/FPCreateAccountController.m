@@ -32,6 +32,7 @@
 #import "NSObject+appdelegate.h"
 #import "FPAppNotificationNames.h"
 #import "FPNames.h"
+#import <JGActionSheet/JGActionSheet.h>
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
@@ -51,6 +52,7 @@
   FPScreenToolkit *_screenToolkit;
   FPUser *_localUser;
   NSNumber *_preserveExistingLocalEntities;
+  BOOL _receivedAuthReqdErrorOnSyncAttempt;
 }
 
 #pragma mark - Initializers
@@ -186,6 +188,7 @@
       return [FPUtils computeSaveUsrErrMsgs:errCode];
     };
     void (^doAccountCreation)(BOOL) = ^ (BOOL syncLocalEntities) {
+      _receivedAuthReqdErrorOnSyncAttempt = NO; // reset
       void (^successBlk)(FPUser *) = nil;
       if (syncLocalEntities) {
         successBlk = ^(FPUser *remoteUser) {
@@ -232,6 +235,7 @@
                                           authRequiredBlk:^(float progress) {
                                             syncAttemptErrors++;
                                             overallSyncProgress += progress;
+                                            _receivedAuthReqdErrorOnSyncAttempt = YES;
                                             dispatch_async(dispatch_get_main_queue(), ^{
                                               [HUD setProgress:overallSyncProgress];
                                             });
@@ -253,10 +257,53 @@
                                                         [[self navigationController] popViewControllerAnimated:YES];
                                                       });
                                                     } else {
-                                                      // TODO NOT 100% success (some error(s))
+                                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                                        [HUD hide:YES];
+                                                        NSString *title = @"Sync problems.";
+                                                        NSString *message = @"\
+There were some problems syncing all of\n\
+your local edits.  You can try syncing them\n\
+later.";
+                                                        JGActionSheetSection *becameUnauthSection = nil;
+                                                        if (_receivedAuthReqdErrorOnSyncAttempt) {
+                                                          NSString *becameUnauthMessage = @"\
+This is awkward.  While syncing your local\n\
+edits, the server is asking for you to\n\
+authenticate again.  Sorry about that.\n\
+To authenticate, tap the Re-authenticate\n\
+button.";
+                                                          NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
+                                                          NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
+                                                          NSRange unauthMsgAttrsRange = NSMakeRange(146, 15); // 'Re-authenticate'
+                                                          [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
+                                                          becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
+                                                                                                                 title:@"Authentication Failure."
+                                                                                                      alertDescription:attrBecameUnauthMessage
+                                                                                                        relativeToView:self.tabBarController.view];
+                                                        }
+                                                        JGActionSheetSection *contentSection = [PEUIUtils warningAlertSectionWithMsgs:nil
+                                                                                                                                title:title
+                                                                                                                     alertDescription:[[NSAttributedString alloc] initWithString:message]
+                                                                                                                       relativeToView:self.tabBarController.view];
+                                                        JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
+                                                                                                                              message:nil
+                                                                                                                         buttonTitles:@[@"Okay."]
+                                                                                                                          buttonStyle:JGActionSheetButtonStyleDefault];
+                                                        JGActionSheet *alertSheet;
+                                                        if (becameUnauthSection) {
+                                                          alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
+                                                        } else {
+                                                          alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
+                                                        }
+                                                        [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
+                                                          [sheet dismissAnimated:YES];
+                                                          [[self navigationController] popViewControllerAnimated:YES];
+                                                        }];
+                                                        [alertSheet showInView:self.tabBarController.view animated:YES];
+                                                      });
                                                     }
                                                   }
-                                                    error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.view)];
+                                                    error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
         };
       } else {
         successBlk = nonLocalSyncSuccessBlk;
@@ -266,31 +313,42 @@
       HUD.labelText = @"Creating account...";
       [_coordDao establishRemoteAccountForLocalUser:_localUser
                       preserveExistingLocalEntities:syncLocalEntities
-                                    remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.view)
-                                  completionHandler:[FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.view)
-                              localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.view)];
+                                    remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.tabBarController.view)
+                                  completionHandler:[FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)
+                              localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
     };
     if (_preserveExistingLocalEntities == nil) { // first time asked
       if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {
-        NSString *msg = @"It seems you've edited some records locally.  Would you like them to be synced to your remote account upon account creation, or would you like them to be deleted?";
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Locally Created Records"
-                                                                       message:msg
-                                                                preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *synced = [UIAlertAction actionWithTitle:@"Sync them to my remote account."
-                                                         style:UIAlertActionStyleDefault
-                                                       handler:^(UIAlertAction *action) {
-                                                         _preserveExistingLocalEntities = [NSNumber numberWithBool:YES];
-                                                         doAccountCreation(YES);
-                                                       }];
-        UIAlertAction *delete = [UIAlertAction actionWithTitle:@"Nah.  Just delete them."
-                                                         style:UIAlertActionStyleDestructive
-                                                       handler:^(UIAlertAction *action) {
-                                                         _preserveExistingLocalEntities = [NSNumber numberWithBool:NO];
-                                                         doAccountCreation(NO);
-                                                       }];
-        [alert addAction:synced];
-        [alert addAction:delete];
-        [self presentViewController:alert animated:YES completion:nil];
+        NSString *msg = @"\
+It seems you've edited some records locally.\n\
+Would you like them to be synced to your\n\
+remote account upon account creation, or\n\
+would you like them to be deleted?";
+        JGActionSheetSection *contentSection = [PEUIUtils questionAlertSectionWithTitle:@"Locally created records."
+                                                                       alertDescription:[[NSAttributedString alloc] initWithString:msg]
+                                                                         relativeToView:self.tabBarController.view];
+        JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
+                                                                              message:nil
+                                                                         buttonTitles:@[@"Sync them to my remote account.",
+                                                                                        @"Nah.  Just delete them."]
+                                                                          buttonStyle:JGActionSheetButtonStyleDefault];
+        [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:1];
+        JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
+        [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
+        [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
+          switch ([indexPath row]) {
+            case 0:  // sync them
+              _preserveExistingLocalEntities = [NSNumber numberWithBool:YES];
+              doAccountCreation(YES);
+              break;
+            case 1:  // delete them
+              _preserveExistingLocalEntities = [NSNumber numberWithBool:NO];
+              doAccountCreation(NO);
+              break;
+          }
+          [sheet dismissAnimated:YES];
+        }];
+        [alertSheet showInView:self.tabBarController.view animated:YES];
       } else {
         _preserveExistingLocalEntities = [NSNumber numberWithBool:NO];
         doAccountCreation(NO);
@@ -300,12 +358,12 @@
     }
   } else {
     NSArray *errMsgs = [FPUtils computeSaveUsrErrMsgs:_formStateMaskForAcctCreation];
-    //[PEUIUtils showAlertWithMsgs:errMsgs title:@"oopsMsg" buttonTitle:@"okayMsg"];
     [PEUIUtils showWarningAlertWithMsgs:errMsgs
                                   title:@"Oops"
                        alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
                             buttonTitle:@"Okay."
-                         relativeToView:[self view]];
+                           buttonAction:nil
+                         relativeToView:self.tabBarController.view];
   }
 }
 

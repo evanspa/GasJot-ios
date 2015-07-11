@@ -43,12 +43,13 @@
 
 @implementation FPReauthenticateController {
   FPCoordinatorDao *_coordDao;
-  UITextField *_caPasswordTf;
+  UITextField *_passwordTf;
   CGFloat animatedDistance;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
   NSNumber *_preserveExistingLocalEntities;
+  BOOL _receivedAuthReqdErrorOnSyncAttempt;
 }
 
 #pragma mark - Initializers
@@ -71,7 +72,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  [_caPasswordTf becomeFirstResponder];
+  [_passwordTf becomeFirstResponder];
 }
 
 - (void)viewDidLoad {
@@ -99,21 +100,20 @@
                                           andHeightOf:1.0
                                        relativeToView:[self view]];
   [PEUIUtils setFrameHeightOfView:reauthPnl ofHeight:0.5 relativeTo:[self view]];
-  TextfieldMaker tfMaker =
-    [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:reauthPnl];
-  _caPasswordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
-  [_caPasswordTf setSecureTextEntry:YES];
-  [PEUIUtils placeView:_caPasswordTf
+  TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:reauthPnl];
+  _passwordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
+  [_passwordTf setSecureTextEntry:YES];
+  [PEUIUtils placeView:_passwordTf
                atTopOf:reauthPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:0.0
               hpadding:0.0];
   RAC(self, formStateMaskForLightLogin) =
-    [RACSignal combineLatest:@[_caPasswordTf.rac_textSignal]
+    [RACSignal combineLatest:@[_passwordTf.rac_textSignal]
                       reduce:^(NSString *password) {
         NSUInteger reauthErrMask = 0;
         if ([password length] == 0) {
-          reauthErrMask = reauthErrMask | FPSaveUsrPasswordNotProvided;
+          reauthErrMask = reauthErrMask | FPSignInPasswordNotProvided | FPSignInAnyIssues;
         }
         return @(reauthErrMask);
       }];
@@ -123,29 +123,16 @@
 #pragma mark - Login event handling
 
 - (void)handleLightLogin {
+  _receivedAuthReqdErrorOnSyncAttempt = NO;
   [[self view] endEditing:YES];
   if (!([self formStateMaskForLightLogin] & FPSignInAnyIssues)) {
     __block MBProgressHUD *HUD;
     void (^successBlk)(void) = ^{
       dispatch_async(dispatch_get_main_queue(), ^{
-        /*[HUD hide:YES];
-        NSString *msg = @"You're all set again.  Thank you.";
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Success"
-                                                                       message:msg
-                                                                preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *okay = [UIAlertAction actionWithTitle:@"Okay."
-                                                       style:UIAlertActionStyleDefault
-                                                     handler:^(UIAlertAction *action) {
-                                                       [[self navigationController] popViewControllerAnimated:YES];
-                                                     }];
-        [alert addAction:okay];
-        [self presentViewController:alert animated:YES completion:nil];*/
-        
         HUD.labelText = @"You're authenticated again.";
         HUD.detailsLabelText = @"Proceeding to sync records...";
         HUD.mode = MBProgressHUDModeDeterminate;
-        
-        
+        // TODO
       });
     };
     ErrMsgsMaker errMsgsMaker = ^ NSArray * (NSInteger errCode) {
@@ -155,18 +142,18 @@
     HUD.delegate = self;
     HUD.labelText = @"Re-authenticating...";
     [_coordDao lightLoginForUser:_user
-                        password:[_caPasswordTf text]
+                        password:[_passwordTf text]
                  remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.view)
-               completionHandler:[FPUtils synchUnitOfWorkZeroArgHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.view)
+               completionHandler:[FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)
            localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.view)];
   } else {
     NSArray *errMsgs = [FPUtils computeSignInErrMsgs:_formStateMaskForLightLogin];
-    //[PEUIUtils showAlertWithMsgs:errMsgs title:@"oopsMsg" buttonTitle:@"okayMsg"];
     [PEUIUtils showWarningAlertWithMsgs:errMsgs
                                   title:@"Oops"
                        alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
                             buttonTitle:@"Okay."
-                         relativeToView:[self view]];
+                           buttonAction:nil
+                         relativeToView:self.tabBarController.view];
   }
 }
 

@@ -971,11 +971,11 @@ locally.  The error is as follows:";
         });
       }
     } else {
-      //[PEUIUtils showAlertWithMsgs:errMsgs title:@"Oops" buttonTitle:@"Okay"];
       [PEUIUtils showWarningAlertWithMsgs:errMsgs
                                     title:@"Oops"
                          alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
                               buttonTitle:@"Okay."
+                             buttonAction:nil
                            relativeToView:[self view]];
       return NO;
     }
@@ -1397,11 +1397,11 @@ locally.  The error is as follows:";
       });
     }
   } else {
-    // local (i.e., not from server) validation checking failed
     [PEUIUtils showWarningAlertWithMsgs:errMsgs
                                   title:@"Oops"
                        alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
                             buttonTitle:@"Okay."
+                           buttonAction:nil
                          relativeToView:[self view]];
   }
 }

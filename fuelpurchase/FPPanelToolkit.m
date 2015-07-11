@@ -361,6 +361,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                         alertDescription:[[NSAttributedString alloc] initWithString:@"There was a problem trying to compute the\n\
 location from the given address above."]
                                              buttonTitle:@"Okay."
+                                            buttonAction:nil
                                           relativeToView:parentView];
                      }
                    }];
