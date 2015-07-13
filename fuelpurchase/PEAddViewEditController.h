@@ -30,6 +30,8 @@ typedef void (^PESyncImmediateAuthRequiredBlk)(float, NSString *, NSString *);
 typedef void (^PESyncImmediateRetryAfterBlk)(float, NSString *, NSString *, NSDate *);
 typedef void (^PESyncImmediateDependencyUnsynced)(float, NSString *, NSString *, NSString *);
 typedef void (^PEEntitySyncCancelerBlk)(PELMMainSupport *, NSError *, NSNumber *);
+typedef BOOL (^PEIsAuthenticatedBlk)(void);
+typedef BOOL (^PEIsLoggedInBlk)(void);
 typedef void (^PEMarkAsDoneEditingBlk)(PEAddViewEditController *,
                                        id,
                                        PESyncImmediateSuccessBlk,
@@ -84,8 +86,8 @@ panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
          entitySaver:(PESaveEntityBlk)entitySaver
       newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
 doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
-syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
-      isUserLoggedIn:(BOOL)isUserLoggedIn
+     isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
+      isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
 syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
 isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForLaterSync
 prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
@@ -109,8 +111,8 @@ getterForNotification:(SEL)getterForNotification;
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
-                            syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
-                                          isUserLoggedIn:(BOOL)isUserLoggedIn
+                                         isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
+                                          isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                          isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForBackgroundSync;
 
@@ -127,8 +129,8 @@ getterForNotification:(SEL)getterForNotification;
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
-                            syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
-                                          isUserLoggedIn:(BOOL)isUserLoggedIn
+                                         isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
+                                          isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                          isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForBackgroundSync
                                    getterForNotification:(SEL)getterForNotification;
@@ -148,8 +150,8 @@ getterForNotification:(SEL)getterForNotification;
                                     entityEditCanceler:(PEEntityEditCancelerBlk)entityEditCanceler
                                            entitySaver:(PESaveEntityBlk)entitySaver
                                doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
-                          syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
-                                        isUserLoggedIn:(BOOL)isUserLoggedIn
+                                       isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
+                                        isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                         syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                        isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForLaterSync
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk

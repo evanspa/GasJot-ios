@@ -37,7 +37,6 @@
   PESaveEntityBlk _entitySaver;
   PESaveNewEntityBlk _newEntitySaver;
   PEMarkAsDoneEditingBlk _doneEditingEntityMarker;
-  BOOL _syncImmediateWhenDoneEditing;
   PEPrepareUIForUserInteractionBlk _prepareUIForUserInteractionBlk;
   PEViewDidAppearBlk _viewDidAppearBlk;
   PEEntityValidatorBlk _entityValidator;
@@ -51,10 +50,11 @@
   NSMutableArray *_errorsForSync;
   NSMutableArray *_successMessageTitlesForSync;
   BOOL _receivedAuthReqdErrorOnSyncAttempt;
-  BOOL _isUserLoggedIn;
+  PEIsLoggedInBlk _isUserLoggedIn;
   PEListViewController *_listViewController;
   UIBarButtonItem *_syncBarButtonItem;
   PESyncerBlk _syncer;
+  PEIsAuthenticatedBlk _isAuthenticatedBlk;
 }
 
 #pragma mark - Initializers
@@ -78,8 +78,8 @@ panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
          entitySaver:(PESaveEntityBlk)entitySaver
       newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
 doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
-syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
-      isUserLoggedIn:(BOOL)isUserLoggedIn
+     isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
+      isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
 syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
 isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForLaterSync // rename to 'isEntityAppropriateForLaterSync'
 prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
@@ -112,9 +112,9 @@ getterForNotification:(SEL)getterForNotification {
     _entitySaver = entitySaver;
     _newEntitySaver = newEntitySaver;
     _doneEditingEntityMarker = doneEditingEntityMarker;
-    _syncImmediateWhenDoneEditing = syncImmediateWhenDoneEditing;
     _isUserLoggedIn = isUserLoggedIn;
     _syncImmediateMBProgressHUDMode = syncImmediateMBProgressHUDMode;
+    _isAuthenticatedBlk = isAuthenticated;
     _isEntityAppropriateForBackgroundSync = isEntityAppropriateForLaterSync;
     _prepareUIForUserInteractionBlk = prepareUIForUserInteractionBlk;
     _viewDidAppearBlk = viewDidAppearBlk;
@@ -142,8 +142,8 @@ getterForNotification:(SEL)getterForNotification {
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
-                            syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
-                                          isUserLoggedIn:(BOOL)isUserLoggedIn
+                                         isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
+                                          isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                     isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForBackgroundSync {
   return [PEAddViewEditController addEntityCtrlrWithUitoolkit:uitoolkit
@@ -159,7 +159,7 @@ getterForNotification:(SEL)getterForNotification {
                                prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                                              viewDidAppearBlk:viewDidAppearBlk
                                               entityValidator:entityValidator
-                                 syncImmediateWhenDoneEditing:syncImmediateWhenDoneEditing
+                                              isAuthenticated:isAuthenticated
                                                isUserLoggedIn:isUserLoggedIn
                                syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
                               isEntityAppropriateForLaterSync:isEntityAppropriateForBackgroundSync
@@ -179,8 +179,8 @@ getterForNotification:(SEL)getterForNotification {
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
-                            syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
-                                          isUserLoggedIn:(BOOL)isUserLoggedIn
+                                         isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
+                                          isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                     isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForBackgroundSync
                                    getterForNotification:(SEL)getterForNotification {
@@ -203,7 +203,7 @@ getterForNotification:(SEL)getterForNotification {
                                              entitySaver:nil
                                           newEntitySaver:newEntitySaver
                                  doneEditingEntityMarker:nil
-                            syncImmediateWhenDoneEditing:syncImmediateWhenDoneEditing
+                                         isAuthenticated:isAuthenticated
                                           isUserLoggedIn:isUserLoggedIn
                           syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
                          isEntityAppropriateForLaterSync:isEntityAppropriateForBackgroundSync
@@ -229,8 +229,8 @@ getterForNotification:(SEL)getterForNotification {
                                     entityEditCanceler:(PEEntityEditCancelerBlk)entityEditCanceler
                                            entitySaver:(PESaveEntityBlk)entitySaver
                                doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
-                          syncImmediateWhenDoneEditing:(BOOL)syncImmediateWhenDoneEditing
-                                        isUserLoggedIn:(BOOL)isUserLoggedIn
+                                       isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
+                                        isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                         syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                        isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForLaterSync
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
@@ -256,7 +256,7 @@ getterForNotification:(SEL)getterForNotification {
                                              entitySaver:entitySaver
                                           newEntitySaver:nil
                                  doneEditingEntityMarker:doneEditingEntityMarker
-                            syncImmediateWhenDoneEditing:syncImmediateWhenDoneEditing
+                                         isAuthenticated:isAuthenticated
                                           isUserLoggedIn:isUserLoggedIn
                           syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
                          isEntityAppropriateForLaterSync:isEntityAppropriateForLaterSync
@@ -295,7 +295,7 @@ getterForNotification:(SEL)getterForNotification {
 }
 
 - (void)dataObjectSyncInitiated:(NSNotification *)notification {
-  if (!_syncImmediateWhenDoneEditing) {
+  if (!_isAuthenticatedBlk()) {
     NSNumber *indexOfNotifEntity =
       [PELMNotificationUtils indexOfEntityRef:_entity notification:notification];
     if (indexOfNotifEntity) {
@@ -307,7 +307,7 @@ getterForNotification:(SEL)getterForNotification {
 }
 
 - (void)dataObjectSynced:(NSNotification *)notification {
-  if (!_syncImmediateWhenDoneEditing) {
+  if (!_isAuthenticatedBlk()) {
     NSNumber *indexOfNotifEntity =
       [PELMNotificationUtils indexOfEntityRef:_entity notification:notification];
     if (indexOfNotifEntity) {
@@ -319,7 +319,7 @@ getterForNotification:(SEL)getterForNotification {
 }
 
 - (void)dataObjectSyncFailed:(NSNotification *)notification {
-  if (!_syncImmediateWhenDoneEditing) {
+  if (!_isAuthenticatedBlk()) {
     NSNumber *indexOfNotifEntity =
       [PELMNotificationUtils indexOfEntityRef:_entity notification:notification];
     if (indexOfNotifEntity) {
@@ -459,7 +459,7 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
   if (_entity) {
     syncTitle = @"";
     if (_syncer &&
-        _syncImmediateWhenDoneEditing &&
+        _isAuthenticatedBlk() &&
         [_entity localMainIdentifier] &&
         ![_entity synced] &&
         ![_entity editInProgress] &&
@@ -719,7 +719,7 @@ The error is as follows:";
     if (isValidEntity) {
       _panelToEntityBinder(_entityPanel, _entity);
       _entitySaver(self, _entity);
-      if (_syncImmediateWhenDoneEditing) {
+      if (_isAuthenticatedBlk()) {
         MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         [self.navigationItem setHidesBackButton:YES animated:YES];
         [[[self navigationItem] leftBarButtonItem] setEnabled:NO];
@@ -835,7 +835,7 @@ locally.  The error is as follows:";
                                                            buttonTitles:@[dealWithLaterActionTitle,
                                                                           cancelActionTitle]
                                                             buttonStyle:JGActionSheetButtonStyleDefault];
-                [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:2];
+                [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:1];
                 buttonsPressedBlock = ^(JGActionSheet *sheet, NSIndexPath *indexPath) {
                   switch ([indexPath row]) {
                     case 0: // deal with later
@@ -958,7 +958,7 @@ locally.  The error is as follows:";
         MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         HUD.delegate = self;
         [HUD setLabelText:[NSString stringWithFormat:@"%@ Saved.", _entityTitle]];
-        if (_isUserLoggedIn) {
+        if (_isUserLoggedIn()) {
           [HUD setDetailsLabelText:@"(not synced with server)"];
         }
         UIImage *image = [UIImage imageNamed:@"hud-complete"];
@@ -1067,7 +1067,7 @@ locally.  The error is as follows:";
         [_listViewController handleAddedEntity:newEntityForNotification];
       }
     };
-    if (_syncImmediateWhenDoneEditing) {
+    if (_isAuthenticatedBlk()) {
       void (^reenableScreen)(void) = ^{
         [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
         [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
@@ -1383,7 +1383,7 @@ locally.  The error is as follows:";
       MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
       HUD.delegate = self;
       [HUD setLabelText:[NSString stringWithFormat:@"%@ Saved.", _entityTitle]];
-      if (_isUserLoggedIn) {
+      if (_isUserLoggedIn()) {
         [HUD setDetailsLabelText:@"(not synced with server)"];
       }
       UIImage *image = [UIImage imageNamed:@"hud-complete"];

@@ -186,8 +186,8 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                      entityEditCanceler:userEditCanceler
                             entitySaver:userSaver
                 doneEditingEntityMarker:doneEditingUserMarker
-           syncImmediateWhenDoneEditing:[APP doesUserHaveValidAuthToken]
-                         isUserLoggedIn:[APP isUserLoggedIn]
+                        isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                         isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
          syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
         isEntityAppropriateForLaterSync:NO
          prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
@@ -379,8 +379,8 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                         viewDidAppearBlk:nil
                          entityValidator:[self newVehicleValidator]
-            syncImmediateWhenDoneEditing:[APP doesUserHaveValidAuthToken]
-                          isUserLoggedIn:[APP isUserLoggedIn]
+                         isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                          isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
           syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
     isEntityAppropriateForLaterSync:YES];
   };
@@ -471,8 +471,8 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                     entityEditCanceler:vehicleEditCanceler
                            entitySaver:vehicleSaver
                doneEditingEntityMarker:doneEditingVehicleMarker
-          syncImmediateWhenDoneEditing:[APP doesUserHaveValidAuthToken]
-                        isUserLoggedIn:[APP isUserLoggedIn]
+                       isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                        isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
         syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
        isEntityAppropriateForLaterSync:YES
         prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
@@ -760,8 +760,8 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                         viewDidAppearBlk:nil
                          entityValidator:[self newFuelStationValidator]
-            syncImmediateWhenDoneEditing:[APP doesUserHaveValidAuthToken]
-                          isUserLoggedIn:[APP isUserLoggedIn]
+                         isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                          isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
           syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
          isEntityAppropriateForLaterSync:YES];
   };
@@ -855,8 +855,8 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                     entityEditCanceler:fuelStationEditCanceler
                            entitySaver:fuelStationSaver
                doneEditingEntityMarker:doneEditingFuelStationMarker
-          syncImmediateWhenDoneEditing:[APP doesUserHaveValidAuthToken]
-                        isUserLoggedIn:[APP isUserLoggedIn]
+                       isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                        isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
         syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
        isEntityAppropriateForLaterSync:YES
         prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
@@ -1078,8 +1078,8 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
           prepareUIForUserInteractionBlk:nil
                         viewDidAppearBlk:viewDidAppearBlk
                          entityValidator:[self newFpEnvLogCompositeValidator]
-            syncImmediateWhenDoneEditing:[APP doesUserHaveValidAuthToken]
-                          isUserLoggedIn:[APP isUserLoggedIn]
+                         isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                          isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
           syncImmediateMBProgressHUDMode:MBProgressHUDModeDeterminate
          isEntityAppropriateForLaterSync:YES
                    getterForNotification:@selector(fpLog)];
@@ -1205,8 +1205,8 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                     entityEditCanceler:fpLogEditCanceler
                            entitySaver:fpLogSaver
                doneEditingEntityMarker:doneEditingFuelPurchaseLogMarker
-          syncImmediateWhenDoneEditing:[APP doesUserHaveValidAuthToken]
-                        isUserLoggedIn:[APP isUserLoggedIn]
+                       isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                        isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
         syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
        isEntityAppropriateForLaterSync:YES
         prepareUIForUserInteractionBlk:nil
@@ -1453,8 +1453,8 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
            prepareUIForUserInteractionBlk:nil
                          viewDidAppearBlk:viewDidAppearBlk
                           entityValidator:[self newEnvironmentLogValidator]
-             syncImmediateWhenDoneEditing:[APP doesUserHaveValidAuthToken]
-                           isUserLoggedIn:[APP isUserLoggedIn]
+                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
            syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
           isEntityAppropriateForLaterSync:YES];
   };
@@ -1565,8 +1565,8 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                            entityEditCanceler:envLogEditCanceler
                                                   entitySaver:envLogSaver
                                       doneEditingEntityMarker:doneEditingEnvironmentLogMarker
-                                 syncImmediateWhenDoneEditing:[APP doesUserHaveValidAuthToken]
-                                               isUserLoggedIn:[APP isUserLoggedIn]
+                                              isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                               isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
                                syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
                               isEntityAppropriateForLaterSync:YES
                                prepareUIForUserInteractionBlk:nil

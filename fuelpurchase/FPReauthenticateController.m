@@ -48,8 +48,6 @@
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
-  NSNumber *_preserveExistingLocalEntities;
-  BOOL _receivedAuthReqdErrorOnSyncAttempt;
 }
 
 #pragma mark - Initializers
@@ -123,7 +121,6 @@
 #pragma mark - Login event handling
 
 - (void)handleLightLogin {
-  _receivedAuthReqdErrorOnSyncAttempt = NO;
   [[self view] endEditing:YES];
   if (!([self formStateMaskForLightLogin] & FPSignInAnyIssues)) {
     __block MBProgressHUD *HUD;
@@ -147,8 +144,7 @@
     ErrMsgsMaker errMsgsMaker = ^ NSArray * (NSInteger errCode) {
       return [FPUtils computeSignInErrMsgs:errCode];
     };
-    void (^doLogin)(BOOL) = ^ (BOOL syncLocalEntities) {
-      _receivedAuthReqdErrorOnSyncAttempt = NO;
+    void (^doLightLogin)(BOOL) = ^ (BOOL syncLocalEntities) {
       void (^successBlk)(void) = nil;
       if (syncLocalEntities) {
         successBlk = ^{
@@ -156,11 +152,11 @@
                                                               object:nil
                                                             userInfo:nil];
           dispatch_async(dispatch_get_main_queue(), ^{
-            HUD.labelText = @"You're authenticated again.";
-            HUD.detailsLabelText = @"Proceeding to sync records...";
+            HUD.labelText = @"Proceeding to sync records...";
             HUD.mode = MBProgressHUDModeDeterminate;
           });
           __block NSInteger numEntitiesSynced = 0;
+          __block BOOL receivedUnauthedError = NO;
           __block NSInteger syncAttemptErrors = 0;
           __block float overallSyncProgress = 0.0;
           [_coordDao flushAllUnsyncedEditsToRemoteForUser:_user
@@ -193,39 +189,35 @@
                                              });
                                            }
                                           authRequiredBlk:^(float progress) {
-                                            syncAttemptErrors++;
                                             overallSyncProgress += progress;
-                                            _receivedAuthReqdErrorOnSyncAttempt = YES;
+                                            receivedUnauthedError = YES;
                                             dispatch_async(dispatch_get_main_queue(), ^{
                                               [HUD setProgress:overallSyncProgress];
                                             });
                                           }
                                                   allDone:^{
-                                                    if (syncAttemptErrors == 0) {
+                                                    if (syncAttemptErrors == 0 && !receivedUnauthedError) {
                                                       // 100% sync success
                                                       dispatch_async(dispatch_get_main_queue(), ^{
-                                                        UIImage *image = [UIImage imageNamed:@"hud-complete"];
-                                                        UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
-                                                        [HUD setCustomView:imageView];
-                                                        HUD.mode = MBProgressHUDModeCustomView;
-                                                        HUD.labelText = @"Sync complete!";
-                                                        HUD.detailsLabelText = @"";
-                                                        [HUD hide:YES afterDelay:1.30];
+                                                        [HUD hide:YES];
+                                                        [PEUIUtils showSuccessAlertWithMsgs:nil
+                                                                                      title:@"Authentication Success."
+                                                                           alertDescription:[[NSAttributedString alloc] initWithString:@"You have become authenticated again and\nyour records have been synced."]
+                                                                                buttonTitle:@"Okay."
+                                                                               buttonAction:^{ [[self navigationController] popViewControllerAnimated:YES]; }
+                                                                             relativeToView:self.tabBarController.view];
                                                       });
-                                                      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.3 * NSEC_PER_SEC),
-                                                                     dispatch_get_main_queue(), ^{
-                                                                       [[self navigationController] popViewControllerAnimated:YES];
-                                                                     });
                                                     } else {
                                                       dispatch_async(dispatch_get_main_queue(), ^{
                                                         [HUD hide:YES];
                                                         NSString *title = @"Sync problems.";
                                                         NSString *message = @"\
-There were some problems syncing all of\n\
-your local edits.  You can try syncing them\n\
-later.";
+Although you became authenticated, there\n\
+were some problems syncing all your local\n\
+edits.  You can try syncing them later.";
+                                                        NSMutableArray *sections = [NSMutableArray array];
                                                         JGActionSheetSection *becameUnauthSection = nil;
-                                                        if (_receivedAuthReqdErrorOnSyncAttempt) {
+                                                        if (receivedUnauthedError) {
                                                           NSString *becameUnauthMessage = @"\
 This is awkward.  While syncing your local\n\
 edits, the server is asking for you to\n\
@@ -241,20 +233,32 @@ button.";
                                                                                                       alertDescription:attrBecameUnauthMessage
                                                                                                         relativeToView:self.tabBarController.view];
                                                         }
-                                                        JGActionSheetSection *contentSection = [PEUIUtils warningAlertSectionWithMsgs:nil
-                                                                                                                                title:title
-                                                                                                                     alertDescription:[[NSAttributedString alloc] initWithString:message]
+                                                        JGActionSheetSection *successSection = [PEUIUtils successAlertSectionWithMsgs:nil
+                                                                                                                                title:@"Authentication Success."
+                                                                                                                     alertDescription:[[NSAttributedString alloc] initWithString:@"You have become authenticated again."]
                                                                                                                        relativeToView:self.tabBarController.view];
+                                                        JGActionSheetSection *warningSection = nil;
+                                                        if (syncAttemptErrors > 0) {
+                                                          warningSection = [PEUIUtils warningAlertSectionWithMsgs:nil
+                                                                                                            title:title
+                                                                                                 alertDescription:[[NSAttributedString alloc] initWithString:message]
+                                                                                                   relativeToView:self.tabBarController.view];
+                                                        }
                                                         JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
                                                                                                                               message:nil
                                                                                                                          buttonTitles:@[@"Okay."]
                                                                                                                           buttonStyle:JGActionSheetButtonStyleDefault];
-                                                        JGActionSheet *alertSheet;
-                                                        if (becameUnauthSection) {
-                                                          alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
-                                                        } else {
-                                                          alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
+                                                        if (!receivedUnauthedError) {
+                                                          [sections addObject:successSection];
                                                         }
+                                                        if (warningSection) {
+                                                          [sections addObject:warningSection];
+                                                        }
+                                                        if (becameUnauthSection) {
+                                                          [sections addObject:becameUnauthSection];
+                                                        }
+                                                        [sections addObject:buttonsSection];
+                                                        JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:sections];
                                                         [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
                                                           [sheet dismissAnimated:YES];
                                                           [[self navigationController] popViewControllerAnimated:YES];
@@ -277,45 +281,7 @@ button.";
                  completionHandler:[FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)
              localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
     };
-    if (_preserveExistingLocalEntities == nil) { // first time asked
-      if ([_coordDao doesUserHaveAnyUnsyncedEntities:_user]) {
-        NSString *msg = @"\
-It seems you've edited some records locally.\n\
-Would you like them to be synced to your\n\
-remote account upon logging in, or\n\
-would you like them to be deleted?";
-        JGActionSheetSection *contentSection = [PEUIUtils questionAlertSectionWithTitle:@"Locally created records."
-                                                                       alertDescription:[[NSAttributedString alloc] initWithString:msg]
-                                                                         relativeToView:self.tabBarController.view];
-        JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
-                                                                              message:nil
-                                                                         buttonTitles:@[@"Sync them to my remote account.",
-                                                                                        @"Nah.  Just delete them."]
-                                                                          buttonStyle:JGActionSheetButtonStyleDefault];
-        [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:1];
-        JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
-        [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
-        [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
-          switch ([indexPath row]) {
-            case 0:  // sync them
-              _preserveExistingLocalEntities = [NSNumber numberWithBool:YES];
-              doLogin(YES);
-              break;
-            case 1:  // delete them
-              _preserveExistingLocalEntities = [NSNumber numberWithBool:NO];
-              doLogin(NO);
-              break;
-          }
-          [sheet dismissAnimated:YES];
-        }];
-        [alertSheet showInView:self.tabBarController.view animated:YES];              
-      } else {
-        _preserveExistingLocalEntities = [NSNumber numberWithBool:NO];
-        doLogin(NO);
-      }
-    } else {
-      doLogin([_preserveExistingLocalEntities boolValue]);
-    }
+    doLightLogin([_coordDao doesUserHaveAnyUnsyncedEntities:_user]);
   } else {
     NSArray *errMsgs = [FPUtils computeSaveUsrErrMsgs:_formStateMaskForLightLogin];
     [PEUIUtils showWarningAlertWithMsgs:errMsgs
