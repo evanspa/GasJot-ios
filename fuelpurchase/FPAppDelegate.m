@@ -212,6 +212,11 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMaker](user);
     [[self window] setRootViewController:_tabBarController];
   }
+  if ([self isUserLoggedIn] && ![self doesUserHaveValidAuthToken]) {
+    UIViewController *settingsCtrl = _tabBarController.viewControllers[1];
+    settingsCtrl.tabBarItem.image = [UIImage imageNamed:@"tab-settings-unauth"];
+    settingsCtrl.tabBarItem.selectedImage = [UIImage imageNamed:@"tab-settings-unauth"];
+  }
   [self.window setBackgroundColor:[UIColor whiteColor]];
   [self.window makeKeyAndVisible];
   return YES;
@@ -339,6 +344,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 keychain under key: [%@].",
              authToken, userGlobalIdentifier);
   [_keychainStore setString:authToken forKey:userGlobalIdentifier];
+  UIViewController *settingsCtrl = _tabBarController.viewControllers[1];
+  settingsCtrl.tabBarItem.image = [UIImage imageNamed:@"tab-settings"];
+  settingsCtrl.tabBarItem.selectedImage = [UIImage imageNamed:@"tab-settings"];
+
   //[_keychainStore removeItemForKey:FPAuthenticationRequiredAtKey];
   // FYI, the reason we don't set the authToken on our _coordDao object is because
   // it is doing it itself; i.e., because the auth token is received THROUGH the
@@ -349,8 +358,12 @@ keychain under key: [%@].",
   DDLogDebug(@"Notified that 'auth required' from some remote operation.  Therefore \
 I'm going to insert this knowledge into the keychian so the app knows it's currently \
 in an unauthenticated state.");
-  //[_keychainStore setString:[[NSDate date] description] forKey:FPAuthenticationRequiredAtKey];
   [_keychainStore removeAllItems];
+  if ([self isUserLoggedIn]) {
+    UIViewController *settingsCtrl = _tabBarController.viewControllers[1];
+    settingsCtrl.tabBarItem.image = [UIImage imageNamed:@"tab-settings-unauth"];
+    settingsCtrl.tabBarItem.selectedImage = [UIImage imageNamed:@"tab-settings-unauth"];
+  }
 }
 
 #pragma mark - Security and User-related

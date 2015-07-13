@@ -214,7 +214,7 @@
                                                         NSString *message = @"\
 Although you became authenticated, there\n\
 were some problems syncing all your local\n\
-edits.  You can try syncing them later.";
+edits.";
                                                         NSMutableArray *sections = [NSMutableArray array];
                                                         JGActionSheetSection *becameUnauthSection = nil;
                                                         if (receivedUnauthedError) {
