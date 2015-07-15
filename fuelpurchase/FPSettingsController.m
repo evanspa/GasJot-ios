@@ -14,6 +14,7 @@
 #import "FPUtils.h"
 #import <PEFuelPurchase-Model/PELMNotificationUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
+#import <PEObjc-Commons/UIImage+PEAdditions.h>
 #import "FPAppNotificationNames.h"
 #import "FPCreateAccountController.h"
 #import "FPAccountLoginController.h"
@@ -28,12 +29,9 @@
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
-  UIButton *_accountSettingsBtn;
-  UIButton *_logoutBtn;
-  UIButton *_loginBtn;
-  UIButton *_reauthenticateBtn;
-  UIButton *_createAccountBtn;
-  UIButton *_deleteAllDataBtn;
+  UIView *_doesHaveAuthTokenPanel;
+  UIView *_doesNotHaveAuthTokenPanel;
+  UIView *_notLoggedInPanel;
 }
 
 #pragma mark - Initializers
@@ -62,124 +60,262 @@
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Settings"];
-  [self makeMainPanel];
+  [self makeNotLoggedInPanel];
+  [self makeDoesHaveAuthTokenPanel];
+  [self makeDoesNotHaveAuthTokenPanel];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  [_accountSettingsBtn removeFromSuperview];
-  [_reauthenticateBtn removeFromSuperview];
-  [_logoutBtn removeFromSuperview];
-  [_loginBtn removeFromSuperview];
-  [_createAccountBtn removeFromSuperview];
-  [_deleteAllDataBtn removeFromSuperview];
+  [_notLoggedInPanel removeFromSuperview];
+  [_doesHaveAuthTokenPanel removeFromSuperview];
+  [_doesNotHaveAuthTokenPanel removeFromSuperview];
   if ([APP isUserLoggedIn]) {
     if ([APP doesUserHaveValidAuthToken]) {
-      [PEUIUtils placeView:_accountSettingsBtn
+      [PEUIUtils placeView:_doesHaveAuthTokenPanel
                    atTopOf:[self view]
              withAlignment:PEUIHorizontalAlignmentTypeLeft
-                  vpadding:100
-                  hpadding:0];
+                  vpadding:0.0
+                  hpadding:0.0];
     } else {
-      [PEUIUtils placeView:_reauthenticateBtn
+      [PEUIUtils placeView:_doesNotHaveAuthTokenPanel
                    atTopOf:[self view]
              withAlignment:PEUIHorizontalAlignmentTypeLeft
-                  vpadding:100
-                  hpadding:0];
+                  vpadding:0.0
+                  hpadding:0.0];
     }
-    [PEUIUtils placeView:_logoutBtn
-              atBottomOf:[self view]
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:100.0
-                hpadding:0.0];
   } else {
-    [PEUIUtils placeView:_loginBtn
+    [PEUIUtils placeView:_notLoggedInPanel
                  atTopOf:[self view]
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:100
-                hpadding:0];
-    [PEUIUtils placeView:_createAccountBtn
-                   below:_loginBtn
-                    onto:[self view]
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:10.0
-                hpadding:0.0];
-    [PEUIUtils placeView:_deleteAllDataBtn
-              atBottomOf:[self view]
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:100.0
+                vpadding:0.0
                 hpadding:0.0];
   }
 }
 
-#pragma mark - Panels
+#pragma mark - Helpers
 
-- (void)makeMainPanel {
+- (UIView *)logoutPaddedMessage {
+  UILabel *logoutMsgLabel = [PEUIUtils labelWithKey:@"\
+Logging out will disconnect this device from\n\
+your remote account.  This will remove your\n\
+fuel purchase data from this device only."
+                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                    backgroundColor:[UIColor clearColor]
+                                          textColor:[UIColor darkGrayColor]
+                                verticalTextPadding:3.0];
+  return [PEUIUtils leftPadView:logoutMsgLabel padding:8.0];
+}
+
+- (UIView *)messagePanelWithMessage:(NSString *)message iconImage:(UIImage *)iconImage {
+  UIImageView *iconImageView = [[UIImageView alloc] initWithImage:iconImage];
+  UILabel *messageLabel = [PEUIUtils labelWithKey:message
+                                             font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                  backgroundColor:[UIColor clearColor]
+                                        textColor:[UIColor darkGrayColor]
+                              verticalTextPadding:3.0];
+  UIView *messageLabelWithPad = [PEUIUtils leftPadView:messageLabel padding:8.0];
+  UIView *messagePanel = [PEUIUtils panelWithWidthOf:1.0
+                                      relativeToView:_doesHaveAuthTokenPanel
+                                         fixedHeight:messageLabelWithPad.frame.size.height];
+  [PEUIUtils placeView:iconImageView
+            inMiddleOf:messagePanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              hpadding:10.0];
+  [PEUIUtils placeView:messageLabelWithPad
+          toTheRightOf:iconImageView
+                  onto:messagePanel
+         withAlignment:PEUIVerticalAlignmentTypeMiddle
+              hpadding:3.0];
+  return messagePanel;
+}
+
+#pragma mark - Panel Makers
+
+- (void)makeDoesHaveAuthTokenPanel {
+  NSString *message = @"\
+You are currently logged in.  From here\n\
+you can view and edit your account\n\
+information and settings.";
+  UIView *messagePanel = [self messagePanelWithMessage:message iconImage:[UIImage syncable]];
   ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
-  _accountSettingsBtn = [_uitoolkit systemButtonMaker](@"Account Settings", nil, nil);
-  [[_accountSettingsBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:_accountSettingsBtn ofWidth:1.0 relativeTo:[self view]];
-  [PEUIUtils addDisclosureIndicatorToButton:_accountSettingsBtn];
-  [_accountSettingsBtn bk_addEventHandler:^(id sender) {
+  _doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
+  UIButton *accountSettingsBtn = [_uitoolkit systemButtonMaker](@"Account Settings", nil, nil);
+  [[accountSettingsBtn layer] setCornerRadius:0.0];
+  [PEUIUtils setFrameWidthOfView:accountSettingsBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
+  [PEUIUtils addDisclosureIndicatorToButton:accountSettingsBtn];
+  [accountSettingsBtn bk_addEventHandler:^(id sender) {
     [PEUIUtils displayController:[_screenToolkit newUserAccountDetailScreenMaker](_user) fromController:self animated:YES];
   } forControlEvents:UIControlEventTouchUpInside];
-  _reauthenticateBtn = [_uitoolkit systemButtonMaker](@"Re-authenticate", nil, nil);
-  [[_reauthenticateBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:_reauthenticateBtn ofWidth:1.0 relativeTo:[self view]];
-  [PEUIUtils addDisclosureIndicatorToButton:_reauthenticateBtn];
-  [_reauthenticateBtn bk_addEventHandler:^(id sender) {
+  UIView *logoutMsgLabelWithPad = [self logoutPaddedMessage];
+  UIButton *logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
+  [[logoutBtn layer] setCornerRadius:0.0];
+  [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
+  
+  // place views onto panel
+  [PEUIUtils placeView:messagePanel
+               atTopOf:_doesHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:100
+              hpadding:0.0];
+  [PEUIUtils placeView:accountSettingsBtn
+                 below:messagePanel
+                  onto:_doesHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:7.0
+              hpadding:0.0];
+  [PEUIUtils placeView:logoutMsgLabelWithPad
+            atBottomOf:_doesHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:175.0
+              hpadding:0.0];
+  [PEUIUtils placeView:logoutBtn
+                 below:logoutMsgLabelWithPad
+                  onto:_doesHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:7.0
+              hpadding:0.0];
+}
+
+- (void)makeDoesNotHaveAuthTokenPanel {
+  NSString *message = @"\
+For security reasons, we need you to\n\
+re-authenticate against your remote\n\
+account.";
+  UIView *messagePanel = [self messagePanelWithMessage:message iconImage:[UIImage unsyncable]];
+  UIImage *warningIcon = [UIImage imageNamed:@"warning-icon"];
+  UIImageView *warningIconView = [[UIImageView alloc] initWithImage:warningIcon];
+  ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
+  _doesNotHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
+  UIButton *reauthenticateBtn = [_uitoolkit systemButtonMaker](@"Re-authenticate", nil, nil);
+  [[reauthenticateBtn layer] setCornerRadius:0.0];
+  [PEUIUtils setFrameWidthOfView:reauthenticateBtn ofWidth:1.0 relativeTo:_doesNotHaveAuthTokenPanel];
+  [PEUIUtils addDisclosureIndicatorToButton:reauthenticateBtn];
+  [reauthenticateBtn bk_addEventHandler:^(id sender) {
     [self presentReauthenticateScreen];
   } forControlEvents:UIControlEventTouchUpInside];
-  _logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
-  [[_logoutBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:_logoutBtn ofWidth:1.0 relativeTo:[self view]];
-  _loginBtn = [_uitoolkit systemButtonMaker](@"Log In", nil, nil);
-  [[_loginBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:_loginBtn ofWidth:1.0 relativeTo:[self view]];
-  [PEUIUtils addDisclosureIndicatorToButton:_loginBtn];
-  [_loginBtn bk_addEventHandler:^(id sender) {
+  UIView *logoutMsgLabelWithPad = [self logoutPaddedMessage];
+  UIButton *logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
+  [[logoutBtn layer] setCornerRadius:0.0];
+  [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:_doesNotHaveAuthTokenPanel];
+  [PEUIUtils placeView:warningIconView
+            inMiddleOf:reauthenticateBtn
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              hpadding:15.0];
+  
+  // place views onto panel
+  [PEUIUtils placeView:messagePanel //messageLabelWithPad
+               atTopOf:_doesNotHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:100
+              hpadding:0];
+  [PEUIUtils placeView:reauthenticateBtn
+                 below:messagePanel //messageLabelWithPad
+                  onto:_doesNotHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:7.0
+              hpadding:0.0];
+  [PEUIUtils placeView:logoutMsgLabelWithPad
+            atBottomOf:_doesNotHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:175.0
+              hpadding:0.0];
+  [PEUIUtils placeView:logoutBtn
+                 below:logoutMsgLabelWithPad
+                  onto:_doesNotHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:7.0
+              hpadding:0.0];
+}
+
+- (void)makeNotLoggedInPanel {
+  NSString *message = @"\
+This action will permanently delete your\n\
+fuel purchase data from this device.";
+  UIView *messagePanel = [self messagePanelWithMessage:message iconImage:[UIImage imageNamed:@"red-exclamation-icon"]];
+  ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
+  _notLoggedInPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
+  UIButton *loginBtn = [_uitoolkit systemButtonMaker](@"Log In", nil, nil);
+  [[loginBtn layer] setCornerRadius:0.0];
+  [PEUIUtils setFrameWidthOfView:loginBtn ofWidth:1.0 relativeTo:_notLoggedInPanel];
+  [PEUIUtils addDisclosureIndicatorToButton:loginBtn];
+  [loginBtn bk_addEventHandler:^(id sender) {
     [self presentLoginScreen];
   } forControlEvents:UIControlEventTouchUpInside];
-  _createAccountBtn = [_uitoolkit systemButtonMaker](@"Create Account", nil, nil);
-  [[_createAccountBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:_createAccountBtn ofWidth:1.0 relativeTo:[self view]];
-  [PEUIUtils addDisclosureIndicatorToButton:_createAccountBtn];
-  [_createAccountBtn bk_addEventHandler:^(id sender) {
+  UIButton *createAccountBtn = [_uitoolkit systemButtonMaker](@"Create Account", nil, nil);
+  [[createAccountBtn layer] setCornerRadius:0.0];
+  [PEUIUtils setFrameWidthOfView:createAccountBtn ofWidth:1.0 relativeTo:_notLoggedInPanel];
+  [PEUIUtils addDisclosureIndicatorToButton:createAccountBtn];
+  [createAccountBtn bk_addEventHandler:^(id sender) {
     [self presentSetupRemoteAccountScreen];
   } forControlEvents:UIControlEventTouchUpInside];
-  _deleteAllDataBtn = buttonMaker(@"Delete All Data", self, @selector(clearAllData));
-  [[_deleteAllDataBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:_deleteAllDataBtn ofWidth:1.0 relativeTo:[self view]];
+  UIButton *deleteAllDataBtn = buttonMaker(@"Delete All Data", self, @selector(clearAllData));
+  [[deleteAllDataBtn layer] setCornerRadius:0.0];
+  [PEUIUtils setFrameWidthOfView:deleteAllDataBtn ofWidth:1.0 relativeTo:_notLoggedInPanel];
+  
+  // place views onto panel
+  [PEUIUtils placeView:loginBtn
+               atTopOf:_notLoggedInPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:100
+              hpadding:0];
+  [PEUIUtils placeView:createAccountBtn
+                 below:loginBtn
+                  onto:_notLoggedInPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:10.0
+              hpadding:0.0];
+  [PEUIUtils placeView:messagePanel
+            atBottomOf:_notLoggedInPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:175.0
+              hpadding:0.0];
+  [PEUIUtils placeView:deleteAllDataBtn
+                 below:messagePanel
+                  onto:_notLoggedInPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:7.0
+              hpadding:0.0];
 }
 
 #pragma mark - Clear All Data
 
 - (void)clearAllData {
-  UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Are you sure?"
-                                                                 message:@"This will permanently delete all your data."
-                                                          preferredStyle:UIAlertControllerStyleAlert];
-  UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Cancel."
-                                                   style:UIAlertActionStyleDefault
-                                                 handler:^(UIAlertAction *action) {}];
-  UIAlertAction *okay = [UIAlertAction actionWithTitle:@"Yes.  Delete my data."
-                                                 style:UIAlertActionStyleDestructive
-                                               handler:^(UIAlertAction *action) {
-                                                 [_coordDao resetAsLocalUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
-                                                 [[NSNotificationCenter defaultCenter] postNotificationName:FPAppDeleteAllDataNotification
-                                                                                                     object:nil
-                                                                                                   userInfo:nil];
-                                                 MBProgressHUD *_HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-                                                 _HUD.delegate = self;
-                                                 [_HUD setLabelText:@"Data deleted successfully."];
-                                                 UIImage *image = [UIImage imageNamed:@"hud-complete"];
-                                                 UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
-                                                 [_HUD setCustomView:imageView];
-                                                 _HUD.mode = MBProgressHUDModeCustomView;
-                                                 [_HUD hide:YES afterDelay:1.30];
-                                               }];
-  [alert addAction:cancel];
-  [alert addAction:okay];
-  [self presentViewController:alert animated:YES completion:nil];
+  NSString *msg = @"\
+This will permanently delete your fuel\n\
+purchase data from this device and cannot\n\
+be undone.";
+  JGActionSheetSection *contentSection = [PEUIUtils dangerAlertSectionWithTitle:@"Are you absolutely sure?"
+                                                                alertDescription:[[NSAttributedString alloc] initWithString:msg]
+                                                                  relativeToView:self.tabBarController.view];
+  JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
+                                                                        message:nil
+                                                                   buttonTitles:@[@"No.  Cancel.", @"Yes.  Delete my data."]
+                                                                    buttonStyle:JGActionSheetButtonStyleDefault];
+  [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:1];
+  JGActionSheet *sheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
+  [sheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
+    switch ([indexPath row]) {
+      case 0: // cancel
+        [sheet dismissAnimated:YES];
+        break;
+      case 1: // delete
+        [sheet dismissAnimated:YES];
+        [_coordDao resetAsLocalUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
+        [[NSNotificationCenter defaultCenter] postNotificationName:FPAppDeleteAllDataNotification
+                                                            object:nil
+                                                          userInfo:nil];
+        MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        HUD.delegate = self;
+        [HUD setLabelText:@"You're data has been deleted."];
+        UIImage *image = [UIImage imageNamed:@"hud-complete"];
+        UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
+        [HUD setCustomView:imageView];
+        HUD.mode = MBProgressHUDModeCustomView;
+        [HUD hide:YES afterDelay:1.50];
+        break;
+    };}];
+  [sheet showInView:self.tabBarController.view animated:YES];
 }
 
 #pragma mark - Re-authenticate screen
@@ -231,17 +367,24 @@
       [_coordDao resetAsLocalUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
       [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLogoutNotification
                                                           object:nil
-                                                        userInfo:nil];
-      UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Logout Successful"
-                                                                     message:@"You have been logged out succesfully.  All of your data has been removed from this device.  If you log in, your data will be re-downloaded."
-                                                              preferredStyle:UIAlertControllerStyleAlert];
-      UIAlertAction *okay = [UIAlertAction actionWithTitle:@"Okay."
-                                                     style:UIAlertActionStyleDefault
-                                                   handler:^(UIAlertAction *action) {
-                                                     [self viewDidAppear:YES];
-                                                   }];
-      [alert addAction:okay];
-      [self presentViewController:alert animated:YES completion:nil];
+                                                        userInfo:nil];      
+      NSString *msg = @"\
+You have been logged out successfully.\n\
+Your remote account is no longer connected\n\
+to this device and your fuel purchase data\n\
+has been removed.\n\n\
+You can still use the app.  Your data will\n\
+simply be saved locally.";
+      [PEUIUtils showSuccessAlertWithMsgs:nil
+                                    title:@"Logout successful."
+                         alertDescription:[[NSAttributedString alloc] initWithString:msg]
+                              buttonTitle:@"Okay."
+                             buttonAction:^{
+                               dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                                 [self viewDidAppear:YES];
+                               });
+                             }
+                           relativeToView:self.tabBarController.view];
     });
   };
   // even if the remote authentication token deletion fails, we don't care; we'll still

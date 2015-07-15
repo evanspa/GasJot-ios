@@ -100,21 +100,41 @@
                                           andHeightOf:1.0
                                        relativeToView:[self view]];
   [PEUIUtils setFrameHeightOfView:signInPnl ofHeight:1.0 relativeTo:[self view]];
+  UILabel *signInMsgLabel = [PEUIUtils labelWithKey:@"\
+From here you can log into your remote\n\
+account, connecting this device to it.  Your\n\
+fuel purchase data will be downloaded to this\n\
+device.\n\n\
+Enter your credentials and tap 'Log In'."
+                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                    backgroundColor:[UIColor clearColor]
+                                          textColor:[UIColor darkGrayColor]
+                                verticalTextPadding:3.0];
+  UIView *signInMsgPanel = [PEUIUtils leftPadView:signInMsgLabel padding:8.0];
   TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:signInPnl];
   _siUsernameOrEmailTf = tfMaker(@"unauth.start.signin.emailusernmtf.pht");
-  [PEUIUtils placeView:_siUsernameOrEmailTf
-               atTopOf:signInPnl
-         withAlignment:PEUIHorizontalAlignmentTypeCenter
-              vpadding:0.0
-              hpadding:0.0];
   _siPasswordTf = tfMaker(@"unauth.start.signin.pwdtf.pht");
   [_siPasswordTf setSecureTextEntry:YES];
+  
+  // place views
+  [PEUIUtils placeView:signInMsgPanel
+               atTopOf:signInPnl
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:0.0
+              hpadding:0.0];
+  [PEUIUtils placeView:_siUsernameOrEmailTf
+                 below:signInMsgPanel
+                  onto:signInPnl
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:7.0
+              hpadding:0.0];
   [PEUIUtils placeView:_siPasswordTf
                  below:_siUsernameOrEmailTf
                   onto:signInPnl
-         withAlignment:PEUIHorizontalAlignmentTypeCenter
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5.0
               hpadding:0.0];
+  
   RAC(self, formStateMaskForSignIn) =
     [RACSignal combineLatest:@[_siUsernameOrEmailTf.rac_textSignal,
                                _siPasswordTf.rac_textSignal]
@@ -143,18 +163,25 @@
     void (^nonLocalSyncSuccessBlk)(void) = ^{
       dispatch_async(dispatch_get_main_queue(), ^{
         [HUD hide:YES];
-        NSString *msg = @"You are now logged in.";
-        [PEUIUtils showSuccessAlertWithMsgs:nil
-                                      title:@"Log in success."
-                           alertDescription:[[NSAttributedString alloc] initWithString:msg]
-                                buttonTitle:@"Okay."
-                               buttonAction:^{
-                                 [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
-                                                                                     object:nil
-                                                                                   userInfo:nil];
-                                 [[self navigationController] popViewControllerAnimated:YES];
-                               }
-                             relativeToView:self.tabBarController.view];
+        [PEUIUtils showLoginSuccessAlertWithTitle:@"Login success."
+                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
+You have been successfully logged in.\n\n\
+Your remote account is now connected to\n\
+this device.  Any fuel purchase data that\n\
+you create and save will be synced to your\n\
+remote account."]
+                                  syncIconMessage:[[NSAttributedString alloc] initWithString:@"\
+The following icon will appear in the app\n\
+indicating that your are currently logged\n\
+into your remote account:"]
+                                      buttonTitle:@"Okay."
+                                     buttonAction:^{
+                                         [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
+                                                                                             object:nil
+                                                                                           userInfo:nil];
+                                         [[self navigationController] popViewControllerAnimated:YES];
+                                       }
+                                   relativeToView:self.tabBarController.view];
       });
     };
     ErrMsgsMaker errMsgsMaker = ^ NSArray * (NSInteger errCode) {

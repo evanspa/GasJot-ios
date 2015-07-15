@@ -76,7 +76,7 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 
 #pragma mark - User Account Panel
 
-- (PEEntityPanelMakerBlk)userAccountPanelMaker;
+- (PEEntityFormPanelMakerBlk)userAccountPanelMaker;
 
 - (PEPanelToEntityBinderBlk)userAccountPanelToUserAccountBinder;
 
@@ -86,7 +86,7 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 
 #pragma mark - Vehicle Panel
 
-- (PEEntityPanelMakerBlk)vehiclePanelMaker;
+- (PEEntityFormPanelMakerBlk)vehiclePanelMaker;
 
 - (PEPanelToEntityBinderBlk)vehiclePanelToVehicleBinder;
 
@@ -98,7 +98,7 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 
 #pragma mark - Fuel Station Panel
 
-- (PEEntityPanelMakerBlk)fuelStationPanelMaker;
+- (PEEntityFormPanelMakerBlk)fuelStationPanelMaker;
 
 - (PEPanelToEntityBinderBlk)fuelStationPanelToFuelStationBinder;
 
@@ -110,7 +110,7 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 
 #pragma mark - Fuel Purchase / Environment Log Composite Panel (Add only)
 
-- (PEEntityPanelMakerBlk)fpEnvLogCompositePanelMakerWithUser:(FPUser *)user
+- (PEEntityFormPanelMakerBlk)fpEnvLogCompositePanelMakerWithUser:(FPUser *)user
                                       defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
                                   defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
                                         defaultPickedLogDate:(NSDate *)defaultPickedLogDate;
@@ -123,7 +123,7 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 
 #pragma mark - Fuel Purchase Log Panel (Edit only)
 
-- (PEEntityPanelMakerBlk)fuelPurchaseLogPanelMakerWithUser:(FPUser *)user
+- (PEEntityFormPanelMakerBlk)fuelPurchaseLogPanelMakerWithUser:(FPUser *)user
                                     defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
                                 defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
                                       defaultPickedLogDate:(NSDate *)defaultPickedLogDate;
@@ -136,7 +136,7 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 
 #pragma mark - Environment Log Panel
 
-- (PEEntityPanelMakerBlk)environmentLogPanelMakerWithUser:(FPUser *)user
+- (PEEntityFormPanelMakerBlk)environmentLogPanelMakerWithUser:(FPUser *)user
                                    defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
                                      defaultPickedLogDate:(NSDate *)defaultPickedLogDate;
 

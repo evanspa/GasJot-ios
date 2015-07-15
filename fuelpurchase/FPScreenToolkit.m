@@ -176,7 +176,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                         entityIndexPath:nil
                               uitoolkit:_uitoolkit
                          itemChangedBlk:nil
-                       entityPanelMaker:[_panelToolkit userAccountPanelMaker]
+                       entityFormPanelMaker:[_panelToolkit userAccountPanelMaker]
                     entityToPanelBinder:[_panelToolkit userAccountToUserAccountPanelBinder]
                     panelToEntityBinder:[_panelToolkit userAccountPanelToUserAccountBinder]
                             entityTitle:@"User Account"
@@ -355,7 +355,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       [vehicleNameTf becomeFirstResponder];
     };
     PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, BOOL dismissCtrlr, FPVehicle *newVehicle) {
-      if (newVehicle) {
+      if (newVehicle && [newVehicle localMainIdentifier]) {
         // delete the unwanted record (probably from when user attempt to sync it, got an app error, and chose to 'forget it, cancel')
         [newVehicle setEditInProgress:YES];
         [_coordDao cancelEditOfVehicle:newVehicle
@@ -369,7 +369,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
              addEntityCtrlrWithUitoolkit:_uitoolkit
                       listViewController:listViewController
                             itemAddedBlk:itemAddedBlk
-                        entityPanelMaker:[_panelToolkit vehiclePanelMaker]
+                    entityFormPanelMaker:[_panelToolkit vehiclePanelMaker]
                      entityToPanelBinder:[_panelToolkit vehicleToVehiclePanelBinder]
                      panelToEntityBinder:[_panelToolkit vehiclePanelToVehicleBinder]
                              entityTitle:@"Vehicle"
@@ -461,7 +461,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                        entityIndexPath:vehicleIndexPath
                              uitoolkit:_uitoolkit
                         itemChangedBlk:itemChangedBlk
-                      entityPanelMaker:[_panelToolkit vehiclePanelMaker]
+                      entityFormPanelMaker:[_panelToolkit vehiclePanelMaker]
                    entityToPanelBinder:[_panelToolkit vehicleToVehiclePanelBinder]
                    panelToEntityBinder:[_panelToolkit vehiclePanelToVehicleBinder]
                            entityTitle:@"Vehicle"
@@ -736,7 +736,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       [nameTf becomeFirstResponder];
     };
     PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, BOOL dismissCtrlr, FPFuelStation *newFuelStation) {
-      if (newFuelStation) {
+      if (newFuelStation && [newFuelStation localMainIdentifier]) {
         // delete the unwanted record (probably from when user attempt to sync it, got an app error, and chose to 'forget it, cancel'
         [newFuelStation setEditInProgress:YES];
         [_coordDao cancelEditOfFuelStation:newFuelStation
@@ -750,7 +750,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
              addEntityCtrlrWithUitoolkit:_uitoolkit
                       listViewController:listViewController
                             itemAddedBlk:itemAddedBlk
-                        entityPanelMaker:[_panelToolkit fuelStationPanelMaker]
+                        entityFormPanelMaker:[_panelToolkit fuelStationPanelMaker]
                      entityToPanelBinder:[_panelToolkit fuelStationToFuelStationPanelBinder]
                      panelToEntityBinder:[_panelToolkit fuelStationPanelToFuelStationBinder]
                              entityTitle:@"Fuel Station"
@@ -845,7 +845,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                        entityIndexPath:fuelStationIndexPath
                              uitoolkit:_uitoolkit
                         itemChangedBlk:itemChangedBlk
-                      entityPanelMaker:[_panelToolkit fuelStationPanelMaker]
+                      entityFormPanelMaker:[_panelToolkit fuelStationPanelMaker]
                    entityToPanelBinder:[_panelToolkit fuelStationToFuelStationPanelBinder]
                    panelToEntityBinder:[_panelToolkit fuelStationPanelToFuelStationBinder]
                            entityTitle:@"Fuel Station"
@@ -1040,21 +1040,27 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
     PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, BOOL dismissCtrlr, FPLogEnvLogComposite *fpEnvLogComposite) {
       if (fpEnvLogComposite) {
         FPFuelPurchaseLog *fpLog = [fpEnvLogComposite fpLog];
-        [fpLog setEditInProgress:YES];
-        [_coordDao cancelEditOfFuelPurchaseLog:fpLog
-                                         error:[FPUtils localSaveErrorHandlerMaker]()];
+        if (fpLog && [fpLog localMainIdentifier]) {
+          [fpLog setEditInProgress:YES];
+          [_coordDao cancelEditOfFuelPurchaseLog:fpLog
+                                           error:[FPUtils localSaveErrorHandlerMaker]()];
+        }
         NSArray *shouldSavePrePostFillupEnvLogs = [self shouldSavePrePostFillupEnvLogs:fpEnvLogComposite];
         BOOL shouldSavePreFillupEnvLog = [shouldSavePrePostFillupEnvLogs[0] boolValue];
         BOOL shouldSavePostFillupEnvLog = [shouldSavePrePostFillupEnvLogs[1] boolValue];
         if (shouldSavePreFillupEnvLog) {
-          [[fpEnvLogComposite preFillupEnvLog] setEditInProgress:YES];
-          [_coordDao cancelEditOfEnvironmentLog:[fpEnvLogComposite preFillupEnvLog]
-                                          error:[FPUtils localSaveErrorHandlerMaker]()];
+          if ([fpEnvLogComposite preFillupEnvLog] && [[fpEnvLogComposite preFillupEnvLog] localMainIdentifier]) {
+            [[fpEnvLogComposite preFillupEnvLog] setEditInProgress:YES];
+            [_coordDao cancelEditOfEnvironmentLog:[fpEnvLogComposite preFillupEnvLog]
+                                            error:[FPUtils localSaveErrorHandlerMaker]()];
+          }
         }
         if (shouldSavePostFillupEnvLog) {
-          [[fpEnvLogComposite postFillupEnvLog] setEditInProgress:YES];
-          [_coordDao cancelEditOfEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
-                                          error:[FPUtils localSaveErrorHandlerMaker]()];
+          if ([fpEnvLogComposite postFillupEnvLog] && [[fpEnvLogComposite postFillupEnvLog] localMainIdentifier]) {
+            [[fpEnvLogComposite postFillupEnvLog] setEditInProgress:YES];
+            [_coordDao cancelEditOfEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
+                                            error:[FPUtils localSaveErrorHandlerMaker]()];
+          }
         }
       }
       if (dismissCtrlr) {
@@ -1065,7 +1071,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
              addEntityCtrlrWithUitoolkit:_uitoolkit
                       listViewController:listViewController
                             itemAddedBlk:itemAddedBlk
-                        entityPanelMaker:[_panelToolkit fpEnvLogCompositePanelMakerWithUser:user
+                        entityFormPanelMaker:[_panelToolkit fpEnvLogCompositePanelMakerWithUser:user
                                                                      defaultSelectedVehicle:defaultSelectedVehicle
                                                                  defaultSelectedFuelStation:defaultSelectedFuelStation
                                                                        defaultPickedLogDate:[NSDate date]]
@@ -1190,7 +1196,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                        entityIndexPath:fpLogIndexPath
                              uitoolkit:_uitoolkit
                         itemChangedBlk:itemChangedBlk
-                      entityPanelMaker:
+                      entityFormPanelMaker:
                         [_panelToolkit
                            fuelPurchaseLogPanelMakerWithUser:user
                                       defaultSelectedVehicle:[_coordDao vehicleForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()]
@@ -1427,7 +1433,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       }
     };
     PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, BOOL dismissCtrlr, FPEnvironmentLog *newEnvLog) {
-      if (newEnvLog) {
+      if (newEnvLog && [newEnvLog localMainIdentifier]) {
         // delete the unwanted record (probably from when user attempt to sync it, got an app error, and chose to 'forget it, cancel'
         [newEnvLog setEditInProgress:YES];
         [_coordDao cancelEditOfEnvironmentLog:newEnvLog
@@ -1441,7 +1447,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
               addEntityCtrlrWithUitoolkit:_uitoolkit
                        listViewController:listViewController
                              itemAddedBlk:itemAddedBlk
-                         entityPanelMaker:[_panelToolkit environmentLogPanelMakerWithUser:user
+                         entityFormPanelMaker:[_panelToolkit environmentLogPanelMakerWithUser:user
                                                                    defaultSelectedVehicle:defaultSelectedVehicle
                                                                      defaultPickedLogDate:[NSDate date]]
                       entityToPanelBinder:[_panelToolkit environmentLogToEnvironmentLogPanelBinder]
@@ -1552,7 +1558,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                               entityIndexPath:envLogIndexPath
                                                     uitoolkit:_uitoolkit
                                                itemChangedBlk:itemChangedBlk
-                                             entityPanelMaker:[_panelToolkit environmentLogPanelMakerWithUser:user
+                                             entityFormPanelMaker:[_panelToolkit environmentLogPanelMakerWithUser:user
                                                                                        defaultSelectedVehicle:[_coordDao vehicleForEnvironmentLog:envLog
                                                                                                                                             error:[FPUtils localFetchErrorHandlerMaker]()]
                                                                                          defaultPickedLogDate:[envLog logDate]]

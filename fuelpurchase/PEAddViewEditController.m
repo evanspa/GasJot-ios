@@ -27,7 +27,7 @@
   PEItemAddedBlk _itemAddedBlk;
   PEItemChangedBlk _itemChangedBlk;
   UIBarButtonItem *_backButton;
-  PEEntityPanelMakerBlk _entityPanelMaker;
+  PEEntityFormPanelMakerBlk _entityFormPanelMaker;
   PEPanelToEntityBinderBlk _panelToEntityBinder;
   NSString *_entityTitle;
   PEEnableDisablePanelBlk _panelEnablerDisabler;
@@ -66,7 +66,7 @@
            uitoolkit:(PEUIToolkit *)uitoolkit
         itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
       itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
-    entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
+entityFormPanelMaker:(PEEntityFormPanelMakerBlk)entityFormPanelMaker
  entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
  panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
          entityTitle:(NSString *)entityTitle
@@ -100,7 +100,7 @@ getterForNotification:(SEL)getterForNotification {
     _uitoolkit = uitoolkit;
     _itemAddedBlk = itemAddedBlk;
     _itemChangedBlk = itemChangedBlk;
-    _entityPanelMaker = entityPanelMaker;
+    _entityFormPanelMaker = entityFormPanelMaker;
     _entityToPanelBinder = entityToPanelBinder;
     _panelToEntityBinder = panelToEntityBinder;
     _entityTitle = entityTitle;
@@ -132,7 +132,7 @@ getterForNotification:(SEL)getterForNotification {
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
                                       listViewController:(PEListViewController *)listViewController
                                             itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
-                                        entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
+                                    entityFormPanelMaker:(PEEntityFormPanelMakerBlk)entityFormPanelMaker
                                      entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                      panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
                                              entityTitle:(NSString *)entityTitle
@@ -149,7 +149,7 @@ getterForNotification:(SEL)getterForNotification {
   return [PEAddViewEditController addEntityCtrlrWithUitoolkit:uitoolkit
                                            listViewController:listViewController
                                                  itemAddedBlk:itemAddedBlk
-                                             entityPanelMaker:entityPanelMaker
+                                             entityFormPanelMaker:entityFormPanelMaker
                                           entityToPanelBinder:entityToPanelBinder
                                           panelToEntityBinder:panelToEntityBinder
                                                   entityTitle:entityTitle
@@ -169,7 +169,7 @@ getterForNotification:(SEL)getterForNotification {
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
                                       listViewController:(PEListViewController *)listViewController
                                             itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
-                                        entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
+                                    entityFormPanelMaker:(PEEntityFormPanelMakerBlk)entityFormPanelMaker
                                      entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                      panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
                                              entityTitle:(NSString *)entityTitle
@@ -182,7 +182,7 @@ getterForNotification:(SEL)getterForNotification {
                                          isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
                                           isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-                    isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForBackgroundSync
+                         isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForBackgroundSync
                                    getterForNotification:(SEL)getterForNotification {
   return [[PEAddViewEditController alloc] initWithEntity:nil
                                       listViewController:listViewController
@@ -191,7 +191,7 @@ getterForNotification:(SEL)getterForNotification {
                                                uitoolkit:uitoolkit
                                             itemAddedBlk:itemAddedBlk
                                           itemChangedBlk:nil
-                                        entityPanelMaker:entityPanelMaker
+                                    entityFormPanelMaker:entityFormPanelMaker
                                      entityToPanelBinder:entityToPanelBinder
                                      panelToEntityBinder:panelToEntityBinder
                                              entityTitle:entityTitle
@@ -219,7 +219,7 @@ getterForNotification:(SEL)getterForNotification {
                                        entityIndexPath:(NSIndexPath *)entityIndexPath
                                              uitoolkit:(PEUIToolkit *)uitoolkit
                                         itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
-                                      entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
+                                  entityFormPanelMaker:(PEEntityFormPanelMakerBlk)entityFormPanelMaker
                                    entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                    panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
                                            entityTitle:(NSString *)entityTitle
@@ -244,7 +244,7 @@ getterForNotification:(SEL)getterForNotification {
                                                uitoolkit:uitoolkit
                                             itemAddedBlk:nil
                                           itemChangedBlk:itemChangedBlk
-                                        entityPanelMaker:entityPanelMaker
+                                    entityFormPanelMaker:entityFormPanelMaker
                                      entityToPanelBinder:entityToPanelBinder
                                      panelToEntityBinder:panelToEntityBinder
                                              entityTitle:entityTitle
@@ -284,10 +284,8 @@ getterForNotification:(SEL)getterForNotification {
     // associated with _entity, and so will receive them!  So, we do a reference-compare;
     // if the notification is for the entity in our context, we can safely ignore it.
     if (_entity != locallyUpdatedEntity) {
-      //[self displayHeadsUpAlertWithMsgs:@[LS(@"vieweditentity.headsup.whileviewing.locallyupdated.msg1"),
-      //                                    LS(@"vieweditentity.headsup.whileviewing.locallyupdated.msg2")]];
       [_entity overwrite:(PELMMainSupport *)locallyUpdatedEntity];
-      _entityToPanelBinder(_entity, _entityPanel);
+      _entityToPanelBinder(_entity, _entityFormPanel);
     } else {
       DDLogDebug(@"in PEAVEC/dataObjectLocallyUpdated:, ignoring notification due to equality match w/_entity.");
     }
@@ -350,11 +348,11 @@ getterForNotification:(SEL)getterForNotification {
   [super viewDidAppear:animated];
   if (_isAdd || _isEdit) {
     if (_prepareUIForUserInteractionBlk) {
-      _prepareUIForUserInteractionBlk(_entityPanel);
+      _prepareUIForUserInteractionBlk(_entityFormPanel);
     }
   }
   if (_viewDidAppearBlk) {
-    _viewDidAppearBlk(_entityPanel);
+    _viewDidAppearBlk(_entityFormPanel);
   }
 }
 
@@ -363,9 +361,9 @@ getterForNotification:(SEL)getterForNotification {
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   UINavigationItem *navItem = [self navigationItem];
   _backButton = [navItem leftBarButtonItem];
-  _entityPanel = _entityPanelMaker(self);
+  _entityFormPanel = _entityFormPanelMaker(self);
   [self setEdgesForExtendedLayout:UIRectEdgeNone];
-  [PEUIUtils placeView:_entityPanel
+  [PEUIUtils placeView:_entityFormPanel
                atTopOf:[self view]
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:0 // parameterize this value too?
@@ -374,14 +372,14 @@ getterForNotification:(SEL)getterForNotification {
   NSString *title;
   if (_isView) {
     title = _entityTitle;
-    _panelEnablerDisabler(_entityPanel, NO);
+    _panelEnablerDisabler(_entityFormPanel, NO);
   } else if (_isEdit) {
     title = [NSString stringWithFormat:@"Edit %@", _entityTitle];
     [self prepareForEditing];
   } else {
     title = [NSString stringWithFormat:@"Add %@", _entityTitle];
   }
-  _entityToPanelBinder(_entity, _entityPanel);
+  _entityToPanelBinder(_entity, _entityFormPanel);
 
   // ---------------------------------------------------------------------------
   // Setup the navigation item (left/center/right areas)
@@ -481,7 +479,7 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
     [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
     [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
     [[self navigationItem] setTitle:_entityTitle];
-    _panelEnablerDisabler(_entityPanel, NO);
+    _panelEnablerDisabler(_entityFormPanel, NO);
     if (_listViewController) {
       [_listViewController handleUpdatedEntity:_entity];
     }
@@ -658,7 +656,7 @@ The error is as follows:";
       _entityCopyBeforeEdit = [_entity copy];
       [super setEditing:flag animated:animated];
       if (_prepareUIForUserInteractionBlk) {
-        _prepareUIForUserInteractionBlk(_entityPanel);
+        _prepareUIForUserInteractionBlk(_entityFormPanel);
       }
       [self setSyncBarButtonState];
     }
@@ -682,7 +680,7 @@ The error is as follows:";
                                                  initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
                                                  target:self
                                                  action:@selector(cancelAddEdit)]];
-    _panelEnablerDisabler(_entityPanel, YES);
+    _panelEnablerDisabler(_entityFormPanel, YES);
   }
   return editPrepareSuccess;
 }
@@ -699,7 +697,7 @@ The error is as follows:";
     [[self navigationItem] setLeftBarButtonItem:_backButton];
     [[self navigationItem] setRightBarButtonItem:[self editButtonItem]];
     [[self navigationItem] setTitle:_entityTitle];
-    _panelEnablerDisabler(_entityPanel, NO);
+    _panelEnablerDisabler(_entityFormPanel, NO);
     if (_listViewController) {
       [_listViewController handleUpdatedEntity:_entity];
     }
@@ -707,17 +705,17 @@ The error is as follows:";
   };
   if (_isEditCanceled) {
     _entityEditCanceler(self, _entity);
-    _entityToPanelBinder(_entity, _entityPanel);
+    _entityToPanelBinder(_entity, _entityFormPanel);
     _isEditCanceled = NO;
     postEditActivities();
   } else {
-    NSArray *errMsgs = _entityValidator(_entityPanel);
+    NSArray *errMsgs = _entityValidator(_entityFormPanel);
     BOOL isValidEntity = YES;
     if (errMsgs && [errMsgs count] > 0) {
       isValidEntity = NO;
     }
     if (isValidEntity) {
-      _panelToEntityBinder(_entityPanel, _entity);
+      _panelToEntityBinder(_entityFormPanel, _entity);
       _entitySaver(self, _entity);
       if (_isAuthenticatedBlk()) {
         MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
@@ -801,7 +799,7 @@ locally.  The error is as follows:";
                 // now we can cancel the edit session as we normally would
                 [_entity overwrite:_entityCopyBeforeEdit];
                 _entityEditCanceler(self, _entity);
-                _entityToPanelBinder(_entity, _entityPanel);
+                _entityToPanelBinder(_entity, _entityFormPanel);
                 _isEditCanceled = NO; // reseting this
                 postEditActivities();
               };
@@ -818,6 +816,7 @@ locally.  The error is as follows:";
                     case 0: // fix now
                       _entityEditPreparer(self, _entity);
                       [super setEditing:YES animated:NO];
+                      [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
                       [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
                       break;
                     case 1: // fix later
@@ -1018,8 +1017,8 @@ locally.  The error is as follows:";
                                             font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                  backgroundColor:[UIColor clearColor]
                                        textColor:[UIColor blackColor]
-                           horizontalTextPadding:3.0
                              verticalTextPadding:0.0];
+  // TODO - left padd lbl with 3.0?
   [PEUIUtils placeView:errImgView
             inMiddleOf:errorPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -1027,7 +1026,7 @@ locally.  The error is as follows:";
   [PEUIUtils placeView:errorMsgLbl
           toTheRightOf:errImgView
                   onto:errorPanel
-         withAlignment:PEUIVerticalAlignmentTypeCenter
+         withAlignment:PEUIVerticalAlignmentTypeMiddle
               hpadding:5.0];
   return errorPanel;
 }
@@ -1048,13 +1047,13 @@ locally.  The error is as follows:";
 
 - (void)doneWithAdd {
   [self.view endEditing:YES];
-  NSArray *errMsgs = _entityValidator(_entityPanel);
+  NSArray *errMsgs = _entityValidator(_entityFormPanel);
   BOOL isValidEntity = YES;
   if (errMsgs && [errMsgs count] > 0) {
     isValidEntity = NO;
   }
   if (isValidEntity) {
-    _newEntity = _entityMaker(_entityPanel);
+    _newEntity = _entityMaker(_entityFormPanel);
     void (^notificationSenderForAdd)(id) = ^(id theNewEntity) {
       id newEntityForNotification = theNewEntity;
       if (_getterForNotification) {
@@ -1069,6 +1068,7 @@ locally.  The error is as follows:";
     };
     if (_isAuthenticatedBlk()) {
       void (^reenableScreen)(void) = ^{
+        [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
         [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
         [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
       };
@@ -1366,7 +1366,7 @@ locally.  The error is as follows:";
         }
       };
       dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-        _newEntitySaver(_entityPanel,
+        _newEntitySaver(_entityFormPanel,
                         _newEntity,
                         _syncSuccessBlk,
                         _syncRetryAfterBlk,
@@ -1376,7 +1376,7 @@ locally.  The error is as follows:";
                         _syncDependencyUnsyncedBlk);
       });
     } else {
-      _newEntitySaver(_entityPanel, _newEntity, nil, nil, nil, nil, nil, nil);
+      _newEntitySaver(_entityFormPanel, _newEntity, nil, nil, nil, nil, nil, nil);
       [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // cancel btn (so they can't cancel it after we'ved saved and we're displaying the HUD)
       [[[self navigationItem] rightBarButtonItem] setEnabled:NO]; // done btn
       [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];

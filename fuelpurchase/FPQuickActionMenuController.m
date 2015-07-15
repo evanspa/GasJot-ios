@@ -20,6 +20,7 @@
 
 #import <FlatUIKit/UIColor+FlatUI.h>
 #import <PEObjc-Commons/PEUIUtils.h>
+#import <PEObjc-Commons/UIImage+PEAdditions.h>
 #import "FPQuickActionMenuController.h"
 #import "FPScreenToolkit.h"
 #import "FPUtils.h"
@@ -35,6 +36,8 @@
   FPUser *_user;
   FPScreenToolkit *_screenToolkit;
   dispatch_queue_t _junkQueue;
+  UIButton *_syncedStatusButton;
+  UIButton *_unsyncedStatusButton;
 }
 
 #pragma mark - Initializers
@@ -56,6 +59,27 @@
 }
 
 #pragma mark - View Controller Lifecycle
+
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  [_syncedStatusButton removeFromSuperview];
+  [_unsyncedStatusButton removeFromSuperview];
+  if ([APP isUserLoggedIn]) {
+    if ([APP doesUserHaveValidAuthToken]) {
+      [PEUIUtils placeView:_syncedStatusButton
+                   atTopOf:self.view
+             withAlignment:PEUIHorizontalAlignmentTypeRight
+                  vpadding:70.0
+                  hpadding:5.0];
+    } else {
+      [PEUIUtils placeView:_unsyncedStatusButton
+                   atTopOf:self.view
+             withAlignment:PEUIHorizontalAlignmentTypeRight
+                  vpadding:70.0
+                  hpadding:5.0];
+    }
+  }
+}
 
 - (void)viewDidLoad {
   [super viewDidLoad];
@@ -82,18 +106,61 @@
     ,btnMaker(@"System Prune", self, @selector(systemPrune))
 #endif
   ];
-  UIView *btnsView =
-    [PEUIUtils twoColumnViewCluster:leftBtns
-                    withRightColumn:rtBtns
-        verticalPaddingBetweenViews:5
-    horizontalPaddingBetweenColumns:8];
+  UIView *btnsView = [PEUIUtils twoColumnViewCluster:leftBtns
+                                     withRightColumn:rtBtns
+                         verticalPaddingBetweenViews:5
+                     horizontalPaddingBetweenColumns:8];
   [PEUIUtils placeView:btnsView
             inMiddleOf:[self view]
          withAlignment:PEUIHorizontalAlignmentTypeCenter
               hpadding:0];
+  UIImage *syncronizationIcon = [UIImage syncableIcon];
+  UIImage *unsynchronizationIcon = [UIImage unsyncableIcon];
+  CGFloat btnLength = 45.0;
+  _syncedStatusButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, btnLength, btnLength)];
+  [_syncedStatusButton setBackgroundColor:[UIColor clearColor]];
+  [_syncedStatusButton setImage:syncronizationIcon forState:UIControlStateNormal];
+  [_syncedStatusButton addTarget:self
+                          action:@selector(synchronziationStatusInfo)
+                forControlEvents:UIControlEventTouchUpInside];
+  _unsyncedStatusButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, btnLength, btnLength)];
+  [_unsyncedStatusButton setBackgroundColor:[UIColor clearColor]];
+  [_unsyncedStatusButton setImage:unsynchronizationIcon forState:UIControlStateNormal];
+  [_unsyncedStatusButton addTarget:self
+                            action:@selector(unsynchronizationStatusInfo)
+                  forControlEvents:UIControlEventTouchUpInside];
 }
 
 #pragma mark - Button Event Handlers
+
+- (void)synchronziationStatusInfo {
+  [PEUIUtils showAlertWithTitle:@"You're logged in."
+                     titleImage:[UIImage syncable]
+               alertDescription:[[NSAttributedString alloc] initWithString:@"\
+You are currently logged in, and this\n\
+device is connected to your remote account."]
+                    buttonTitle:@"Okay."
+                   buttonAction:nil
+                 relativeToView:self.tabBarController.view];
+}
+
+- (void)unsynchronizationStatusInfo {
+  NSString *message = @"\
+Although this device is connected to\n\
+your remote account, your edits are\n\
+not able to sync because you need to\n\
+re-authenticate. To re-authenticate, go to:\n\n\
+Settings \u2794 Re-authenticate.";
+  NSDictionary *attrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
+  NSMutableAttributedString *attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
+  [attrMessage setAttributes:attrs range:NSMakeRange(155, 26)];
+  [PEUIUtils showAlertWithTitle:@"Unable to sync."
+                     titleImage:[UIImage unsyncable]
+               alertDescription:attrMessage
+                    buttonTitle:@"Okay."
+                   buttonAction:nil
+                 relativeToView:self.tabBarController.view];
+}
 
 - (void)clearKeychain {
   [APP clearKeychain];

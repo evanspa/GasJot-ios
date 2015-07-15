@@ -14,7 +14,7 @@
 @class PEListViewController;
 @class PEAddViewEditController;
 typedef NSDictionary *(^PEComponentsMakerBlk)(UIViewController *);
-typedef UIView *(^PEEntityPanelMakerBlk)(PEAddViewEditController *);
+typedef UIView *(^PEEntityFormPanelMakerBlk)(PEAddViewEditController *);
 typedef void (^PEPanelToEntityBinderBlk)(UIView *, id);
 typedef void (^PEEntityToPanelBinderBlk)(id, UIView *);
 typedef void (^PEEnableDisablePanelBlk)(UIView *, BOOL);
@@ -74,7 +74,7 @@ typedef NSArray *(^PEMessagesFromErrMask)(NSInteger);
            uitoolkit:(PEUIToolkit *)uitoolkit
         itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
       itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
-    entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
+entityFormPanelMaker:(PEEntityFormPanelMakerBlk)entityFormPanelMaker
  entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
  panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
          entityTitle:(NSString *)entityTitle
@@ -101,7 +101,7 @@ getterForNotification:(SEL)getterForNotification;
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
                                       listViewController:(PEListViewController *)listViewController
                                             itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
-                                        entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
+                                    entityFormPanelMaker:(PEEntityFormPanelMakerBlk)entityFormPanelMaker
                                      entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                      panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
                                              entityTitle:(NSString *)entityTitle
@@ -119,7 +119,7 @@ getterForNotification:(SEL)getterForNotification;
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
                                       listViewController:(PEListViewController *)listViewController
                                             itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
-                                        entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
+                                    entityFormPanelMaker:(PEEntityFormPanelMakerBlk)entityFormPanelMaker
                                      entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                      panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
                                              entityTitle:(NSString *)entityTitle
@@ -140,7 +140,7 @@ getterForNotification:(SEL)getterForNotification;
                                        entityIndexPath:(NSIndexPath *)entityIndexPath
                                              uitoolkit:(PEUIToolkit *)uitoolkit
                                         itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
-                                      entityPanelMaker:(PEEntityPanelMakerBlk)entityPanelMaker
+                                  entityFormPanelMaker:(PEEntityFormPanelMakerBlk)entityFormPanelMaker
                                    entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                    panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
                                            entityTitle:(NSString *)entityTitle
@@ -167,6 +167,6 @@ getterForNotification:(SEL)getterForNotification;
 
 @property (readonly, nonatomic) PEEntityToPanelBinderBlk entityToPanelBinder;
 
-@property (nonatomic) UIView *entityPanel;
+@property (nonatomic) UIView *entityFormPanel;
 
 @end

@@ -32,6 +32,7 @@
 #import "NSObject+appdelegate.h"
 #import "FPAppNotificationNames.h"
 #import "FPNames.h"
+#import <FlatUIKit/UIColor+FlatUI.h>
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
@@ -79,7 +80,7 @@
     [self pdvDevEnable];
   #endif
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
-  [PEUIUtils placeView:[self panelForAccountCreation]
+  [PEUIUtils placeView:[self panelForReauthentication]
                atTopOf:[self view]
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:100.0
@@ -93,18 +94,32 @@
 
 #pragma mark - GUI construction (making panels)
 
-- (UIView *)panelForAccountCreation {
+- (UIView *)panelForReauthentication {
   UIView *reauthPnl = [PEUIUtils panelWithWidthOf:1.0
-                                          andHeightOf:1.0
-                                       relativeToView:[self view]];
+                                      andHeightOf:1.0
+                                   relativeToView:[self view]];
   [PEUIUtils setFrameHeightOfView:reauthPnl ofHeight:0.5 relativeTo:[self view]];
+  UILabel *messageLabel = [PEUIUtils labelWithKey:@"Enter your password and hit 'Done' to\nre-authenticate."
+                                             font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                  backgroundColor:[UIColor clearColor]
+                                        textColor:[UIColor darkGrayColor]
+                              verticalTextPadding:3.0];
+  UIView *messageLabelWithPad = [PEUIUtils leftPadView:messageLabel padding:8.0];
   TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:reauthPnl];
   _passwordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
   [_passwordTf setSecureTextEntry:YES];
-  [PEUIUtils placeView:_passwordTf
+  
+  // place views
+  [PEUIUtils placeView:messageLabelWithPad
                atTopOf:reauthPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:0.0
+              hpadding:0.0];
+  [PEUIUtils placeView:_passwordTf
+                 below:messageLabelWithPad
+                  onto:reauthPnl
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:10.0
               hpadding:0.0];
   RAC(self, formStateMaskForLightLogin) =
     [RACSignal combineLatest:@[_passwordTf.rac_textSignal]

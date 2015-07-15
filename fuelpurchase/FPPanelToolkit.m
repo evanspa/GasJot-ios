@@ -47,7 +47,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
 
 #pragma mark - User Account Panel
 
-- (PEEntityPanelMakerBlk)userAccountPanelMaker {
+- (PEEntityFormPanelMakerBlk)userAccountPanelMaker {
   return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
     UIView *userAccountPanel = [PEUIUtils panelWithWidthOf:1.0
@@ -129,7 +129,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
 
 #pragma mark - Vehicle Panel
 
-- (PEEntityPanelMakerBlk)vehiclePanelMaker {
+- (PEEntityFormPanelMakerBlk)vehiclePanelMaker {
   return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
     UIView *vehiclePanel = [PEUIUtils panelWithWidthOf:1.0
@@ -255,7 +255,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
 
 #pragma mark - Fuel Station Panel
 
-- (PEEntityPanelMakerBlk)fuelStationPanelMaker {
+- (PEEntityFormPanelMakerBlk)fuelStationPanelMaker {
   return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
     UIView *fuelStationPanel = [PEUIUtils panelWithWidthOf:1.0
@@ -483,7 +483,7 @@ location from the given address above."]
 
 #pragma mark - Fuel Purchase / Environment Log Composite Panel (Add only)
 
-- (PEEntityPanelMakerBlk)fpEnvLogCompositePanelMakerWithUser:(FPUser *)user
+- (PEEntityFormPanelMakerBlk)fpEnvLogCompositePanelMakerWithUser:(FPUser *)user
                                       defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
                                   defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
                                         defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
@@ -756,8 +756,7 @@ location from the given address above."]
                        font:[numGallonsTf font]
             backgroundColor:[UIColor clearColor]
                   textColor:[_uitoolkit colorForTableCellTitles]
-      horizontalTextPadding:3.0
-        verticalTextPadding:3.0];
+        verticalTextPadding:3.0]; 
     [PEUIUtils placeView:gotCarWashLbl
               inMiddleOf:gotCarWashPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -765,7 +764,7 @@ location from the given address above."]
     [PEUIUtils placeView:gotCarWashSwitch
             toTheRightOf:gotCarWashLbl
                     onto:gotCarWashPanel
-           withAlignment:PEUIVerticalAlignmentTypeCenter
+           withAlignment:PEUIVerticalAlignmentTypeMiddle
                 hpadding:15.0];
     components[@(FPFpLogTagCarWashPanel)] = gotCarWashPanel;
     PEItemSelectedAction vehicleSelectedAction = ^(FPVehicle *vehicle, NSIndexPath *indexPath, UIViewController *vehicleSelectionController) {
@@ -811,7 +810,7 @@ location from the given address above."]
   };
 }
 
-- (PEEntityPanelMakerBlk)fuelPurchaseLogPanelMakerWithUser:(FPUser *)user
+- (PEEntityFormPanelMakerBlk)fuelPurchaseLogPanelMakerWithUser:(FPUser *)user
                                     defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
                                 defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
                                       defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
@@ -1017,7 +1016,7 @@ location from the given address above."]
   };
 }
 
-- (PEEntityPanelMakerBlk)environmentLogPanelMakerWithUser:(FPUser *)user
+- (PEEntityFormPanelMakerBlk)environmentLogPanelMakerWithUser:(FPUser *)user
                                    defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
                                      defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
   return ^ UIView * (UIViewController *parentViewController) {

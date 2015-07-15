@@ -103,29 +103,51 @@
                                           andHeightOf:1.0
                                        relativeToView:[self view]];
   [PEUIUtils setFrameHeightOfView:createAcctPnl ofHeight:0.5 relativeTo:[self view]];
+  
+  UILabel *createAccountMsgLabel = [PEUIUtils labelWithKey:@"\
+From here you can create a remote account.\n\
+This will enable your fuel purchase data to be\n\
+synced to a server where you can access it\n\
+from the FP web site or other devices.\n\n\
+Fill out the form below and tap 'Done'."
+                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                    backgroundColor:[UIColor clearColor]
+                                          textColor:[UIColor darkGrayColor]
+                                verticalTextPadding:3.0];
+  UIView *createAccountMsgPanel = [PEUIUtils leftPadView:createAccountMsgLabel padding:8.0];
+  
   TextfieldMaker tfMaker =
     [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:createAcctPnl];
   _caFullNameTf = tfMaker(@"unauth.start.ca.fullnametf.pht");
-  [PEUIUtils placeView:_caFullNameTf
+  _caEmailOrUsernameTf = tfMaker(@"unauth.start.ca.emailorusernametf.pht");
+  _caPasswordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
+  [_caPasswordTf setSecureTextEntry:YES];
+  
+  // place views
+  [PEUIUtils placeView:createAccountMsgPanel
                atTopOf:createAcctPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:0.0
               hpadding:0.0];
-  _caEmailOrUsernameTf = tfMaker(@"unauth.start.ca.emailorusernametf.pht");
+  [PEUIUtils placeView:_caFullNameTf
+                 below:createAccountMsgPanel
+                  onto:createAcctPnl
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:7.0
+              hpadding:0];
   [PEUIUtils placeView:_caEmailOrUsernameTf
                  below:_caFullNameTf
                   onto:createAcctPnl
-         withAlignment:PEUIHorizontalAlignmentTypeCenter
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5
               hpadding:0];
-  _caPasswordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
-  [_caPasswordTf setSecureTextEntry:YES];
   [PEUIUtils placeView:_caPasswordTf
                  below:_caEmailOrUsernameTf
                   onto:createAcctPnl
-         withAlignment:PEUIHorizontalAlignmentTypeCenter
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5
               hpadding:0];
+  
   RAC(self, formStateMaskForAcctCreation) =
     [RACSignal combineLatest:@[_caFullNameTf.rac_textSignal,
                                _caEmailOrUsernameTf.rac_textSignal,
@@ -168,20 +190,17 @@
     void (^nonLocalSyncSuccessBlk)(FPUser *) = ^(FPUser *user){
       dispatch_async(dispatch_get_main_queue(), ^{
         [HUD hide:YES];
-        NSString *msg = @"You're account has been successfully created.";
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Success"
-                                                                       message:msg
-                                                                preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *okay = [UIAlertAction actionWithTitle:@"Okay."
-                                                       style:UIAlertActionStyleDefault
-                                                     handler:^(UIAlertAction *action) {
-                                                       [[NSNotificationCenter defaultCenter] postNotificationName:FPAppAccountCreationNotification
-                                                                                                           object:nil
-                                                                                                         userInfo:nil];
-                                                       [[self navigationController] popViewControllerAnimated:YES];
-                                                     }];
-        [alert addAction:okay];
-        [self presentViewController:alert animated:YES completion:nil];
+        [PEUIUtils showSuccessAlertWithMsgs:nil
+                                      title:@"Success."
+                           alertDescription:[[NSAttributedString alloc] initWithString:@"You're account has been created\nsuccessfully."]
+                                buttonTitle:@"Okay."
+                               buttonAction:^{
+                                 [[NSNotificationCenter defaultCenter] postNotificationName:FPAppAccountCreationNotification
+                                                                                     object:nil
+                                                                                   userInfo:nil];
+                                 [[self navigationController] popViewControllerAnimated:YES];
+                               }
+                             relativeToView:self.tabBarController.view];
       });
     };
     ErrMsgsMaker errMsgsMaker = ^ NSArray * (NSInteger errCode) {

@@ -60,7 +60,6 @@
 		180EDA3419C7C89B00C782A6 /* FPEditsInProgressController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPEditsInProgressController.m; sourceTree = "<group>"; };
 		1822308B1A7042FC00884600 /* NSMutableArray+MoveObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableArray+MoveObject.h"; sourceTree = "<group>"; };
 		1822308C1A7042FC00884600 /* NSMutableArray+MoveObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableArray+MoveObject.m"; sourceTree = "<group>"; };
-		182F651E1A244E2700A769E4 /* IQKeyboardManager.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = IQKeyboardManager.bundle; path = ../Pods/IQKeyboardManager/IQKeyBoardManager/Resources/IQKeyboardManager.bundle; sourceTree = "<group>"; };
 		183E13A418009F9F009E9085 /* fpapi-resource.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "fpapi-resource.json"; sourceTree = "<group>"; };
 		183E1414180237A2009E9085 /* FPUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPUtils.h; sourceTree = "<group>"; };
 		183E1415180237A2009E9085 /* FPUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPUtils.m; sourceTree = "<group>"; };
@@ -409,7 +408,6 @@
 		18D6DFB217F68005006B300D /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				182F651E1A244E2700A769E4 /* IQKeyboardManager.bundle */,
 				1899260D18B3071600B61772 /* simulation */,
 				18CC2D0117F68117009DF2CE /* en.lproj */,
 				18D6DFBD17F68005006B300D /* Images.xcassets */,
