@@ -15,6 +15,7 @@
 #import <PEFuelPurchase-Model/PELMNotificationUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEObjc-Commons/UIImage+PEAdditions.h>
+#import <PEObjc-Commons/UIView+PERoundify.h>
 #import "FPAppNotificationNames.h"
 #import "FPCreateAccountController.h"
 #import "FPAccountLoginController.h"
@@ -183,8 +184,6 @@ For security reasons, we need you to\n\
 re-authenticate against your remote\n\
 account.";
   UIView *messagePanel = [self messagePanelWithMessage:message iconImage:[UIImage unsyncable]];
-  UIImage *warningIcon = [UIImage imageNamed:@"warning-icon"];
-  UIImageView *warningIconView = [[UIImageView alloc] initWithImage:warningIcon];
   ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
   _doesNotHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
   UIButton *reauthenticateBtn = [_uitoolkit systemButtonMaker](@"Re-authenticate", nil, nil);
@@ -197,20 +196,31 @@ account.";
   UIView *logoutMsgLabelWithPad = [self logoutPaddedMessage];
   UIButton *logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
   [[logoutBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:_doesNotHaveAuthTokenPanel];
-  [PEUIUtils placeView:warningIconView
+  [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:_doesNotHaveAuthTokenPanel];    
+  UIView *exclamationView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
+  exclamationView.layer.cornerRadius = 10;
+  exclamationView.backgroundColor = [UIColor redColor];
+  [PEUIUtils placeView:[PEUIUtils labelWithKey:@"!"
+                                          font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                               backgroundColor:[UIColor clearColor]
+                                     textColor:[UIColor whiteColor]
+                           verticalTextPadding:0.0]
+            inMiddleOf:exclamationView
+         withAlignment:PEUIHorizontalAlignmentTypeCenter
+              hpadding:0.0];
+  [PEUIUtils placeView:exclamationView
             inMiddleOf:reauthenticateBtn
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               hpadding:15.0];
   
   // place views onto panel
-  [PEUIUtils placeView:messagePanel //messageLabelWithPad
+  [PEUIUtils placeView:messagePanel
                atTopOf:_doesNotHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:100
               hpadding:0];
   [PEUIUtils placeView:reauthenticateBtn
-                 below:messagePanel //messageLabelWithPad
+                 below:messagePanel
                   onto:_doesNotHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:7.0

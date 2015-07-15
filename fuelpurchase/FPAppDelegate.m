@@ -99,6 +99,7 @@ NSString * const FPAppKeychainService = @"fp-app";
   NSMutableArray *_locations;
   UICKeyChainStore *_keychainStore;
   UITabBarController *_tabBarController;
+  FPUser *_user;
 
   #ifdef FP_DEV
     PDVUtils *_pdvUtils;
@@ -166,14 +167,14 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [_coordDao globalCancelSyncInProgressWithError:[FPUtils localSaveErrorHandlerMaker]()];
   [_coordDao pruneAllSyncedEntitiesWithError:[FPUtils localSaveErrorHandlerMaker]()];
   _keychainStore = [UICKeyChainStore keyChainStoreWithService:@"name.paulevans.fpauth-token"];
-  FPUser *user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
-  if (user) {
-    _authToken = [self storedAuthenticationTokenForUser:user];
+  _user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
+  if (_user) {
+    _authToken = [self storedAuthenticationTokenForUser:_user];
     if (_authToken) {
       [_coordDao setAuthToken:_authToken];
     }
   } else {
-    user = [_coordDao newLocalUserWithError:[FPUtils localSaveErrorHandlerMaker]()];
+    _user = [_coordDao newLocalUserWithError:[FPUtils localSaveErrorHandlerMaker]()];
   }
   self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
   // Setup notification observing
@@ -198,25 +199,25 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     if ([self doesUserHaveValidAuthToken]) {
       DDLogVerbose(@"User is logged in and has a valid authentication token.");
       // present quick menu screen
-      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMaker](user);
+      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMaker](_user);
       [[self window] setRootViewController:_tabBarController];
     } else {
       DDLogVerbose(@"User is logged in and does NOT have a valid authentication token.");
       // TODO present login screen (login screen should have an optional "bypass" features to go 'local only')
-      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMaker](user);
+      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMaker](_user);
       [[self window] setRootViewController:_tabBarController];
     }
   } else {
     DDLogVerbose(@"User is NOT logged in.");
     // present quick menu screen
-     _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMaker](user);
+     _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMaker](_user);
     [[self window] setRootViewController:_tabBarController];
   }
   if ([self isUserLoggedIn] && ![self doesUserHaveValidAuthToken]) {
     UIViewController *settingsCtrl = _tabBarController.viewControllers[1];
-    settingsCtrl.tabBarItem.image = [UIImage imageNamed:@"tab-settings-unauth"];
-    settingsCtrl.tabBarItem.selectedImage = [UIImage imageNamed:@"tab-settings-unauth"];
+    settingsCtrl.tabBarItem.badgeValue = @"!";
   }
+  [self refreshUnsyncedEditsTabBadgeValue];
   [self.window setBackgroundColor:[UIColor whiteColor]];
   [self.window makeKeyAndVisible];
   return YES;
@@ -228,10 +229,12 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
   [_locationManager stopUpdatingLocation];
+  [self refreshUnsyncedEditsTabBadgeValue];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
   [_locationManager startUpdatingLocation];
+  [self refreshUnsyncedEditsTabBadgeValue];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
@@ -243,11 +246,41 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [_locationManager stopUpdatingLocation];
 }
 
+#pragma mark - Total Num Unsynced Entities Refresher
+
+- (void)refreshUnsyncedEditsTabBadgeValue {
+  dispatch_async(dispatch_get_main_queue(), ^{
+    void (^clearBadge)(void) = ^{
+      [_tabBarController.tabBar.items[2] setBadgeValue:nil];
+    };
+    if ([self isUserLoggedIn]) {
+      if (_user) {
+        NSInteger totalNumUnsyncedEdits = [_coordDao numUnsyncedVehiclesForUser:_user] +
+        [_coordDao numUnsyncedFuelStationsForUser:_user] +
+        [_coordDao numUnsyncedFuelPurchaseLogsForUser:_user] +
+        [_coordDao numUnsyncedEnvironmentLogsForUser:_user];
+        if (totalNumUnsyncedEdits > 0) {
+          [_tabBarController.tabBar.items[2] setBadgeValue:[NSString stringWithFormat:@"%ld", (long)totalNumUnsyncedEdits]];
+        } else {
+          clearBadge();
+        }
+      } else {
+        clearBadge();
+      }
+    } else {
+      clearBadge();
+    }
+  });
+}
+
 #pragma mark - Reset user interface
 
 - (void)resetUserInterface {
   UINavigationController *home = [_tabBarController viewControllers][0];
   [home popToRootViewControllerAnimated:NO];
+  UIViewController *settingsCtrl = _tabBarController.viewControllers[1];
+  settingsCtrl.tabBarItem.badgeValue = nil;
+  [self refreshUnsyncedEditsTabBadgeValue];
 }
 
 #pragma mark - Initialization helpers
@@ -345,8 +378,7 @@ keychain under key: [%@].",
              authToken, userGlobalIdentifier);
   [_keychainStore setString:authToken forKey:userGlobalIdentifier];
   UIViewController *settingsCtrl = _tabBarController.viewControllers[1];
-  settingsCtrl.tabBarItem.image = [UIImage imageNamed:@"tab-settings"];
-  settingsCtrl.tabBarItem.selectedImage = [UIImage imageNamed:@"tab-settings"];
+  settingsCtrl.tabBarItem.badgeValue = nil;
 
   //[_keychainStore removeItemForKey:FPAuthenticationRequiredAtKey];
   // FYI, the reason we don't set the authToken on our _coordDao object is because
@@ -361,8 +393,7 @@ in an unauthenticated state.");
   [_keychainStore removeAllItems];
   if ([self isUserLoggedIn]) {
     UIViewController *settingsCtrl = _tabBarController.viewControllers[1];
-    settingsCtrl.tabBarItem.image = [UIImage imageNamed:@"tab-settings-unauth"];
-    settingsCtrl.tabBarItem.selectedImage = [UIImage imageNamed:@"tab-settings-unauth"];
+    settingsCtrl.tabBarItem.badgeValue = @"!";
   }
 }
 

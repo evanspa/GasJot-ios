@@ -189,13 +189,13 @@
 			name = "Settings Screen";
 			sourceTree = "<group>";
 		};
-		180EDA3219C7C87E00C782A6 /* Edits in Progress Screen */ = {
+		180EDA3219C7C87E00C782A6 /* Unsynced Edits Screen */ = {
 			isa = PBXGroup;
 			children = (
 				180EDA3319C7C89B00C782A6 /* FPEditsInProgressController.h */,
 				180EDA3419C7C89B00C782A6 /* FPEditsInProgressController.m */,
 			);
-			name = "Edits in Progress Screen";
+			name = "Unsynced Edits Screen";
 			sourceTree = "<group>";
 		};
 		18456CE719D39D840023A2A7 /* Panel Toolkit */ = {
@@ -306,7 +306,7 @@
 				CAB5E94D1B4B007E00144072 /* Re-authenticate */,
 				CA7D5A2B1B384FEE00433581 /* Account Login */,
 				CA7D5A2A1B384FDE00433581 /* Account Creation */,
-				180EDA3219C7C87E00C782A6 /* Edits in Progress Screen */,
+				180EDA3219C7C87E00C782A6 /* Unsynced Edits Screen */,
 				180EDA2D19C7C2AB00C782A6 /* Settings Screen */,
 				18010C57180E470C005F5CEB /* Quick Action Menu Screen */,
 			);

@@ -21,6 +21,7 @@
 #import <FlatUIKit/UIColor+FlatUI.h>
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/UIImage+PEAdditions.h>
+#import <PEObjc-Commons/UIView+PERoundify.h>
 #import "FPQuickActionMenuController.h"
 #import "FPScreenToolkit.h"
 #import "FPUtils.h"
@@ -36,6 +37,8 @@
   FPUser *_user;
   FPScreenToolkit *_screenToolkit;
   dispatch_queue_t _junkQueue;
+  //UIView *_syncableStatusPanel;
+  //UIView *_unsyncableStatusPanel;
   UIButton *_syncedStatusButton;
   UIButton *_unsyncedStatusButton;
 }
@@ -69,14 +72,14 @@
       [PEUIUtils placeView:_syncedStatusButton
                    atTopOf:self.view
              withAlignment:PEUIHorizontalAlignmentTypeRight
-                  vpadding:70.0
-                  hpadding:5.0];
+                  vpadding:80.0
+                  hpadding:0.0];
     } else {
       [PEUIUtils placeView:_unsyncedStatusButton
                    atTopOf:self.view
              withAlignment:PEUIHorizontalAlignmentTypeRight
-                  vpadding:70.0
-                  hpadding:5.0];
+                  vpadding:80.0
+                  hpadding:0.0];
     }
   }
 }
@@ -114,31 +117,36 @@
             inMiddleOf:[self view]
          withAlignment:PEUIHorizontalAlignmentTypeCenter
               hpadding:0];
-  UIImage *syncronizationIcon = [UIImage syncableIcon];
-  UIImage *unsynchronizationIcon = [UIImage unsyncableIcon];
-  CGFloat btnLength = 45.0;
-  _syncedStatusButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, btnLength, btnLength)];
-  [_syncedStatusButton setBackgroundColor:[UIColor clearColor]];
-  [_syncedStatusButton setImage:syncronizationIcon forState:UIControlStateNormal];
-  [_syncedStatusButton addTarget:self
-                          action:@selector(synchronziationStatusInfo)
-                forControlEvents:UIControlEventTouchUpInside];
-  _unsyncedStatusButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, btnLength, btnLength)];
-  [_unsyncedStatusButton setBackgroundColor:[UIColor clearColor]];
-  [_unsyncedStatusButton setImage:unsynchronizationIcon forState:UIControlStateNormal];
-  [_unsyncedStatusButton addTarget:self
-                            action:@selector(unsynchronizationStatusInfo)
-                  forControlEvents:UIControlEventTouchUpInside];
+  _syncedStatusButton = [self syncStatusButtonWithImage:[UIImage syncableIcon]
+                                                 action:@selector(synchronziationStatusInfo)];
+  _unsyncedStatusButton = [self syncStatusButtonWithImage:[UIImage unsyncableIcon]
+                                                   action:@selector(unsynchronizationStatusInfo)];
+}
+
+#pragma mark - Helpers
+
+- (UIButton *)syncStatusButtonWithImage:(UIImage *)image
+                                 action:(SEL)action {
+  UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 45.0, 35.0)];
+  [button setBackgroundColor:[UIColor whiteColor]];
+  [button addRoundedCorners:UIRectCornerTopLeft|UIRectCornerBottomLeft
+                  withRadii:CGSizeMake(5.0, 5.0)];
+  [button setImage:image forState:UIControlStateNormal];
+  [button addTarget:self
+             action:action
+   forControlEvents:UIControlEventTouchUpInside];
+  return button;
 }
 
 #pragma mark - Button Event Handlers
 
 - (void)synchronziationStatusInfo {
-  [PEUIUtils showAlertWithTitle:@"You're logged in."
+  [PEUIUtils showAlertWithTitle:@"FYI you are logged in."
                      titleImage:[UIImage syncable]
                alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You are currently logged in, and this\n\
-device is connected to your remote account."]
+Just letting you know you're currently\n\
+logged in, and that this device is\n\
+connected to your remote account."]
                     buttonTitle:@"Okay."
                    buttonAction:nil
                  relativeToView:self.tabBarController.view];
@@ -146,15 +154,16 @@ device is connected to your remote account."]
 
 - (void)unsynchronizationStatusInfo {
   NSString *message = @"\
-Although this device is connected to\n\
-your remote account, your edits are\n\
-not able to sync because you need to\n\
-re-authenticate. To re-authenticate, go to:\n\n\
+Just letting you know that although this\n\
+device is connected to your remote account,\n\
+your edits are not able to sync because you\n\
+need to re-authenticate.\n\n\
+To re-authenticate, go to:\n\n\
 Settings \u2794 Re-authenticate.";
   NSDictionary *attrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
   NSMutableAttributedString *attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
-  [attrMessage setAttributes:attrs range:NSMakeRange(155, 26)];
-  [PEUIUtils showAlertWithTitle:@"Unable to sync."
+  [attrMessage setAttributes:attrs range:NSMakeRange(183, 26)];
+  [PEUIUtils showAlertWithTitle:@"Heads up!  You are currently\nunable to sync."
                      titleImage:[UIImage unsyncable]
                alertDescription:attrMessage
                     buttonTitle:@"Okay."

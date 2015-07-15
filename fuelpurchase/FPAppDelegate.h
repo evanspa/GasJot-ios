@@ -50,6 +50,10 @@
 
 - (BOOL)doesUserHaveValidAuthToken;
 
+#pragma mark - Total Num Unsynced Entities Refresher
+
+- (void)refreshUnsyncedEditsTabBadgeValue;
+
 #pragma mark - Properties
 
 /** The application window. */

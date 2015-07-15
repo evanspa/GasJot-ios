@@ -211,9 +211,9 @@
                                             });
                                           }
                                                   allDone:^{
-                                                    if (syncAttemptErrors == 0 && !receivedUnauthedError) {
+                                                    dispatch_async(dispatch_get_main_queue(), ^{
+                                                      if (syncAttemptErrors == 0 && !receivedUnauthedError) {
                                                       // 100% sync success
-                                                      dispatch_async(dispatch_get_main_queue(), ^{
                                                         [HUD hide:YES];
                                                         [PEUIUtils showSuccessAlertWithMsgs:nil
                                                                                       title:@"Authentication Success."
@@ -221,9 +221,7 @@
                                                                                 buttonTitle:@"Okay."
                                                                                buttonAction:^{ [[self navigationController] popViewControllerAnimated:YES]; }
                                                                              relativeToView:self.tabBarController.view];
-                                                      });
-                                                    } else {
-                                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                                      } else {
                                                         [HUD hide:YES];
                                                         NSString *title = @"Sync problems.";
                                                         NSString *message = @"\
@@ -279,8 +277,9 @@ button.";
                                                           [[self navigationController] popViewControllerAnimated:YES];
                                                         }];
                                                         [alertSheet showInView:self.tabBarController.view animated:YES];
-                                                      });
-                                                    }
+                                                      }
+                                                      [APP refreshUnsyncedEditsTabBadgeValue];
+                                                    });
                                                   }
                                                     error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
         };
