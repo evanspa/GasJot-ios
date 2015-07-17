@@ -10,10 +10,8 @@
 		18010C5A180E4752005F5CEB /* FPQuickActionMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18010C59180E4752005F5CEB /* FPQuickActionMenuController.m */; };
 		180EDA3019C7C2D200C782A6 /* FPSettingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 180EDA2F19C7C2D200C782A6 /* FPSettingsController.m */; };
 		180EDA3519C7C89B00C782A6 /* FPEditsInProgressController.m in Sources */ = {isa = PBXBuildFile; fileRef = 180EDA3419C7C89B00C782A6 /* FPEditsInProgressController.m */; };
-		1822308D1A7042FC00884600 /* NSMutableArray+MoveObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 1822308C1A7042FC00884600 /* NSMutableArray+MoveObject.m */; };
 		183E13A518009F9F009E9085 /* fpapi-resource.json in Resources */ = {isa = PBXBuildFile; fileRef = 183E13A418009F9F009E9085 /* fpapi-resource.json */; };
 		183E1416180237A2009E9085 /* FPUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 183E1415180237A2009E9085 /* FPUtils.m */; };
-		183E1485180245D6009E9085 /* NSDictionary+FuelPurchase.m in Sources */ = {isa = PBXBuildFile; fileRef = 183E1484180245D6009E9085 /* NSDictionary+FuelPurchase.m */; };
 		183E148B1803CB3A009E9085 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 183E148A1803CB3A009E9085 /* MobileCoreServices.framework */; };
 		183E148C1803CB40009E9085 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 183E14871803CA54009E9085 /* SystemConfiguration.framework */; };
 		184601A219BFF6EC001C1B3A /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 184601A119BFF6EC001C1B3A /* libsqlite3.dylib */; };
@@ -22,14 +20,11 @@
 		186E0B7C19CD237B00CE4B3A /* PEListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 186E0B7B19CD237B00CE4B3A /* PEListViewController.m */; };
 		1899260E18B3071600B61772 /* simulation in Resources */ = {isa = PBXBuildFile; fileRef = 1899260D18B3071600B61772 /* simulation */; };
 		189AC7561A78034500A6CFE3 /* FPLogEnvLogComposite.m in Sources */ = {isa = PBXBuildFile; fileRef = 189AC7551A78034500A6CFE3 /* FPLogEnvLogComposite.m */; };
-		18A7E2DC196103C300C107DF /* NSObject+appdelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18A7E2DB196103C300C107DF /* NSObject+appdelegate.m */; };
 		18AC0722181ACC8C001FF24E /* FPLogging.m in Sources */ = {isa = PBXBuildFile; fileRef = 18AC0721181ACC8C001FF24E /* FPLogging.m */; };
 		18B17D5719DAE696001D2BF6 /* PEAddViewEditController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18B17D5619DAE696001D2BF6 /* PEAddViewEditController.m */; };
 		18C3CD7419DC3B440092C002 /* FPPanelToolkit.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C3CD7319DC3B440092C002 /* FPPanelToolkit.m */; };
 		18CC2CF817F680AC009DF2CE /* FPNames.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CF317F680AC009DF2CE /* FPNames.m */; };
 		18CC2CFA17F680AC009DF2CE /* FPCreateAccountController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CF717F680AC009DF2CE /* FPCreateAccountController.m */; };
-		18CC2CFF17F680BB009DF2CE /* UIColor+FuelPurchase.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CFC17F680BB009DF2CE /* UIColor+FuelPurchase.m */; };
-		18CC2D0017F680BB009DF2CE /* UIFont+FuelPurchase.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CFE17F680BB009DF2CE /* UIFont+FuelPurchase.m */; };
 		18CC2D0217F68117009DF2CE /* en.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 18CC2D0117F68117009DF2CE /* en.lproj */; };
 		18CF523219C9D9C90020FC94 /* FPScreenToolkit.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CF523119C9D9C90020FC94 /* FPScreenToolkit.m */; };
 		18D2F90D19F20CD7002D9869 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18D2F90B19F20CCE002D9869 /* CoreLocation.framework */; };
@@ -58,13 +53,9 @@
 		180EDA2F19C7C2D200C782A6 /* FPSettingsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPSettingsController.m; sourceTree = "<group>"; };
 		180EDA3319C7C89B00C782A6 /* FPEditsInProgressController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPEditsInProgressController.h; sourceTree = "<group>"; };
 		180EDA3419C7C89B00C782A6 /* FPEditsInProgressController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPEditsInProgressController.m; sourceTree = "<group>"; };
-		1822308B1A7042FC00884600 /* NSMutableArray+MoveObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableArray+MoveObject.h"; sourceTree = "<group>"; };
-		1822308C1A7042FC00884600 /* NSMutableArray+MoveObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableArray+MoveObject.m"; sourceTree = "<group>"; };
 		183E13A418009F9F009E9085 /* fpapi-resource.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "fpapi-resource.json"; sourceTree = "<group>"; };
 		183E1414180237A2009E9085 /* FPUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPUtils.h; sourceTree = "<group>"; };
 		183E1415180237A2009E9085 /* FPUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPUtils.m; sourceTree = "<group>"; };
-		183E1483180245D6009E9085 /* NSDictionary+FuelPurchase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+FuelPurchase.h"; sourceTree = "<group>"; };
-		183E1484180245D6009E9085 /* NSDictionary+FuelPurchase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+FuelPurchase.m"; sourceTree = "<group>"; };
 		183E14871803CA54009E9085 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		183E148A1803CB3A009E9085 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		184601A119BFF6EC001C1B3A /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
@@ -78,8 +69,6 @@
 		1899260D18B3071600B61772 /* simulation */ = {isa = PBXFileReference; lastKnownFileType = folder; path = simulation; sourceTree = "<group>"; };
 		189AC7541A78034500A6CFE3 /* FPLogEnvLogComposite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPLogEnvLogComposite.h; sourceTree = "<group>"; };
 		189AC7551A78034500A6CFE3 /* FPLogEnvLogComposite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPLogEnvLogComposite.m; sourceTree = "<group>"; };
-		18A7E2DA196103C300C107DF /* NSObject+appdelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+appdelegate.h"; sourceTree = "<group>"; };
-		18A7E2DB196103C300C107DF /* NSObject+appdelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+appdelegate.m"; sourceTree = "<group>"; };
 		18AC0720181ACC8C001FF24E /* FPLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPLogging.h; sourceTree = "<group>"; };
 		18AC0721181ACC8C001FF24E /* FPLogging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPLogging.m; sourceTree = "<group>"; };
 		18B17D5519DAE696001D2BF6 /* PEAddViewEditController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PEAddViewEditController.h; sourceTree = "<group>"; };
@@ -90,10 +79,6 @@
 		18CC2CF317F680AC009DF2CE /* FPNames.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPNames.m; sourceTree = "<group>"; };
 		18CC2CF617F680AC009DF2CE /* FPCreateAccountController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPCreateAccountController.h; sourceTree = "<group>"; };
 		18CC2CF717F680AC009DF2CE /* FPCreateAccountController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPCreateAccountController.m; sourceTree = "<group>"; };
-		18CC2CFB17F680BB009DF2CE /* UIColor+FuelPurchase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+FuelPurchase.h"; sourceTree = "<group>"; };
-		18CC2CFC17F680BB009DF2CE /* UIColor+FuelPurchase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+FuelPurchase.m"; sourceTree = "<group>"; };
-		18CC2CFD17F680BB009DF2CE /* UIFont+FuelPurchase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIFont+FuelPurchase.h"; sourceTree = "<group>"; };
-		18CC2CFE17F680BB009DF2CE /* UIFont+FuelPurchase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIFont+FuelPurchase.m"; sourceTree = "<group>"; };
 		18CC2D0117F68117009DF2CE /* en.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = en.lproj; sourceTree = "<group>"; };
 		18CF523019C9D9C90020FC94 /* FPScreenToolkit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPScreenToolkit.h; sourceTree = "<group>"; };
 		18CF523119C9D9C90020FC94 /* FPScreenToolkit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPScreenToolkit.m; sourceTree = "<group>"; };
@@ -274,23 +259,6 @@
 			name = "Fp Env Log Composite";
 			sourceTree = "<group>";
 		};
-		18AB99F917F68304002A8A69 /* Categories */ = {
-			isa = PBXGroup;
-			children = (
-				18CC2CFB17F680BB009DF2CE /* UIColor+FuelPurchase.h */,
-				18CC2CFC17F680BB009DF2CE /* UIColor+FuelPurchase.m */,
-				18CC2CFD17F680BB009DF2CE /* UIFont+FuelPurchase.h */,
-				18CC2CFE17F680BB009DF2CE /* UIFont+FuelPurchase.m */,
-				183E1483180245D6009E9085 /* NSDictionary+FuelPurchase.h */,
-				183E1484180245D6009E9085 /* NSDictionary+FuelPurchase.m */,
-				18A7E2DA196103C300C107DF /* NSObject+appdelegate.h */,
-				18A7E2DB196103C300C107DF /* NSObject+appdelegate.m */,
-				1822308B1A7042FC00884600 /* NSMutableArray+MoveObject.h */,
-				1822308C1A7042FC00884600 /* NSMutableArray+MoveObject.m */,
-			);
-			name = Categories;
-			sourceTree = "<group>";
-		};
 		18AB99FA17F6831C002A8A69 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -397,7 +365,6 @@
 				CA7D5A241B383F4500433581 /* Notifications */,
 				18AB99FA17F6831C002A8A69 /* Utils */,
 				CA7D5A281B384F4000433581 /* User Interface */,
-				18AB99F917F68304002A8A69 /* Categories */,
 				18AC071F181AC784001FF24E /* Logging */,
 				18D6DFB217F68005006B300D /* Supporting Files */,
 			);
@@ -631,17 +598,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				180EDA3019C7C2D200C782A6 /* FPSettingsController.m in Sources */,
-				18A7E2DC196103C300C107DF /* NSObject+appdelegate.m in Sources */,
 				186ADB3219E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.m in Sources */,
 				CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */,
-				18CC2D0017F680BB009DF2CE /* UIFont+FuelPurchase.m in Sources */,
 				CA90F4241B45AB7F005FAB35 /* PEServerSyncActionSheet.m in Sources */,
 				18B17D5719DAE696001D2BF6 /* PEAddViewEditController.m in Sources */,
 				18F61A891A96133000BA631A /* UIScrollView+PEAdditions.m in Sources */,
 				18D6DFBC17F68005006B300D /* FPAppDelegate.m in Sources */,
 				18D6DFB817F68005006B300D /* main.m in Sources */,
 				180EDA3519C7C89B00C782A6 /* FPEditsInProgressController.m in Sources */,
-				1822308D1A7042FC00884600 /* NSMutableArray+MoveObject.m in Sources */,
 				18CC2CF817F680AC009DF2CE /* FPNames.m in Sources */,
 				18EC863019EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m in Sources */,
 				CA7D5A271B383F5A00433581 /* FPAppNotificationNames.m in Sources */,
@@ -650,14 +614,12 @@
 				CA7D5A2E1B3851E200433581 /* FPAccountLoginController.m in Sources */,
 				186E0B7C19CD237B00CE4B3A /* PEListViewController.m in Sources */,
 				CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */,
-				18CC2CFF17F680BB009DF2CE /* UIColor+FuelPurchase.m in Sources */,
 				189AC7561A78034500A6CFE3 /* FPLogEnvLogComposite.m in Sources */,
 				18010C5A180E4752005F5CEB /* FPQuickActionMenuController.m in Sources */,
 				183E1416180237A2009E9085 /* FPUtils.m in Sources */,
 				18AC0722181ACC8C001FF24E /* FPLogging.m in Sources */,
 				1865B7D919FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m in Sources */,
 				18C3CD7419DC3B440092C002 /* FPPanelToolkit.m in Sources */,
-				183E1485180245D6009E9085 /* NSDictionary+FuelPurchase.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

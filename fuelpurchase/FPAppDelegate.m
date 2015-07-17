@@ -26,7 +26,6 @@
 #import "FPAppDelegate.h"
 #import <PEFuelPurchase-Model/FPUser.h>
 #import "FPQuickActionMenuController.h"
-#import "UIColor+FuelPurchase.h"  // TODO - get rid of this
 #import <IQKeyboardManager/IQKeyboardManager.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPUtils.h"
@@ -255,6 +254,11 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
         // need to add 'unsynced edits' controller
         [_tabBarController setViewControllers:@[controllers[0], controllers[1], [_screenToolkit unsynedEditsViewControllerForUser:_user]]
                                      animated:YES];
+      } else {
+        // whatever might be currently displayed on the 'unsynced edits' screen is
+        // probably now stale.  To be safe (and simple), we'll pop the stack to the
+        // root
+        [controllers[2] popToRootViewControllerAnimated:NO];
       }
       if (_user) {
         NSInteger totalNumUnsyncedEdits = [_coordDao numUnsyncedVehiclesForUser:_user] +
@@ -282,8 +286,8 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 #pragma mark - Reset user interface
 
 - (void)resetUserInterface {
-  UINavigationController *home = [_tabBarController viewControllers][0];
-  [home popToRootViewControllerAnimated:NO];
+  NSArray *controllers = [_tabBarController viewControllers];
+  [controllers[0] popToRootViewControllerAnimated:NO];
   [self refreshTabs];
 }
 

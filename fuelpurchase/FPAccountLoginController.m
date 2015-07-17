@@ -29,7 +29,6 @@
 #import "FPAuthenticationAssertion.h"
 #import "FPQuickActionMenuController.h"
 #import "FPUtils.h"
-#import "NSObject+appdelegate.h"
 #import "FPAppNotificationNames.h"
 #import "FPNames.h"
 

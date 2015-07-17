@@ -10,7 +10,7 @@
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEFuelPurchase-Model/PELMNotificationUtils.h>
-#import "NSMutableArray+MoveObject.h"
+#import "PEObjc-Commons/NSMutableArray+PEAdditions.h"
 #import "UIScrollView+PEAdditions.h"
 #import "FPLogging.h"
 

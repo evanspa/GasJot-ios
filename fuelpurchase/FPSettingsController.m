@@ -366,18 +366,14 @@ be undone.";
 
 #pragma mark - Logout
 
-- (void)logout {  
-  // TODO - check to see if there are any unsynced records in main_* tables, and
-  // if any exist, alert the user, as a logout would blow them away, and his/her
-  // edits would be lost
-  
+- (void)logout {
   void (^postAuthTokenNoMatterWhat)(void) = ^{
     dispatch_async(dispatch_get_main_queue(), ^{
       [APP clearKeychain];
       [_coordDao resetAsLocalUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
       [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLogoutNotification
                                                           object:nil
-                                                        userInfo:nil];      
+                                                        userInfo:nil];
       NSString *msg = @"\
 You have been logged out successfully.\n\
 Your remote account is no longer connected\n\
@@ -397,13 +393,30 @@ simply be saved locally.";
                            relativeToView:self.tabBarController.view];
     });
   };
-  // even if the remote authentication token deletion fails, we don't care; we'll still
-  // tell the user that logout was successful.  The server should have the smarts to eventually delete
-  // the token from its database based on a set of rules anyway (e.g., natural expiration date, or,
-  // invalidation after N-amount of inactivity, etc)
-  [_coordDao deleteRemoteAuthenticationTokenWithRemoteStoreBusy:^(NSDate *retryAfter) {
-    postAuthTokenNoMatterWhat();
-  } addlCompletionHandler:^{ postAuthTokenNoMatterWhat(); }];
+  void (^doLogout)(void) = ^{
+    // even if the remote authentication token deletion fails, we don't care; we'll still
+    // tell the user that logout was successful.  The server should have the smarts to eventually delete
+    // the token from its database based on a set of rules anyway (e.g., natural expiration date, or,
+    // invalidation after N-amount of inactivity, etc)
+    [_coordDao deleteRemoteAuthenticationTokenWithRemoteStoreBusy:^(NSDate *retryAfter) {
+      postAuthTokenNoMatterWhat();
+    } addlCompletionHandler:^{ postAuthTokenNoMatterWhat(); }];
+  };
+  NSInteger numUnsyncedEdits = [_coordDao totalNumUnsyncedEntitiesForUser:_user];
+  if (numUnsyncedEdits > 0) {
+    [PEUIUtils showWarningConfirmAlertWithTitle:@"You have unsynced edits."
+                               alertDescription:[[NSAttributedString alloc] initWithString:@"\
+You have unsynced edits.  If you log out,\n\
+they will be permanently deleted.\n\n\
+Are you sure you want to do continue?"]
+                                okaybuttonTitle:@"Yes.  Log me out."
+                               okaybuttonAction:^{ doLogout(); }
+                              cancelbuttonTitle:@"Cancel."
+                             cancelbuttonAction:^{ }
+                                 relativeToView:self.tabBarController.view];
+  } else {
+    doLogout();
+  }
 }
 
 #pragma mark - Edit Mode
