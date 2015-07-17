@@ -198,26 +198,22 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   if ([self isUserLoggedIn]) {
     if ([self doesUserHaveValidAuthToken]) {
       DDLogVerbose(@"User is logged in and has a valid authentication token.");
-      // present quick menu screen
-      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMaker](_user);
+      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:YES](_user);
       [[self window] setRootViewController:_tabBarController];
     } else {
       DDLogVerbose(@"User is logged in and does NOT have a valid authentication token.");
-      // TODO present login screen (login screen should have an optional "bypass" features to go 'local only')
-      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMaker](_user);
+      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:YES](_user);
       [[self window] setRootViewController:_tabBarController];
     }
   } else {
     DDLogVerbose(@"User is NOT logged in.");
-    // present quick menu screen
-     _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMaker](_user);
+     _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:NO](_user);
     [[self window] setRootViewController:_tabBarController];
   }
   if ([self isUserLoggedIn] && ![self doesUserHaveValidAuthToken]) {
-    UIViewController *settingsCtrl = _tabBarController.viewControllers[1];
-    settingsCtrl.tabBarItem.badgeValue = @"!";
+    [_tabBarController.tabBar.items[1] setBadgeValue:@"1"];
   }
-  [self refreshUnsyncedEditsTabBadgeValue];
+  [self refreshTabs];
   [self.window setBackgroundColor:[UIColor whiteColor]];
   [self.window makeKeyAndVisible];
   return YES;
@@ -229,12 +225,12 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
   [_locationManager stopUpdatingLocation];
-  [self refreshUnsyncedEditsTabBadgeValue];
+  [self refreshTabs];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
   [_locationManager startUpdatingLocation];
-  [self refreshUnsyncedEditsTabBadgeValue];
+  [self refreshTabs];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
@@ -246,14 +242,20 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [_locationManager stopUpdatingLocation];
 }
 
-#pragma mark - Total Num Unsynced Entities Refresher
+#pragma mark - Refresh Tabs
 
-- (void)refreshUnsyncedEditsTabBadgeValue {
+- (void)refreshTabs {
   dispatch_async(dispatch_get_main_queue(), ^{
     void (^clearBadge)(void) = ^{
       [_tabBarController.tabBar.items[2] setBadgeValue:nil];
     };
+    NSArray *controllers = [_tabBarController viewControllers];
     if ([self isUserLoggedIn]) {
+      if ([controllers count] == 2) {
+        // need to add 'unsynced edits' controller
+        [_tabBarController setViewControllers:@[controllers[0], controllers[1], [_screenToolkit unsynedEditsViewControllerForUser:_user]]
+                                     animated:YES];
+      }
       if (_user) {
         NSInteger totalNumUnsyncedEdits = [_coordDao numUnsyncedVehiclesForUser:_user] +
         [_coordDao numUnsyncedFuelStationsForUser:_user] +
@@ -268,7 +270,11 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
         clearBadge();
       }
     } else {
-      clearBadge();
+      if ([controllers count] == 3) {
+        // need to remove 'unsynced edits' controller
+        [_tabBarController setViewControllers:@[controllers[0], controllers[1]]
+                                     animated:YES];
+      }
     }
   });
 }
@@ -278,9 +284,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 - (void)resetUserInterface {
   UINavigationController *home = [_tabBarController viewControllers][0];
   [home popToRootViewControllerAnimated:NO];
-  UIViewController *settingsCtrl = _tabBarController.viewControllers[1];
-  settingsCtrl.tabBarItem.badgeValue = nil;
-  [self refreshUnsyncedEditsTabBadgeValue];
+  [self refreshTabs];
 }
 
 #pragma mark - Initialization helpers
@@ -374,11 +378,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 - (void)didReceiveNewAuthToken:(NSString *)authToken
        forUserGlobalIdentifier:(NSString *)userGlobalIdentifier {
   DDLogDebug(@"Received new authentication token: [%@].  About to store in \
-keychain under key: [%@].",
-             authToken, userGlobalIdentifier);
+keychain under key: [%@].  Is main thread? %@", authToken, userGlobalIdentifier,
+             [PEUtils yesNoFromBool:[NSThread isMainThread]]);
   [_keychainStore setString:authToken forKey:userGlobalIdentifier];
-  UIViewController *settingsCtrl = _tabBarController.viewControllers[1];
-  settingsCtrl.tabBarItem.badgeValue = nil;
+  [_tabBarController.tabBar.items[1] setBadgeValue:nil];
 
   //[_keychainStore removeItemForKey:FPAuthenticationRequiredAtKey];
   // FYI, the reason we don't set the authToken on our _coordDao object is because
@@ -389,11 +392,10 @@ keychain under key: [%@].",
 - (void)authRequired:(HCAuthentication *)authentication {
   DDLogDebug(@"Notified that 'auth required' from some remote operation.  Therefore \
 I'm going to insert this knowledge into the keychian so the app knows it's currently \
-in an unauthenticated state.");
+in an unauthenticated state.  Is main thread?  %@", [PEUtils yesNoFromBool:[NSThread isMainThread]]);
   [_keychainStore removeAllItems];
   if ([self isUserLoggedIn]) {
-    UIViewController *settingsCtrl = _tabBarController.viewControllers[1];
-    settingsCtrl.tabBarItem.badgeValue = @"!";
+    [_tabBarController.tabBar.items[1] setBadgeValue:@"!"];
   }
 }
 
@@ -497,10 +499,10 @@ in an unauthenticated state.");
       // Authenticated landing screen
       [[PDVScreen alloc] initWithDisplayName:@"Authenticated Landing"
                                  description:@"Authenticated landing screen of pre-existing user with resident auth token."
-                         viewControllerMaker:^{return [_screenToolkit newTabBarHomeLandingScreenMaker]([_coordDao userWithError:nil]);}],
+                         viewControllerMaker:^{return [_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:NO]([_coordDao userWithError:nil]);}],
       [[PDVScreen alloc] initWithDisplayName:@"Authenticated Landing"
                                  description:@"Authenticated landing screen which occurs when a user creates an account."
-                         viewControllerMaker:^{return [_screenToolkit newTabBarHomeLandingScreenMaker]([_coordDao userWithError:nil]);}]]];
+                         viewControllerMaker:^{return [_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:NO]([_coordDao userWithError:nil]);}]]];
   return @[ createAcctScreenGroup ];
 }
 

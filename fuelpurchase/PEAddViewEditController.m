@@ -1011,14 +1011,12 @@ locally.  The error is as follows:";
                          height:(CGFloat)height
                     leftImgIcon:(UIImage *)leftImgIcon {
   UIView *errorPanel = [PEUIUtils panelWithWidthOf:0.9 relativeToView:contentView fixedHeight:height];
-  //[PEUIUtils applyBorderToView:subErrorPanel withColor:[UIColor blueColor]];
   UIImageView *errImgView = [[UIImageView alloc] initWithImage:leftImgIcon];
   UILabel *errorMsgLbl = [PEUIUtils labelWithKey:title
                                             font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                  backgroundColor:[UIColor clearColor]
                                        textColor:[UIColor blackColor]
                              verticalTextPadding:0.0];
-  // TODO - left padd lbl with 3.0?
   [PEUIUtils placeView:errImgView
             inMiddleOf:errorPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft

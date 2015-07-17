@@ -52,7 +52,7 @@
 
 #pragma mark - Total Num Unsynced Entities Refresher
 
-- (void)refreshUnsyncedEditsTabBadgeValue;
+- (void)refreshTabs;
 
 #pragma mark - Properties
 

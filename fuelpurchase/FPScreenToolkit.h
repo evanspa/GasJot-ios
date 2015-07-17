@@ -39,7 +39,7 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id);
 
 #pragma mark - Drafts Screens
 
-- (FPAuthScreenMaker)newViewDraftsScreenMaker;
+- (FPAuthScreenMaker)newViewUnsyncedEditsScreenMaker;
 
 #pragma mark - Settings Screens
 
@@ -52,6 +52,8 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id);
 #pragma mark - Vehicle Screens
 
 - (FPAuthScreenMaker)newViewVehiclesScreenMaker;
+
+- (FPAuthScreenMaker)newViewUnsyncedVehiclesScreenMaker;
 
 - (FPAuthScreenMaker)newVehiclesForSelectionScreenMakerWithItemSelectedAction:(PEItemSelectedAction)itemSelectedAction
                                                        initialSelectedVehicle:(FPVehicle *)initialSelectedVehicle;
@@ -79,6 +81,8 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id);
 
 - (FPAuthScreenMaker)newViewFuelStationsScreenMaker;
 
+- (FPAuthScreenMaker)newViewUnsyncedFuelStationsScreenMaker;
+
 - (FPAuthScreenMaker)newFuelStationsForSelectionScreenMakerWithItemSelectedAction:(PEItemSelectedAction)itemSelectedAction
                                                        initialSelectedFuelStation:(FPFuelStation *)initialSelectedFuelStation;
 
@@ -101,15 +105,17 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id);
 
 - (FPAuthScreenMaker)newViewFuelPurchaseLogsScreenMakerForFuelStationInCtx;
 
+- (FPAuthScreenMaker)newViewUnsyncedFuelPurchaseLogsScreenMaker;
+
 #pragma mark - Environment Log Screens
 
 - (FPAuthScreenMaker)newAddEnvironmentLogScreenMakerWithBlk:(PEItemAddedBlk)itemAddedBlk
                                      defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
                                          listViewController:(PEListViewController *)listViewController;
 
-//- (FPAuthScreenMaker)newViewEnvironmentLogsScreenMaker;
-
 - (FPAuthScreenMaker)newViewEnvironmentLogsScreenMakerForVehicleInCtx;
+
+- (FPAuthScreenMaker)newViewUnsyncedEnvironmentLogsScreenMaker;
 
 #pragma mark - Quick Action Screen
 
@@ -117,6 +123,8 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id);
 
 #pragma mark - Tab-bar Authenticated Landing Screen
 
-- (FPAuthScreenMaker)newTabBarHomeLandingScreenMaker;
+- (FPAuthScreenMaker)newTabBarHomeLandingScreenMakerIsLoggedIn:(BOOL)isLoggedIn;
+
+- (UIViewController *)unsynedEditsViewControllerForUser:(FPUser *)user;
 
 @end

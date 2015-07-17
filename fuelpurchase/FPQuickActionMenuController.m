@@ -176,7 +176,6 @@ Settings \u2794 Re-authenticate.";
 }
 
 - (void)systemPrune {
-  // TODO incorporate a HUD into this
   [_coordDao pruneAllSyncedEntitiesWithError:[FPUtils localDatabaseErrorHudHandlerMaker](nil, self.view)];  
 }
 

@@ -54,33 +54,22 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
 
 #pragma mark - Helpers
 
-/*- (void(^)(void))entityBeingSyncedBlk {
-  return ^{
-    [PEUIUtils showAlertWithMsgs:@[[NSString stringWithFormat:@"Sorry, but the \
-remote-synchronizer is currently attempting to sync this record.  Try again in a few moments."]]
-                           title:@"Oops."
-                     buttonTitle:@"okayMsg"];
-    
+- (PEWouldBeIndexOfEntity)wouldBeIndexBlkForEqualityBlock:(BOOL(^)(id, id))equalityBlock
+                                            entityFetcher:(NSArray *(^)(void))entityFetcher {
+  return ^ NSInteger (PELMMainSupport *entity) {
+    NSArray *entities = entityFetcher();
+    NSInteger index = 0;
+    NSInteger count = 0;
+    for (PELMMainSupport *e in entities) {
+      if (equalityBlock(e, entity)) {
+        index = count;
+        break;
+      }
+      count++;
+    }
+    return index;
   };
 }
-
-- (void(^)(void))entityDeletedBlk {
-  return ^{
-    [PEUIUtils showAlertWithMsgs:@[[NSString stringWithFormat:@"Sorry, but the \
-remote-synchronizer indicates this record is marked for deletion."]]
-                           title:@"Oops."
-                     buttonTitle:@"okayMsg"];
-  };
-}
-
-- (void(^)(void))entityInConflictBlk {
-  return ^{
-    [PEUIUtils showAlertWithMsgs:@[[NSString stringWithFormat:@"Sorry, but the \
-remote-synchronizer indicates this record is marked as in-conflict."]]
-                           title:@"Oops."
-                     buttonTitle:@"okayMsg"];
-  };
-}*/
 
 #pragma mark - Generic Screens
 
@@ -94,7 +83,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
 
 #pragma mark - Drafts Screens
 
-- (FPAuthScreenMaker)newViewDraftsScreenMaker {
+- (FPAuthScreenMaker)newViewUnsyncedEditsScreenMaker {
   return ^ UIViewController *(FPUser *user) {
     return [[FPEditsInProgressController alloc]
               initWithStoreCoordinator:_coordDao
@@ -139,13 +128,13 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                             entityDeleted:nil //[self entityDeletedBlk]
                                          entityInConflict:nil //[self entityInConflictBlk]
                                                     error:[FPUtils localSaveErrorHandlerMaker]()];
-      [APP refreshUnsyncedEditsTabBadgeValue];
+      [APP refreshTabs];
       return prepareSuccess;
     };
     PEEntityEditCancelerBlk userEditCanceler = ^(PEAddViewEditController *ctrl, FPUser *user) {
       [_coordDao cancelEditOfUser:user
                             error:[FPUtils localSaveErrorHandlerMaker]()];
-      [APP refreshUnsyncedEditsTabBadgeValue];
+      [APP refreshTabs];
     };
     PESaveEntityBlk userSaver = ^(PEAddViewEditController *ctrl, FPUser *user) {
       [_coordDao saveUser:user
@@ -162,11 +151,11 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       NSString *mainMsgFragment = @"syncing user account";
       NSString *recordTitle = @"User account";
       [_coordDao markAsDoneEditingAndSyncUserImmediate:user
-                                            successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                    remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                    tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                        remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveUsrErrMsgs:errMask]); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                       authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
+                                            successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                    remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                    tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                        remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveUsrErrMsgs:errMask]); [APP refreshTabs];}
+                                       authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
@@ -202,19 +191,6 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
 
 #pragma mark - Vehicle Screens
 
-+ (NSInteger)indexOfVehicle:(FPVehicle *)vehicle inVehicles:(NSArray *)vehicles {
-  NSInteger index = 0;
-  NSInteger count = 0;
-  for (FPVehicle *v in vehicles) {
-    if ([v isEqualToVehicle:vehicle]) {
-      index = count;
-      break;
-    }
-    count++;
-  }
-  return index;
-}
-
 - (FPAuthScreenMaker)newViewVehiclesScreenMaker {
   return ^ UIViewController *(FPUser *user) {
     void (^addVehicleAction)(PEListViewController *, PEItemAddedBlk) =
@@ -242,11 +218,8 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       return [_coordDao vehiclesForUser:user
                                   error:[FPUtils localFetchErrorHandlerMaker]()];
     };
-    NSArray *initialVehicles = [_coordDao vehiclesForUser:user
-                                                    error:[FPUtils localFetchErrorHandlerMaker]()];
-    PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
-      return [FPScreenToolkit indexOfVehicle:(FPVehicle *)entity inVehicles:pageLoader(nil)];
-    };
+    PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPVehicle *v1, FPVehicle *v2){return [v1 isEqualToVehicle:v2];}
+                                                                     entityFetcher:^{ return pageLoader(nil); }];
     PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPVehicle *vehicle) {return [vehicle name];}
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
@@ -261,7 +234,48 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                            initialSelectedItem:nil
                                  addItemAction:addVehicleAction
                                 cellIdentifier:@"FPVehicleCell"
-                                initialObjects:initialVehicles
+                                initialObjects:pageLoader(nil)
+                                    pageLoader:pageLoader
+                                heightForCells:52.0
+                               detailViewMaker:vehicleDetailViewMaker
+                                     uitoolkit:_uitoolkit
+                doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
+                          wouldBeIndexOfEntity:wouldBeIndexBlk];
+  };
+}
+
+- (FPAuthScreenMaker)newViewUnsyncedVehiclesScreenMaker {
+  return ^ UIViewController *(FPUser *user) {
+    FPDetailViewMaker vehicleDetailViewMaker = ^UIViewController *(PEListViewController *listViewCtrl,
+                                                                   id dataObject,
+                                                                   NSIndexPath *indexPath,
+                                                                   PEItemChangedBlk itemChangedBlk) {
+      return [self newVehicleDetailScreenMakerWithVehicle:dataObject
+                                         vehicleIndexPath:indexPath
+                                           itemChangedBlk:itemChangedBlk
+                                       listViewController:listViewCtrl](user);
+    };
+    PEPageLoaderBlk pageLoader = ^ NSArray * (FPVehicle *lastVehicle) {
+      return [_coordDao unsyncedVehiclesForUser:user
+                                          error:[FPUtils localFetchErrorHandlerMaker]()];
+    };
+    PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPVehicle *v1, FPVehicle *v2){return [v1 isEqualToVehicle:v2];}
+                                                                     entityFetcher:^{ return pageLoader(nil); }];
+    PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPVehicle *vehicle) {return [vehicle name];}
+                                                        alwaysTopifyTitleLabel:NO
+                                                                     uitoolkit:_uitoolkit
+                                                          subtitleLeftHPadding:15.0
+                                                                    isLoggedIn:[APP isUserLoggedIn]];
+    return [[PEListViewController alloc]
+              initWithClassOfDataSourceObjects:[FPVehicle class]
+                                         title:@"Unsynced Vehicles"
+                         isPaginatedDataSource:NO
+                               tableCellStyler:tableCellStyler
+                            itemSelectedAction:nil
+                           initialSelectedItem:nil
+                                 addItemAction:nil
+                                cellIdentifier:@"FPVehicleCell"
+                                initialObjects:pageLoader(nil)
                                     pageLoader:pageLoader
                                 heightForCells:52.0
                                detailViewMaker:vehicleDetailViewMaker
@@ -288,11 +302,8 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       return [_coordDao vehiclesForUser:user
                                   error:[FPUtils localFetchErrorHandlerMaker]()];
     };
-    NSArray *initialVehicles = [_coordDao vehiclesForUser:user
-                                                    error:[FPUtils localFetchErrorHandlerMaker]()];
-    PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
-      return [FPScreenToolkit indexOfVehicle:(FPVehicle *)entity inVehicles:pageLoader(nil)];
-    };
+    PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPVehicle *v1, FPVehicle *v2){return [v1 isEqualToVehicle:v2];}
+                                                                     entityFetcher:^{ return pageLoader(nil); }];
     PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPVehicle *vehicle) {return [vehicle name];}
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
@@ -307,7 +318,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                           initialSelectedItem:initialSelectedVehicle
                                 addItemAction:addVehicleAction
                                cellIdentifier:@"FPVehicleCell"
-                               initialObjects:initialVehicles
+                               initialObjects:pageLoader(nil)
                                    pageLoader:pageLoader
                                heightForCells:52.0
                               detailViewMaker:nil
@@ -343,15 +354,15 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
         NSString *recordTitle = @"Vehicle";
         [_coordDao saveNewAndSyncImmediateVehicle:newVehicle
                                           forUser:user
-                                       successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                               remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshUnsyncedEditsTabBadgeValue];}
-                               tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                   remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                  authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
+                                       successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                               remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                               tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                   remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]); [APP refreshTabs];}
+                                  authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                             error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
         [_coordDao saveNewVehicle:newVehicle forUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
-        [APP refreshUnsyncedEditsTabBadgeValue];
+        [APP refreshTabs];
       }
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
@@ -364,7 +375,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
         [newVehicle setEditInProgress:YES];
         [_coordDao cancelEditOfVehicle:newVehicle
                                  error:[FPUtils localSaveErrorHandlerMaker]()];
-        [APP refreshUnsyncedEditsTabBadgeValue];
+        [APP refreshTabs];
       }
       if (dismissCtrlr) {
         [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
@@ -403,18 +414,18 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                                entityDeleted:nil //[self entityDeletedBlk]
                                             entityInConflict:nil //[self entityInConflictBlk]
                                                        error:[FPUtils localSaveErrorHandlerMaker]()];
-      [APP refreshUnsyncedEditsTabBadgeValue];
+      [APP refreshTabs];
       return prepareSuccess;
     };
     PEEntityEditCancelerBlk vehicleEditCanceler = ^(PEAddViewEditController *ctrl, FPVehicle *vehicle) {
       [_coordDao cancelEditOfVehicle:vehicle
                                error:[FPUtils localSaveErrorHandlerMaker]()];
-      [APP refreshUnsyncedEditsTabBadgeValue];
+      [APP refreshTabs];
     };
     PESaveEntityBlk vehicleSaver = ^(PEAddViewEditController *ctrl, FPVehicle *vehicle) {
       [_coordDao saveVehicle:vehicle
                        error:[FPUtils localSaveErrorHandlerMaker]()];
-      [APP refreshUnsyncedEditsTabBadgeValue];
+      [APP refreshTabs];
     };
     PEMarkAsDoneEditingBlk doneEditingVehicleMarker = ^(PEAddViewEditController *ctrl,
                                                         FPVehicle *vehicle,
@@ -429,16 +440,16 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
         NSString *recordTitle = @"Vehicle";
         [_coordDao markAsDoneEditingAndSyncVehicleImmediate:vehicle
                                                     forUser:user
-                                                 successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                         remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                         tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                             remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                            authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
+                                                 successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                         remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                         tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                             remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]); [APP refreshTabs];}
+                                            authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                       error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
         [_coordDao markAsDoneEditingVehicle:vehicle
                                       error:[FPUtils localSaveErrorHandlerMaker]()];
-        [APP refreshUnsyncedEditsTabBadgeValue];
+        [APP refreshTabs];
       }
     };
     PESyncerBlk syncer = ^(PEAddViewEditController *ctrl,
@@ -453,11 +464,11 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       NSString *recordTitle = @"Vehicle";
       [_coordDao flushUnsyncedChangesToVehicle:vehicle
                                        forUser:user
-                                addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue]; }
-                        addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshUnsyncedEditsTabBadgeValue];}
-                        addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                            addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]); [APP refreshUnsyncedEditsTabBadgeValue];}
-                           addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
+                                addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs]; }
+                        addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                        addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                            addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]); [APP refreshTabs];}
+                           addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                          error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
@@ -555,19 +566,6 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
   [unknownReason setTag:unknownReasonTag];
 }
 
-+ (NSInteger)indexOfFuelStation:(FPFuelStation *)fuelstation inFuelStations:(NSArray *)fuelstations {
-  NSInteger index = 0;
-  NSInteger count = 0;
-  for (FPFuelStation *fs in fuelstations) {
-    if ([fs isEqualToFuelStation:fuelstation]) {
-      index = count;
-      break;
-    }
-    count++;
-  }
-  return index;
-}
-
 - (FPAuthScreenMaker)newViewFuelStationsScreenMaker {
   return ^ UIViewController *(FPUser *user) {
     void (^addFuelStationAction)(PEListViewController *, PEItemAddedBlk) =
@@ -595,12 +593,8 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       fuelstations = [FPUtils sortFuelstations:fuelstations inAscOrderByDistanceFrom:[APP latestLocation]];
       return fuelstations;
     };
-    NSArray *initialFuelStations =
-      [_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];
-    initialFuelStations = [FPUtils sortFuelstations:initialFuelStations inAscOrderByDistanceFrom:[APP latestLocation]];
-    PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
-      return [FPScreenToolkit indexOfFuelStation:(FPFuelStation *)entity inFuelStations:pageLoader(nil)];
-    };
+    PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelStation *fs1, FPFuelStation *fs2){return [fs1 isEqualToFuelStation:fs2];}
+                                                                     entityFetcher:^{ return pageLoader(nil); }];
     PESyncViewStyler tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
       [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
                        alwaysTopifyTitleLabel:YES
@@ -628,7 +622,63 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                           initialSelectedItem:nil
                                 addItemAction:addFuelStationAction
                                cellIdentifier:@"FPFuelStationCell"
-                               initialObjects:initialFuelStations
+                               initialObjects:pageLoader(nil)
+                                   pageLoader:pageLoader
+                               heightForCells:52.0
+                              detailViewMaker:fuelStationDetailViewMaker
+                                    uitoolkit:_uitoolkit
+               doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
+                         wouldBeIndexOfEntity:wouldBeIndexBlk];
+  };
+}
+
+- (FPAuthScreenMaker)newViewUnsyncedFuelStationsScreenMaker {
+  return ^ UIViewController *(FPUser *user) {
+    FPDetailViewMaker fuelStationDetailViewMaker = ^UIViewController *(PEListViewController *listViewCtlr,
+                                                                       id dataObject,
+                                                                       NSIndexPath *indexPath,
+                                                                       PEItemChangedBlk itemChangedBlk) {
+      return [self newFuelStationDetailScreenMakerWithFuelStation:dataObject
+                                             fuelStationIndexPath:indexPath
+                                                   itemChangedBlk:itemChangedBlk
+                                               listViewController:listViewCtlr](user);
+    };
+    PEPageLoaderBlk pageLoader = ^ NSArray * (id lastObject) {
+      NSArray *fuelstations = [_coordDao unsyncedFuelStationsForUser:user
+                                                               error:[FPUtils localFetchErrorHandlerMaker]()];
+      fuelstations = [FPUtils sortFuelstations:fuelstations inAscOrderByDistanceFrom:[APP latestLocation]];
+      return fuelstations;
+    };
+    PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelStation *fs1, FPFuelStation *fs2){return [fs1 isEqualToFuelStation:fs2];}
+                                                                     entityFetcher:^{ return pageLoader(nil); }];
+    PESyncViewStyler tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
+      [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
+                       alwaysTopifyTitleLabel:YES
+                                    uitoolkit:_uitoolkit
+                         subtitleLeftHPadding:15.0
+                                   isLoggedIn:[APP isUserLoggedIn]](contentView, fuelstation);
+      CGFloat distanceInfoVPadding = 25.5;
+      if ([fuelstation location]) {
+        if ([APP latestLocation]) {
+          distanceInfoVPadding = 28.5;
+        }
+      }
+      [self addDistanceInfoToTopOfCellContentView:contentView
+                          withHorizontalAlignment:PEUIHorizontalAlignmentTypeRight
+                              withVerticalPadding:distanceInfoVPadding
+                                horizontalPadding:20.0
+                                  withFuelstation:fuelstation];
+    };
+    return [[PEListViewController alloc]
+             initWithClassOfDataSourceObjects:[FPFuelStation class]
+                                        title:@"Unsynced Fuel Stations"
+                        isPaginatedDataSource:NO
+                              tableCellStyler:tableCellStyler
+                           itemSelectedAction:nil
+                          initialSelectedItem:nil
+                                addItemAction:nil
+                               cellIdentifier:@"FPFuelStationCell"
+                               initialObjects:pageLoader(nil)
                                    pageLoader:pageLoader
                                heightForCells:52.0
                               detailViewMaker:fuelStationDetailViewMaker
@@ -657,12 +707,8 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       fuelstations = [FPUtils sortFuelstations:fuelstations inAscOrderByDistanceFrom:[APP latestLocation]];
       return fuelstations;
     };
-    NSArray *initialFuelStations =
-    [_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];
-    initialFuelStations = [FPUtils sortFuelstations:initialFuelStations inAscOrderByDistanceFrom:[APP latestLocation]];
-    PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
-      return [FPScreenToolkit indexOfFuelStation:(FPFuelStation *)entity inFuelStations:pageLoader(nil)];
-    };
+    PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelStation *fs1, FPFuelStation *fs2){return [fs1 isEqualToFuelStation:fs2];}
+                                                                     entityFetcher:^{ return pageLoader(nil); }];
     PESyncViewStyler tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
       [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
                        alwaysTopifyTitleLabel:YES
@@ -690,7 +736,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                           initialSelectedItem:initialSelectedFuelStation
                                 addItemAction:addFuelStationAction
                                cellIdentifier:@"FPFuelStationCell"
-                               initialObjects:initialFuelStations
+                               initialObjects:pageLoader(nil)
                                    pageLoader:pageLoader
                                heightForCells:52.0
                               detailViewMaker:nil
@@ -726,17 +772,17 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
         NSString *recordTitle = @"Fuel station";
         [_coordDao saveNewAndSyncImmediateFuelStation:newFuelStation
                                               forUser:user
-                                           successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                   remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                   tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                       remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                      authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
+                                           successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                   remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                   tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                       remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]); [APP refreshTabs];}
+                                      authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                 error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
         [_coordDao saveNewFuelStation:newFuelStation
                               forUser:user
                                 error:[FPUtils localSaveErrorHandlerMaker]()];
-        [APP refreshUnsyncedEditsTabBadgeValue];
+        [APP refreshTabs];
       }
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
@@ -749,7 +795,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
         [newFuelStation setEditInProgress:YES];
         [_coordDao cancelEditOfFuelStation:newFuelStation
                                      error:[FPUtils localSaveErrorHandlerMaker]()];
-        [APP refreshUnsyncedEditsTabBadgeValue];
+        [APP refreshTabs];
       }
       if (dismissCtrlr) {
         [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
@@ -789,14 +835,14 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                                    entityDeleted:nil //[self entityDeletedBlk]
                                                 entityInConflict:nil //[self entityInConflictBlk]
                                                            error:[FPUtils localSaveErrorHandlerMaker]()];
-      [APP refreshUnsyncedEditsTabBadgeValue];
+      [APP refreshTabs];
       return prepareSuccess;
     };
     PEEntityEditCancelerBlk fuelStationEditCanceler = ^ (PEAddViewEditController *ctrl, PELMModelSupport *entity) {
       FPFuelStation *fuelStation = (FPFuelStation *)entity;
       [_coordDao cancelEditOfFuelStation:fuelStation
                                    error:[FPUtils localSaveErrorHandlerMaker]()];
-      [APP refreshUnsyncedEditsTabBadgeValue];
+      [APP refreshTabs];
     };
     PESaveEntityBlk fuelStationSaver = ^(PEAddViewEditController *ctrl, PELMModelSupport *entity) {
       FPFuelStation *fuelStation = (FPFuelStation *)entity;
@@ -817,16 +863,16 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
         FPFuelStation *fuelStation = (FPFuelStation *)entity;
         [_coordDao markAsDoneEditingAndSyncFuelStationImmediate:fuelStation
                                                         forUser:user
-                                                     successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                             remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                             tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                                 remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                                authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
+                                                     successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                             remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                             tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                 remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]); [APP refreshTabs];}
+                                                authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                           error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
         [_coordDao markAsDoneEditingFuelStation:fuelStation
                                           error:[FPUtils localSaveErrorHandlerMaker]()];
-        [APP refreshUnsyncedEditsTabBadgeValue];
+        [APP refreshTabs];
       }
     };
     PESyncerBlk syncer = ^(PEAddViewEditController *ctrl,
@@ -841,11 +887,11 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       NSString *recordTitle = @"Fuel station";
       [_coordDao flushUnsyncedChangesToFuelStation:fuelStation
                                            forUser:user
-                                    addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                            addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshUnsyncedEditsTabBadgeValue];}
-                            addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]); [APP refreshUnsyncedEditsTabBadgeValue];}
-                               addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
+                                    addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                            addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                            addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]); [APP refreshTabs];}
+                               addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                              error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
@@ -979,13 +1025,13 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                                   forUser:user
                                                   vehicle:selectedVehicle
                                               fuelStation:selectedFuelStation
-                                               successBlk:^{successBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                       remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                       tempRemoteErrorBlk:^{tempErrBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                           remoteErrorBlk:^(NSInteger errMask) {errBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                          authRequiredBlk:^{authReqdBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                             skippedDueToVehicleNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshUnsyncedEditsTabBadgeValue];}
-                         skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The associated fuel station is not yet synced."); [APP refreshUnsyncedEditsTabBadgeValue];}
+                                               successBlk:^{successBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                       remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                       tempRemoteErrorBlk:^{tempErrBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                           remoteErrorBlk:^(NSInteger errMask) {errBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
+                                          authRequiredBlk:^{authReqdBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                             skippedDueToVehicleNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
+                         skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The associated fuel station is not yet synced."); [APP refreshTabs];}
                                                     error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
         [_coordDao saveNewFuelPurchaseLog:[fpEnvLogComposite fpLog]
@@ -993,7 +1039,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                   vehicle:selectedVehicle
                               fuelStation:selectedFuelStation
                                     error:[FPUtils localSaveErrorHandlerMaker]()];
-        [APP refreshUnsyncedEditsTabBadgeValue];
+        [APP refreshTabs];
       }
       if (savePreFillupEnvLogPercentComplete) {
         recordTitle = @"Pre-fillup environment log";
@@ -1001,18 +1047,18 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
           [_coordDao saveNewAndSyncImmediateEnvironmentLog:[fpEnvLogComposite preFillupEnvLog]
                                                    forUser:user
                                                    vehicle:selectedVehicle
-                                                successBlk:^{successBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                        remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                        tempRemoteErrorBlk:^{tempErrBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                            remoteErrorBlk:^(NSInteger errMask) {errBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                           authRequiredBlk:^{authReqdBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                              skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshUnsyncedEditsTabBadgeValue];}
+                                                successBlk:^{successBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                        remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                        tempRemoteErrorBlk:^{tempErrBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                            remoteErrorBlk:^(NSInteger errMask) {errBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                           authRequiredBlk:^{authReqdBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                              skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                                      error:[FPUtils localSaveErrorHandlerMaker]()];
         } else {
           [_coordDao saveNewEnvironmentLog:[fpEnvLogComposite preFillupEnvLog]
                                    forUser:user vehicle:selectedVehicle
                                      error:[FPUtils localSaveErrorHandlerMaker]()];
-          [APP refreshUnsyncedEditsTabBadgeValue];
+          [APP refreshTabs];
         }
       }
       if (savePostFillupEnvLogPercentComplete) {
@@ -1021,18 +1067,18 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
           [_coordDao saveNewAndSyncImmediateEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
                                                    forUser:user
                                                    vehicle:selectedVehicle
-                                                successBlk:^{successBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                        remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                        tempRemoteErrorBlk:^{tempErrBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                            remoteErrorBlk:^(NSInteger errMask) {errBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                           authRequiredBlk:^{authReqdBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                              skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshUnsyncedEditsTabBadgeValue];}
+                                                successBlk:^{successBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                        remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                        tempRemoteErrorBlk:^{tempErrBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                            remoteErrorBlk:^(NSInteger errMask) {errBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                           authRequiredBlk:^{authReqdBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                              skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                                      error:[FPUtils localSaveErrorHandlerMaker]()];
         } else {
           [_coordDao saveNewEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
                                    forUser:user vehicle:selectedVehicle
                                      error:[FPUtils localSaveErrorHandlerMaker]()];
-          [APP refreshUnsyncedEditsTabBadgeValue];
+          [APP refreshTabs];
         }
       }
     };
@@ -1069,7 +1115,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
                                             error:[FPUtils localSaveErrorHandlerMaker]()];
           }
         }
-        [APP refreshUnsyncedEditsTabBadgeValue];
+        [APP refreshTabs];
       }
       if (dismissCtrlr) {
         [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
@@ -1132,14 +1178,14 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
         // in the table view.
         refreshVehicleFuelStationTableView(ctrl, fpLog);
       }
-      [APP refreshUnsyncedEditsTabBadgeValue];
+      [APP refreshTabs];
       return result;
     };
     PEEntityEditCancelerBlk fpLogEditCanceler = ^(PEAddViewEditController *ctrl, FPFuelPurchaseLog *fpLog) {
       [_coordDao cancelEditOfFuelPurchaseLog:fpLog
                                        error:[FPUtils localSaveErrorHandlerMaker]()];
       refreshVehicleFuelStationTableView(ctrl, fpLog);
-      [APP refreshUnsyncedEditsTabBadgeValue];
+      [APP refreshTabs];
     };
     PESaveEntityBlk fpLogSaver = ^(PEAddViewEditController *ctrl, FPFuelPurchaseLog *fpLog) {
       FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
@@ -1166,18 +1212,18 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
         NSString *recordTitle = @"Fuel purchase log";
         [_coordDao markAsDoneEditingAndSyncFuelPurchaseLogImmediate:fpLog
                                                             forUser:user
-                                                         successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                                 remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                                 tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                                     remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                                    authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                       skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                   skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated fuel station is not yet synced."); [APP refreshUnsyncedEditsTabBadgeValue];}
+                                                         successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                 remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                                 tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                     remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
+                                                    authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                       skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
+                                   skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated fuel station is not yet synced."); [APP refreshTabs];}
                                                               error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
         [_coordDao markAsDoneEditingFuelPurchaseLog:fpLog
                                               error:[FPUtils localSaveErrorHandlerMaker]()];
-        [APP refreshUnsyncedEditsTabBadgeValue];
+        [APP refreshTabs];
       }
     };
     PESyncerBlk syncer = ^(PEAddViewEditController *ctrl,
@@ -1192,13 +1238,13 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       NSString *recordTitle = @"Fuel purchase log";
       [_coordDao flushUnsyncedChangesToFuelPurchaseLog:fpLog
                                               forUser:user
-                                       addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                               addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshUnsyncedEditsTabBadgeValue];}
-                               addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                   addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                  addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                         skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshUnsyncedEditsTabBadgeValue];}
-                     skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated fuel station is not yet synced."); [APP refreshUnsyncedEditsTabBadgeValue];}
+                                       addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                               addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                               addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                   addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
+                                  addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                         skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
+                     skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated fuel station is not yet synced."); [APP refreshTabs];}
                                                 error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     return [PEAddViewEditController
@@ -1379,7 +1425,51 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
   };
 }
 
-#pragma mark - Environment Log Screens
+- (FPAuthScreenMaker)newViewUnsyncedFuelPurchaseLogsScreenMaker {
+  return ^ UIViewController *(FPUser *user) {
+    FPDetailViewMaker fpLogDetailViewMaker =
+      ^UIViewController *(PEListViewController *listViewCtrlr,
+                          id dataObject,
+                          NSIndexPath *indexPath,
+                          PEItemChangedBlk itemChangedBlk) {
+      return [self newFuelPurchaseLogDetailScreenMakerWithFpLog:dataObject
+                                                 fpLogIndexPath:indexPath
+                                                 itemChangedBlk:itemChangedBlk
+                                  listViewParentIsVehicleDetail:NO
+                              listViewParentIsFuelStationDetail:NO
+                                             listViewController:listViewCtrlr](user);
+    };
+    PEPageLoaderBlk pageLoader = ^ NSArray * (FPFuelPurchaseLog *lastFpLog) {
+      return [_coordDao unsyncedFuelPurchaseLogsForUser:user
+                                                  error:[FPUtils localFetchErrorHandlerMaker]()];
+    };
+    PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelPurchaseLog *f1, FPFuelPurchaseLog *f2){return [f1 isEqualToFuelPurchaseLog:f2];}
+                                                                     entityFetcher:^{ return pageLoader(nil); }];
+    PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog) {return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];}
+                                                        alwaysTopifyTitleLabel:NO
+                                                                     uitoolkit:_uitoolkit
+                                                          subtitleLeftHPadding:15.0
+                                                                    isLoggedIn:[APP isUserLoggedIn]];
+    return [[PEListViewController alloc]
+             initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
+                                        title:@"Unsynced FP Logs"
+                        isPaginatedDataSource:NO
+                              tableCellStyler:tableCellStyler
+                           itemSelectedAction:nil
+                          initialSelectedItem:nil
+                                addItemAction:nil
+                               cellIdentifier:@"FPFuelPurchaseLogCell"
+                               initialObjects:pageLoader(nil)
+                                   pageLoader:pageLoader
+                               heightForCells:52.0
+                              detailViewMaker:fpLogDetailViewMaker
+                                    uitoolkit:_uitoolkit
+               doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
+                         wouldBeIndexOfEntity:wouldBeIndexBlk];
+  };
+}
+
+#pragma mark - Environment Log Screen
 
 - (PEEntityValidatorBlk)newEnvironmentLogValidator {
   return ^NSArray *(UIView *envLogPanel) {
@@ -1394,7 +1484,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
     PEMessageCollector cannotBeBlankCollector =
       [PEUIUtils newTfCannotBeEmptyBlkForMsgs:errMsgs entityPanel:envLogPanel];
     cannotBeBlankCollector(FPEnvLogTagOdometer, @"Odometer cannot be empty.");
-    cannotBeBlankCollector(FPEnvLogTagReportedOutsideTemp, @"Reported outside temperature cannot be empty.");
+    cannotBeBlankCollector(FPEnvLogTagReportedOutsideTemp, @"Reported outside temperature cannot\nbe empty.");
     return errMsgs;
   };
 }
@@ -1421,19 +1511,19 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
         [_coordDao saveNewAndSyncImmediateEnvironmentLog:envLog
                                                  forUser:user
                                                  vehicle:selectedVehicle
-                                              successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                      remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                      tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                          remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                         authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                            skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshUnsyncedEditsTabBadgeValue];}
+                                              successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                      remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                      tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                          remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                         authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                            skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                                    error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
         [_coordDao saveNewEnvironmentLog:envLog
                                  forUser:user
                                  vehicle:selectedVehicle
                                    error:[FPUtils localSaveErrorHandlerMaker]()];
-        [APP refreshUnsyncedEditsTabBadgeValue];
+        [APP refreshTabs];
       }
     };
     PEViewDidAppearBlk viewDidAppearBlk = ^(UIView *entityPanel) {
@@ -1450,7 +1540,7 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
         [newEnvLog setEditInProgress:YES];
         [_coordDao cancelEditOfEnvironmentLog:newEnvLog
                                         error:[FPUtils localSaveErrorHandlerMaker]()];
-        [APP refreshUnsyncedEditsTabBadgeValue];
+        [APP refreshTabs];
       }
       if (dismissCtrlr) {
         [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
@@ -1504,14 +1594,14 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       if (result) {
         refreshVehicleTableView(ctrl, envLog);
       }
-      [APP refreshUnsyncedEditsTabBadgeValue];
+      [APP refreshTabs];
       return result;
     };
     PEEntityEditCancelerBlk envLogEditCanceler = ^(PEAddViewEditController *ctrl, FPEnvironmentLog *envLog) {
       [_coordDao cancelEditOfEnvironmentLog:envLog
                                       error:[FPUtils localSaveErrorHandlerMaker]()];
       refreshVehicleTableView(ctrl, envLog);
-      [APP refreshUnsyncedEditsTabBadgeValue];
+      [APP refreshTabs];
     };
     PESaveEntityBlk envLogSaver = ^(PEAddViewEditController *ctrl, FPEnvironmentLog *envLog) {
       FPEnvLogVehicleAndDateDataSourceDelegate *ds =
@@ -1536,17 +1626,17 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
         NSString *recordTitle = @"Environment log";
         [_coordDao markAsDoneEditingAndSyncEnvironmentLogImmediate:envLog
                                                             forUser:user
-                                                         successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                                 remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                                 tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                                     remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                                    authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                       skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshUnsyncedEditsTabBadgeValue];}
+                                                         successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                 remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                                 tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                     remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                                    authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                       skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                                               error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
         [_coordDao markAsDoneEditingEnvironmentLog:envLog
                                               error:[FPUtils localSaveErrorHandlerMaker]()];
-        [APP refreshUnsyncedEditsTabBadgeValue];
+        [APP refreshTabs];
       }
     };
     PESyncerBlk syncer = ^(PEAddViewEditController *ctrl,
@@ -1561,12 +1651,12 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
       NSString *recordTitle = @"Environment log";
       [_coordDao flushUnsyncedChangesToEnvironmentLog:envLog
                                               forUser:user
-                                       addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                               addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshUnsyncedEditsTabBadgeValue];}
-                               addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                   addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshUnsyncedEditsTabBadgeValue];}
-                                  addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshUnsyncedEditsTabBadgeValue];}
-                         skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshUnsyncedEditsTabBadgeValue];}
+                                       addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                               addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                               addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                   addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                  addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                         skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                                 error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     return [PEAddViewEditController viewEntityCtrlrWithEntity:envLog
@@ -1667,6 +1757,48 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
   };
 }
 
+- (FPAuthScreenMaker)newViewUnsyncedEnvironmentLogsScreenMaker {
+  return ^ UIViewController *(FPUser *user) {
+    FPDetailViewMaker envLogDetailViewMaker =
+    ^UIViewController *(PEListViewController *listViewCtrlr,
+                        id dataObject,
+                        NSIndexPath *indexPath,
+                        PEItemChangedBlk itemChangedBlk) {
+      return [self newEnvironmentLogDetailScreenMakerWithEnvLog:dataObject
+                                                envLogIndexPath:indexPath
+                                                 itemChangedBlk:itemChangedBlk
+                                             listViewController:listViewCtrlr](user);
+    };
+    PEPageLoaderBlk pageLoader = ^ NSArray * (FPEnvironmentLog *lastEnvLog) {
+      return [_coordDao unsyncedEnvironmentLogsForUser:user
+                                                 error:[FPUtils localFetchErrorHandlerMaker]()];
+    };
+    PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPEnvironmentLog *e1, FPEnvironmentLog *e2){return [e1 isEqualToEnvironmentLog:e2];}
+                                                                     entityFetcher:^{ return pageLoader(nil); }];
+    PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPEnvironmentLog *envLog) {return [PEUtils stringFromDate:[envLog logDate] withPattern:@"MM/dd/YYYY"];}
+                                                        alwaysTopifyTitleLabel:NO
+                                                                     uitoolkit:_uitoolkit
+                                                          subtitleLeftHPadding:15.0
+                                                                    isLoggedIn:[APP isUserLoggedIn]];
+    return [[PEListViewController alloc]
+             initWithClassOfDataSourceObjects:[FPEnvironmentLog class]
+                                        title:@"Unsynced Env Logs"
+                        isPaginatedDataSource:NO
+                              tableCellStyler:tableCellStyler
+                           itemSelectedAction:nil
+                          initialSelectedItem:nil
+                                addItemAction:nil
+                               cellIdentifier:@"FPEnvironmentLogCell"
+                               initialObjects:pageLoader(nil)
+                                   pageLoader:pageLoader
+                               heightForCells:52.0
+                              detailViewMaker:envLogDetailViewMaker
+                                    uitoolkit:_uitoolkit
+               doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
+                         wouldBeIndexOfEntity:wouldBeIndexBlk];
+  };
+}
+
 #pragma mark - Quick Action Screen
 
 - (FPAuthScreenMakerWithTempNotification)newQuickActionMenuScreenMaker {
@@ -1680,32 +1812,39 @@ remote-synchronizer indicates this record is marked as in-conflict."]]
 
 #pragma mark - Tab-bar Authenticated Landing Screen
 
-- (FPAuthScreenMaker)newTabBarHomeLandingScreenMaker {
+- (FPAuthScreenMaker)newTabBarHomeLandingScreenMakerIsLoggedIn:(BOOL)isLoggedIn {
   return ^ UIViewController *(FPUser *user) {
     UIViewController *quickActionMenuCtrl = [self newQuickActionMenuScreenMaker](user);
     UIViewController *settingsMenuCtrl = [self newViewSettingsScreenMaker](user);
-    UIViewController *draftsCtrl = [self newViewDraftsScreenMaker](user);
     UITabBarController *tabBarCtrl =
     [[UITabBarController alloc] initWithNibName:nil bundle:nil];
-    [tabBarCtrl setViewControllers:@[
-                                     [PEUIUtils navControllerWithRootController:quickActionMenuCtrl
-                                                            navigationBarHidden:NO
-                                                                tabBarItemTitle:@"Quick Action Menu"
-                                                                tabBarItemImage:[UIImage imageNamed:@"tab-home"]
-                                                        tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-home"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]],
-                                     [PEUIUtils navControllerWithRootController:settingsMenuCtrl
-                                                            navigationBarHidden:NO
-                                                                tabBarItemTitle:@"Settings"
-                                                                tabBarItemImage:[UIImage imageNamed:@"tab-settings"]
-                                                        tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-settings"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]],
-                                     [PEUIUtils navControllerWithRootController:draftsCtrl
-                                                            navigationBarHidden:NO
-                                                                tabBarItemTitle:@"Unsynced Edits"
-                                                                tabBarItemImage:[UIImage imageNamed:@"tab-drafts"]
-                                                        tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-drafts"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]]]];
+    NSMutableArray *controllers = [NSMutableArray array];
+    [controllers addObject:[PEUIUtils navControllerWithRootController:quickActionMenuCtrl
+                                                  navigationBarHidden:NO
+                                                      tabBarItemTitle:@"Quick Action Menu"
+                                                      tabBarItemImage:[UIImage imageNamed:@"tab-home"]
+                                              tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-home"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]]];
+    [controllers addObject:[PEUIUtils navControllerWithRootController:settingsMenuCtrl
+                                                  navigationBarHidden:NO
+                                                      tabBarItemTitle:@"Settings"
+                                                      tabBarItemImage:[UIImage imageNamed:@"tab-settings"]
+                                              tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-settings"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]]];
+    if (isLoggedIn) {
+      [controllers addObject:[self unsynedEditsViewControllerForUser:user]];
+    }
+    [tabBarCtrl setViewControllers:controllers animated:YES];
     [tabBarCtrl setSelectedIndex:0];
     return tabBarCtrl;
   };
+}
+
+- (UIViewController *)unsynedEditsViewControllerForUser:(FPUser *)user {
+  UIViewController *unsyncedEditsController = [self newViewUnsyncedEditsScreenMaker](user);
+  return [PEUIUtils navControllerWithRootController:unsyncedEditsController
+                                navigationBarHidden:NO
+                                    tabBarItemTitle:@"Unsynced Edits"
+                                    tabBarItemImage:[UIImage imageNamed:@"tab-drafts"]
+                            tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-drafts"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]];
 }
 
 @end

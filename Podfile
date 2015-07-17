@@ -2,7 +2,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 platform :ios, '8.3'
 
-pod 'PEFuelPurchase-Model', '~> 1.0.46'
+pod 'PEFuelPurchase-Model', '~> 1.0.50'
 pod 'PEFuelPurchase-Common', '~> 1.0.8'
 pod 'PEObjc-Commons', '~> 1.0.27'
 pod 'ReactiveCocoa', '~> 2.4.7'

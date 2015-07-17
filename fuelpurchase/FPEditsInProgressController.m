@@ -22,11 +22,6 @@
   FPUser *_user;
   UIView *_eipsMessagePanel;
   UIView *_noEipsMessagePanel;
-  // badge panels
-  UIView *_numEipVehiclesBadgePanel;
-  UIView *_numEipFuelStationsBadgePanel;
-  UIView *_numEipFplogsBadgePanel;
-  UIView *_numEipEnvlogsBadgePanel;
   // buttons
   UIButton *_vehiclesButton;
   UIButton *_fuelStationsButton;
@@ -107,7 +102,11 @@ You currently have no unsynced items."
 }
 
 - (UIButton *)buttonWithLabel:(NSString *)labelText
+                      numEips:(NSInteger)numEips
                       handler:(void(^)(void))handler {
+  if (numEips == 0) {
+    return nil;
+  }
   UIButton *button = [_uitoolkit systemButtonMaker](labelText, nil, nil);
   [[button layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:button ofWidth:1.0 relativeTo:self.view];
@@ -115,16 +114,12 @@ You currently have no unsynced items."
   [button bk_addEventHandler:^(id sender) {
     handler();
   } forControlEvents:UIControlEventTouchUpInside];
+  UIView *badge = [self badgeForNumEips:numEips];
+  [PEUIUtils placeView:badge
+            inMiddleOf:button
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              hpadding:15.0];
   return button;
-}
-
-- (void)placeBadge:(UIView *)badge onButton:(UIButton *)button {
-  if (badge) {
-    [PEUIUtils placeView:badge
-              inMiddleOf:button
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                hpadding:15.0];
-  }
 }
 
 #pragma mark - View Controller Lifecyle
@@ -132,9 +127,11 @@ You currently have no unsynced items."
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:YES];
   
-  // remove stale views
+  // remove stale message panels
   [_eipsMessagePanel removeFromSuperview];
-  [_noEipsMessagePanel removeFromSuperview];  
+  [_noEipsMessagePanel removeFromSuperview];
+  
+  // remove stale buttons
   [_vehiclesButton removeFromSuperview];
   [_fuelStationsButton removeFromSuperview];
   [_fplogsButton removeFromSuperview];
@@ -147,17 +144,34 @@ You currently have no unsynced items."
   NSInteger numEipEnvLogs = [_coordDao numUnsyncedEnvironmentLogsForUser:_user];
   NSInteger totalNumEips = numEipVehicles + numEipFuelStations + numEipFpLogs + numEipEnvLogs;
   
-  // create the badge panels
-  _numEipVehiclesBadgePanel = [self badgeForNumEips:numEipVehicles];
-  _numEipFuelStationsBadgePanel = [self badgeForNumEips:numEipFuelStations];
-  _numEipFplogsBadgePanel = [self badgeForNumEips:numEipFpLogs];
-  _numEipEnvlogsBadgePanel = [self badgeForNumEips:numEipEnvLogs];
-  
-  // place the badges
-  [self placeBadge:_numEipVehiclesBadgePanel onButton:_vehiclesButton];
-  [self placeBadge:_numEipFuelStationsBadgePanel onButton:_fuelStationsButton];
-  [self placeBadge:_numEipFplogsBadgePanel onButton:_fplogsButton];
-  [self placeBadge:_numEipEnvlogsBadgePanel onButton:_envlogsButton];
+  _vehiclesButton = [self buttonWithLabel:@"Vehicles"
+                                  numEips:numEipVehicles
+                                  handler:^{
+                                    [PEUIUtils displayController:[_screenToolkit newViewUnsyncedVehiclesScreenMaker](_user)
+                                                  fromController:self
+                                                        animated:YES];
+  }];
+  _fuelStationsButton = [self buttonWithLabel:@"Fuel Stations"
+                                      numEips:numEipFuelStations
+                                      handler:^{
+                                        [PEUIUtils displayController:[_screenToolkit newViewUnsyncedFuelStationsScreenMaker](_user)
+                                                      fromController:self
+                                                            animated:YES];
+  }];
+  _fplogsButton = [self buttonWithLabel:@"Fuel Purchase Logs"
+                                numEips:numEipFpLogs
+                                handler:^{
+                                  [PEUIUtils displayController:[_screenToolkit newViewUnsyncedFuelPurchaseLogsScreenMaker](_user)
+                                                fromController:self
+                                                      animated:YES];
+  }];
+  _envlogsButton = [self buttonWithLabel:@"Environment Logs"
+                                 numEips:numEipEnvLogs
+                                 handler:^{
+                                   [PEUIUtils displayController:[_screenToolkit newViewUnsyncedEnvironmentLogsScreenMaker](_user)
+                                                 fromController:self
+                                                       animated:YES];
+  }];
   
   // place the views
   UIView *messagePanel;
@@ -172,7 +186,7 @@ You currently have no unsynced items."
               vpadding:100
               hpadding:0.0];
   UIView *topView = messagePanel;
-  if (_numEipVehiclesBadgePanel) {
+  if (_vehiclesButton) {
     [PEUIUtils placeView:_vehiclesButton
                    below:topView
                     onto:self.view
@@ -181,7 +195,7 @@ You currently have no unsynced items."
                 hpadding:0.0];
     topView = _vehiclesButton;
   }
-  if (_numEipFuelStationsBadgePanel) {
+  if (_fuelStationsButton) {
     [PEUIUtils placeView:_fuelStationsButton
                    below:topView
                     onto:self.view
@@ -190,7 +204,7 @@ You currently have no unsynced items."
                 hpadding:0.0];
     topView = _fuelStationsButton;
   }
-  if (_numEipFplogsBadgePanel) {
+  if (_fplogsButton) {
     [PEUIUtils placeView:_fplogsButton
                    below:topView
                     onto:self.view
@@ -199,7 +213,7 @@ You currently have no unsynced items."
                 hpadding:0.0];
     topView = _fplogsButton;
   }
-  if (_numEipEnvlogsBadgePanel) {
+  if (_envlogsButton) {
     [PEUIUtils placeView:_envlogsButton
                    below:topView
                     onto:self.view
@@ -222,10 +236,6 @@ You currently have no unsynced items."
   // make the button (and message panel) views
   _eipsMessagePanel = [self paddedEipsInfoMessage];
   _noEipsMessagePanel = [self paddedNoEipsInfoMessage];
-  _vehiclesButton = [self buttonWithLabel:@"Vehicles" handler:^{}];
-  _fuelStationsButton = [self buttonWithLabel:@"Fuel Stations" handler:^{}];
-  _fplogsButton = [self buttonWithLabel:@"Fuel Purchase Logs" handler:^{}];
-  _envlogsButton = [self buttonWithLabel:@"Environment Logs" handler:^{}];
 }
 
 @end

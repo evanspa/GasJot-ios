@@ -212,8 +212,9 @@
                                           }
                                                   allDone:^{
                                                     dispatch_async(dispatch_get_main_queue(), ^{
+                                                      [APP refreshTabs];
                                                       if (syncAttemptErrors == 0 && !receivedUnauthedError) {
-                                                      // 100% sync success
+                                                        // 100% sync success
                                                         [HUD hide:YES];
                                                         [PEUIUtils showSuccessAlertWithMsgs:nil
                                                                                       title:@"Authentication Success."
@@ -278,7 +279,6 @@ button.";
                                                         }];
                                                         [alertSheet showInView:self.tabBarController.view animated:YES];
                                                       }
-                                                      [APP refreshUnsyncedEditsTabBadgeValue];
                                                     });
                                                   }
                                                     error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];

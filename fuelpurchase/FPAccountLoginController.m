@@ -251,7 +251,7 @@ into your remote account:"]
                                                         HUD.labelText = @"Sync complete!";
                                                         HUD.detailsLabelText = @"";
                                                         [HUD hide:YES afterDelay:1.30];
-                                                        [APP refreshUnsyncedEditsTabBadgeValue];
+                                                        [APP refreshTabs];
                                                       });
                                                       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.3 * NSEC_PER_SEC),
                                                                      dispatch_get_main_queue(), ^{
@@ -301,7 +301,7 @@ button.";
                                                           [[self navigationController] popViewControllerAnimated:YES];
                                                         }];
                                                         [alertSheet showInView:self.tabBarController.view animated:YES];
-                                                        [APP refreshUnsyncedEditsTabBadgeValue];
+                                                        [APP refreshTabs];
                                                       });
                                                     }
                                                   }
