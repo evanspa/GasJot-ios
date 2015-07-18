@@ -212,6 +212,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   if ([self isUserLoggedIn] && ![self doesUserHaveValidAuthToken]) {
     [_tabBarController.tabBar.items[1] setBadgeValue:@"1"];
   }
+  [_tabBarController setDelegate:self];
   [self refreshTabs];
   [self.window setBackgroundColor:[UIColor whiteColor]];
   [self.window makeKeyAndVisible];
@@ -254,11 +255,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
         // need to add 'unsynced edits' controller
         [_tabBarController setViewControllers:@[controllers[0], controllers[1], [_screenToolkit unsynedEditsViewControllerForUser:_user]]
                                      animated:YES];
-      } else {
-        // whatever might be currently displayed on the 'unsynced edits' screen is
-        // probably now stale.  To be safe (and simple), we'll pop the stack to the
-        // root
-        [controllers[2] popToRootViewControllerAnimated:NO];
       }
       if (_user) {
         NSInteger totalNumUnsyncedEdits = [_coordDao numUnsyncedVehiclesForUser:_user] +
@@ -274,6 +270,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
         clearBadge();
       }
     } else {
+      [_tabBarController.tabBar.items[1] setBadgeValue:nil];
       if ([controllers count] == 3) {
         // need to remove 'unsynced edits' controller
         [_tabBarController setViewControllers:@[controllers[0], controllers[1]]
@@ -283,12 +280,40 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   });
 }
 
-#pragma mark - Reset user interface
+#pragma mark - Resetting the user interface and tab bar delegate
 
 - (void)resetUserInterface {
   NSArray *controllers = [_tabBarController viewControllers];
   [controllers[0] popToRootViewControllerAnimated:NO];
+  if ([controllers count] == 3) {
+    [controllers[2] popToRootViewControllerAnimated:NO];
+  }
   [self refreshTabs];
+}
+
+- (BOOL)tabBarController:(UITabBarController *)tabBarController
+shouldSelectViewController:(UIViewController *)viewController {
+  return YES;
+}
+
+- (void)tabBarController:(UITabBarController *)tabBarController
+ didSelectViewController:(UIViewController *)viewController {
+  NSArray *controllers = [_tabBarController viewControllers];
+  if ([controllers count] == 3) {
+    // the following ensures that an entity cannot be displayed in 2 different list
+    // or add/view/edit controllers simultaneously (i.e., a controller rooted from
+    // the quick action screen, or a controller root from the unsynced edits screen).
+    UINavigationController *navController = (UINavigationController *)viewController;
+    if ([[navController topViewController] isKindOfClass:[FPQuickActionMenuController class]]) {
+      [controllers[2] popToRootViewControllerAnimated:NO];
+    } else if ([[navController topViewController] isKindOfClass:[FPEditsInProgressController class]]) {
+      // there's no need to pop to root if the unsynced-edits root is just the
+      // info-message screen that there aren't any unsynced edits
+      if ([_coordDao totalNumUnsyncedEntitiesForUser:_user] > 0) {
+        [controllers[0] popToRootViewControllerAnimated:NO];
+      }
+    }
+  }
 }
 
 #pragma mark - Initialization helpers

@@ -36,6 +36,7 @@
   CLLocationManagerDelegate,
   MBProgressHUDDelegate,
   FPAuthTokenDelegate,
+  UITabBarControllerDelegate,
   FPRemoteStoreSyncConflictDelegate
 #ifdef FP_DEV
   ,PDVDevEnabled

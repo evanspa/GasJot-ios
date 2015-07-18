@@ -243,19 +243,29 @@ into your remote account:"]
                                                     if (syncAttemptErrors == 0) {
                                                       // 100% sync success
                                                       dispatch_async(dispatch_get_main_queue(), ^{
-                                                        UIImage *image = [UIImage imageNamed:@"hud-complete"];
-                                                        UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
-                                                        [HUD setCustomView:imageView];
-                                                        HUD.mode = MBProgressHUDModeCustomView;
-                                                        HUD.labelText = @"Sync complete!";
-                                                        HUD.detailsLabelText = @"";
-                                                        [HUD hide:YES afterDelay:1.30];
-                                                        [APP refreshTabs];
+                                                        [HUD hide:YES];
+                                                        [PEUIUtils showLoginSuccessAlertWithTitle:@"Login & sync success."
+                                                                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
+You have been successfully logged in and\n\
+your local edits have been synced.\n\n\
+Your remote account is now connected to\n\
+this device.  Any fuel purchase data that\n\
+you create and save will be synced to your\n\
+remote account."]
+                                                                                  syncIconMessage:[[NSAttributedString alloc] initWithString:@"\
+The following icon will appear in the app\n\
+indicating that your are currently logged\n\
+into your remote account:"]
+                                                                                      buttonTitle:@"Okay."
+                                                                                     buttonAction:^{
+                                                                                       [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
+                                                                                                                                           object:nil
+                                                                                                                                         userInfo:nil];
+                                                                                       [[self navigationController] popViewControllerAnimated:YES];
+                                                                                       [APP refreshTabs];
+                                                                                     }
+                                                                                   relativeToView:self.tabBarController.view];
                                                       });
-                                                      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.3 * NSEC_PER_SEC),
-                                                                     dispatch_get_main_queue(), ^{
-                                                                       [[self navigationController] popViewControllerAnimated:YES];
-                                                                     });
                                                     } else {
                                                       dispatch_async(dispatch_get_main_queue(), ^{
                                                         [HUD hide:YES];

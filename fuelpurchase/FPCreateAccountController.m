@@ -191,7 +191,7 @@ Fill out the form below and tap 'Done'."
         [HUD hide:YES];
         [PEUIUtils showSuccessAlertWithMsgs:nil
                                       title:@"Success."
-                           alertDescription:[[NSAttributedString alloc] initWithString:@"You're account has been created\nsuccessfully."]
+                           alertDescription:[[NSAttributedString alloc] initWithString:@"Account creation success."]
                                 buttonTitle:@"Okay."
                                buttonAction:^{
                                  [[NSNotificationCenter defaultCenter] postNotificationName:FPAppAccountCreationNotification
@@ -262,18 +262,27 @@ Fill out the form below and tap 'Done'."
                                                     if (syncAttemptErrors == 0) {
                                                       // 100% sync success
                                                       dispatch_async(dispatch_get_main_queue(), ^{
-                                                        UIImage *image = [UIImage imageNamed:@"hud-complete"];
-                                                        UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
-                                                        [HUD setCustomView:imageView];
-                                                        HUD.mode = MBProgressHUDModeCustomView;
-                                                        HUD.labelText = @"Sync complete!";
-                                                        HUD.detailsLabelText = @"";
-                                                        [HUD hide:YES afterDelay:1.30];
-                                                        [APP refreshTabs];
-                                                      });
-                                                      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.3 * NSEC_PER_SEC),
-                                                                     dispatch_get_main_queue(), ^{
-                                                        [[self navigationController] popViewControllerAnimated:YES];
+                                                        [HUD hide:YES];
+                                                        [PEUIUtils showLoginSuccessAlertWithTitle:@"Account creation & sync\nsuccess."
+                                                                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
+Your remote account has been created and\n\
+your local edits have been synced.\n\n\
+Your account is now connected to this\n\
+device.  Any fuel purchase data that\n\
+you create and save will be synced to your\n\
+remote account."]
+                                                                                  syncIconMessage:[[NSAttributedString alloc] initWithString:@"\
+The following icon will appear in the app\n\
+indicating that your are currently logged\n\
+into your remote account:"]
+                                                                                      buttonTitle:@"Okay."
+                                                                                     buttonAction:^{
+                                                                                       [[NSNotificationCenter defaultCenter] postNotificationName:FPAppAccountCreationNotification
+                                                                                                                                           object:nil
+                                                                                                                                         userInfo:nil];
+                                                                                       [[self navigationController] popViewControllerAnimated:YES];
+                                                                                     }
+                                                                                   relativeToView:self.tabBarController.view];
                                                       });
                                                     } else {
                                                       dispatch_async(dispatch_get_main_queue(), ^{
