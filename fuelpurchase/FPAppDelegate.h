@@ -21,7 +21,6 @@
 #import <UIKit/UIKit.h>
 #import <MBProgressHUD/MBProgressHUD.h>
 #import <PEFuelPurchase-Common/FPAuthTokenDelegate.h>
-#import <PEFuelPurchase-Model/FPRemoteStoreSyncConflictDelegate.h>
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 
@@ -36,8 +35,7 @@
   CLLocationManagerDelegate,
   MBProgressHUDDelegate,
   FPAuthTokenDelegate,
-  UITabBarControllerDelegate,
-  FPRemoteStoreSyncConflictDelegate
+  UITabBarControllerDelegate
 #ifdef FP_DEV
   ,PDVDevEnabled
 #endif

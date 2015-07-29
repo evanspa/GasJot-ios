@@ -198,13 +198,12 @@
       PELMMainSupport *entity;
       for (NSInteger i = 0; i < dsCount; i++) {
         entity = _dataSource[i];
-        if (([entity localMainIdentifier] == nil && [entity localMasterIdentifier] == nil) ||
-            [entity deleted]) {
+        if ([entity localMainIdentifier] == nil && [entity localMasterIdentifier] == nil) {
           DDLogDebug(@"PELVC/hRE, entity at index [%ld] has nil IDs, so we'll remove it.", (long)i);
           [_dataSource removeObjectAtIndex:i];
           [_tableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:i inSection:0]]
                             withRowAnimation:UITableViewRowAnimationFade];
-          //entityRemoved = YES; // because we're in the "removing a dude in the nils-path", I don't want this function to return "YES", because then a stupid "entity removed" temp-notification will appear, which I don't want because the entity was never truly ADDED to begin with.
+          entityRemoved = YES;
           break;
         }
       }

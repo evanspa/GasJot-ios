@@ -203,6 +203,13 @@ into your remote account:"]
           __block NSInteger syncAttemptErrors = 0;
           __block float overallSyncProgress = 0.0;
           [_coordDao flushAllUnsyncedEditsToRemoteForUser:_localUser
+                                        entityNotFoundBlk:^(float progress) {
+                                          syncAttemptErrors++;
+                                          overallSyncProgress += progress;
+                                          dispatch_async(dispatch_get_main_queue(), ^{
+                                            [HUD setProgress:overallSyncProgress];
+                                          });
+                                        }
                                                successBlk:^(float progress) {
                                                  numEntitiesSynced++;
                                                  overallSyncProgress += progress;
@@ -231,6 +238,13 @@ into your remote account:"]
                                                [HUD setProgress:overallSyncProgress];
                                              });
                                            }
+                                              conflictBlk:^(float progress, id latestEntity) {
+                                                syncAttemptErrors++;
+                                                overallSyncProgress += progress;
+                                                dispatch_async(dispatch_get_main_queue(), ^{
+                                                  [HUD setProgress:overallSyncProgress];
+                                                });
+                                              }
                                           authRequiredBlk:^(float progress) {
                                             syncAttemptErrors++;
                                             overallSyncProgress += progress;

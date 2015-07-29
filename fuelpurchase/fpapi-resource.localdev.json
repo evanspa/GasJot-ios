@@ -1,4 +1,5 @@
 { "_links": {
   "users": { "href": "http://localhost:4040/fp/users" },
   "login": { "href": "http://localhost:4040/fp/login" },
+  "logout": { "href": "http://localhost:4040/fp/logout" },
   "light-login": { "href": "http://localhost:4040/fp/light-login" }}}

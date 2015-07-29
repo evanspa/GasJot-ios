@@ -58,17 +58,17 @@ PODS:
     - PESimu-Select (~> 1.0.3)
   - PEFuelPurchase-Common (1.0.8):
     - PEHateoas-Client (~> 1.0.2)
-  - PEFuelPurchase-Model (1.0.50):
+  - PEFuelPurchase-Model (1.0.54):
     - CocoaLumberjack (~> 1.9)
     - FMDB (~> 2.5)
     - PEFuelPurchase-Common (~> 1.0.8)
-    - PEHateoas-Client (~> 1.0.2)
-    - PEObjc-Commons (~> 1.0.27)
+    - PEHateoas-Client (~> 1.0.3)
+    - PEObjc-Commons (~> 1.0.30)
     - UICKeyChainStore (~> 2.0.4)
-  - PEHateoas-Client (1.0.2):
-    - AFNetworking (~> 2.5.1)
+  - PEHateoas-Client (1.0.3):
+    - AFNetworking (~> 2.5.4)
     - CocoaLumberjack (~> 1.9)
-    - PEObjc-Commons (~> 1.0.1)
+    - PEObjc-Commons (~> 1.0.30)
   - PEObjc-Commons (1.0.30):
     - JGActionSheet (~> 1.0.4)
   - PESimu-Select (1.0.3):
@@ -92,7 +92,7 @@ PODS:
   - UICKeyChainStore (2.0.6)
 
 DEPENDENCIES:
-  - AFNetworking (~> 2.5.1)
+  - AFNetworking (~> 2.5.4)
   - BlocksKit (~> 2.2.5)
   - CocoaLumberjack (~> 1.9)
   - FlatUIKit (~> 1.6.2)
@@ -102,7 +102,7 @@ DEPENDENCIES:
   - MBProgressHUD (~> 0.9.1)
   - PEDev-Console (~> 1.0.4)
   - PEFuelPurchase-Common (~> 1.0.8)
-  - PEFuelPurchase-Model (~> 1.0.50)
+  - PEFuelPurchase-Model (~> 1.0.54)
   - PEObjc-Commons (~> 1.0.30)
   - ReactiveCocoa (~> 2.4.7)
   - UICKeyChainStore (~> 2.0.5)
@@ -120,8 +120,8 @@ SPEC CHECKSUMS:
   OHHTTPStubs: 8cf0cfe6f34f13fc88fdf5b2a1b2c2536e8c0261
   PEDev-Console: e950c909066280c4cd17e717c30f2977eb3a0ebe
   PEFuelPurchase-Common: 315cd43955e69e5be94373405f1b55b6723d30b6
-  PEFuelPurchase-Model: 2659cbb32226bb4d481ed758e9f98ef9f002ef0d
-  PEHateoas-Client: 9729b1e9099a9626c644e730f6ab7c37f0e55ccd
+  PEFuelPurchase-Model: d90c79af8f8e3ea5f32a46726ad53d95bb4c2f59
+  PEHateoas-Client: 3c0b2a7d99e7614a4a2a86f3a6158599db82ac76
   PEObjc-Commons: 2e128a55cb8f48294397171d56042a66fe9383a7
   PESimu-Select: 9ad38adb78e42e79c9f9365f71c9b05215b6ac10
   PEWire-Control: 2aeefa4014575adbc52cfbf3206395d9a7c07b22
@@ -129,4 +129,4 @@ SPEC CHECKSUMS:
   ReactiveCocoa: eb38dee0a0e698f73a9b25e5c1faea2bb4c79240
   UICKeyChainStore: c5719c814e8bd69e74e4a0fc09daf8f4d6257a59
 
-COCOAPODS: 0.37.2
+COCOAPODS: 0.38.2

@@ -394,13 +394,14 @@ simply be saved locally.";
     });
   };
   void (^doLogout)(void) = ^{
-    // even if the remote authentication token deletion fails, we don't care; we'll still
+    // even if the logout fails, we don't care; we'll still
     // tell the user that logout was successful.  The server should have the smarts to eventually delete
     // the token from its database based on a set of rules anyway (e.g., natural expiration date, or,
     // invalidation after N-amount of inactivity, etc)
-    [_coordDao deleteRemoteAuthenticationTokenWithRemoteStoreBusy:^(NSDate *retryAfter) {
-      postAuthTokenNoMatterWhat();
-    } addlCompletionHandler:^{ postAuthTokenNoMatterWhat(); }];
+    [_coordDao logoutUser:_user
+   addlRemoteStoreBusyBlk:^(NSDate *retryAfter) { postAuthTokenNoMatterWhat(); }
+        addlCompletionBlk:^{ postAuthTokenNoMatterWhat(); }
+    localSaveErrorHandler:[FPUtils localSaveErrorHandlerMaker]()];
   };
   NSInteger numUnsyncedEdits = [_coordDao totalNumUnsyncedEntitiesForUser:_user];
   if (numUnsyncedEdits > 0) {

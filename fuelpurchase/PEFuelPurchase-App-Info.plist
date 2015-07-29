@@ -44,6 +44,12 @@
 	<string>fp-error-mask</string>
 	<key>FP establish session header name</key>
 	<string>fp-establish-session</string>
+	<key>FP if-unmodified-since header name</key>
+	<string>fp-if-unmodified-since</string>
+	<key>FP login failed reason header name</key>
+	<string>fp-login-failed-reason</string>
+	<key>FP account closed reason header name</key>
+	<string>fp-delete-reason</string>
 	<key>FP time interval for flush to remote master</key>
 	<integer>2</integer>
 	<key>FP timeout for main thread coordinator dao operations</key>

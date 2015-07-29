@@ -124,9 +124,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
   return ^ UIViewController * (FPUser *user) {
     PEEntityEditPreparerBlk userEditPreparer = ^BOOL(PEAddViewEditController *ctrl, FPUser *user) {
       BOOL prepareSuccess = [_coordDao prepareUserForEdit:user
-                                        entityBeingSynced:nil //[self entityBeingSyncedBlk]
-                                            entityDeleted:nil //[self entityDeletedBlk]
-                                         entityInConflict:nil //[self entityInConflictBlk]
                                                     error:[FPUtils localSaveErrorHandlerMaker]()];
       [APP refreshTabs];
       return prepareSuccess;
@@ -151,10 +148,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       NSString *mainMsgFragment = @"syncing user account";
       NSString *recordTitle = @"User account";
       [_coordDao markAsDoneEditingAndSyncUserImmediate:user
+                                   notFoundOnServerBlk:^{ } // TODO
                                             successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                     remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
                                     tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                         remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveUsrErrMsgs:errMask]); [APP refreshTabs];}
+                                           conflictBlk:^(FPUser *latestUser) { } // TODO
                                        authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
@@ -168,7 +167,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                         entityIndexPath:nil
                               uitoolkit:_uitoolkit
                          itemChangedBlk:nil
-                       entityFormPanelMaker:[_panelToolkit userAccountPanelMaker]
+                   entityFormPanelMaker:[_panelToolkit userAccountPanelMaker]
                     entityToPanelBinder:[_panelToolkit userAccountToUserAccountPanelBinder]
                     panelToEntityBinder:[_panelToolkit userAccountPanelToUserAccountBinder]
                             entityTitle:@"User Account"
@@ -354,10 +353,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         NSString *recordTitle = @"Vehicle";
         [_coordDao saveNewAndSyncImmediateVehicle:newVehicle
                                           forUser:user
+                              notFoundOnServerBlk:^{} // TODO
                                        successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
                                tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                    remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]); [APP refreshTabs];}
+                                      conflictBlk:^(id e) {} // TODO
                                   authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                             error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
@@ -410,9 +411,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     PEEntityEditPreparerBlk vehicleEditPreparer = ^BOOL(PEAddViewEditController *ctrl, FPVehicle *vehicle) {
       BOOL prepareSuccess = [_coordDao prepareVehicleForEdit:vehicle
                                                      forUser:user
-                                           entityBeingSynced:nil //[self entityBeingSyncedBlk]
-                                               entityDeleted:nil //[self entityDeletedBlk]
-                                            entityInConflict:nil //[self entityInConflictBlk]
                                                        error:[FPUtils localSaveErrorHandlerMaker]()];
       [APP refreshTabs];
       return prepareSuccess;
@@ -440,10 +438,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         NSString *recordTitle = @"Vehicle";
         [_coordDao markAsDoneEditingAndSyncVehicleImmediate:vehicle
                                                     forUser:user
+                                        notFoundOnServerBlk:^{} // TODO
                                                  successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                          remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
                                          tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                              remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]); [APP refreshTabs];}
+                                                conflictBlk:^(FPVehicle *latestVehicle) {}
                                             authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                       error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
@@ -464,10 +464,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       NSString *recordTitle = @"Vehicle";
       [_coordDao flushUnsyncedChangesToVehicle:vehicle
                                        forUser:user
-                                addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs]; }
+                           notFoundOnServerBlk:^{} // TODO
+                                addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs]; }
                         addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
                         addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                             addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]); [APP refreshTabs];}
+                               addlConflictBlk:^(FPVehicle *latestVehicle) {} // TODO
                            addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                          error:[FPUtils localSaveErrorHandlerMaker]()];
     };
@@ -772,10 +774,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         NSString *recordTitle = @"Fuel station";
         [_coordDao saveNewAndSyncImmediateFuelStation:newFuelStation
                                               forUser:user
+                                  notFoundOnServerBlk:^{} // TODO
                                            successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                    remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
                                    tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                        remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]); [APP refreshTabs];}
+                                          conflictBlk:^(id e) {} // TODO
                                       authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                 error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
@@ -831,9 +835,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       FPFuelStation *fuelStation = (FPFuelStation *)entity;
       BOOL prepareSuccess = [_coordDao prepareFuelStationForEdit:fuelStation
                                                          forUser:user
-                                               entityBeingSynced:nil //[self entityBeingSyncedBlk]
-                                                   entityDeleted:nil //[self entityDeletedBlk]
-                                                entityInConflict:nil //[self entityInConflictBlk]
                                                            error:[FPUtils localSaveErrorHandlerMaker]()];
       [APP refreshTabs];
       return prepareSuccess;
@@ -863,10 +864,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         FPFuelStation *fuelStation = (FPFuelStation *)entity;
         [_coordDao markAsDoneEditingAndSyncFuelStationImmediate:fuelStation
                                                         forUser:user
+                                            notFoundOnServerBlk:^{} // TODO
                                                      successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                              remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
                                              tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                  remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]); [APP refreshTabs];}
+                                                    conflictBlk:^(FPFuelStation *latestFuelStation) {} // TODO
                                                 authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                           error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
@@ -887,10 +890,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       NSString *recordTitle = @"Fuel station";
       [_coordDao flushUnsyncedChangesToFuelStation:fuelStation
                                            forUser:user
-                                    addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                               notFoundOnServerBlk:^{} // TODO
+                                    addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                             addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
                             addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                 addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]); [APP refreshTabs];}
+                                   addlConflictBlk:^(FPFuelStation *latestFuelStation) {} // TODO
                                addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                              error:[FPUtils localSaveErrorHandlerMaker]()];
     };
@@ -1025,10 +1030,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                   forUser:user
                                                   vehicle:selectedVehicle
                                               fuelStation:selectedFuelStation
+                                      notFoundOnServerBlk:^{} // TODO
                                                successBlk:^{successBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                        remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
                                        tempRemoteErrorBlk:^{tempErrBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                            remoteErrorBlk:^(NSInteger errMask) {errBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
+                                              conflictBlk:^(id e) {} // TODO
                                           authRequiredBlk:^{authReqdBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
                              skippedDueToVehicleNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                          skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The associated fuel station is not yet synced."); [APP refreshTabs];}
@@ -1047,10 +1054,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
           [_coordDao saveNewAndSyncImmediateEnvironmentLog:[fpEnvLogComposite preFillupEnvLog]
                                                    forUser:user
                                                    vehicle:selectedVehicle
+                                       notFoundOnServerBlk:^{} // TODO
                                                 successBlk:^{successBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                         remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
                                         tempRemoteErrorBlk:^{tempErrBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                             remoteErrorBlk:^(NSInteger errMask) {errBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                               conflictBlk:^(id e) {} // TODO
                                            authRequiredBlk:^{authReqdBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
                               skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                                      error:[FPUtils localSaveErrorHandlerMaker]()];
@@ -1067,10 +1076,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
           [_coordDao saveNewAndSyncImmediateEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
                                                    forUser:user
                                                    vehicle:selectedVehicle
+                                       notFoundOnServerBlk:^{} // TODO
                                                 successBlk:^{successBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                         remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
                                         tempRemoteErrorBlk:^{tempErrBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                             remoteErrorBlk:^(NSInteger errMask) {errBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                               conflictBlk:^(id e) {} // TODO
                                            authRequiredBlk:^{authReqdBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
                               skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                                      error:[FPUtils localSaveErrorHandlerMaker]()];
@@ -1167,9 +1178,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     PEEntityEditPreparerBlk fpLogEditPreparer = ^BOOL(PEAddViewEditController *ctrl, FPFuelPurchaseLog *fpLog) {
       BOOL result = [_coordDao prepareFuelPurchaseLogForEdit:fpLog
                                                      forUser:user
-                                           entityBeingSynced:nil //[self entityBeingSyncedBlk]
-                                               entityDeleted:nil //[self entityDeletedBlk]
-                                            entityInConflict:nil //[self entityInConflictBlk]
                                                        error:[FPUtils localSaveErrorHandlerMaker]()];
       if (result) {
         // this is needed because the 'prepare' call right above will mutate the currently-selected vehicle
@@ -1212,10 +1220,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         NSString *recordTitle = @"Fuel purchase log";
         [_coordDao markAsDoneEditingAndSyncFuelPurchaseLogImmediate:fpLog
                                                             forUser:user
+                                                notFoundOnServerBlk:^{ } // TODO
                                                          successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                  remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
                                                  tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                      remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
+                                                        conflictBlk:^(FPFuelPurchaseLog *latestFplog) {} // TODO
                                                     authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                        skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                    skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated fuel station is not yet synced."); [APP refreshTabs];}
@@ -1238,10 +1248,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       NSString *recordTitle = @"Fuel purchase log";
       [_coordDao flushUnsyncedChangesToFuelPurchaseLog:fpLog
                                               forUser:user
-                                       addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                   notFoundOnServerBlk:^{} // TODO
+                                       addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
                                addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                    addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
+                                      addlConflictBlk:^(FPFuelPurchaseLog *latestFplog) {} // TODO
                                   addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                          skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                      skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated fuel station is not yet synced."); [APP refreshTabs];}
@@ -1511,10 +1523,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         [_coordDao saveNewAndSyncImmediateEnvironmentLog:envLog
                                                  forUser:user
                                                  vehicle:selectedVehicle
+                                     notFoundOnServerBlk:^{} // TODO
                                               successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                       remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
                                       tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                           remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                             conflictBlk:^(id e) {} // TODO
                                          authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                             skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                                    error:[FPUtils localSaveErrorHandlerMaker]()];
@@ -1587,9 +1601,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     PEEntityEditPreparerBlk envLogEditPreparer = ^BOOL(PEAddViewEditController *ctrl, FPEnvironmentLog *envLog) {
       BOOL result = [_coordDao prepareEnvironmentLogForEdit:envLog
                                                     forUser:user
-                                          entityBeingSynced:nil //[self entityBeingSyncedBlk]
-                                              entityDeleted:nil //[self entityDeletedBlk]
-                                           entityInConflict:nil //[self entityInConflictBlk]
                                                       error:[FPUtils localSaveErrorHandlerMaker]()];
       if (result) {
         refreshVehicleTableView(ctrl, envLog);
@@ -1626,10 +1637,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         NSString *recordTitle = @"Environment log";
         [_coordDao markAsDoneEditingAndSyncEnvironmentLogImmediate:envLog
                                                             forUser:user
+                                               notFoundOnServerBlk:^{} // TODO
                                                          successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                  remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
                                                  tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                      remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                                        conflictBlk:^(FPEnvironmentLog *latestEnvlog) {} // TODO
                                                     authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                        skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                                               error:[FPUtils localSaveErrorHandlerMaker]()];
@@ -1651,10 +1664,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       NSString *recordTitle = @"Environment log";
       [_coordDao flushUnsyncedChangesToEnvironmentLog:envLog
                                               forUser:user
-                                       addlSuccessBlk:^(PELMMainSupport *v){successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                  notFoundOnServerBlk:^{} // TODO
+                                       addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
                                addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                    addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                      addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {} // TODO
                                   addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                          skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                                 error:[FPUtils localSaveErrorHandlerMaker]()];

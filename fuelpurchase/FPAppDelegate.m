@@ -71,6 +71,9 @@ NSString * const FPUserAgentDeviceMakeHeaderNameKey      = @"FP user agent devic
 NSString * const FPUserAgentDeviceOsHeaderNameKey        = @"FP user agent device os header name";
 NSString * const FPUserAgentDeviceOsVersionHeaderNameKey = @"FP user agent device os version header name";
 NSString * const FPAuthTokenResponseHeaderNameKey        = @"FP auth token response header name";
+NSString * const FPIfUnmodifiedSinceHeaderNameKey        = @"FP if-unmodified-since header name";
+NSString * const FPLoginFailedReasonHeaderNameKey        = @"FP login failed reason header name";
+NSString * const FPAccountClosedReasonHeaderNameKey      = @"FP account closed reason header name";
 NSString * const FPTimeoutForCoordDaoMainThreadOpsKey    = @"FP timeout for main thread coordinator dao operations";
 NSString * const FPTimeIntervalForFlushToRemoteMasterKey = @"FP time interval for flush to remote master";
 NSString * const FPIsUserLoggedInIndicatorKey            = @"FP is user logged in indicator";
@@ -175,6 +178,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   } else {
     _user = [_coordDao newLocalUserWithError:[FPUtils localSaveErrorHandlerMaker]()];
   }
+  NSLog(@"in startup, user: %@", _user);
   self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
   // Setup notification observing
   [[NSNotificationCenter defaultCenter] addObserver:self
@@ -361,6 +365,9 @@ shouldSelectViewController:(UIViewController *)viewController {
              errorMaskHeaderName:bundleVal(FPErrorMaskHeaderNameKey)
       establishSessionHeaderName:bundleVal(FPEstablishSessionHeaderNameKey)
      authTokenResponseHeaderName:bundleVal(FPAuthTokenResponseHeaderNameKey)
+     ifUnmodifiedSinceHeaderName:bundleVal(FPIfUnmodifiedSinceHeaderNameKey)
+     loginFailedReasonHeaderName:bundleVal(FPLoginFailedReasonHeaderNameKey)
+   accountClosedReasonHeaderName:bundleVal(FPAccountClosedReasonHeaderNameKey)
     bundleHoldingApiJsonResource:mainBundle
        nameOfApiJsonResourceFile:FPAPIResourceFileName
                  apiResMtVersion:bundleVal(FPRestServiceMtVersionKey)
@@ -369,37 +376,9 @@ shouldSelectViewController:(UIViewController *)viewController {
          fuelStationResMtVersion:bundleVal(FPRestServiceMtVersionKey)
      fuelPurchaseLogResMtVersion:bundleVal(FPRestServiceMtVersionKey)
       environmentLogResMtVersion:bundleVal(FPRestServiceMtVersionKey)
-      remoteSyncConflictDelegate:self
                authTokenDelegate:self
         allowInvalidCertificates:YES];
   [_coordDao initializeLocalDatabaseWithError:[FPUtils localSaveErrorHandlerMaker]()];
-}
-
-#pragma mark - FPRemoteStoreSyncConflictDelegate protocol
-
-- (void)remoteStoreVersionOfUser:(FPUser *)remoteStoreUser
-         isNewerThanLocalVersion:(FPUser *)localUser {
-  DDLogDebug(@"Sync conflict experienced for user instance.");
-}
-
-- (void)remoteStoreVersionOfVehicle:(FPVehicle *)remoteStoreVehicle
-            isNewerThanLocalVersion:(FPVehicle *)localVehicle {
-  DDLogDebug(@"Sync conflict experienced for vehicle instance.");
-}
-
-- (void)remoteStoreVersionOfFuelStation:(FPFuelStation *)remoteStoreFuelStation
-                isNewerThanLocalVersion:(FPFuelStation *)localFuelStation {
-  DDLogDebug(@"Sync conflict experienced for fuel station instance.");
-}
-
-- (void)remoteStoreVersionOfFuelPurchaseLog:(FPFuelPurchaseLog *)remoteStoreFuelPurchaseLog
-                    isNewerThanLocalVersion:(FPFuelPurchaseLog *)localFuelPurchaseLog {
-  DDLogDebug(@"Sync conflict experienced for fuel purchase log instance.");
-}
-
-- (void)remoteStoreVersionOfEnvironmentLog:(FPEnvironmentLog *)remoteStoreEnvironmentLog
-                   isNewerThanLocalVersion:(FPEnvironmentLog *)localEnvironmentLog {
-  DDLogDebug(@"Sync conflict experienced for environment log instance.");
 }
 
 #pragma mark - FPAuthTokenDelegate protocol

@@ -174,6 +174,13 @@
           __block NSInteger syncAttemptErrors = 0;
           __block float overallSyncProgress = 0.0;
           [_coordDao flushAllUnsyncedEditsToRemoteForUser:_user
+                                        entityNotFoundBlk:^(float progress) {
+                                          syncAttemptErrors++;
+                                          overallSyncProgress += progress;
+                                          dispatch_async(dispatch_get_main_queue(), ^{
+                                            [HUD setProgress:overallSyncProgress];
+                                          });
+                                        }
                                                successBlk:^(float progress) {
                                                  numEntitiesSynced++;
                                                  overallSyncProgress += progress;
@@ -202,6 +209,13 @@
                                                [HUD setProgress:overallSyncProgress];
                                              });
                                            }
+                                        conflictBlk:^(float progress, id e) {
+                                          syncAttemptErrors++;
+                                          overallSyncProgress += progress;
+                                          dispatch_async(dispatch_get_main_queue(), ^{
+                                            [HUD setProgress:overallSyncProgress];
+                                          });
+                                        }
                                           authRequiredBlk:^(float progress) {
                                             overallSyncProgress += progress;
                                             receivedUnauthedError = YES;
