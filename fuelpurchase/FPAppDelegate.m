@@ -350,7 +350,7 @@ shouldSelectViewController:(UIViewController *)viewController {
         URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@",
                                      FPLocalSqlLiteDataFileName,
                                      FPDataFileExtension]];
-  DDLogDebug(@"About to load local database from: [%@]", [localSqlLiteDataFileUrl absoluteString]);
+  DDLogInfo(@"About to load local database from: [%@]", [localSqlLiteDataFileUrl absoluteString]);
   _coordDao =
     [[FPCoordinatorDao alloc]
       initWithSqliteDataFilePath:[localSqlLiteDataFileUrl absoluteString]
@@ -438,10 +438,6 @@ in an unauthenticated state.  Is main thread?  %@", [PEUtils yesNoFromBool:[NSTh
     authToken = [_keychainStore stringForKey:globalIdentifier];
   }
   return authToken;
-}
-
-- (UIViewController *)goalEstablishingHeightenedAuthentication {
-  return nil; // todo
 }
 
 #pragma mark - UI Toolkit maker

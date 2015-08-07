@@ -563,6 +563,21 @@ The error is as follows:";
       HUD.progress = _percentCompleteSavingEntity;
     });
   };
+  void(^_syncNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                             NSString *mainMsgTitle,
+                                                             NSString *recordTitle) {
+    handleHudProgress(percentComplete);
+    // TODO - perhaps need to add ability for 'not found' errors to be 'special' such that
+    // a user is given a special error dialog informing that their record will now be deleted
+    // from the device.  This VC needs to accept a 'delete me' block so the entity can be
+    // locally deleted.
+    [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
+                                [NSNumber numberWithBool:NO],
+                                @[[NSString stringWithFormat:@"Not found."]]]];
+    if (_percentCompleteSavingEntity == 1.0) {
+      syncDone(mainMsgTitle);
+    }
+  };
   void(^_syncSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
                                                             NSString *mainMsgTitle,
                                                             NSString *recordTitle) {
@@ -612,6 +627,17 @@ The error is as follows:";
       syncDone(mainMsgTitle);
     }
   };
+  void(^_syncConflictBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                             NSString *mainMsgTitle,
+                                                             NSString *recordTitle) {
+    handleHudProgress(percentComplete);
+    [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
+                                [NSNumber numberWithBool:NO],
+                                @[[NSString stringWithFormat:@"Conflict."]]]];
+    if (_percentCompleteSavingEntity == 1.0) {
+      syncDone(mainMsgTitle);
+    }
+  };
   void(^_syncAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
                                                              NSString *mainMsgTitle,
                                                              NSString *recordTitle) {
@@ -639,10 +665,12 @@ The error is as follows:";
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
     _syncer(self,
             _entity,
+            _syncNotFoundBlk,
             _syncSuccessBlk,
             _syncRetryAfterBlk,
             _syncServerTempError,
             _syncServerError,
+            _syncConflictBlk,
             _syncAuthReqdBlk,
             _syncDependencyUnsyncedBlk);
   });
@@ -866,6 +894,21 @@ locally.  The error is as follows:";
             HUD.progress = _percentCompleteSavingEntity;
           });
         };
+        void(^_syncNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                   NSString *mainMsgTitle,
+                                                                   NSString *recordTitle) {
+          handleHudProgress(percentComplete);
+          // TODO - perhaps need to add ability for 'not found' errors to be 'special' such that
+          // a user is given a special error dialog informing that their record will now be deleted
+          // from the device.  This VC needs to accept a 'delete me' block so the entity can be
+          // locally deleted.
+          [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
+                                      [NSNumber numberWithBool:NO],
+                                      @[[NSString stringWithFormat:@"Not found."]]]];
+          if (_percentCompleteSavingEntity == 1.0) {
+            immediateSyncDone(mainMsgTitle);
+          }
+        };
         void(^_syncSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
                                                                   NSString *mainMsgTitle,
                                                                   NSString *recordTitle) {
@@ -915,6 +958,17 @@ locally.  The error is as follows:";
             immediateSyncDone(mainMsgTitle);
           }
         };
+        void(^_syncConflictBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                   NSString *mainMsgTitle,
+                                                                   NSString *recordTitle) {
+          handleHudProgress(percentComplete);
+          [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
+                                      [NSNumber numberWithBool:NO],
+                                      @[[NSString stringWithFormat:@"Conflict."]]]];
+          if (_percentCompleteSavingEntity == 1.0) {
+            immediateSyncDone(mainMsgTitle);
+          }
+        };
         void(^_syncAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
                                                                    NSString *mainMsgTitle,
                                                                    NSString *recordTitle) {
@@ -942,10 +996,12 @@ locally.  The error is as follows:";
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
           _doneEditingEntityMarker(self,
                                    _entity,
+                                   _syncNotFoundBlk,
                                    _syncSuccessBlk,
                                    _syncRetryAfterBlk,
                                    _syncServerTempError,
                                    _syncServerError,
+                                   _syncConflictBlk,
                                    _syncAuthReqdBlk,
                                    _syncDependencyUnsyncedBlk);
         });
@@ -953,7 +1009,7 @@ locally.  The error is as follows:";
         [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // cancel btn (so they can't cancel it after we'ved saved and we're displaying the HUD)
         [[[self navigationItem] rightBarButtonItem] setEnabled:NO]; // done btn
         [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
-        _doneEditingEntityMarker(self, _entity, nil, nil, nil, nil, nil, nil);
+        _doneEditingEntityMarker(self, _entity, nil, nil, nil, nil, nil, nil, nil, nil);
         MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         HUD.delegate = self;
         [HUD setLabelText:[NSString stringWithFormat:@"%@ Saved.", _entityTitle]];
@@ -1290,6 +1346,17 @@ locally.  The error is as follows:";
           HUD.progress = _percentCompleteSavingEntity;
         });
       };
+      void(^_syncNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                 NSString *mainMsgTitle,
+                                                                 NSString *recordTitle) {
+        handleHudProgress(percentComplete);
+        [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
+                                    [NSNumber numberWithBool:NO],
+                                    @[[NSString stringWithFormat:@"Not found."]]]];
+        if (_percentCompleteSavingEntity == 1.0) {
+          immediateSaveDone(mainMsgTitle);
+        }
+      };
       void(^_syncSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
                                                                 NSString *mainMsgTitle,
                                                                 NSString *recordTitle) {
@@ -1339,6 +1406,17 @@ locally.  The error is as follows:";
           immediateSaveDone(mainMsgTitle);
         }
       };
+      void(^_syncConflictBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                 NSString *mainMsgTitle,
+                                                                 NSString *recordTitle) {
+        handleHudProgress(percentComplete);
+        [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
+                                    [NSNumber numberWithBool:NO],
+                                    @[[NSString stringWithFormat:@"Conflict."]]]];
+        if (_percentCompleteSavingEntity == 1.0) {
+          immediateSaveDone(mainMsgTitle);
+        }
+      };
       void(^_syncAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
                                                                  NSString *mainMsgTitle,
                                                                  NSString *recordTitle) {
@@ -1366,15 +1444,17 @@ locally.  The error is as follows:";
       dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         _newEntitySaver(_entityFormPanel,
                         _newEntity,
+                        _syncNotFoundBlk,
                         _syncSuccessBlk,
                         _syncRetryAfterBlk,
                         _syncServerTempError,
                         _syncServerError,
+                        _syncConflictBlk,
                         _syncAuthReqdBlk,
                         _syncDependencyUnsyncedBlk);
       });
     } else {
-      _newEntitySaver(_entityFormPanel, _newEntity, nil, nil, nil, nil, nil, nil);
+      _newEntitySaver(_entityFormPanel, _newEntity, nil, nil, nil, nil, nil, nil, nil, nil);
       [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // cancel btn (so they can't cancel it after we'ved saved and we're displaying the HUD)
       [[[self navigationItem] rightBarButtonItem] setEnabled:NO]; // done btn
       [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];

@@ -1,5 +1,4 @@
 { "_links": {
   "users": { "href": "https://fprest.paulevans.name/fp/users" },
   "login": { "href": "https://fprest.paulevans.name/fp/login" },
-  "logout": { "href": "https://fprest.paulevans.name/fp/logout" },
   "light-login": { "href": "https://fprest.paulevans.name/fp/light-login" }}}

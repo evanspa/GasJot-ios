@@ -15,12 +15,25 @@ typedef NSArray *(^PEPageRefresherBlk)(id);
 typedef NSArray *(^PEPageLoaderBlk)(id);
 typedef void (^PESyncViewStyler)(UIView *, id);
 typedef void (^PEItemSelectedAction)(id, NSIndexPath *, UIViewController *);
+typedef void (^PEItemDeleter)(UIViewController *,
+                              id,
+                              NSIndexPath *,
+                              PESyncNotFoundBlk,
+                              PESyncImmediateSuccessBlk,
+                              PESyncImmediateRetryAfterBlk,
+                              PESyncImmediateServerTempErrorBlk,
+                              PESyncImmediateServerErrorBlk,
+                              PESyncConflictBlk,
+                              PESyncImmediateAuthRequiredBlk,
+                              PESyncImmediateDependencyUnsynced);
+typedef NSInteger (^PEItemChildrenCounter)(id, NSIndexPath *, UIViewController *);
+typedef NSArray * (^PEItemChildrenMsgsBlk)(id, NSIndexPath *, UIViewController *);
 typedef UIViewController *(^FPDetailViewMaker)(PEListViewController *, id, NSIndexPath *, PEItemChangedBlk);
 typedef BOOL (^PEDoesEntityBelongToListView)(PELMMainSupport *);
 typedef NSInteger (^PEWouldBeIndexOfEntity)(PELMMainSupport *);
 
 @interface PEListViewController : UIViewController <UITableViewDataSource,
-UITableViewDelegate>
+UITableViewDelegate, MBProgressHUDDelegate>
 
 #pragma mark - Initializers
 
@@ -38,7 +51,12 @@ UITableViewDelegate>
                        detailViewMaker:(FPDetailViewMaker)detailViewMaker
                              uitoolkit:(PEUIToolkit *)uitoolkit
         doesEntityBelongToThisListView:(PEDoesEntityBelongToListView)doesEntityBelongToThisListView
-                  wouldBeIndexOfEntity:(PEWouldBeIndexOfEntity)wouldBeIndexOfEntity;
+                  wouldBeIndexOfEntity:(PEWouldBeIndexOfEntity)wouldBeIndexOfEntity
+                       isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
+                        isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
+                   itemChildrenCounter:(PEItemChildrenCounter)itemChildrenCounter
+                   itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
+                           itemDeleter:(PEItemDeleter)itemDeleter;
 
 #pragma mark - Entity changed methods
 
