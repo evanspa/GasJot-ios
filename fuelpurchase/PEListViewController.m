@@ -43,6 +43,7 @@
   PEItemChildrenCounter _itemChildrenCounter;
   PEItemChildrenMsgsBlk _itemChildrenMsgsBlk;
   PEItemDeleter _itemDeleter;
+  PEItemLocalDeleter _itemLocalDeleter;
 }
 
 #pragma mark - Initializers
@@ -66,7 +67,8 @@
                         isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                    itemChildrenCounter:(PEItemChildrenCounter)itemChildrenCounter
                    itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
-                           itemDeleter:(PEItemDeleter)itemDeleter {
+                           itemDeleter:(PEItemDeleter)itemDeleter
+                      itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter {
   NSAssert(!(detailViewMaker && initialSelectedItem), @"detailViewMaker and initialSelectedItem cannot BOTH be provided");
   NSAssert(!(detailViewMaker && itemSelectedAction), @"detailViewMaker and itemSelectedAction cannot BOTH be provided");
   self = [super initWithNibName:nil bundle:nil];
@@ -98,6 +100,7 @@
     _itemChildrenCounter = itemChildrenCounter;
     _itemChildrenMsgsBlk = itemChildrenMsgsBlk;
     _itemDeleter = itemDeleter;
+    _itemLocalDeleter = itemLocalDeleter;
   }
   return self;
 }
@@ -456,168 +459,8 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
       void (^postDeleteAttemptActivities)(void) = ^{
         [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
       };
-      if (_isAuthenticatedBlk()) {
-        [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
-        void(^immediateDelDone)(NSString *) = ^(NSString *mainMsgTitle) {
-          if ([_errorsForDelete count] == 0) { // success
-            dispatch_async(dispatch_get_main_queue(), ^{
-              [_tableView beginUpdates];
-              [_dataSource removeObjectAtIndex:indexPath.row];
-              [_tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-              [_tableView endUpdates];
-              [HUD setLabelText:_successMessageTitlesForDelete[0]];
-              UIImage *image = [UIImage imageNamed:@"hud-complete"];
-              UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
-              [HUD setCustomView:imageView];
-              HUD.mode = MBProgressHUDModeCustomView;
-              [HUD hide:YES afterDelay:1.30];
-              dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.35 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-                postDeleteAttemptActivities();
-              });
-            });
-          } else { // error
-            dispatch_async(dispatch_get_main_queue(), ^{
-              [HUD hide:YES afterDelay:0];
-              NSMutableAttributedString *attrMessage;
-              NSString *title;
-              NSString *message;
-              NSArray *subErrors = _errorsForDelete[0][2];
-              if ([subErrors count] > 1) {
-                message = @"\
-There were problems deleting your\n\
-entity from the server.  The errors are\n\
-as follows:";
-                title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
-              } else {
-                message = @"\
-There was a problem deleting your\n\
-entity from the server.  The error is\n\
-as follows:";
-                title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
-              }
-              attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
-              JGActionSheetSection *becameUnauthSection = [self becameUnauthenticatedSection];
-              JGActionSheetSection *contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
-                                                                                    title:title
-                                                                         alertDescription:attrMessage
-                                                                           relativeToView:self.view];
-              JGActionSheetSection *buttonsSection;
-              void (^buttonsPressedBlock)(JGActionSheet *, NSIndexPath *);
-              buttonsSection = [JGActionSheetSection sectionWithTitle:nil
-                                                              message:nil
-                                                         buttonTitles:@[@"Okay."]
-                                                          buttonStyle:JGActionSheetButtonStyleDefault];
-              [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:0];
-              buttonsPressedBlock = ^(JGActionSheet *sheet, NSIndexPath *btnIndexPath) {
-                postDeleteAttemptActivities();
-                [sheet dismissAnimated:YES];
-                [_tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-              };
-              JGActionSheet *alertSheet;
-              if (becameUnauthSection) {
-                alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
-              } else {
-                alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
-              }
-              [alertSheet setDelegate:self];
-              [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
-              [alertSheet setButtonPressedBlock:buttonsPressedBlock];
-              [alertSheet showInView:[self viewForAlerts] animated:YES];
-            });
-          }
-        };
-        void(^delNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                 NSString *mainMsgTitle,
-                                                                 NSString *recordTitle) {
-          [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
-                                        [NSNumber numberWithBool:NO],
-                                        @[[NSString stringWithFormat:@"Not found."]]]];
-          immediateDelDone(mainMsgTitle);
-        };
-        void(^delSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                NSString *mainMsgTitle,
-                                                                NSString *recordTitle) {
-          [_successMessageTitlesForDelete addObject:[NSString stringWithFormat:@"%@ deleted.", recordTitle]];
-          immediateDelDone(mainMsgTitle);
-        };
-        void(^delRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete,
-                                                                             NSString *mainMsgTitle,
-                                                                             NSString *recordTitle,
-                                                                             NSDate *retryAfter) {
-          [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
-                                        [NSNumber numberWithBool:NO],
-                                        @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]]]];
-          immediateDelDone(mainMsgTitle);
-        };
-        void (^delServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                      NSString *mainMsgTitle,
-                                                                      NSString *recordTitle) {
-          [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
-                                        [NSNumber numberWithBool:NO],
-                                        @[@"Temporary server error."]]];
-          immediateDelDone(mainMsgTitle);
-        };
-        void (^delServerError)(float, NSString *, NSString *, NSArray *) = ^(float percentComplete,
-                                                                             NSString *mainMsgTitle,
-                                                                             NSString *recordTitle,
-                                                                             NSArray *computedErrMsgs) {
-          BOOL isErrorUserFixable = YES;
-          if (!computedErrMsgs || ([computedErrMsgs count] == 0)) {
-            computedErrMsgs = @[@"Unknown server error."];
-            isErrorUserFixable = NO;
-          }
-          [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
-                                        [NSNumber numberWithBool:isErrorUserFixable],
-                                        computedErrMsgs]];
-          immediateDelDone(mainMsgTitle);
-        };
-        void(^delConflictBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                 NSString *mainMsgTitle,
-                                                                 NSString *recordTitle) {
-          [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
-                                        [NSNumber numberWithBool:NO],
-                                        @[[NSString stringWithFormat:@"Conflict."]]]];
-          immediateDelDone(mainMsgTitle);
-        };
-        void(^delAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                   NSString *mainMsgTitle,
-                                                                   NSString *recordTitle) {
-          _receivedAuthReqdErrorOnDeleteAttempt = YES;
-          [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
-                                        [NSNumber numberWithBool:NO],
-                                        @[@"Authentication required."]]];
-          immediateDelDone(mainMsgTitle);
-        };
-        void (^delDependencyUnsyncedBlk)(float, NSString *, NSString *, NSString *) = ^(float percentComplete,
-                                                                                        NSString *mainMsgTitle,
-                                                                                        NSString *recordTitle,
-                                                                                        NSString *dependencyErrMsg) {
-          [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
-                                        [NSNumber numberWithBool:NO],
-                                        @[dependencyErrMsg]]];
-          immediateDelDone(mainMsgTitle);
-        };
-        void (^deleteItem)(void) = ^{
-          HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-          HUD.delegate = self;
-          HUD.labelText = @"Deleting from server...";
-          [_errorsForDelete removeAllObjects];
-          [_successMessageTitlesForDelete removeAllObjects];
-          _receivedAuthReqdErrorOnDeleteAttempt = NO;
-          dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-            _itemDeleter(self,
-                         item,
-                         indexPath,
-                         delNotFoundBlk,
-                         delSuccessBlk,
-                         delRetryAfterBlk,
-                         delServerTempError,
-                         delServerError,
-                         delConflictBlk,
-                         delAuthReqdBlk,
-                         delDependencyUnsyncedBlk);
-          });
-        };
+      
+      void (^doDeleteWithChildrenConfirm)(void(^)(void)) = ^(void(^deleter)(void)) {
         if (_itemChildrenCounter) {
           NSInteger numChildren = _itemChildrenCounter(item, indexPath, self);
           if (numChildren > 0) {
@@ -628,7 +471,7 @@ Deleting this record will result in the\n\
 following child-records being deleted.\n\n\
 Are you sure you want to continue?"]
                                        okaybuttonTitle:@"Yes, delete."
-                                      okaybuttonAction:^{deleteItem();}
+                                      okaybuttonAction:^{deleter();}
                                      cancelbuttonTitle:@"No, cancel."
                                     cancelbuttonAction:^{
                                       postDeleteAttemptActivities();
@@ -636,18 +479,196 @@ Are you sure you want to continue?"]
                                     }
                                         relativeToView:[self viewForAlerts]];
           } else {
-            deleteItem();
+            deleter();
           }
         } else {
-          deleteItem();
+          deleter();
+        }
+      };
+      
+      if ([item globalIdentifier]) {
+        if (_isAuthenticatedBlk()) {
+          [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+          void(^immediateDelDone)(NSString *) = ^(NSString *mainMsgTitle) {
+            if ([_errorsForDelete count] == 0) { // success
+              dispatch_async(dispatch_get_main_queue(), ^{
+                [_tableView beginUpdates];
+                [_dataSource removeObjectAtIndex:indexPath.row];
+                [_tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+                [_tableView endUpdates];
+                [HUD setLabelText:_successMessageTitlesForDelete[0]];
+                UIImage *image = [UIImage imageNamed:@"hud-complete"];
+                UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
+                [HUD setCustomView:imageView];
+                HUD.mode = MBProgressHUDModeCustomView;
+                [HUD hide:YES afterDelay:1.30];
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.35 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                  postDeleteAttemptActivities();
+                });
+              });
+            } else { // error
+              dispatch_async(dispatch_get_main_queue(), ^{
+                [HUD hide:YES afterDelay:0];
+                NSMutableAttributedString *attrMessage;
+                NSString *title;
+                NSString *message;
+                NSArray *subErrors = _errorsForDelete[0][2];
+                if ([subErrors count] > 1) {
+                  message = @"\
+There were problems deleting your\n\
+entity from the server.  The errors are\n\
+as follows:";
+                  title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
+                } else {
+                  message = @"\
+There was a problem deleting your\n\
+entity from the server.  The error is\n\
+as follows:";
+                  title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
+                }
+                attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
+                JGActionSheetSection *becameUnauthSection = [self becameUnauthenticatedSection];
+                JGActionSheetSection *contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
+                                                                                      title:title
+                                                                           alertDescription:attrMessage
+                                                                             relativeToView:self.view];
+                JGActionSheetSection *buttonsSection;
+                void (^buttonsPressedBlock)(JGActionSheet *, NSIndexPath *);
+                buttonsSection = [JGActionSheetSection sectionWithTitle:nil
+                                                                message:nil
+                                                           buttonTitles:@[@"Okay."]
+                                                            buttonStyle:JGActionSheetButtonStyleDefault];
+                [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:0];
+                buttonsPressedBlock = ^(JGActionSheet *sheet, NSIndexPath *btnIndexPath) {
+                  postDeleteAttemptActivities();
+                  [sheet dismissAnimated:YES];
+                  [_tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+                };
+                JGActionSheet *alertSheet;
+                if (becameUnauthSection) {
+                  alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
+                } else {
+                  alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
+                }
+                [alertSheet setDelegate:self];
+                [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
+                [alertSheet setButtonPressedBlock:buttonsPressedBlock];
+                [alertSheet showInView:[self viewForAlerts] animated:YES];
+              });
+            }
+          };
+          void(^delNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                   NSString *mainMsgTitle,
+                                                                   NSString *recordTitle) {
+            [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
+                                          [NSNumber numberWithBool:NO],
+                                          @[[NSString stringWithFormat:@"Not found."]]]];
+            immediateDelDone(mainMsgTitle);
+          };
+          void(^delSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                  NSString *mainMsgTitle,
+                                                                  NSString *recordTitle) {
+            [_successMessageTitlesForDelete addObject:[NSString stringWithFormat:@"%@ deleted.", recordTitle]];
+            immediateDelDone(mainMsgTitle);
+          };
+          void(^delRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete,
+                                                                               NSString *mainMsgTitle,
+                                                                               NSString *recordTitle,
+                                                                               NSDate *retryAfter) {
+            [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
+                                          [NSNumber numberWithBool:NO],
+                                          @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]]]];
+            immediateDelDone(mainMsgTitle);
+          };
+          void (^delServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                        NSString *mainMsgTitle,
+                                                                        NSString *recordTitle) {
+            [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
+                                          [NSNumber numberWithBool:NO],
+                                          @[@"Temporary server error."]]];
+            immediateDelDone(mainMsgTitle);
+          };
+          void (^delServerError)(float, NSString *, NSString *, NSArray *) = ^(float percentComplete,
+                                                                               NSString *mainMsgTitle,
+                                                                               NSString *recordTitle,
+                                                                               NSArray *computedErrMsgs) {
+            BOOL isErrorUserFixable = YES;
+            if (!computedErrMsgs || ([computedErrMsgs count] == 0)) {
+              computedErrMsgs = @[@"Unknown server error."];
+              isErrorUserFixable = NO;
+            }
+            [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
+                                          [NSNumber numberWithBool:isErrorUserFixable],
+                                          computedErrMsgs]];
+            immediateDelDone(mainMsgTitle);
+          };
+          void(^delConflictBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                   NSString *mainMsgTitle,
+                                                                   NSString *recordTitle) {
+            [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
+                                          [NSNumber numberWithBool:NO],
+                                          @[[NSString stringWithFormat:@"Conflict."]]]];
+            immediateDelDone(mainMsgTitle);
+          };
+          void(^delAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                   NSString *mainMsgTitle,
+                                                                   NSString *recordTitle) {
+            _receivedAuthReqdErrorOnDeleteAttempt = YES;
+            [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
+                                          [NSNumber numberWithBool:NO],
+                                          @[@"Authentication required."]]];
+            immediateDelDone(mainMsgTitle);
+          };
+          void (^delDependencyUnsyncedBlk)(float, NSString *, NSString *, NSString *) = ^(float percentComplete,
+                                                                                          NSString *mainMsgTitle,
+                                                                                          NSString *recordTitle,
+                                                                                          NSString *dependencyErrMsg) {
+            [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
+                                          [NSNumber numberWithBool:NO],
+                                          @[dependencyErrMsg]]];
+            immediateDelDone(mainMsgTitle);
+          };
+          void (^deleteRemoteItem)(void) = ^{
+            HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+            HUD.delegate = self;
+            HUD.labelText = @"Deleting from server...";
+            [_errorsForDelete removeAllObjects];
+            [_successMessageTitlesForDelete removeAllObjects];
+            _receivedAuthReqdErrorOnDeleteAttempt = NO;
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+              _itemDeleter(self,
+                           item,
+                           indexPath,
+                           delNotFoundBlk,
+                           delSuccessBlk,
+                           delRetryAfterBlk,
+                           delServerTempError,
+                           delServerError,
+                           delConflictBlk,
+                           delAuthReqdBlk,
+                           delDependencyUnsyncedBlk);
+            });
+          };
+          doDeleteWithChildrenConfirm(deleteRemoteItem);
+        } else {
+          [PEUIUtils showWarningAlertWithMsgs:@[]
+                                        title:@"Oops"
+                             alertDescription:[[NSAttributedString alloc] initWithString:@"You cannot delete anything because you're currently not authenticated."]
+                                  buttonTitle:@"Okay."
+                                 buttonAction:nil
+                               relativeToView:[self viewForAlerts]];
         }
       } else {
-        [PEUIUtils showWarningAlertWithMsgs:@[]
-                                      title:@"Oops"
-                           alertDescription:[[NSAttributedString alloc] initWithString:@"You cannot delete anything because you're currently not authenticated."]
-                                buttonTitle:@"Okay."
-                               buttonAction:nil
-                             relativeToView:[self viewForAlerts]];
+        doDeleteWithChildrenConfirm(^{
+          dispatch_async(dispatch_get_main_queue(), ^{
+            [_tableView beginUpdates];
+            _itemLocalDeleter(self, item, indexPath);
+            [_dataSource removeObjectAtIndex:indexPath.row];
+            [_tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+            [_tableView endUpdates];
+            postDeleteAttemptActivities();
+          });
+        });
       }
     }
   }

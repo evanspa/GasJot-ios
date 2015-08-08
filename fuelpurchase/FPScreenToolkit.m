@@ -192,6 +192,67 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
 
 #pragma mark - Vehicle Screens
 
+- (PEItemChildrenCounter)vehicleItemChildrenCounter {
+  PEItemChildrenCounter itemChildrenCounter = ^ NSInteger (FPVehicle *vehicle,
+                                                           NSIndexPath *indexPath,
+                                                           UIViewController *listViewController) {
+    return [_coordDao numFuelPurchaseLogsForVehicle:vehicle
+                                              error:[FPUtils localFetchErrorHandlerMaker]()] +
+      [_coordDao numEnvironmentLogsForVehicle:vehicle
+                                        error:[FPUtils localFetchErrorHandlerMaker]()];
+  };
+  return itemChildrenCounter;
+}
+
+- (PEItemChildrenMsgsBlk)vehicleItemChildrenMsgs {
+  PEItemChildrenMsgsBlk itemChildrenMsgs = ^ NSArray * (FPVehicle *vehicle,
+                                                        NSIndexPath *indexPath,
+                                                        UIViewController *listViewController) {
+    NSInteger numFplogs = [_coordDao numFuelPurchaseLogsForVehicle:vehicle
+                                                             error:[FPUtils localFetchErrorHandlerMaker]()];
+    NSInteger numEnvlogs = [_coordDao numEnvironmentLogsForVehicle:vehicle
+                                                             error:[FPUtils localFetchErrorHandlerMaker]()];
+    return @[[NSString stringWithFormat:@"%ld fuel purchase log%@", (long)numFplogs, (numFplogs > 1 ? @"s" : @"")],
+             [NSString stringWithFormat:@"%ld environment log%@", (long)numEnvlogs, (numEnvlogs > 1 ? @"s" : @"")]];
+  };
+  return itemChildrenMsgs;
+}
+
+- (PEItemDeleter)vehicleItemDeleterForUser:(FPUser *)user {
+  PEItemDeleter itemDeleter = ^ (UIViewController *listViewController,
+                                 FPVehicle *vehicle,
+                                 NSIndexPath *indexPath,
+                                 PESyncNotFoundBlk notFoundBlk,
+                                 PESyncImmediateSuccessBlk successBlk,
+                                 PESyncImmediateRetryAfterBlk retryAfterBlk,
+                                 PESyncImmediateServerTempErrorBlk tempErrBlk,
+                                 PESyncImmediateServerErrorBlk errBlk,
+                                 PESyncConflictBlk conflictBlk,
+                                 PESyncImmediateAuthRequiredBlk authReqdBlk,
+                                 PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
+    NSString *mainMsgFragment = @"deleting vehicle";
+    NSString *recordTitle = @"Vehicle";
+    [_coordDao deleteVehicle:vehicle
+                     forUser:user
+         notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+              addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+      addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+      addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+          addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+             addlConflictBlk:^(id e) {conflictBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+         addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                       error:[FPUtils localSaveErrorHandlerMaker]()];
+  };
+  return itemDeleter;
+}
+
+- (PEItemLocalDeleter)vehicleItemLocalDeleter {
+  return ^ (UIViewController *listViewController, FPVehicle *vehicle, NSIndexPath *indexPath) {
+    [[_coordDao localDao] deleteVehicle:vehicle error:[FPUtils localSaveErrorHandlerMaker]()];
+    [APP refreshTabs];
+  };
+}
+
 - (FPAuthScreenMaker)newViewVehiclesScreenMaker {
   return ^ UIViewController *(FPUser *user) {
     void (^addVehicleAction)(PEListViewController *, PEItemAddedBlk) =
@@ -226,25 +287,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
                                                                     isLoggedIn:[APP isUserLoggedIn]];
-    PEItemChildrenCounter itemChildrenCounter = ^ NSInteger (FPVehicle *vehicle, NSIndexPath *indexPath, UIViewController *listViewController) {
-      return 0; // TODO
-    };
-    PEItemChildrenMsgsBlk itemChildrenMsgs = ^ NSArray * (FPVehicle *vehicle, NSIndexPath *indexPath, UIViewController *listViewController) {
-      return @[]; // TODO
-    };
-    PEItemDeleter itemDeleter = ^ (UIViewController *listViewController,
-                                   FPVehicle *vehicle,
-                                   NSIndexPath *indexPath,
-                                   PESyncNotFoundBlk notFoundBlk,
-                                   PESyncImmediateSuccessBlk successBlk,
-                                   PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                   PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                   PESyncImmediateServerErrorBlk errBlk,
-                                   PESyncConflictBlk conflictBlk,
-                                   PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                   PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
-      // TODO
-    };
     return [[PEListViewController alloc]
               initWithClassOfDataSourceObjects:[FPVehicle class]
                                          title:@"Vehicles"
@@ -263,9 +305,10 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                           wouldBeIndexOfEntity:wouldBeIndexBlk
                                isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
                                 isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                           itemChildrenCounter:itemChildrenCounter
-                           itemChildrenMsgsBlk:itemChildrenMsgs
-                                   itemDeleter:itemDeleter];
+                           itemChildrenCounter:[self vehicleItemChildrenCounter]
+                           itemChildrenMsgsBlk:[self vehicleItemChildrenMsgs]
+                                   itemDeleter:[self vehicleItemDeleterForUser:user]
+                              itemLocalDeleter:[self vehicleItemLocalDeleter]];
   };
 }
 
@@ -291,25 +334,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
                                                                     isLoggedIn:[APP isUserLoggedIn]];
-    PEItemChildrenCounter itemChildrenCounter = ^ NSInteger (FPVehicle *vehicle, NSIndexPath *indexPath, UIViewController *listViewController) {
-      return 0; // TODO
-    };
-    PEItemChildrenMsgsBlk itemChildrenMsgs = ^ NSArray * (FPVehicle *vehicle, NSIndexPath *indexPath, UIViewController *listViewController) {
-      return @[]; // TODO
-    };
-    PEItemDeleter itemDeleter = ^ (UIViewController *listViewController,
-                                   FPVehicle *vehicle,
-                                   NSIndexPath *indexPath,
-                                   PESyncNotFoundBlk notFoundBlk,
-                                   PESyncImmediateSuccessBlk successBlk,
-                                   PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                   PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                   PESyncImmediateServerErrorBlk errBlk,
-                                   PESyncConflictBlk conflictBlk,
-                                   PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                   PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
-      // TODO
-    };
     return [[PEListViewController alloc]
               initWithClassOfDataSourceObjects:[FPVehicle class]
                                          title:@"Unsynced Vehicles"
@@ -328,9 +352,10 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                           wouldBeIndexOfEntity:wouldBeIndexBlk
                                isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
                                 isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                           itemChildrenCounter:itemChildrenCounter
-                           itemChildrenMsgsBlk:itemChildrenMsgs
-                                   itemDeleter:itemDeleter];
+                           itemChildrenCounter:[self vehicleItemChildrenCounter]
+                           itemChildrenMsgsBlk:[self vehicleItemChildrenMsgs]
+                                   itemDeleter:[self vehicleItemDeleterForUser:user]
+                              itemLocalDeleter:[self vehicleItemLocalDeleter]];
   };
 }
 
@@ -358,25 +383,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
                                                                     isLoggedIn:[APP isUserLoggedIn]];
-    PEItemChildrenCounter itemChildrenCounter = ^ NSInteger (FPVehicle *vehicle, NSIndexPath *indexPath, UIViewController *listViewController) {
-      return 0; // TODO
-    };
-    PEItemChildrenMsgsBlk itemChildrenMsgs = ^ NSArray * (FPVehicle *vehicle, NSIndexPath *indexPath, UIViewController *listViewController) {
-      return @[]; // TODO
-    };
-    PEItemDeleter itemDeleter = ^ (UIViewController *listViewController,
-                                   FPVehicle *vehicle,
-                                   NSIndexPath *indexPath,
-                                   PESyncNotFoundBlk notFoundBlk,
-                                   PESyncImmediateSuccessBlk successBlk,
-                                   PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                   PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                   PESyncImmediateServerErrorBlk errBlk,
-                                   PESyncConflictBlk conflictBlk,
-                                   PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                   PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
-      // TODO
-    };
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPVehicle class]
                                         title:@"Choose Vehicle"
@@ -395,9 +401,10 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                          wouldBeIndexOfEntity:wouldBeIndexBlk
                               isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
                                isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                          itemChildrenCounter:itemChildrenCounter
-                          itemChildrenMsgsBlk:itemChildrenMsgs
-                                  itemDeleter:itemDeleter];
+                          itemChildrenCounter:[self vehicleItemChildrenCounter]
+                          itemChildrenMsgsBlk:[self vehicleItemChildrenMsgs]
+                                  itemDeleter:[self vehicleItemDeleterForUser:user]
+                             itemLocalDeleter:[self vehicleItemLocalDeleter]];
   };
 }
 
@@ -563,7 +570,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                        entityIndexPath:vehicleIndexPath
                              uitoolkit:_uitoolkit
                         itemChangedBlk:itemChangedBlk
-                      entityFormPanelMaker:[_panelToolkit vehiclePanelMaker]
+                  entityFormPanelMaker:[_panelToolkit vehiclePanelMaker]
                    entityToPanelBinder:[_panelToolkit vehicleToVehiclePanelBinder]
                    panelToEntityBinder:[_panelToolkit vehiclePanelToVehicleBinder]
                            entityTitle:@"Vehicle"
@@ -602,7 +609,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                         UIViewController *listViewController) {
     NSInteger numFplogs = [_coordDao numFuelPurchaseLogsForFuelStation:fuelStation
                                                                  error:[FPUtils localFetchErrorHandlerMaker]()];
-    return @[[NSString stringWithFormat:@"%ld fuel purchase log%@", numFplogs, (numFplogs > 1 ? @"s" : @"")]];
+    return @[[NSString stringWithFormat:@"%ld fuel purchase log%@", (long)numFplogs, (numFplogs > 1 ? @"s" : @"")]];
   };
   return itemChildrenMsgs;
 }
@@ -633,6 +640,13 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                            error:[FPUtils localSaveErrorHandlerMaker]()];
   };
   return itemDeleter;
+}
+
+- (PEItemLocalDeleter)fuelStationItemLocalDeleter {
+  return ^ (UIViewController *listViewController, FPFuelStation *fuelStation, NSIndexPath *indexPath) {
+    [[_coordDao localDao] deleteFuelstation:fuelStation error:[FPUtils localSaveErrorHandlerMaker]()];
+    [APP refreshTabs];
+  };
 }
 
 - (void)addDistanceInfoToTopOfCellContentView:(UIView *)contentView
@@ -764,7 +778,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
                           itemChildrenCounter:[self fuelStationItemChildrenCounter]
                           itemChildrenMsgsBlk:[self fuelStationItemChildrenMsgs]
-                                  itemDeleter:[self fuelStationItemDeleterForUser:user]];
+                                  itemDeleter:[self fuelStationItemDeleterForUser:user]
+                             itemLocalDeleter:[self fuelStationItemLocalDeleter]];
   };
 }
 
@@ -825,7 +840,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
                           itemChildrenCounter:[self fuelStationItemChildrenCounter]
                           itemChildrenMsgsBlk:[self fuelStationItemChildrenMsgs]
-                                  itemDeleter:[self fuelStationItemDeleterForUser:user]];
+                                  itemDeleter:[self fuelStationItemDeleterForUser:user]
+                             itemLocalDeleter:[self fuelStationItemLocalDeleter]];
   };
 }
 
@@ -888,7 +904,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
                           itemChildrenCounter:[self fuelStationItemChildrenCounter]
                           itemChildrenMsgsBlk:[self fuelStationItemChildrenMsgs]
-                                  itemDeleter:[self fuelStationItemDeleterForUser:user]];
+                                  itemDeleter:[self fuelStationItemDeleterForUser:user]
+                             itemLocalDeleter:[self fuelStationItemLocalDeleter]];
   };
 }
 
@@ -1475,6 +1492,13 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
   return itemDeleter;
 }
 
+- (PEItemLocalDeleter)fplogItemLocalDeleter {
+  return ^ (UIViewController *listViewController, FPFuelPurchaseLog *fplog, NSIndexPath *indexPath) {
+    [[_coordDao localDao] deleteFuelPurchaseLog:fplog error:[FPUtils localSaveErrorHandlerMaker]()];
+    [APP refreshTabs];
+  };
+}
+
 - (FPAuthScreenMaker)newViewFuelPurchaseLogsScreenMakerForVehicleInCtx {
   return ^ UIViewController *(FPVehicle *vehicle) {
     FPUser *user = [_coordDao userForVehicle:vehicle error:[FPUtils localFetchErrorHandlerMaker]()];
@@ -1550,7 +1574,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
                           itemChildrenCounter:nil
                           itemChildrenMsgsBlk:nil
-                                  itemDeleter:[self fplogItemDeleterForUser:user]];
+                                  itemDeleter:[self fplogItemDeleterForUser:user]
+                             itemLocalDeleter:[self fplogItemLocalDeleter]];
   };
 }
 
@@ -1627,7 +1652,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
                           itemChildrenCounter:nil
                           itemChildrenMsgsBlk:nil
-                                  itemDeleter:[self fplogItemDeleterForUser:user]];
+                                  itemDeleter:[self fplogItemDeleterForUser:user]
+                             itemLocalDeleter:[self fplogItemLocalDeleter]];
   };
 }
 
@@ -1676,7 +1702,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
                           itemChildrenCounter:nil
                           itemChildrenMsgsBlk:nil
-                                  itemDeleter:[self fplogItemDeleterForUser:user]];
+                                  itemDeleter:[self fplogItemDeleterForUser:user]
+                             itemLocalDeleter:[self fplogItemLocalDeleter]];
   };
 }
 
@@ -1936,6 +1963,13 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
   return itemDeleter;
 }
 
+- (PEItemLocalDeleter)envlogItemLocalDeleter {
+  return ^ (UIViewController *listViewController, FPEnvironmentLog *envlog, NSIndexPath *indexPath) {
+    [[_coordDao localDao] deleteEnvironmentLog:envlog error:[FPUtils localSaveErrorHandlerMaker]()];
+    [APP refreshTabs];
+  };
+}
+
 - (FPAuthScreenMaker)newViewEnvironmentLogsScreenMakerForVehicleInCtx {
   return ^ UIViewController *(FPVehicle *vehicle) {
     FPUser *user = [_coordDao userForVehicle:vehicle error:[FPUtils localFetchErrorHandlerMaker]()];
@@ -2006,7 +2040,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
                           itemChildrenCounter:nil
                           itemChildrenMsgsBlk:nil
-                                  itemDeleter:[self envlogItemDeleterForUser:user]];
+                                  itemDeleter:[self envlogItemDeleterForUser:user]
+                             itemLocalDeleter:[self envlogItemLocalDeleter]];
   };
 }
 
@@ -2053,7 +2088,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
                           itemChildrenCounter:nil
                           itemChildrenMsgsBlk:nil
-                                  itemDeleter:[self envlogItemDeleterForUser:user]];
+                                  itemDeleter:[self envlogItemDeleterForUser:user]
+                             itemLocalDeleter:[self envlogItemLocalDeleter]];
   };
 }
 

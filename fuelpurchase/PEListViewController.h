@@ -26,6 +26,7 @@ typedef void (^PEItemDeleter)(UIViewController *,
                               PESyncConflictBlk,
                               PESyncImmediateAuthRequiredBlk,
                               PESyncImmediateDependencyUnsynced);
+typedef void (^PEItemLocalDeleter)(UIViewController *, id, NSIndexPath *);
 typedef NSInteger (^PEItemChildrenCounter)(id, NSIndexPath *, UIViewController *);
 typedef NSArray * (^PEItemChildrenMsgsBlk)(id, NSIndexPath *, UIViewController *);
 typedef UIViewController *(^FPDetailViewMaker)(PEListViewController *, id, NSIndexPath *, PEItemChangedBlk);
@@ -56,7 +57,8 @@ UITableViewDelegate, MBProgressHUDDelegate>
                         isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                    itemChildrenCounter:(PEItemChildrenCounter)itemChildrenCounter
                    itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
-                           itemDeleter:(PEItemDeleter)itemDeleter;
+                           itemDeleter:(PEItemDeleter)itemDeleter
+                      itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter;
 
 #pragma mark - Entity changed methods
 
