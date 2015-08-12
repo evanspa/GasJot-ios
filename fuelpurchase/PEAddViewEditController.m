@@ -27,7 +27,8 @@
   PEItemAddedBlk _itemAddedBlk;
   PEItemChangedBlk _itemChangedBlk;
   UIBarButtonItem *_backButton;
-  PEEntityFormPanelMakerBlk _entityFormPanelMaker;
+  PEEntityPanelMakerBlk _entityFormPanelMaker;
+  PEEntityViewPanelMakerBlk _entityViewPanelMaker;
   PEPanelToEntityBinderBlk _panelToEntityBinder;
   NSString *_entityTitle;
   PEEnableDisablePanelBlk _panelEnablerDisabler;
@@ -55,6 +56,7 @@
   UIBarButtonItem *_syncBarButtonItem;
   PESyncerBlk _syncer;
   PEIsAuthenticatedBlk _isAuthenticatedBlk;
+  UIView *_entityViewPanel;
 }
 
 #pragma mark - Initializers
@@ -66,7 +68,8 @@
            uitoolkit:(PEUIToolkit *)uitoolkit
         itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
       itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
-entityFormPanelMaker:(PEEntityFormPanelMakerBlk)entityFormPanelMaker
+entityFormPanelMaker:(PEEntityPanelMakerBlk)entityFormPanelMaker
+entityViewPanelMaker:(PEEntityViewPanelMakerBlk)entityViewPanelMaker
  entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
  panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
          entityTitle:(NSString *)entityTitle
@@ -101,6 +104,7 @@ getterForNotification:(SEL)getterForNotification {
     _itemAddedBlk = itemAddedBlk;
     _itemChangedBlk = itemChangedBlk;
     _entityFormPanelMaker = entityFormPanelMaker;
+    _entityViewPanelMaker = entityViewPanelMaker;
     _entityToPanelBinder = entityToPanelBinder;
     _panelToEntityBinder = panelToEntityBinder;
     _entityTitle = entityTitle;
@@ -132,7 +136,7 @@ getterForNotification:(SEL)getterForNotification {
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
                                       listViewController:(PEListViewController *)listViewController
                                             itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
-                                    entityFormPanelMaker:(PEEntityFormPanelMakerBlk)entityFormPanelMaker
+                                    entityFormPanelMaker:(PEEntityPanelMakerBlk)entityFormPanelMaker
                                      entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                      panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
                                              entityTitle:(NSString *)entityTitle
@@ -169,7 +173,7 @@ getterForNotification:(SEL)getterForNotification {
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
                                       listViewController:(PEListViewController *)listViewController
                                             itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
-                                    entityFormPanelMaker:(PEEntityFormPanelMakerBlk)entityFormPanelMaker
+                                    entityFormPanelMaker:(PEEntityPanelMakerBlk)entityFormPanelMaker
                                      entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                      panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
                                              entityTitle:(NSString *)entityTitle
@@ -192,6 +196,7 @@ getterForNotification:(SEL)getterForNotification {
                                             itemAddedBlk:itemAddedBlk
                                           itemChangedBlk:nil
                                     entityFormPanelMaker:entityFormPanelMaker
+                                    entityViewPanelMaker:nil
                                      entityToPanelBinder:entityToPanelBinder
                                      panelToEntityBinder:panelToEntityBinder
                                              entityTitle:entityTitle
@@ -219,7 +224,8 @@ getterForNotification:(SEL)getterForNotification {
                                        entityIndexPath:(NSIndexPath *)entityIndexPath
                                              uitoolkit:(PEUIToolkit *)uitoolkit
                                         itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
-                                  entityFormPanelMaker:(PEEntityFormPanelMakerBlk)entityFormPanelMaker
+                                  entityFormPanelMaker:(PEEntityPanelMakerBlk)entityFormPanelMaker
+                                  entityViewPanelMaker:(PEEntityViewPanelMakerBlk)entityViewPanelMaker
                                    entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
                                    panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
                                            entityTitle:(NSString *)entityTitle
@@ -245,6 +251,7 @@ getterForNotification:(SEL)getterForNotification {
                                             itemAddedBlk:nil
                                           itemChangedBlk:itemChangedBlk
                                     entityFormPanelMaker:entityFormPanelMaker
+                                    entityViewPanelMaker:entityViewPanelMaker
                                      entityToPanelBinder:entityToPanelBinder
                                      panelToEntityBinder:panelToEntityBinder
                                              entityTitle:entityTitle
@@ -341,6 +348,11 @@ getterForNotification:(SEL)getterForNotification {
     DDLogDebug(@"Removing PEAVEC as a notification observer.");
     [[NSNotificationCenter defaultCenter] removeObserver:self];
   }
+  if ([_entity editInProgress]) {
+    _panelToEntityBinder(_entityFormPanel, _entity);
+    _entitySaver(self, _entity);
+    DDLogDebug(@"in viewWillDisappear:, saved entity");
+  }
   [super viewWillDisappear:animated];
 }
 
@@ -361,25 +373,34 @@ getterForNotification:(SEL)getterForNotification {
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   UINavigationItem *navItem = [self navigationItem];
   _backButton = [navItem leftBarButtonItem];
-  _entityFormPanel = _entityFormPanelMaker(self);
   [self setEdgesForExtendedLayout:UIRectEdgeNone];
-  [PEUIUtils placeView:_entityFormPanel
-               atTopOf:[self view]
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:0 // parameterize this value too?
-              hpadding:0];
-
+  _entityFormPanel = _entityFormPanelMaker(self);
+  if (_entityViewPanelMaker) {
+    _entityViewPanel = _entityViewPanelMaker(self, _entity);
+  }
+  void (^placeAndBindEntityPanel)(UIView *, BOOL) = ^(UIView *entityPanel, BOOL doBind) {
+    [PEUIUtils placeView:entityPanel
+                 atTopOf:[self view]
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:0
+                hpadding:0];
+    if (doBind) {
+      _entityToPanelBinder(_entity, entityPanel);
+    }
+  };
   NSString *title;
   if (_isView) {
+    placeAndBindEntityPanel(_entityViewPanel, NO);
     title = _entityTitle;
-    _panelEnablerDisabler(_entityFormPanel, NO);
+    //_panelEnablerDisabler(_entityFormPanel, NO);
   } else if (_isEdit) {
+    placeAndBindEntityPanel(_entityFormPanel, YES);
     title = [NSString stringWithFormat:@"Edit %@", _entityTitle];
     [self prepareForEditing];
   } else {
+    placeAndBindEntityPanel(_entityFormPanel, YES);
     title = [NSString stringWithFormat:@"Add %@", _entityTitle];
   }
-  _entityToPanelBinder(_entity, _entityFormPanel);
 
   // ---------------------------------------------------------------------------
   // Setup the navigation item (left/center/right areas)
@@ -708,6 +729,9 @@ The error is as follows:";
                                                  initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
                                                  target:self
                                                  action:@selector(cancelAddEdit)]];
+    [_entityViewPanel removeFromSuperview];
+    [PEUIUtils placeView:_entityFormPanel atTopOf:[self view] withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0 hpadding:0];
+    _entityToPanelBinder(_entity, _entityFormPanel);
     _panelEnablerDisabler(_entityFormPanel, YES);
   }
   return editPrepareSuccess;
@@ -730,6 +754,9 @@ The error is as follows:";
       [_listViewController handleUpdatedEntity:_entity];
     }
     [self setSyncBarButtonState];
+    [_entityFormPanel removeFromSuperview];
+    _entityViewPanel = _entityViewPanelMaker(self, _entity);
+    [PEUIUtils placeView:_entityViewPanel atTopOf:[self view] withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0 hpadding:0];
   };
   if (_isEditCanceled) {
     _entityEditCanceler(self, _entity);

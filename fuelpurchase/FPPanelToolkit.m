@@ -15,6 +15,7 @@
 #import <BlocksKit/UIControl+BlocksKit.h>
 #import "FPLogEnvLogComposite.h"
 #import "FPNames.h"
+#import "FPUtils.h"
 
 NSString * const FPFpLogEntityMakerFpLogEntry = @"FPFpLogEntityMakerFpLogEntry";
 NSString * const FPFpLogEntityMakerVehicleEntry = @"FPFpLogEntityMakerVehicleEntry";
@@ -47,7 +48,40 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
 
 #pragma mark - User Account Panel
 
-- (PEEntityFormPanelMakerBlk)userAccountPanelMaker {
+- (PEEntityViewPanelMakerBlk)userAccountViewPanelMaker {
+  return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user) {
+    UIView *parentView = [parentViewController view];
+    UIView *userAccountPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
+    UIView *userAccountDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Full name", [PEUtils emptyIfNil:[user name]]],
+                                                                      @[@"Username", [PEUtils emptyIfNil:[user username]]],
+                                                                      @[@"Email", [PEUtils emptyIfNil:[user email]]]]
+                                                     withCellHeight:36.5
+                                                  labelLeftHPadding:10.0
+                                                 valueRightHPadding:15.0
+                                                          labelFont:[_uitoolkit fontForTextfields]
+                                                          valueFont:[_uitoolkit fontForTextfields]
+                                                     labelTextColor:[UIColor blackColor]
+                                                     valueTextColor:[UIColor grayColor]
+                                     minPaddingBetweenLabelAndValue:10.0
+                                                  includeTopDivider:NO
+                                               includeBottomDivider:NO
+                                               includeInnerDividers:NO
+                                            innerDividerWidthFactor:0.95
+                                                     dividerPadding:3.5
+                                            rowPanelBackgroundColor:[UIColor whiteColor]
+                                               panelBackgroundColor:[_uitoolkit colorForWindows]
+                                                       dividerColor:nil
+                                                     relativeToView:parentView];
+    [PEUIUtils placeView:userAccountDataPanel
+                 atTopOf:userAccountPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:15
+                hpadding:0];
+    return userAccountPanel;
+  };
+}
+
+- (PEEntityPanelMakerBlk)userAccountFormPanelMaker {
   return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
     UIView *userAccountPanel = [PEUIUtils panelWithWidthOf:1.0
@@ -79,7 +113,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
   };
 }
 
-- (PEPanelToEntityBinderBlk)userAccountPanelToUserAccountBinder {
+- (PEPanelToEntityBinderBlk)userFormPanelToUserBinder {
   return ^ void (UIView *panel, FPUser *userAccount) {
     [PEUIUtils bindToEntity:userAccount
            withStringSetter:@selector(setName:)
@@ -96,7 +130,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
   };
 }
 
-- (PEEntityToPanelBinderBlk)userAccountToUserAccountPanelBinder {
+- (PEEntityToPanelBinderBlk)userToUserPanelBinder {
   return ^ void (FPUser *userAccount, UIView *panel) {
     [PEUIUtils bindToTextControlWithTag:FPUserTagName
                                fromView:panel
@@ -113,7 +147,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
   };
 }
 
-- (PEEnableDisablePanelBlk)userAccountPanelEnablerDisabler {
+- (PEEnableDisablePanelBlk)userFormPanelEnablerDisabler {
   return ^ (UIView *panel, BOOL enable) {
     [PEUIUtils enableControlWithTag:FPUserTagName
                            fromView:panel
@@ -129,12 +163,83 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
 
 #pragma mark - Vehicle Panel
 
-- (PEEntityFormPanelMakerBlk)vehiclePanelMaker {
+- (void)placeViewLogsButtonsOntoVehiclePanel:(UIView *)vehiclePanel
+                                   belowView:(UIView *)belowView
+                        parentViewController:(PEAddViewEditController *)parentViewController {
+  // View Fuel Purchase Logs button
+  UIButton *viewFpLogsBtn = [_uitoolkit systemButtonMaker](@"Fuel Purchase Logs", nil, nil);
+  [PEUIUtils setFrameWidthOfView:viewFpLogsBtn ofWidth:1.0 relativeTo:vehiclePanel];
+  [PEUIUtils addDisclosureIndicatorToButton:viewFpLogsBtn];
+  [viewFpLogsBtn bk_addEventHandler:^(id sender) {
+    FPVehicle *vehicle = (FPVehicle *)[parentViewController entity];
+    FPAuthScreenMaker fpLogsScreenMaker =
+    [_screenToolkit newViewFuelPurchaseLogsScreenMakerForVehicleInCtx];
+    [PEUIUtils displayController:fpLogsScreenMaker(vehicle) fromController:parentViewController animated:YES];
+  } forControlEvents:UIControlEventTouchUpInside];
+  [PEUIUtils placeView:viewFpLogsBtn
+                 below:belowView
+                  onto:vehiclePanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:30
+              hpadding:0];
+  // View Environment Logs button
+  UIButton *viewEnvLogsBtn = [_uitoolkit systemButtonMaker](@"Environment Logs", nil, nil);
+  [PEUIUtils setFrameWidthOfView:viewEnvLogsBtn ofWidth:1.0 relativeTo:vehiclePanel];
+  [PEUIUtils addDisclosureIndicatorToButton:viewEnvLogsBtn];
+  [viewEnvLogsBtn bk_addEventHandler:^(id sender) {
+    FPVehicle *vehicle = (FPVehicle *)[parentViewController entity];
+    FPAuthScreenMaker envLogsScreenMaker =
+    [_screenToolkit newViewEnvironmentLogsScreenMakerForVehicleInCtx];
+    [PEUIUtils displayController:envLogsScreenMaker(vehicle) fromController:parentViewController animated:YES];
+  } forControlEvents:UIControlEventTouchUpInside];
+  [PEUIUtils placeView:viewEnvLogsBtn
+                 below:viewFpLogsBtn
+                  onto:vehiclePanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:5
+              hpadding:0];
+}
+
+- (PEEntityViewPanelMakerBlk)vehicleViewPanelMaker {
+  return ^ UIView * (PEAddViewEditController *parentViewController, FPVehicle *vehicle) {
+    UIView *parentView = [parentViewController view];
+    UIView *vehiclePanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
+    UIView *vehicleDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Vehicle name", [PEUtils emptyIfNil:[vehicle name]]],
+                                                                  @[@"Default octane", [PEUtils emptyIfNil:[[vehicle defaultOctane] description]]],
+                                                                  @[@"Fuel capacity", [PEUtils emptyIfNil:[[vehicle fuelCapacity] description]]]]
+                                                 withCellHeight:36.5
+                                              labelLeftHPadding:10.0
+                                             valueRightHPadding:15.0
+                                                      labelFont:[_uitoolkit fontForTextfields]
+                                                      valueFont:[_uitoolkit fontForTextfields]
+                                                 labelTextColor:[UIColor blackColor]
+                                                 valueTextColor:[UIColor grayColor]
+                                 minPaddingBetweenLabelAndValue:10.0
+                                              includeTopDivider:NO
+                                           includeBottomDivider:NO
+                                           includeInnerDividers:NO
+                                        innerDividerWidthFactor:0.95
+                                                 dividerPadding:3.5
+                                        rowPanelBackgroundColor:[UIColor whiteColor]
+                                           panelBackgroundColor:[_uitoolkit colorForWindows]
+                                                   dividerColor:nil
+                                                 relativeToView:parentView];
+    [PEUIUtils placeView:vehicleDataPanel
+                 atTopOf:vehiclePanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:15.0
+                hpadding:0.0];
+    [self placeViewLogsButtonsOntoVehiclePanel:vehiclePanel
+                                     belowView:vehicleDataPanel
+                          parentViewController:parentViewController];
+    return vehiclePanel;
+  };
+}
+
+- (PEEntityPanelMakerBlk)vehicleFormPanelMaker {
   return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
-    UIView *vehiclePanel = [PEUIUtils panelWithWidthOf:1.0
-                                           andHeightOf:1.0
-                                        relativeToView:parentView];
+    UIView *vehiclePanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
     TaggedTextfieldMaker tfMaker =
       [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:vehiclePanel];
     UITextField *vehicleNameTf = tfMaker(@"Vehicle name", FPVehicleTagName);
@@ -159,43 +264,14 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    // View Fuel Purchase Logs button
-    UIButton *viewFpLogsBtn = [_uitoolkit systemButtonMaker](@"Fuel Purchase Logs", nil, nil);
-    [PEUIUtils setFrameWidthOfView:viewFpLogsBtn ofWidth:1.0 relativeTo:vehiclePanel];
-    [PEUIUtils addDisclosureIndicatorToButton:viewFpLogsBtn];
-    [viewFpLogsBtn bk_addEventHandler:^(id sender) {
-      FPVehicle *vehicle = (FPVehicle *)[parentViewController entity];
-      FPAuthScreenMaker fpLogsScreenMaker =
-        [_screenToolkit newViewFuelPurchaseLogsScreenMakerForVehicleInCtx];
-      [PEUIUtils displayController:fpLogsScreenMaker(vehicle) fromController:parentViewController animated:YES];
-    } forControlEvents:UIControlEventTouchUpInside];
-    [PEUIUtils placeView:viewFpLogsBtn
-                   below:vehicleFuelCapacityTf
-                    onto:vehiclePanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:30
-                hpadding:0];
-    // View Environment Logs button
-    UIButton *viewEnvLogsBtn = [_uitoolkit systemButtonMaker](@"Environment Logs", nil, nil);
-    [PEUIUtils setFrameWidthOfView:viewEnvLogsBtn ofWidth:1.0 relativeTo:vehiclePanel];
-    [PEUIUtils addDisclosureIndicatorToButton:viewEnvLogsBtn];
-    [viewEnvLogsBtn bk_addEventHandler:^(id sender) {
-      FPVehicle *vehicle = (FPVehicle *)[parentViewController entity];
-      FPAuthScreenMaker envLogsScreenMaker =
-        [_screenToolkit newViewEnvironmentLogsScreenMakerForVehicleInCtx];
-      [PEUIUtils displayController:envLogsScreenMaker(vehicle) fromController:parentViewController animated:YES];
-    } forControlEvents:UIControlEventTouchUpInside];
-    [PEUIUtils placeView:viewEnvLogsBtn
-                   below:viewFpLogsBtn
-                    onto:vehiclePanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5
-                hpadding:0];
+    [self placeViewLogsButtonsOntoVehiclePanel:vehiclePanel
+                                     belowView:vehicleFuelCapacityTf
+                          parentViewController:parentViewController];
     return vehiclePanel;
   };
 }
 
-- (PEPanelToEntityBinderBlk)vehiclePanelToVehicleBinder {
+- (PEPanelToEntityBinderBlk)vehicleFormPanelToVehicleBinder {
   return ^ void (UIView *panel, FPVehicle *vehicle) {
     [PEUIUtils bindToEntity:vehicle
            withStringSetter:@selector(setName:)
@@ -229,7 +305,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
   };
 }
 
-- (PEEnableDisablePanelBlk)vehiclePanelEnablerDisabler {
+- (PEEnableDisablePanelBlk)vehicleFormPanelEnablerDisabler {
   return ^ (UIView *panel, BOOL enable) {
     [PEUIUtils enableControlWithTag:FPVehicleTagName
                            fromView:panel
@@ -255,15 +331,99 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
 
 #pragma mark - Fuel Station Panel
 
-- (PEEntityFormPanelMakerBlk)fuelStationPanelMaker {
+- (UIButton *)placeViewLogsButtonOntoFuelstationPanel:(UIView *)fuelstationPanel
+                                            belowView:(UIView *)belowView
+                                 parentViewController:(PEAddViewEditController *)parentViewController {
+  UIButton *viewFpLogsBtn = [_uitoolkit systemButtonMaker](@"Fuel Purchase Logs", nil, nil);
+  [PEUIUtils setFrameWidthOfView:viewFpLogsBtn ofWidth:1.0 relativeTo:fuelstationPanel];
+  [PEUIUtils addDisclosureIndicatorToButton:viewFpLogsBtn];
+  [viewFpLogsBtn bk_addEventHandler:^(id sender) {
+    FPVehicle *vehicle = (FPVehicle *)[parentViewController entity];
+    FPAuthScreenMaker fpLogsScreenMaker =
+    [_screenToolkit newViewFuelPurchaseLogsScreenMakerForFuelStationInCtx];
+    [PEUIUtils displayController:fpLogsScreenMaker(vehicle) fromController:parentViewController animated:YES];
+  } forControlEvents:UIControlEventTouchUpInside];
+  [PEUIUtils placeView:viewFpLogsBtn
+                 below:belowView
+                  onto:fuelstationPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:30
+              hpadding:0];
+  return viewFpLogsBtn;
+}
+
+- (NSArray *)placeCoordinatesTableOntoFuelstationPanel:(UIView *)fuelstationPanel
+                                           fuelstation:(FPFuelStation *)fuelstation
+                                             belowView:(UIView *)belowView
+                                  parentViewController:(PEAddViewEditController *)parentViewController {
+  UIView *parentView = [parentViewController view];
+  UITableView *coordinatesTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)
+                                                                   style:UITableViewStyleGrouped];
+  FPFuelStationCoordinatesTableDataSource *ds =
+    [[FPFuelStationCoordinatesTableDataSource alloc] initWithFuelStationLatitude:[fuelstation latitude]
+                                                                       longitude:[fuelstation longitude]];
+  [_tableViewDataSources addObject:ds];
+  [coordinatesTableView setDataSource:ds];
+  [coordinatesTableView setScrollEnabled:NO];
+  [coordinatesTableView setTag:FPFuelStationTagLocationCoordinates];
+  [PEUIUtils setFrameWidthOfView:coordinatesTableView ofWidth:1.0 relativeTo:parentView];
+  [PEUIUtils setFrameHeight:142.0 ofView:coordinatesTableView];
+  [PEUIUtils placeView:coordinatesTableView
+                 below:belowView
+                  onto:fuelstationPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:0.0
+              hpadding:0.0];
+  return @[coordinatesTableView, ds];
+}
+
+- (PEEntityViewPanelMakerBlk)fuelstationViewPanelMaker {
+  return ^ UIView * (PEAddViewEditController *parentViewController, FPFuelStation *fuelstation) {
+    UIView *parentView = [parentViewController view];
+    UIView *fuelstationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
+    UIView *fuelstationDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Fuel station name", [PEUtils emptyIfNil:[fuelstation name]]],
+                                                                      @[@"Street", [PEUtils emptyIfNil:[fuelstation street]]],
+                                                                      @[@"City", [PEUtils emptyIfNil:[fuelstation city]]],
+                                                                      @[@"State", [PEUtils emptyIfNil:[fuelstation state]]],
+                                                                      @[@"Zip", [PEUtils emptyIfNil:[fuelstation zip]]]]
+                                                     withCellHeight:36.5
+                                                  labelLeftHPadding:10.0
+                                                 valueRightHPadding:15.0
+                                                          labelFont:[_uitoolkit fontForTextfields]
+                                                          valueFont:[_uitoolkit fontForTextfields]
+                                                     labelTextColor:[UIColor blackColor]
+                                                     valueTextColor:[UIColor grayColor]
+                                     minPaddingBetweenLabelAndValue:10.0
+                                                  includeTopDivider:NO
+                                               includeBottomDivider:NO
+                                               includeInnerDividers:NO
+                                            innerDividerWidthFactor:0.95
+                                                     dividerPadding:3.5
+                                            rowPanelBackgroundColor:[UIColor whiteColor]
+                                               panelBackgroundColor:[_uitoolkit colorForWindows]
+                                                       dividerColor:nil
+                                                     relativeToView:parentView];
+    [PEUIUtils placeView:fuelstationDataPanel
+                 atTopOf:fuelstationPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:15.0
+                hpadding:0.0];
+    UITableView *coordinatesTableView = [self placeCoordinatesTableOntoFuelstationPanel:fuelstationPanel
+                                                                            fuelstation:fuelstation
+                                                                              belowView:fuelstationDataPanel
+                                                                   parentViewController:parentViewController][0];
+    [self placeViewLogsButtonOntoFuelstationPanel:fuelstationPanel
+                                        belowView:coordinatesTableView
+                             parentViewController:parentViewController];
+    return fuelstationPanel;
+  };
+}
+
+- (PEEntityPanelMakerBlk)fuelstationFormPanelMaker {
   return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
-    UIView *fuelStationPanel = [PEUIUtils panelWithWidthOf:1.0
-                                               andHeightOf:1.1
-                                            relativeToView:parentView];
-    //[PEUIUtils applyBorderToView:fuelStationPanel withColor:[UIColor greenColor]];
-    TaggedTextfieldMaker tfMaker =
-      [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:fuelStationPanel];
+    UIView *fuelStationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.1 relativeToView:parentView];
+    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:fuelStationPanel];
     UITextField *fuelStationNameTf = tfMaker(@"Fuel station name", FPFuelStationTagName);
     UITextField *fuelStationStreetTf = tfMaker(@"Street", FPFuelStationTagStreet);
     UITextField *fuelStationCityTf = tfMaker(@"City", FPFuelStationTagCity);
@@ -299,24 +459,12 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    UITableView *coordinatesTableView =
-      [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)
-                                   style:UITableViewStyleGrouped];
-    FPFuelStationCoordinatesTableDataSource *ds =
-      [[FPFuelStationCoordinatesTableDataSource alloc]
-        initWithFuelStationLatitude:nil longitude:nil];
-    [_tableViewDataSources addObject:ds];
-    [coordinatesTableView setDataSource:ds];
-    [coordinatesTableView setScrollEnabled:NO];
-    [coordinatesTableView setTag:FPFuelStationTagLocationCoordinates];
-    [PEUIUtils setFrameWidthOfView:coordinatesTableView ofWidth:1.0 relativeTo:parentView];
-    [PEUIUtils setFrameHeightOfView:coordinatesTableView ofHeight:.25 relativeTo:parentView];
-    [PEUIUtils placeView:coordinatesTableView
-                   below:fuelStationZipTf
-                    onto:fuelStationPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:0.0
-                hpadding:0.0];
+    NSArray *tableAndDs = [self placeCoordinatesTableOntoFuelstationPanel:fuelStationPanel
+                                                              fuelstation:nil
+                                                                belowView:fuelStationZipTf
+                                                     parentViewController:parentViewController];
+    UITableView *coordinatesTableView = tableAndDs[0];
+    FPFuelStationCoordinatesTableDataSource *ds = tableAndDs[1];
     UIButton *useCurrentLocationBtn = [_uitoolkit systemButtonMaker](@"Use Current Location", nil, nil);
     [useCurrentLocationBtn setTag:FPFuelStationTagUseCurrentLocation];
     [useCurrentLocationBtn bk_addEventHandler:^(id sender) {
@@ -373,22 +521,9 @@ location from the given address above."]
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:10.0
                 hpadding:0];
-    UIButton *viewFpLogsBtn = [_uitoolkit systemButtonMaker](@"Fuel Purchase Logs", nil, nil);
-    [PEUIUtils setFrameWidthOfView:viewFpLogsBtn ofWidth:1.0 relativeTo:fuelStationPanel];
-    [PEUIUtils addDisclosureIndicatorToButton:viewFpLogsBtn];
-    [viewFpLogsBtn bk_addEventHandler:^(id sender) {
-      FPVehicle *vehicle = (FPVehicle *)[parentViewController entity];
-      FPAuthScreenMaker fpLogsScreenMaker =
-      [_screenToolkit newViewFuelPurchaseLogsScreenMakerForFuelStationInCtx];
-      [PEUIUtils displayController:fpLogsScreenMaker(vehicle) fromController:parentViewController animated:YES];
-    } forControlEvents:UIControlEventTouchUpInside];
-    [PEUIUtils placeView:viewFpLogsBtn
-                   below:recomputeCoordsBtn
-                    onto:fuelStationPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:30
-                hpadding:0];
-    
+    [self placeViewLogsButtonOntoFuelstationPanel:fuelStationPanel
+                                        belowView:recomputeCoordsBtn
+                             parentViewController:parentViewController];
     // wrap fuel station panel in scroll view (so everything can "fit")
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelStationPanel frame]];
     [scrollView setContentSize:CGSizeMake(fuelStationPanel.frame.size.width, 1.25 * fuelStationPanel.frame.size.height)];
@@ -398,7 +533,7 @@ location from the given address above."]
   };
 }
 
-- (PEPanelToEntityBinderBlk)fuelStationPanelToFuelStationBinder {
+- (PEPanelToEntityBinderBlk)fuelstationFormPanelToFuelstationBinder {
   return ^ void (UIView *panel, FPFuelStation *fuelStation) {
     void (^bindte)(NSInteger, SEL) = ^(NSInteger tag, SEL sel) {
       [PEUIUtils bindToEntity:fuelStation
@@ -420,7 +555,7 @@ location from the given address above."]
   };
 }
 
-- (PEEntityToPanelBinderBlk)fuelStationToFuelStationPanelBinder {
+- (PEEntityToPanelBinderBlk)fuelstationToFuelstationPanelBinder {
   return ^ void (FPFuelStation *fuelStation, UIView *panel) {
     void (^bindtt)(NSInteger, SEL) = ^ (NSInteger tag, SEL sel) {
       [PEUIUtils bindToTextControlWithTag:tag
@@ -443,7 +578,7 @@ location from the given address above."]
   };
 }
 
-- (PEEnableDisablePanelBlk)fuelStationPanelEnablerDisabler {
+- (PEEnableDisablePanelBlk)fuelstationFormPanelEnablerDisabler {
   return ^ (UIView *panel, BOOL enable) {
     void (^enabDisab)(NSInteger) = ^(NSInteger tag) {
       [PEUIUtils enableControlWithTag:tag
@@ -460,7 +595,7 @@ location from the given address above."]
   };
 }
 
-- (PEEntityMakerBlk)fuelStationMaker {
+- (PEEntityMakerBlk)fuelstationMaker {
   return ^ PELMModelSupport * (UIView *panel) {
     NSString *(^tfstr)(NSInteger) = ^ NSString * (NSInteger tag) {
       return [PEUIUtils stringFromTextFieldWithTag:tag fromView:panel];
@@ -483,18 +618,18 @@ location from the given address above."]
 
 #pragma mark - Fuel Purchase / Environment Log Composite Panel (Add only)
 
-- (PEEntityFormPanelMakerBlk)fpEnvLogCompositePanelMakerWithUser:(FPUser *)user
-                                      defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
-                                  defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
-                                        defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
+- (PEEntityPanelMakerBlk)fpEnvLogCompositeFormPanelMakerWithUser:(FPUser *)user
+                                          defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
+                                      defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
+                                            defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
   return ^ UIView * (UIViewController *parentViewController) {
     UIView *parentView = [parentViewController view];
     UIView *fpEnvCompPanel = [PEUIUtils panelWithWidthOf:1.0
                                              andHeightOf:1.12
                                           relativeToView:parentView];
-    NSDictionary *envlogComponents = [self envlogComponentsWithUser:user
-                                             defaultSelectedVehicle:defaultSelectedVehicle
-                                               defaultPickedLogDate:defaultPickedLogDate](parentViewController);
+    NSDictionary *envlogComponents = [self envlogFormComponentsWithUser:user
+                                                 defaultSelectedVehicle:defaultSelectedVehicle
+                                                   defaultPickedLogDate:defaultPickedLogDate](parentViewController);
     UITextField *odometerTf = envlogComponents[@(FPEnvLogTagOdometer)];
     UITextField *reportedAvgMpgTf = envlogComponents[@(FPEnvLogTagReportedAvgMpg)];
     UITextField *reportedAvgMphTf = envlogComponents[@(FPEnvLogTagReportedAvgMph)];
@@ -505,10 +640,10 @@ location from the given address above."]
     [preFillupReportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
     UITextField *postFillupReportedDteTf = tfMaker(@"Post-fillup Reported DTE", FPFpEnvLogCompositeTagPostFillupReportedDte);
     [postFillupReportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
-    NSDictionary *fplogComponents = [self fplogComponentsWithUser:user
-                                           defaultSelectedVehicle:defaultSelectedVehicle
-                                       defaultSelectedFuelStation:defaultSelectedFuelStation
-                                             defaultPickedLogDate:defaultPickedLogDate](parentViewController);
+    NSDictionary *fplogComponents = [self fplogFormComponentsWithUser:user
+                                               defaultSelectedVehicle:defaultSelectedVehicle
+                                           defaultSelectedFuelStation:defaultSelectedFuelStation
+                                                 defaultPickedLogDate:defaultPickedLogDate](parentViewController);
     UITableView *vehicleFuelStationDateTableView = fplogComponents[@(FPFpLogTagVehicleFuelStationAndDate)];
     //[PEUIUtils applyBorderToView:vehicleFuelStationDateTableView withColor:[UIColor yellowColor]];
     UITextField *numGallonsTf = fplogComponents[@(FPFpLogTagNumGallons)];
@@ -602,9 +737,9 @@ location from the given address above."]
   };
 }
 
-- (PEPanelToEntityBinderBlk)fpEnvLogCompositePanelToFpEnvLogCompositeBinder {
+- (PEPanelToEntityBinderBlk)fpEnvLogCompositeFormPanelToFpEnvLogCompositeBinder {
   PEPanelToEntityBinderBlk fpLogPanelToEntityBinder =
-    [self fuelPurchaseLogPanelToFuelPurchaseLogBinder];
+    [self fplogFormPanelToFplogBinder];
   return ^ void (UIView *panel, FPLogEnvLogComposite *fpEnvLogComposite) {
     fpLogPanelToEntityBinder(panel, [fpEnvLogComposite fpLog]);
     void (^binddecToEnvLogs)(NSInteger, SEL) = ^(NSInteger tag, SEL sel) {
@@ -646,7 +781,7 @@ location from the given address above."]
 
 - (PEEntityToPanelBinderBlk)fpEnvLogCompositeToFpEnvLogCompositePanelBinder {
   PEEntityToPanelBinderBlk fpLogToPanelBinder =
-    [self fuelPurchaseLogToFuelPurchaseLogPanelBinder];
+    [self fplogToFplogPanelBinder];
   return ^ void (FPLogEnvLogComposite *fpEnvLogComposite, UIView *panel) {
     fpLogToPanelBinder([fpEnvLogComposite fpLog], panel);
     void (^bindtt)(NSInteger, SEL) = ^ (NSInteger tag, SEL sel) {
@@ -702,10 +837,62 @@ location from the given address above."]
 
 #pragma mark - Fuel Purchase Log
 
-- (PEComponentsMakerBlk)fplogComponentsWithUser:(FPUser *)user
-                         defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
-                     defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
-                           defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
+- (PEEntityViewPanelMakerBlk)fplogViewPanelMakerWithUser:(FPUser *)user {
+  return ^ UIView * (PEAddViewEditController *parentViewController, FPFuelPurchaseLog *fplog) {
+    UIView *parentView = [parentViewController view];
+    UIView *fplogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
+    UIView *fplogDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Num gallons", [PEUtils emptyIfNil:[[fplog numGallons] description]]],
+                                                                @[@"Price per gallon", [PEUtils emptyIfNil:[[fplog gallonPrice] description]]],
+                                                                @[@"Octane", [PEUtils emptyIfNil:[[fplog octane] description]]],
+                                                                @[@"Car wash per-gallon discount", [PEUtils emptyIfNil:[[fplog carWashPerGallonDiscount] description]]],
+                                                                @[@"Got car wash?", [PEUtils yesNoFromBool:[fplog gotCarWash]]]]
+                                               withCellHeight:36.5
+                                            labelLeftHPadding:10.0
+                                           valueRightHPadding:15.0
+                                                    labelFont:[_uitoolkit fontForTextfields]
+                                                    valueFont:[_uitoolkit fontForTextfields]
+                                               labelTextColor:[UIColor blackColor]
+                                               valueTextColor:[UIColor grayColor]
+                               minPaddingBetweenLabelAndValue:10.0
+                                            includeTopDivider:NO
+                                         includeBottomDivider:NO
+                                         includeInnerDividers:NO
+                                      innerDividerWidthFactor:0.95
+                                               dividerPadding:3.5
+                                      rowPanelBackgroundColor:[UIColor whiteColor]
+                                         panelBackgroundColor:[_uitoolkit colorForWindows]
+                                                 dividerColor:nil
+                                               relativeToView:parentView];
+    FPVehicle *vehicle = [_coordDao vehicleForFuelPurchaseLog:fplog error:[FPUtils localFetchErrorHandlerMaker]()];
+    FPFuelStation *fuelstation = [_coordDao fuelStationForFuelPurchaseLog:fplog error:[FPUtils localFetchErrorHandlerMaker]()];
+    NSDictionary *components = [self fplogFormComponentsWithUser:user
+                                          defaultSelectedVehicle:vehicle
+                                      defaultSelectedFuelStation:fuelstation
+                                            defaultPickedLogDate:[fplog purchasedAt]](parentViewController);
+    UITableView *vehicleFuelStationDateTableView = components[@(FPFpLogTagVehicleFuelStationAndDate)];
+    FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds = (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)vehicleFuelStationDateTableView.dataSource;
+    [ds setSelectedFuelStation:fuelstation];
+    [ds setSelectedVehicle:vehicle];
+    [vehicleFuelStationDateTableView setUserInteractionEnabled:NO];
+    [PEUIUtils placeView:vehicleFuelStationDateTableView
+                 atTopOf:fplogPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:0.0
+                hpadding:0.0];
+    [PEUIUtils placeView:fplogDataPanel
+                   below:vehicleFuelStationDateTableView
+                    onto:fplogPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    return fplogPanel;
+  };
+}
+
+- (PEComponentsMakerBlk)fplogFormComponentsWithUser:(FPUser *)user
+                             defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
+                         defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
+                               defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
   return ^ NSDictionary * (UIViewController *parentViewController) {
     NSMutableDictionary *components = [NSMutableDictionary dictionary];
     UIView *parentView = [parentViewController view];
@@ -715,7 +902,7 @@ location from the given address above."]
     [vehicleFuelStationDateTableView setScrollEnabled:NO];
     [vehicleFuelStationDateTableView setTag:FPFpLogTagVehicleFuelStationAndDate];
     [PEUIUtils setFrameWidthOfView:vehicleFuelStationDateTableView ofWidth:1.0 relativeTo:parentView];
-    [PEUIUtils setFrameHeightOfView:vehicleFuelStationDateTableView ofHeight:.28 relativeTo:parentView];
+    [PEUIUtils setFrameHeight:170.0 ofView:vehicleFuelStationDateTableView];
     vehicleFuelStationDateTableView.sectionHeaderHeight = 2.0;
     vehicleFuelStationDateTableView.sectionFooterHeight = 2.0;
     components[@(FPFpLogTagVehicleFuelStationAndDate)] = vehicleFuelStationDateTableView;
@@ -791,18 +978,17 @@ location from the given address above."]
        withRowAnimation:UITableViewRowAnimationAutomatic];
     };
     FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
-    [[FPFpLogVehicleFuelStationDateDataSourceAndDelegate alloc]
-     initWithControllerCtx:parentViewController
-     defaultSelectedVehicle:defaultSelectedVehicle
-     defaultSelectedFuelStation:defaultSelectedFuelStation
-     defaultLogDate:defaultPickedLogDate
-     vehicleSelectedAction:vehicleSelectedAction
-     fuelStationSelectedAction:fuelStationSelectedAction
-     logDatePickedAction:logDatePickedAction
-     coordinatorDao:_coordDao
-     user:user
-     screenToolkit:_screenToolkit
-     error:_errorBlk];
+    [[FPFpLogVehicleFuelStationDateDataSourceAndDelegate alloc] initWithControllerCtx:parentViewController
+                                                               defaultSelectedVehicle:defaultSelectedVehicle
+                                                           defaultSelectedFuelStation:defaultSelectedFuelStation
+                                                                       defaultLogDate:defaultPickedLogDate
+                                                                vehicleSelectedAction:vehicleSelectedAction
+                                                            fuelStationSelectedAction:fuelStationSelectedAction
+                                                                  logDatePickedAction:logDatePickedAction
+                                                                       coordinatorDao:_coordDao
+                                                                                 user:user
+                                                                        screenToolkit:_screenToolkit
+                                                                                error:_errorBlk];
     [_tableViewDataSources addObject:ds];
     [vehicleFuelStationDateTableView setDataSource:ds];
     [vehicleFuelStationDateTableView setDelegate:ds];
@@ -810,19 +996,19 @@ location from the given address above."]
   };
 }
 
-- (PEEntityFormPanelMakerBlk)fuelPurchaseLogPanelMakerWithUser:(FPUser *)user
-                                    defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
-                                defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
-                                      defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
+- (PEEntityPanelMakerBlk)fplogFormPanelMakerWithUser:(FPUser *)user
+                              defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
+                          defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
+                                defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
   return ^ UIView * (UIViewController *parentViewController) {
     UIView *parentView = [parentViewController view];
     UIView *fpLogPanel = [PEUIUtils panelWithWidthOf:1.0
                                          andHeightOf:1.0
                                       relativeToView:parentView];
-    NSDictionary *components = [self fplogComponentsWithUser:user
-                                      defaultSelectedVehicle:defaultSelectedVehicle
-                                  defaultSelectedFuelStation:defaultSelectedFuelStation
-                                        defaultPickedLogDate:defaultPickedLogDate](parentViewController);
+    NSDictionary *components = [self fplogFormComponentsWithUser:user
+                                          defaultSelectedVehicle:defaultSelectedVehicle
+                                      defaultSelectedFuelStation:defaultSelectedFuelStation
+                                            defaultPickedLogDate:defaultPickedLogDate](parentViewController);
     UITableView *vehicleFuelStationDateTableView = components[@(FPFpLogTagVehicleFuelStationAndDate)];
     UITextField *numGallonsTf = components[@(FPFpLogTagNumGallons)];
     UITextField *pricePerGallonTf = components[@(FPFpLogTagPricePerGallon)];
@@ -874,7 +1060,7 @@ location from the given address above."]
   };
 }
 
-- (PEPanelToEntityBinderBlk)fuelPurchaseLogPanelToFuelPurchaseLogBinder {
+- (PEPanelToEntityBinderBlk)fplogFormPanelToFplogBinder {
   return ^ void (UIView *panel, FPFuelPurchaseLog *fpLog) {
     void (^binddec)(NSInteger, SEL) = ^(NSInteger tag, SEL sel) {
       [PEUIUtils bindToEntity:fpLog
@@ -894,7 +1080,6 @@ location from the given address above."]
     binddec(FPFpLogTagCarWashPerGallonDiscount, @selector(setCarWashPerGallonDiscount:));
     UISwitch *gotCarWasSwitch = (UISwitch *)[panel viewWithTag:FPFpLogTagGotCarWash];
     [fpLog setGotCarWash:[gotCarWasSwitch isOn]];
-    
     UITableView *vehicleFuelStationDateTableView =
       (UITableView *)[panel viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
     FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
@@ -903,7 +1088,7 @@ location from the given address above."]
   };
 }
 
-- (PEEntityToPanelBinderBlk)fuelPurchaseLogToFuelPurchaseLogPanelBinder {
+- (PEEntityToPanelBinderBlk)fplogToFplogPanelBinder {
   return ^ void (FPFuelPurchaseLog *fpLog, UIView *panel) {
     if (fpLog) {
       void (^bindtt)(NSInteger, SEL) = ^ (NSInteger tag, SEL sel) {
@@ -918,7 +1103,6 @@ location from the given address above."]
       bindtt(FPFpLogTagCarWashPerGallonDiscount, @selector(carWashPerGallonDiscount));
       UISwitch *gotCarWasSwitch = (UISwitch *)[panel viewWithTag:FPFpLogTagGotCarWash];
       [gotCarWasSwitch setOn:[fpLog gotCarWash] animated:YES];
-      
       if ([fpLog purchasedAt]) {
         UITableView *vehicleFuelStationDateTableView =
         (UITableView *)[panel viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
@@ -931,7 +1115,7 @@ location from the given address above."]
   };
 }
 
-- (PEEnableDisablePanelBlk)fuelPurchaseLogPanelEnablerDisabler {
+- (PEEnableDisablePanelBlk)fplogFormPanelEnablerDisabler {
   return ^ (UIView *panel, BOOL enable) {
     void (^enabDisab)(NSInteger) = ^(NSInteger tag) {
       [PEUIUtils enableControlWithTag:tag
@@ -952,9 +1136,55 @@ location from the given address above."]
 
 #pragma mark - Environment Log
 
-- (PEComponentsMakerBlk)envlogComponentsWithUser:(FPUser *)user
-                          defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
-                            defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
+- (PEEntityViewPanelMakerBlk)envlogViewPanelMakerWithUser:(FPUser *)user {
+  return ^ UIView * (PEAddViewEditController *parentViewController, FPEnvironmentLog *envlog) {
+    UIView *parentView = [parentViewController view];
+    UIView *envlogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
+    UIView *envlogDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Odometer", [PEUtils emptyIfNil:[[envlog odometer] description]]],
+                                                                 @[@"Reported DTE", [PEUtils emptyIfNil:[[envlog reportedDte] description]]],
+                                                                 @[@"Reported avg mpg", [PEUtils emptyIfNil:[[envlog reportedAvgMpg] description]]],
+                                                                 @[@"Reported avg mph", [PEUtils emptyIfNil:[[envlog reportedAvgMph] description]]],
+                                                                 @[@"Reported outside temperature", [PEUtils emptyIfNil:[[envlog reportedOutsideTemp] description]]]]
+                                                withCellHeight:36.5
+                                             labelLeftHPadding:10.0
+                                            valueRightHPadding:15.0
+                                                     labelFont:[_uitoolkit fontForTextfields]
+                                                     valueFont:[_uitoolkit fontForTextfields]
+                                                labelTextColor:[UIColor blackColor]
+                                                valueTextColor:[UIColor grayColor]
+                                minPaddingBetweenLabelAndValue:10.0
+                                             includeTopDivider:NO
+                                          includeBottomDivider:NO
+                                          includeInnerDividers:NO
+                                       innerDividerWidthFactor:0.95
+                                                dividerPadding:3.5
+                                       rowPanelBackgroundColor:[UIColor whiteColor]
+                                          panelBackgroundColor:[_uitoolkit colorForWindows]
+                                                  dividerColor:nil
+                                                relativeToView:parentView];
+    NSDictionary *components = [self envlogFormComponentsWithUser:user
+                                           defaultSelectedVehicle:[_coordDao vehicleForEnvironmentLog:envlog error:[FPUtils localFetchErrorHandlerMaker]()]
+                                             defaultPickedLogDate:[envlog logDate]](parentViewController);
+    UITableView *vehicleAndLogDateTableView = components[@(FPEnvLogTagVehicleAndDate)];
+    [vehicleAndLogDateTableView setUserInteractionEnabled:NO];
+    [PEUIUtils placeView:vehicleAndLogDateTableView
+                 atTopOf:envlogPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:0.0
+                hpadding:0.0];
+    [PEUIUtils placeView:envlogDataPanel
+                   below:vehicleAndLogDateTableView
+                    onto:envlogPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    return envlogPanel;
+  };
+}
+
+- (PEComponentsMakerBlk)envlogFormComponentsWithUser:(FPUser *)user
+                              defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
+                                defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
   return ^ NSDictionary * (UIViewController *parentViewController) {
     NSMutableDictionary *components = [NSMutableDictionary dictionary];
     UIView *parentView = [parentViewController view];
@@ -964,7 +1194,7 @@ location from the given address above."]
     [vehicleAndLogDateTableView setScrollEnabled:NO];
     [vehicleAndLogDateTableView setTag:FPEnvLogTagVehicleAndDate];
     [PEUIUtils setFrameWidthOfView:vehicleAndLogDateTableView ofWidth:1.0 relativeTo:parentView];
-    [PEUIUtils setFrameHeightOfView:vehicleAndLogDateTableView ofHeight:.22 relativeTo:parentView];
+    [PEUIUtils setFrameHeight:124.96 ofView:vehicleAndLogDateTableView];
     PEItemSelectedAction vehicleSelectedAction = ^(FPVehicle *vehicle, NSIndexPath *indexPath, UIViewController *vehicleSelectionController) {
       [[vehicleSelectionController navigationController] popViewControllerAnimated:YES];
       [vehicleAndLogDateTableView
@@ -1016,15 +1246,15 @@ location from the given address above."]
   };
 }
 
-- (PEEntityFormPanelMakerBlk)environmentLogPanelMakerWithUser:(FPUser *)user
-                                   defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
-                                     defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
+- (PEEntityPanelMakerBlk)envlogFormPanelMakerWithUser:(FPUser *)user
+                               defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
+                                 defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
   return ^ UIView * (UIViewController *parentViewController) {
     UIView *parentView = [parentViewController view];
     UIView *envLogPanel = [PEUIUtils panelWithWidthOf:1.0
                                           andHeightOf:1.0
                                        relativeToView:parentView];
-    NSDictionary *components = [self envlogComponentsWithUser:user
+    NSDictionary *components = [self envlogFormComponentsWithUser:user
                                        defaultSelectedVehicle:defaultSelectedVehicle
                                          defaultPickedLogDate:defaultPickedLogDate](parentViewController);
     UITableView *vehicleAndLogDateTableView = components[@(FPEnvLogTagVehicleAndDate)];
@@ -1042,7 +1272,7 @@ location from the given address above."]
                    below:vehicleAndLogDateTableView
                     onto:envLogPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:0.0
+                vpadding:5.0
                 hpadding:0.0];
     [PEUIUtils placeView:reportedAvgMpgTf
                    below:odometerTf
@@ -1072,7 +1302,7 @@ location from the given address above."]
   };
 }
 
-- (PEPanelToEntityBinderBlk)environmentLogPanelToEnvironmentLogBinder {
+- (PEPanelToEntityBinderBlk)envlogFormPanelToEnvlogBinder {
   return ^ void (UIView *panel, FPEnvironmentLog *envLog) {
     void (^binddec)(NSInteger, SEL) = ^(NSInteger tag, SEL sel) {
       [PEUIUtils bindToEntity:envLog
@@ -1100,7 +1330,7 @@ location from the given address above."]
   };
 }
 
-- (PEEntityToPanelBinderBlk)environmentLogToEnvironmentLogPanelBinder {
+- (PEEntityToPanelBinderBlk)envlogToEnvlogPanelBinder {
   return ^ void (FPEnvironmentLog *envLog, UIView *panel) {
     void (^bindtt)(NSInteger, SEL) = ^ (NSInteger tag, SEL sel) {
       [PEUIUtils bindToTextControlWithTag:tag
@@ -1127,7 +1357,7 @@ location from the given address above."]
   };
 }
 
-- (PEEnableDisablePanelBlk)environmentLogPanelEnablerDisabler {
+- (PEEnableDisablePanelBlk)envlogFormPanelEnablerDisabler {
   return ^ (UIView *panel, BOOL enable) {
     void (^enabDisab)(NSInteger) = ^(NSInteger tag) {
       [PEUIUtils enableControlWithTag:tag
@@ -1145,7 +1375,7 @@ location from the given address above."]
   };
 }
 
-- (PEEntityMakerBlk)environmentLogMaker {
+- (PEEntityMakerBlk)envlogMaker {
   return ^ PELMModelSupport * (UIView *panel) {
     NSNumber *(^tfnum)(NSInteger) = ^ NSNumber * (NSInteger tag) {
       return [PEUIUtils numberFromTextFieldWithTag:tag fromView:panel];

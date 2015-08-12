@@ -76,46 +76,52 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 
 #pragma mark - User Account Panel
 
-- (PEEntityFormPanelMakerBlk)userAccountPanelMaker;
+- (PEEntityViewPanelMakerBlk)userAccountViewPanelMaker;
 
-- (PEPanelToEntityBinderBlk)userAccountPanelToUserAccountBinder;
+- (PEEntityPanelMakerBlk)userAccountFormPanelMaker;
 
-- (PEEntityToPanelBinderBlk)userAccountToUserAccountPanelBinder;
+- (PEPanelToEntityBinderBlk)userFormPanelToUserBinder;
 
-- (PEEnableDisablePanelBlk)userAccountPanelEnablerDisabler;
+- (PEEntityToPanelBinderBlk)userToUserPanelBinder;
+
+- (PEEnableDisablePanelBlk)userFormPanelEnablerDisabler;
 
 #pragma mark - Vehicle Panel
 
-- (PEEntityFormPanelMakerBlk)vehiclePanelMaker;
+- (PEEntityViewPanelMakerBlk)vehicleViewPanelMaker;
 
-- (PEPanelToEntityBinderBlk)vehiclePanelToVehicleBinder;
+- (PEEntityPanelMakerBlk)vehicleFormPanelMaker;
+
+- (PEPanelToEntityBinderBlk)vehicleFormPanelToVehicleBinder;
 
 - (PEEntityToPanelBinderBlk)vehicleToVehiclePanelBinder;
 
-- (PEEnableDisablePanelBlk)vehiclePanelEnablerDisabler;
+- (PEEnableDisablePanelBlk)vehicleFormPanelEnablerDisabler;
 
 - (PEEntityMakerBlk)vehicleMaker;
 
 #pragma mark - Fuel Station Panel
 
-- (PEEntityFormPanelMakerBlk)fuelStationPanelMaker;
+- (PEEntityViewPanelMakerBlk)fuelstationViewPanelMaker;
 
-- (PEPanelToEntityBinderBlk)fuelStationPanelToFuelStationBinder;
+- (PEEntityPanelMakerBlk)fuelstationFormPanelMaker;
 
-- (PEEntityToPanelBinderBlk)fuelStationToFuelStationPanelBinder;
+- (PEPanelToEntityBinderBlk)fuelstationFormPanelToFuelstationBinder;
 
-- (PEEnableDisablePanelBlk)fuelStationPanelEnablerDisabler;
+- (PEEntityToPanelBinderBlk)fuelstationToFuelstationPanelBinder;
 
-- (PEEntityMakerBlk)fuelStationMaker;
+- (PEEnableDisablePanelBlk)fuelstationFormPanelEnablerDisabler;
+
+- (PEEntityMakerBlk)fuelstationMaker;
 
 #pragma mark - Fuel Purchase / Environment Log Composite Panel (Add only)
 
-- (PEEntityFormPanelMakerBlk)fpEnvLogCompositePanelMakerWithUser:(FPUser *)user
+- (PEEntityPanelMakerBlk)fpEnvLogCompositeFormPanelMakerWithUser:(FPUser *)user
                                       defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
                                   defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
                                         defaultPickedLogDate:(NSDate *)defaultPickedLogDate;
 
-- (PEPanelToEntityBinderBlk)fpEnvLogCompositePanelToFpEnvLogCompositeBinder;
+- (PEPanelToEntityBinderBlk)fpEnvLogCompositeFormPanelToFpEnvLogCompositeBinder;
 
 - (PEEntityToPanelBinderBlk)fpEnvLogCompositeToFpEnvLogCompositePanelBinder;
 
@@ -123,29 +129,33 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 
 #pragma mark - Fuel Purchase Log Panel (Edit only)
 
-- (PEEntityFormPanelMakerBlk)fuelPurchaseLogPanelMakerWithUser:(FPUser *)user
-                                    defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
-                                defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
-                                      defaultPickedLogDate:(NSDate *)defaultPickedLogDate;
+- (PEEntityViewPanelMakerBlk)fplogViewPanelMakerWithUser:(FPUser *)user;
 
-- (PEPanelToEntityBinderBlk)fuelPurchaseLogPanelToFuelPurchaseLogBinder;
+- (PEEntityPanelMakerBlk)fplogFormPanelMakerWithUser:(FPUser *)user
+                              defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
+                          defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
+                                defaultPickedLogDate:(NSDate *)defaultPickedLogDate;
 
-- (PEEntityToPanelBinderBlk)fuelPurchaseLogToFuelPurchaseLogPanelBinder;
+- (PEPanelToEntityBinderBlk)fplogFormPanelToFplogBinder;
 
-- (PEEnableDisablePanelBlk)fuelPurchaseLogPanelEnablerDisabler;
+- (PEEntityToPanelBinderBlk)fplogToFplogPanelBinder;
+
+- (PEEnableDisablePanelBlk)fplogFormPanelEnablerDisabler;
 
 #pragma mark - Environment Log Panel
 
-- (PEEntityFormPanelMakerBlk)environmentLogPanelMakerWithUser:(FPUser *)user
+- (PEEntityViewPanelMakerBlk)envlogViewPanelMakerWithUser:(FPUser *)user;
+
+- (PEEntityPanelMakerBlk)envlogFormPanelMakerWithUser:(FPUser *)user
                                    defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
                                      defaultPickedLogDate:(NSDate *)defaultPickedLogDate;
 
-- (PEPanelToEntityBinderBlk)environmentLogPanelToEnvironmentLogBinder;
+- (PEPanelToEntityBinderBlk)envlogFormPanelToEnvlogBinder;
 
-- (PEEntityToPanelBinderBlk)environmentLogToEnvironmentLogPanelBinder;
+- (PEEntityToPanelBinderBlk)envlogToEnvlogPanelBinder;
 
-- (PEEnableDisablePanelBlk)environmentLogPanelEnablerDisabler;
+- (PEEnableDisablePanelBlk)envlogFormPanelEnablerDisabler;
 
-- (PEEntityMakerBlk)environmentLogMaker;
+- (PEEntityMakerBlk)envlogMaker;
 
 @end

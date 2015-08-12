@@ -653,9 +653,13 @@ as follows:";
         } else {
           [PEUIUtils showWarningAlertWithMsgs:@[]
                                         title:@"Oops"
-                             alertDescription:[[NSAttributedString alloc] initWithString:@"You cannot delete anything because you're currently not authenticated."]
+                             alertDescription:[[NSAttributedString alloc] initWithString:@"\
+You cannot delete anything because\n\
+you're currently not authenticated."]
                                   buttonTitle:@"Okay."
-                                 buttonAction:nil
+                                 buttonAction:^{
+                                   [_tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+                                 }
                                relativeToView:[self viewForAlerts]];
         }
       } else {

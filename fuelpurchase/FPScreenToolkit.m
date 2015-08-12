@@ -169,11 +169,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                         entityIndexPath:nil
                               uitoolkit:_uitoolkit
                          itemChangedBlk:nil
-                   entityFormPanelMaker:[_panelToolkit userAccountPanelMaker]
-                    entityToPanelBinder:[_panelToolkit userAccountToUserAccountPanelBinder]
-                    panelToEntityBinder:[_panelToolkit userAccountPanelToUserAccountBinder]
+                   entityFormPanelMaker:[_panelToolkit userAccountFormPanelMaker]
+                   entityViewPanelMaker:[_panelToolkit userAccountViewPanelMaker]
+                    entityToPanelBinder:[_panelToolkit userToUserPanelBinder]
+                    panelToEntityBinder:[_panelToolkit userFormPanelToUserBinder]
                             entityTitle:@"User Account"
-                   panelEnablerDisabler:[_panelToolkit userAccountPanelEnablerDisabler]
+                   panelEnablerDisabler:[_panelToolkit userFormPanelEnablerDisabler]
                       entityAddCanceler:nil
                      entityEditPreparer:userEditPreparer
                      entityEditCanceler:userEditCanceler
@@ -469,9 +470,9 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
              addEntityCtrlrWithUitoolkit:_uitoolkit
                       listViewController:listViewController
                             itemAddedBlk:itemAddedBlk
-                    entityFormPanelMaker:[_panelToolkit vehiclePanelMaker]
+                    entityFormPanelMaker:[_panelToolkit vehicleFormPanelMaker]
                      entityToPanelBinder:[_panelToolkit vehicleToVehiclePanelBinder]
-                     panelToEntityBinder:[_panelToolkit vehiclePanelToVehicleBinder]
+                     panelToEntityBinder:[_panelToolkit vehicleFormPanelToVehicleBinder]
                              entityTitle:@"Vehicle"
                        entityAddCanceler:addCanceler
                              entityMaker:[_panelToolkit vehicleMaker]
@@ -570,11 +571,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                        entityIndexPath:vehicleIndexPath
                              uitoolkit:_uitoolkit
                         itemChangedBlk:itemChangedBlk
-                  entityFormPanelMaker:[_panelToolkit vehiclePanelMaker]
+                  entityFormPanelMaker:[_panelToolkit vehicleFormPanelMaker]
+                  entityViewPanelMaker:[_panelToolkit vehicleViewPanelMaker]
                    entityToPanelBinder:[_panelToolkit vehicleToVehiclePanelBinder]
-                   panelToEntityBinder:[_panelToolkit vehiclePanelToVehicleBinder]
+                   panelToEntityBinder:[_panelToolkit vehicleFormPanelToVehicleBinder]
                            entityTitle:@"Vehicle"
-                  panelEnablerDisabler:[_panelToolkit vehiclePanelEnablerDisabler]
+                  panelEnablerDisabler:[_panelToolkit vehicleFormPanelEnablerDisabler]
                      entityAddCanceler:nil
                     entityEditPreparer:vehicleEditPreparer
                     entityEditCanceler:vehicleEditCanceler
@@ -972,12 +974,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
              addEntityCtrlrWithUitoolkit:_uitoolkit
                       listViewController:listViewController
                             itemAddedBlk:itemAddedBlk
-                    entityFormPanelMaker:[_panelToolkit fuelStationPanelMaker]
-                     entityToPanelBinder:[_panelToolkit fuelStationToFuelStationPanelBinder]
-                     panelToEntityBinder:[_panelToolkit fuelStationPanelToFuelStationBinder]
+                    entityFormPanelMaker:[_panelToolkit fuelstationFormPanelMaker]
+                     entityToPanelBinder:[_panelToolkit fuelstationToFuelstationPanelBinder]
+                     panelToEntityBinder:[_panelToolkit fuelstationFormPanelToFuelstationBinder]
                              entityTitle:@"Fuel Station"
                        entityAddCanceler:addCanceler
-                             entityMaker:[_panelToolkit fuelStationMaker]
+                             entityMaker:[_panelToolkit fuelstationMaker]
                           newEntitySaver:newFuelStationSaver
           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                         viewDidAppearBlk:nil
@@ -1076,11 +1078,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                        entityIndexPath:fuelStationIndexPath
                              uitoolkit:_uitoolkit
                         itemChangedBlk:itemChangedBlk
-                      entityFormPanelMaker:[_panelToolkit fuelStationPanelMaker]
-                   entityToPanelBinder:[_panelToolkit fuelStationToFuelStationPanelBinder]
-                   panelToEntityBinder:[_panelToolkit fuelStationPanelToFuelStationBinder]
+                  entityFormPanelMaker:[_panelToolkit fuelstationFormPanelMaker]
+                  entityViewPanelMaker:[_panelToolkit fuelstationViewPanelMaker]
+                   entityToPanelBinder:[_panelToolkit fuelstationToFuelstationPanelBinder]
+                   panelToEntityBinder:[_panelToolkit fuelstationFormPanelToFuelstationBinder]
                            entityTitle:@"Fuel Station"
-                  panelEnablerDisabler:[_panelToolkit fuelStationPanelEnablerDisabler]
+                  panelEnablerDisabler:[_panelToolkit fuelstationFormPanelEnablerDisabler]
                      entityAddCanceler:nil
                     entityEditPreparer:fuelStationEditPreparer
                     entityEditCanceler:fuelStationEditCanceler
@@ -1305,12 +1308,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
              addEntityCtrlrWithUitoolkit:_uitoolkit
                       listViewController:listViewController
                             itemAddedBlk:itemAddedBlk
-                        entityFormPanelMaker:[_panelToolkit fpEnvLogCompositePanelMakerWithUser:user
+                        entityFormPanelMaker:[_panelToolkit fpEnvLogCompositeFormPanelMakerWithUser:user
                                                                      defaultSelectedVehicle:defaultSelectedVehicle
                                                                  defaultSelectedFuelStation:defaultSelectedFuelStation
                                                                        defaultPickedLogDate:[NSDate date]]
                      entityToPanelBinder:[_panelToolkit fpEnvLogCompositeToFpEnvLogCompositePanelBinder]
-                     panelToEntityBinder:[_panelToolkit fpEnvLogCompositePanelToFpEnvLogCompositeBinder]
+                     panelToEntityBinder:[_panelToolkit fpEnvLogCompositeFormPanelToFpEnvLogCompositeBinder]
                              entityTitle:@"Fuel Purchase Log"
                        entityAddCanceler:addCanceler
                              entityMaker:[_panelToolkit fpEnvLogCompositeMaker]
@@ -1334,11 +1337,10 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                listViewController:(PEListViewController *)listViewController {
   return ^ UIViewController * (FPUser *user) {
     void (^refreshVehicleFuelStationTableView)(PEAddViewEditController *, FPFuelPurchaseLog *) = ^(PEAddViewEditController *ctrl, FPFuelPurchaseLog *fpLog) {
-      UITableView *vehicleFuelStationDateTableView =
-      (UITableView *)[[ctrl view] viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
-        FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
-      (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehicleFuelStationDateTableView dataSource];
-        FPVehicle *currentFpLogVehicleInDb = [_coordDao vehicleForFuelPurchaseLog:fpLog error:[FPUtils localSaveErrorHandlerMaker]()];
+      UITableView *vehicleFuelStationDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
+      FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
+        (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehicleFuelStationDateTableView dataSource];
+      FPVehicle *currentFpLogVehicleInDb = [_coordDao vehicleForFuelPurchaseLog:fpLog error:[FPUtils localSaveErrorHandlerMaker]()];
       FPFuelStation *currentFpLogFuelStationInDb = [_coordDao fuelStationForFuelPurchaseLog:fpLog error:[FPUtils localSaveErrorHandlerMaker]()];
       [ds setSelectedVehicle:currentFpLogVehicleInDb];
       [ds setSelectedFuelStation:currentFpLogFuelStationInDb];
@@ -1365,6 +1367,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       [APP refreshTabs];
     };
     PESaveEntityBlk fpLogSaver = ^(PEAddViewEditController *ctrl, FPFuelPurchaseLog *fpLog) {
+      refreshVehicleFuelStationTableView(ctrl, fpLog);
       FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
         (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)
           [(UITableView *)[[ctrl view] viewWithTag:FPFpLogTagVehicleFuelStationAndDate] dataSource];
@@ -1438,16 +1441,17 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                        entityIndexPath:fpLogIndexPath
                              uitoolkit:_uitoolkit
                         itemChangedBlk:itemChangedBlk
-                      entityFormPanelMaker:
+                  entityFormPanelMaker:
                         [_panelToolkit
-                           fuelPurchaseLogPanelMakerWithUser:user
-                                      defaultSelectedVehicle:[_coordDao vehicleForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()]
-                                  defaultSelectedFuelStation:[_coordDao fuelStationForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()]
-                                        defaultPickedLogDate:[fpLog purchasedAt]]
-                   entityToPanelBinder:[_panelToolkit fuelPurchaseLogToFuelPurchaseLogPanelBinder]
-                   panelToEntityBinder:[_panelToolkit fuelPurchaseLogPanelToFuelPurchaseLogBinder]
+                           fplogFormPanelMakerWithUser:user
+                                defaultSelectedVehicle:[_coordDao vehicleForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()]
+                            defaultSelectedFuelStation:[_coordDao fuelStationForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()]
+                                  defaultPickedLogDate:[fpLog purchasedAt]]
+                  entityViewPanelMaker:[_panelToolkit fplogViewPanelMakerWithUser:user]
+                   entityToPanelBinder:[_panelToolkit fplogToFplogPanelBinder]
+                   panelToEntityBinder:[_panelToolkit fplogFormPanelToFplogBinder]
                            entityTitle:@"Fuel Purchase Log"
-                  panelEnablerDisabler:[_panelToolkit fuelPurchaseLogPanelEnablerDisabler]
+                  panelEnablerDisabler:[_panelToolkit fplogFormPanelEnablerDisabler]
                      entityAddCanceler:nil
                     entityEditPreparer:fpLogEditPreparer
                     entityEditCanceler:fpLogEditCanceler
@@ -1792,14 +1796,14 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
               addEntityCtrlrWithUitoolkit:_uitoolkit
                        listViewController:listViewController
                              itemAddedBlk:itemAddedBlk
-                         entityFormPanelMaker:[_panelToolkit environmentLogPanelMakerWithUser:user
+                         entityFormPanelMaker:[_panelToolkit envlogFormPanelMakerWithUser:user
                                                                    defaultSelectedVehicle:defaultSelectedVehicle
                                                                      defaultPickedLogDate:[NSDate date]]
-                      entityToPanelBinder:[_panelToolkit environmentLogToEnvironmentLogPanelBinder]
-                      panelToEntityBinder:[_panelToolkit environmentLogPanelToEnvironmentLogBinder]
+                      entityToPanelBinder:[_panelToolkit envlogToEnvlogPanelBinder]
+                      panelToEntityBinder:[_panelToolkit envlogFormPanelToEnvlogBinder]
                               entityTitle:@"Environment Log"
                         entityAddCanceler:addCanceler
-                              entityMaker:[_panelToolkit environmentLogMaker]
+                              entityMaker:[_panelToolkit envlogMaker]
                            newEntitySaver:newEnvironmentLogSaver
            prepareUIForUserInteractionBlk:nil
                          viewDidAppearBlk:viewDidAppearBlk
@@ -1843,6 +1847,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       [APP refreshTabs];
     };
     PESaveEntityBlk envLogSaver = ^(PEAddViewEditController *ctrl, FPEnvironmentLog *envLog) {
+      refreshVehicleTableView(ctrl, envLog);
       FPEnvLogVehicleAndDateDataSourceDelegate *ds =
         (FPEnvLogVehicleAndDateDataSourceDelegate *)
         [(UITableView *)[[ctrl view] viewWithTag:FPEnvLogTagVehicleAndDate] dataSource];
@@ -1911,14 +1916,15 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                               entityIndexPath:envLogIndexPath
                                                     uitoolkit:_uitoolkit
                                                itemChangedBlk:itemChangedBlk
-                                             entityFormPanelMaker:[_panelToolkit environmentLogPanelMakerWithUser:user
-                                                                                       defaultSelectedVehicle:[_coordDao vehicleForEnvironmentLog:envLog
-                                                                                                                                            error:[FPUtils localFetchErrorHandlerMaker]()]
-                                                                                         defaultPickedLogDate:[envLog logDate]]
-                                          entityToPanelBinder:[_panelToolkit environmentLogToEnvironmentLogPanelBinder]
-                                          panelToEntityBinder:[_panelToolkit environmentLogPanelToEnvironmentLogBinder]
+                                         entityFormPanelMaker:[_panelToolkit envlogFormPanelMakerWithUser:user
+                                                                                   defaultSelectedVehicle:[_coordDao vehicleForEnvironmentLog:envLog
+                                                                                                                                        error:[FPUtils localFetchErrorHandlerMaker]()]
+                                                                                     defaultPickedLogDate:[envLog logDate]]
+                                         entityViewPanelMaker:[_panelToolkit envlogViewPanelMakerWithUser:user]
+                                          entityToPanelBinder:[_panelToolkit envlogToEnvlogPanelBinder]
+                                          panelToEntityBinder:[_panelToolkit envlogFormPanelToEnvlogBinder]
                                                   entityTitle:@"Environment Log"
-                                         panelEnablerDisabler:[_panelToolkit environmentLogPanelEnablerDisabler]
+                                         panelEnablerDisabler:[_panelToolkit envlogFormPanelEnablerDisabler]
                                             entityAddCanceler:nil
                                            entityEditPreparer:envLogEditPreparer
                                            entityEditCanceler:envLogEditCanceler
