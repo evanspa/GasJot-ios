@@ -18,6 +18,7 @@
   UIViewController *_controllerCtx;
   PEItemSelectedAction _vehicleSelectedAction;
   void(^_logDatePickedAction)(NSDate *);
+  BOOL _displayDisclosureIndicators;
 }
 
 #pragma mark - Initializers
@@ -27,6 +28,7 @@
              defaultLogDate:(NSDate *)defaultLogDate
       vehicleSelectedAction:(PEItemSelectedAction)vehicleSelectedAction
         logDatePickedAction:(void(^)(NSDate *))logDatePickedAction
+displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
              coordinatorDao:(FPCoordinatorDao *)coordDao
                        user:(FPUser *)user
                screenToolkit:(FPScreenToolkit *)screenToolkit
@@ -37,6 +39,7 @@
     _coordDao = coordDao;
     _selectedVehicle = defaultSelectedVehicle;
     _pickedLogDate = defaultLogDate;
+    _displayDisclosureIndicators = displayDisclosureIndicators;
     _user = user;
     _screenToolkit = screenToolkit;
     __weak FPEnvLogVehicleAndDateDataSourceDelegate *weakSelf = self;
@@ -141,7 +144,11 @@ heightForHeaderInSection:(NSInteger)section {
       [[cell detailTextLabel] setText:[PEUtils stringFromDate:_pickedLogDate withPattern:@"MM/dd/YYYY"]];
       break;
   }
-  [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
+  if (_displayDisclosureIndicators) {
+    [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
+  } else {
+    [cell setAccessoryType:UITableViewCellAccessoryNone];
+  }
   return cell;
 }
 

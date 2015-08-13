@@ -22,6 +22,7 @@
       vehicleSelectedAction:(PEItemSelectedAction)vehicleSelectedAction
   fuelStationSelectedAction:(PEItemSelectedAction)fuelStationSelectedAction
         logDatePickedAction:(void(^)(NSDate *))logDatePickedAction
+displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
              coordinatorDao:(FPCoordinatorDao *)coordDao
                        user:(FPUser *)user
               screenToolkit:(FPScreenToolkit *)screenToolkit

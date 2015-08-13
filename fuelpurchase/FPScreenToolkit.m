@@ -402,10 +402,10 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                          wouldBeIndexOfEntity:wouldBeIndexBlk
                               isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
                                isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                          itemChildrenCounter:[self vehicleItemChildrenCounter]
-                          itemChildrenMsgsBlk:[self vehicleItemChildrenMsgs]
-                                  itemDeleter:[self vehicleItemDeleterForUser:user]
-                             itemLocalDeleter:[self vehicleItemLocalDeleter]];
+                          itemChildrenCounter:nil
+                          itemChildrenMsgsBlk:nil
+                                  itemDeleter:nil
+                             itemLocalDeleter:nil];
   };
 }
 
@@ -904,10 +904,10 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                          wouldBeIndexOfEntity:wouldBeIndexBlk
                               isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
                                isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                          itemChildrenCounter:[self fuelStationItemChildrenCounter]
-                          itemChildrenMsgsBlk:[self fuelStationItemChildrenMsgs]
-                                  itemDeleter:[self fuelStationItemDeleterForUser:user]
-                             itemLocalDeleter:[self fuelStationItemLocalDeleter]];
+                          itemChildrenCounter:nil
+                          itemChildrenMsgsBlk:nil
+                                  itemDeleter:nil
+                             itemLocalDeleter:nil];
   };
 }
 

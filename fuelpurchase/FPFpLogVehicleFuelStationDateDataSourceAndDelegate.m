@@ -21,6 +21,7 @@
   PEItemSelectedAction _vehicleSelectedAction;
   PEItemSelectedAction _fuelStationSelectedAction;
   void(^_logDatePickedAction)(NSDate *);
+  BOOL _displayDisclosureIndicators;
 }
 
 #pragma mark - Initializers
@@ -32,6 +33,7 @@
       vehicleSelectedAction:(PEItemSelectedAction)vehicleSelectedAction
   fuelStationSelectedAction:(PEItemSelectedAction)fuelStationSelectedAction
         logDatePickedAction:(void(^)(NSDate *))logDatePickedAction
+displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
              coordinatorDao:(FPCoordinatorDao *)coordDao
                        user:(FPUser *)user
                screenToolkit:(FPScreenToolkit *)screenToolkit
@@ -43,6 +45,7 @@
     _selectedVehicle = defaultSelectedVehicle;
     _selectedFuelStation = defaultSelectedFuelStation;
     _pickedLogDate = defaultLogDate;
+    _displayDisclosureIndicators = displayDisclosureIndicators;
     _user = user;
     _screenToolkit = screenToolkit;
     _uitoolkit = [_screenToolkit uitoolkit];
@@ -187,6 +190,12 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
       break;
     case 1:
       [[cell textLabel] setText:@"Fuel station"];
+      CGFloat hpadding;
+      if (_displayDisclosureIndicators) {
+        hpadding = 5.0;
+      } else {
+        hpadding = 15.0;
+      }
       if (_selectedFuelStation) {
         UIView *contentView = [cell contentView];
         LabelMaker cellTitleMaker = [_uitoolkit tableCellTitleMaker];
@@ -202,17 +211,17 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
           CLLocation *latestCurrentLocation = [APP latestLocation];
           if (latestCurrentLocation) {
             distanceInfoVPadding = 7.0;
-            [PEUIUtils placeView:title atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:7.0 hpadding:5];
+            [PEUIUtils placeView:title atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:7.0 hpadding:hpadding];
           } else {
-            [PEUIUtils placeView:title atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:2.0 hpadding:5];
+            [PEUIUtils placeView:title atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:2.0 hpadding:hpadding];
           }
         } else {
-          [PEUIUtils placeView:title atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:2.0 hpadding:5];
+          [PEUIUtils placeView:title atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:2.0 hpadding:hpadding];
         }
         [_screenToolkit addDistanceInfoToTopOfCellContentView:contentView
                                       withHorizontalAlignment:PEUIHorizontalAlignmentTypeRight
                                           withVerticalPadding:(title.frame.size.height + distanceInfoVPadding)
-                                            horizontalPadding:5.0
+                                            horizontalPadding:hpadding
                                               withFuelstation:_selectedFuelStation];
       } else {
         [[cell detailTextLabel] setText:@"(no fuel stations found)"];
@@ -223,7 +232,11 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
       [[cell detailTextLabel] setText:[PEUtils stringFromDate:_pickedLogDate withPattern:@"MM/dd/YYYY"]];
       break;
   }
-  [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
+  if (_displayDisclosureIndicators) {
+    [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
+  } else {
+    [cell setAccessoryType:UITableViewCellAccessoryNone];
+  }
 }
 
 #pragma mark - Table view data source
@@ -242,7 +255,11 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
   UITableViewCell *cell =
     [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1
                            reuseIdentifier:nil];
-  [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
+  if (_displayDisclosureIndicators) {
+    [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
+  } else {
+    [cell setAccessoryType:UITableViewCellAccessoryNone];
+  }
   return cell;
 }
 

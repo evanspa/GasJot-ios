@@ -131,7 +131,7 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 
 - (PEEntityViewPanelMakerBlk)fplogViewPanelMakerWithUser:(FPUser *)user;
 
-- (PEEntityPanelMakerBlk)fplogFormPanelMakerWithUser:(FPUser *)user
+- (PEEntityPanelMakerBlk)fplogFormPanelMakerWithUser:(FPUser *)user                          
                               defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
                           defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
                                 defaultPickedLogDate:(NSDate *)defaultPickedLogDate;
