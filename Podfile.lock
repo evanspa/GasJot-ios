@@ -47,7 +47,7 @@ PODS:
   - FMDB/standard (2.5):
     - FMDB/common
   - IQKeyboardManager (3.2.1.2)
-  - JGActionSheet (1.0.4)
+  - JGActionSheet (1.0.5)
   - KissXML (5.0)
   - MBProgressHUD (0.9.1)
   - OHHTTPStubs (3.1.12):
@@ -58,7 +58,7 @@ PODS:
     - PESimu-Select (~> 1.0.3)
   - PEFuelPurchase-Common (1.0.8):
     - PEHateoas-Client (~> 1.0.2)
-  - PEFuelPurchase-Model (1.0.62):
+  - PEFuelPurchase-Model (1.0.64):
     - CocoaLumberjack (~> 1.9)
     - FMDB (~> 2.5)
     - PEFuelPurchase-Common (~> 1.0.8)
@@ -69,7 +69,7 @@ PODS:
     - AFNetworking (~> 2.5.4)
     - CocoaLumberjack (~> 1.9)
     - PEObjc-Commons (~> 1.0.30)
-  - PEObjc-Commons (1.0.36):
+  - PEObjc-Commons (1.0.37):
     - JGActionSheet (~> 1.0.4)
   - PESimu-Select (1.0.3):
     - PEObjc-Commons (~> 1.0.20)
@@ -102,8 +102,8 @@ DEPENDENCIES:
   - MBProgressHUD (~> 0.9.1)
   - PEDev-Console (~> 1.0.4)
   - PEFuelPurchase-Common (~> 1.0.8)
-  - PEFuelPurchase-Model (~> 1.0.62)
-  - PEObjc-Commons (~> 1.0.36)
+  - PEFuelPurchase-Model (~> 1.0.64)
+  - PEObjc-Commons (~> 1.0.37)
   - ReactiveCocoa (~> 2.4.7)
   - UICKeyChainStore (~> 2.0.5)
 
@@ -114,15 +114,15 @@ SPEC CHECKSUMS:
   FlatUIKit: 1b41f0d4952ce8d970d8479ce79df54a960242c4
   FMDB: 96e8f1bcc1329e269330f99770ad4285d9003e52
   IQKeyboardManager: 4adcd7cc9c17440a7cb74755f6f6c8389919c6bf
-  JGActionSheet: 7c6a947dca93a5c6031032ab76e157b19087d593
+  JGActionSheet: 2cfca820b57a11ec4b4a5655d45ee599fbeddc05
   KissXML: ce643413d618ad69886d0d43c3792b7dedfe476e
   MBProgressHUD: c47f2c166c126cf2ce36498d80f33e754d4e93ad
   OHHTTPStubs: 8cf0cfe6f34f13fc88fdf5b2a1b2c2536e8c0261
   PEDev-Console: e950c909066280c4cd17e717c30f2977eb3a0ebe
   PEFuelPurchase-Common: 315cd43955e69e5be94373405f1b55b6723d30b6
-  PEFuelPurchase-Model: 2b9510225a4ec4c384f575b87de15b1d66ef67c3
+  PEFuelPurchase-Model: bc476f217fb71fa89d0fe095d477da36d501e361
   PEHateoas-Client: a11c832ec447941e63e37d2e0851f0b5e9cd4aec
-  PEObjc-Commons: 8191137dab2179e1e170ff828035556d4313b1ff
+  PEObjc-Commons: 10547609d1b9e3f07283d262f38b102d0da31b85
   PESimu-Select: 9ad38adb78e42e79c9f9365f71c9b05215b6ac10
   PEWire-Control: 2aeefa4014575adbc52cfbf3206395d9a7c07b22
   PEXML-Utils: f7e0759b8e4e2ec3a39c781b362d7fb233fc8421

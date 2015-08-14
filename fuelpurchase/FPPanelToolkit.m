@@ -205,8 +205,8 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     UIView *parentView = [parentViewController view];
     UIView *vehiclePanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
     UIView *vehicleDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Vehicle name", [PEUtils emptyIfNil:[vehicle name]]],
-                                                                  @[@"Default octane", [PEUtils emptyIfNil:[[vehicle defaultOctane] description]]],
-                                                                  @[@"Fuel capacity", [PEUtils emptyIfNil:[[vehicle fuelCapacity] description]]]]
+                                                                  @[@"Default octane", [PEUtils descriptionOrEmptyIfNil:[vehicle defaultOctane]]],
+                                                                  @[@"Fuel capacity", [PEUtils descriptionOrEmptyIfNil:[vehicle fuelCapacity]]]]
                                                  withCellHeight:36.5
                                               labelLeftHPadding:10.0
                                              valueRightHPadding:15.0
@@ -843,11 +843,11 @@ location from the given address above."]
   return ^ UIView * (PEAddViewEditController *parentViewController, FPFuelPurchaseLog *fplog) {
     UIView *parentView = [parentViewController view];
     UIView *fplogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *fplogDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Octane", [PEUtils emptyIfNil:[[fplog octane] description]]],
-                                                                @[@"Price per gallon", [PEUtils emptyIfNil:[[fplog gallonPrice] description]]],
-                                                                @[@"Car wash per-gallon discount", [PEUtils emptyIfNil:[[fplog carWashPerGallonDiscount] description]]],
+    UIView *fplogDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Octane", [PEUtils descriptionOrEmptyIfNil:[fplog octane]]],
+                                                                @[@"Price per gallon", [PEUtils descriptionOrEmptyIfNil:[fplog gallonPrice]]],
+                                                                @[@"Car wash per-gallon discount", [PEUtils descriptionOrEmptyIfNil:[fplog carWashPerGallonDiscount]]],
                                                                 @[@"Got car wash?", [PEUtils yesNoFromBool:[fplog gotCarWash]]],
-                                                                @[@"Num gallons", [PEUtils emptyIfNil:[[fplog numGallons] description]]]]
+                                                                @[@"Num gallons", [PEUtils descriptionOrEmptyIfNil:[fplog numGallons]]]]
                                                withCellHeight:36.5
                                             labelLeftHPadding:10.0
                                            valueRightHPadding:15.0
@@ -1146,11 +1146,11 @@ location from the given address above."]
   return ^ UIView * (PEAddViewEditController *parentViewController, FPEnvironmentLog *envlog) {
     UIView *parentView = [parentViewController view];
     UIView *envlogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *envlogDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Odometer", [PEUtils emptyIfNil:[[envlog odometer] description]]],
-                                                                 @[@"Reported DTE", [PEUtils emptyIfNil:[[envlog reportedDte] description]]],
-                                                                 @[@"Reported avg mpg", [PEUtils emptyIfNil:[[envlog reportedAvgMpg] description]]],
-                                                                 @[@"Reported avg mph", [PEUtils emptyIfNil:[[envlog reportedAvgMph] description]]],
-                                                                 @[@"Reported outside temperature", [PEUtils emptyIfNil:[[envlog reportedOutsideTemp] description]]]]
+    UIView *envlogDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Odometer", [PEUtils descriptionOrEmptyIfNil:[envlog odometer]]],
+                                                                 @[@"Reported DTE", [PEUtils descriptionOrEmptyIfNil:[envlog reportedDte]]],
+                                                                 @[@"Reported avg mpg", [PEUtils descriptionOrEmptyIfNil:[envlog reportedAvgMpg]]],
+                                                                 @[@"Reported avg mph", [PEUtils descriptionOrEmptyIfNil:[envlog reportedAvgMph]]],
+                                                                 @[@"Reported outside temperature", [PEUtils descriptionOrEmptyIfNil:[envlog reportedOutsideTemp]]]]
                                                 withCellHeight:36.5
                                              labelLeftHPadding:10.0
                                             valueRightHPadding:15.0
