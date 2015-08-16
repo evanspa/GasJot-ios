@@ -1367,7 +1367,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       [APP refreshTabs];
     };
     PESaveEntityBlk fpLogSaver = ^(PEAddViewEditController *ctrl, FPFuelPurchaseLog *fpLog) {
-      refreshVehicleFuelStationTableView(ctrl, fpLog);
       FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
         (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)
           [(UITableView *)[[ctrl view] viewWithTag:FPFpLogTagVehicleFuelStationAndDate] dataSource];
@@ -1847,7 +1846,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       [APP refreshTabs];
     };
     PESaveEntityBlk envLogSaver = ^(PEAddViewEditController *ctrl, FPEnvironmentLog *envLog) {
-      refreshVehicleTableView(ctrl, envLog);
       FPEnvLogVehicleAndDateDataSourceDelegate *ds =
         (FPEnvLogVehicleAndDateDataSourceDelegate *)
         [(UITableView *)[[ctrl view] viewWithTag:FPEnvLogTagVehicleAndDate] dataSource];
