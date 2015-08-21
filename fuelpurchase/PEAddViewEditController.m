@@ -518,6 +518,15 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
   _percentCompleteSavingEntity = 0.0;
   HUD.progress = _percentCompleteSavingEntity;
   [_errorsForSync removeAllObjects];
+  
+  // The meaning of the elements of the arrays found within _errorsForSync:
+  //
+  // _errorsForSync[*][0]: Error title (string)
+  // _errorsForSync[*][1]: Is error user-fixable (bool)
+  // _errorsForSync[*][2]: An NSArray of sub-error messages (strings)
+  // _errorsForSync[*][3]: Is error conflict-type (bool)
+  //
+  
   [_successMessageTitlesForSync removeAllObjects];
   _receivedAuthReqdErrorOnSyncAttempt = NO;
   void(^syncDone)(NSString *) = ^(NSString *mainMsgTitle) {
@@ -540,41 +549,76 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
         NSString *title;
         NSString *okayActionTitle = @"Okay.  I'll try again later.";
         NSString *message;
+        BOOL isConflictError = NO;
         NSArray *subErrors = _errorsForSync[0][2];
         if ([subErrors count] > 1) {
           message = @"There were problems syncing to the server.\n\
 The errors are as follows:";
           title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
         } else {
-          message = @"There was a problem syncing to the server.\n\
+          if ([_errorsForSync[0][3] boolValue]) {
+            isConflictError = YES;
+          } else {
+            message = @"There was a problem syncing to the server.\n\
 The error is as follows:";
-          title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
+            title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
+          }
         }
-        JGActionSheetSection *becameUnauthSection = [self becameUnauthenticatedSection];
-        JGActionSheetSection *contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
-                                                                              title:title
-                                                                   alertDescription:[[NSAttributedString alloc] initWithString:message]
-                                                                     relativeToView:self.view];
-        JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
-                                                                              message:nil
-                                                                         buttonTitles:@[okayActionTitle]
-                                                                          buttonStyle:JGActionSheetButtonStyleDefault];
-        JGActionSheet *alertSheet;
-        if (becameUnauthSection) {
-          alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
+        if (isConflictError) {
+          id latestEntity = _errorsForSync[0][4];
+          NSMutableAttributedString *desc = [[NSMutableAttributedString alloc] initWithString:@"\
+The remote copy of this entity has been\n\
+updated since you downloaded it.  You have\n\
+a few options:\n\n\
+If you cancel, your local edits will be\n\
+retained."];
+          NSDictionary *attrs = @{ NSFontAttributeName : [UIFont italicSystemFontOfSize:14.0] };
+          [desc setAttributes:attrs range:NSMakeRange(99, 49)];
+          [PEUIUtils showEditConflictAlertWithTitle:@"Conflict."
+                                   alertDescription:desc
+                                   mergeButtonTitle:@"Merge remote and local, then review."
+                                  mergeButtonAction:^{}
+                                 replaceButtonTitle:@"Replace local with remote, then review."
+                                replaceButtonAction:^{}
+                          forceSaveLocalButtonTitle:@"I don't care.  Force save my local copy."
+                              forceSaveButtonAction:^{
+                                postSyncActivities();
+                                _entityEditPreparer(self, _entity);
+                                [_entity setUpdatedAt:[latestEntity updatedAt]];
+                                [self setEditing:YES animated:YES];
+                                [self doneWithEdit];
+                                [super setEditing:NO animated:YES];
+                              }
+                                  cancelButtonTitle:@"Cancel.  I'll deal with this later."
+                                 cancelButtonAction:^{ postSyncActivities(); }
+                                     relativeToView:self.view];
         } else {
-          alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
+          JGActionSheetSection *becameUnauthSection = [self becameUnauthenticatedSection];
+          JGActionSheetSection *contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
+                                                                                title:title
+                                                                     alertDescription:[[NSAttributedString alloc] initWithString:message]
+                                                                       relativeToView:self.view];
+          JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
+                                                                                message:nil
+                                                                           buttonTitles:@[okayActionTitle]
+                                                                            buttonStyle:JGActionSheetButtonStyleDefault];
+          JGActionSheet *alertSheet;
+          if (becameUnauthSection) {
+            alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
+          } else {
+            alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
+          }
+          [alertSheet setDelegate:self];
+          [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
+          [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
+            switch ([indexPath row]) {
+              case 0: // okay
+                postSyncActivities();
+                [sheet dismissAnimated:YES];
+                break;
+            };}];
+          [alertSheet showInView:[self view] animated:YES];
         }
-        [alertSheet setDelegate:self];
-        [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
-        [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
-          switch ([indexPath row]) {
-            case 0: // okay
-              postSyncActivities();
-              [sheet dismissAnimated:YES];
-              break;
-          };}];
-        [alertSheet showInView:[self view] animated:YES];
       });
     }
   };
@@ -584,9 +628,9 @@ The error is as follows:";
       HUD.progress = _percentCompleteSavingEntity;
     });
   };
-  void(^_syncNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                             NSString *mainMsgTitle,
-                                                             NSString *recordTitle) {
+  void(^syncNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                            NSString *mainMsgTitle,
+                                                            NSString *recordTitle) {
     handleHudProgress(percentComplete);
     // TODO - perhaps need to add ability for 'not found' errors to be 'special' such that
     // a user is given a special error dialog informing that their record will now be deleted
@@ -594,47 +638,50 @@ The error is as follows:";
     // locally deleted.
     [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                 [NSNumber numberWithBool:NO],
-                                @[[NSString stringWithFormat:@"Not found."]]]];
+                                @[[NSString stringWithFormat:@"Not found."]],
+                                [NSNumber numberWithBool:NO]]];
     if (_percentCompleteSavingEntity == 1.0) {
       syncDone(mainMsgTitle);
     }
   };
-  void(^_syncSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                            NSString *mainMsgTitle,
-                                                            NSString *recordTitle) {
+  void(^syncSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                           NSString *mainMsgTitle,
+                                                           NSString *recordTitle) {
     handleHudProgress(percentComplete);
     [_successMessageTitlesForSync addObject:[NSString stringWithFormat:@"%@ synced.", recordTitle]];
     if (_percentCompleteSavingEntity == 1.0) {
       syncDone(mainMsgTitle);
     }
   };
-  void(^_syncRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete,
-                                                                         NSString *mainMsgTitle,
-                                                                         NSString *recordTitle,
-                                                                         NSDate *retryAfter) {
+  void(^syncRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete,
+                                                                        NSString *mainMsgTitle,
+                                                                        NSString *recordTitle,
+                                                                        NSDate *retryAfter) {
     handleHudProgress(percentComplete);
     [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                 [NSNumber numberWithBool:NO],
-                                @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]]]];
+                                @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                [NSNumber numberWithBool:NO]]];
     if (_percentCompleteSavingEntity == 1.0) {
       syncDone(mainMsgTitle);
     }
   };
-  void (^_syncServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                  NSString *mainMsgTitle,
-                                                                  NSString *recordTitle) {
+  void(^syncServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                NSString *mainMsgTitle,
+                                                                NSString *recordTitle) {
     handleHudProgress(percentComplete);
     [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                 [NSNumber numberWithBool:NO],
-                                @[@"Temporary server error."]]];
+                                @[@"Temporary server error."],
+                                [NSNumber numberWithBool:NO]]];
     if (_percentCompleteSavingEntity == 1.0) {
       syncDone(mainMsgTitle);
     }
   };
-  void (^_syncServerError)(float, NSString *, NSString *, NSArray *) = ^(float percentComplete,
-                                                                         NSString *mainMsgTitle,
-                                                                         NSString *recordTitle,
-                                                                         NSArray *computedErrMsgs) {
+  void(^syncServerError)(float, NSString *, NSString *, NSArray *) = ^(float percentComplete,
+                                                                       NSString *mainMsgTitle,
+                                                                       NSString *recordTitle,
+                                                                       NSArray *computedErrMsgs) {
     handleHudProgress(percentComplete);
     BOOL isErrorUserFixable = YES;
     if (!computedErrMsgs || ([computedErrMsgs count] == 0)) {
@@ -643,42 +690,48 @@ The error is as follows:";
     }
     [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                 [NSNumber numberWithBool:isErrorUserFixable],
-                                computedErrMsgs]];
+                                computedErrMsgs,
+                                [NSNumber numberWithBool:NO]]];
     if (_percentCompleteSavingEntity == 1.0) {
       syncDone(mainMsgTitle);
     }
   };
-  void(^_syncConflictBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                             NSString *mainMsgTitle,
-                                                             NSString *recordTitle) {
+  void(^syncConflictBlk)(float, NSString *, NSString *, id) = ^(float percentComplete,
+                                                                NSString *mainMsgTitle,
+                                                                NSString *recordTitle,
+                                                                id latestEntity) {
     handleHudProgress(percentComplete);
     [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                 [NSNumber numberWithBool:NO],
-                                @[[NSString stringWithFormat:@"Conflict."]]]];
+                                @[[NSString stringWithFormat:@"Conflict."]],
+                                [NSNumber numberWithBool:YES],
+                                latestEntity]];
     if (_percentCompleteSavingEntity == 1.0) {
       syncDone(mainMsgTitle);
     }
   };
-  void(^_syncAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                             NSString *mainMsgTitle,
-                                                             NSString *recordTitle) {
+  void(^syncAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                            NSString *mainMsgTitle,
+                                                            NSString *recordTitle) {
     _receivedAuthReqdErrorOnSyncAttempt = YES;
     handleHudProgress(percentComplete);
     [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                 [NSNumber numberWithBool:NO],
-                                @[@"Authentication required."]]];
+                                @[@"Authentication required."],
+                                [NSNumber numberWithBool:NO]]];
     if (_percentCompleteSavingEntity == 1.0) {
       syncDone(mainMsgTitle);
     }
   };
-  void (^_syncDependencyUnsyncedBlk)(float, NSString *, NSString *, NSString *) = ^(float percentComplete,
-                                                                                    NSString *mainMsgTitle,
-                                                                                    NSString *recordTitle,
-                                                                                    NSString *dependencyErrMsg) {
+  void(^syncDependencyUnsyncedBlk)(float, NSString *, NSString *, NSString *) = ^(float percentComplete,
+                                                                                  NSString *mainMsgTitle,
+                                                                                  NSString *recordTitle,
+                                                                                  NSString *dependencyErrMsg) {
     handleHudProgress(percentComplete);
     [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                 [NSNumber numberWithBool:NO],
-                                @[dependencyErrMsg]]];
+                                @[dependencyErrMsg],
+                                [NSNumber numberWithBool:NO]]];
     if (_percentCompleteSavingEntity == 1.0) {
       syncDone(mainMsgTitle);
     }
@@ -686,14 +739,14 @@ The error is as follows:";
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
     _syncer(self,
             _entity,
-            _syncNotFoundBlk,
-            _syncSuccessBlk,
-            _syncRetryAfterBlk,
-            _syncServerTempError,
-            _syncServerError,
-            _syncConflictBlk,
-            _syncAuthReqdBlk,
-            _syncDependencyUnsyncedBlk);
+            syncNotFoundBlk,
+            syncSuccessBlk,
+            syncRetryAfterBlk,
+            syncServerTempError,
+            syncServerError,
+            syncConflictBlk,
+            syncAuthReqdBlk,
+            syncDependencyUnsyncedBlk);
   });
 }
 
@@ -784,6 +837,15 @@ The error is as follows:";
         _percentCompleteSavingEntity = 0.0;
         HUD.progress = _percentCompleteSavingEntity;
         [_errorsForSync removeAllObjects];
+        
+        // The meaning of the elements of the arrays found within _errorsForSync:
+        //
+        // _errorsForSync[*][0]: Error title (string)
+        // _errorsForSync[*][1]: Is error user-fixable (bool)
+        // _errorsForSync[*][2]: An NSArray of sub-error messages (strings)
+        // _errorsForSync[*][3]: Is error conflict-type (bool)
+        //
+        
         [_successMessageTitlesForSync removeAllObjects];
         _receivedAuthReqdErrorOnSyncAttempt = NO;
         void(^immediateSyncDone)(NSString *) = ^(NSString *mainMsgTitle) {
@@ -813,6 +875,7 @@ The error is as follows:";
               NSString *dealWithLaterActionTitle;
               NSString *cancelActionTitle;
               NSString *message;
+              BOOL isConflictError = NO;
               NSArray *subErrors = _errorsForSync[0][2]; // because only single-record edit, we can skip the "not saved" msg title, and just display the sub-errors
               if ([subErrors count] > 1) {
                 message = @"\
@@ -825,93 +888,128 @@ locally.  The errors are as follows:";
                 cancelActionTitle = @"Forget it.  Just cancel them.";
                 title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
               } else {
-                message = @"\
+                if ([_errorsForSync[0][3] boolValue]) {
+                  isConflictError = YES;
+                } else {
+                  message = @"\
 Although there was a problem syncing your\n\
 edits to the server, they have been saved\n\
 locally.  The error is as follows:";
-                fixLaterActionTitle = @"I'll fix it later.";
-                fixNowActionTitle = @"I'll fix it now.";
-                dealWithLaterActionTitle = @"I'll try syncing it later.";
-                cancelActionTitle = @"Forget it.  Just cancel it.";
-                title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
+                  fixLaterActionTitle = @"I'll fix it later.";
+                  fixNowActionTitle = @"I'll fix it now.";
+                  dealWithLaterActionTitle = @"I'll try syncing it later.";
+                  cancelActionTitle = @"Forget it.  Just cancel it.";
+                  title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
+                }
               }
-              messageAttrsRange = NSMakeRange(68, 23); // 'have...locally'
-              attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
-              [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
-              JGActionSheetSection *becameUnauthSection = [self becameUnauthenticatedSection];
-              JGActionSheetSection *contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
-                                                                                    title:title
-                                                                         alertDescription:attrMessage
-                                                                           relativeToView:self.view];
-              JGActionSheetSection *buttonsSection;
-              void (^buttonsPressedBlock)(JGActionSheet *, NSIndexPath *);
-              // 'fix' buttons here
-              void (^cancelAction)(void) = ^{
-                // First, we need to save the copy-before-edit entity to get the database
-                // back to how it was before the user did the editing
-                _entitySaver(self, _entityCopyBeforeEdit);
-                
-                // now we can cancel the edit session as we normally would
-                [_entity overwrite:_entityCopyBeforeEdit];
-                _entityEditCanceler(self, _entity);
-                _entityToPanelBinder(_entity, _entityFormPanel);
-                _isEditCanceled = NO; // reseting this
-                postEditActivities();
-              };
-              if ([PEAddViewEditController areErrorsAllUserFixable:_errorsForSync]) {
-                buttonsSection = [JGActionSheetSection sectionWithTitle:nil
-                                                                message:nil
-                                                           buttonTitles:@[fixNowActionTitle,
-                                                                          fixLaterActionTitle,
-                                                                          cancelActionTitle]
-                                                            buttonStyle:JGActionSheetButtonStyleDefault];
-                [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:2];
-                buttonsPressedBlock = ^(JGActionSheet *sheet, NSIndexPath *indexPath) {
-                  switch ([indexPath row]) {
-                    case 0: // fix now
-                      _entityEditPreparer(self, _entity);
-                      [super setEditing:YES animated:NO];
-                      [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
-                      [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
-                      break;
-                    case 1: // fix later
-                      postEditActivities();
-                      break;
-                    case 2: // cancel
-                      cancelAction();
-                      break;
-                  }
-                  [sheet dismissAnimated:YES];
-                };
+              if (isConflictError) {
+                id latestEntity = _errorsForSync[0][4];
+                NSLog(@"latestEntity: %@", latestEntity);
+                NSMutableAttributedString *desc = [[NSMutableAttributedString alloc] initWithString:@"\
+The remote copy of this entity has been\n\
+updated since you downloaded it.  You have\n\
+a few options:\n\n\
+If you cancel, your local edits will be\n\
+retained."];
+                NSDictionary *attrs = @{ NSFontAttributeName : [UIFont italicSystemFontOfSize:14.0] };
+                [desc setAttributes:attrs range:NSMakeRange(99, 49)];
+                [PEUIUtils showEditConflictAlertWithTitle:@"Conflict."
+                                         alertDescription:desc
+                                         mergeButtonTitle:@"Merge remote and local, then review."
+                                        mergeButtonAction:^{}
+                                       replaceButtonTitle:@"Replace local with remote, then review."
+                                      replaceButtonAction:^{}
+                                forceSaveLocalButtonTitle:@"I don't care.  Force save my local copy."
+                                    forceSaveButtonAction:^{
+                                      postEditActivities();
+                                      _entityEditPreparer(self, _entity);
+                                      [_entity setUpdatedAt:[latestEntity updatedAt]];
+                                      [self setEditing:YES animated:YES];
+                                      [self doneWithEdit];
+                                      [super setEditing:NO animated:YES];
+                                    }
+                                        cancelButtonTitle:@"Cancel.  I'll deal with this later."
+                                       cancelButtonAction:^{ postEditActivities(); }
+                                           relativeToView:self.view];
               } else {
-                buttonsSection = [JGActionSheetSection sectionWithTitle:nil
-                                                                message:nil
-                                                           buttonTitles:@[dealWithLaterActionTitle,
-                                                                          cancelActionTitle]
-                                                            buttonStyle:JGActionSheetButtonStyleDefault];
-                [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:1];
-                buttonsPressedBlock = ^(JGActionSheet *sheet, NSIndexPath *indexPath) {
-                  switch ([indexPath row]) {
-                    case 0: // deal with later
-                      postEditActivities();
-                      break;
-                    case 1: // cancel
-                      cancelAction();
-                      break;
-                  }
-                  [sheet dismissAnimated:YES];
+                messageAttrsRange = NSMakeRange(68, 23); // 'have...locally'
+                attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
+                [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
+                JGActionSheetSection *becameUnauthSection = [self becameUnauthenticatedSection];
+                JGActionSheetSection *contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
+                                                                                      title:title
+                                                                           alertDescription:attrMessage
+                                                                             relativeToView:self.view];
+                JGActionSheetSection *buttonsSection;
+                void (^buttonsPressedBlock)(JGActionSheet *, NSIndexPath *);
+                // 'fix' buttons here
+                void (^cancelAction)(void) = ^{
+                  // First, we need to save the copy-before-edit entity to get the database
+                  // back to how it was before the user did the editing
+                  _entitySaver(self, _entityCopyBeforeEdit);
+                  
+                  // now we can cancel the edit session as we normally would
+                  [_entity overwrite:_entityCopyBeforeEdit];
+                  _entityEditCanceler(self, _entity);
+                  _entityToPanelBinder(_entity, _entityFormPanel);
+                  _isEditCanceled = NO; // reseting this
+                  postEditActivities();
                 };
+                if ([PEAddViewEditController areErrorsAllUserFixable:_errorsForSync]) {
+                  buttonsSection = [JGActionSheetSection sectionWithTitle:nil
+                                                                  message:nil
+                                                             buttonTitles:@[fixNowActionTitle,
+                                                                            fixLaterActionTitle,
+                                                                            cancelActionTitle]
+                                                              buttonStyle:JGActionSheetButtonStyleDefault];
+                  [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:2];
+                  buttonsPressedBlock = ^(JGActionSheet *sheet, NSIndexPath *indexPath) {
+                    switch ([indexPath row]) {
+                      case 0: // fix now
+                        _entityEditPreparer(self, _entity);
+                        [super setEditing:YES animated:NO];
+                        [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
+                        [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
+                        break;
+                      case 1: // fix later
+                        postEditActivities();
+                        break;
+                      case 2: // cancel
+                        cancelAction();
+                        break;
+                    }
+                    [sheet dismissAnimated:YES];
+                  };
+                } else {
+                  buttonsSection = [JGActionSheetSection sectionWithTitle:nil
+                                                                  message:nil
+                                                             buttonTitles:@[dealWithLaterActionTitle,
+                                                                            cancelActionTitle]
+                                                              buttonStyle:JGActionSheetButtonStyleDefault];
+                  [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:1];
+                  buttonsPressedBlock = ^(JGActionSheet *sheet, NSIndexPath *indexPath) {
+                    switch ([indexPath row]) {
+                      case 0: // deal with later
+                        postEditActivities();
+                        break;
+                      case 1: // cancel
+                        cancelAction();
+                        break;
+                    }
+                    [sheet dismissAnimated:YES];
+                  };
+                }
+                JGActionSheet *alertSheet;
+                if (becameUnauthSection) {
+                  alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
+                } else {
+                  alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
+                }
+                [alertSheet setDelegate:self];
+                [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
+                [alertSheet setButtonPressedBlock:buttonsPressedBlock];
+                [alertSheet showInView:[self view] animated:YES];
               }
-              JGActionSheet *alertSheet;
-              if (becameUnauthSection) {
-                alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
-              } else {
-                alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
-              }
-              [alertSheet setDelegate:self];
-              [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
-              [alertSheet setButtonPressedBlock:buttonsPressedBlock];
-              [alertSheet showInView:[self view] animated:YES];
             });
           }
         };
@@ -921,9 +1019,9 @@ locally.  The error is as follows:";
             HUD.progress = _percentCompleteSavingEntity;
           });
         };
-        void(^_syncNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                   NSString *mainMsgTitle,
-                                                                   NSString *recordTitle) {
+        void(^syncNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                  NSString *mainMsgTitle,
+                                                                  NSString *recordTitle) {
           handleHudProgress(percentComplete);
           // TODO - perhaps need to add ability for 'not found' errors to be 'special' such that
           // a user is given a special error dialog informing that their record will now be deleted
@@ -931,47 +1029,50 @@ locally.  The error is as follows:";
           // locally deleted.
           [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                       [NSNumber numberWithBool:NO],
-                                      @[[NSString stringWithFormat:@"Not found."]]]];
+                                      @[[NSString stringWithFormat:@"Not found."]],
+                                      [NSNumber numberWithBool:NO]]];
           if (_percentCompleteSavingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
         };
-        void(^_syncSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                  NSString *mainMsgTitle,
-                                                                  NSString *recordTitle) {
+        void(^syncSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                 NSString *mainMsgTitle,
+                                                                 NSString *recordTitle) {
           handleHudProgress(percentComplete);
           [_successMessageTitlesForSync addObject:[NSString stringWithFormat:@"%@ synced.", recordTitle]];
           if (_percentCompleteSavingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
         };
-        void(^_syncRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete,
-                                                                               NSString *mainMsgTitle,
-                                                                               NSString *recordTitle,
-                                                                               NSDate *retryAfter) {
+        void(^syncRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete,
+                                                                              NSString *mainMsgTitle,
+                                                                              NSString *recordTitle,
+                                                                              NSDate *retryAfter) {
           handleHudProgress(percentComplete);
           [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                     [NSNumber numberWithBool:NO],
-                                     @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]]]];
+                                      [NSNumber numberWithBool:NO],
+                                      @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                      [NSNumber numberWithBool:NO]]];
           if (_percentCompleteSavingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
         };
-        void (^_syncServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                        NSString *mainMsgTitle,
-                                                                        NSString *recordTitle) {
+        void (^syncServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                       NSString *mainMsgTitle,
+                                                                       NSString *recordTitle) {
           handleHudProgress(percentComplete);
           [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                     [NSNumber numberWithBool:NO],
-                                     @[@"Temporary server error."]]];
+                                      [NSNumber numberWithBool:NO],
+                                      @[@"Temporary server error."],
+                                      [NSNumber numberWithBool:NO]]];
           if (_percentCompleteSavingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
         };
-        void (^_syncServerError)(float, NSString *, NSString *, NSArray *) = ^(float percentComplete,
-                                                                               NSString *mainMsgTitle,
-                                                                               NSString *recordTitle,
-                                                                               NSArray *computedErrMsgs) {
+        void (^syncServerError)(float, NSString *, NSString *, NSArray *) = ^(float percentComplete,
+                                                                              NSString *mainMsgTitle,
+                                                                              NSString *recordTitle,
+                                                                              NSArray *computedErrMsgs) {
           handleHudProgress(percentComplete);
           BOOL isErrorUserFixable = YES;
           if (!computedErrMsgs || ([computedErrMsgs count] == 0)) {
@@ -979,43 +1080,49 @@ locally.  The error is as follows:";
             isErrorUserFixable = NO;
           }
           [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                     [NSNumber numberWithBool:isErrorUserFixable],
-                                     computedErrMsgs]];
+                                      [NSNumber numberWithBool:isErrorUserFixable],
+                                      computedErrMsgs,
+                                      [NSNumber numberWithBool:NO]]];
           if (_percentCompleteSavingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
         };
-        void(^_syncConflictBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                   NSString *mainMsgTitle,
-                                                                   NSString *recordTitle) {
+        void(^syncConflictBlk)(float, NSString *, NSString *, id) = ^(float percentComplete,
+                                                                      NSString *mainMsgTitle,
+                                                                      NSString *recordTitle,
+                                                                      id latestEntity) {
           handleHudProgress(percentComplete);
           [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                       [NSNumber numberWithBool:NO],
-                                      @[[NSString stringWithFormat:@"Conflict."]]]];
+                                      @[[NSString stringWithFormat:@"Conflict."]],
+                                      [NSNumber numberWithBool:YES],
+                                      latestEntity]];
           if (_percentCompleteSavingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
         };
-        void(^_syncAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                   NSString *mainMsgTitle,
-                                                                   NSString *recordTitle) {
+        void(^syncAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                  NSString *mainMsgTitle,
+                                                                  NSString *recordTitle) {
           _receivedAuthReqdErrorOnSyncAttempt = YES;
           handleHudProgress(percentComplete);
           [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                     [NSNumber numberWithBool:NO],
-                                     @[@"Authentication required."]]];
+                                      [NSNumber numberWithBool:NO],
+                                      @[@"Authentication required."],
+                                      [NSNumber numberWithBool:NO]]];
           if (_percentCompleteSavingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
         };
-        void (^_syncDependencyUnsyncedBlk)(float, NSString *, NSString *, NSString *) = ^(float percentComplete,
-                                                                                          NSString *mainMsgTitle,
-                                                                                          NSString *recordTitle,
-                                                                                          NSString *dependencyErrMsg) {
+        void (^syncDependencyUnsyncedBlk)(float, NSString *, NSString *, NSString *) = ^(float percentComplete,
+                                                                                         NSString *mainMsgTitle,
+                                                                                         NSString *recordTitle,
+                                                                                         NSString *dependencyErrMsg) {
           handleHudProgress(percentComplete);
           [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                       [NSNumber numberWithBool:NO],
-                                      @[dependencyErrMsg]]];
+                                      @[dependencyErrMsg],
+                                      [NSNumber numberWithBool:NO]]];
           if (_percentCompleteSavingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
@@ -1023,14 +1130,14 @@ locally.  The error is as follows:";
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
           _doneEditingEntityMarker(self,
                                    _entity,
-                                   _syncNotFoundBlk,
-                                   _syncSuccessBlk,
-                                   _syncRetryAfterBlk,
-                                   _syncServerTempError,
-                                   _syncServerError,
-                                   _syncConflictBlk,
-                                   _syncAuthReqdBlk,
-                                   _syncDependencyUnsyncedBlk);
+                                   syncNotFoundBlk,
+                                   syncSuccessBlk,
+                                   syncRetryAfterBlk,
+                                   syncServerTempError,
+                                   syncServerError,
+                                   syncConflictBlk,
+                                   syncAuthReqdBlk,
+                                   syncDependencyUnsyncedBlk);
         });
       } else {
         [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // cancel btn (so they can't cancel it after we'ved saved and we're displaying the HUD)
@@ -1164,6 +1271,14 @@ locally.  The error is as follows:";
       _percentCompleteSavingEntity = 0.0;
       HUD.progress = _percentCompleteSavingEntity;
       [_errorsForSync removeAllObjects];
+      
+      // The meaning of the elements of the arrays found within _errorsForSync:
+      //
+      // _errorsForSync[*][0]: Error title (string)
+      // _errorsForSync[*][1]: Is error user-fixable (bool)
+      // _errorsForSync[*][2]: An NSArray of sub-error messages (strings)
+      //
+      
       [_successMessageTitlesForSync removeAllObjects];
       _receivedAuthReqdErrorOnSyncAttempt = NO;
       void(^immediateSaveDone)(NSString *) = ^(NSString *mainMsgTitle) {
@@ -1367,15 +1482,15 @@ locally.  The error is as follows:";
           });
         }
       };
-      void (^handleHudProgress)(float) = ^(float percentComplete) {
+      void(^handleHudProgress)(float) = ^(float percentComplete) {
         _percentCompleteSavingEntity += percentComplete;
         dispatch_async(dispatch_get_main_queue(), ^{
           HUD.progress = _percentCompleteSavingEntity;
         });
       };
-      void(^_syncNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                 NSString *mainMsgTitle,
-                                                                 NSString *recordTitle) {
+      void(^syncNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                NSString *mainMsgTitle,
+                                                                NSString *recordTitle) {
         handleHudProgress(percentComplete);
         [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                     [NSNumber numberWithBool:NO],
@@ -1384,19 +1499,19 @@ locally.  The error is as follows:";
           immediateSaveDone(mainMsgTitle);
         }
       };
-      void(^_syncSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                NSString *mainMsgTitle,
-                                                                NSString *recordTitle) {
+      void(^syncSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                               NSString *mainMsgTitle,
+                                                               NSString *recordTitle) {
         handleHudProgress(percentComplete);
         [_successMessageTitlesForSync addObject:[NSString stringWithFormat:@"%@ synced.", recordTitle]];
         if (_percentCompleteSavingEntity == 1.0) {
           immediateSaveDone(mainMsgTitle);
         }
       };
-      void(^_syncRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete,
-                                                                             NSString *mainMsgTitle,
-                                                                             NSString *recordTitle,
-                                                                             NSDate *retryAfter) {
+      void(^syncRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete,
+                                                                            NSString *mainMsgTitle,
+                                                                            NSString *recordTitle,
+                                                                            NSDate *retryAfter) {
         handleHudProgress(percentComplete);
         [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                    [NSNumber numberWithBool:NO],
@@ -1405,9 +1520,9 @@ locally.  The error is as follows:";
           immediateSaveDone(mainMsgTitle);
         }
       };
-      void (^_syncServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                      NSString *mainMsgTitle,
-                                                                      NSString *recordTitle) {
+      void(^syncServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                    NSString *mainMsgTitle,
+                                                                    NSString *recordTitle) {
         handleHudProgress(percentComplete);
         [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                    [NSNumber numberWithBool:NO],
@@ -1416,10 +1531,10 @@ locally.  The error is as follows:";
           immediateSaveDone(mainMsgTitle);
         }
       };
-      void (^_syncServerError)(float, NSString *, NSString *, NSArray *) = ^(float percentComplete,
-                                                                             NSString *mainMsgTitle,
-                                                                             NSString *recordTitle,
-                                                                             NSArray *computedErrMsgs) {
+      void(^syncServerError)(float, NSString *, NSString *, NSArray *) = ^(float percentComplete,
+                                                                           NSString *mainMsgTitle,
+                                                                           NSString *recordTitle,
+                                                                           NSArray *computedErrMsgs) {
         handleHudProgress(percentComplete);
         BOOL isErrorUserFixable = YES;
         if (!computedErrMsgs || ([computedErrMsgs count] == 0)) {
@@ -1433,20 +1548,9 @@ locally.  The error is as follows:";
           immediateSaveDone(mainMsgTitle);
         }
       };
-      void(^_syncConflictBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                 NSString *mainMsgTitle,
-                                                                 NSString *recordTitle) {
-        handleHudProgress(percentComplete);
-        [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                    [NSNumber numberWithBool:NO],
-                                    @[[NSString stringWithFormat:@"Conflict."]]]];
-        if (_percentCompleteSavingEntity == 1.0) {
-          immediateSaveDone(mainMsgTitle);
-        }
-      };
-      void(^_syncAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                 NSString *mainMsgTitle,
-                                                                 NSString *recordTitle) {
+      void(^syncAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                NSString *mainMsgTitle,
+                                                                NSString *recordTitle) {
         _receivedAuthReqdErrorOnSyncAttempt = YES;
         handleHudProgress(percentComplete);
         [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
@@ -1456,10 +1560,10 @@ locally.  The error is as follows:";
           immediateSaveDone(mainMsgTitle);
         }
       };
-      void (^_syncDependencyUnsyncedBlk)(float, NSString *, NSString *, NSString *) = ^(float percentComplete,
-                                                                                        NSString *mainMsgTitle,
-                                                                                        NSString *recordTitle,
-                                                                                        NSString *dependencyErrMsg) {
+      void(^syncDependencyUnsyncedBlk)(float, NSString *, NSString *, NSString *) = ^(float percentComplete,
+                                                                                      NSString *mainMsgTitle,
+                                                                                      NSString *recordTitle,
+                                                                                      NSString *dependencyErrMsg) {
         handleHudProgress(percentComplete);
         [_errorsForSync addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                     [NSNumber numberWithBool:NO],
@@ -1471,14 +1575,14 @@ locally.  The error is as follows:";
       dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         _newEntitySaver(_entityFormPanel,
                         _newEntity,
-                        _syncNotFoundBlk,
-                        _syncSuccessBlk,
-                        _syncRetryAfterBlk,
-                        _syncServerTempError,
-                        _syncServerError,
-                        _syncConflictBlk,
-                        _syncAuthReqdBlk,
-                        _syncDependencyUnsyncedBlk);
+                        syncNotFoundBlk,
+                        syncSuccessBlk,
+                        syncRetryAfterBlk,
+                        syncServerTempError,
+                        syncServerError,
+                        nil, // conflicts are not possible with adds
+                        syncAuthReqdBlk,
+                        syncDependencyUnsyncedBlk);
       });
     } else {
       _newEntitySaver(_entityFormPanel, _newEntity, nil, nil, nil, nil, nil, nil, nil, nil);

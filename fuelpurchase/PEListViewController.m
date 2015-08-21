@@ -602,9 +602,10 @@ as follows:";
                                           computedErrMsgs]];
             immediateDelDone(mainMsgTitle);
           };
-          void(^delConflictBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                   NSString *mainMsgTitle,
-                                                                   NSString *recordTitle) {
+          void(^delConflictBlk)(float, NSString *, NSString *, id) = ^(float percentComplete,
+                                                                       NSString *mainMsgTitle,
+                                                                       NSString *recordTitle,
+                                                                       id latestEntity) {
             [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
                                           [NSNumber numberWithBool:NO],
                                           @[[NSString stringWithFormat:@"Conflict."]]]];

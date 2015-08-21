@@ -25,7 +25,7 @@ typedef void (^PEEntityAddCancelerBlk)(PEAddViewEditController *, BOOL, id);
 typedef id   (^PEEntityMakerBlk)(UIView *);
 typedef void (^PESaveEntityBlk)(PEAddViewEditController *, id);
 typedef void (^PESyncNotFoundBlk)(float, NSString *, NSString *);
-typedef void (^PESyncConflictBlk)(float, NSString *, NSString *);
+typedef void (^PESyncConflictBlk)(float, NSString *, NSString *, id);
 typedef void (^PESyncImmediateSuccessBlk)(float, NSString *, NSString *);
 typedef void (^PESyncImmediateServerTempErrorBlk)(float, NSString *, NSString *);
 typedef void (^PESyncImmediateServerErrorBlk)(float, NSString *, NSString *, NSArray *);
