@@ -577,9 +577,17 @@ retained."];
           [PEUIUtils showEditConflictAlertWithTitle:@"Conflict."
                                    alertDescription:desc
                                    mergeButtonTitle:@"Merge remote and local, then review."
-                                  mergeButtonAction:^{}
+                                  mergeButtonAction:^{
+                                  }
                                  replaceButtonTitle:@"Replace local with remote, then review."
-                                replaceButtonAction:^{}
+                                replaceButtonAction:^{
+                                  postSyncActivities();
+                                  _entityEditPreparer(self, _entity);
+                                  [self setEditing:YES animated:YES];
+                                  [_entity setUpdatedAt:[latestEntity updatedAt]];
+                                  [_entity overwriteDomainProperties:latestEntity];
+                                  _entityToPanelBinder(_entity, _entityFormPanel);
+                                }
                           forceSaveLocalButtonTitle:@"I don't care.  Force save my local copy."
                               forceSaveButtonAction:^{
                                 postSyncActivities();
@@ -812,6 +820,9 @@ retained."];
     [PEUIUtils placeView:_entityViewPanel atTopOf:[self view] withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0 hpadding:0];
   };
   if (_isEditCanceled) {
+    if (_entityCopyBeforeEdit) {
+      [_entity overwrite:_entityCopyBeforeEdit];
+    }
     _entityEditCanceler(self, _entity);
     _entityToPanelBinder(_entity, _entityFormPanel);
     _isEditCanceled = NO;
@@ -916,9 +927,33 @@ retained."];
                 [PEUIUtils showEditConflictAlertWithTitle:@"Conflict."
                                          alertDescription:desc
                                          mergeButtonTitle:@"Merge remote and local, then review."
-                                        mergeButtonAction:^{}
+                                        mergeButtonAction:^{
+                                          postEditActivities();
+                                          _entityEditPreparer(self, _entity);
+                                          [self setEditing:YES animated:YES];
+                                          [_entity setUpdatedAt:[latestEntity updatedAt]];
+
+                                          /*
+                                           + merge the domain properties (not including dependent-objects)
+                                           + invoke _doesRemotesDependenciesExistLocally(latestEntity)
+                                             + if yes
+                                             + else
+                                             +  fetch remote dependencies and persist them locally
+                                             +  copy them to their main tables
+                                             +  bind 
+                                           */
+                                          
+                                          _entityToPanelBinder(_entity, _entityFormPanel);
+                                        }
                                        replaceButtonTitle:@"Replace local with remote, then review."
-                                      replaceButtonAction:^{}
+                                      replaceButtonAction:^{
+                                        postEditActivities();
+                                        _entityEditPreparer(self, _entity);
+                                        [self setEditing:YES animated:YES];
+                                        [_entity setUpdatedAt:[latestEntity updatedAt]];
+                                        [_entity overwriteDomainProperties:latestEntity];
+                                        _entityToPanelBinder(_entity, _entityFormPanel);
+                                      }
                                 forceSaveLocalButtonTitle:@"I don't care.  Force save my local copy."
                                     forceSaveButtonAction:^{
                                       postEditActivities();

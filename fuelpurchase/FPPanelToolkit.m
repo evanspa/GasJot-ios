@@ -1264,8 +1264,8 @@ location from the given address above."]
                                        relativeToView:parentView];
     NSDictionary *components = [self envlogFormComponentsWithUser:user
                                       displayDisclosureIndicators:YES
-                                       defaultSelectedVehicle:defaultSelectedVehicle
-                                         defaultPickedLogDate:defaultPickedLogDate](parentViewController);
+                                           defaultSelectedVehicle:defaultSelectedVehicle
+                                             defaultPickedLogDate:defaultPickedLogDate](parentViewController);
     UITableView *vehicleAndLogDateTableView = components[@(FPEnvLogTagVehicleAndDate)];
     UITextField *odometerTf = components[@(FPEnvLogTagOdometer)];
     UITextField *reportedDteTf = components[@(FPEnvLogTagReportedDte)];
