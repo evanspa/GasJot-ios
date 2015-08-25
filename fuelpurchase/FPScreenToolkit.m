@@ -163,6 +163,56 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       UITextField *userNameTf = (UITextField *)[entityPanel viewWithTag:FPUserTagName];
       [userNameTf becomeFirstResponder];
     };
+    
+    PEMergeBlk mergeBlk = ^ NSDictionary * (PEAddViewEditController *ctrl, FPUser *localUser, FPUser *remoteUser) {
+      FPUser *masterUser = [[_coordDao localDao] masterUserWithId:[localUser localMasterIdentifier]
+                                                            error:[FPUtils localFetchErrorHandlerMaker]()];
+      return [FPUser mergeRemoteUser:remoteUser withLocalUser:localUser localMasterUser:masterUser];
+    };
+    PEConflictResolveFields conflictResolveFieldsBlk = ^(PEAddViewEditController *ctrl,
+                                                         NSDictionary *mergeConflicts,
+                                                         FPUser *localUser,
+                                                         FPUser *remoteUser) {
+      NSMutableArray *fields = [NSMutableArray arrayWithCapacity:mergeConflicts.count];
+      [mergeConflicts enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        NSString *fieldName = key;
+        if ([fieldName isEqualToString:FPUserNameField]) {
+          [fields addObject:@[@"Name:", @(FPUserTagName), [localUser name], [remoteUser name]]];
+        } else if ([fieldName isEqualToString:FPUserUsernameField]) {
+          [fields addObject:@[@"Username:", @(FPUserTagUsername), [localUser username] , [remoteUser username]]];
+        } else if ([fieldName isEqualToString:FPUserEmailField]) {
+          [fields addObject:@[@"Email:", @(FPUserTagEmail), [localUser email] , [remoteUser email]]];
+        }
+      }];
+      return fields;
+    };
+    PEConflictResolvedEntity conflictResolvedEntityBlk = ^ id (PEAddViewEditController *ctrl,
+                                                               NSDictionary *mergeConflicts,
+                                                               NSArray *valueLabels,
+                                                               FPUser *localUser,
+                                                               FPUser *remoteUser) {
+      FPUser *resolvedUser = [localUser copy];
+      NSInteger numValueLabels = [valueLabels count];
+      for (int i = 0; i < numValueLabels; i++) {
+        NSArray *valueLabelPair = valueLabels[i];
+        UILabel *remoteValue = valueLabelPair[1];
+        if (remoteValue.tag > 0) {
+          switch (remoteValue.tag) {
+            case FPUserTagName:
+              [resolvedUser setName:[remoteUser name]];
+              break;
+            case FPUserTagUsername:
+              [resolvedUser setUsername:[remoteUser username]];
+              break;
+            case FPUserTagEmail:
+              [resolvedUser setEmail:[remoteUser email]];
+              break;
+          }
+        }
+      }
+      return resolvedUser;
+    };
+    
     return [PEAddViewEditController
               viewEntityCtrlrWithEntity:user
                      listViewController:nil
@@ -187,7 +237,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
          prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                        viewDidAppearBlk:nil
                         entityValidator:[self newUserAccountValidator]
-                                 syncer:nil];
+                                 syncer:nil
+                  numRemoteDepsNotLocal:nil
+                                  merge:mergeBlk
+                      fetchDependencies:nil
+                  conflictResolveFields:conflictResolveFieldsBlk
+                 conflictResolvedEntity:conflictResolvedEntityBlk];
   };
 }
 
@@ -565,6 +620,54 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       UITextField *vehicleNameTf = (UITextField *)[entityPanel viewWithTag:FPVehicleTagName];
       [vehicleNameTf becomeFirstResponder];
     };
+    PEMergeBlk mergeBlk = ^ NSDictionary * (PEAddViewEditController *ctrl, FPVehicle *localVehicle, FPVehicle *remoteVehicle) {
+      FPVehicle *masterVehicle = [[_coordDao localDao] masterVehicleWithId:[localVehicle localMasterIdentifier]
+                                                                     error:[FPUtils localFetchErrorHandlerMaker]()];
+      return [FPVehicle mergeRemoteVehicle:remoteVehicle withLocalVehicle:localVehicle localMasterVehicle:masterVehicle];
+    };
+    PEConflictResolveFields conflictResolveFieldsBlk = ^(PEAddViewEditController *ctrl,
+                                                         NSDictionary *mergeConflicts,
+                                                         FPVehicle *localVehicle,
+                                                         FPVehicle *remoteVehicle) {
+      NSMutableArray *fields = [NSMutableArray arrayWithCapacity:mergeConflicts.count];
+      [mergeConflicts enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        NSString *fieldName = key;
+        if ([fieldName isEqualToString:FPVehicleNameField]) {
+          [fields addObject:@[@"Name:", @(FPVehicleTagName), [localVehicle name], [remoteVehicle name]]];
+        } else if ([fieldName isEqualToString:FPVehicleDefaultOctaneField]) {
+          [fields addObject:@[@"Default octane:", @(FPVehicleTagDefaultOctane), [[localVehicle defaultOctane] description], [[remoteVehicle defaultOctane] description]]];
+        } else if ([fieldName isEqualToString:FPVehicleFuelCapacityField]) {
+          [fields addObject:@[@"Fuel capacity:", @(FPVehicleTagFuelCapacity), [[localVehicle fuelCapacity] description], [[remoteVehicle fuelCapacity] description]]];
+        }
+      }];
+      return fields;
+    };
+    PEConflictResolvedEntity conflictResolvedEntityBlk = ^ id (PEAddViewEditController *ctrl,
+                                                               NSDictionary *mergeConflicts,
+                                                               NSArray *valueLabels,
+                                                               FPVehicle *localVehicle,
+                                                               FPVehicle *remoteVehicle) {
+      FPVehicle *resolvedVehicle = [localVehicle copy];
+      NSInteger numValueLabels = [valueLabels count];
+      for (int i = 0; i < numValueLabels; i++) {
+        NSArray *valueLabelPair = valueLabels[i];
+        UILabel *remoteValue = valueLabelPair[1];
+        if (remoteValue.tag > 0) {
+          switch (remoteValue.tag) {
+            case FPVehicleTagName:
+              [resolvedVehicle setName:[remoteVehicle name]];
+              break;
+            case FPVehicleTagDefaultOctane:
+              [resolvedVehicle setDefaultOctane:[remoteVehicle defaultOctane]];
+              break;
+            case FPVehicleTagFuelCapacity:
+              [resolvedVehicle setFuelCapacity:[remoteVehicle fuelCapacity]];
+              break;
+          }
+        }
+      }
+      return resolvedVehicle;
+    };
     return [PEAddViewEditController
              viewEntityCtrlrWithEntity:vehicle
                     listViewController:listViewController
@@ -589,7 +692,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                       viewDidAppearBlk:nil
                        entityValidator:[self newVehicleValidator]
-                                syncer:syncer];
+                                syncer:syncer
+                 numRemoteDepsNotLocal:nil
+                                 merge:mergeBlk
+                     fetchDependencies:nil
+                 conflictResolveFields:conflictResolveFieldsBlk
+                conflictResolvedEntity:conflictResolvedEntityBlk];
   };
 }
 
@@ -1096,7 +1204,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                       viewDidAppearBlk:nil
                        entityValidator:[self newFuelStationValidator]
-                                syncer:syncer];
+                                syncer:syncer
+                 numRemoteDepsNotLocal:nil
+                                 merge:nil
+                     fetchDependencies:nil
+                 conflictResolveFields:nil
+                conflictResolvedEntity:nil];
   };
 }
 
@@ -1463,7 +1576,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         prepareUIForUserInteractionBlk:nil
                       viewDidAppearBlk:nil
                        entityValidator:[self newFuelPurchaseLogValidator]
-                                syncer:syncer];
+                                syncer:syncer
+                 numRemoteDepsNotLocal:nil
+                                 merge:nil
+                     fetchDependencies:nil
+                 conflictResolveFields:nil
+                conflictResolvedEntity:nil];
   };
 }
 
@@ -1935,7 +2053,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                prepareUIForUserInteractionBlk:nil
                                              viewDidAppearBlk:nil
                                               entityValidator:[self newEnvironmentLogValidator]
-                                                       syncer:syncer];
+                                                       syncer:syncer
+                                        numRemoteDepsNotLocal:nil
+                                                        merge:nil
+                                            fetchDependencies:nil
+                                        conflictResolveFields:nil
+                                       conflictResolvedEntity:nil];
   };
 }
 

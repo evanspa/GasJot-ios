@@ -147,6 +147,7 @@
 Just letting you know you're currently\n\
 logged in, and that this device is\n\
 connected to your remote account."]
+                       topInset:70.0
                     buttonTitle:@"Okay."
                    buttonAction:nil
                  relativeToView:self.tabBarController.view];
@@ -166,6 +167,7 @@ Settings \u2794 Re-authenticate.";
   [PEUIUtils showAlertWithTitle:@"Heads up!  You are currently\nunable to sync."
                      titleImage:[UIImage unsyncable]
                alertDescription:attrMessage
+                       topInset:70.0
                     buttonTitle:@"Okay."
                    buttonAction:nil
                  relativeToView:self.tabBarController.view];

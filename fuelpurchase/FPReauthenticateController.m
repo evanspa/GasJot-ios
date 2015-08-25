@@ -145,6 +145,7 @@
         [PEUIUtils showSuccessAlertWithMsgs:nil
                                       title:@"Success."
                            alertDescription:[[NSAttributedString alloc] initWithString:msg]
+                                   topInset:70.0
                                 buttonTitle:@"Okay."
                                buttonAction:^{
                                  [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
@@ -232,6 +233,7 @@
                                                         [PEUIUtils showSuccessAlertWithMsgs:nil
                                                                                       title:@"Authentication Success."
                                                                            alertDescription:[[NSAttributedString alloc] initWithString:@"You have become authenticated again and\nyour records have been synced."]
+                                                                                   topInset:70.0
                                                                                 buttonTitle:@"Okay."
                                                                                buttonAction:^{ [[self navigationController] popViewControllerAnimated:YES]; }
                                                                              relativeToView:self.tabBarController.view];
@@ -314,6 +316,7 @@ button.";
     [PEUIUtils showWarningAlertWithMsgs:errMsgs
                                   title:@"Oops"
                        alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
+                               topInset:70.0
                             buttonTitle:@"Okay."
                            buttonAction:nil
                          relativeToView:self.tabBarController.view];

@@ -192,6 +192,7 @@ Fill out the form below and tap 'Done'."
         [PEUIUtils showSuccessAlertWithMsgs:nil
                                       title:@"Success."
                            alertDescription:[[NSAttributedString alloc] initWithString:@"Account creation success."]
+                                   topInset:70.0
                                 buttonTitle:@"Okay."
                                buttonAction:^{
                                  [[NSNotificationCenter defaultCenter] postNotificationName:FPAppAccountCreationNotification
@@ -289,6 +290,7 @@ remote account."]
 The following icon will appear in the app\n\
 indicating that your are currently logged\n\
 into your remote account:"]
+                                                                                         topInset:70.0
                                                                                       buttonTitle:@"Okay."
                                                                                      buttonAction:^{
                                                                                        [[NSNotificationCenter defaultCenter] postNotificationName:FPAppAccountCreationNotification
@@ -404,6 +406,7 @@ would you like them to be deleted?";
     [PEUIUtils showWarningAlertWithMsgs:errMsgs
                                   title:@"Oops"
                        alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
+                               topInset:70.0
                             buttonTitle:@"Okay."
                            buttonAction:nil
                          relativeToView:self.tabBarController.view];

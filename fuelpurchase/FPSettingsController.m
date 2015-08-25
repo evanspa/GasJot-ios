@@ -384,6 +384,7 @@ simply be saved locally.";
       [PEUIUtils showSuccessAlertWithMsgs:nil
                                     title:@"Logout successful."
                          alertDescription:[[NSAttributedString alloc] initWithString:msg]
+                                 topInset:70.0
                               buttonTitle:@"Okay."
                              buttonAction:^{
                                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
@@ -410,10 +411,11 @@ simply be saved locally.";
 You have unsynced edits.  If you log out,\n\
 they will be permanently deleted.\n\n\
 Are you sure you want to do continue?"]
-                                okaybuttonTitle:@"Yes.  Log me out."
-                               okaybuttonAction:^{ doLogout(); }
-                              cancelbuttonTitle:@"Cancel."
-                             cancelbuttonAction:^{ }
+                                       topInset:70.0
+                                okayButtonTitle:@"Yes.  Log me out."
+                               okayButtonAction:^{ doLogout(); }
+                              cancelButtonTitle:@"Cancel."
+                             cancelButtonAction:^{ }
                                  relativeToView:self.tabBarController.view];
   } else {
     doLogout();

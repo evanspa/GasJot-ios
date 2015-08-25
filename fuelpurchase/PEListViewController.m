@@ -470,10 +470,11 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
 Deleting this record will result in the\n\
 following child-records being deleted.\n\n\
 Are you sure you want to continue?"]
-                                       okaybuttonTitle:@"Yes, delete."
-                                      okaybuttonAction:^{deleter();}
-                                     cancelbuttonTitle:@"No, cancel."
-                                    cancelbuttonAction:^{
+                                              topInset:70.0
+                                       okayButtonTitle:@"Yes, delete."
+                                      okayButtonAction:^{deleter();}
+                                     cancelButtonTitle:@"No, cancel."
+                                    cancelButtonAction:^{
                                       postDeleteAttemptActivities();
                                       [_tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
                                     }
@@ -657,6 +658,7 @@ as follows:";
                              alertDescription:[[NSAttributedString alloc] initWithString:@"\
 You cannot delete anything because\n\
 you're currently not authenticated."]
+                                     topInset:70.0
                                   buttonTitle:@"Okay."
                                  buttonAction:^{
                                    [_tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];

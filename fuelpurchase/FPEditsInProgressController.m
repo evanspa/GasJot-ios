@@ -366,6 +366,7 @@ You currently have no unsynced items."
                                                                               title:@"Sync Complete."
                                                                    alertDescription:[[NSAttributedString alloc] initWithString:@"\
 Your records have been synced."]
+                                                                           topInset:70.0
                                                                         buttonTitle:@"Okay."
                                                                        buttonAction:^{ [self viewWillAppear:YES]; }
                                                                      relativeToView:self.tabBarController.view];

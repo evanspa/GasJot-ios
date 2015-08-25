@@ -178,6 +178,7 @@
                                  title:@"Server Busy."
                       alertDescription:[[NSAttributedString alloc] initWithString:@"We apologize, but the server is currently\n\
 busy.  Please retry your request shortly."]
+                              topInset:70.0
                            buttonTitle:@"Okay."
                           buttonAction:nil
                         relativeToView:relativeToView];
@@ -212,6 +213,7 @@ busy.  Please retry your request shortly."]
           [PEUIUtils showErrorAlertWithMsgs:errMsgs
                                       title:@"Authentication failure."
                            alertDescription:[[NSAttributedString alloc] initWithString:message]
+                                   topInset:70.0
                                 buttonTitle:@"Okay."
                                buttonAction:nil
                              relativeToView:relativeToView];
@@ -245,6 +247,7 @@ busy.  Please retry your request shortly."]
                                       title:@"Oops."
                            alertDescription:[[NSAttributedString alloc] initWithString:@"An error has occurred.  The details are as\n\
 follows:"]
+                                   topInset:70.0
                                 buttonTitle:@"Okay."
                                buttonAction:nil
                              relativeToView:relativeToView];
@@ -278,6 +281,7 @@ follows:"]
                                       title:@"Oops."
                            alertDescription:[[NSAttributedString alloc] initWithString:@"An error has occurred.  The details are as\n\
 follows:"]
+                                   topInset:70.0
                                 buttonTitle:@"Okay."
                                buttonAction:nil
                              relativeToView:relativeToView];
@@ -297,6 +301,7 @@ follows:"]
                                   title:@"This is awkward."
                        alertDescription:[[NSAttributedString alloc] initWithString:@"An error has occurred attempting to talk\n\
 to the local database.  The details are:"]
+                               topInset:70.0
                             buttonTitle:@"Okay."
                            buttonAction:nil
                          relativeToView:relativeToView];

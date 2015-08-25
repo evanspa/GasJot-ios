@@ -35,6 +35,17 @@ typedef void (^PESyncImmediateDependencyUnsynced)(float, NSString *, NSString *,
 typedef void (^PEEntitySyncCancelerBlk)(PELMMainSupport *, NSError *, NSNumber *);
 typedef BOOL (^PEIsAuthenticatedBlk)(void);
 typedef BOOL (^PEIsLoggedInBlk)(void);
+typedef NSInteger (^PENumRemoteDepsNotLocal)(id);
+typedef NSDictionary * (^PEMergeBlk)(PEAddViewEditController *, id, id);
+typedef NSArray * (^PEConflictResolveFields)(PEAddViewEditController *, NSDictionary *, id, id);
+typedef id (^PEConflictResolvedEntity)(PEAddViewEditController *, NSDictionary *, NSArray *, id, id);
+typedef void (^PEFetcherBlk)(PEAddViewEditController *,
+                             id,
+                             PESyncNotFoundBlk,
+                             PESyncImmediateSuccessBlk,
+                             PESyncImmediateRetryAfterBlk,
+                             PESyncImmediateServerTempErrorBlk,
+                             PESyncImmediateAuthRequiredBlk);
 typedef void (^PEMarkAsDoneEditingBlk)(PEAddViewEditController *,
                                        id,
                                        PESyncNotFoundBlk,
@@ -104,6 +115,11 @@ prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUse
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
      entityValidator:(PEEntityValidatorBlk)entityValidator
               syncer:(PESyncerBlk)syncer
+numRemoteDepsNotLocal:(PENumRemoteDepsNotLocal)numRemoteDepsNotLocal
+               merge:(PEMergeBlk)merge
+   fetchDependencies:(PEFetcherBlk)fetchDependencies
+conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
+conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
 getterForNotification:(SEL)getterForNotification;
 
 #pragma mark - Factory functions
@@ -168,7 +184,12 @@ getterForNotification:(SEL)getterForNotification;
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator
-                                                syncer:(PESyncerBlk)syncer;
+                                                syncer:(PESyncerBlk)syncer
+                                 numRemoteDepsNotLocal:(PENumRemoteDepsNotLocal)numRemoteDepsNotLocal
+                                                 merge:(PEMergeBlk)merge
+                                     fetchDependencies:(PEFetcherBlk)fetchDependencies
+                                 conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
+                                conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity;
 
 #pragma mark - Properties
 

@@ -173,6 +173,7 @@ remote account."]
 The following icon will appear in the app\n\
 indicating that your are currently logged\n\
 into your remote account:"]
+                                         topInset:70.0
                                       buttonTitle:@"Okay."
                                      buttonAction:^{
                                          [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
@@ -270,6 +271,7 @@ remote account."]
 The following icon will appear in the app\n\
 indicating that your are currently logged\n\
 into your remote account:"]
+                                                                                         topInset:70.0
                                                                                       buttonTitle:@"Okay."
                                                                                      buttonAction:^{
                                                                                        [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
@@ -388,6 +390,7 @@ would you like them to be deleted?";
     [PEUIUtils showWarningAlertWithMsgs:errMsgs
                                   title:@"Oops"
                        alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
+                               topInset:70.0
                             buttonTitle:@"Okay."
                            buttonAction:nil
                          relativeToView:self.tabBarController.view];
