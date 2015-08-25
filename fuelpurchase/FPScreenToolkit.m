@@ -1180,6 +1180,74 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       UITextField *nameTf = (UITextField *)[entityPanel viewWithTag:FPFuelStationTagName];
       [nameTf becomeFirstResponder];
     };
+    PEMergeBlk mergeBlk = ^ NSDictionary * (PEAddViewEditController *ctrl, FPFuelStation *localFuelstation, FPFuelStation *remoteFuelstation) {
+      FPFuelStation *masterFuelstation = [[_coordDao localDao] masterFuelstationWithId:[localFuelstation localMasterIdentifier]
+                                                                                 error:[FPUtils localFetchErrorHandlerMaker]()];
+      return [FPFuelStation mergeRemoteFuelstation:remoteFuelstation withLocalFuelstation:localFuelstation localMasterFuelstation:masterFuelstation];
+    };
+    PEConflictResolveFields conflictResolveFieldsBlk = ^(PEAddViewEditController *ctrl,
+                                                         NSDictionary *mergeConflicts,
+                                                         FPFuelStation *localFuelstation,
+                                                         FPFuelStation *remoteFuelstation) {
+      NSMutableArray *fields = [NSMutableArray arrayWithCapacity:mergeConflicts.count];
+      [mergeConflicts enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        NSString *fieldName = key;
+        if ([fieldName isEqualToString:FPFuelstationNameField]) {
+          [fields addObject:@[@"Fuel station name:", @(FPFuelStationTagName), [localFuelstation name], [remoteFuelstation name]]];
+        } else if ([fieldName isEqualToString:FPFuelstationStreetField]) {
+          [fields addObject:@[@"Street:", @(FPFuelStationTagStreet), [localFuelstation street], [remoteFuelstation street]]];
+        } else if ([fieldName isEqualToString:FPFuelstationCityField]) {
+          [fields addObject:@[@"City:", @(FPFuelStationTagCity), [localFuelstation city], [remoteFuelstation city]]];
+        } else if ([fieldName isEqualToString:FPFuelstationStateField]) {
+          [fields addObject:@[@"State:", @(FPFuelStationTagState), [localFuelstation state], [remoteFuelstation state]]];
+        } else if ([fieldName isEqualToString:FPFuelstationZipField]) {
+          [fields addObject:@[@"Zip:", @(FPFuelStationTagZip), [localFuelstation zip], [remoteFuelstation zip]]];
+        } else if ([fieldName isEqualToString:FPFuelstationLatitudeField]) {
+          [fields addObject:@[@"Latitude:", @(FPFuelStationTagLocationCoordinates), [[localFuelstation latitude] description], [[remoteFuelstation latitude] description]]];
+        } else if ([fieldName isEqualToString:FPFuelstationLongitudeField]) {
+          [fields addObject:@[@"Longitude:", @(FPFuelStationTagLocationCoordinates+1), [[localFuelstation longitude] description], [[remoteFuelstation longitude] description]]];
+        }
+      }];
+      return fields;
+    };
+    PEConflictResolvedEntity conflictResolvedEntityBlk = ^ id (PEAddViewEditController *ctrl,
+                                                               NSDictionary *mergeConflicts,
+                                                               NSArray *valueLabels,
+                                                               FPFuelStation *localFuelstation,
+                                                               FPFuelStation *remoteFuelstation) {
+      FPFuelStation *resolvedFuelstation = [localFuelstation copy];
+      NSInteger numValueLabels = [valueLabels count];
+      for (int i = 0; i < numValueLabels; i++) {
+        NSArray *valueLabelPair = valueLabels[i];
+        UILabel *remoteValue = valueLabelPair[1];
+        if (remoteValue.tag > 0) {
+          switch (remoteValue.tag) {
+            case FPFuelStationTagName:
+              [resolvedFuelstation setName:[remoteFuelstation name]];
+              break;
+            case FPFuelStationTagStreet:
+              [resolvedFuelstation setStreet:[remoteFuelstation street]];
+              break;
+            case FPFuelStationTagCity:
+              [resolvedFuelstation setCity:[remoteFuelstation city]];
+              break;
+            case FPFuelStationTagState:
+              [resolvedFuelstation setState:[remoteFuelstation state]];
+              break;
+            case FPFuelStationTagZip:
+              [resolvedFuelstation setZip:[remoteFuelstation zip]];
+              break;
+            case FPFuelStationTagLocationCoordinates: // latitude
+              [resolvedFuelstation setLatitude:[remoteFuelstation latitude]];
+              break;
+            case (FPFuelStationTagLocationCoordinates + 1): // longitude
+              [resolvedFuelstation setLongitude:[remoteFuelstation longitude]];
+              break;
+          }
+        }
+      }
+      return resolvedFuelstation;
+    };
     return [PEAddViewEditController
              viewEntityCtrlrWithEntity:fuelStation
                     listViewController:listViewController
@@ -1206,10 +1274,10 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                        entityValidator:[self newFuelStationValidator]
                                 syncer:syncer
                  numRemoteDepsNotLocal:nil
-                                 merge:nil
+                                 merge:mergeBlk
                      fetchDependencies:nil
-                 conflictResolveFields:nil
-                conflictResolvedEntity:nil];
+                 conflictResolveFields:conflictResolveFieldsBlk
+                conflictResolvedEntity:conflictResolvedEntityBlk];
   };
 }
 

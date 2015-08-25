@@ -360,8 +360,8 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
   UITableView *coordinatesTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)
                                                                    style:UITableViewStyleGrouped];
   FPFuelStationCoordinatesTableDataSource *ds =
-    [[FPFuelStationCoordinatesTableDataSource alloc] initWithFuelStationLatitude:[fuelstation latitude]
-                                                                       longitude:[fuelstation longitude]];
+    [[FPFuelStationCoordinatesTableDataSource alloc] initWithFuelStationLatitude:[PEUtils nilIfNSNull:[fuelstation latitude]]
+                                                                       longitude:[PEUtils nilIfNSNull:[fuelstation longitude]]];
   [_tableViewDataSources addObject:ds];
   [coordinatesTableView setDataSource:ds];
   [coordinatesTableView setScrollEnabled:NO];
