@@ -961,6 +961,132 @@ retained."];
                   [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
                   [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
                 };
+                void (^fetchDepsThenTakeAction)(void(^)(void)) = ^(void(^postFetchAction)(void)) {
+                  if (_numRemoteDepsNotLocal) {
+                    NSInteger numDepsThatDontExistLocally = _numRemoteDepsNotLocal(latestEntity);
+                    if (numDepsThatDontExistLocally == 0) {
+                      postFetchAction();
+                    } else {
+                      // Ugh.  This sucks. Okay, let's do this!
+                      __block float percentCompleteFetchingDeps = 0.0;
+                      NSMutableArray *successMsgsForDepsFetch = [NSMutableArray array];
+                      NSMutableArray *errsForDepsFetch = [NSMutableArray array];
+                      MBProgressHUD *depFetchHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+                      [depFetchHud setLabelText:[NSString stringWithFormat:@"Downloading dependencies."]];
+                      void (^handleHudProgress)(float) = ^(float percentComplete) {
+                        percentCompleteFetchingDeps += percentComplete;
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                          depFetchHud.progress = percentCompleteFetchingDeps;
+                        });
+                      };
+                      void(^depFetchDone)(NSString *) = ^(NSString *mainMsgTitle) {
+                        if ([errsForDepsFetch count] == 0) { // success
+                          dispatch_async(dispatch_get_main_queue(), ^{
+                            [depFetchHud setLabelText:@"Dependencies successfully fetched."];
+                            [depFetchHud hide:YES afterDelay:1.30];
+                            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.35 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                              postFetchAction();
+                            });
+                          });
+                        } else { // error(s)
+                          dispatch_async(dispatch_get_main_queue(), ^{
+                            [depFetchHud hide:YES afterDelay:0];
+                            void (^dismissErrAlertAction)(void) = ^{
+                              _entityEditPreparer(self, _entity);
+                              [self setEditing:YES animated:YES];
+                              reenableNavButtons();
+                            };
+                            if ([errsForDepsFetch count] > 1) {
+                              NSString *fetchErrMsg = @"\
+There were problems downloading this\n\
+entity's dependencies.";
+                              [PEUIUtils showMultiErrorAlertWithFailures:errsForDepsFetch
+                                                                   title:@"Fetch errors."
+                                                        alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
+                                                                topInset:70.0
+                                                             buttonTitle:@"Okay."
+                                                            buttonAction:^{
+                                                              dismissErrAlertAction();
+                                                            }
+                                                          relativeToView:self.view];
+                            } else {
+                              NSString *fetchErrMsg = @"\
+There was a problem downloading this\n\
+entity's dependency.";
+                              [PEUIUtils showErrorAlertWithMsgs:errsForDepsFetch[0][2]
+                                                          title:@"Fetch error."
+                                               alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
+                                                       topInset:70.0
+                                                    buttonTitle:@"Okay."
+                                                   buttonAction:^{
+                                                     dismissErrAlertAction();
+                                                   }
+                                                 relativeToView:self.view];
+                            }
+                          });
+                        }
+                      };
+                      void(^depNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                               NSString *mainMsgTitle,
+                                                                               NSString *recordTitle) {
+                        handleHudProgress(percentComplete);
+                        [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
+                                                      [NSNumber numberWithBool:NO],
+                                                      @[[NSString stringWithFormat:@"Not found."]],
+                                                      [NSNumber numberWithBool:NO]]];
+                        if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
+                      };
+                      void(^depSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                              NSString *mainMsgTitle,
+                                                                              NSString *recordTitle) {
+                        handleHudProgress(percentComplete);
+                        [successMsgsForDepsFetch addObject:[NSString stringWithFormat:@"%@ fetched.", recordTitle]];
+                        if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
+                      };
+                      void(^depRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete,
+                                                                                           NSString *mainMsgTitle,
+                                                                                           NSString *recordTitle,
+                                                                                           NSDate *retryAfter) {
+                        handleHudProgress(percentComplete);
+                        [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
+                                                      [NSNumber numberWithBool:NO],
+                                                      @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                                      [NSNumber numberWithBool:NO]]];
+                        if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
+                      };
+                      void (^depServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                                    NSString *mainMsgTitle,
+                                                                                    NSString *recordTitle) {
+                        handleHudProgress(percentComplete);
+                        [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
+                                                      [NSNumber numberWithBool:NO],
+                                                      @[@"Temporary server error."],
+                                                      [NSNumber numberWithBool:NO]]];
+                        if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
+                      };
+                      void(^depAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                               NSString *mainMsgTitle,
+                                                                               NSString *recordTitle) {
+                        _receivedAuthReqdErrorOnSyncAttempt = YES;
+                        handleHudProgress(percentComplete);
+                        [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
+                                                      [NSNumber numberWithBool:NO],
+                                                      @[@"Authentication required."],
+                                                      [NSNumber numberWithBool:NO]]];
+                        if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
+                      };
+                      _fetchDependencies(self,
+                                         latestEntity,
+                                         depNotFoundBlk,
+                                         depSuccessBlk,
+                                         depRetryAfterBlk,
+                                         depServerTempError,
+                                         depAuthReqdBlk);
+                    }
+                  } else {
+                    postFetchAction();
+                  }
+                };
                 [PEUIUtils showEditConflictAlertWithTitle:@"Conflict."
                                          alertDescription:desc
                                                  topInset:70.0
@@ -1013,130 +1139,21 @@ merge conflicts.";
                                               _entityToPanelBinder(_entity, _entityFormPanel);
                                             }
                                           };
-                                          if (_numRemoteDepsNotLocal) {
-                                            NSInteger numDepsThatDontExistLocally = _numRemoteDepsNotLocal(latestEntity);
-                                            if (numDepsThatDontExistLocally == 0) {
-                                              doMerge();
-                                            } else {
-                                              // ugh.  this sucks. let's do this!
-                                              __block float percentCompleteFetchingDeps = 0.0;
-                                              NSMutableArray *successMsgsForDepsFetch = [NSMutableArray array];
-                                              NSMutableArray *errsForDepsFetch = [NSMutableArray array];
-                                              MBProgressHUD *depFetchHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-                                              [depFetchHud setLabelText:[NSString stringWithFormat:@"Downloading dependencies."]];
-                                              void (^handleHudProgress)(float) = ^(float percentComplete) {
-                                                percentCompleteFetchingDeps += percentComplete;
-                                                dispatch_async(dispatch_get_main_queue(), ^{
-                                                  depFetchHud.progress = percentCompleteFetchingDeps;
-                                                });
-                                              };
-                                              void(^depFetchDone)(NSString *) = ^(NSString *mainMsgTitle) {
-                                                if ([errsForDepsFetch count] == 0) { // success
-                                                  dispatch_async(dispatch_get_main_queue(), ^{
-                                                    [depFetchHud setLabelText:@"Dependencies successfully fetched."];
-                                                    [depFetchHud hide:YES afterDelay:1.30];
-                                                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.35 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-                                                      doMerge();
-                                                    });
-                                                  });
-                                                } else { // error(s)
-                                                  dispatch_async(dispatch_get_main_queue(), ^{
-                                                    [depFetchHud hide:YES afterDelay:0];
-                                                    if ([errsForDepsFetch count] > 1) {
-                                                      NSString *fetchErrMsg = @"\
-There were problems downloading this\n\
-entity's dependencies.";
-                                                      [PEUIUtils showMultiErrorAlertWithFailures:errsForDepsFetch
-                                                                                           title:@"Fetch errors."
-                                                                                alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
-                                                                                        topInset:70.0
-                                                                                     buttonTitle:@"Okay."
-                                                                                    buttonAction:^{ reenableNavButtons(); }
-                                                                                  relativeToView:self.view];
-                                                    } else {
-                                                      NSString *fetchErrMsg = @"\
-There was a problem downloading this\n\
-entity's dependency.";
-                                                      [PEUIUtils showErrorAlertWithMsgs:errsForDepsFetch
-                                                                                  title:@"Fetch error."
-                                                                       alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
-                                                                               topInset:70.0
-                                                                            buttonTitle:@"Okay."
-                                                                           buttonAction:^{ reenableNavButtons(); }
-                                                                         relativeToView:self.view];
-                                                    }
-                                                  });
-                                                }
-                                              };
-                                              void(^depNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                                                       NSString *mainMsgTitle,
-                                                                                                       NSString *recordTitle) {
-                                                handleHudProgress(percentComplete);
-                                                [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
-                                                                              [NSNumber numberWithBool:NO],
-                                                                              @[[NSString stringWithFormat:@"Not found."]],
-                                                                              [NSNumber numberWithBool:NO]]];
-                                                if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
-                                              };
-                                              void(^depSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                                                       NSString *mainMsgTitle,
-                                                                                                       NSString *recordTitle) {
-                                                handleHudProgress(percentComplete);
-                                                [successMsgsForDepsFetch addObject:[NSString stringWithFormat:@"%@ fetched.", recordTitle]];
-                                                if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
-                                              };
-                                              void(^depRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete,
-                                                                                                                   NSString *mainMsgTitle,
-                                                                                                                   NSString *recordTitle,
-                                                                                                                   NSDate *retryAfter) {
-                                                handleHudProgress(percentComplete);
-                                                [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
-                                                                              [NSNumber numberWithBool:NO],
-                                                                              @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
-                                                                              [NSNumber numberWithBool:NO]]];
-                                                if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
-                                              };
-                                              void (^depServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                                                            NSString *mainMsgTitle,
-                                                                                                            NSString *recordTitle) {
-                                                handleHudProgress(percentComplete);
-                                                [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
-                                                                              [NSNumber numberWithBool:NO],
-                                                                              @[@"Temporary server error."],
-                                                                              [NSNumber numberWithBool:NO]]];
-                                                if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
-                                              };
-                                              void(^depAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                                                       NSString *mainMsgTitle,
-                                                                                                       NSString *recordTitle) {
-                                                _receivedAuthReqdErrorOnSyncAttempt = YES;
-                                                handleHudProgress(percentComplete);
-                                                [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
-                                                                              [NSNumber numberWithBool:NO],
-                                                                              @[@"Authentication required."],
-                                                                             [NSNumber numberWithBool:NO]]];
-                                               if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
-                                              };
-                                              _fetchDependencies(self,
-                                                                 _entity,
-                                                                 depNotFoundBlk,
-                                                                 depSuccessBlk,
-                                                                 depRetryAfterBlk,
-                                                                 depServerTempError,
-                                                                 depAuthReqdBlk);
-                                            }
-                                          } else {
-                                            doMerge();
-                                          }
+                                          fetchDepsThenTakeAction(doMerge);
                                        }
                                        replaceButtonTitle:@"Replace local with remote, then review."
                                       replaceButtonAction:^{
-                                        _entityEditPreparer(self, _entity);
-                                        [self setEditing:YES animated:YES];
-                                        reenableNavButtons();
-                                        [_entity setUpdatedAt:[latestEntity updatedAt]];
-                                        [_entity overwriteDomainProperties:latestEntity];
-                                        _entityToPanelBinder(_entity, _entityFormPanel);
+                                        fetchDepsThenTakeAction(^{
+                                          _entityEditPreparer(self, _entity);
+                                          [self setEditing:YES animated:YES];
+                                          reenableNavButtons();
+                                          [_entity setUpdatedAt:[latestEntity updatedAt]];
+                                          [_entity overwriteDomainProperties:latestEntity];
+                                          _entityToPanelBinder(_entity, _entityFormPanel);
+                                          // TODO - need to invoke block that takes 'self' for additional
+                                          // updating of the UI (e.g., the updating of the table DS for envlog
+                                          // and fplog screens) - like: _updateDepsPanel(self, latestEntity)
+                                        });
                                       }
                                 forceSaveLocalButtonTitle:@"I don't care.  Force save my local copy."
                                     forceSaveButtonAction:^{

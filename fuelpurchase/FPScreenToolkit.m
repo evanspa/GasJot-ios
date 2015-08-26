@@ -316,8 +316,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       // the reason we present the add screen as a nav-ctrl is so we that can experience
       // the animation effect of the view appearing from the bottom-up (and it being modal)
       UIViewController *addVehicleScreen =
-        [self newAddVehicleScreenMakerWithDelegate:itemAddedBlk
-                                listViewController:listViewCtrl](user);
+        [self newAddVehicleScreenMakerWithDelegate:itemAddedBlk listViewController:listViewCtrl](user);
       [listViewCtrl presentViewController:[PEUIUtils navigationControllerWithController:addVehicleScreen
                                                                     navigationBarHidden:NO]
                                  animated:YES
@@ -333,8 +332,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                        listViewController:listViewCtrl](user);
     };
     PEPageLoaderBlk pageLoader = ^ NSArray * (FPVehicle *lastVehicle) {
-      return [_coordDao vehiclesForUser:user
-                                  error:[FPUtils localFetchErrorHandlerMaker]()];
+      return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPVehicle *v1, FPVehicle *v2){return [v1 isEqualToVehicle:v2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
@@ -2095,6 +2093,106 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                          skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                                 error:[FPUtils localSaveErrorHandlerMaker]()];
     };
+    PENumRemoteDepsNotLocal numRemoteDepsNotLocalBlk = ^ NSInteger (FPEnvironmentLog *remoteEnvlog) {
+      FPVehicle *vehicle = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      if (vehicle) {
+        return 0;
+      }
+      return 1;
+    };
+    PEFetcherBlk depFetcherBlk = ^(PEAddViewEditController *ctrl,
+                                   FPEnvironmentLog *remoteEnvlog,
+                                   PESyncNotFoundBlk notFoundBlk,
+                                   PESyncImmediateSuccessBlk successBlk,
+                                   PESyncImmediateRetryAfterBlk retryAfterBlk,
+                                   PESyncImmediateServerTempErrorBlk tempErrBlk,
+                                   PESyncImmediateAuthRequiredBlk authReqdBlk) {
+      NSString *mainMsgFragment = @"fetching vehicle";
+      NSString *recordTitle = @"Vehicle";
+      NSLog(@"Proceeding to fetch [%@]", [remoteEnvlog vehicleGlobalIdentifier]);
+      [_coordDao fetchAndSaveNewVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier]
+                                            forUser:user
+                                notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                     addlSuccessBlk:^(FPVehicle *fetchedVehicle) {successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                             addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                             addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                              error:[FPUtils localSaveErrorHandlerMaker]()];
+    };
+    PEMergeBlk mergeBlk = ^ NSDictionary * (PEAddViewEditController *ctrl, FPEnvironmentLog *localEnvlog, FPEnvironmentLog *remoteEnvlog) {
+      FPEnvironmentLog *masterEnvlog = [[_coordDao localDao] masterEnvlogWithId:[localEnvlog localMasterIdentifier]
+                                                                          error:[FPUtils localFetchErrorHandlerMaker]()];
+      UITableView *vehicleAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPEnvLogTagVehicleAndDate];
+      FPEnvLogVehicleAndDateDataSourceDelegate *ds = (FPEnvLogVehicleAndDateDataSourceDelegate *)[vehicleAndDateTableView dataSource];
+      // the vehicles to compare
+      FPVehicle *vehicleForLocalEnvlog = [ds selectedVehicle];
+      FPVehicle *vehicleForMasterEnvlog = [[_coordDao localDao] masterVehicleForMasterEnvLog:masterEnvlog error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPVehicle *vehicleForRemoteEnvlog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      NSString *origLocalEnvlogVehicleGlobalId = [vehicleForLocalEnvlog globalIdentifier];
+      // well, really we're only going to compare global IDs using our existing 'mergeRemoteEnvlog' function
+      [localEnvlog setVehicleGlobalIdentifier:[vehicleForLocalEnvlog globalIdentifier]];
+      [masterEnvlog setVehicleGlobalIdentifier:[vehicleForMasterEnvlog globalIdentifier]];
+      [remoteEnvlog setVehicleGlobalIdentifier:[vehicleForRemoteEnvlog globalIdentifier]];
+      NSDictionary *mergeConflicts = [FPEnvironmentLog mergeRemoteEnvlog:remoteEnvlog withLocalEnvlog:localEnvlog localMasterEnvlog:masterEnvlog];
+      if (![origLocalEnvlogVehicleGlobalId isEqualToString:[localEnvlog vehicleGlobalIdentifier]]) {
+        // since the vehicle global ID changed on the local env log, then the remote's version
+        // MUST have been substituded-in.
+        [ds setSelectedVehicle:vehicleForRemoteEnvlog];
+        [vehicleAndDateTableView reloadData];
+      }
+      return mergeConflicts;
+    };
+    PEConflictResolveFields conflictResolveFieldsBlk =
+      ^(PEAddViewEditController *ctrl, NSDictionary *mergeConflicts, FPEnvironmentLog *localEnvlog, FPEnvironmentLog *remoteEnvlog) {
+      NSMutableArray *fields = [NSMutableArray arrayWithCapacity:mergeConflicts.count];
+      [mergeConflicts enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        NSString *fieldName = key;
+        if ([fieldName isEqualToString:FPEnvlogOdometerField]) {
+          [fields addObject:@[@"Odometer:", @(FPEnvLogTagOdometer), [[localEnvlog odometer] description], [[remoteEnvlog odometer] description]]];
+        } else if ([fieldName isEqualToString:FPEnvlogReportedDteField]) {
+          [fields addObject:@[@"DTE:", @(FPEnvLogTagReportedDte), [[localEnvlog reportedDte] description], [[remoteEnvlog reportedDte] description]]];
+        } else if ([fieldName isEqualToString:FPEnvlogReportedAvgMpgField]) {
+          [fields addObject:@[@"Reported avg mpg:", @(FPEnvLogTagReportedAvgMpg), [[localEnvlog reportedAvgMpg] description], [[remoteEnvlog reportedAvgMpg] description]]];
+        } else if ([fieldName isEqualToString:FPEnvlogReportedAvgMphField]) {
+          [fields addObject:@[@"Reported avg mph:", @(FPEnvLogTagReportedAvgMph), [[localEnvlog reportedAvgMph] description], [[remoteEnvlog reportedAvgMph] description]]];
+        } else if ([fieldName isEqualToString:FPEnvlogReportedOutsideTempField]) {
+          [fields addObject:@[@"Reported outside temperature:", @(FPEnvLogTagReportedOutsideTemp), [[localEnvlog reportedOutsideTemp] description], [[remoteEnvlog reportedOutsideTemp] description]]];
+        }
+      }];
+      return fields;
+    };
+    PEConflictResolvedEntity conflictResolvedEntityBlk =
+      ^ id (PEAddViewEditController *ctrl, NSDictionary *mergeConflicts, NSArray *valueLabels, FPEnvironmentLog *localEnvlog, FPEnvironmentLog *remoteEnvlog) {
+      FPEnvironmentLog *resolvedEnvlog = [localEnvlog copy];
+      NSInteger numValueLabels = [valueLabels count];
+      for (int i = 0; i < numValueLabels; i++) {
+        NSArray *valueLabelPair = valueLabels[i];
+        UILabel *remoteValue = valueLabelPair[1];
+        if (remoteValue.tag > 0) {
+          
+          // TODO - include vehicle selection in below logic
+          
+          switch (remoteValue.tag) {
+            case FPEnvLogTagOdometer:
+              [resolvedEnvlog setOdometer:[remoteEnvlog odometer]];
+              break;
+            case FPEnvLogTagReportedDte:
+              [resolvedEnvlog setReportedDte:[remoteEnvlog reportedDte]];
+              break;
+            case FPEnvLogTagReportedAvgMpg:
+              [resolvedEnvlog setReportedAvgMpg:[remoteEnvlog reportedAvgMpg]];
+              break;
+            case FPEnvLogTagReportedAvgMph:
+              [resolvedEnvlog setReportedAvgMph:[remoteEnvlog reportedAvgMph]];
+              break;
+            case FPEnvLogTagReportedOutsideTemp:
+              [resolvedEnvlog setReportedOutsideTemp:[remoteEnvlog reportedOutsideTemp]];
+              break;
+          }
+        }
+      }
+      return resolvedEnvlog;
+    };
     return [PEAddViewEditController viewEntityCtrlrWithEntity:envLog
                                            listViewController:listViewController
                                               entityIndexPath:envLogIndexPath
@@ -2122,11 +2220,11 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                              viewDidAppearBlk:nil
                                               entityValidator:[self newEnvironmentLogValidator]
                                                        syncer:syncer
-                                        numRemoteDepsNotLocal:nil
-                                                        merge:nil
-                                            fetchDependencies:nil
-                                        conflictResolveFields:nil
-                                       conflictResolvedEntity:nil];
+                                        numRemoteDepsNotLocal:numRemoteDepsNotLocalBlk
+                                                        merge:mergeBlk
+                                            fetchDependencies:depFetcherBlk
+                                        conflictResolveFields:conflictResolveFieldsBlk
+                                       conflictResolvedEntity:conflictResolvedEntityBlk];
   };
 }
 
