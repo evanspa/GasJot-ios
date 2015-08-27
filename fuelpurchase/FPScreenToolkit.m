@@ -2138,16 +2138,24 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         // since the vehicle global ID changed on the local env log, then the remote's version
         // MUST have been substituded-in.
         [ds setSelectedVehicle:vehicleForRemoteEnvlog];
-        [vehicleAndDateTableView reloadData];
       }
       return mergeConflicts;
     };
     PEConflictResolveFields conflictResolveFieldsBlk =
-      ^(PEAddViewEditController *ctrl, NSDictionary *mergeConflicts, FPEnvironmentLog *localEnvlog, FPEnvironmentLog *remoteEnvlog) {
+    ^(PEAddViewEditController *ctrl, NSDictionary *mergeConflicts, FPEnvironmentLog *localEnvlog, FPEnvironmentLog *remoteEnvlog) {
+      UITableView *vehicleAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPEnvLogTagVehicleAndDate];
+      FPEnvLogVehicleAndDateDataSourceDelegate *ds = (FPEnvLogVehicleAndDateDataSourceDelegate *)[vehicleAndDateTableView dataSource];
+      FPVehicle *vehicleForLocalEnvlog = [ds selectedVehicle];
+      FPVehicle *vehicleForRemoteEnvlog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier]
+                                                                                    error:[FPUtils localFetchErrorHandlerMaker]()];
       NSMutableArray *fields = [NSMutableArray arrayWithCapacity:mergeConflicts.count];
       [mergeConflicts enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         NSString *fieldName = key;
-        if ([fieldName isEqualToString:FPEnvlogOdometerField]) {
+        if ([fieldName isEqualToString:FPEnvlogVehicleGlobalIdField]) {
+          [fields addObject:@[@"Vehicle:", @(FPEnvLogTagVehicle), [vehicleForLocalEnvlog name], [vehicleForRemoteEnvlog name]]];
+        } else if ([fieldName isEqualToString:FPEnvlogLogDateField]) {
+          [fields addObject:@[@"Log date:", @(FPEnvLogTagLogDate), [PEUtils stringFromDate:[localEnvlog logDate] withPattern:@"MM/dd/YYYY"], [PEUtils stringFromDate:[remoteEnvlog logDate] withPattern:@"MM/dd/YYYY"]]];
+        } else if ([fieldName isEqualToString:FPEnvlogOdometerField]) {
           [fields addObject:@[@"Odometer:", @(FPEnvLogTagOdometer), [[localEnvlog odometer] description], [[remoteEnvlog odometer] description]]];
         } else if ([fieldName isEqualToString:FPEnvlogReportedDteField]) {
           [fields addObject:@[@"DTE:", @(FPEnvLogTagReportedDte), [[localEnvlog reportedDte] description], [[remoteEnvlog reportedDte] description]]];
@@ -2165,13 +2173,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       ^ id (PEAddViewEditController *ctrl, NSDictionary *mergeConflicts, NSArray *valueLabels, FPEnvironmentLog *localEnvlog, FPEnvironmentLog *remoteEnvlog) {
       FPEnvironmentLog *resolvedEnvlog = [localEnvlog copy];
       NSInteger numValueLabels = [valueLabels count];
+      UITableView *vehicleAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPEnvLogTagVehicleAndDate];
+      FPEnvLogVehicleAndDateDataSourceDelegate *ds = (FPEnvLogVehicleAndDateDataSourceDelegate *)[vehicleAndDateTableView dataSource];
       for (int i = 0; i < numValueLabels; i++) {
         NSArray *valueLabelPair = valueLabels[i];
         UILabel *remoteValue = valueLabelPair[1];
         if (remoteValue.tag > 0) {
-          
-          // TODO - include vehicle selection in below logic
-          
           switch (remoteValue.tag) {
             case FPEnvLogTagOdometer:
               [resolvedEnvlog setOdometer:[remoteEnvlog odometer]];
@@ -2188,6 +2195,19 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
             case FPEnvLogTagReportedOutsideTemp:
               [resolvedEnvlog setReportedOutsideTemp:[remoteEnvlog reportedOutsideTemp]];
               break;
+            case FPEnvLogTagLogDate:
+            {
+              [resolvedEnvlog setLogDate:[remoteEnvlog logDate]];
+              [ds setPickedLogDate:[resolvedEnvlog logDate]];
+              break;
+            }
+            case FPEnvLogTagVehicle:
+            {
+              FPVehicle *vehicleForRemoteEnvlog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier]
+                                                                                            error:[FPUtils localFetchErrorHandlerMaker]()];
+              [ds setSelectedVehicle:vehicleForRemoteEnvlog];
+              break;
+            }
           }
         }
       }

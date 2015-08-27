@@ -58,7 +58,9 @@ typedef NS_ENUM (NSInteger, FPEnvLogTag) {
   FPEnvLogTagReportedAvgMpg,
   FPEnvLogTagReportedAvgMph,
   FPEnvLogTagReportedOutsideTemp,
-  FPEnvLogTagReportedDte
+  FPEnvLogTagReportedDte,
+  FPEnvLogTagVehicle, // used for conflict-merging
+  FPEnvLogTagLogDate, // used for conflict-merging
 };
 
 FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFpLogEntry;
