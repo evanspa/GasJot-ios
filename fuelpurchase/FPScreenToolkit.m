@@ -241,6 +241,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                   numRemoteDepsNotLocal:nil
                                   merge:mergeBlk
                       fetchDependencies:nil
+                        updateDepsPanel:nil
                   conflictResolveFields:conflictResolveFieldsBlk
                  conflictResolvedEntity:conflictResolvedEntityBlk];
   };
@@ -694,6 +695,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                  numRemoteDepsNotLocal:nil
                                  merge:mergeBlk
                      fetchDependencies:nil
+                       updateDepsPanel:nil
                  conflictResolveFields:conflictResolveFieldsBlk
                 conflictResolvedEntity:conflictResolvedEntityBlk];
   };
@@ -1274,6 +1276,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                  numRemoteDepsNotLocal:nil
                                  merge:mergeBlk
                      fetchDependencies:nil
+                       updateDepsPanel:nil
                  conflictResolveFields:conflictResolveFieldsBlk
                 conflictResolvedEntity:conflictResolvedEntityBlk];
   };
@@ -1613,6 +1616,173 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                       skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated fuel station is not yet synced."); [APP refreshTabs];}
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
+    PENumRemoteDepsNotLocal numRemoteDepsNotLocalBlk = ^ NSInteger (FPFuelPurchaseLog *remoteFplog) {
+      FPVehicle *vehicle = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPFuelStation *fuelstation = [[_coordDao localDao] masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      NSInteger numNonLocalDeps = 0;
+      if (!vehicle) numNonLocalDeps++;
+      if (!fuelstation) numNonLocalDeps++;
+      return numNonLocalDeps;
+    };
+    PEFetcherBlk depFetcherBlk = ^(PEAddViewEditController *ctrl,
+                                   FPFuelPurchaseLog *remoteFplog,
+                                   PESyncNotFoundBlk notFoundBlk,
+                                   PESyncImmediateSuccessBlk successBlk,
+                                   PESyncImmediateRetryAfterBlk retryAfterBlk,
+                                   PESyncImmediateServerTempErrorBlk tempErrBlk,
+                                   PESyncImmediateAuthRequiredBlk authReqdBlk) {
+      FPVehicle *vehicle = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPFuelStation *fuelstation = [[_coordDao localDao] masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      float percentOfFetching = 1.0;
+      if (!vehicle && !fuelstation) {
+        percentOfFetching = 0.5;
+      }
+      if (!vehicle) {
+        NSString *mainMsgFragment = @"fetching vehicle";
+        NSString *recordTitle = @"Vehicle";
+        [_coordDao fetchAndSaveNewVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier]
+                                              forUser:user
+                                  notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                       addlSuccessBlk:^(FPVehicle *fetchedVehicle) {successBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                               addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(percentOfFetching, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                               addlTempRemoteErrorBlk:^{tempErrBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                  addlAuthRequiredBlk:^{authReqdBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                error:[FPUtils localSaveErrorHandlerMaker]()];
+      }
+      if (!fuelstation) {
+        NSString *mainMsgFragment = @"fetching fuelstation";
+        NSString *recordTitle = @"Fuelstation";
+        [_coordDao fetchAndSaveNewFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier]
+                                                  forUser:user
+                                      notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                           addlSuccessBlk:^(FPFuelStation *fetchedFuelstation) {successBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                   addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(percentOfFetching, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                   addlTempRemoteErrorBlk:^{tempErrBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                      addlAuthRequiredBlk:^{authReqdBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                    error:[FPUtils localSaveErrorHandlerMaker]()];
+      }
+    };
+    PEMergeBlk mergeBlk = ^ NSDictionary * (PEAddViewEditController *ctrl, FPFuelPurchaseLog *localFplog, FPFuelPurchaseLog *remoteFplog) {
+      FPFuelPurchaseLog *masterFplog = [[_coordDao localDao] masterFplogWithId:[localFplog localMasterIdentifier]
+                                                                         error:[FPUtils localFetchErrorHandlerMaker]()];
+      UITableView *vehFsAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
+      FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds = (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehFsAndDateTableView dataSource];
+      FPVehicle *vehicleForLocalFplog = [ds selectedVehicle];
+      FPVehicle *vehicleForMasterFplog = [[_coordDao localDao] masterVehicleForMasterFpLog:masterFplog error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPVehicle *vehicleForRemoteFplog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      NSString *origLocalFplogVehicleGlobalId = [vehicleForLocalFplog globalIdentifier];
+      [localFplog setVehicleGlobalIdentifier:[vehicleForLocalFplog globalIdentifier]];
+      [masterFplog setVehicleGlobalIdentifier:[vehicleForMasterFplog globalIdentifier]];
+      [remoteFplog setVehicleGlobalIdentifier:[vehicleForRemoteFplog globalIdentifier]];
+      FPFuelStation *fuelstationForLocalFplog = [ds selectedFuelStation];
+      FPFuelStation *fuelstationForMasterFplog = [[_coordDao localDao] masterFuelstationForMasterFpLog:masterFplog error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPFuelStation *fuelstationForRemoteFplog = [[_coordDao localDao] masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      NSString *origLocalFplogFuelstationGlobalId = [fuelstationForLocalFplog globalIdentifier];
+      [localFplog setFuelStationGlobalIdentifier:[fuelstationForLocalFplog globalIdentifier]];
+      [masterFplog setFuelStationGlobalIdentifier:[fuelstationForMasterFplog globalIdentifier]];
+      [remoteFplog setFuelStationGlobalIdentifier:[fuelstationForRemoteFplog globalIdentifier]];
+      NSDictionary *mergeConflicts = [FPFuelPurchaseLog mergeRemoteFplog:remoteFplog withLocalFplog:localFplog localMasterFplog:masterFplog];
+      if (![origLocalFplogVehicleGlobalId isEqualToString:[localFplog vehicleGlobalIdentifier]]) {
+        [ds setSelectedVehicle:vehicleForRemoteFplog];
+      }
+      if (![origLocalFplogFuelstationGlobalId isEqualToString:[localFplog fuelStationGlobalIdentifier]]) {
+        [ds setSelectedFuelStation:fuelstationForRemoteFplog];
+      }
+      return mergeConflicts;
+    };
+    PEConflictResolveFields conflictResolveFieldsBlk =
+    ^(PEAddViewEditController *ctrl, NSDictionary *mergeConflicts, FPFuelPurchaseLog *localFplog, FPFuelPurchaseLog *remoteFplog) {
+      UITableView *vehFsAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
+      FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds = (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehFsAndDateTableView dataSource];
+      FPVehicle *vehicleForLocalFplog = [ds selectedVehicle];
+      FPVehicle *vehicleForRemoteFplog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier]
+                                                                                   error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPFuelStation *fuelstationForLocalFplog = [ds selectedFuelStation];
+      FPFuelStation *fuelstationForRemoteFplog = [[_coordDao localDao] masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier]
+                                                                                               error:[FPUtils localFetchErrorHandlerMaker]()];
+      PEOrNil orNil = [PEUtils orNilMaker];
+      NSMutableArray *fields = [NSMutableArray arrayWithCapacity:mergeConflicts.count];
+      [mergeConflicts enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        NSString *fieldName = key;
+        if ([fieldName isEqualToString:FPFplogVehicleGlobalIdField]) {
+          [fields addObject:@[@"Vehicle:", @(FPFpLogTagVehicle), orNil([vehicleForLocalFplog name]), orNil([vehicleForRemoteFplog name])]];
+        } else if ([fieldName isEqualToString:FPFplogFuelstationGlobalIdField]) {
+          [fields addObject:@[@"Fuel station:", @(FPFpLogTagFuelstation), orNil([fuelstationForLocalFplog name]), orNil([fuelstationForRemoteFplog name])]];
+        } else if ([fieldName isEqualToString:FPFplogPurchasedAtField]) {
+          [fields addObject:@[@"Purchased date:", @(FPFpLogTagPurchasedDate), [PEUtils stringFromDate:[localFplog purchasedAt] withPattern:@"MM/dd/YYYY"], [PEUtils stringFromDate:[remoteFplog purchasedAt] withPattern:@"MM/dd/YYYY"]]];
+        } else if ([fieldName isEqualToString:FPFplogOctaneField]) {
+          [fields addObject:@[@"Octane:", @(FPFpLogTagOctane), [PEUtils descriptionOrEmptyIfNil:[localFplog octane]], [PEUtils descriptionOrEmptyIfNil:[remoteFplog octane]]]];
+        } else if ([fieldName isEqualToString:FPFplogGallonPriceField]) {
+          [fields addObject:@[@"Price per gallon:", @(FPFpLogTagPricePerGallon), [PEUtils descriptionOrEmptyIfNil:[localFplog gallonPrice]], [PEUtils descriptionOrEmptyIfNil:[remoteFplog gallonPrice]]]];
+        } else if ([fieldName isEqualToString:FPFplogCarWashPerGallonDiscountField]) {
+          [fields addObject:@[@"Car wash per-gallon discount:", @(FPFpLogTagCarWashPerGallonDiscount), [PEUtils descriptionOrEmptyIfNil:[localFplog carWashPerGallonDiscount]], [PEUtils descriptionOrEmptyIfNil:[remoteFplog carWashPerGallonDiscount]]]];
+        } else if ([fieldName isEqualToString:FPFplogGotCarWashField]) {
+          [fields addObject:@[@"Got car wash?", @(FPFpLogTagGotCarWash), [PEUtils yesNoFromBool:[localFplog gotCarWash]], [PEUtils yesNoFromBool:[remoteFplog gotCarWash]]]];
+        } else if ([fieldName isEqualToString:FPFplogNumGallonsField]) {
+          [fields addObject:@[@"Num gallons:", @(FPFpLogTagNumGallons), [PEUtils descriptionOrEmptyIfNil:[localFplog numGallons]], [PEUtils descriptionOrEmptyIfNil:[remoteFplog numGallons]]]];
+        }
+      }];
+      return fields;
+    };
+    PEConflictResolvedEntity conflictResolvedEntityBlk =
+    ^ id (PEAddViewEditController *ctrl, NSDictionary *mergeConflicts, NSArray *valueLabels, FPFuelPurchaseLog *localFplog, FPFuelPurchaseLog *remoteFplog) {
+      FPFuelPurchaseLog *resolvedFplog = [localFplog copy];
+      NSInteger numValueLabels = [valueLabels count];
+      UITableView *vehFsAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
+      FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds = (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehFsAndDateTableView dataSource];
+      for (int i = 0; i < numValueLabels; i++) {
+        NSArray *valueLabelPair = valueLabels[i];
+        UILabel *remoteValue = valueLabelPair[1];
+        if (remoteValue.tag > 0) {
+          switch (remoteValue.tag) {
+            case FPFpLogTagOctane:
+              [resolvedFplog setOctane:[remoteFplog octane]];
+              break;
+            case FPFpLogTagPricePerGallon:
+              [resolvedFplog setGallonPrice:[remoteFplog gallonPrice]];
+              break;
+            case FPFpLogTagCarWashPerGallonDiscount:
+              [resolvedFplog setCarWashPerGallonDiscount:[remoteFplog carWashPerGallonDiscount]];
+              break;
+            case FPFpLogTagGotCarWash:
+              [resolvedFplog setGotCarWash:[remoteFplog gotCarWash]];
+              break;
+            case FPFpLogTagNumGallons:
+              [resolvedFplog setNumGallons:[remoteFplog numGallons]];
+              break;
+            case FPFpLogTagPurchasedDate:
+              [resolvedFplog setPurchasedAt:[remoteFplog purchasedAt]];
+              [ds setPickedLogDate:[resolvedFplog purchasedAt]];
+              break;
+            case FPFpLogTagVehicle:
+            {
+              FPVehicle *vehicleForRemoteFplog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier]
+                                                                                           error:[FPUtils localFetchErrorHandlerMaker]()];
+              [ds setSelectedVehicle:vehicleForRemoteFplog];
+              break;
+            }
+            case FPFpLogTagFuelstation:
+            {
+              FPFuelStation *fuelstationForRemoteFplog = [[_coordDao localDao] masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier]
+                                                                                                       error:[FPUtils localFetchErrorHandlerMaker]()];
+              [ds setSelectedFuelStation:fuelstationForRemoteFplog];
+              break;
+            }
+          }
+        }
+      }
+      return resolvedFplog;
+    };
+    PEUpdateDepsPanel updateDepsPanel = ^(PEAddViewEditController *ctrl, FPFuelPurchaseLog *remoteFplog) {
+      UITableView *vehFsAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
+      FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds = (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehFsAndDateTableView dataSource];
+      FPVehicle *vehicleForRemoteFplog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier]
+                                                                                   error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPFuelStation *fuelstationForRemoteFplog = [[_coordDao localDao] masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier]
+                                                                                               error:[FPUtils localFetchErrorHandlerMaker]()];
+      [ds setSelectedVehicle:vehicleForRemoteFplog];
+      [ds setSelectedFuelStation:fuelstationForRemoteFplog];
+    };
     return [PEAddViewEditController
              viewEntityCtrlrWithEntity:fpLog
                     listViewController:listViewController
@@ -1643,11 +1813,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                       viewDidAppearBlk:nil
                        entityValidator:[self newFuelPurchaseLogValidator]
                                 syncer:syncer
-                 numRemoteDepsNotLocal:nil
-                                 merge:nil
-                     fetchDependencies:nil
-                 conflictResolveFields:nil
-                conflictResolvedEntity:nil];
+                 numRemoteDepsNotLocal:numRemoteDepsNotLocalBlk
+                                 merge:mergeBlk
+                     fetchDependencies:depFetcherBlk
+                       updateDepsPanel:updateDepsPanel
+                 conflictResolveFields:conflictResolveFieldsBlk
+                conflictResolvedEntity:conflictResolvedEntityBlk];
   };
 }
 
@@ -2109,7 +2280,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                    PESyncImmediateAuthRequiredBlk authReqdBlk) {
       NSString *mainMsgFragment = @"fetching vehicle";
       NSString *recordTitle = @"Vehicle";
-      NSLog(@"Proceeding to fetch [%@]", [remoteEnvlog vehicleGlobalIdentifier]);
       [_coordDao fetchAndSaveNewVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier]
                                             forUser:user
                                 notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
@@ -2156,15 +2326,15 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         } else if ([fieldName isEqualToString:FPEnvlogLogDateField]) {
           [fields addObject:@[@"Log date:", @(FPEnvLogTagLogDate), [PEUtils stringFromDate:[localEnvlog logDate] withPattern:@"MM/dd/YYYY"], [PEUtils stringFromDate:[remoteEnvlog logDate] withPattern:@"MM/dd/YYYY"]]];
         } else if ([fieldName isEqualToString:FPEnvlogOdometerField]) {
-          [fields addObject:@[@"Odometer:", @(FPEnvLogTagOdometer), [[localEnvlog odometer] description], [[remoteEnvlog odometer] description]]];
+          [fields addObject:@[@"Odometer:", @(FPEnvLogTagOdometer), [PEUtils descriptionOrEmptyIfNil:[localEnvlog odometer]], [PEUtils descriptionOrEmptyIfNil:[remoteEnvlog odometer]]]];
         } else if ([fieldName isEqualToString:FPEnvlogReportedDteField]) {
-          [fields addObject:@[@"DTE:", @(FPEnvLogTagReportedDte), [[localEnvlog reportedDte] description], [[remoteEnvlog reportedDte] description]]];
+          [fields addObject:@[@"DTE:", @(FPEnvLogTagReportedDte), [PEUtils descriptionOrEmptyIfNil:[localEnvlog reportedDte]], [PEUtils descriptionOrEmptyIfNil:[remoteEnvlog reportedDte]]]];
         } else if ([fieldName isEqualToString:FPEnvlogReportedAvgMpgField]) {
-          [fields addObject:@[@"Reported avg mpg:", @(FPEnvLogTagReportedAvgMpg), [[localEnvlog reportedAvgMpg] description], [[remoteEnvlog reportedAvgMpg] description]]];
+          [fields addObject:@[@"Reported avg mpg:", @(FPEnvLogTagReportedAvgMpg), [PEUtils descriptionOrEmptyIfNil:[localEnvlog reportedAvgMpg]], [PEUtils descriptionOrEmptyIfNil:[remoteEnvlog reportedAvgMpg]]]];
         } else if ([fieldName isEqualToString:FPEnvlogReportedAvgMphField]) {
-          [fields addObject:@[@"Reported avg mph:", @(FPEnvLogTagReportedAvgMph), [[localEnvlog reportedAvgMph] description], [[remoteEnvlog reportedAvgMph] description]]];
+          [fields addObject:@[@"Reported avg mph:", @(FPEnvLogTagReportedAvgMph), [PEUtils descriptionOrEmptyIfNil:[localEnvlog reportedAvgMph]], [PEUtils descriptionOrEmptyIfNil:[remoteEnvlog reportedAvgMph]]]];
         } else if ([fieldName isEqualToString:FPEnvlogReportedOutsideTempField]) {
-          [fields addObject:@[@"Reported outside temperature:", @(FPEnvLogTagReportedOutsideTemp), [[localEnvlog reportedOutsideTemp] description], [[remoteEnvlog reportedOutsideTemp] description]]];
+          [fields addObject:@[@"Reported outside temperature:", @(FPEnvLogTagReportedOutsideTemp), [PEUtils descriptionOrEmptyIfNil:[localEnvlog reportedOutsideTemp]], [PEUtils descriptionOrEmptyIfNil:[remoteEnvlog reportedOutsideTemp]]]];
         }
       }];
       return fields;
@@ -2196,11 +2366,9 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
               [resolvedEnvlog setReportedOutsideTemp:[remoteEnvlog reportedOutsideTemp]];
               break;
             case FPEnvLogTagLogDate:
-            {
               [resolvedEnvlog setLogDate:[remoteEnvlog logDate]];
               [ds setPickedLogDate:[resolvedEnvlog logDate]];
               break;
-            }
             case FPEnvLogTagVehicle:
             {
               FPVehicle *vehicleForRemoteEnvlog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier]
@@ -2212,6 +2380,13 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         }
       }
       return resolvedEnvlog;
+    };
+    PEUpdateDepsPanel updateDepsPanel = ^(PEAddViewEditController *ctrl, FPEnvironmentLog *remoteEnvlog) {
+      UITableView *vehicleAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPEnvLogTagVehicleAndDate];
+      FPEnvLogVehicleAndDateDataSourceDelegate *ds = (FPEnvLogVehicleAndDateDataSourceDelegate *)[vehicleAndDateTableView dataSource];
+      FPVehicle *vehicleForRemoteEnvlog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier]
+                                                                                    error:[FPUtils localFetchErrorHandlerMaker]()];
+      [ds setSelectedVehicle:vehicleForRemoteEnvlog];
     };
     return [PEAddViewEditController viewEntityCtrlrWithEntity:envLog
                                            listViewController:listViewController
@@ -2243,6 +2418,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                         numRemoteDepsNotLocal:numRemoteDepsNotLocalBlk
                                                         merge:mergeBlk
                                             fetchDependencies:depFetcherBlk
+                                              updateDepsPanel:updateDepsPanel
                                         conflictResolveFields:conflictResolveFieldsBlk
                                        conflictResolvedEntity:conflictResolvedEntityBlk];
   };

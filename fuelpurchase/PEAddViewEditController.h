@@ -36,6 +36,7 @@ typedef void (^PEEntitySyncCancelerBlk)(PELMMainSupport *, NSError *, NSNumber *
 typedef BOOL (^PEIsAuthenticatedBlk)(void);
 typedef BOOL (^PEIsLoggedInBlk)(void);
 typedef NSInteger (^PENumRemoteDepsNotLocal)(id);
+typedef void (^PEUpdateDepsPanel)(PEAddViewEditController *, id);
 typedef NSDictionary * (^PEMergeBlk)(PEAddViewEditController *, id, id);
 typedef NSArray * (^PEConflictResolveFields)(PEAddViewEditController *, NSDictionary *, id, id);
 typedef id (^PEConflictResolvedEntity)(PEAddViewEditController *, NSDictionary *, NSArray *, id, id);
@@ -118,6 +119,7 @@ prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUse
 numRemoteDepsNotLocal:(PENumRemoteDepsNotLocal)numRemoteDepsNotLocal
                merge:(PEMergeBlk)merge
    fetchDependencies:(PEFetcherBlk)fetchDependencies
+     updateDepsPanel:(PEUpdateDepsPanel)updateDepsPanel
 conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
 conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
 getterForNotification:(SEL)getterForNotification;
@@ -188,6 +190,7 @@ getterForNotification:(SEL)getterForNotification;
                                  numRemoteDepsNotLocal:(PENumRemoteDepsNotLocal)numRemoteDepsNotLocal
                                                  merge:(PEMergeBlk)merge
                                      fetchDependencies:(PEFetcherBlk)fetchDependencies
+                                       updateDepsPanel:(PEUpdateDepsPanel)updateDepsPanel
                                  conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
                                 conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity;
 

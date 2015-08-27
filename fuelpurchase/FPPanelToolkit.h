@@ -49,11 +49,14 @@ typedef NS_ENUM (NSInteger, FPFpLogTag) {
   FPFpLogTagOctane,
   FPFpLogTagCarWashPanel,
   FPFpLogTagCarWashPerGallonDiscount,
-  FPFpLogTagGotCarWash
+  FPFpLogTagGotCarWash,
+  FPFpLogTagVehicle,      // used for conflict-merging
+  FPFpLogTagFuelstation,  // used for conflict-merging
+  FPFpLogTagPurchasedDate // used for conflict-merging
 };
 
 typedef NS_ENUM (NSInteger, FPEnvLogTag) {
-  FPEnvLogTagVehicleAndDate = 21,
+  FPEnvLogTagVehicleAndDate = 24,
   FPEnvLogTagOdometer,
   FPEnvLogTagReportedAvgMpg,
   FPEnvLogTagReportedAvgMph,

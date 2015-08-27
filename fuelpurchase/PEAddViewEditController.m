@@ -62,6 +62,7 @@
   PEFetcherBlk _fetchDependencies;
   PEConflictResolveFields _conflictResolveFields;
   PEConflictResolvedEntity _conflictResolvedEntity;
+  PEUpdateDepsPanel _updateDepsPanel;
 }
 
 #pragma mark - Initializers
@@ -97,6 +98,7 @@ prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUse
 numRemoteDepsNotLocal:(PENumRemoteDepsNotLocal)numRemoteDepsNotLocal
                merge:(PEMergeBlk)merge
    fetchDependencies:(PEFetcherBlk)fetchDependencies
+     updateDepsPanel:(PEUpdateDepsPanel)updateDepsPanel
 conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
 conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
 getterForNotification:(SEL)getterForNotification {
@@ -137,6 +139,7 @@ getterForNotification:(SEL)getterForNotification {
     _numRemoteDepsNotLocal = numRemoteDepsNotLocal;
     _merge = merge;
     _fetchDependencies = fetchDependencies;
+    _updateDepsPanel = updateDepsPanel;
     _conflictResolveFields = conflictResolveFields;
     _conflictResolvedEntity = conflictResolvedEntity;
     _getterForNotification = getterForNotification;
@@ -234,6 +237,7 @@ getterForNotification:(SEL)getterForNotification {
                                    numRemoteDepsNotLocal:nil
                                                    merge:nil
                                        fetchDependencies:nil
+                                         updateDepsPanel:nil
                                    conflictResolveFields:nil
                                   conflictResolvedEntity:nil
                                    getterForNotification:getterForNotification];
@@ -266,6 +270,7 @@ getterForNotification:(SEL)getterForNotification {
                                  numRemoteDepsNotLocal:(PENumRemoteDepsNotLocal)numRemoteDepsNotLocal
                                                  merge:(PEMergeBlk)merge
                                      fetchDependencies:(PEFetcherBlk)fetchDependencies
+                                       updateDepsPanel:(PEUpdateDepsPanel)updateDepsPanel
                                  conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
                                 conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity {
   return [[PEAddViewEditController alloc] initWithEntity:entity
@@ -299,6 +304,7 @@ getterForNotification:(SEL)getterForNotification {
                                    numRemoteDepsNotLocal:numRemoteDepsNotLocal
                                                    merge:merge
                                        fetchDependencies:fetchDependencies
+                                         updateDepsPanel:updateDepsPanel
                                    conflictResolveFields:conflictResolveFields
                                   conflictResolvedEntity:conflictResolvedEntity
                                    getterForNotification:nil];
@@ -604,34 +610,9 @@ If you cancel, your local edits will be\n\
 retained."];
           NSDictionary *attrs = @{ NSFontAttributeName : [UIFont italicSystemFontOfSize:14.0] };
           [desc setAttributes:attrs range:NSMakeRange(99, 49)];
-          [PEUIUtils showEditConflictAlertWithTitle:@"Conflict."
-                                   alertDescription:desc
-                                           topInset:70.0
-                                   mergeButtonTitle:@"Merge remote and local, then review."
-                                  mergeButtonAction:^ (UIView *alertSection) {
-                                    // TODO
-                                  }
-                                 replaceButtonTitle:@"Replace local with remote, then review."
-                                replaceButtonAction:^{
-                                  postSyncActivities();
-                                  _entityEditPreparer(self, _entity);
-                                  [self setEditing:YES animated:YES];
-                                  [_entity setUpdatedAt:[latestEntity updatedAt]];
-                                  [_entity overwriteDomainProperties:latestEntity];
-                                  _entityToPanelBinder(_entity, _entityFormPanel);
-                                }
-                          forceSaveLocalButtonTitle:@"I don't care.  Force save my local copy."
-                              forceSaveButtonAction:^{
-                                postSyncActivities();
-                                _entityEditPreparer(self, _entity);
-                                [_entity setUpdatedAt:[latestEntity updatedAt]];
-                                [self setEditing:YES animated:YES];
-                                [self doneWithEdit];
-                                [super setEditing:NO animated:YES];
-                              }
-                                  cancelButtonTitle:@"Cancel.  I'll deal with this later."
-                                 cancelButtonAction:^{ postSyncActivities(); }
-                                     relativeToView:self.view];
+          [self presentConflictAlertWithLatestEntity:latestEntity
+                                    alertDescription:desc
+                                        cancelAction:postSyncActivities];
         } else {
           JGActionSheetSection *becameUnauthSection = [self becameUnauthenticatedSection];
           JGActionSheetSection *contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
@@ -788,6 +769,241 @@ retained."];
             syncAuthReqdBlk,
             syncDependencyUnsyncedBlk);
   });
+}
+
+#pragma mark - Conflict Helpers
+
+- (void (^)(void(^)(void)))downloadDepsForEntity:(id)latestEntity
+                       dismissErrAlertPostAction:(void(^)(void))dismissErrAlertPostAction {
+  void (^fetchDepsThenTakeAction)(void(^)(void)) = ^(void(^postFetchAction)(void)) {
+    if (_numRemoteDepsNotLocal) {
+      NSInteger numDepsThatDontExistLocally = _numRemoteDepsNotLocal(latestEntity);
+      if (numDepsThatDontExistLocally == 0) {
+        postFetchAction();
+      } else {
+        // Ugh.  This sucks. Okay, let's do this!
+        __block float percentCompleteFetchingDeps = 0.0;
+        NSMutableArray *successMsgsForDepsFetch = [NSMutableArray array];
+        NSMutableArray *errsForDepsFetch = [NSMutableArray array];
+        MBProgressHUD *depFetchHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        [depFetchHud setLabelText:[NSString stringWithFormat:@"Downloading dependencies."]];
+        void (^handleHudProgress)(float) = ^(float percentComplete) {
+          percentCompleteFetchingDeps += percentComplete;
+          dispatch_async(dispatch_get_main_queue(), ^{
+            depFetchHud.progress = percentCompleteFetchingDeps;
+          });
+        };
+        void(^depFetchDone)(NSString *) = ^(NSString *mainMsgTitle) {
+          if ([errsForDepsFetch count] == 0) { // success
+            dispatch_async(dispatch_get_main_queue(), ^{
+              [depFetchHud setLabelText:@"Dependencies fetched."];
+              [depFetchHud hide:YES afterDelay:1.30];
+              dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.35 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                postFetchAction();
+              });
+            });
+          } else { // error(s)
+            dispatch_async(dispatch_get_main_queue(), ^{
+              [depFetchHud hide:YES afterDelay:0];
+              void (^dismissErrAlertAction)(void) = ^{
+                _entityEditPreparer(self, _entity);
+                [self setEditing:YES animated:YES];
+                //reenableNavButtons();
+                dismissErrAlertPostAction();
+              };
+              if ([errsForDepsFetch count] > 1) {
+                NSString *fetchErrMsg = @"\
+There were problems downloading this\n\
+entity's dependencies.";
+                [PEUIUtils showMultiErrorAlertWithFailures:errsForDepsFetch
+                                                     title:@"Fetch errors."
+                                          alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
+                                                  topInset:70.0
+                                               buttonTitle:@"Okay."
+                                              buttonAction:^{
+                                                dismissErrAlertAction();
+                                              }
+                                            relativeToView:self.view];
+              } else {
+                NSString *fetchErrMsg = @"\
+There was a problem downloading this\n\
+entity's dependency.";
+                [PEUIUtils showErrorAlertWithMsgs:errsForDepsFetch[0][2]
+                                            title:@"Fetch error."
+                                 alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
+                                         topInset:70.0
+                                      buttonTitle:@"Okay."
+                                     buttonAction:^{
+                                       dismissErrAlertAction();
+                                     }
+                                   relativeToView:self.view];
+              }
+            });
+          }
+        };
+        void(^depNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                 NSString *mainMsgTitle,
+                                                                 NSString *recordTitle) {
+          handleHudProgress(percentComplete);
+          [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
+                                        [NSNumber numberWithBool:NO],
+                                        @[[NSString stringWithFormat:@"Not found."]],
+                                        [NSNumber numberWithBool:NO]]];
+          if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
+        };
+        void(^depSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                NSString *mainMsgTitle,
+                                                                NSString *recordTitle) {
+          handleHudProgress(percentComplete);
+          [successMsgsForDepsFetch addObject:[NSString stringWithFormat:@"%@ fetched.", recordTitle]];
+          if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
+        };
+        void(^depRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete,
+                                                                             NSString *mainMsgTitle,
+                                                                             NSString *recordTitle,
+                                                                             NSDate *retryAfter) {
+          handleHudProgress(percentComplete);
+          [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
+                                        [NSNumber numberWithBool:NO],
+                                        @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                        [NSNumber numberWithBool:NO]]];
+          if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
+        };
+        void (^depServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                      NSString *mainMsgTitle,
+                                                                      NSString *recordTitle) {
+          handleHudProgress(percentComplete);
+          [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
+                                        [NSNumber numberWithBool:NO],
+                                        @[@"Temporary server error."],
+                                        [NSNumber numberWithBool:NO]]];
+          if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
+        };
+        void(^depAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                 NSString *mainMsgTitle,
+                                                                 NSString *recordTitle) {
+          _receivedAuthReqdErrorOnSyncAttempt = YES;
+          handleHudProgress(percentComplete);
+          [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
+                                        [NSNumber numberWithBool:NO],
+                                        @[@"Authentication required."],
+                                        [NSNumber numberWithBool:NO]]];
+          if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
+        };
+        _fetchDependencies(self,
+                           latestEntity,
+                           depNotFoundBlk,
+                           depSuccessBlk,
+                           depRetryAfterBlk,
+                           depServerTempError,
+                           depAuthReqdBlk);
+      }
+    } else {
+      postFetchAction();
+    }
+  };
+  return fetchDepsThenTakeAction;
+}
+
+- (void(^)(void))mergerWithLatestEntity:(id)latestEntity
+                           navReenabler:(void(^)(void))navReenabler
+                           alertSection:(UIView *)alertSection {
+  void (^doMerge)(void) = ^{
+    _entityEditPreparer(self, _entity);
+    [self setEditing:YES animated:YES];
+    NSDictionary *mergeConflicts = _merge(self, _entity, latestEntity);
+    if ([mergeConflicts count] > 0) {
+      [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // ensures 'Cancel' button stays grayed-out
+      [self.view endEditing:YES]; // dismiss the keyboard
+      NSString *desc = @"\
+Use the form below to resolve the\n\
+merge conflicts.";
+      [PEUIUtils showConflictResolverWithTitle:@"Conflict resolver."
+                              alertDescription:[[NSAttributedString alloc] initWithString:desc]
+                         conflictResolveFields:_conflictResolveFields(self, mergeConflicts, _entity, latestEntity)
+                                withCellHeight:36.75
+                             labelLeftHPadding:5.0
+                            valueRightHPadding:8.0
+                                     labelFont:[UIFont systemFontOfSize:14]
+                                     valueFont:[UIFont systemFontOfSize:14]
+                                labelTextColor:[UIColor darkGrayColor]
+                                valueTextColor:[UIColor darkGrayColor]
+                minPaddingBetweenLabelAndValue:10.0
+                             includeTopDivider:NO
+                          includeBottomDivider:NO
+                          includeInnerDividers:YES
+                       innerDividerWidthFactor:0.967
+                                dividerPadding:3.0
+                       rowPanelBackgroundColor:[UIColor clearColor]
+                          panelBackgroundColor:[UIColor whiteColor]
+                                  dividerColor:[UIColor lightGrayColor]
+                                      topInset:0.0
+                               okayButtonTitle:@"Okay.  Merge 'em!"
+                              okayButtonAction:^(NSArray *valueLabels) {
+                                navReenabler();
+                                [_entity setUpdatedAt:[latestEntity updatedAt]];
+                                id resultEntity = _conflictResolvedEntity(self, mergeConflicts, valueLabels, _entity, latestEntity);
+                                _entityToPanelBinder(resultEntity, _entityFormPanel);
+                              }
+                             cancelButtonTitle:@"Cancel.  I'll deal with this later."
+                            cancelButtonAction:^{ navReenabler(); }
+                       relativeToViewForLayout:alertSection
+                          relativeToViewForPop:self.view];
+    } else {
+      navReenabler();
+      [_entity setUpdatedAt:[latestEntity updatedAt]];
+      _entityToPanelBinder(_entity, _entityFormPanel);
+    }
+  };
+  return doMerge;
+}
+
+- (void)presentConflictAlertWithLatestEntity:(id)latestEntity
+                            alertDescription:(NSAttributedString *)desc
+                                cancelAction:(void(^)(void))cancelAction {
+  void (^reenableNavButtons)(void) = ^{
+    [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
+    [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
+  };
+  void (^fetchDepsThenTakeAction)(void(^)(void)) = [self downloadDepsForEntity:latestEntity
+                                                     dismissErrAlertPostAction:reenableNavButtons];
+  [PEUIUtils showEditConflictAlertWithTitle:@"Conflict."
+                           alertDescription:desc
+                                   topInset:70.0
+                           mergeButtonTitle:@"Merge remote and local, then review."
+                          mergeButtonAction:^(UIView *alertSection) {
+                            void (^doMerge)(void) = [self mergerWithLatestEntity:latestEntity
+                                                                    navReenabler:reenableNavButtons
+                                                                    alertSection:alertSection];
+                            fetchDepsThenTakeAction(doMerge);
+                          }
+                         replaceButtonTitle:@"Replace local with remote, then review."
+                        replaceButtonAction:^{
+                          fetchDepsThenTakeAction(^{
+                            _entityEditPreparer(self, _entity);
+                            [self setEditing:YES animated:YES];
+                            reenableNavButtons();
+                            [_entity setUpdatedAt:[latestEntity updatedAt]];
+                            [_entity overwriteDomainProperties:latestEntity];
+                            _entityToPanelBinder(_entity, _entityFormPanel);
+                            // TODO - need to invoke block that takes 'self' for additional
+                            // updating of the UI (e.g., the updating of the table DS for envlog
+                            // and fplog screens) - like:
+                            _updateDepsPanel(self, latestEntity);
+                          });
+                        }
+                  forceSaveLocalButtonTitle:@"I don't care.  Force save my local copy."
+                      forceSaveButtonAction:^{
+                        _entityEditPreparer(self, _entity);
+                        [_entity setUpdatedAt:[latestEntity updatedAt]];
+                        [self setEditing:YES animated:YES];
+                        reenableNavButtons();
+                        [self doneWithEdit];
+                        [super setEditing:NO animated:YES];
+                      }
+                          cancelButtonTitle:@"Cancel.  I'll deal with this later."
+                         cancelButtonAction:^{ cancelAction(); /*postEditActivities();*/ }
+                             relativeToView:self.view];
 }
 
 #pragma mark - Toggle into edit mode
@@ -948,7 +1164,6 @@ locally.  The error is as follows:";
               }
               if (isConflictError) {
                 id latestEntity = _errorsForSync[0][4];
-                NSLog(@"latestEntity: %@", latestEntity);
                 NSMutableAttributedString *desc = [[NSMutableAttributedString alloc] initWithString:@"\
 The remote copy of this entity has been\n\
 updated since you downloaded it.  You have\n\
@@ -957,216 +1172,9 @@ If you cancel, your local edits will be\n\
 retained."];
                 NSDictionary *attrs = @{ NSFontAttributeName : [UIFont italicSystemFontOfSize:14.0] };
                 [desc setAttributes:attrs range:NSMakeRange(99, 49)];
-                void (^reenableNavButtons)(void) = ^{
-                  [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
-                  [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
-                };
-                void (^fetchDepsThenTakeAction)(void(^)(void)) = ^(void(^postFetchAction)(void)) {
-                  if (_numRemoteDepsNotLocal) {
-                    NSInteger numDepsThatDontExistLocally = _numRemoteDepsNotLocal(latestEntity);
-                    if (numDepsThatDontExistLocally == 0) {
-                      postFetchAction();
-                    } else {
-                      // Ugh.  This sucks. Okay, let's do this!
-                      __block float percentCompleteFetchingDeps = 0.0;
-                      NSMutableArray *successMsgsForDepsFetch = [NSMutableArray array];
-                      NSMutableArray *errsForDepsFetch = [NSMutableArray array];
-                      MBProgressHUD *depFetchHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-                      [depFetchHud setLabelText:[NSString stringWithFormat:@"Downloading dependencies."]];
-                      void (^handleHudProgress)(float) = ^(float percentComplete) {
-                        percentCompleteFetchingDeps += percentComplete;
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                          depFetchHud.progress = percentCompleteFetchingDeps;
-                        });
-                      };
-                      void(^depFetchDone)(NSString *) = ^(NSString *mainMsgTitle) {
-                        if ([errsForDepsFetch count] == 0) { // success
-                          dispatch_async(dispatch_get_main_queue(), ^{
-                            [depFetchHud setLabelText:@"Dependencies successfully fetched."];
-                            [depFetchHud hide:YES afterDelay:1.30];
-                            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.35 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-                              postFetchAction();
-                            });
-                          });
-                        } else { // error(s)
-                          dispatch_async(dispatch_get_main_queue(), ^{
-                            [depFetchHud hide:YES afterDelay:0];
-                            void (^dismissErrAlertAction)(void) = ^{
-                              _entityEditPreparer(self, _entity);
-                              [self setEditing:YES animated:YES];
-                              reenableNavButtons();
-                            };
-                            if ([errsForDepsFetch count] > 1) {
-                              NSString *fetchErrMsg = @"\
-There were problems downloading this\n\
-entity's dependencies.";
-                              [PEUIUtils showMultiErrorAlertWithFailures:errsForDepsFetch
-                                                                   title:@"Fetch errors."
-                                                        alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
-                                                                topInset:70.0
-                                                             buttonTitle:@"Okay."
-                                                            buttonAction:^{
-                                                              dismissErrAlertAction();
-                                                            }
-                                                          relativeToView:self.view];
-                            } else {
-                              NSString *fetchErrMsg = @"\
-There was a problem downloading this\n\
-entity's dependency.";
-                              [PEUIUtils showErrorAlertWithMsgs:errsForDepsFetch[0][2]
-                                                          title:@"Fetch error."
-                                               alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
-                                                       topInset:70.0
-                                                    buttonTitle:@"Okay."
-                                                   buttonAction:^{
-                                                     dismissErrAlertAction();
-                                                   }
-                                                 relativeToView:self.view];
-                            }
-                          });
-                        }
-                      };
-                      void(^depNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                               NSString *mainMsgTitle,
-                                                                               NSString *recordTitle) {
-                        handleHudProgress(percentComplete);
-                        [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
-                                                      [NSNumber numberWithBool:NO],
-                                                      @[[NSString stringWithFormat:@"Not found."]],
-                                                      [NSNumber numberWithBool:NO]]];
-                        if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
-                      };
-                      void(^depSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                              NSString *mainMsgTitle,
-                                                                              NSString *recordTitle) {
-                        handleHudProgress(percentComplete);
-                        [successMsgsForDepsFetch addObject:[NSString stringWithFormat:@"%@ fetched.", recordTitle]];
-                        if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
-                      };
-                      void(^depRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete,
-                                                                                           NSString *mainMsgTitle,
-                                                                                           NSString *recordTitle,
-                                                                                           NSDate *retryAfter) {
-                        handleHudProgress(percentComplete);
-                        [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
-                                                      [NSNumber numberWithBool:NO],
-                                                      @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
-                                                      [NSNumber numberWithBool:NO]]];
-                        if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
-                      };
-                      void (^depServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                                    NSString *mainMsgTitle,
-                                                                                    NSString *recordTitle) {
-                        handleHudProgress(percentComplete);
-                        [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
-                                                      [NSNumber numberWithBool:NO],
-                                                      @[@"Temporary server error."],
-                                                      [NSNumber numberWithBool:NO]]];
-                        if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
-                      };
-                      void(^depAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
-                                                                               NSString *mainMsgTitle,
-                                                                               NSString *recordTitle) {
-                        _receivedAuthReqdErrorOnSyncAttempt = YES;
-                        handleHudProgress(percentComplete);
-                        [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
-                                                      [NSNumber numberWithBool:NO],
-                                                      @[@"Authentication required."],
-                                                      [NSNumber numberWithBool:NO]]];
-                        if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
-                      };
-                      _fetchDependencies(self,
-                                         latestEntity,
-                                         depNotFoundBlk,
-                                         depSuccessBlk,
-                                         depRetryAfterBlk,
-                                         depServerTempError,
-                                         depAuthReqdBlk);
-                    }
-                  } else {
-                    postFetchAction();
-                  }
-                };
-                [PEUIUtils showEditConflictAlertWithTitle:@"Conflict."
-                                         alertDescription:desc
-                                                 topInset:70.0
-                                         mergeButtonTitle:@"Merge remote and local, then review."
-                                        mergeButtonAction:^ (UIView *alertSection) {
-                                          void (^doMerge)(void) = ^{
-                                            _entityEditPreparer(self, _entity);
-                                            [self setEditing:YES animated:YES];
-                                            NSDictionary *mergeConflicts = _merge(self, _entity, latestEntity);
-                                            if ([mergeConflicts count] > 0) {
-                                              [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // ensures 'Cancel' button stays grayed-out
-                                              [self.view endEditing:YES]; // dismiss the keyboard
-                                              NSString *desc = @"\
-Use the form below to resolve the\n\
-merge conflicts.";
-                                              [PEUIUtils showConflictResolverWithTitle:@"Conflict resolver."
-                                                                      alertDescription:[[NSAttributedString alloc] initWithString:desc]
-                                                                 conflictResolveFields:_conflictResolveFields(self, mergeConflicts, _entity, latestEntity)
-                                                                        withCellHeight:36.75
-                                                                     labelLeftHPadding:5.0
-                                                                    valueRightHPadding:8.0
-                                                                             labelFont:[UIFont systemFontOfSize:14]
-                                                                             valueFont:[UIFont systemFontOfSize:14]
-                                                                        labelTextColor:[UIColor darkGrayColor]
-                                                                        valueTextColor:[UIColor darkGrayColor]
-                                                        minPaddingBetweenLabelAndValue:10.0
-                                                                     includeTopDivider:NO
-                                                                  includeBottomDivider:NO
-                                                                  includeInnerDividers:YES
-                                                               innerDividerWidthFactor:0.967
-                                                                        dividerPadding:3.0
-                                                               rowPanelBackgroundColor:[UIColor clearColor]
-                                                                  panelBackgroundColor:[UIColor whiteColor]
-                                                                          dividerColor:[UIColor lightGrayColor]
-                                                                              topInset:0.0
-                                                                       okayButtonTitle:@"Okay.  Merge 'em!"
-                                                                      okayButtonAction:^(NSArray *valueLabels) {
-                                                                        reenableNavButtons();
-                                                                        [_entity setUpdatedAt:[latestEntity updatedAt]];
-                                                                        id resultEntity = _conflictResolvedEntity(self, mergeConflicts, valueLabels, _entity, latestEntity);
-                                                                        _entityToPanelBinder(resultEntity, _entityFormPanel);
-                                                                      }
-                                                                     cancelButtonTitle:@"Cancel.  I'll deal with this later."
-                                                                    cancelButtonAction:^{ reenableNavButtons(); }
-                                                               relativeToViewForLayout:alertSection
-                                                                  relativeToViewForPop:self.view];
-                                            } else {
-                                              reenableNavButtons();
-                                              [_entity setUpdatedAt:[latestEntity updatedAt]];
-                                              _entityToPanelBinder(_entity, _entityFormPanel);
-                                            }
-                                          };
-                                          fetchDepsThenTakeAction(doMerge);
-                                       }
-                                       replaceButtonTitle:@"Replace local with remote, then review."
-                                      replaceButtonAction:^{
-                                        fetchDepsThenTakeAction(^{
-                                          _entityEditPreparer(self, _entity);
-                                          [self setEditing:YES animated:YES];
-                                          reenableNavButtons();
-                                          [_entity setUpdatedAt:[latestEntity updatedAt]];
-                                          [_entity overwriteDomainProperties:latestEntity];
-                                          _entityToPanelBinder(_entity, _entityFormPanel);
-                                          // TODO - need to invoke block that takes 'self' for additional
-                                          // updating of the UI (e.g., the updating of the table DS for envlog
-                                          // and fplog screens) - like: _updateDepsPanel(self, latestEntity)
-                                        });
-                                      }
-                                forceSaveLocalButtonTitle:@"I don't care.  Force save my local copy."
-                                    forceSaveButtonAction:^{
-                                      _entityEditPreparer(self, _entity);
-                                      [_entity setUpdatedAt:[latestEntity updatedAt]];
-                                      [self setEditing:YES animated:YES];
-                                      reenableNavButtons();
-                                      [self doneWithEdit];
-                                      [super setEditing:NO animated:YES];
-                                    }
-                                        cancelButtonTitle:@"Cancel.  I'll deal with this later."
-                                       cancelButtonAction:^{ postEditActivities(); }
-                                           relativeToView:self.view];
+                [self presentConflictAlertWithLatestEntity:latestEntity
+                                          alertDescription:desc
+                                              cancelAction:postEditActivities];
               } else {
                 messageAttrsRange = NSMakeRange(68, 23); // 'have...locally'
                 attrMessage = [[NSMutableAttributedString alloc] initWithString:message];

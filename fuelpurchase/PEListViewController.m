@@ -722,8 +722,6 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
   if (_detailViewMaker) {
     [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
   }
-  //NSLog(@"_initialSelectedItem: %@", _initialSelectedItem);
-  //NSLog(@"dataObject: %@", dataObject);
   if (_initialSelectedItem) {
     if ([_initialSelectedItem isEqual:dataObject]) {
       [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
