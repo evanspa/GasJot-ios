@@ -177,11 +177,11 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       [mergeConflicts enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         NSString *fieldName = key;
         if ([fieldName isEqualToString:FPUserNameField]) {
-          [fields addObject:@[@"Name:", @(FPUserTagName), [localUser name], [remoteUser name]]];
+          [fields addObject:@[@"Name:", @(FPUserTagName), [PEUtils emptyIfNil:[localUser name]], [PEUtils emptyIfNil:[remoteUser name]]]];
         } else if ([fieldName isEqualToString:FPUserUsernameField]) {
-          [fields addObject:@[@"Username:", @(FPUserTagUsername), [localUser username] , [remoteUser username]]];
+          [fields addObject:@[@"Username:", @(FPUserTagUsername), [PEUtils emptyIfNil:[localUser username]], [PEUtils emptyIfNil:[remoteUser username]]]];
         } else if ([fieldName isEqualToString:FPUserEmailField]) {
-          [fields addObject:@[@"Email:", @(FPUserTagEmail), [localUser email] , [remoteUser email]]];
+          [fields addObject:@[@"Email:", @(FPUserTagEmail), [PEUtils emptyIfNil:[localUser email]], [PEUtils emptyIfNil:[remoteUser email]]]];
         }
       }];
       return fields;
@@ -632,11 +632,11 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       [mergeConflicts enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         NSString *fieldName = key;
         if ([fieldName isEqualToString:FPVehicleNameField]) {
-          [fields addObject:@[@"Name:", @(FPVehicleTagName), [localVehicle name], [remoteVehicle name]]];
+          [fields addObject:@[@"Name:", @(FPVehicleTagName), [PEUtils emptyIfNil:[localVehicle name]], [PEUtils emptyIfNil:[remoteVehicle name]]]];
         } else if ([fieldName isEqualToString:FPVehicleDefaultOctaneField]) {
-          [fields addObject:@[@"Default octane:", @(FPVehicleTagDefaultOctane), [[localVehicle defaultOctane] description], [[remoteVehicle defaultOctane] description]]];
+          [fields addObject:@[@"Default octane:", @(FPVehicleTagDefaultOctane), [PEUtils descriptionOrEmptyIfNil:[localVehicle defaultOctane]], [PEUtils descriptionOrEmptyIfNil:[remoteVehicle defaultOctane]]]];
         } else if ([fieldName isEqualToString:FPVehicleFuelCapacityField]) {
-          [fields addObject:@[@"Fuel capacity:", @(FPVehicleTagFuelCapacity), [[localVehicle fuelCapacity] description], [[remoteVehicle fuelCapacity] description]]];
+          [fields addObject:@[@"Fuel capacity:", @(FPVehicleTagFuelCapacity), [PEUtils descriptionOrEmptyIfNil:[localVehicle fuelCapacity]], [PEUtils descriptionOrEmptyIfNil:[remoteVehicle fuelCapacity]]]];
         }
       }];
       return fields;
@@ -1193,19 +1193,19 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       [mergeConflicts enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         NSString *fieldName = key;
         if ([fieldName isEqualToString:FPFuelstationNameField]) {
-          [fields addObject:@[@"Fuel station name:", @(FPFuelStationTagName), [localFuelstation name], [remoteFuelstation name]]];
+          [fields addObject:@[@"Fuel station name:", @(FPFuelStationTagName), [PEUtils emptyIfNil:[localFuelstation name]], [PEUtils emptyIfNil:[remoteFuelstation name]]]];
         } else if ([fieldName isEqualToString:FPFuelstationStreetField]) {
-          [fields addObject:@[@"Street:", @(FPFuelStationTagStreet), [localFuelstation street], [remoteFuelstation street]]];
+          [fields addObject:@[@"Street:", @(FPFuelStationTagStreet), [PEUtils emptyIfNil:[localFuelstation street]], [PEUtils emptyIfNil:[remoteFuelstation street]]]];
         } else if ([fieldName isEqualToString:FPFuelstationCityField]) {
-          [fields addObject:@[@"City:", @(FPFuelStationTagCity), [localFuelstation city], [remoteFuelstation city]]];
+          [fields addObject:@[@"City:", @(FPFuelStationTagCity), [PEUtils emptyIfNil:[localFuelstation city]], [PEUtils emptyIfNil:[remoteFuelstation city]]]];
         } else if ([fieldName isEqualToString:FPFuelstationStateField]) {
-          [fields addObject:@[@"State:", @(FPFuelStationTagState), [localFuelstation state], [remoteFuelstation state]]];
+          [fields addObject:@[@"State:", @(FPFuelStationTagState), [PEUtils emptyIfNil:[localFuelstation state]], [PEUtils emptyIfNil:[remoteFuelstation state]]]];
         } else if ([fieldName isEqualToString:FPFuelstationZipField]) {
-          [fields addObject:@[@"Zip:", @(FPFuelStationTagZip), [localFuelstation zip], [remoteFuelstation zip]]];
+          [fields addObject:@[@"Zip:", @(FPFuelStationTagZip), [PEUtils emptyIfNil:[localFuelstation zip]], [PEUtils emptyIfNil:[remoteFuelstation zip]]]];
         } else if ([fieldName isEqualToString:FPFuelstationLatitudeField]) {
-          [fields addObject:@[@"Latitude:", @(FPFuelStationTagLocationCoordinates), [[localFuelstation latitude] description], [[remoteFuelstation latitude] description]]];
+          [fields addObject:@[@"Latitude:", @(FPFuelStationTagLocationCoordinates), [PEUtils descriptionOrEmptyIfNil:[localFuelstation latitude]], [PEUtils descriptionOrEmptyIfNil:[remoteFuelstation latitude]]]];
         } else if ([fieldName isEqualToString:FPFuelstationLongitudeField]) {
-          [fields addObject:@[@"Longitude:", @(FPFuelStationTagLocationCoordinates+1), [[localFuelstation longitude] description], [[remoteFuelstation longitude] description]]];
+          [fields addObject:@[@"Longitude:", @(FPFuelStationTagLocationCoordinates+1), [PEUtils descriptionOrEmptyIfNil:[localFuelstation longitude]], [PEUtils descriptionOrEmptyIfNil:[remoteFuelstation longitude]]]];
         }
       }];
       return fields;
