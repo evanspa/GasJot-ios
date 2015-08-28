@@ -140,23 +140,23 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     PEMarkAsDoneEditingBlk doneEditingUserMarker = ^(PEAddViewEditController *ctrl,
                                                      FPUser *user,
                                                      PESyncNotFoundBlk notFoundBlk,
-                                                     PESyncImmediateSuccessBlk successBlk,
-                                                     PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                                     PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                                     PESyncImmediateServerErrorBlk errBlk,
+                                                     PESyncSuccessBlk successBlk,
+                                                     PESyncRetryAfterBlk retryAfterBlk,
+                                                     PESyncServerTempErrorBlk tempErrBlk,
+                                                     PESyncServerErrorBlk errBlk,
                                                      PESyncConflictBlk conflictBlk,
-                                                     PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                                     PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"syncing user account";
+                                                     PESyncAuthRequiredBlk authReqdBlk,
+                                                     PESyncDependencyUnsynced depUnsyncedBlk) {
+      NSString *mainMsgFragment = @"uploading user account";
       NSString *recordTitle = @"User account";
       [_coordDao markAsDoneEditingAndSyncUserImmediate:user
                                    notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                            successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                    remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                                    tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                        remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveUsrErrMsgs:errMask]); [APP refreshTabs];}
-                                           conflictBlk:^(FPUser *latestUser) {conflictBlk(1, mainMsgFragment, recordTitle, latestUser); [APP refreshTabs];}
-                                       authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                        addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                    addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveUsrErrMsgs:errMask]); [APP refreshTabs];}
+                                       addlConflictBlk:^(FPUser *latestUser) {conflictBlk(1, mainMsgFragment, recordTitle, latestUser); [APP refreshTabs];}
+                                   addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
@@ -212,7 +212,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       }
       return resolvedUser;
     };
-    
     return [PEAddViewEditController
               viewEntityCtrlrWithEntity:user
                      listViewController:nil
@@ -233,15 +232,16 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                         isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
                          isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
          syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
-        isEntityAppropriateForLaterSync:NO
          prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                        viewDidAppearBlk:nil
                         entityValidator:[self newUserAccountValidator]
-                                 syncer:nil
+                               uploader:nil
                   numRemoteDepsNotLocal:nil
                                   merge:mergeBlk
                       fetchDependencies:nil
                         updateDepsPanel:nil
+                             downloader:nil
+                      postDownloadSaver:nil
                   conflictResolveFields:conflictResolveFieldsBlk
                  conflictResolvedEntity:conflictResolvedEntityBlk];
   };
@@ -280,23 +280,23 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                  FPVehicle *vehicle,
                                  NSIndexPath *indexPath,
                                  PESyncNotFoundBlk notFoundBlk,
-                                 PESyncImmediateSuccessBlk successBlk,
-                                 PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                 PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                 PESyncImmediateServerErrorBlk errBlk,
+                                 PESyncSuccessBlk successBlk,
+                                 PESyncRetryAfterBlk retryAfterBlk,
+                                 PESyncServerTempErrorBlk tempErrBlk,
+                                 PESyncServerErrorBlk errBlk,
                                  PESyncConflictBlk conflictBlk,
-                                 PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                 PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
+                                 PESyncAuthRequiredBlk authReqdBlk,
+                                 PESyncDependencyUnsynced depUnsyncedBlk) {
     NSString *mainMsgFragment = @"deleting vehicle";
     NSString *recordTitle = @"Vehicle";
     [_coordDao deleteVehicle:vehicle
                      forUser:user
          notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
               addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-      addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-      addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-          addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
-             addlConflictBlk:^(FPVehicle *latestVehicle) {conflictBlk(1, mainMsgFragment, recordTitle, latestVehicle); [APP refreshTabs];}
+          remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+          tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+              remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                 conflictBlk:^(FPVehicle *latestVehicle) {conflictBlk(1, mainMsgFragment, recordTitle, latestVehicle); [APP refreshTabs];}
          addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                        error:[FPUtils localSaveErrorHandlerMaker]()];
   };
@@ -479,25 +479,25 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     PESaveNewEntityBlk newVehicleSaver = ^(UIView *entityPanel,
                                            FPVehicle *newVehicle,
                                            PESyncNotFoundBlk notFoundBlk,
-                                           PESyncImmediateSuccessBlk successBlk,
-                                           PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                           PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                           PESyncImmediateServerErrorBlk errBlk,
+                                           PESyncSuccessBlk successBlk,
+                                           PESyncRetryAfterBlk retryAfterBlk,
+                                           PESyncServerTempErrorBlk tempErrBlk,
+                                           PESyncServerErrorBlk errBlk,
                                            PESyncConflictBlk conflictBlk,
-                                           PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                           PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
+                                           PESyncAuthRequiredBlk authReqdBlk,
+                                           PESyncDependencyUnsynced depUnsyncedBlk) {
       if ([APP doesUserHaveValidAuthToken]) {
-        NSString *mainMsgFragment = @"syncing vehicle";
+        NSString *mainMsgFragment = @"uploading vehicle";
         NSString *recordTitle = @"Vehicle";
         [_coordDao saveNewAndSyncImmediateVehicle:newVehicle
                                           forUser:user
                               notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                       successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                               remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                               tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                   remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]); [APP refreshTabs];}
-                                      conflictBlk:^(FPVehicle *latestVehicle) {conflictBlk(1, mainMsgFragment, recordTitle, latestVehicle); [APP refreshTabs];}
-                                  authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                   addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                           addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                           addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                               addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]); [APP refreshTabs];}
+                                  addlConflictBlk:^(FPVehicle *latestVehicle) {conflictBlk(1, mainMsgFragment, recordTitle, latestVehicle); [APP refreshTabs];}
+                              addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                             error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
         [_coordDao saveNewVehicle:newVehicle forUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
@@ -536,8 +536,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                          entityValidator:[self newVehicleValidator]
                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-          syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
-         isEntityAppropriateForLaterSync:YES];
+          syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate];
   };
 }
 
@@ -554,55 +553,52 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       return prepareSuccess;
     };
     PEEntityEditCancelerBlk vehicleEditCanceler = ^(PEAddViewEditController *ctrl, FPVehicle *vehicle) {
-      [_coordDao cancelEditOfVehicle:vehicle
-                               error:[FPUtils localSaveErrorHandlerMaker]()];
+      [_coordDao cancelEditOfVehicle:vehicle error:[FPUtils localSaveErrorHandlerMaker]()];
       [APP refreshTabs];
     };
     PESaveEntityBlk vehicleSaver = ^(PEAddViewEditController *ctrl, FPVehicle *vehicle) {
-      [_coordDao saveVehicle:vehicle
-                       error:[FPUtils localSaveErrorHandlerMaker]()];
+      [_coordDao saveVehicle:vehicle error:[FPUtils localSaveErrorHandlerMaker]()];
       [APP refreshTabs];
     };
     PEMarkAsDoneEditingBlk doneEditingVehicleMarker = ^(PEAddViewEditController *ctrl,
                                                         FPVehicle *vehicle,
                                                         PESyncNotFoundBlk notFoundBlk,
-                                                        PESyncImmediateSuccessBlk successBlk,
-                                                        PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                                        PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                                        PESyncImmediateServerErrorBlk errBlk,
+                                                        PESyncSuccessBlk successBlk,
+                                                        PESyncRetryAfterBlk retryAfterBlk,
+                                                        PESyncServerTempErrorBlk tempErrBlk,
+                                                        PESyncServerErrorBlk errBlk,
                                                         PESyncConflictBlk conflictBlk,
-                                                        PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                                        PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
+                                                        PESyncAuthRequiredBlk authReqdBlk,
+                                                        PESyncDependencyUnsynced depUnsyncedBlk) {
       if ([APP doesUserHaveValidAuthToken]) {
-        NSString *mainMsgFragment = @"syncing vehicle";
+        NSString *mainMsgFragment = @"uploading vehicle";
         NSString *recordTitle = @"Vehicle";
         [_coordDao markAsDoneEditingAndSyncVehicleImmediate:vehicle
                                                     forUser:user
                                         notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                                 successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                         remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                                         tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                             remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]); [APP refreshTabs];}
-                                                conflictBlk:^(FPVehicle *latestVehicle) {conflictBlk(1, mainMsgFragment, recordTitle, latestVehicle); [APP refreshTabs];}
-                                            authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                             addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                     addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                     addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                         addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveVehicleErrMsgs:errMask]); [APP refreshTabs];}
+                                            addlConflictBlk:^(FPVehicle *latestVehicle) {conflictBlk(1, mainMsgFragment, recordTitle, latestVehicle); [APP refreshTabs];}
+                                        addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                       error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
-        [_coordDao markAsDoneEditingVehicle:vehicle
-                                      error:[FPUtils localSaveErrorHandlerMaker]()];
+        [_coordDao markAsDoneEditingVehicle:vehicle error:[FPUtils localSaveErrorHandlerMaker]()];
         [APP refreshTabs];
       }
     };
-    PESyncerBlk syncer = ^(PEAddViewEditController *ctrl,
-                           FPVehicle *vehicle,
-                           PESyncNotFoundBlk notFoundBlk,
-                           PESyncImmediateSuccessBlk successBlk,
-                           PESyncImmediateRetryAfterBlk retryAfterBlk,
-                           PESyncImmediateServerTempErrorBlk tempErrBlk,
-                           PESyncImmediateServerErrorBlk errBlk,
-                           PESyncConflictBlk conflictBlk,
-                           PESyncImmediateAuthRequiredBlk authReqdBlk,
-                           PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"syncing vehicle";
+    PEUploaderBlk uploader = ^(PEAddViewEditController *ctrl,
+                               FPVehicle *vehicle,
+                               PESyncNotFoundBlk notFoundBlk,
+                               PESyncSuccessBlk successBlk,
+                               PESyncRetryAfterBlk retryAfterBlk,
+                               PESyncServerTempErrorBlk tempErrBlk,
+                               PESyncServerErrorBlk errBlk,
+                               PESyncConflictBlk conflictBlk,
+                               PESyncAuthRequiredBlk authReqdBlk,
+                               PESyncDependencyUnsynced depUnsyncedBlk) {
+      NSString *mainMsgFragment = @"uploading vehicle";
       NSString *recordTitle = @"Vehicle";
       [_coordDao flushUnsyncedChangesToVehicle:vehicle
                                        forUser:user
@@ -667,6 +663,29 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       }
       return resolvedVehicle;
     };
+    PEDownloaderBlk downloaderBlk = ^ (PEAddViewEditController *ctrl,
+                                       FPVehicle *vehicle,
+                                       PESyncNotFoundBlk notFoundBlk,
+                                       PEDownloadSuccessBlk successBlk,
+                                       PESyncRetryAfterBlk retryAfterBlk,
+                                       PESyncServerTempErrorBlk tempErrBlk,
+                                       PESyncAuthRequiredBlk authReqdBlk) {
+      NSString *mainMsgFragment = @"fetching vehicle";
+      NSString *recordTitle = @"Vehicle";
+      float percentOfFetching = 1.0;
+      [_coordDao fetchVehicleWithGlobalId:[vehicle globalIdentifier]
+                                  forUser:user
+                      notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle);}
+                               successBlk:^(FPVehicle *fetchedVehicle) {successBlk(percentOfFetching, mainMsgFragment, recordTitle, fetchedVehicle);}
+                       remoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(percentOfFetching, mainMsgFragment, recordTitle, retryAfter);}
+                       tempRemoteErrorBlk:^{tempErrBlk(percentOfFetching, mainMsgFragment, recordTitle);}
+                      addlAuthRequiredBlk:^{authReqdBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}];
+    };
+    PEPostDownloaderSaver postDownloadSaverBlk = ^ (PEAddViewEditController *ctrl,
+                                                    FPVehicle *downloadedVehicle,
+                                                    FPVehicle *vehicle) {
+      [[_coordDao localDao] saveMasterVehicle:downloadedVehicle forUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
+    };
     return [PEAddViewEditController
              viewEntityCtrlrWithEntity:vehicle
                     listViewController:listViewController
@@ -687,15 +706,16 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                        isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
                         isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
         syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
-       isEntityAppropriateForLaterSync:YES
         prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                       viewDidAppearBlk:nil
                        entityValidator:[self newVehicleValidator]
-                                syncer:syncer
+                              uploader:uploader
                  numRemoteDepsNotLocal:nil
                                  merge:mergeBlk
                      fetchDependencies:nil
                        updateDepsPanel:nil
+                            downloader:downloaderBlk
+                     postDownloadSaver:postDownloadSaverBlk
                  conflictResolveFields:conflictResolveFieldsBlk
                 conflictResolvedEntity:conflictResolvedEntityBlk];
   };
@@ -729,23 +749,23 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                  FPFuelStation *fuelStation,
                                  NSIndexPath *indexPath,
                                  PESyncNotFoundBlk notFoundBlk,
-                                 PESyncImmediateSuccessBlk successBlk,
-                                 PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                 PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                 PESyncImmediateServerErrorBlk errBlk,
+                                 PESyncSuccessBlk successBlk,
+                                 PESyncRetryAfterBlk retryAfterBlk,
+                                 PESyncServerTempErrorBlk tempErrBlk,
+                                 PESyncServerErrorBlk errBlk,
                                  PESyncConflictBlk conflictBlk,
-                                 PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                 PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
+                                 PESyncAuthRequiredBlk authReqdBlk,
+                                 PESyncDependencyUnsynced depUnsyncedBlk) {
     NSString *mainMsgFragment = @"deleting fuel station";
     NSString *recordTitle = @"Fuel station";
     [_coordDao deleteFuelStation:fuelStation
                          forUser:user
              notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                   addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-          addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-          addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-              addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
-                 addlConflictBlk:^(FPFuelStation *latestFuelstation) {conflictBlk(1, mainMsgFragment, recordTitle, latestFuelstation); [APP refreshTabs];}
+              remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+              tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                  remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                     conflictBlk:^(FPFuelStation *latestFuelstation) {conflictBlk(1, mainMsgFragment, recordTitle, latestFuelstation); [APP refreshTabs];}
              addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                            error:[FPUtils localSaveErrorHandlerMaker]()];
   };
@@ -1035,25 +1055,25 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     PESaveNewEntityBlk newFuelStationSaver = ^(UIView *entityPanel,
                                                FPFuelStation *newFuelStation,
                                                PESyncNotFoundBlk notFoundBlk,
-                                               PESyncImmediateSuccessBlk successBlk,
-                                               PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                               PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                               PESyncImmediateServerErrorBlk errBlk,
+                                               PESyncSuccessBlk successBlk,
+                                               PESyncRetryAfterBlk retryAfterBlk,
+                                               PESyncServerTempErrorBlk tempErrBlk,
+                                               PESyncServerErrorBlk errBlk,
                                                PESyncConflictBlk conflictBlk,
-                                               PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                               PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
+                                               PESyncAuthRequiredBlk authReqdBlk,
+                                               PESyncDependencyUnsynced depUnsyncedBlk) {
       if ([APP doesUserHaveValidAuthToken]) {
-        NSString *mainMsgFragment = @"syncing fuel station";
+        NSString *mainMsgFragment = @"uploading fuel station";
         NSString *recordTitle = @"Fuel station";
         [_coordDao saveNewAndSyncImmediateFuelStation:newFuelStation
                                               forUser:user
                                   notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                           successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                   remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                                   tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                       remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]); [APP refreshTabs];}
-                                          conflictBlk:^(FPFuelStation *latestFuelstation) {conflictBlk(1, mainMsgFragment, recordTitle, latestFuelstation); [APP refreshTabs];}
-                                      authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                       addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                               addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                               addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                   addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]); [APP refreshTabs];}
+                                      addlConflictBlk:^(FPFuelStation *latestFuelstation) {conflictBlk(1, mainMsgFragment, recordTitle, latestFuelstation); [APP refreshTabs];}
+                                  addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                 error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
         [_coordDao saveNewFuelStation:newFuelStation
@@ -1094,8 +1114,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                          entityValidator:[self newFuelStationValidator]
                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-          syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
-         isEntityAppropriateForLaterSync:YES];
+          syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate];
   };
 }
 
@@ -1126,26 +1145,26 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     PEMarkAsDoneEditingBlk doneEditingFuelStationMarker = ^(PEAddViewEditController *ctrl,
                                                             PELMModelSupport *entity,
                                                             PESyncNotFoundBlk notFoundBlk,
-                                                            PESyncImmediateSuccessBlk successBlk,
-                                                            PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                                            PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                                            PESyncImmediateServerErrorBlk errBlk,
+                                                            PESyncSuccessBlk successBlk,
+                                                            PESyncRetryAfterBlk retryAfterBlk,
+                                                            PESyncServerTempErrorBlk tempErrBlk,
+                                                            PESyncServerErrorBlk errBlk,
                                                             PESyncConflictBlk conflictBlk,
-                                                            PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                                            PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
+                                                            PESyncAuthRequiredBlk authReqdBlk,
+                                                            PESyncDependencyUnsynced depUnsyncedBlk) {
       if ([APP doesUserHaveValidAuthToken]) {
-        NSString *mainMsgFragment = @"syncing fuel station";
+        NSString *mainMsgFragment = @"uploading fuel station";
         NSString *recordTitle = @"Fuel station";
         FPFuelStation *fuelStation = (FPFuelStation *)entity;
         [_coordDao markAsDoneEditingAndSyncFuelStationImmediate:fuelStation
                                                         forUser:user
                                             notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                                     successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                             remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                                             tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                                 remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]); [APP refreshTabs];}
-                                                    conflictBlk:^(FPFuelStation *latestFuelStation) {conflictBlk(1, mainMsgFragment, recordTitle, latestFuelStation); [APP refreshTabs];}
-                                                authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                 addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                         addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                         addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                             addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveFuelStationErrMsgs:errMask]); [APP refreshTabs];}
+                                                addlConflictBlk:^(FPFuelStation *latestFuelStation) {conflictBlk(1, mainMsgFragment, recordTitle, latestFuelStation); [APP refreshTabs];}
+                                            addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                           error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
         [_coordDao markAsDoneEditingFuelStation:fuelStation
@@ -1153,17 +1172,17 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         [APP refreshTabs];
       }
     };
-    PESyncerBlk syncer = ^(PEAddViewEditController *ctrl,
-                           FPFuelStation *fuelStation,
-                           PESyncNotFoundBlk notFoundBlk,
-                           PESyncImmediateSuccessBlk successBlk,
-                           PESyncImmediateRetryAfterBlk retryAfterBlk,
-                           PESyncImmediateServerTempErrorBlk tempErrBlk,
-                           PESyncImmediateServerErrorBlk errBlk,
-                           PESyncConflictBlk conflictBlk,
-                           PESyncImmediateAuthRequiredBlk authReqdBlk,
-                           PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"syncing fuel station";
+    PEUploaderBlk uploader = ^(PEAddViewEditController *ctrl,
+                               FPFuelStation *fuelStation,
+                               PESyncNotFoundBlk notFoundBlk,
+                               PESyncSuccessBlk successBlk,
+                               PESyncRetryAfterBlk retryAfterBlk,
+                               PESyncServerTempErrorBlk tempErrBlk,
+                               PESyncServerErrorBlk errBlk,
+                               PESyncConflictBlk conflictBlk,
+                               PESyncAuthRequiredBlk authReqdBlk,
+                               PESyncDependencyUnsynced depUnsyncedBlk) {
+      NSString *mainMsgFragment = @"uploading fuel station";
       NSString *recordTitle = @"Fuel station";
       [_coordDao flushUnsyncedChangesToFuelStation:fuelStation
                                            forUser:user
@@ -1248,6 +1267,29 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       }
       return resolvedFuelstation;
     };
+    PEDownloaderBlk downloaderBlk = ^ (PEAddViewEditController *ctrl,
+                                       FPFuelStation *fuelstation,
+                                       PESyncNotFoundBlk notFoundBlk,
+                                       PEDownloadSuccessBlk successBlk,
+                                       PESyncRetryAfterBlk retryAfterBlk,
+                                       PESyncServerTempErrorBlk tempErrBlk,
+                                       PESyncAuthRequiredBlk authReqdBlk) {
+      NSString *mainMsgFragment = @"fetching fuelstation";
+      NSString *recordTitle = @"Fuel station";
+      float percentOfFetching = 1.0;
+      [_coordDao fetchFuelstationWithGlobalId:[fuelstation globalIdentifier]
+                                      forUser:user
+                          notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle);}
+                                   successBlk:^(FPFuelStation *fetchedFuelstation) {successBlk(percentOfFetching, mainMsgFragment, recordTitle, fetchedFuelstation);}
+                           remoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(percentOfFetching, mainMsgFragment, recordTitle, retryAfter);}
+                           tempRemoteErrorBlk:^{tempErrBlk(percentOfFetching, mainMsgFragment, recordTitle);}
+                          addlAuthRequiredBlk:^{authReqdBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}];
+    };
+    PEPostDownloaderSaver postDownloadSaverBlk = ^ (PEAddViewEditController *ctrl,
+                                                    FPFuelStation *downloadedFuelstation,
+                                                    FPFuelStation *fuelstation) {
+      [[_coordDao localDao] saveMasterFuelstation:downloadedFuelstation forUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
+    };
     return [PEAddViewEditController
              viewEntityCtrlrWithEntity:fuelStation
                     listViewController:listViewController
@@ -1268,15 +1310,16 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                        isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
                         isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
         syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
-       isEntityAppropriateForLaterSync:YES
         prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                       viewDidAppearBlk:nil
                        entityValidator:[self newFuelStationValidator]
-                                syncer:syncer
+                                uploader:uploader
                  numRemoteDepsNotLocal:nil
                                  merge:mergeBlk
                      fetchDependencies:nil
                        updateDepsPanel:nil
+                            downloader:downloaderBlk
+                     postDownloadSaver:postDownloadSaverBlk
                  conflictResolveFields:conflictResolveFieldsBlk
                 conflictResolvedEntity:conflictResolvedEntityBlk];
   };
@@ -1340,13 +1383,13 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     PESaveNewEntityBlk newFuelPurchaseLogSaver = ^(UIView *entityPanel,
                                                    FPLogEnvLogComposite *fpEnvLogComposite,
                                                    PESyncNotFoundBlk notFoundBlk,
-                                                   PESyncImmediateSuccessBlk successBlk,
-                                                   PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                                   PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                                   PESyncImmediateServerErrorBlk errBlk,
+                                                   PESyncSuccessBlk successBlk,
+                                                   PESyncRetryAfterBlk retryAfterBlk,
+                                                   PESyncServerTempErrorBlk tempErrBlk,
+                                                   PESyncServerErrorBlk errBlk,
                                                    PESyncConflictBlk conflictBlk,
-                                                   PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                                   PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
+                                                   PESyncAuthRequiredBlk authReqdBlk,
+                                                   PESyncDependencyUnsynced depUnsyncedBlk) {
       FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
         (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)
           [(UITableView *)[entityPanel viewWithTag:FPFpLogTagVehicleFuelStationAndDate] dataSource];
@@ -1373,9 +1416,9 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       } else {
         saveFpLogPercentComplete = 1.0;
       }
-      NSString *mainMsgFragment = @"syncing fuel purchase log";
+      NSString *mainMsgFragment = @"uploading fuel purchase log";
       if (savePreFillupEnvLogPercentComplete || savePostFillupEnvLogPercentComplete) {
-        mainMsgFragment = @"syncing fuel purchase\nand environment logs";
+        mainMsgFragment = @"uploading fuel purchase\nand environment logs";
       }
       NSString *recordTitle = @"Fuel purchase log";
       BOOL doSyncImmediate = [APP doesUserHaveValidAuthToken];
@@ -1385,12 +1428,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                   vehicle:selectedVehicle
                                               fuelStation:selectedFuelStation
                                       notFoundOnServerBlk:^{notFoundBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                               successBlk:^{successBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                       remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                                       tempRemoteErrorBlk:^{tempErrBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                           remoteErrorBlk:^(NSInteger errMask) {errBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
-                                              conflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
-                                          authRequiredBlk:^{authReqdBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                           addlSuccessBlk:^{successBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                   addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                   addlTempRemoteErrorBlk:^{tempErrBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                       addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
+                                          addlConflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
+                                      addlAuthRequiredBlk:^{authReqdBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
                              skippedDueToVehicleNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                          skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The associated fuel station is not yet synced."); [APP refreshTabs];}
                                                     error:[FPUtils localSaveErrorHandlerMaker]()];
@@ -1409,12 +1452,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                    forUser:user
                                                    vehicle:selectedVehicle
                                        notFoundOnServerBlk:^{notFoundBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                                successBlk:^{successBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                        remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                                        tempRemoteErrorBlk:^{tempErrBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                            remoteErrorBlk:^(NSInteger errMask) {errBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
-                                               conflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
-                                           authRequiredBlk:^{authReqdBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                            addlSuccessBlk:^{successBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                    addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                    addlTempRemoteErrorBlk:^{tempErrBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                        addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                           addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
+                                       addlAuthRequiredBlk:^{authReqdBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
                               skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                                      error:[FPUtils localSaveErrorHandlerMaker]()];
         } else {
@@ -1431,12 +1474,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                    forUser:user
                                                    vehicle:selectedVehicle
                                        notFoundOnServerBlk:^{notFoundBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                                successBlk:^{successBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                        remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                                        tempRemoteErrorBlk:^{tempErrBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                            remoteErrorBlk:^(NSInteger errMask) {errBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
-                                               conflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
-                                           authRequiredBlk:^{authReqdBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                            addlSuccessBlk:^{successBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                    addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                    addlTempRemoteErrorBlk:^{tempErrBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                        addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                           addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
+                                       addlAuthRequiredBlk:^{authReqdBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
                               skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                                      error:[FPUtils localSaveErrorHandlerMaker]()];
         } else {
@@ -1506,7 +1549,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
           syncImmediateMBProgressHUDMode:MBProgressHUDModeDeterminate
-         isEntityAppropriateForLaterSync:YES
                    getterForNotification:@selector(fpLog)];
   };
 }
@@ -1543,8 +1585,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       return result;
     };
     PEEntityEditCancelerBlk fpLogEditCanceler = ^(PEAddViewEditController *ctrl, FPFuelPurchaseLog *fpLog) {
-      [_coordDao cancelEditOfFuelPurchaseLog:fpLog
-                                       error:[FPUtils localSaveErrorHandlerMaker]()];
+      [_coordDao cancelEditOfFuelPurchaseLog:fpLog error:[FPUtils localSaveErrorHandlerMaker]()];
       refreshVehicleFuelStationTableView(ctrl, fpLog);
       [APP refreshTabs];
     };
@@ -1563,45 +1604,44 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     PEMarkAsDoneEditingBlk doneEditingFuelPurchaseLogMarker = ^(PEAddViewEditController *ctrl,
                                                                 FPFuelPurchaseLog *fpLog,
                                                                 PESyncNotFoundBlk notFoundBlk,
-                                                                PESyncImmediateSuccessBlk successBlk,
-                                                                PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                                                PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                                                PESyncImmediateServerErrorBlk errBlk,
+                                                                PESyncSuccessBlk successBlk,
+                                                                PESyncRetryAfterBlk retryAfterBlk,
+                                                                PESyncServerTempErrorBlk tempErrBlk,
+                                                                PESyncServerErrorBlk errBlk,
                                                                 PESyncConflictBlk conflictBlk,
-                                                                PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                                                PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
+                                                                PESyncAuthRequiredBlk authReqdBlk,
+                                                                PESyncDependencyUnsynced depUnsyncedBlk) {
       if ([APP doesUserHaveValidAuthToken]) {
-        NSString *mainMsgFragment = @"syncing fuel purchase log";
+        NSString *mainMsgFragment = @"uploading fuel purchase log";
         NSString *recordTitle = @"Fuel purchase log";
         [_coordDao markAsDoneEditingAndSyncFuelPurchaseLogImmediate:fpLog
                                                             forUser:user
                                                 notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                                         successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                                 remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                                                 tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                                     remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
-                                                        conflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(1, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
-                                                    authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                     addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                             addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                             addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                 addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
+                                                    addlConflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(1, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
+                                                addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                        skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                    skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated fuel station is not yet synced."); [APP refreshTabs];}
                                                               error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
-        [_coordDao markAsDoneEditingFuelPurchaseLog:fpLog
-                                              error:[FPUtils localSaveErrorHandlerMaker]()];
+        [_coordDao markAsDoneEditingFuelPurchaseLog:fpLog error:[FPUtils localSaveErrorHandlerMaker]()];
         [APP refreshTabs];
       }
     };
-    PESyncerBlk syncer = ^(PEAddViewEditController *ctrl,
-                           FPFuelPurchaseLog *fpLog,
-                           PESyncNotFoundBlk notFoundBlk,
-                           PESyncImmediateSuccessBlk successBlk,
-                           PESyncImmediateRetryAfterBlk retryAfterBlk,
-                           PESyncImmediateServerTempErrorBlk tempErrBlk,
-                           PESyncImmediateServerErrorBlk errBlk,
-                           PESyncConflictBlk conflictBlk,
-                           PESyncImmediateAuthRequiredBlk authReqdBlk,
-                           PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"syncing fuel purchase log";
+    PEUploaderBlk uploader = ^(PEAddViewEditController *ctrl,
+                               FPFuelPurchaseLog *fpLog,
+                               PESyncNotFoundBlk notFoundBlk,
+                               PESyncSuccessBlk successBlk,
+                               PESyncRetryAfterBlk retryAfterBlk,
+                               PESyncServerTempErrorBlk tempErrBlk,
+                               PESyncServerErrorBlk errBlk,
+                               PESyncConflictBlk conflictBlk,
+                               PESyncAuthRequiredBlk authReqdBlk,
+                               PESyncDependencyUnsynced depUnsyncedBlk) {
+      NSString *mainMsgFragment = @"uploading fuel purchase log";
       NSString *recordTitle = @"Fuel purchase log";
       [_coordDao flushUnsyncedChangesToFuelPurchaseLog:fpLog
                                                forUser:user
@@ -1624,13 +1664,13 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       if (!fuelstation) numNonLocalDeps++;
       return numNonLocalDeps;
     };
-    PEFetcherBlk depFetcherBlk = ^(PEAddViewEditController *ctrl,
-                                   FPFuelPurchaseLog *remoteFplog,
-                                   PESyncNotFoundBlk notFoundBlk,
-                                   PESyncImmediateSuccessBlk successBlk,
-                                   PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                   PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                   PESyncImmediateAuthRequiredBlk authReqdBlk) {
+    PEDependencyFetcherBlk depFetcherBlk = ^(PEAddViewEditController *ctrl,
+                                             FPFuelPurchaseLog *remoteFplog,
+                                             PESyncNotFoundBlk notFoundBlk,
+                                             PESyncSuccessBlk successBlk,
+                                             PESyncRetryAfterBlk retryAfterBlk,
+                                             PESyncServerTempErrorBlk tempErrBlk,
+                                             PESyncAuthRequiredBlk authReqdBlk) {
       FPVehicle *vehicle = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
       FPFuelStation *fuelstation = [[_coordDao localDao] masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
       float percentOfFetching = 1.0;
@@ -1644,8 +1684,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                               forUser:user
                                   notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                        addlSuccessBlk:^(FPVehicle *fetchedVehicle) {successBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                               addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(percentOfFetching, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                               addlTempRemoteErrorBlk:^{tempErrBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                   remoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(percentOfFetching, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                   tempRemoteErrorBlk:^{tempErrBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                   addlAuthRequiredBlk:^{authReqdBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                 error:[FPUtils localSaveErrorHandlerMaker]()];
       }
@@ -1656,8 +1696,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                   forUser:user
                                       notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                            addlSuccessBlk:^(FPFuelStation *fetchedFuelstation) {successBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                   addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(percentOfFetching, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                                   addlTempRemoteErrorBlk:^{tempErrBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                       remoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(percentOfFetching, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                       tempRemoteErrorBlk:^{tempErrBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                       addlAuthRequiredBlk:^{authReqdBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                     error:[FPUtils localSaveErrorHandlerMaker]()];
       }
@@ -1783,6 +1823,20 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       [ds setSelectedVehicle:vehicleForRemoteFplog];
       [ds setSelectedFuelStation:fuelstationForRemoteFplog];
     };
+    PEDownloaderBlk downloaderBlk = ^ (PEAddViewEditController *ctrl,
+                                       FPFuelPurchaseLog *fplog,
+                                       PESyncNotFoundBlk notFoundBlk,
+                                       PEDownloadSuccessBlk successBlk,
+                                       PESyncRetryAfterBlk retryAfterBlk,
+                                       PESyncServerTempErrorBlk tempErrBlk,
+                                       PESyncAuthRequiredBlk authReqdBlk) {
+      
+    };
+    PEPostDownloaderSaver postDownloadSaverBlk = ^ (PEAddViewEditController *ctrl,
+                                                    FPFuelPurchaseLog *downloadedFplog,
+                                                    FPFuelPurchaseLog *fplog) {
+      
+    };
     return [PEAddViewEditController
              viewEntityCtrlrWithEntity:fpLog
                     listViewController:listViewController
@@ -1808,15 +1862,16 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                        isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
                         isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
         syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
-       isEntityAppropriateForLaterSync:YES
         prepareUIForUserInteractionBlk:nil
                       viewDidAppearBlk:nil
                        entityValidator:[self newFuelPurchaseLogValidator]
-                                syncer:syncer
+                                uploader:uploader
                  numRemoteDepsNotLocal:numRemoteDepsNotLocalBlk
                                  merge:mergeBlk
                      fetchDependencies:depFetcherBlk
                        updateDepsPanel:updateDepsPanel
+                            downloader:downloaderBlk
+                     postDownloadSaver:postDownloadSaverBlk
                  conflictResolveFields:conflictResolveFieldsBlk
                 conflictResolvedEntity:conflictResolvedEntityBlk];
   };
@@ -1827,23 +1882,23 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                  FPFuelPurchaseLog *fplog,
                                  NSIndexPath *indexPath,
                                  PESyncNotFoundBlk notFoundBlk,
-                                 PESyncImmediateSuccessBlk successBlk,
-                                 PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                 PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                 PESyncImmediateServerErrorBlk errBlk,
+                                 PESyncSuccessBlk successBlk,
+                                 PESyncRetryAfterBlk retryAfterBlk,
+                                 PESyncServerTempErrorBlk tempErrBlk,
+                                 PESyncServerErrorBlk errBlk,
                                  PESyncConflictBlk conflictBlk,
-                                 PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                 PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
+                                 PESyncAuthRequiredBlk authReqdBlk,
+                                 PESyncDependencyUnsynced depUnsyncedBlk) {
     NSString *mainMsgFragment = @"deleting fuel purchase log";
     NSString *recordTitle = @"Fuel purchase log";
     [_coordDao deleteFuelPurchaseLog:fplog
                              forUser:user
                  notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                       addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-              addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-              addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                  addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
-                     addlConflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(1, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
+                  remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                  tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                      remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                         conflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(1, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
                  addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                error:[FPUtils localSaveErrorHandlerMaker]()];
   };
@@ -2092,30 +2147,30 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     PESaveNewEntityBlk newEnvironmentLogSaver = ^(UIView *entityPanel,
                                                   FPEnvironmentLog *envLog,
                                                   PESyncNotFoundBlk notFoundBlk,
-                                                  PESyncImmediateSuccessBlk successBlk,
-                                                  PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                                  PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                                  PESyncImmediateServerErrorBlk errBlk,
+                                                  PESyncSuccessBlk successBlk,
+                                                  PESyncRetryAfterBlk retryAfterBlk,
+                                                  PESyncServerTempErrorBlk tempErrBlk,
+                                                  PESyncServerErrorBlk errBlk,
                                                   PESyncConflictBlk conflictBlk,
-                                                  PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                                  PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
+                                                  PESyncAuthRequiredBlk authReqdBlk,
+                                                  PESyncDependencyUnsynced depUnsyncedBlk) {
       FPEnvLogVehicleAndDateDataSourceDelegate *ds =
         (FPEnvLogVehicleAndDateDataSourceDelegate *)
         [(UITableView *)[entityPanel viewWithTag:FPEnvLogTagVehicleAndDate] dataSource];
       FPVehicle *selectedVehicle = [ds selectedVehicle];
       if ([APP doesUserHaveValidAuthToken]) {
-        NSString *mainMsgFragment = @"syncing environment log";
+        NSString *mainMsgFragment = @"uploading environment log";
         NSString *recordTitle = @"Environment log";
         [_coordDao saveNewAndSyncImmediateEnvironmentLog:envLog
                                                  forUser:user
                                                  vehicle:selectedVehicle
                                      notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                              successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                      remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                                      tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                          remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
-                                             conflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(1, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
-                                         authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                          addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                  addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                  addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                      addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                         addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(1, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
+                                     addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                             skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                                    error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
@@ -2164,8 +2219,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                           entityValidator:[self newEnvironmentLogValidator]
                           isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
                            isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-           syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
-          isEntityAppropriateForLaterSync:YES];
+           syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate];
   };
 }
 
@@ -2213,25 +2267,25 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     PEMarkAsDoneEditingBlk doneEditingEnvironmentLogMarker = ^(PEAddViewEditController *ctrl,
                                                                FPEnvironmentLog *envLog,
                                                                PESyncNotFoundBlk notFoundBlk,
-                                                               PESyncImmediateSuccessBlk successBlk,
-                                                               PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                                               PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                                               PESyncImmediateServerErrorBlk errBlk,
+                                                               PESyncSuccessBlk successBlk,
+                                                               PESyncRetryAfterBlk retryAfterBlk,
+                                                               PESyncServerTempErrorBlk tempErrBlk,
+                                                               PESyncServerErrorBlk errBlk,
                                                                PESyncConflictBlk conflictBlk,
-                                                               PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                                               PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
+                                                               PESyncAuthRequiredBlk authReqdBlk,
+                                                               PESyncDependencyUnsynced depUnsyncedBlk) {
       if ([APP doesUserHaveValidAuthToken]) {
-        NSString *mainMsgFragment = @"syncing environment log";
+        NSString *mainMsgFragment = @"uploading environment log";
         NSString *recordTitle = @"Environment log";
         [_coordDao markAsDoneEditingAndSyncEnvironmentLogImmediate:envLog
                                                             forUser:user
                                                notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                                         successBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                                 remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                                                 tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                                     remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
-                                                        conflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(1, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
-                                                    authRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                    addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                            addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                            addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                                   addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(1, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
+                                               addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                        skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The associated vehicle is not yet synced."); [APP refreshTabs];}
                                                               error:[FPUtils localSaveErrorHandlerMaker]()];
       } else {
@@ -2240,17 +2294,17 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         [APP refreshTabs];
       }
     };
-    PESyncerBlk syncer = ^(PEAddViewEditController *ctrl,
+    PEUploaderBlk uploader = ^(PEAddViewEditController *ctrl,
                            FPEnvironmentLog *envLog,
                            PESyncNotFoundBlk notFoundBlk,
-                           PESyncImmediateSuccessBlk successBlk,
-                           PESyncImmediateRetryAfterBlk retryAfterBlk,
-                           PESyncImmediateServerTempErrorBlk tempErrBlk,
-                           PESyncImmediateServerErrorBlk errBlk,
+                           PESyncSuccessBlk successBlk,
+                           PESyncRetryAfterBlk retryAfterBlk,
+                           PESyncServerTempErrorBlk tempErrBlk,
+                           PESyncServerErrorBlk errBlk,
                            PESyncConflictBlk conflictBlk,
-                           PESyncImmediateAuthRequiredBlk authReqdBlk,
-                           PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"syncing environment log";
+                           PESyncAuthRequiredBlk authReqdBlk,
+                           PESyncDependencyUnsynced depUnsyncedBlk) {
+      NSString *mainMsgFragment = @"uploading environment log";
       NSString *recordTitle = @"Environment log";
       [_coordDao flushUnsyncedChangesToEnvironmentLog:envLog
                                               forUser:user
@@ -2271,21 +2325,21 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       }
       return 1;
     };
-    PEFetcherBlk depFetcherBlk = ^(PEAddViewEditController *ctrl,
+    PEDependencyFetcherBlk depFetcherBlk = ^(PEAddViewEditController *ctrl,
                                    FPEnvironmentLog *remoteEnvlog,
                                    PESyncNotFoundBlk notFoundBlk,
-                                   PESyncImmediateSuccessBlk successBlk,
-                                   PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                   PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                   PESyncImmediateAuthRequiredBlk authReqdBlk) {
+                                   PESyncSuccessBlk successBlk,
+                                   PESyncRetryAfterBlk retryAfterBlk,
+                                   PESyncServerTempErrorBlk tempErrBlk,
+                                   PESyncAuthRequiredBlk authReqdBlk) {
       NSString *mainMsgFragment = @"fetching vehicle";
       NSString *recordTitle = @"Vehicle";
       [_coordDao fetchAndSaveNewVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier]
                                             forUser:user
                                 notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                      addlSuccessBlk:^(FPVehicle *fetchedVehicle) {successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                             addlRemoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                             addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                 remoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                 tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                 addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                               error:[FPUtils localSaveErrorHandlerMaker]()];
     };
@@ -2388,6 +2442,20 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                                     error:[FPUtils localFetchErrorHandlerMaker]()];
       [ds setSelectedVehicle:vehicleForRemoteEnvlog];
     };
+    PEDownloaderBlk downloaderBlk = ^ (PEAddViewEditController *ctrl,
+                                       FPEnvironmentLog *envlog,
+                                       PESyncNotFoundBlk notFoundBlk,
+                                       PEDownloadSuccessBlk successBlk,
+                                       PESyncRetryAfterBlk retryAfterBlk,
+                                       PESyncServerTempErrorBlk tempErrBlk,
+                                       PESyncAuthRequiredBlk authReqdBlk) {
+      
+    };
+    PEPostDownloaderSaver postDownloadSaverBlk = ^ (PEAddViewEditController *ctrl,
+                                                    FPEnvironmentLog *downloadedEnvlog,
+                                                    FPEnvironmentLog *envlog) {
+      
+    };
     return [PEAddViewEditController viewEntityCtrlrWithEntity:envLog
                                            listViewController:listViewController
                                               entityIndexPath:envLogIndexPath
@@ -2410,15 +2478,16 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                               isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
                                                isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
                                syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
-                              isEntityAppropriateForLaterSync:YES
                                prepareUIForUserInteractionBlk:nil
                                              viewDidAppearBlk:nil
                                               entityValidator:[self newEnvironmentLogValidator]
-                                                       syncer:syncer
+                                                     uploader:uploader
                                         numRemoteDepsNotLocal:numRemoteDepsNotLocalBlk
                                                         merge:mergeBlk
                                             fetchDependencies:depFetcherBlk
                                               updateDepsPanel:updateDepsPanel
+                                                   downloader:downloaderBlk
+                                            postDownloadSaver:postDownloadSaverBlk
                                         conflictResolveFields:conflictResolveFieldsBlk
                                        conflictResolvedEntity:conflictResolvedEntityBlk];
   };
@@ -2429,23 +2498,23 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                  FPEnvironmentLog *envlog,
                                  NSIndexPath *indexPath,
                                  PESyncNotFoundBlk notFoundBlk,
-                                 PESyncImmediateSuccessBlk successBlk,
-                                 PESyncImmediateRetryAfterBlk retryAfterBlk,
-                                 PESyncImmediateServerTempErrorBlk tempErrBlk,
-                                 PESyncImmediateServerErrorBlk errBlk,
+                                 PESyncSuccessBlk successBlk,
+                                 PESyncRetryAfterBlk retryAfterBlk,
+                                 PESyncServerTempErrorBlk tempErrBlk,
+                                 PESyncServerErrorBlk errBlk,
                                  PESyncConflictBlk conflictBlk,
-                                 PESyncImmediateAuthRequiredBlk authReqdBlk,
-                                 PESyncImmediateDependencyUnsynced depUnsyncedBlk) {
+                                 PESyncAuthRequiredBlk authReqdBlk,
+                                 PESyncDependencyUnsynced depUnsyncedBlk) {
     NSString *mainMsgFragment = @"deleting environment log";
     NSString *recordTitle = @"Environment log";
     [_coordDao deleteEnvironmentLog:envlog
                             forUser:user
                 notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                      addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-             addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-             addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                 addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
-                    addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(1, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
+                 remoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                 tempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                     remoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                        conflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(1, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
                 addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                               error:[FPUtils localSaveErrorHandlerMaker]()];
   };

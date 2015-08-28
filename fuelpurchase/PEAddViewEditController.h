@@ -26,12 +26,13 @@ typedef id   (^PEEntityMakerBlk)(UIView *);
 typedef void (^PESaveEntityBlk)(PEAddViewEditController *, id);
 typedef void (^PESyncNotFoundBlk)(float, NSString *, NSString *);
 typedef void (^PESyncConflictBlk)(float, NSString *, NSString *, id);
-typedef void (^PESyncImmediateSuccessBlk)(float, NSString *, NSString *);
-typedef void (^PESyncImmediateServerTempErrorBlk)(float, NSString *, NSString *);
-typedef void (^PESyncImmediateServerErrorBlk)(float, NSString *, NSString *, NSArray *);
-typedef void (^PESyncImmediateAuthRequiredBlk)(float, NSString *, NSString *);
-typedef void (^PESyncImmediateRetryAfterBlk)(float, NSString *, NSString *, NSDate *);
-typedef void (^PESyncImmediateDependencyUnsynced)(float, NSString *, NSString *, NSString *);
+typedef void (^PESyncSuccessBlk)(float, NSString *, NSString *);
+typedef void (^PEDownloadSuccessBlk)(float, NSString *, NSString *, id);
+typedef void (^PESyncServerTempErrorBlk)(float, NSString *, NSString *);
+typedef void (^PESyncServerErrorBlk)(float, NSString *, NSString *, NSArray *);
+typedef void (^PESyncAuthRequiredBlk)(float, NSString *, NSString *);
+typedef void (^PESyncRetryAfterBlk)(float, NSString *, NSString *, NSDate *);
+typedef void (^PESyncDependencyUnsynced)(float, NSString *, NSString *, NSString *);
 typedef void (^PEEntitySyncCancelerBlk)(PELMMainSupport *, NSError *, NSNumber *);
 typedef BOOL (^PEIsAuthenticatedBlk)(void);
 typedef BOOL (^PEIsLoggedInBlk)(void);
@@ -40,43 +41,51 @@ typedef void (^PEUpdateDepsPanel)(PEAddViewEditController *, id);
 typedef NSDictionary * (^PEMergeBlk)(PEAddViewEditController *, id, id);
 typedef NSArray * (^PEConflictResolveFields)(PEAddViewEditController *, NSDictionary *, id, id);
 typedef id (^PEConflictResolvedEntity)(PEAddViewEditController *, NSDictionary *, NSArray *, id, id);
-typedef void (^PEFetcherBlk)(PEAddViewEditController *,
-                             id,
-                             PESyncNotFoundBlk,
-                             PESyncImmediateSuccessBlk,
-                             PESyncImmediateRetryAfterBlk,
-                             PESyncImmediateServerTempErrorBlk,
-                             PESyncImmediateAuthRequiredBlk);
+typedef void (^PEPostDownloaderSaver)(PEAddViewEditController *, id, id);
+typedef void (^PEDependencyFetcherBlk)(PEAddViewEditController *,
+                                       id,
+                                       PESyncNotFoundBlk,
+                                       PESyncSuccessBlk,
+                                       PESyncRetryAfterBlk,
+                                       PESyncServerTempErrorBlk,
+                                       PESyncAuthRequiredBlk);
+typedef void (^PEDownloaderBlk)(PEAddViewEditController *,
+                                id,
+                                PESyncNotFoundBlk,
+                                PEDownloadSuccessBlk,
+                                PESyncRetryAfterBlk,
+                                PESyncServerTempErrorBlk,
+                                PESyncAuthRequiredBlk);
 typedef void (^PEMarkAsDoneEditingBlk)(PEAddViewEditController *,
                                        id,
                                        PESyncNotFoundBlk,
-                                       PESyncImmediateSuccessBlk,
-                                       PESyncImmediateRetryAfterBlk,
-                                       PESyncImmediateServerTempErrorBlk,
-                                       PESyncImmediateServerErrorBlk,
+                                       PESyncSuccessBlk,
+                                       PESyncRetryAfterBlk,
+                                       PESyncServerTempErrorBlk,
+                                       PESyncServerErrorBlk,
                                        PESyncConflictBlk,
-                                       PESyncImmediateAuthRequiredBlk,
-                                       PESyncImmediateDependencyUnsynced);
-typedef void (^PESyncerBlk)(PEAddViewEditController *,
-                            id,
-                            PESyncNotFoundBlk,
-                            PESyncImmediateSuccessBlk,
-                            PESyncImmediateRetryAfterBlk,
-                            PESyncImmediateServerTempErrorBlk,
-                            PESyncImmediateServerErrorBlk,
-                            PESyncConflictBlk,
-                            PESyncImmediateAuthRequiredBlk,
-                            PESyncImmediateDependencyUnsynced);
+                                       PESyncAuthRequiredBlk,
+                                       PESyncDependencyUnsynced);
+typedef void (^PEUploaderBlk)(PEAddViewEditController *,
+                              id,
+                              PESyncNotFoundBlk,
+                              PESyncSuccessBlk,
+                              PESyncRetryAfterBlk,
+                              PESyncServerTempErrorBlk,
+                              PESyncServerErrorBlk,
+                              PESyncConflictBlk,
+                              PESyncAuthRequiredBlk,
+                              PESyncDependencyUnsynced);
 typedef void (^PESaveNewEntityBlk)(UIView *,
                                    id,
                                    PESyncNotFoundBlk,
-                                   PESyncImmediateSuccessBlk,
-                                   PESyncImmediateRetryAfterBlk,
-                                   PESyncImmediateServerTempErrorBlk,
-                                   PESyncImmediateServerErrorBlk,
+                                   PESyncSuccessBlk,
+                                   PESyncRetryAfterBlk,
+                                   PESyncServerTempErrorBlk,
+                                   PESyncServerErrorBlk,
                                    PESyncConflictBlk,
-                                   PESyncImmediateAuthRequiredBlk,
-                                   PESyncImmediateDependencyUnsynced);
+                                   PESyncAuthRequiredBlk,
+                                   PESyncDependencyUnsynced);
 typedef void (^PEItemAddedBlk)(PEAddViewEditController *, id);
 typedef void (^PEItemChangedBlk)(id, NSIndexPath *);
 typedef void (^PEPrepareUIForUserInteractionBlk)(UIView *);
@@ -111,15 +120,16 @@ doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
      isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
       isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
 syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForLaterSync
 prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
      entityValidator:(PEEntityValidatorBlk)entityValidator
-              syncer:(PESyncerBlk)syncer
+              uploader:(PEUploaderBlk)uploader
 numRemoteDepsNotLocal:(PENumRemoteDepsNotLocal)numRemoteDepsNotLocal
                merge:(PEMergeBlk)merge
-   fetchDependencies:(PEFetcherBlk)fetchDependencies
+   fetchDependencies:(PEDependencyFetcherBlk)fetchDependencies
      updateDepsPanel:(PEUpdateDepsPanel)updateDepsPanel
+          downloader:(PEDownloaderBlk)downloader
+   postDownloadSaver:(PEPostDownloaderSaver)postDownloadSaver
 conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
 conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
 getterForNotification:(SEL)getterForNotification;
@@ -141,8 +151,7 @@ getterForNotification:(SEL)getterForNotification;
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
                                          isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
                                           isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
-                          syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-                         isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForBackgroundSync;
+                          syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode;
 
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
                                       listViewController:(PEListViewController *)listViewController
@@ -160,7 +169,6 @@ getterForNotification:(SEL)getterForNotification;
                                          isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
                                           isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-                         isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForBackgroundSync
                                    getterForNotification:(SEL)getterForNotification;
 
 + (PEAddViewEditController *)viewEntityCtrlrWithEntity:(PELMMainSupport *)entity
@@ -182,15 +190,16 @@ getterForNotification:(SEL)getterForNotification;
                                        isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
                                         isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                         syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-                       isEntityAppropriateForLaterSync:(BOOL)isEntityAppropriateForLaterSync
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator
-                                                syncer:(PESyncerBlk)syncer
+                                              uploader:(PEUploaderBlk)uploader
                                  numRemoteDepsNotLocal:(PENumRemoteDepsNotLocal)numRemoteDepsNotLocal
                                                  merge:(PEMergeBlk)merge
-                                     fetchDependencies:(PEFetcherBlk)fetchDependencies
+                                     fetchDependencies:(PEDependencyFetcherBlk)fetchDependencies
                                        updateDepsPanel:(PEUpdateDepsPanel)updateDepsPanel
+                                            downloader:(PEDownloaderBlk)downloader
+                                     postDownloadSaver:(PEPostDownloaderSaver)postDownloadSaver
                                  conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
                                 conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity;
 

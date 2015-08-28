@@ -400,7 +400,7 @@ simply be saved locally.";
     // the token from its database based on a set of rules anyway (e.g., natural expiration date, or,
     // invalidation after N-amount of inactivity, etc)
     [_coordDao logoutUser:_user
-   addlRemoteStoreBusyBlk:^(NSDate *retryAfter) { postAuthTokenNoMatterWhat(); }
+       remoteStoreBusyBlk:^(NSDate *retryAfter) { postAuthTokenNoMatterWhat(); }
         addlCompletionBlk:^{ postAuthTokenNoMatterWhat(); }
     localSaveErrorHandler:[FPUtils localSaveErrorHandlerMaker]()];
   };

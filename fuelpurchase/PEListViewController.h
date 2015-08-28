@@ -19,13 +19,13 @@ typedef void (^PEItemDeleter)(UIViewController *,
                               id,
                               NSIndexPath *,
                               PESyncNotFoundBlk,
-                              PESyncImmediateSuccessBlk,
-                              PESyncImmediateRetryAfterBlk,
-                              PESyncImmediateServerTempErrorBlk,
-                              PESyncImmediateServerErrorBlk,
+                              PESyncSuccessBlk,
+                              PESyncRetryAfterBlk,
+                              PESyncServerTempErrorBlk,
+                              PESyncServerErrorBlk,
                               PESyncConflictBlk,
-                              PESyncImmediateAuthRequiredBlk,
-                              PESyncImmediateDependencyUnsynced);
+                              PESyncAuthRequiredBlk,
+                              PESyncDependencyUnsynced);
 typedef void (^PEItemLocalDeleter)(UIViewController *, id, NSIndexPath *);
 typedef NSInteger (^PEItemChildrenCounter)(id, NSIndexPath *, UIViewController *);
 typedef NSArray * (^PEItemChildrenMsgsBlk)(id, NSIndexPath *, UIViewController *);
