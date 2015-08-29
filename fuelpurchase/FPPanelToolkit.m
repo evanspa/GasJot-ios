@@ -1003,8 +1003,8 @@ location from the given address above."]
 }
 
 - (PEEntityPanelMakerBlk)fplogFormPanelMakerWithUser:(FPUser *)user
-                              defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
-                          defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
+                              defaultSelectedVehicle:(FPVehicle *(^)(void))defaultSelectedVehicle
+                          defaultSelectedFuelStation:(FPFuelStation *(^)(void))defaultSelectedFuelStation
                                 defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
   return ^ UIView * (UIViewController *parentViewController) {
     UIView *parentView = [parentViewController view];
@@ -1013,8 +1013,8 @@ location from the given address above."]
                                       relativeToView:parentView];
     NSDictionary *components = [self fplogFormComponentsWithUser:user
                                       displayDisclosureIndicator:YES
-                                          defaultSelectedVehicle:defaultSelectedVehicle
-                                      defaultSelectedFuelStation:defaultSelectedFuelStation
+                                          defaultSelectedVehicle:defaultSelectedVehicle()
+                                      defaultSelectedFuelStation:defaultSelectedFuelStation()
                                             defaultPickedLogDate:defaultPickedLogDate](parentViewController);
     UITableView *vehicleFuelStationDateTableView = components[@(FPFpLogTagVehicleFuelStationAndDate)];
     UITextField *numGallonsTf = components[@(FPFpLogTagNumGallons)];
@@ -1256,7 +1256,7 @@ location from the given address above."]
 }
 
 - (PEEntityPanelMakerBlk)envlogFormPanelMakerWithUser:(FPUser *)user
-                               defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
+                               defaultSelectedVehicle:(FPVehicle *(^)(void))defaultSelectedVehicle
                                  defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
   return ^ UIView * (UIViewController *parentViewController) {
     UIView *parentView = [parentViewController view];
@@ -1265,7 +1265,7 @@ location from the given address above."]
                                        relativeToView:parentView];
     NSDictionary *components = [self envlogFormComponentsWithUser:user
                                       displayDisclosureIndicators:YES
-                                           defaultSelectedVehicle:defaultSelectedVehicle
+                                           defaultSelectedVehicle:defaultSelectedVehicle()
                                              defaultPickedLogDate:defaultPickedLogDate](parentViewController);
     UITableView *vehicleAndLogDateTableView = components[@(FPEnvLogTagVehicleAndDate)];
     UITextField *odometerTf = components[@(FPEnvLogTagOdometer)];

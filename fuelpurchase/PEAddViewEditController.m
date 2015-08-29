@@ -1205,13 +1205,13 @@ merge conflicts.";
     editPrepareSuccess = _entityEditPreparer(self, _entity);
   }
   if (editPrepareSuccess) {
-    //[[self navigationItem] setTitle:[NSString stringWithFormat:@"Edit %@", _entityTitle]];
     [[self navigationItem] setTitleView:[self titleWithText:@"(editing mode)"]]; //[NSString stringWithFormat:@"Edit %@", _entityTitle]]];
     [[self navigationItem] setLeftBarButtonItem:[[UIBarButtonItem alloc]
                                                  initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
                                                  target:self
                                                  action:@selector(cancelAddEdit)]];
     [_entityViewPanel removeFromSuperview];
+    _entityFormPanel = _entityFormPanelMaker(self);
     [PEUIUtils placeView:_entityFormPanel atTopOf:[self view] withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0 hpadding:0];
     _entityToPanelBinder(_entity, _entityFormPanel);
     _panelEnablerDisabler(_entityFormPanel, YES);

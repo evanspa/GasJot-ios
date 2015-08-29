@@ -1830,12 +1830,34 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                        PESyncRetryAfterBlk retryAfterBlk,
                                        PESyncServerTempErrorBlk tempErrBlk,
                                        PESyncAuthRequiredBlk authReqdBlk) {
-      
+      NSString *mainMsgFragment = @"fetching fuel purchase log";
+      NSString *recordTitle = @"Fuel purchase log";
+      float percentOfFetching = 1.0;
+      [_coordDao fetchFuelPurchaseLogWithGlobalId:[fplog globalIdentifier]
+                                          forUser:user
+                              notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle);}
+                                       successBlk:^(FPFuelPurchaseLog *fetchedFplog) {successBlk(percentOfFetching, mainMsgFragment, recordTitle, fetchedFplog);}
+                               remoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(percentOfFetching, mainMsgFragment, recordTitle, retryAfter);}
+                               tempRemoteErrorBlk:^{tempErrBlk(percentOfFetching, mainMsgFragment, recordTitle);}
+                              addlAuthRequiredBlk:^{authReqdBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}];
     };
     PEPostDownloaderSaver postDownloadSaverBlk = ^ (PEAddViewEditController *ctrl,
                                                     FPFuelPurchaseLog *downloadedFplog,
                                                     FPFuelPurchaseLog *fplog) {
-      
+      FPVehicle *vehicleForDownloadedFplog = [[_coordDao localDao] masterVehicleWithGlobalId:[downloadedFplog vehicleGlobalIdentifier]
+                                                                                       error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPFuelStation *fuelstationForDownloadedFplog = [[_coordDao localDao] masterFuelstationWithGlobalId:[downloadedFplog fuelStationGlobalIdentifier]
+                                                                                                   error:[FPUtils localFetchErrorHandlerMaker]()];
+      [[_coordDao localDao] saveMasterFuelPurchaseLog:downloadedFplog
+                                           forVehicle:vehicleForDownloadedFplog
+                                       forFuelstation:fuelstationForDownloadedFplog
+                                              forUser:user
+                                                error:[FPUtils localSaveErrorHandlerMaker]()];
+      UITableView *vehFsAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
+      FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds = (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehFsAndDateTableView dataSource];
+      [ds setSelectedVehicle:vehicleForDownloadedFplog];
+      [ds setSelectedFuelStation:fuelstationForDownloadedFplog];
+      [vehFsAndDateTableView reloadData];
     };
     return [PEAddViewEditController
              viewEntityCtrlrWithEntity:fpLog
@@ -1844,11 +1866,10 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                              uitoolkit:_uitoolkit
                         itemChangedBlk:itemChangedBlk
                   entityFormPanelMaker:
-                        [_panelToolkit
-                           fplogFormPanelMakerWithUser:user
-                                defaultSelectedVehicle:[_coordDao vehicleForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()]
-                            defaultSelectedFuelStation:[_coordDao fuelStationForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()]
-                                  defaultPickedLogDate:[fpLog purchasedAt]]
+                        [_panelToolkit fplogFormPanelMakerWithUser:user
+                                            defaultSelectedVehicle:^{return [_coordDao vehicleForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                        defaultSelectedFuelStation:^{return [_coordDao fuelStationForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                              defaultPickedLogDate:[fpLog purchasedAt]]
                   entityViewPanelMaker:[_panelToolkit fplogViewPanelMakerWithUser:user]
                    entityToPanelBinder:[_panelToolkit fplogToFplogPanelBinder]
                    panelToEntityBinder:[_panelToolkit fplogFormPanelToFplogBinder]
@@ -2206,7 +2227,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                        listViewController:listViewController
                              itemAddedBlk:itemAddedBlk
                          entityFormPanelMaker:[_panelToolkit envlogFormPanelMakerWithUser:user
-                                                                   defaultSelectedVehicle:defaultSelectedVehicle
+                                                                   defaultSelectedVehicle:^{ return defaultSelectedVehicle; }
                                                                      defaultPickedLogDate:[NSDate date]]
                       entityToPanelBinder:[_panelToolkit envlogToEnvlogPanelBinder]
                       panelToEntityBinder:[_panelToolkit envlogFormPanelToEnvlogBinder]
@@ -2449,12 +2470,27 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                        PESyncRetryAfterBlk retryAfterBlk,
                                        PESyncServerTempErrorBlk tempErrBlk,
                                        PESyncAuthRequiredBlk authReqdBlk) {
-      
+      NSString *mainMsgFragment = @"fetching environment log";
+      NSString *recordTitle = @"Environment log";
+      float percentOfFetching = 1.0;
+      [_coordDao fetchEnvironmentLogWithGlobalId:[envLog globalIdentifier]
+                                         forUser:user
+                             notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle);}
+                                      successBlk:^(FPEnvironmentLog *fetchedEnvlog) {successBlk(percentOfFetching, mainMsgFragment, recordTitle, fetchedEnvlog);}
+                              remoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(percentOfFetching, mainMsgFragment, recordTitle, retryAfter);}
+                              tempRemoteErrorBlk:^{tempErrBlk(percentOfFetching, mainMsgFragment, recordTitle);}
+                             addlAuthRequiredBlk:^{authReqdBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}];
     };
     PEPostDownloaderSaver postDownloadSaverBlk = ^ (PEAddViewEditController *ctrl,
                                                     FPEnvironmentLog *downloadedEnvlog,
                                                     FPEnvironmentLog *envlog) {
-      
+      FPVehicle *vehicleForDownloadedEnvlog = [[_coordDao localDao] masterVehicleWithGlobalId:[downloadedEnvlog vehicleGlobalIdentifier]
+                                                                                        error:[FPUtils localFetchErrorHandlerMaker]()];
+      [[_coordDao localDao] saveMasterEnvironmentLog:downloadedEnvlog forVehicle:vehicleForDownloadedEnvlog forUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
+      UITableView *vehicleAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPEnvLogTagVehicleAndDate];
+      FPEnvLogVehicleAndDateDataSourceDelegate *ds = (FPEnvLogVehicleAndDateDataSourceDelegate *)[vehicleAndDateTableView dataSource];
+      [ds setSelectedVehicle:vehicleForDownloadedEnvlog];
+      [vehicleAndDateTableView reloadData];
     };
     return [PEAddViewEditController viewEntityCtrlrWithEntity:envLog
                                            listViewController:listViewController
@@ -2462,8 +2498,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                     uitoolkit:_uitoolkit
                                                itemChangedBlk:itemChangedBlk
                                          entityFormPanelMaker:[_panelToolkit envlogFormPanelMakerWithUser:user
-                                                                                   defaultSelectedVehicle:[_coordDao vehicleForEnvironmentLog:envLog
-                                                                                                                                        error:[FPUtils localFetchErrorHandlerMaker]()]
+                                                                                   defaultSelectedVehicle:^{ return [_coordDao vehicleForEnvironmentLog:envLog
+                                                                                                                                                  error:[FPUtils localFetchErrorHandlerMaker]()]; }
                                                                                      defaultPickedLogDate:[envLog logDate]]
                                          entityViewPanelMaker:[_panelToolkit envlogViewPanelMakerWithUser:user]
                                           entityToPanelBinder:[_panelToolkit envlogToEnvlogPanelBinder]
