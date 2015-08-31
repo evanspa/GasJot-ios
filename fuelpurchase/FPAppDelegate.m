@@ -456,7 +456,7 @@ in an unauthenticated state.  Is main thread?  %@", [PEUtils yesNoFromBool:[NSTh
                              accentColor:[UIColor colorFromHexCode:@"FFBF40"]
                           fontForButtons:[UIFont systemFontOfSize:[UIFont buttonFontSize]]
                   cornerRadiusForButtons:3
-               verticalPaddingForButtons:30
+               verticalPaddingForButtons:25
              horizontalPaddingForButtons:25
                 bgColorForWarningButtons:[UIColor carrotColor]
               textColorForWarningButtons:[UIColor whiteColor]

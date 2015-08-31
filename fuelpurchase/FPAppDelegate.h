@@ -55,6 +55,8 @@
 
 #pragma mark - Properties
 
+@property (nonatomic) BOOL offlineMode;
+
 /** The application window. */
 @property (strong, nonatomic) UIWindow *window;
 

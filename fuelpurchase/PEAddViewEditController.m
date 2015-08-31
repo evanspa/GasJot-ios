@@ -36,8 +36,10 @@
   PEEntityEditCancelerBlk _entityEditCanceler;
   PEEntityMakerBlk _entityMaker;
   PESaveEntityBlk _entitySaver;
-  PESaveNewEntityBlk _newEntitySaver;
-  PEMarkAsDoneEditingBlk _doneEditingEntityMarker;
+  PESaveNewEntityLocalBlk _newEntitySaverLocal;
+  PESaveNewEntityImmediateSyncBlk _newEntitySaverImmediateSync;
+  PEMarkAsDoneEditingLocalBlk _doneEditingEntityLocalSync;
+  PEMarkAsDoneEditingImmediateSyncBlk _doneEditingEntityImmediateSync;
   PEPrepareUIForUserInteractionBlk _prepareUIForUserInteractionBlk;
   PEViewDidAppearBlk _viewDidAppearBlk;
   PEEntityValidatorBlk _entityValidator;
@@ -62,6 +64,7 @@
   PEConflictResolveFields _conflictResolveFields;
   PEConflictResolvedEntity _conflictResolvedEntity;
   PEUpdateDepsPanel _updateDepsPanel;
+  PEIsOfflineModeBlk _isOfflineMode;
 }
 
 #pragma mark - Initializers
@@ -84,10 +87,13 @@ panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
   entityEditCanceler:(PEEntityEditCancelerBlk)entityEditCanceler
          entityMaker:(PEEntityMakerBlk)entityMaker
          entitySaver:(PESaveEntityBlk)entitySaver
-      newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
-doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
+ newEntitySaverLocal:(PESaveNewEntityLocalBlk)newEntitySaverLocal
+newEntitySaverImmediateSync:(PESaveNewEntityImmediateSyncBlk)newEntitySaverImmediateSync
+doneEditingEntityLocal:(PEMarkAsDoneEditingLocalBlk)doneEditingEntityLocal
+doneEditingEntityImmediateSync:(PEMarkAsDoneEditingImmediateSyncBlk)doneEditingEntityImmediateSync
      isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
       isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
+       isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
 syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
 prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
@@ -126,9 +132,12 @@ getterForNotification:(SEL)getterForNotification {
     _entityEditCanceler = entityEditCanceler;
     _entityMaker = entityMaker;
     _entitySaver = entitySaver;
-    _newEntitySaver = newEntitySaver;
-    _doneEditingEntityMarker = doneEditingEntityMarker;
+    _newEntitySaverLocal = newEntitySaverLocal;
+    _newEntitySaverImmediateSync = newEntitySaverImmediateSync;
+    _doneEditingEntityLocalSync = doneEditingEntityLocal;
+    _doneEditingEntityImmediateSync = doneEditingEntityImmediateSync;
     _isUserLoggedIn = isUserLoggedIn;
+    _isOfflineMode = isOfflineMode;
     _syncImmediateMBProgressHUDMode = syncImmediateMBProgressHUDMode;
     _isAuthenticatedBlk = isAuthenticated;
     _prepareUIForUserInteractionBlk = prepareUIForUserInteractionBlk;
@@ -159,12 +168,14 @@ getterForNotification:(SEL)getterForNotification {
                                              entityTitle:(NSString *)entityTitle
                                        entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
                                              entityMaker:(PEEntityMakerBlk)entityMaker
-                                          newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
+                                     newEntitySaverLocal:(PESaveNewEntityLocalBlk)newEntitySaverLocal
+                             newEntitySaverImmediateSync:(PESaveNewEntityImmediateSyncBlk)newEntitySaverImmediateSync
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
                                          isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
                                           isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
+                                           isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode {
   return [PEAddViewEditController addEntityCtrlrWithUitoolkit:uitoolkit
                                            listViewController:listViewController
@@ -175,12 +186,14 @@ getterForNotification:(SEL)getterForNotification {
                                                   entityTitle:entityTitle
                                             entityAddCanceler:entityAddCanceler
                                                   entityMaker:entityMaker
-                                               newEntitySaver:newEntitySaver
+                                          newEntitySaverLocal:newEntitySaverLocal
+                                  newEntitySaverImmediateSync:newEntitySaverImmediateSync
                                prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                                              viewDidAppearBlk:viewDidAppearBlk
                                               entityValidator:entityValidator
                                               isAuthenticated:isAuthenticated
                                                isUserLoggedIn:isUserLoggedIn
+                                                isOfflineMode:isOfflineMode
                                syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
                                         getterForNotification:nil];
 }
@@ -194,12 +207,14 @@ getterForNotification:(SEL)getterForNotification {
                                              entityTitle:(NSString *)entityTitle
                                        entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
                                              entityMaker:(PEEntityMakerBlk)entityMaker
-                                          newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
+                                     newEntitySaverLocal:(PESaveNewEntityLocalBlk)newEntitySaverLocal
+                             newEntitySaverImmediateSync:(PESaveNewEntityImmediateSyncBlk)newEntitySaverImmediateSync
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
                                          isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
                                           isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
+                                           isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                                    getterForNotification:(SEL)getterForNotification {
   return [[PEAddViewEditController alloc] initWithEntity:nil
@@ -220,10 +235,13 @@ getterForNotification:(SEL)getterForNotification {
                                       entityEditCanceler:nil
                                              entityMaker:entityMaker
                                              entitySaver:nil
-                                          newEntitySaver:newEntitySaver
-                                 doneEditingEntityMarker:nil
+                                     newEntitySaverLocal:newEntitySaverLocal
+                             newEntitySaverImmediateSync:newEntitySaverImmediateSync
+                                  doneEditingEntityLocal:nil
+                          doneEditingEntityImmediateSync:nil
                                          isAuthenticated:isAuthenticated
                                           isUserLoggedIn:isUserLoggedIn
+                                           isOfflineMode:isOfflineMode
                           syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
                           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:viewDidAppearBlk
@@ -255,14 +273,16 @@ getterForNotification:(SEL)getterForNotification {
                                     entityEditPreparer:(PEEntityEditPreparerBlk)entityEditPreparer
                                     entityEditCanceler:(PEEntityEditCancelerBlk)entityEditCanceler
                                            entitySaver:(PESaveEntityBlk)entitySaver
-                               doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
+                                doneEditingEntityLocal:(PEMarkAsDoneEditingLocalBlk)doneEditingEntityLocal
+                        doneEditingEntityImmediateSync:(PEMarkAsDoneEditingImmediateSyncBlk)doneEditingEntityImmediateSync
                                        isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
                                         isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
+                                         isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
                         syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                        entityValidator:(PEEntityValidatorBlk)entityValidator
-                                                uploader:(PEUploaderBlk)uploader
+                                              uploader:(PEUploaderBlk)uploader
                                  numRemoteDepsNotLocal:(PENumRemoteDepsNotLocal)numRemoteDepsNotLocal
                                                  merge:(PEMergeBlk)merge
                                      fetchDependencies:(PEDependencyFetcherBlk)fetchDependencies
@@ -289,10 +309,13 @@ getterForNotification:(SEL)getterForNotification {
                                       entityEditCanceler:entityEditCanceler
                                              entityMaker:nil
                                              entitySaver:entitySaver
-                                          newEntitySaver:nil
-                                 doneEditingEntityMarker:doneEditingEntityMarker
+                                     newEntitySaverLocal:nil
+                             newEntitySaverImmediateSync:nil
+                                  doneEditingEntityLocal:doneEditingEntityLocal
+                          doneEditingEntityImmediateSync:doneEditingEntityImmediateSync
                                          isAuthenticated:isAuthenticated
                                           isUserLoggedIn:isUserLoggedIn
+                                           isOfflineMode:isOfflineMode
                           syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
                           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:viewDidAppearBlk
@@ -739,8 +762,8 @@ There was a problem downloading the entity.";
         UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
         [HUD setCustomView:imageView];
         HUD.mode = MBProgressHUDModeCustomView;
-        [HUD hide:YES afterDelay:1.30];
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.35 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        [HUD hide:YES afterDelay:1.0];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
           postUploadActivities();
         });
       });
@@ -962,8 +985,8 @@ retained."];
           if ([errsForDepsFetch count] == 0) { // success
             dispatch_async(dispatch_get_main_queue(), ^{
               [depFetchHud setLabelText:@"Dependencies fetched."];
-              [depFetchHud hide:YES afterDelay:1.30];
-              dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.35 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+              [depFetchHud hide:YES afterDelay:1.0];
+              dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
                 postFetchAction();
               });
             });
@@ -1263,7 +1286,7 @@ merge conflicts.";
     if (isValidEntity) {
       _panelToEntityBinder(_entityFormPanel, _entity);
       _entitySaver(self, _entity);
-      if (_isAuthenticatedBlk()) {
+      if (_isAuthenticatedBlk() && (!_isOfflineMode() || (_doneEditingEntityLocalSync == nil))) {
         MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         [self.navigationItem setHidesBackButton:YES animated:YES];
         [[[self navigationItem] leftBarButtonItem] setEnabled:NO];
@@ -1293,8 +1316,8 @@ merge conflicts.";
               UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
               [HUD setCustomView:imageView];
               HUD.mode = MBProgressHUDModeCustomView;
-              [HUD hide:YES afterDelay:1.30];
-              dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.35 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+              [HUD hide:YES afterDelay:1.0];
+              dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
                 postEditActivities();
               });
             });
@@ -1548,7 +1571,7 @@ retained."];
           }
         };
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-          _doneEditingEntityMarker(self,
+          _doneEditingEntityImmediateSync(self,
                                    _entity,
                                    syncNotFoundBlk,
                                    syncSuccessBlk,
@@ -1563,19 +1586,25 @@ retained."];
         [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // cancel btn (so they can't cancel it after we'ved saved and we're displaying the HUD)
         [[[self navigationItem] rightBarButtonItem] setEnabled:NO]; // done btn
         [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
-        _doneEditingEntityMarker(self, _entity, nil, nil, nil, nil, nil, nil, nil, nil);
+        _doneEditingEntityLocalSync(self, _entity);
         MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         HUD.delegate = self;
         [HUD setLabelText:[NSString stringWithFormat:@"%@ Saved.", _entityTitle]];
-        if (_isUserLoggedIn()) {
-          [HUD setDetailsLabelText:@"(not synced with server)"];
+        NSString *hudDetailText = nil;
+        if (_isOfflineMode() && _isAuthenticatedBlk()) {
+          hudDetailText = @"(offline mode enabled)";
+        } else if (_isUserLoggedIn() && !_isAuthenticatedBlk()) {
+          hudDetailText = @"(not synced with server)";
+        }
+        if (hudDetailText) {
+          [HUD setDetailsLabelText:hudDetailText];
         }
         UIImage *image = [UIImage imageNamed:@"hud-complete"];
         UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
         [HUD setCustomView:imageView];
         HUD.mode = MBProgressHUDModeCustomView;
-        [HUD hide:YES afterDelay:1.30];
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.35 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        [HUD hide:YES afterDelay:1.0];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
           postEditActivities();
         });
       }
@@ -1675,7 +1704,7 @@ retained."];
         [_listViewController handleAddedEntity:newEntityForNotification];
       }
     };
-    if (_isAuthenticatedBlk()) {
+    if (_isAuthenticatedBlk() && !_isOfflineMode()) {
       void (^reenableScreen)(void) = ^{
         [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
         [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
@@ -1739,8 +1768,8 @@ retained."];
               UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
               [HUD setCustomView:imageView];
               HUD.mode = MBProgressHUDModeCustomView;
-              [HUD hide:YES afterDelay:1.30];
-              dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.4 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+              [HUD hide:YES afterDelay:1.0];
+              dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
                 _itemAddedBlk(self, _newEntity);  // this is what causes this controller to be dismissed
               });
             }
@@ -1994,7 +2023,7 @@ locally.  The error is as follows:";
         }
       };
       dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-        _newEntitySaver(_entityFormPanel,
+        _newEntitySaverImmediateSync(_entityFormPanel,
                         _newEntity,
                         syncNotFoundBlk,
                         syncSuccessBlk,
@@ -2006,22 +2035,28 @@ locally.  The error is as follows:";
                         syncDependencyUnsyncedBlk);
       });
     } else {
-      _newEntitySaver(_entityFormPanel, _newEntity, nil, nil, nil, nil, nil, nil, nil, nil);
+      _newEntitySaverLocal(_entityFormPanel, _newEntity);
       [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // cancel btn (so they can't cancel it after we'ved saved and we're displaying the HUD)
       [[[self navigationItem] rightBarButtonItem] setEnabled:NO]; // done btn
       [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
       MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
       HUD.delegate = self;
       [HUD setLabelText:[NSString stringWithFormat:@"%@ Saved.", _entityTitle]];
-      if (_isUserLoggedIn()) {
-        [HUD setDetailsLabelText:@"(not synced with server)"];
+      NSString *hudDetailText = nil;
+      if (_isOfflineMode() && _isAuthenticatedBlk()) {
+        hudDetailText = @"(offline mode enabled)";
+      } else if (_isUserLoggedIn() && !_isAuthenticatedBlk()) {
+        hudDetailText = @"(not synced with server)";
+      }
+      if (hudDetailText) {
+        [HUD setDetailsLabelText:hudDetailText];
       }
       UIImage *image = [UIImage imageNamed:@"hud-complete"];
       UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
       [HUD setCustomView:imageView];
       HUD.mode = MBProgressHUDModeCustomView;
-      [HUD hide:YES afterDelay:1.30];
-      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.4 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+      [HUD hide:YES afterDelay:1.0];
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         notificationSenderForAdd(_newEntity);
         _itemAddedBlk(self, _newEntity);  // this is what causes this controller to be dismissed
       });

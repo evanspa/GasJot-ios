@@ -9,6 +9,7 @@
 #import "FPSettingsController.h"
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <BlocksKit/UIControl+BlocksKit.h>
+#import <BlocksKit/UIView+BlocksKit.h>
 #import "PELMUIUtils.h"
 #import "FPNames.h"
 #import "FPUtils.h"
@@ -96,16 +97,21 @@
 
 #pragma mark - Helpers
 
+- (UIView *)paddedMessageWithString:(NSString *)message {
+  UILabel *label = [PEUIUtils labelWithKey:message
+                                      font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                           backgroundColor:[UIColor clearColor]
+                                 textColor:[UIColor darkGrayColor]
+                       verticalTextPadding:3.0];
+  return [PEUIUtils leftPadView:label padding:8.0];
+}
+
 - (UIView *)logoutPaddedMessage {
-  UILabel *logoutMsgLabel = [PEUIUtils labelWithKey:@"\
+  NSString *logoutMsg = @"\
 Logging out will disconnect this device from\n\
 your remote account.  This will remove your\n\
-fuel purchase data from this device only."
-                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                    backgroundColor:[UIColor clearColor]
-                                          textColor:[UIColor darkGrayColor]
-                                verticalTextPadding:3.0];
-  return [PEUIUtils leftPadView:logoutMsgLabel padding:8.0];
+fuel purchase data from this device only.";
+  return [self paddedMessageWithString:logoutMsg];
 }
 
 - (UIView *)messagePanelWithMessage:(NSString *)message iconImage:(UIImage *)iconImage {
@@ -131,9 +137,32 @@ fuel purchase data from this device only."
   return messagePanel;
 }
 
+- (void)displayOfflineModeInfoAlert {
+  [PEUIUtils showInfoAlertWithTitle:@"Offline mode."
+                   alertDescription:[[NSAttributedString alloc] initWithString:@"\
+Offline mode prevents upload attempts to\n\
+the server, keeping all saves local-only.\n\n\
+Enable offline mode if you are making\n\
+many saves and you want them done\n\
+instantly.  Or enable offline mode if you\n\
+are making saves and you know you have a\n\
+poor internet connection.\n\n\
+Later, you can bulk-upload your edits via:\n\n\
+'Unsynced Edits' \u2794 'Sync All'"]
+                           topInset:70.0 buttonTitle:@"Okay."
+                       buttonAction:^{}
+                     relativeToView:self.tabBarController.view];
+}
+
 #pragma mark - Panel Makers
 
 - (void)makeDoesHaveAuthTokenPanel {
+  CGFloat dividerHeight = (1.0 / [UIScreen mainScreen].scale);
+  UIView *(^makeDivider)(CGFloat) = ^ UIView * (CGFloat widthOf) {
+    UIView *divider = [PEUIUtils panelWithWidthOf:widthOf relativeToView:_doesHaveAuthTokenPanel fixedHeight:dividerHeight];
+    [divider setBackgroundColor:[UIColor darkGrayColor]];
+    return divider;
+  };
   NSString *message = @"\
 You are currently logged in.  From here\n\
 you can view and edit your account\n\
@@ -148,16 +177,40 @@ information and settings.";
   [accountSettingsBtn bk_addEventHandler:^(id sender) {
     [PEUIUtils displayController:[_screenToolkit newUserAccountDetailScreenMaker](_user) fromController:self animated:YES];
   } forControlEvents:UIControlEventTouchUpInside];
+  NSString *offlineModeLabelText = @"\
+Offline mode.  Enables fast\n\
+saving (adds / edits only) in\n\
+poor-connection environments.";
+  NSMutableAttributedString *offlineModeLabelAttrText =
+    [[NSMutableAttributedString alloc] initWithString:offlineModeLabelText];
+  NSDictionary *attrs = @{ NSUnderlineStyleAttributeName : @(NSUnderlineStyleSingle),
+                           NSForegroundColorAttributeName : [UIColor blueColor]};
+  [offlineModeLabelAttrText setAttributes:attrs range:NSMakeRange(0, 12)];
+  UILabel *offlineModeLabel = [PEUIUtils labelWithAttributeText:offlineModeLabelAttrText
+                                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                backgroundColor:[UIColor clearColor]
+                                                      textColor:[UIColor darkGrayColor]
+                                            verticalTextPadding:3.0];
+  [offlineModeLabel setUserInteractionEnabled:YES];
+  UITapGestureRecognizer *tapGesture =
+    [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(displayOfflineModeInfoAlert)];
+  [offlineModeLabel addGestureRecognizer:tapGesture];
+  UIView *offlineModeLabelPanelWithPad = [PEUIUtils leftPadView:offlineModeLabel padding:8.0];
+  UISwitch *offlineModeSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+  [offlineModeSwitch setOn:[APP offlineMode]];
+  [offlineModeSwitch bk_addEventHandler:^(id sender) {
+    [APP setOfflineMode:offlineModeSwitch.on];
+  } forControlEvents:UIControlEventTouchUpInside];
+
   UIView *logoutMsgLabelWithPad = [self logoutPaddedMessage];
   UIButton *logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
   [[logoutBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
-  
   // place views onto panel
   [PEUIUtils placeView:messagePanel
                atTopOf:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:100
+              vpadding:80
               hpadding:0.0];
   [PEUIUtils placeView:accountSettingsBtn
                  below:messagePanel
@@ -165,10 +218,34 @@ information and settings.";
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:7.0
               hpadding:0.0];
-  [PEUIUtils placeView:logoutMsgLabelWithPad
-            atBottomOf:_doesHaveAuthTokenPanel
+  UIView *divider = makeDivider(1.0);
+  [PEUIUtils placeView:divider below:accountSettingsBtn
+                  onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:175.0
+              vpadding:20.0
+              hpadding:0.0];
+  [PEUIUtils placeView:offlineModeLabelPanelWithPad
+                 below:divider
+                  onto:_doesHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:20.0
+              hpadding:0.0];
+  [PEUIUtils placeView:offlineModeSwitch
+          toTheRightOf:offlineModeLabelPanelWithPad
+                  onto:_doesHaveAuthTokenPanel
+         withAlignment:PEUIVerticalAlignmentTypeMiddle
+              hpadding:30.0];
+  divider = makeDivider(1.0);
+  [PEUIUtils placeView:divider
+                 below:offlineModeLabelPanelWithPad
+                  onto:_doesHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:20.0 hpadding:0.0];
+  [PEUIUtils placeView:logoutMsgLabelWithPad
+                 below:divider
+                  onto:_doesHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:20.0
               hpadding:0.0];
   [PEUIUtils placeView:logoutBtn
                  below:logoutMsgLabelWithPad
@@ -367,8 +444,10 @@ be undone.";
 #pragma mark - Logout
 
 - (void)logout {
+  __block MBProgressHUD *HUD;
   void (^postAuthTokenNoMatterWhat)(void) = ^{
     dispatch_async(dispatch_get_main_queue(), ^{
+      [HUD hide:YES];
       [APP clearKeychain];
       [_coordDao resetAsLocalUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
       [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLogoutNotification
@@ -395,6 +474,9 @@ simply be saved locally.";
     });
   };
   void (^doLogout)(void) = ^{
+    HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    HUD.delegate = self;
+    HUD.labelText = @"Logging out...";
     // even if the logout fails, we don't care; we'll still
     // tell the user that logout was successful.  The server should have the smarts to eventually delete
     // the token from its database based on a set of rules anyway (e.g., natural expiration date, or,
@@ -420,11 +502,6 @@ Are you sure you want to do continue?"]
   } else {
     doLogout();
   }
-}
-
-#pragma mark - Edit Mode
-
-- (void)putInEditMode {
 }
 
 @end

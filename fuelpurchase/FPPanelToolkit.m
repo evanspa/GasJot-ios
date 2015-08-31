@@ -933,8 +933,7 @@ location from the given address above."]
     tfMaker(@"Car was per-gallon discount", FPFpLogTagCarWashPerGallonDiscount);
     [carWashPerGallonDiscountTf setKeyboardType:UIKeyboardTypeDecimalPad];
     components[@(FPFpLogTagCarWashPerGallonDiscount)] = carWashPerGallonDiscountTf;
-    UISwitch *gotCarWashSwitch =
-    [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+    UISwitch *gotCarWashSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
     [gotCarWashSwitch setTag:FPFpLogTagGotCarWash];
     components[@(FPFpLogTagGotCarWash)] = gotCarWashSwitch;
     UIView *gotCarWashPanel =

@@ -69,7 +69,7 @@ PODS:
     - AFNetworking (~> 2.5.4)
     - CocoaLumberjack (~> 1.9)
     - PEObjc-Commons (~> 1.0.43)
-  - PEObjc-Commons (1.0.44):
+  - PEObjc-Commons (1.0.45):
     - BlocksKit (~> 2.2.5)
     - JGActionSheet (~> 1.0.4)
   - PESimu-Select (1.0.3):
@@ -104,7 +104,7 @@ DEPENDENCIES:
   - PEDev-Console (~> 1.0.4)
   - PEFuelPurchase-Common (~> 1.0.8)
   - PEFuelPurchase-Model (~> 1.0.94)
-  - PEObjc-Commons (~> 1.0.44)
+  - PEObjc-Commons (~> 1.0.45)
   - ReactiveCocoa (~> 2.4.7)
   - UICKeyChainStore (~> 2.0.5)
 
@@ -123,7 +123,7 @@ SPEC CHECKSUMS:
   PEFuelPurchase-Common: 315cd43955e69e5be94373405f1b55b6723d30b6
   PEFuelPurchase-Model: 0aa8b6fb1303cf2c906c9c3524682afa7866d65c
   PEHateoas-Client: 0a08b2f02833411ea1fab2a92d8949efd14035d8
-  PEObjc-Commons: 3848fda3d554beb62dedece03f6540c656fcee3c
+  PEObjc-Commons: de76aa61e6c2ab39c5c9be0d1e20d4fadfc46aa2
   PESimu-Select: 9ad38adb78e42e79c9f9365f71c9b05215b6ac10
   PEWire-Control: 2aeefa4014575adbc52cfbf3206395d9a7c07b22
   PEXML-Utils: f7e0759b8e4e2ec3a39c781b362d7fb233fc8421

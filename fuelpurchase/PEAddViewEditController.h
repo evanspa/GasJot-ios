@@ -36,6 +36,7 @@ typedef void (^PESyncDependencyUnsynced)(float, NSString *, NSString *, NSString
 typedef void (^PEEntitySyncCancelerBlk)(PELMMainSupport *, NSError *, NSNumber *);
 typedef BOOL (^PEIsAuthenticatedBlk)(void);
 typedef BOOL (^PEIsLoggedInBlk)(void);
+typedef BOOL (^PEIsOfflineModeBlk)(void);
 typedef NSInteger (^PENumRemoteDepsNotLocal)(id);
 typedef void (^PEUpdateDepsPanel)(PEAddViewEditController *, id);
 typedef NSDictionary * (^PEMergeBlk)(PEAddViewEditController *, id, id);
@@ -56,16 +57,17 @@ typedef void (^PEDownloaderBlk)(PEAddViewEditController *,
                                 PESyncRetryAfterBlk,
                                 PESyncServerTempErrorBlk,
                                 PESyncAuthRequiredBlk);
-typedef void (^PEMarkAsDoneEditingBlk)(PEAddViewEditController *,
-                                       id,
-                                       PESyncNotFoundBlk,
-                                       PESyncSuccessBlk,
-                                       PESyncRetryAfterBlk,
-                                       PESyncServerTempErrorBlk,
-                                       PESyncServerErrorBlk,
-                                       PESyncConflictBlk,
-                                       PESyncAuthRequiredBlk,
-                                       PESyncDependencyUnsynced);
+typedef void (^PEMarkAsDoneEditingLocalBlk)(PEAddViewEditController *, id);
+typedef void (^PEMarkAsDoneEditingImmediateSyncBlk)(PEAddViewEditController *,
+                                                    id,
+                                                    PESyncNotFoundBlk,
+                                                    PESyncSuccessBlk,
+                                                    PESyncRetryAfterBlk,
+                                                    PESyncServerTempErrorBlk,
+                                                    PESyncServerErrorBlk,
+                                                    PESyncConflictBlk,
+                                                    PESyncAuthRequiredBlk,
+                                                    PESyncDependencyUnsynced);
 typedef void (^PEUploaderBlk)(PEAddViewEditController *,
                               id,
                               PESyncNotFoundBlk,
@@ -76,16 +78,17 @@ typedef void (^PEUploaderBlk)(PEAddViewEditController *,
                               PESyncConflictBlk,
                               PESyncAuthRequiredBlk,
                               PESyncDependencyUnsynced);
-typedef void (^PESaveNewEntityBlk)(UIView *,
-                                   id,
-                                   PESyncNotFoundBlk,
-                                   PESyncSuccessBlk,
-                                   PESyncRetryAfterBlk,
-                                   PESyncServerTempErrorBlk,
-                                   PESyncServerErrorBlk,
-                                   PESyncConflictBlk,
-                                   PESyncAuthRequiredBlk,
-                                   PESyncDependencyUnsynced);
+typedef void (^PESaveNewEntityLocalBlk)(UIView *, id);
+typedef void (^PESaveNewEntityImmediateSyncBlk)(UIView *,
+                                                id,
+                                                PESyncNotFoundBlk,
+                                                PESyncSuccessBlk,
+                                                PESyncRetryAfterBlk,
+                                                PESyncServerTempErrorBlk,
+                                                PESyncServerErrorBlk,
+                                                PESyncConflictBlk,
+                                                PESyncAuthRequiredBlk,
+                                                PESyncDependencyUnsynced);
 typedef void (^PEItemAddedBlk)(PEAddViewEditController *, id);
 typedef void (^PEItemChangedBlk)(id, NSIndexPath *);
 typedef void (^PEPrepareUIForUserInteractionBlk)(UIView *);
@@ -115,10 +118,13 @@ panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
   entityEditCanceler:(PEEntityEditCancelerBlk)entityEditCanceler
          entityMaker:(PEEntityMakerBlk)entityMaker
          entitySaver:(PESaveEntityBlk)entitySaver
-      newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
-doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
+ newEntitySaverLocal:(PESaveNewEntityLocalBlk)newEntitySaverLocal
+newEntitySaverImmediateSync:(PESaveNewEntityImmediateSyncBlk)newEntitySaverImmediateSync
+doneEditingEntityLocal:(PEMarkAsDoneEditingLocalBlk)doneEditingEntityLocal
+doneEditingEntityImmediateSync:(PEMarkAsDoneEditingImmediateSyncBlk)doneEditingEntityImmediateSync
      isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
       isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
+       isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
 syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
 prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
     viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
@@ -145,12 +151,14 @@ getterForNotification:(SEL)getterForNotification;
                                              entityTitle:(NSString *)entityTitle
                                        entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
                                              entityMaker:(PEEntityMakerBlk)entityMaker
-                                          newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
+                                     newEntitySaverLocal:(PESaveNewEntityLocalBlk)newEntitySaverLocal
+                             newEntitySaverImmediateSync:(PESaveNewEntityImmediateSyncBlk)newEntitySaverImmediateSync
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
                                          isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
                                           isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
+                                           isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode;
 
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
@@ -162,12 +170,14 @@ getterForNotification:(SEL)getterForNotification;
                                              entityTitle:(NSString *)entityTitle
                                        entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
                                              entityMaker:(PEEntityMakerBlk)entityMaker
-                                          newEntitySaver:(PESaveNewEntityBlk)newEntitySaver
+                                     newEntitySaverLocal:(PESaveNewEntityLocalBlk)newEntitySaverLocal
+                             newEntitySaverImmediateSync:(PESaveNewEntityImmediateSyncBlk)newEntitySaverImmediateSync
                           prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
                                          entityValidator:(PEEntityValidatorBlk)entityValidator
                                          isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
                                           isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
+                                           isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                                    getterForNotification:(SEL)getterForNotification;
 
@@ -186,9 +196,11 @@ getterForNotification:(SEL)getterForNotification;
                                     entityEditPreparer:(PEEntityEditPreparerBlk)entityEditPreparer
                                     entityEditCanceler:(PEEntityEditCancelerBlk)entityEditCanceler
                                            entitySaver:(PESaveEntityBlk)entitySaver
-                               doneEditingEntityMarker:(PEMarkAsDoneEditingBlk)doneEditingEntityMarker
+                                doneEditingEntityLocal:(PEMarkAsDoneEditingLocalBlk)doneEditingEntityLocal
+                        doneEditingEntityImmediateSync:(PEMarkAsDoneEditingImmediateSyncBlk)doneEditingEntityImmediateSync
                                        isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
                                         isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
+                                         isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
                         syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                         prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
                                       viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk

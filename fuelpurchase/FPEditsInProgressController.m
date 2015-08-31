@@ -64,7 +64,7 @@ or have known problems."
 
 - (UIView *)syncAllInfoMessage {
   UILabel *infoMsgLabel = [PEUIUtils labelWithKey:@"\
-This action will attempt to sync all 'sync-able'\n\
+This action will attempt to upload all 'sync-able'\n\
 edits.  This include items that don't have\n\
 known problems or are not in edit-in-progress\n\
 mode."

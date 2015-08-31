@@ -502,8 +502,8 @@ Are you sure you want to continue?"]
                 UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
                 [HUD setCustomView:imageView];
                 HUD.mode = MBProgressHUDModeCustomView;
-                [HUD hide:YES afterDelay:1.30];
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.35 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                [HUD hide:YES afterDelay:1.0];
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
                   postDeleteAttemptActivities();
                 });
               });
