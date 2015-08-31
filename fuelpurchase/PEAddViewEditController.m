@@ -462,7 +462,7 @@ getterForNotification:(SEL)getterForNotification {
       [rightBarButtonItems addObject:newSysItem(UIBarButtonSystemItemDone, @selector(doneWithEdit))];
     }
   }
-  [rightBarButtonItems addObject:_uploadBarButtonItem];
+  if (_uploader) { [rightBarButtonItems addObject:_uploadBarButtonItem]; }
   if (_downloader) { [rightBarButtonItems addObject:_downloadBarButtonItem]; }
   [navItem setRightBarButtonItems:rightBarButtonItems animated:YES];
   [self setUploadDownloadBarButtonStates];
@@ -576,13 +576,16 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
         id downloadedEntity = successMsgsForEntityDownload[0][1];
         if ([downloadedEntity isEqual:[NSNull null]]) {
           // we already have the latest version of _entity (server responded with 304)
-          [PEUIUtils showSuccessAlertWithTitle:@"You already have the latest!"
+          [PEUIUtils showSuccessAlertWithTitle:@"You already have the latest."
                               alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You already have the latest version of\n\
-this entity on your device."]
+You already have the latest version of this\n\
+entity on your device."]
                                       topInset:70.0
                                    buttonTitle:@"Okay."
-                                  buttonAction:^{ reenableNavButtons(); }
+                                  buttonAction:^{
+                                    reenableNavButtons();
+                                    [self setUploadDownloadBarButtonStates];
+                                  }
                                 relativeToView:self.view];
         } else {
           void (^fetchDepsThenTakeAction)(void(^)(void)) = [self downloadDepsForEntity:downloadedEntity
@@ -593,15 +596,14 @@ this entity on your device."]
             // to be downloaded).  Also, this block executes on the main thread.
             [PEUIUtils showSuccessAlertWithTitle:@"Success."
                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
-The latest version of this entity has\n\
-been successfully downloaded to your\n\
-device."]
+The latest version of this entity has been\n\
+successfully downloaded to your device."]
                                         topInset:70.0
                                      buttonTitle:@"Okay."
                                     buttonAction:^{
-                                      _postDownloadSaver(self, downloadedEntity, _entity);
                                       [_entity setUpdatedAt:[downloadedEntity updatedAt]];
                                       [_entity overwriteDomainProperties:downloadedEntity];
+                                      _postDownloadSaver(self, downloadedEntity, _entity);
                                       postDownloadActivities();
                                     }
                                   relativeToView:self.view];

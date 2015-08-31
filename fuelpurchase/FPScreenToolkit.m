@@ -674,6 +674,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       NSString *recordTitle = @"Vehicle";
       float percentOfFetching = 1.0;
       [_coordDao fetchVehicleWithGlobalId:[vehicle globalIdentifier]
+                          ifModifiedSince:[vehicle updatedAt]
                                   forUser:user
                       notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle);}
                                successBlk:^(FPVehicle *fetchedVehicle) {successBlk(percentOfFetching, mainMsgFragment, recordTitle, fetchedVehicle);}
@@ -1278,6 +1279,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       NSString *recordTitle = @"Fuel station";
       float percentOfFetching = 1.0;
       [_coordDao fetchFuelstationWithGlobalId:[fuelstation globalIdentifier]
+                              ifModifiedSince:[fuelstation updatedAt]
                                       forUser:user
                           notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle);}
                                    successBlk:^(FPFuelStation *fetchedFuelstation) {successBlk(percentOfFetching, mainMsgFragment, recordTitle, fetchedFuelstation);}
@@ -1834,6 +1836,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       NSString *recordTitle = @"Fuel purchase log";
       float percentOfFetching = 1.0;
       [_coordDao fetchFuelPurchaseLogWithGlobalId:[fplog globalIdentifier]
+                                  ifModifiedSince:[fplog updatedAt]
                                           forUser:user
                               notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle);}
                                        successBlk:^(FPFuelPurchaseLog *fetchedFplog) {successBlk(percentOfFetching, mainMsgFragment, recordTitle, fetchedFplog);}
@@ -2316,15 +2319,15 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       }
     };
     PEUploaderBlk uploader = ^(PEAddViewEditController *ctrl,
-                           FPEnvironmentLog *envLog,
-                           PESyncNotFoundBlk notFoundBlk,
-                           PESyncSuccessBlk successBlk,
-                           PESyncRetryAfterBlk retryAfterBlk,
-                           PESyncServerTempErrorBlk tempErrBlk,
-                           PESyncServerErrorBlk errBlk,
-                           PESyncConflictBlk conflictBlk,
-                           PESyncAuthRequiredBlk authReqdBlk,
-                           PESyncDependencyUnsynced depUnsyncedBlk) {
+                               FPEnvironmentLog *envLog,
+                               PESyncNotFoundBlk notFoundBlk,
+                               PESyncSuccessBlk successBlk,
+                               PESyncRetryAfterBlk retryAfterBlk,
+                               PESyncServerTempErrorBlk tempErrBlk,
+                               PESyncServerErrorBlk errBlk,
+                               PESyncConflictBlk conflictBlk,
+                               PESyncAuthRequiredBlk authReqdBlk,
+                               PESyncDependencyUnsynced depUnsyncedBlk) {
       NSString *mainMsgFragment = @"uploading environment log";
       NSString *recordTitle = @"Environment log";
       [_coordDao flushUnsyncedChangesToEnvironmentLog:envLog
@@ -2474,6 +2477,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       NSString *recordTitle = @"Environment log";
       float percentOfFetching = 1.0;
       [_coordDao fetchEnvironmentLogWithGlobalId:[envLog globalIdentifier]
+                                 ifModifiedSince:[envLog updatedAt]
                                          forUser:user
                              notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle);}
                                       successBlk:^(FPEnvironmentLog *fetchedEnvlog) {successBlk(percentOfFetching, mainMsgFragment, recordTitle, fetchedEnvlog);}

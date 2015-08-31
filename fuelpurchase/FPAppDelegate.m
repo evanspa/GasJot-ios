@@ -71,6 +71,7 @@ NSString * const FPUserAgentDeviceMakeHeaderNameKey      = @"FP user agent devic
 NSString * const FPUserAgentDeviceOsHeaderNameKey        = @"FP user agent device os header name";
 NSString * const FPUserAgentDeviceOsVersionHeaderNameKey = @"FP user agent device os version header name";
 NSString * const FPAuthTokenResponseHeaderNameKey        = @"FP auth token response header name";
+NSString * const FPIfModifiedSinceHeaderNameKey          = @"FP if-modified-since header name";
 NSString * const FPIfUnmodifiedSinceHeaderNameKey        = @"FP if-unmodified-since header name";
 NSString * const FPLoginFailedReasonHeaderNameKey        = @"FP login failed reason header name";
 NSString * const FPAccountClosedReasonHeaderNameKey      = @"FP account closed reason header name";
@@ -365,6 +366,7 @@ shouldSelectViewController:(UIViewController *)viewController {
              errorMaskHeaderName:bundleVal(FPErrorMaskHeaderNameKey)
       establishSessionHeaderName:bundleVal(FPEstablishSessionHeaderNameKey)
      authTokenResponseHeaderName:bundleVal(FPAuthTokenResponseHeaderNameKey)
+       ifModifiedSinceHeaderName:bundleVal(FPIfModifiedSinceHeaderNameKey)
      ifUnmodifiedSinceHeaderName:bundleVal(FPIfUnmodifiedSinceHeaderNameKey)
      loginFailedReasonHeaderName:bundleVal(FPLoginFailedReasonHeaderNameKey)
    accountClosedReasonHeaderName:bundleVal(FPAccountClosedReasonHeaderNameKey)
