@@ -22,6 +22,7 @@
 #import <ReactiveCocoa/RACSubscriptingAssignmentTrampoline.h>
 #import <ReactiveCocoa/RACSignal+Operations.h>
 #import <PEObjc-Commons/PEUIUtils.h>
+#import <PEObjc-Commons/PEUtils.h>
 #import <PEFuelPurchase-Model/FPErrorDomainsAndCodes.h>
 #import "FPAccountLoginController.h"
 #import "FPAuthenticationAssertionSerializer.h"
@@ -343,7 +344,16 @@ button.";
              andLinkRemoteUserToLocalUser:_localUser
             preserveExistingLocalEntities:syncLocalEntities
                           remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.tabBarController.view)
-                        completionHandler:^(id user, NSError *err) { [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(err); }
+                        completionHandler:^(FPUser *user, NSError *err) {
+                          [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(err);
+                          NSDate *mostRecentUpdatedAt =
+                            [[_coordDao localDao] mostRecentMasterUpdateForUser:user
+                                                                          error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
+                          DDLogDebug(@"in FPAccountLoginController/handleSignIn, login success, mostRecentUpdatedAt: [%@](%@)", mostRecentUpdatedAt, [PEUtils millisecondsFromDate:mostRecentUpdatedAt]);
+                          if (mostRecentUpdatedAt) {
+                            [APP setChangelogUpdatedAt:mostRecentUpdatedAt];
+                          }
+                        }
                     localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
     };
     if (_preserveExistingLocalEntities == nil) { // first time asked

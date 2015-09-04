@@ -64,4 +64,8 @@
 
 - (CLLocation *)latestLocation;
 
+- (NSDate *)changelogUpdatedAt;
+
+- (void)setChangelogUpdatedAt:(NSDate *)updatedAt;
+
 @end

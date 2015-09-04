@@ -22,6 +22,7 @@
 #import <ReactiveCocoa/RACSubscriptingAssignmentTrampoline.h>
 #import <ReactiveCocoa/RACSignal+Operations.h>
 #import <PEObjc-Commons/PEUIUtils.h>
+#import <PEObjc-Commons/PEUtils.h>
 #import <PEFuelPurchase-Model/FPErrorDomainsAndCodes.h>
 #import "FPCreateAccountController.h"
 #import "FPAuthenticationAssertionSerializer.h"
@@ -359,7 +360,11 @@ button.";
       [_coordDao establishRemoteAccountForLocalUser:_localUser
                       preserveExistingLocalEntities:syncLocalEntities
                                     remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.tabBarController.view)
-                                  completionHandler:[FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)
+                                  completionHandler:^(FPUser *user, NSError *err) {
+                                    [FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(user, err);
+                                    DDLogDebug(@"in FPCreateAccountController/handleAccountCreation, calling [APP setChangelogUpdatedAt:(%@)", [PEUtils millisecondsFromDate:user.updatedAt]);
+                                    [APP setChangelogUpdatedAt:[user updatedAt]];
+                                  }
                               localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
     };
     if (_preserveExistingLocalEntities == nil) { // first time asked

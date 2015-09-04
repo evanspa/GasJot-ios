@@ -212,6 +212,29 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       }
       return resolvedUser;
     };
+    PEDownloaderBlk downloaderBlk = ^ (PEAddViewEditController *ctrl,
+                                       FPUser *user,
+                                       PESyncNotFoundBlk notFoundBlk,
+                                       PEDownloadSuccessBlk successBlk,
+                                       PESyncRetryAfterBlk retryAfterBlk,
+                                       PESyncServerTempErrorBlk tempErrBlk,
+                                       PESyncAuthRequiredBlk authReqdBlk) {
+      NSString *mainMsgFragment = @"fetching user account";
+      NSString *recordTitle = @"User account";
+      float percentOfFetching = 1.0;
+      [_coordDao fetchUser:user
+           ifModifiedSince:[user updatedAt]
+       notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle);}
+                successBlk:^(FPUser *fetchedUser) {successBlk(percentOfFetching, mainMsgFragment, recordTitle, fetchedUser);}
+        remoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(percentOfFetching, mainMsgFragment, recordTitle, retryAfter);}
+        tempRemoteErrorBlk:^{tempErrBlk(percentOfFetching, mainMsgFragment, recordTitle);}
+       addlAuthRequiredBlk:^{authReqdBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}];
+    };
+    PEPostDownloaderSaver postDownloadSaverBlk = ^ (PEAddViewEditController *ctrl,
+                                                    FPUser *downloadedUser,
+                                                    FPUser *user) {
+      [[_coordDao localDao] saveMasterUser:downloadedUser error:[FPUtils localSaveErrorHandlerMaker]()];
+    };
     return [PEAddViewEditController
               viewEntityCtrlrWithEntity:user
                      listViewController:nil
@@ -242,8 +265,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                   merge:mergeBlk
                       fetchDependencies:nil
                         updateDepsPanel:nil
-                             downloader:nil
-                      postDownloadSaver:nil
+                             downloader:downloaderBlk
+                      postDownloadSaver:postDownloadSaverBlk
                   conflictResolveFields:conflictResolveFieldsBlk
                  conflictResolvedEntity:conflictResolvedEntityBlk];
   };

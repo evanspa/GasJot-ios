@@ -1174,10 +1174,9 @@ merge conflicts.";
                             [_entity setUpdatedAt:[latestEntity updatedAt]];
                             [_entity overwriteDomainProperties:latestEntity];
                             _entityToPanelBinder(_entity, _entityFormPanel);
-                            // TODO - need to invoke block that takes 'self' for additional
-                            // updating of the UI (e.g., the updating of the table DS for envlog
-                            // and fplog screens) - like:
-                            _updateDepsPanel(self, latestEntity);
+                            if (_updateDepsPanel) {
+                              _updateDepsPanel(self, latestEntity);
+                            }
                           });
                         }
                   forceSaveLocalButtonTitle:@"I don't care.  Force save my local copy."

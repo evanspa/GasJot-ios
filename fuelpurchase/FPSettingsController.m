@@ -31,7 +31,7 @@
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
-  UIView *_doesHaveAuthTokenPanel;
+  UIScrollView *_doesHaveAuthTokenPanel;
   UIView *_doesNotHaveAuthTokenPanel;
   UIView *_notLoggedInPanel;
 }
@@ -65,6 +65,7 @@
   [self makeNotLoggedInPanel];
   [self makeDoesHaveAuthTokenPanel];
   [self makeDoesNotHaveAuthTokenPanel];
+  [self setAutomaticallyAdjustsScrollViewInsets:NO]; // http://stackoverflow.com/questions/6523205/uiscrollview-adjusts-contentoffset-when-contentsize-changes
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -163,13 +164,17 @@ Later, you can bulk-upload your edits via:\n\n\
     [divider setBackgroundColor:[UIColor darkGrayColor]];
     return divider;
   };
-  NSString *message = @"\
+  ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
+  _doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
+  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width,
+                                                     1.19 * self.view.frame.size.height)];
+  [_doesHaveAuthTokenPanel setBounces:NO];
+  
+  NSString *accountSettingsMessage = @"\
 You are currently logged in.  From here\n\
 you can view and edit your account\n\
 information and settings.";
-  UIView *messagePanel = [self messagePanelWithMessage:message iconImage:[UIImage syncable]];
-  ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
-  _doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
+  UIView *accountSettingsMsgPanel = [self messagePanelWithMessage:accountSettingsMessage iconImage:[UIImage syncable]];
   UIButton *accountSettingsBtn = [_uitoolkit systemButtonMaker](@"Account Settings", nil, nil);
   [[accountSettingsBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:accountSettingsBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
@@ -177,6 +182,71 @@ information and settings.";
   [accountSettingsBtn bk_addEventHandler:^(id sender) {
     [PEUIUtils displayController:[_screenToolkit newUserAccountDetailScreenMaker](_user) fromController:self animated:YES];
   } forControlEvents:UIControlEventTouchUpInside];
+  
+  /*NSString *changelogMessage = @"\
+From here you can download all of the\n\
+latest records from the server.  This\n\
+allows you to easily keep your device\n\
+in sync with your account.";*/
+    NSString *changelogMessage = @"\
+Keeps your device in sync with your\n\
+account in case you've made edits to\n\
+records on other devices.";
+  UIView *changelogMsgPanel = [self messagePanelWithMessage:changelogMessage iconImage:[UIImage imageNamed:@"download"]];
+  UIButton *changelogBtn = [_uitoolkit systemButtonMaker](@"Download Latest Records", nil, nil);
+  [[changelogBtn layer] setCornerRadius:0.0];
+  [PEUIUtils setFrameWidthOfView:changelogBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
+  [changelogBtn bk_addEventHandler:^(id sender) {
+    MBProgressHUD *changelogHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    changelogHud.delegate = self;
+    DDLogDebug(@"in FPSettingsController, proceeding to download changelog, ifModifiedSince: [%@]", [PEUtils millisecondsFromDate:[APP changelogUpdatedAt]]);
+    [changelogHud setLabelText:@"Downloading latest records..."];
+    [_coordDao fetchChangelogForUser:_user
+                     ifModifiedSince:[APP changelogUpdatedAt]
+                 notFoundOnServerBlk:^{
+                   dispatch_async(dispatch_get_main_queue(), ^{
+                     [changelogHud hide:YES];
+                     // display alert
+                   });
+                 }
+                          successBlk:^(FPChangelog *changelog) {
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                              [changelogHud hide:YES];
+                              if (changelog) {
+                                DDLogDebug(@"in FPSettingsController/fetchChangelog success, calling [APP setChangelogUpdatedAt:(%@)", [PEUtils millisecondsFromDate:changelog.updatedAt]);
+                                [APP setChangelogUpdatedAt:changelog.updatedAt];
+                              } else {
+                                [PEUIUtils showSuccessAlertWithTitle:@"You already have all the latest."
+                                                    alertDescription:[[NSAttributedString alloc] initWithString:@"\
+You already have the latest version of all\n\
+of your records on your device."]
+                                                            topInset:70.0
+                                                         buttonTitle:@"Okay."
+                                                        buttonAction:^{ }
+                                                      relativeToView:self.tabBarController.view];
+                              }
+                            });
+                          }
+                  remoteStoreBusyBlk:^(NSDate *retryAfter) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                      [changelogHud hide:YES];
+                      // display alert
+                    });
+                  }
+                  tempRemoteErrorBlk:^{
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                      [changelogHud hide:YES];
+                      // display alert
+                    });
+                  }
+                 addlAuthRequiredBlk:^{
+                   dispatch_async(dispatch_get_main_queue(), ^{
+                     [APP refreshTabs];
+                     // display 'awkward' alert
+                   });
+                 }];
+  } forControlEvents:UIControlEventTouchUpInside];
+  
   NSString *offlineModeLabelText = @"\
 Offline mode.  Enables fast\n\
 saving (adds / edits only) in\n\
@@ -204,16 +274,17 @@ poor-connection environments.";
 
   UIView *logoutMsgLabelWithPad = [self logoutPaddedMessage];
   UIButton *logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
+  [logoutBtn setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
   [[logoutBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
   // place views onto panel
-  [PEUIUtils placeView:messagePanel
+  [PEUIUtils placeView:accountSettingsMsgPanel
                atTopOf:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:80
               hpadding:0.0];
   [PEUIUtils placeView:accountSettingsBtn
-                 below:messagePanel
+                 below:accountSettingsMsgPanel
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:7.0
@@ -234,13 +305,32 @@ poor-connection environments.";
           toTheRightOf:offlineModeLabelPanelWithPad
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIVerticalAlignmentTypeMiddle
-              hpadding:30.0];
+              hpadding:30.0];  
   divider = makeDivider(1.0);
   [PEUIUtils placeView:divider
                  below:offlineModeLabelPanelWithPad
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:20.0 hpadding:0.0];
+  [PEUIUtils placeView:changelogMsgPanel
+                 below:divider
+                  onto:_doesHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:20.0
+              hpadding:0.0];
+  [PEUIUtils placeView:changelogBtn
+                 below:changelogMsgPanel
+                  onto:_doesHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:7.0
+              hpadding:0.0];
+  divider = makeDivider(1.0);
+  [PEUIUtils placeView:divider
+                 below:changelogBtn
+                  onto:_doesHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:20.0
+              hpadding:0.0];
   [PEUIUtils placeView:logoutMsgLabelWithPad
                  below:divider
                   onto:_doesHaveAuthTokenPanel
@@ -338,6 +428,7 @@ fuel purchase data from this device.";
   } forControlEvents:UIControlEventTouchUpInside];
   UIButton *deleteAllDataBtn = buttonMaker(@"Delete All Data", self, @selector(clearAllData));
   [[deleteAllDataBtn layer] setCornerRadius:0.0];
+  [deleteAllDataBtn setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
   [PEUIUtils setFrameWidthOfView:deleteAllDataBtn ofWidth:1.0 relativeTo:_notLoggedInPanel];
   
   // place views onto panel

@@ -79,6 +79,9 @@ NSString * const FPTimeoutForCoordDaoMainThreadOpsKey    = @"FP timeout for main
 NSString * const FPTimeIntervalForFlushToRemoteMasterKey = @"FP time interval for flush to remote master";
 NSString * const FPIsUserLoggedInIndicatorKey            = @"FP is user logged in indicator";
 
+// NSUserDefaults keys
+NSString * const FPChangelogUpdatedAtUserDefaultsKey = @"FP changelog updated at";
+
 #ifdef FP_DEV
   NSString * const FPAPIResourceFileName = @"fpapi-resource.localdev";
 #else
@@ -116,6 +119,16 @@ NSString * const FPAppKeychainService = @"fp-app";
     return [_locations lastObject];
   }
   return nil;
+}
+
+- (NSDate *)changelogUpdatedAt {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  return [defaults objectForKey:FPChangelogUpdatedAtUserDefaultsKey];
+}
+
+- (void)setChangelogUpdatedAt:(NSDate *)updatedAt {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:updatedAt forKey:FPChangelogUpdatedAtUserDefaultsKey];
 }
 
 #pragma mark - Location Manager Delegate
@@ -352,6 +365,7 @@ shouldSelectViewController:(UIViewController *)viewController {
                                      FPLocalSqlLiteDataFileName,
                                      FPDataFileExtension]];
   DDLogInfo(@"About to load local database from: [%@]", [localSqlLiteDataFileUrl absoluteString]);
+  NSString *restServiceMtVersion = bundleVal(FPRestServiceMtVersionKey);
   _coordDao =
     [[FPCoordinatorDao alloc]
       initWithSqliteDataFilePath:[localSqlLiteDataFileUrl absoluteString]
@@ -372,12 +386,13 @@ shouldSelectViewController:(UIViewController *)viewController {
    accountClosedReasonHeaderName:bundleVal(FPAccountClosedReasonHeaderNameKey)
     bundleHoldingApiJsonResource:mainBundle
        nameOfApiJsonResourceFile:FPAPIResourceFileName
-                 apiResMtVersion:bundleVal(FPRestServiceMtVersionKey)
-                userResMtVersion:bundleVal(FPRestServiceMtVersionKey)
-             vehicleResMtVersion:bundleVal(FPRestServiceMtVersionKey)
-         fuelStationResMtVersion:bundleVal(FPRestServiceMtVersionKey)
-     fuelPurchaseLogResMtVersion:bundleVal(FPRestServiceMtVersionKey)
-      environmentLogResMtVersion:bundleVal(FPRestServiceMtVersionKey)
+                 apiResMtVersion:restServiceMtVersion
+           changelogResMtVersion:restServiceMtVersion
+                userResMtVersion:restServiceMtVersion
+             vehicleResMtVersion:restServiceMtVersion
+         fuelStationResMtVersion:restServiceMtVersion
+     fuelPurchaseLogResMtVersion:restServiceMtVersion
+      environmentLogResMtVersion:restServiceMtVersion
                authTokenDelegate:self
         allowInvalidCertificates:YES];
   [_coordDao initializeLocalDatabaseWithError:[FPUtils localSaveErrorHandlerMaker]()];
