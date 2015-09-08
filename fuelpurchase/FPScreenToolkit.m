@@ -268,16 +268,18 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                              downloader:downloaderBlk
                       postDownloadSaver:postDownloadSaverBlk
                   conflictResolveFields:conflictResolveFieldsBlk
-                 conflictResolvedEntity:conflictResolvedEntityBlk];
+                 conflictResolvedEntity:conflictResolvedEntityBlk
+                    itemChildrenCounter:nil
+                    itemChildrenMsgsBlk:nil
+                            itemDeleter:nil
+                       itemLocalDeleter:nil];
   };
 }
 
 #pragma mark - Vehicle Screens
 
 - (PEItemChildrenCounter)vehicleItemChildrenCounter {
-  PEItemChildrenCounter itemChildrenCounter = ^ NSInteger (FPVehicle *vehicle,
-                                                           NSIndexPath *indexPath,
-                                                           UIViewController *listViewController) {
+  PEItemChildrenCounter itemChildrenCounter = ^ NSInteger (FPVehicle *vehicle) {
     return [_coordDao numFuelPurchaseLogsForVehicle:vehicle
                                               error:[FPUtils localFetchErrorHandlerMaker]()] +
       [_coordDao numEnvironmentLogsForVehicle:vehicle
@@ -287,9 +289,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
 }
 
 - (PEItemChildrenMsgsBlk)vehicleItemChildrenMsgs {
-  PEItemChildrenMsgsBlk itemChildrenMsgs = ^ NSArray * (FPVehicle *vehicle,
-                                                        NSIndexPath *indexPath,
-                                                        UIViewController *listViewController) {
+  PEItemChildrenMsgsBlk itemChildrenMsgs = ^ NSArray * (FPVehicle *vehicle) {
     NSInteger numFplogs = [_coordDao numFuelPurchaseLogsForVehicle:vehicle
                                                              error:[FPUtils localFetchErrorHandlerMaker]()];
     NSInteger numEnvlogs = [_coordDao numEnvironmentLogsForVehicle:vehicle
@@ -745,16 +745,18 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                             downloader:downloaderBlk
                      postDownloadSaver:postDownloadSaverBlk
                  conflictResolveFields:conflictResolveFieldsBlk
-                conflictResolvedEntity:conflictResolvedEntityBlk];
+                conflictResolvedEntity:conflictResolvedEntityBlk
+                   itemChildrenCounter:[self vehicleItemChildrenCounter]
+                   itemChildrenMsgsBlk:[self vehicleItemChildrenMsgs]
+                           itemDeleter:[self vehicleItemDeleterForUser:user]
+                      itemLocalDeleter:[self vehicleItemLocalDeleter]];
   };
 }
 
 #pragma mark - Fuel Station Screens
 
 - (PEItemChildrenCounter)fuelStationItemChildrenCounter {
-  PEItemChildrenCounter itemChildrenCounter = ^ NSInteger (FPFuelStation *fuelStation,
-                                                           NSIndexPath *indexPath,
-                                                           UIViewController *listViewController) {
+  PEItemChildrenCounter itemChildrenCounter = ^ NSInteger (FPFuelStation *fuelStation) {
     return [_coordDao numFuelPurchaseLogsForFuelStation:fuelStation
                                                   error:[FPUtils localFetchErrorHandlerMaker]()];
   };
@@ -762,9 +764,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
 }
 
 - (PEItemChildrenMsgsBlk)fuelStationItemChildrenMsgs {
-  PEItemChildrenMsgsBlk itemChildrenMsgs = ^ NSArray * (FPFuelStation *fuelStation,
-                                                        NSIndexPath *indexPath,
-                                                        UIViewController *listViewController) {
+  PEItemChildrenMsgsBlk itemChildrenMsgs = ^ NSArray * (FPFuelStation *fuelStation) {
     NSInteger numFplogs = [_coordDao numFuelPurchaseLogsForFuelStation:fuelStation
                                                                  error:[FPUtils localFetchErrorHandlerMaker]()];
     return @[[NSString stringWithFormat:@"%ld fuel purchase log%@", (long)numFplogs, (numFplogs > 1 ? @"s" : @"")]];
@@ -1348,7 +1348,11 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                             downloader:downloaderBlk
                      postDownloadSaver:postDownloadSaverBlk
                  conflictResolveFields:conflictResolveFieldsBlk
-                conflictResolvedEntity:conflictResolvedEntityBlk];
+                conflictResolvedEntity:conflictResolvedEntityBlk
+                   itemChildrenCounter:[self fuelStationItemChildrenCounter]
+                   itemChildrenMsgsBlk:[self fuelStationItemChildrenMsgs]
+                           itemDeleter:[self fuelStationItemDeleterForUser:user]
+                      itemLocalDeleter:[self fuelStationItemLocalDeleter]];
   };
 }
 
@@ -1996,7 +2000,11 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                             downloader:downloaderBlk
                      postDownloadSaver:postDownloadSaverBlk
                  conflictResolveFields:conflictResolveFieldsBlk
-                conflictResolvedEntity:conflictResolvedEntityBlk];
+                conflictResolvedEntity:conflictResolvedEntityBlk
+                   itemChildrenCounter:nil
+                   itemChildrenMsgsBlk:nil
+                           itemDeleter:[self fplogItemDeleterForUser:user]
+                      itemLocalDeleter:[self fplogItemLocalDeleter]];
   };
 }
 
@@ -2631,7 +2639,11 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                    downloader:downloaderBlk
                                             postDownloadSaver:postDownloadSaverBlk
                                         conflictResolveFields:conflictResolveFieldsBlk
-                                       conflictResolvedEntity:conflictResolvedEntityBlk];
+                                       conflictResolvedEntity:conflictResolvedEntityBlk
+                                          itemChildrenCounter:nil
+                                          itemChildrenMsgsBlk:nil
+                                                  itemDeleter:[self envlogItemDeleterForUser:user]
+                                             itemLocalDeleter:[self envlogItemLocalDeleter]];
   };
 }
 

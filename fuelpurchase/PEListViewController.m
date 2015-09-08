@@ -462,9 +462,9 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
       
       void (^doDeleteWithChildrenConfirm)(void(^)(void)) = ^(void(^deleter)(void)) {
         if (_itemChildrenCounter) {
-          NSInteger numChildren = _itemChildrenCounter(item, indexPath, self);
+          NSInteger numChildren = _itemChildrenCounter(item);
           if (numChildren > 0) {
-            [PEUIUtils showWarningConfirmAlertWithMsgs:_itemChildrenMsgsBlk(item, indexPath, self)
+            [PEUIUtils showWarningConfirmAlertWithMsgs:_itemChildrenMsgsBlk(item)
                                                  title:@"Are you sure?"
                                       alertDescription:[[NSAttributedString alloc] initWithString:@"\
 Deleting this record will result in the\n\

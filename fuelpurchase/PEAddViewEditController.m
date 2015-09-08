@@ -53,6 +53,7 @@
   PEListViewController *_listViewController;
   UIBarButtonItem *_uploadBarButtonItem;
   UIBarButtonItem *_downloadBarButtonItem;
+  UIBarButtonItem *_deleteBarButtonItem;
   PEUploaderBlk _uploader;
   PEIsAuthenticatedBlk _isAuthenticatedBlk;
   UIView *_entityViewPanel;
@@ -65,6 +66,10 @@
   PEConflictResolvedEntity _conflictResolvedEntity;
   PEUpdateDepsPanel _updateDepsPanel;
   PEIsOfflineModeBlk _isOfflineMode;
+  PEItemChildrenCounter _itemChildrenCounter;
+  PEItemChildrenMsgsBlk _itemChildrenMsgsBlk;
+  PEItemDeleter _itemDeleter;
+  PEItemLocalDeleter _itemLocalDeleter;
 }
 
 #pragma mark - Initializers
@@ -107,6 +112,10 @@ numRemoteDepsNotLocal:(PENumRemoteDepsNotLocal)numRemoteDepsNotLocal
    postDownloadSaver:(PEPostDownloaderSaver)postDownloadSaver
 conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
 conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
+ itemChildrenCounter:(PEItemChildrenCounter)itemChildrenCounter
+ itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
+         itemDeleter:(PEItemDeleter)itemDeleter
+    itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
 getterForNotification:(SEL)getterForNotification {
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
@@ -152,6 +161,10 @@ getterForNotification:(SEL)getterForNotification {
     _postDownloadSaver = postDownloadSaver;
     _conflictResolveFields = conflictResolveFields;
     _conflictResolvedEntity = conflictResolvedEntity;
+    _itemChildrenCounter = itemChildrenCounter;
+    _itemChildrenMsgsBlk = itemChildrenMsgsBlk;
+    _itemDeleter = itemDeleter;
+    _itemLocalDeleter = itemLocalDeleter;
     _getterForNotification = getterForNotification;
   }
   return self;
@@ -255,6 +268,10 @@ getterForNotification:(SEL)getterForNotification {
                                        postDownloadSaver:nil
                                    conflictResolveFields:nil
                                   conflictResolvedEntity:nil
+                                     itemChildrenCounter:nil
+                                     itemChildrenMsgsBlk:nil
+                                             itemDeleter:nil
+                                        itemLocalDeleter:nil
                                    getterForNotification:getterForNotification];
 }
 
@@ -290,7 +307,11 @@ getterForNotification:(SEL)getterForNotification {
                                             downloader:(PEDownloaderBlk)downloader
                                      postDownloadSaver:(PEPostDownloaderSaver)postDownloadSaver
                                  conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
-                                conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity {
+                                conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
+                                   itemChildrenCounter:(PEItemChildrenCounter)itemChildrenCounter
+                                   itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
+                                           itemDeleter:(PEItemDeleter)itemDeleter
+                                      itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter {
   return [[PEAddViewEditController alloc] initWithEntity:entity
                                       listViewController:listViewController
                                                    isAdd:NO
@@ -329,6 +350,10 @@ getterForNotification:(SEL)getterForNotification {
                                        postDownloadSaver:postDownloadSaver
                                    conflictResolveFields:conflictResolveFields
                                   conflictResolvedEntity:conflictResolvedEntity
+                                     itemChildrenCounter:itemChildrenCounter
+                                     itemChildrenMsgsBlk:itemChildrenMsgsBlk
+                                             itemDeleter:itemDeleter
+                                        itemLocalDeleter:itemLocalDeleter
                                    getterForNotification:nil];
 }
 
@@ -472,9 +497,7 @@ getterForNotification:(SEL)getterForNotification {
     [item setImage:[UIImage imageNamed:imgName]];
     return item;
   };
-  [navItem setTitleView:[self titleWithText:title]];
-  _uploadBarButtonItem = newImgItem(@"upload-icon", @selector(doUpload));
-  _downloadBarButtonItem = newImgItem(@"download-icon", @selector(doDownload));
+  //[navItem setTitleView:[self titleWithText:title]];
   if (_isView) {
     [rightBarButtonItems addObject:[self editButtonItem]];
   } else {
@@ -485,10 +508,18 @@ getterForNotification:(SEL)getterForNotification {
       [rightBarButtonItems addObject:newSysItem(UIBarButtonSystemItemDone, @selector(doneWithEdit))];
     }
   }
-  if (_uploader) { [rightBarButtonItems addObject:_uploadBarButtonItem]; }
-  if (_downloader) { [rightBarButtonItems addObject:_downloadBarButtonItem]; }
+  if (_isUserLoggedIn()) {
+    _uploadBarButtonItem = newImgItem(@"upload-icon", @selector(doUpload));
+    _downloadBarButtonItem = newImgItem(@"download-icon", @selector(doDownload));
+    if (_uploader) { [rightBarButtonItems addObject:_uploadBarButtonItem]; }
+    if (_downloader) { [rightBarButtonItems addObject:_downloadBarButtonItem]; }
+  }
+  if (_itemDeleter) {
+    _deleteBarButtonItem = newImgItem(@"delete-icon", @selector(doDelete));
+    [rightBarButtonItems addObject:_deleteBarButtonItem];
+  }
   [navItem setRightBarButtonItems:rightBarButtonItems animated:YES];
-  [self setUploadDownloadBarButtonStates];
+  [self setUploadDownloadDeleteBarButtonStates];
 }
 
 #pragma mark - JGActionSheetDelegate and Alert-related Helpers
@@ -521,9 +552,10 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
 
 #pragma mark - Uploading and Downloading (Sync)
 
-- (void)setUploadDownloadBarButtonStates {
+- (void)setUploadDownloadDeleteBarButtonStates {
   [self setUploadBarButtonState];
   [self setDownloadBarButtonState];
+  [self setDeleteBarButtonState];
 }
 
 - (void)setUploadBarButtonState {
@@ -544,18 +576,50 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
 - (void)setDownloadBarButtonState {
   BOOL enableDownloadItem = NO;
   if (_entity) {
-    if ([_entity synced] ||
-        ([_entity localMainIdentifier] == nil)) {
+    if (_isAuthenticatedBlk() &&
+        ([_entity synced] ||
+         ([_entity localMainIdentifier] == nil) ||
+         ([_entity editCount] == 0))) {
       enableDownloadItem = YES;
     }
   }
   [_downloadBarButtonItem setEnabled:enableDownloadItem];
 }
 
+- (void)setDeleteBarButtonState {
+  BOOL enableDeleteItem = NO;
+  if (_entity) {
+    if (_isUserLoggedIn()) {
+      if (_isAuthenticatedBlk() &&
+          ([_entity synced] ||
+           ([_entity localMainIdentifier] == nil) ||
+           ([_entity editCount] == 0))) {
+        enableDeleteItem = YES;
+      }
+    } else {
+      if (![_entity editInProgress]) {
+        enableDeleteItem = YES;
+      }
+    }
+  }
+  [_deleteBarButtonItem setEnabled:enableDeleteItem];
+}
+
+- (void)doDelete {
+  
+}
+
 - (void)doDownload {
   __block CGFloat percentCompleteDownloadingEntity = 0.0;
   NSMutableArray *successMsgsForEntityDownload = [NSMutableArray array];
   NSMutableArray *errsForEntityDownload = [NSMutableArray array];
+  // The meaning of the elements of the arrays found within errsForEntityDownload:
+  //
+  // errsForEntityDownload[*][0]: Error title (string)
+  // errsForEntityDownload[*][1]: Is error user-fixable (bool)
+  // errsForEntityDownload[*][2]: An NSArray of sub-error messages (strings)
+  // errsForEntityDownload[*][3]: Is entity not found (bool)
+  //
   MBProgressHUD *downloadHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
   [self.navigationItem setHidesBackButton:YES animated:YES];
   [[[self navigationItem] leftBarButtonItem] setEnabled:NO];
@@ -583,7 +647,7 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
     if (_listViewController) {
       [_listViewController handleUpdatedEntity:_entity];
     }
-    [self setUploadDownloadBarButtonStates];
+    [self setUploadDownloadDeleteBarButtonStates];
     [_entityViewPanel removeFromSuperview];
     _entityViewPanel = _entityViewPanelMaker(self, _entity);
     [PEUIUtils placeView:_entityViewPanel
@@ -607,7 +671,7 @@ entity on your device."]
                                    buttonTitle:@"Okay."
                                   buttonAction:^{
                                     reenableNavButtons();
-                                    [self setUploadDownloadBarButtonStates];
+                                    [self setUploadDownloadDeleteBarButtonStates];
                                   }
                                 relativeToView:self.view];
         } else {
@@ -636,20 +700,22 @@ successfully downloaded to your device."]
     } else { // error(s)
       dispatch_async(dispatch_get_main_queue(), ^{
         [downloadHud hide:YES afterDelay:0.0];
-        void (^dismissErrAlertAction)(void) = ^{
-          // TODO
-        };
-        NSString *fetchErrMsg = @"\
+        if ([errsForEntityDownload[0][3] boolValue]) {
+          [self handleNotFoundError];
+        } else {
+          NSString *fetchErrMsg = @"\
 There was a problem downloading the entity.";
-        [PEUIUtils showErrorAlertWithMsgs:errsForEntityDownload[0][2]
-                                    title:@"Download error."
-                         alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
-                                 topInset:70.0
-                              buttonTitle:@"Okay."
-                             buttonAction:^{
-                               dismissErrAlertAction();
-                             }
-                           relativeToView:self.view];
+          [PEUIUtils showErrorAlertWithMsgs:errsForEntityDownload[0][2]
+                                      title:@"Download error."
+                           alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
+                                   topInset:70.0
+                                buttonTitle:@"Okay."
+                               buttonAction:^{
+                                 reenableNavButtons();
+                                 [self setUploadDownloadDeleteBarButtonStates];
+                               }
+                             relativeToView:self.view];
+        }
       });
     }
   };
@@ -660,7 +726,7 @@ There was a problem downloading the entity.";
     [errsForEntityDownload addObject:@[[NSString stringWithFormat:@"%@ not downloaded.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[[NSString stringWithFormat:@"Not found."]],
-                                       [NSNumber numberWithBool:NO]]];
+                                       [NSNumber numberWithBool:YES]]];
     if (percentCompleteDownloadingEntity == 1.0) { entityDownloadDone(mainMsgTitle); }
   };
   PEDownloadSuccessBlk downloadSuccessBlk = ^(float percentComplete,
@@ -725,12 +791,12 @@ There was a problem downloading the entity.";
     [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
     [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
     //[[self navigationItem] setTitle:_entityTitle];
-    [[self navigationItem] setTitleView:[self titleWithText:_entityTitle]];
+    //[[self navigationItem] setTitleView:[self titleWithText:_entityTitle]];
     _panelEnablerDisabler(_entityFormPanel, NO);
     if (_listViewController) {
       [_listViewController handleUpdatedEntity:_entity];
     }
-    [self setUploadDownloadBarButtonStates];
+    [self setUploadDownloadDeleteBarButtonStates];
   };
   MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
   [self.navigationItem setHidesBackButton:YES animated:YES];
@@ -959,7 +1025,27 @@ retained."];
   });
 }
 
-#pragma mark - Conflict Helpers
+#pragma mark - Conflict and Not Found Helpers
+
+- (void)handleNotFoundError {
+  NSString *fetchErrMsg = @"\
+It would appear this record no longer\n\
+exists and was probably deleted on\n\
+a different device.\n\n\
+To keep the data on your device consistent\n\
+with your account, it will be removed now.";
+  [PEUIUtils showErrorAlertWithMsgs:nil
+                              title:@"Entity not found."
+                   alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
+                           topInset:70.0
+                        buttonTitle:@"Okay."
+                       buttonAction:^{
+                         _itemLocalDeleter(self, _entity, _entityIndexPath);
+                         [_listViewController handleRemovedEntity:_entity];
+                         [[self navigationController] popViewControllerAnimated:YES];
+                       }
+                     relativeToView:self.view];
+}
 
 - (void (^)(void(^)(void)))downloadDepsForEntity:(id)entity
                        dismissErrAlertPostAction:(void(^)(void))dismissErrAlertPostAction {
@@ -1203,7 +1289,7 @@ merge conflicts.";
       if (_prepareUIForUserInteractionBlk) {
         _prepareUIForUserInteractionBlk(_entityFormPanel);
       }
-      [self setUploadDownloadBarButtonStates];
+      [self setUploadDownloadDeleteBarButtonStates];
       //_backButton = [[self navigationItem] leftBarButtonItem]; // i just added this
     }
   } else {
@@ -1229,7 +1315,7 @@ merge conflicts.";
     editPrepareSuccess = _entityEditPreparer(self, _entity);
   }
   if (editPrepareSuccess) {
-    [[self navigationItem] setTitleView:[self titleWithText:@"(editing mode)"]]; //[NSString stringWithFormat:@"Edit %@", _entityTitle]]];
+    //[[self navigationItem] setTitleView:[self titleWithText:@"(editing mode)"]]; //[NSString stringWithFormat:@"Edit %@", _entityTitle]]];
     [[self navigationItem] setLeftBarButtonItem:[[UIBarButtonItem alloc]
                                                  initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
                                                  target:self
@@ -1254,12 +1340,12 @@ merge conflicts.";
     [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
     [[self navigationItem] setLeftBarButtonItem:_backButton];
     [[self navigationItem] setRightBarButtonItem:[self editButtonItem]];
-    [[self navigationItem] setTitleView:[self titleWithText:_entityTitle]];
+    //[[self navigationItem] setTitleView:[self titleWithText:_entityTitle]];
     _panelEnablerDisabler(_entityFormPanel, NO);
     if (_listViewController) {
       [_listViewController handleUpdatedEntity:_entity];
     }
-    [self setUploadDownloadBarButtonStates];
+    [self setUploadDownloadDeleteBarButtonStates];
     [_entityFormPanel removeFromSuperview];
     _entityViewPanel = _entityViewPanelMaker(self, _entity);
     [PEUIUtils placeView:_entityViewPanel
@@ -1303,6 +1389,8 @@ merge conflicts.";
         // errorsForUpload[*][1]: Is error user-fixable (bool)
         // errorsForUpload[*][2]: An NSArray of sub-error messages (strings)
         // errorsForUpload[*][3]: Is error conflict-type (bool)
+        // errorsForUpload[*][4]: The latest entity if err is conflict-type
+        // errorsForUpload[*][5]: Is entity not found
         //
         NSMutableArray *successMessageTitlesForUpload = [NSMutableArray array];
         _receivedAuthReqdErrorOnSyncAttempt = NO;
@@ -1323,44 +1411,9 @@ merge conflicts.";
           } else { // error
             dispatch_async(dispatch_get_main_queue(), ^{
               [HUD hide:YES afterDelay:0];
-              NSDictionary *messageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0],
-                                              NSForegroundColorAttributeName : [UIColor blueColor] };
-              NSRange messageAttrsRange;
-              NSMutableAttributedString *attrMessage;
-              NSString *title;
-              NSString *fixNowActionTitle;
-              NSString *fixLaterActionTitle;
-              NSString *dealWithLaterActionTitle;
-              NSString *cancelActionTitle;
-              NSString *message;
-              BOOL isConflictError = NO;
-              NSArray *subErrors = errorsForUpload[0][2]; // because only single-record edit, we can skip the "not saved" msg title, and just display the sub-errors
-              if ([subErrors count] > 1) {
-                message = @"\
-Although there were problems syncing your\n\
-edits to the server, they have been saved\n\
-locally.  The errors are as follows:";
-                fixNowActionTitle = @"I'll fix them now.";
-                fixLaterActionTitle = @"I'll fix them later.";
-                dealWithLaterActionTitle = @"I'll try syncing them later.";
-                cancelActionTitle = @"Forget it.  Just cancel them.";
-                title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
-              } else {
-                if ([errorsForUpload[0][3] boolValue]) {
-                  isConflictError = YES;
-                } else {
-                  message = @"\
-Although there was a problem syncing your\n\
-edits to the server, they have been saved\n\
-locally.  The error is as follows:";
-                  fixLaterActionTitle = @"I'll fix it later.";
-                  fixNowActionTitle = @"I'll fix it now.";
-                  dealWithLaterActionTitle = @"I'll try syncing it later.";
-                  cancelActionTitle = @"Forget it.  Just cancel it.";
-                  title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
-                }
-              }
-              if (isConflictError) {
+              if ([errorsForUpload[0][5] boolValue]) { // is entity not found
+                [self handleNotFoundError];
+              } else if ([errorsForUpload[0][3] boolValue]) { // conflict error
                 id latestEntity = errorsForUpload[0][4];
                 NSMutableAttributedString *desc = [[NSMutableAttributedString alloc] initWithString:@"\
 The remote copy of this entity has been\n\
@@ -1373,7 +1426,39 @@ retained."];
                 [self presentConflictAlertWithLatestEntity:latestEntity
                                           alertDescription:desc
                                               cancelAction:postEditActivities];
-              } else {
+              } else { // all other error types
+                NSDictionary *messageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0],
+                                                NSForegroundColorAttributeName : [UIColor blueColor] };
+                NSRange messageAttrsRange;
+                NSMutableAttributedString *attrMessage;
+                NSString *title;
+                NSString *fixNowActionTitle;
+                NSString *fixLaterActionTitle;
+                NSString *dealWithLaterActionTitle;
+                NSString *cancelActionTitle;
+                NSString *message;
+                NSArray *subErrors = errorsForUpload[0][2]; // because only single-record edit, we can skip the "not saved" msg title, and just display the sub-errors
+                if ([subErrors count] > 1) {
+                  message = @"\
+Although there were problems syncing your\n\
+edits to the server, they have been saved\n\
+locally.  The errors are as follows:";
+                  fixNowActionTitle = @"I'll fix them now.";
+                  fixLaterActionTitle = @"I'll fix them later.";
+                  dealWithLaterActionTitle = @"I'll try syncing them later.";
+                  cancelActionTitle = @"Forget it.  Just cancel them.";
+                  title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
+                } else {
+                  message = @"\
+Although there was a problem syncing your\n\
+edits to the server, they have been saved\n\
+locally.  The error is as follows:";
+                  fixLaterActionTitle = @"I'll fix it later.";
+                  fixNowActionTitle = @"I'll fix it now.";
+                  dealWithLaterActionTitle = @"I'll try syncing it later.";
+                  cancelActionTitle = @"Forget it.  Just cancel it.";
+                  title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
+                }
                 messageAttrsRange = NSMakeRange(68, 23); // 'have...locally'
                 attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
                 [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
@@ -1465,14 +1550,12 @@ retained."];
                                                                   NSString *mainMsgTitle,
                                                                   NSString *recordTitle) {
           handleHudProgress(percentComplete);
-          // TODO - perhaps need to add ability for 'not found' errors to be 'special' such that
-          // a user is given a special error dialog informing that their record will now be deleted
-          // from the device.  This VC needs to accept a 'delete me' block so the entity can be
-          // locally deleted.
           [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                      [NSNumber numberWithBool:NO],
-                                      @[[NSString stringWithFormat:@"Not found."]],
-                                      [NSNumber numberWithBool:NO]]];
+                                       [NSNumber numberWithBool:NO],
+                                       @[[NSString stringWithFormat:@"Not found."]],
+                                       [NSNumber numberWithBool:NO],
+                                       [NSNull null],
+                                       [NSNumber numberWithBool:YES]]];
           if (percentCompleteUploadingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
@@ -1492,9 +1575,11 @@ retained."];
                                                                               NSDate *retryAfter) {
           handleHudProgress(percentComplete);
           [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                      [NSNumber numberWithBool:NO],
-                                      @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
-                                      [NSNumber numberWithBool:NO]]];
+                                       [NSNumber numberWithBool:NO],
+                                       @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                       [NSNumber numberWithBool:NO],
+                                       [NSNull null],
+                                       [NSNumber numberWithBool:NO]]];
           if (percentCompleteUploadingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
@@ -1504,9 +1589,11 @@ retained."];
                                                                        NSString *recordTitle) {
           handleHudProgress(percentComplete);
           [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                      [NSNumber numberWithBool:NO],
-                                      @[@"Temporary server error."],
-                                      [NSNumber numberWithBool:NO]]];
+                                       [NSNumber numberWithBool:NO],
+                                       @[@"Temporary server error."],
+                                       [NSNumber numberWithBool:NO],
+                                       [NSNull null],
+                                       [NSNumber numberWithBool:NO]]];
           if (percentCompleteUploadingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
@@ -1522,9 +1609,11 @@ retained."];
             isErrorUserFixable = NO;
           }
           [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                      [NSNumber numberWithBool:isErrorUserFixable],
-                                      computedErrMsgs,
-                                      [NSNumber numberWithBool:NO]]];
+                                       [NSNumber numberWithBool:isErrorUserFixable],
+                                       computedErrMsgs,
+                                       [NSNumber numberWithBool:NO],
+                                       [NSNull null],
+                                       [NSNumber numberWithBool:NO]]];
           if (percentCompleteUploadingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
@@ -1535,10 +1624,11 @@ retained."];
                                                                       id latestEntity) {
           handleHudProgress(percentComplete);
           [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                      [NSNumber numberWithBool:NO],
-                                      @[[NSString stringWithFormat:@"Conflict."]],
-                                      [NSNumber numberWithBool:YES],
-                                      latestEntity]];
+                                       [NSNumber numberWithBool:NO],
+                                       @[[NSString stringWithFormat:@"Conflict."]],
+                                       [NSNumber numberWithBool:YES],
+                                       latestEntity,
+                                       [NSNumber numberWithBool:NO]]];
           if (percentCompleteUploadingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
@@ -1549,9 +1639,11 @@ retained."];
           _receivedAuthReqdErrorOnSyncAttempt = YES;
           handleHudProgress(percentComplete);
           [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                      [NSNumber numberWithBool:NO],
-                                      @[@"Authentication required."],
-                                      [NSNumber numberWithBool:NO]]];
+                                       [NSNumber numberWithBool:NO],
+                                       @[@"Authentication required."],
+                                       [NSNumber numberWithBool:NO],
+                                       [NSNull null],
+                                       [NSNumber numberWithBool:NO]]];
           if (percentCompleteUploadingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
@@ -1562,9 +1654,11 @@ retained."];
                                                                                          NSString *dependencyErrMsg) {
           handleHudProgress(percentComplete);
           [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                      [NSNumber numberWithBool:NO],
-                                      @[dependencyErrMsg],
-                                      [NSNumber numberWithBool:NO]]];
+                                       [NSNumber numberWithBool:NO],
+                                       @[dependencyErrMsg],
+                                       [NSNumber numberWithBool:NO],
+                                       [NSNull null],
+                                       [NSNumber numberWithBool:NO]]];
           if (percentCompleteUploadingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }

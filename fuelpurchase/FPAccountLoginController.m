@@ -346,12 +346,14 @@ button.";
                           remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.tabBarController.view)
                         completionHandler:^(FPUser *user, NSError *err) {
                           [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(err);
-                          NSDate *mostRecentUpdatedAt =
-                            [[_coordDao localDao] mostRecentMasterUpdateForUser:user
-                                                                          error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
-                          DDLogDebug(@"in FPAccountLoginController/handleSignIn, login success, mostRecentUpdatedAt: [%@](%@)", mostRecentUpdatedAt, [PEUtils millisecondsFromDate:mostRecentUpdatedAt]);
-                          if (mostRecentUpdatedAt) {
-                            [APP setChangelogUpdatedAt:mostRecentUpdatedAt];
+                          if (user) {
+                            NSDate *mostRecentUpdatedAt =
+                              [[_coordDao localDao] mostRecentMasterUpdateForUser:user
+                                                                            error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
+                            DDLogDebug(@"in FPAccountLoginController/handleSignIn, login success, mostRecentUpdatedAt: [%@](%@)", mostRecentUpdatedAt, [PEUtils millisecondsFromDate:mostRecentUpdatedAt]);
+                            if (mostRecentUpdatedAt) {
+                              [APP setChangelogUpdatedAt:mostRecentUpdatedAt];
+                            }
                           }
                         }
                     localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];

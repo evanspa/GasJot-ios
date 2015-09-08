@@ -211,7 +211,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
                                            selector:@selector(resetUserInterface)
                                                name:FPAppLoginNotification
                                              object:nil];
-  
   if ([self isUserLoggedIn]) {
     if ([self doesUserHaveValidAuthToken]) {
       DDLogVerbose(@"User is logged in and has a valid authentication token.");

@@ -43,6 +43,8 @@ typedef NSDictionary * (^PEMergeBlk)(PEAddViewEditController *, id, id);
 typedef NSArray * (^PEConflictResolveFields)(PEAddViewEditController *, NSDictionary *, id, id);
 typedef id (^PEConflictResolvedEntity)(PEAddViewEditController *, NSDictionary *, NSArray *, id, id);
 typedef void (^PEPostDownloaderSaver)(PEAddViewEditController *, id, id);
+typedef NSInteger (^PEItemChildrenCounter)(id);
+typedef NSArray * (^PEItemChildrenMsgsBlk)(id);
 typedef void (^PEDependencyFetcherBlk)(PEAddViewEditController *,
                                        id,
                                        PESyncNotFoundBlk,
@@ -89,6 +91,18 @@ typedef void (^PESaveNewEntityImmediateSyncBlk)(UIView *,
                                                 PESyncConflictBlk,
                                                 PESyncAuthRequiredBlk,
                                                 PESyncDependencyUnsynced);
+typedef void (^PEItemDeleter)(UIViewController *,
+                              id,
+                              NSIndexPath *,
+                              PESyncNotFoundBlk,
+                              PESyncSuccessBlk,
+                              PESyncRetryAfterBlk,
+                              PESyncServerTempErrorBlk,
+                              PESyncServerErrorBlk,
+                              PESyncConflictBlk,
+                              PESyncAuthRequiredBlk,
+                              PESyncDependencyUnsynced);
+typedef void (^PEItemLocalDeleter)(UIViewController *, id, NSIndexPath *);
 typedef void (^PEItemAddedBlk)(PEAddViewEditController *, id);
 typedef void (^PEItemChangedBlk)(id, NSIndexPath *);
 typedef void (^PEPrepareUIForUserInteractionBlk)(UIView *);
@@ -138,6 +152,10 @@ numRemoteDepsNotLocal:(PENumRemoteDepsNotLocal)numRemoteDepsNotLocal
    postDownloadSaver:(PEPostDownloaderSaver)postDownloadSaver
 conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
 conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
+ itemChildrenCounter:(PEItemChildrenCounter)itemChildrenCounter
+ itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
+         itemDeleter:(PEItemDeleter)itemDeleter
+    itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
 getterForNotification:(SEL)getterForNotification;
 
 #pragma mark - Factory functions
@@ -213,7 +231,11 @@ getterForNotification:(SEL)getterForNotification;
                                             downloader:(PEDownloaderBlk)downloader
                                      postDownloadSaver:(PEPostDownloaderSaver)postDownloadSaver
                                  conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
-                                conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity;
+                                conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
+                                   itemChildrenCounter:(PEItemChildrenCounter)itemChildrenCounter
+                                   itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
+                                           itemDeleter:(PEItemDeleter)itemDeleter
+                                      itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter;
 
 #pragma mark - Properties
 

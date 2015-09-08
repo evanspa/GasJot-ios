@@ -53,6 +53,10 @@
 
 - (void)refreshTabs;
 
+#pragma mark - Resetting the user interface and tab bar delegate
+
+- (void)resetUserInterface;
+
 #pragma mark - Properties
 
 @property (nonatomic) BOOL offlineMode;

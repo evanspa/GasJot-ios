@@ -183,70 +183,122 @@ information and settings.";
     [PEUIUtils displayController:[_screenToolkit newUserAccountDetailScreenMaker](_user) fromController:self animated:YES];
   } forControlEvents:UIControlEventTouchUpInside];
   
-  /*NSString *changelogMessage = @"\
-From here you can download all of the\n\
-latest records from the server.  This\n\
-allows you to easily keep your device\n\
-in sync with your account.";*/
-    NSString *changelogMessage = @"\
-Keeps your device in sync with your\n\
-account in case you've made edits to\n\
-records on other devices.";
+  NSString *changelogMessage = @"\
+Keeps your device synchronized with\n\
+your account in case you've made edits\n\
+and deletions on other devices.";
   UIView *changelogMsgPanel = [self messagePanelWithMessage:changelogMessage iconImage:[UIImage imageNamed:@"download"]];
-  UIButton *changelogBtn = [_uitoolkit systemButtonMaker](@"Download Latest Records", nil, nil);
+  UIButton *changelogBtn = [_uitoolkit systemButtonMaker](@"Synchronize All", nil, nil);
   [[changelogBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:changelogBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
   [changelogBtn bk_addEventHandler:^(id sender) {
     MBProgressHUD *changelogHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     changelogHud.delegate = self;
     DDLogDebug(@"in FPSettingsController, proceeding to download changelog, ifModifiedSince: [%@]", [PEUtils millisecondsFromDate:[APP changelogUpdatedAt]]);
-    [changelogHud setLabelText:@"Downloading latest records..."];
+    [changelogHud setLabelText:@"Synchronizing with server..."];
+    void (^displayUnexpectedErrorAlert)(void) = ^{
+      [PEUIUtils showErrorAlertWithMsgs:nil
+                                  title:@"Error."
+                       alertDescription:[[NSAttributedString alloc] initWithString:@"\
+We're sorry, but an unexpected error has\n\
+occurred.  Please try this again later."]
+                               topInset:70.0
+                            buttonTitle:@"Okay."
+                           buttonAction:^{}
+                         relativeToView:self.tabBarController.view];
+    };
     [_coordDao fetchChangelogForUser:_user
                      ifModifiedSince:[APP changelogUpdatedAt]
                  notFoundOnServerBlk:^{
                    dispatch_async(dispatch_get_main_queue(), ^{
                      [changelogHud hide:YES];
-                     // display alert
+                     displayUnexpectedErrorAlert();
                    });
                  }
                           successBlk:^(FPChangelog *changelog) {
                             dispatch_async(dispatch_get_main_queue(), ^{
                               [changelogHud hide:YES];
-                              if (changelog) {
-                                DDLogDebug(@"in FPSettingsController/fetchChangelog success, calling [APP setChangelogUpdatedAt:(%@)", [PEUtils millisecondsFromDate:changelog.updatedAt]);
-                                [APP setChangelogUpdatedAt:changelog.updatedAt];
-                              } else {
-                                [PEUIUtils showSuccessAlertWithTitle:@"You already have all the latest."
+                              void (^displayAlreadySynchronizedAlert)(void) = ^{
+                                [PEUIUtils showSuccessAlertWithTitle:@"Already synchronized."
                                                     alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You already have the latest version of all\n\
-of your records on your device."]
+Your device is already fully synchronized\n\
+with your account."]
                                                             topInset:70.0
                                                          buttonTitle:@"Okay."
                                                         buttonAction:^{ }
                                                       relativeToView:self.tabBarController.view];
+                              };
+                              if (changelog) {
+                                DDLogDebug(@"in FPSettingsController/fetchChangelog success, calling [APP setChangelogUpdatedAt:(%@)", [PEUtils millisecondsFromDate:changelog.updatedAt]);
+                                [APP setChangelogUpdatedAt:changelog.updatedAt];
+                                NSInteger numUpdates = [_coordDao saveChangelog:changelog forUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
+                                if (numUpdates > 0) {
+                                  [PEUIUtils showSuccessAlertWithTitle:@"Synchronized."
+                                                      alertDescription:[[NSAttributedString alloc] initWithString:@"\
+You have successfully synchronized your\n\
+account to this device."]
+                                                              topInset:70.0
+                                                           buttonTitle:@"Okay."
+                                                          buttonAction:^{
+                                                            [APP refreshTabs];
+                                                            [APP resetUserInterface];
+                                                          }
+                                                        relativeToView:self.tabBarController.view];
+                                } else {
+                                  displayAlreadySynchronizedAlert();
+                                }
+                              } else {
+                                displayAlreadySynchronizedAlert();
                               }
                             });
                           }
                   remoteStoreBusyBlk:^(NSDate *retryAfter) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                       [changelogHud hide:YES];
-                      // display alert
+                      [PEUIUtils showWaitAlertWithMsgs:nil
+                                                 title:@"Server is busy."
+                                      alertDescription:[[NSAttributedString alloc] initWithString:@"\
+The server is currently busy at the moment.\n\
+Please try this again later."]
+                                              topInset:70.0
+                                           buttonTitle:@"Okay."
+                                          buttonAction:^{}
+                                        relativeToView:self.tabBarController.view];
                     });
                   }
                   tempRemoteErrorBlk:^{
                     dispatch_async(dispatch_get_main_queue(), ^{
                       [changelogHud hide:YES];
-                      // display alert
+                      displayUnexpectedErrorAlert();
                     });
                   }
                  addlAuthRequiredBlk:^{
                    dispatch_async(dispatch_get_main_queue(), ^{
+                     [changelogHud hide:YES];
                      [APP refreshTabs];
-                     // display 'awkward' alert
+                     NSString *becameUnauthMessage = @"\
+Well this is awkward.  While syncing\n\
+your account, the server is asking for you\n\
+to re-authenticate.\n\n\
+To authenticate, tap the Re-authenticate\n\
+button.";
+                     NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
+                     NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
+                     NSRange unauthMsgAttrsRange = NSMakeRange(126, 15); // 'Re-authenticate'
+                     [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
+                     [PEUIUtils showWarningAlertWithMsgs:nil
+                                                   title:@"Authentication Failure."
+                                        alertDescription:attrBecameUnauthMessage
+                                                topInset:70.0
+                                             buttonTitle:@"Okay."
+                                            buttonAction:^{
+                                              [APP refreshTabs];
+                                              [self viewDidAppear:YES];
+                                            }
+                                          relativeToView:self.tabBarController.view];
                    });
                  }];
   } forControlEvents:UIControlEventTouchUpInside];
-  
   NSString *offlineModeLabelText = @"\
 Offline mode.  Enables fast\n\
 saving (adds / edits only) in\n\
