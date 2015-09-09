@@ -48,7 +48,6 @@
   id _newEntity;
   PELMMainSupport *_entityCopyBeforeEdit;
   MBProgressHUDMode _syncImmediateMBProgressHUDMode;
-  BOOL _receivedAuthReqdErrorOnSyncAttempt;
   PEIsLoggedInBlk _isUserLoggedIn;
   PEListViewController *_listViewController;
   UIBarButtonItem *_uploadBarButtonItem;
@@ -533,21 +532,17 @@ getterForNotification:(SEL)getterForNotification {
 - (void)actionSheetDidDismiss:(JGActionSheet *)actionSheet {}
 
 - (JGActionSheetSection *)becameUnauthenticatedSection {
-  JGActionSheetSection *becameUnauthSection = nil;
-  if (_receivedAuthReqdErrorOnSyncAttempt) {
-    NSString *becameUnauthMessage = @"\
-It appears you are no longer authenticated.\n\
+  NSString *becameUnauthMessage = @"\
+It appears you are no longer authenticated. \
 To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
-    NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
-    NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
-    NSRange unauthMsgAttrsRange = NSMakeRange(72, 26); // 'Settings...Re-authenticate'
-    [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
-    becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
-                                                           title:@"Authentication Failure."
-                                                alertDescription:attrBecameUnauthMessage
-                                                  relativeToView:self.view];
-  }
-  return becameUnauthSection;
+  NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
+  NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
+  NSRange unauthMsgAttrsRange = NSMakeRange(72, 26); // 'Settings...Re-authenticate'
+  [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
+  return [PEUIUtils warningAlertSectionWithMsgs:nil
+                                          title:@"Authentication Failure."
+                               alertDescription:attrBecameUnauthMessage
+                                 relativeToView:self.view];
 }
 
 #pragma mark - Uploading and Downloading (Sync)
@@ -606,10 +601,229 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
 }
 
 - (void)doDelete {
-  
+  NSMutableArray *errorsForDelete = [NSMutableArray array];
+  NSMutableArray *successMessageTitlesForDelete = [NSMutableArray array];
+  __block BOOL receivedAuthReqdErrorOnDeleteAttempt = NO;
+  void (^reenableNavButtons)(void) = ^{
+    [self.navigationItem setHidesBackButton:NO animated:YES];
+    [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
+    [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
+    [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+    [self setUploadDownloadDeleteBarButtonStates];
+  };
+  void (^doDeleteWithChildrenConfirm)(void(^)(void)) = ^(void(^deleter)(void)) {
+    if (_itemChildrenCounter) {
+      NSInteger numChildren = _itemChildrenCounter(_entity);
+      if (numChildren > 0) {
+        [PEUIUtils showWarningConfirmAlertWithMsgs:_itemChildrenMsgsBlk(_entity)
+                                             title:@"Are you sure?"
+                                  alertDescription:[[NSAttributedString alloc] initWithString:@"\
+Deleting this record will result in the \
+following child-records being deleted.\n\n\
+Are you sure you want to continue?"]
+                                          topInset:70.0
+                                   okayButtonTitle:@"Yes, delete."
+                                  okayButtonAction:^{ deleter(); }
+                                 cancelButtonTitle:@"No, cancel."
+                                cancelButtonAction:^{
+                                  reenableNavButtons();
+                                }
+                                    relativeToView:self.view];
+      } else {
+        deleter();
+      }
+    } else {
+      deleter();
+    }
+  };
+  if ([_entity globalIdentifier]) {
+    __block MBProgressHUD *deleteHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    [self.navigationItem setHidesBackButton:YES animated:YES];
+    [[[self navigationItem] leftBarButtonItem] setEnabled:NO];
+    [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
+    [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+    [_downloadBarButtonItem setEnabled:NO];
+    [_uploadBarButtonItem setEnabled:NO];
+    [_deleteBarButtonItem setEnabled:NO];
+    void(^immediateDelDone)(NSString *) = ^(NSString *mainMsgTitle) {
+      if ([errorsForDelete count] == 0) { // success
+        dispatch_async(dispatch_get_main_queue(), ^{
+          [_listViewController handleRemovedEntity:_entity];
+          [deleteHud setLabelText:successMessageTitlesForDelete[0]];
+          UIImage *image = [UIImage imageNamed:@"hud-complete"];
+          UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
+          [deleteHud setCustomView:imageView];
+          deleteHud.mode = MBProgressHUDModeCustomView;
+          [deleteHud hide:YES afterDelay:1.0];
+          dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            [_listViewController handleRemovedEntity:_entity];
+            [[self navigationController] popViewControllerAnimated:YES];
+          });
+        });
+      } else { // error
+        dispatch_async(dispatch_get_main_queue(), ^{
+          [deleteHud hide:YES afterDelay:0];
+          
+          
+          
+          
+          
+          NSMutableAttributedString *attrMessage;
+          NSString *title;
+          NSString *message;
+          NSArray *subErrors = errorsForDelete[0][2];
+          if ([subErrors count] > 1) {
+            message = @"\
+There were problems deleting your \
+entity from the server.  The errors are \
+as follows:";
+            title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
+          } else {
+            message = @"\
+There was a problem deleting your \
+entity from the server.  The error is \
+as follows:";
+            title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
+          }
+          attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
+          JGActionSheetSection *becameUnauthSection = nil;
+          if (receivedAuthReqdErrorOnDeleteAttempt) {
+            becameUnauthSection = [self becameUnauthenticatedSection];
+          }
+          JGActionSheetSection *contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
+                                                                                title:title
+                                                                     alertDescription:attrMessage
+                                                                       relativeToView:self.view];
+          JGActionSheetSection *buttonsSection;
+          void (^buttonsPressedBlock)(JGActionSheet *, NSIndexPath *);
+          buttonsSection = [JGActionSheetSection sectionWithTitle:nil
+                                                          message:nil
+                                                     buttonTitles:@[@"Okay."]
+                                                      buttonStyle:JGActionSheetButtonStyleDefault];
+          [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:0];
+          buttonsPressedBlock = ^(JGActionSheet *sheet, NSIndexPath *btnIndexPath) {
+            reenableNavButtons();
+            [sheet dismissAnimated:YES];
+          };
+          JGActionSheet *alertSheet;
+          if (becameUnauthSection) {
+            alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
+          } else {
+            alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
+          }
+          [alertSheet setDelegate:self];
+          [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
+          [alertSheet setButtonPressedBlock:buttonsPressedBlock];
+          [alertSheet showInView:self.view animated:YES];
+        });
+      }
+    };
+    void(^delNotFoundBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                             NSString *mainMsgTitle,
+                                                             NSString *recordTitle) {
+      [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
+                                   [NSNumber numberWithBool:NO],
+                                   @[[NSString stringWithFormat:@"Not found."]]]];
+      immediateDelDone(mainMsgTitle);
+    };
+    void(^delSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                            NSString *mainMsgTitle,
+                                                            NSString *recordTitle) {
+      [successMessageTitlesForDelete addObject:[NSString stringWithFormat:@"%@ deleted.", recordTitle]];
+      immediateDelDone(mainMsgTitle);
+    };
+    void(^delRetryAfterBlk)(float, NSString *, NSString *, NSDate *) = ^(float percentComplete,
+                                                                         NSString *mainMsgTitle,
+                                                                         NSString *recordTitle,
+                                                                         NSDate *retryAfter) {
+      [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
+                                   [NSNumber numberWithBool:NO],
+                                   @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]]]];
+      immediateDelDone(mainMsgTitle);
+    };
+    void (^delServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                                  NSString *mainMsgTitle,
+                                                                  NSString *recordTitle) {
+      [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
+                                   [NSNumber numberWithBool:NO],
+                                   @[@"Temporary server error."]]];
+      immediateDelDone(mainMsgTitle);
+    };
+    void (^delServerError)(float, NSString *, NSString *, NSArray *) = ^(float percentComplete,
+                                                                         NSString *mainMsgTitle,
+                                                                         NSString *recordTitle,
+                                                                         NSArray *computedErrMsgs) {
+      BOOL isErrorUserFixable = YES;
+      if (!computedErrMsgs || ([computedErrMsgs count] == 0)) {
+        computedErrMsgs = @[@"Unknown server error."];
+        isErrorUserFixable = NO;
+      }
+      [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
+                                   [NSNumber numberWithBool:isErrorUserFixable],
+                                   computedErrMsgs]];
+      immediateDelDone(mainMsgTitle);
+    };
+    void(^delConflictBlk)(float, NSString *, NSString *, id) = ^(float percentComplete,
+                                                                 NSString *mainMsgTitle,
+                                                                 NSString *recordTitle,
+                                                                 id latestEntity) {
+      [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
+                                   [NSNumber numberWithBool:NO],
+                                   @[[NSString stringWithFormat:@"Conflict."]]]];
+      immediateDelDone(mainMsgTitle);
+    };
+    void(^delAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
+                                                             NSString *mainMsgTitle,
+                                                             NSString *recordTitle) {
+      receivedAuthReqdErrorOnDeleteAttempt = YES;
+      [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
+                                    [NSNumber numberWithBool:NO],
+                                    @[@"Authentication required."]]];
+      immediateDelDone(mainMsgTitle);
+    };
+    void (^delDependencyUnsyncedBlk)(float, NSString *, NSString *, NSString *) = ^(float percentComplete,
+                                                                                    NSString *mainMsgTitle,
+                                                                                    NSString *recordTitle,
+                                                                                    NSString *dependencyErrMsg) {
+      [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
+                                    [NSNumber numberWithBool:NO],
+                                    @[dependencyErrMsg]]];
+      immediateDelDone(mainMsgTitle);
+    };
+    void (^deleteRemoteItem)(void) = ^{
+      deleteHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+      deleteHud.delegate = self;
+      deleteHud.labelText = @"Deleting from server...";
+      [errorsForDelete removeAllObjects];
+      [successMessageTitlesForDelete removeAllObjects];
+      receivedAuthReqdErrorOnDeleteAttempt = NO;
+      dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+        _itemDeleter(self,
+                     _entity,
+                     _entityIndexPath,
+                     delNotFoundBlk,
+                     delSuccessBlk,
+                     delRetryAfterBlk,
+                     delServerTempError,
+                     delServerError,
+                     delConflictBlk,
+                     delAuthReqdBlk,
+                     delDependencyUnsyncedBlk);
+      });
+    };
+    doDeleteWithChildrenConfirm(deleteRemoteItem);
+   } else {
+    doDeleteWithChildrenConfirm(^{
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [_listViewController handleRemovedEntity:_entity];
+        [[self navigationController] popViewControllerAnimated:YES];
+      });
+    });
+  }
 }
 
 - (void)doDownload {
+  __block BOOL receivedAuthReqdErrorOnDownloadAttempt = NO;
   __block CGFloat percentCompleteDownloadingEntity = 0.0;
   NSMutableArray *successMsgsForEntityDownload = [NSMutableArray array];
   NSMutableArray *errsForEntityDownload = [NSMutableArray array];
@@ -618,7 +832,8 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
   // errsForEntityDownload[*][0]: Error title (string)
   // errsForEntityDownload[*][1]: Is error user-fixable (bool)
   // errsForEntityDownload[*][2]: An NSArray of sub-error messages (strings)
-  // errsForEntityDownload[*][3]: Is entity not found (bool)
+  // errsForEntityDownload[*][3]: Is error type server-busy? (bool)
+  // errsForEntityDownload[*][4]: Is entity not found (bool)
   //
   MBProgressHUD *downloadHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
   [self.navigationItem setHidesBackButton:YES animated:YES];
@@ -626,6 +841,8 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
   [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
   [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
   [_downloadBarButtonItem setEnabled:NO];
+  [_uploadBarButtonItem setEnabled:NO];
+  [_deleteBarButtonItem setEnabled:NO];
   [downloadHud setLabelText:[NSString stringWithFormat:@"Downloading latest entity."]];
   void (^handleHudProgress)(float) = ^(float percentComplete) {
     percentCompleteDownloadingEntity += percentComplete;
@@ -665,7 +882,7 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
           // we already have the latest version of _entity (server responded with 304)
           [PEUIUtils showSuccessAlertWithTitle:@"You already have the latest."
                               alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You already have the latest version of this\n\
+You already have the latest version of this \
 entity on your device."]
                                       topInset:70.0
                                    buttonTitle:@"Okay."
@@ -683,7 +900,7 @@ entity on your device."]
             // to be downloaded).  Also, this block executes on the main thread.
             [PEUIUtils showSuccessAlertWithTitle:@"Success."
                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
-The latest version of this entity has been\n\
+The latest version of this entity has been \
 successfully downloaded to your device."]
                                         topInset:70.0
                                      buttonTitle:@"Okay."
@@ -700,9 +917,14 @@ successfully downloaded to your device."]
     } else { // error(s)
       dispatch_async(dispatch_get_main_queue(), ^{
         [downloadHud hide:YES afterDelay:0.0];
-        if ([errsForEntityDownload[0][3] boolValue]) {
+        if ([errsForEntityDownload[0][3] boolValue]) { // server busy
+          [self handleServerBusyErrorWithAction:^{
+            reenableNavButtons();
+            [self setUploadDownloadDeleteBarButtonStates];
+          }];
+        } else if ([errsForEntityDownload[0][4] boolValue]) { // not found
           [self handleNotFoundError];
-        } else {
+        } else { // any other error type
           NSString *fetchErrMsg = @"\
 There was a problem downloading the entity.";
           [PEUIUtils showErrorAlertWithMsgs:errsForEntityDownload[0][2]
@@ -726,6 +948,7 @@ There was a problem downloading the entity.";
     [errsForEntityDownload addObject:@[[NSString stringWithFormat:@"%@ not downloaded.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[[NSString stringWithFormat:@"Not found."]],
+                                       [NSNumber numberWithBool:NO],
                                        [NSNumber numberWithBool:YES]]];
     if (percentCompleteDownloadingEntity == 1.0) { entityDownloadDone(mainMsgTitle); }
   };
@@ -749,6 +972,7 @@ There was a problem downloading the entity.";
     [errsForEntityDownload addObject:@[[NSString stringWithFormat:@"%@ not downloaded.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                       [NSNumber numberWithBool:YES],
                                        [NSNumber numberWithBool:NO]]];
     if (percentCompleteDownloadingEntity == 1.0) { entityDownloadDone(mainMsgTitle); }
   };
@@ -759,17 +983,19 @@ There was a problem downloading the entity.";
     [errsForEntityDownload addObject:@[[NSString stringWithFormat:@"%@ not downloaded.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[@"Temporary server error."],
+                                       [NSNumber numberWithBool:NO],
                                        [NSNumber numberWithBool:NO]]];
     if (percentCompleteDownloadingEntity == 1.0) { entityDownloadDone(mainMsgTitle); }
   };
   void(^downloadAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
                                                                 NSString *mainMsgTitle,
                                                                 NSString *recordTitle) {
-    _receivedAuthReqdErrorOnSyncAttempt = YES;
+    receivedAuthReqdErrorOnDownloadAttempt = YES;
     handleHudProgress(percentComplete);
     [errsForEntityDownload addObject:@[[NSString stringWithFormat:@"%@ not downloaded.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[@"Authentication required."],
+                                       [NSNumber numberWithBool:NO],
                                        [NSNumber numberWithBool:NO]]];
     if (percentCompleteDownloadingEntity == 1.0) { entityDownloadDone(mainMsgTitle); }
   };
@@ -815,10 +1041,13 @@ There was a problem downloading the entity.";
   // errorsForUpload[*][0]: Error title (string)
   // errorsForUpload[*][1]: Is error user-fixable (bool)
   // errorsForUpload[*][2]: An NSArray of sub-error messages (strings)
-  // errorsForUpload[*][3]: Is error conflict-type (bool)
+  // errorsForUpload[*][3]: Is error type server busy (bool)
+  // errorsForUpload[*][4]: Is error conflict-type (bool)
+  // errorsForUpload[*][5]: Latest entity for conflict error
+  // errorsForUpload[*][6]: Entity not found (bool)
   //
   NSMutableArray *successMessageTitlesForUpload = [NSMutableArray array];
-  _receivedAuthReqdErrorOnSyncAttempt = NO;
+  __block BOOL receivedAuthReqdErrorOnUploadAttempt = NO;
   void(^uploadDone)(NSString *) = ^(NSString *mainMsgTitle) {
     if ([errorsForUpload count] == 0) { // success
       dispatch_async(dispatch_get_main_queue(), ^{
@@ -836,39 +1065,43 @@ There was a problem downloading the entity.";
     } else { // error
       dispatch_async(dispatch_get_main_queue(), ^{
         [HUD hide:YES afterDelay:0];
-        NSString *title;
-        NSString *okayActionTitle = @"Okay.  I'll try again later.";
-        NSString *message;
-        BOOL isConflictError = NO;
-        NSArray *subErrors = errorsForUpload[0][2];
-        if ([subErrors count] > 1) {
-          message = @"There were problems uploading to the server.\n\
-The errors are as follows:";
-          title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
-        } else {
-          if ([errorsForUpload[0][3] boolValue]) {
-            isConflictError = YES;
-          } else {
-            message = @"There was a problem uploading to the server.\n\
-The error is as follows:";
-            title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
-          }
-        }
-        if (isConflictError) {
-          id latestEntity = errorsForUpload[0][4];
+        if ([errorsForUpload[0][4] boolValue]) { // conflict error
+          id latestEntity = errorsForUpload[0][5];
           NSMutableAttributedString *desc = [[NSMutableAttributedString alloc] initWithString:@"\
-The remote copy of this entity has been\n\
-updated since you last downloaded it.  You\n\
+The remote copy of this entity has been \
+updated since you last downloaded it.  You \
 have a few options:\n\n\
-If you cancel, your local edits will be\n\
+If you cancel, your local edits will be \
 retained."];
           NSDictionary *attrs = @{ NSFontAttributeName : [UIFont italicSystemFontOfSize:14.0] };
           [desc setAttributes:attrs range:NSMakeRange(99, 49)];
           [self presentConflictAlertWithLatestEntity:latestEntity
                                     alertDescription:desc
                                         cancelAction:postUploadActivities];
-        } else {
-          JGActionSheetSection *becameUnauthSection = [self becameUnauthenticatedSection];
+        } else if ([errorsForUpload[0][3] boolValue]) {
+          [self handleServerBusyErrorWithAction:^{
+            postUploadActivities();
+          }];
+        } else if ([errorsForUpload[0][6] boolValue]) { // not found
+          [self handleNotFoundError];
+        } else {  // any other error type
+          NSString *title;
+          NSString *okayActionTitle = @"Okay.  I'll try again later.";
+          NSString *message;
+          NSArray *subErrors = errorsForUpload[0][2];
+          if ([subErrors count] > 1) {
+            message = @"There were problems uploading to the server. \
+The errors are as follows:";
+            title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
+          } else {
+            message = @"There was a problem uploading to the server. \
+The error is as follows:";
+            title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
+          }
+          JGActionSheetSection *becameUnauthSection = nil;
+          if (receivedAuthReqdErrorOnUploadAttempt) {
+            becameUnauthSection = [self becameUnauthenticatedSection];
+          }
           JGActionSheetSection *contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
                                                                                 title:title
                                                                      alertDescription:[[NSAttributedString alloc] initWithString:message]
@@ -907,14 +1140,13 @@ retained."];
                                                               NSString *mainMsgTitle,
                                                               NSString *recordTitle) {
     handleHudProgress(percentComplete);
-    // TODO - perhaps need to add ability for 'not found' errors to be 'special' such that
-    // a user is given a special error dialog informing that their record will now be deleted
-    // from the device.  This VC needs to accept a 'delete me' block so the entity can be
-    // locally deleted.
     [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                [NSNumber numberWithBool:NO],
-                                @[[NSString stringWithFormat:@"Not found."]],
-                                [NSNumber numberWithBool:NO]]];
+                                 [NSNumber numberWithBool:NO],
+                                 @[[NSString stringWithFormat:@"Not found."]],
+                                 [NSNumber numberWithBool:NO],
+                                 [NSNumber numberWithBool:NO],
+                                 [NSNull null],
+                                 [NSNumber numberWithBool:YES]]];
     if (percentCompleteUploadingEntity == 1.0) {
       uploadDone(mainMsgTitle);
     }
@@ -934,9 +1166,12 @@ retained."];
                                                                           NSDate *retryAfter) {
     handleHudProgress(percentComplete);
     [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                [NSNumber numberWithBool:NO],
-                                @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
-                                [NSNumber numberWithBool:NO]]];
+                                 [NSNumber numberWithBool:NO],
+                                 @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                 [NSNumber numberWithBool:YES],
+                                 [NSNumber numberWithBool:NO],
+                                 [NSNull null],
+                                 [NSNumber numberWithBool:NO]]];
     if (percentCompleteUploadingEntity == 1.0) {
       uploadDone(mainMsgTitle);
     }
@@ -946,9 +1181,12 @@ retained."];
                                                                   NSString *recordTitle) {
     handleHudProgress(percentComplete);
     [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                [NSNumber numberWithBool:NO],
-                                @[@"Temporary server error."],
-                                [NSNumber numberWithBool:NO]]];
+                                 [NSNumber numberWithBool:NO],
+                                 @[@"Temporary server error."],
+                                 [NSNumber numberWithBool:NO],
+                                 [NSNumber numberWithBool:NO],
+                                 [NSNull null],
+                                 [NSNumber numberWithBool:NO]]];
     if (percentCompleteUploadingEntity == 1.0) {
       uploadDone(mainMsgTitle);
     }
@@ -964,9 +1202,12 @@ retained."];
       isErrorUserFixable = NO;
     }
     [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                [NSNumber numberWithBool:isErrorUserFixable],
-                                computedErrMsgs,
-                                [NSNumber numberWithBool:NO]]];
+                                 [NSNumber numberWithBool:isErrorUserFixable],
+                                 computedErrMsgs,
+                                 [NSNumber numberWithBool:NO],
+                                 [NSNumber numberWithBool:NO],
+                                 [NSNull null],
+                                 [NSNumber numberWithBool:NO]]];
     if (percentCompleteUploadingEntity == 1.0) {
       uploadDone(mainMsgTitle);
     }
@@ -977,10 +1218,12 @@ retained."];
                                                                   id latestEntity) {
     handleHudProgress(percentComplete);
     [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not uploaded.", recordTitle],
-                                [NSNumber numberWithBool:NO],
-                                @[[NSString stringWithFormat:@"Conflict."]],
-                                [NSNumber numberWithBool:YES],
-                                latestEntity]];
+                                 [NSNumber numberWithBool:NO],
+                                 @[[NSString stringWithFormat:@"Conflict."]],
+                                 [NSNumber numberWithBool:NO],
+                                 [NSNumber numberWithBool:YES],
+                                 latestEntity,
+                                 [NSNumber numberWithBool:NO]]];
     if (percentCompleteUploadingEntity == 1.0) {
       uploadDone(mainMsgTitle);
     }
@@ -988,12 +1231,15 @@ retained."];
   void(^uploadAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
                                                               NSString *mainMsgTitle,
                                                               NSString *recordTitle) {
-    _receivedAuthReqdErrorOnSyncAttempt = YES;
+    receivedAuthReqdErrorOnUploadAttempt = YES;
     handleHudProgress(percentComplete);
     [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not uploaded.", recordTitle],
-                                [NSNumber numberWithBool:NO],
-                                @[@"Authentication required."],
-                                [NSNumber numberWithBool:NO]]];
+                                 [NSNumber numberWithBool:NO],
+                                 @[@"Authentication required."],
+                                 [NSNumber numberWithBool:NO],
+                                 [NSNumber numberWithBool:NO],
+                                 [NSNull null],
+                                 [NSNumber numberWithBool:NO]]];
     if (percentCompleteUploadingEntity == 1.0) {
       uploadDone(mainMsgTitle);
     }
@@ -1004,9 +1250,12 @@ retained."];
                                                                                     NSString *dependencyErrMsg) {
     handleHudProgress(percentComplete);
     [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not uploaded.", recordTitle],
-                                [NSNumber numberWithBool:NO],
-                                @[dependencyErrMsg],
-                                [NSNumber numberWithBool:NO]]];
+                                 [NSNumber numberWithBool:NO],
+                                 @[dependencyErrMsg],
+                                 [NSNumber numberWithBool:NO],
+                                 [NSNumber numberWithBool:NO],
+                                 [NSNull null],
+                                 [NSNumber numberWithBool:NO]]];
     if (percentCompleteUploadingEntity == 1.0) {
       uploadDone(mainMsgTitle);
     }
@@ -1025,17 +1274,31 @@ retained."];
   });
 }
 
-#pragma mark - Conflict and Not Found Helpers
+#pragma mark - Conflict, Not Found and other helpers
+
+- (void)handleServerBusyErrorWithAction:(void(^)(void))action {
+  [PEUIUtils showWaitAlertWithMsgs:nil
+                             title:@"Busy with maintenance."
+                  alertDescription:[[NSAttributedString alloc] initWithString:@"\
+The server is currently busy at the moment \
+undergoing maintenance.\n\n\
+We apologize for the inconvenience.  Please \
+try this operation again later."]
+                          topInset:70.0
+                       buttonTitle:@"Okay."
+                      buttonAction:action
+                    relativeToView:self.view];
+}
 
 - (void)handleNotFoundError {
   NSString *fetchErrMsg = @"\
-It would appear this record no longer\n\
-exists and was probably deleted on\n\
+It would appear this record no longer \
+exists and was probably deleted on \
 a different device.\n\n\
-To keep the data on your device consistent\n\
+To keep the data on your device consistent \
 with your account, it will be removed now.";
   [PEUIUtils showErrorAlertWithMsgs:nil
-                              title:@"Entity not found."
+                              title:@"Record not found."
                    alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
                            topInset:70.0
                         buttonTitle:@"Okay."
@@ -1049,6 +1312,7 @@ with your account, it will be removed now.";
 
 - (void (^)(void(^)(void)))downloadDepsForEntity:(id)entity
                        dismissErrAlertPostAction:(void(^)(void))dismissErrAlertPostAction {
+  __block BOOL receivedAuthReqdErrorOnDownloadDepsAttempt = NO;
   void (^fetchDepsThenTakeAction)(void(^)(void)) = ^(void(^postFetchAction)(void)) {
     if (_numRemoteDepsNotLocal) {
       NSInteger numDepsThatDontExistLocally = _numRemoteDepsNotLocal(entity);
@@ -1087,7 +1351,7 @@ with your account, it will be removed now.";
               };
               if ([errsForDepsFetch count] > 1) {
                 NSString *fetchErrMsg = @"\
-There were problems downloading this\n\
+There were problems downloading this \
 entity's dependencies.";
                 [PEUIUtils showMultiErrorAlertWithFailures:errsForDepsFetch
                                                      title:@"Fetch errors."
@@ -1100,7 +1364,7 @@ entity's dependencies.";
                                             relativeToView:self.view];
               } else {
                 NSString *fetchErrMsg = @"\
-There was a problem downloading this\n\
+There was a problem downloading this \
 entity's dependency.";
                 [PEUIUtils showErrorAlertWithMsgs:errsForDepsFetch[0][2]
                                             title:@"Fetch error."
@@ -1156,7 +1420,7 @@ entity's dependency.";
         void(^depAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
                                                                  NSString *mainMsgTitle,
                                                                  NSString *recordTitle) {
-          _receivedAuthReqdErrorOnSyncAttempt = YES;
+          receivedAuthReqdErrorOnDownloadDepsAttempt = YES;
           handleHudProgress(percentComplete);
           [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
                                         [NSNumber numberWithBool:NO],
@@ -1190,7 +1454,7 @@ entity's dependency.";
       [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // ensures 'Cancel' button stays grayed-out
       [self.view endEditing:YES]; // dismiss the keyboard
       NSString *desc = @"\
-Use the form below to resolve the\n\
+Use the form below to resolve the \
 merge conflicts.";
       [PEUIUtils showConflictResolverWithTitle:@"Conflict resolver."
                               alertDescription:[[NSAttributedString alloc] initWithString:desc]
@@ -1388,12 +1652,13 @@ merge conflicts.";
         // errorsForUpload[*][0]: Error title (string)
         // errorsForUpload[*][1]: Is error user-fixable (bool)
         // errorsForUpload[*][2]: An NSArray of sub-error messages (strings)
-        // errorsForUpload[*][3]: Is error conflict-type (bool)
-        // errorsForUpload[*][4]: The latest entity if err is conflict-type
-        // errorsForUpload[*][5]: Is entity not found
+        // errorsForUpload[*][3]: Is error type server-busy? (bool)
+        // errorsForUpload[*][4]: Is error conflict-type (bool)
+        // errorsForUpload[*][5]: The latest entity if err is conflict-type
+        // errorsForUpload[*][6]: Is entity not found
         //
         NSMutableArray *successMessageTitlesForUpload = [NSMutableArray array];
-        _receivedAuthReqdErrorOnSyncAttempt = NO;
+        __block BOOL receivedAuthReqdErrorOnSaveAttempt = NO;
         void(^immediateSyncDone)(NSString *) = ^(NSString *mainMsgTitle) {
           if ([errorsForUpload count] == 0) { // success
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -1411,15 +1676,29 @@ merge conflicts.";
           } else { // error
             dispatch_async(dispatch_get_main_queue(), ^{
               [HUD hide:YES afterDelay:0];
-              if ([errorsForUpload[0][5] boolValue]) { // is entity not found
+              if ([errorsForUpload[0][6] boolValue]) { // is entity not found
                 [self handleNotFoundError];
-              } else if ([errorsForUpload[0][3] boolValue]) { // conflict error
-                id latestEntity = errorsForUpload[0][4];
+              } else if ([errorsForUpload[0][3] boolValue]) { // server busy
+                [PEUIUtils showWaitAlertWithMsgs:nil
+                                           title:@"Busy with maintenance."
+                                alertDescription:[[NSAttributedString alloc] initWithString:@"\
+The server is currently busy at the moment \
+undergoing maintenance.\n\n\
+Your edits have been saved locally.  You \
+can try to upload them later."]
+                                        topInset:70.0
+                                     buttonTitle:@"Okay."
+                                    buttonAction:^{
+                                      postEditActivities();
+                                    }
+                                  relativeToView:self.view];
+              } else if ([errorsForUpload[0][4] boolValue]) { // conflict error
+                id latestEntity = errorsForUpload[0][5];
                 NSMutableAttributedString *desc = [[NSMutableAttributedString alloc] initWithString:@"\
-The remote copy of this entity has been\n\
-updated since you downloaded it.  You have\n\
+The remote copy of this entity has been \
+updated since you downloaded it.  You have \
 a few options:\n\n\
-If you cancel, your local edits will be\n\
+If you cancel, your local edits will be \
 retained."];
                 NSDictionary *attrs = @{ NSFontAttributeName : [UIFont italicSystemFontOfSize:14.0] };
                 [desc setAttributes:attrs range:NSMakeRange(99, 49)];
@@ -1440,8 +1719,8 @@ retained."];
                 NSArray *subErrors = errorsForUpload[0][2]; // because only single-record edit, we can skip the "not saved" msg title, and just display the sub-errors
                 if ([subErrors count] > 1) {
                   message = @"\
-Although there were problems syncing your\n\
-edits to the server, they have been saved\n\
+Although there were problems syncing your \
+edits to the server, they have been saved \
 locally.  The errors are as follows:";
                   fixNowActionTitle = @"I'll fix them now.";
                   fixLaterActionTitle = @"I'll fix them later.";
@@ -1450,8 +1729,8 @@ locally.  The errors are as follows:";
                   title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
                 } else {
                   message = @"\
-Although there was a problem syncing your\n\
-edits to the server, they have been saved\n\
+Although there was a problem syncing your \
+edits to the server, they have been saved \
 locally.  The error is as follows:";
                   fixLaterActionTitle = @"I'll fix it later.";
                   fixNowActionTitle = @"I'll fix it now.";
@@ -1462,7 +1741,10 @@ locally.  The error is as follows:";
                 messageAttrsRange = NSMakeRange(68, 23); // 'have...locally'
                 attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
                 [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
-                JGActionSheetSection *becameUnauthSection = [self becameUnauthenticatedSection];
+                JGActionSheetSection *becameUnauthSection = nil;
+                if (receivedAuthReqdErrorOnSaveAttempt) {
+                  becameUnauthSection = [self becameUnauthenticatedSection];
+                }
                 JGActionSheetSection *contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
                                                                                       title:title
                                                                            alertDescription:attrMessage
@@ -1554,6 +1836,7 @@ locally.  The error is as follows:";
                                        [NSNumber numberWithBool:NO],
                                        @[[NSString stringWithFormat:@"Not found."]],
                                        [NSNumber numberWithBool:NO],
+                                       [NSNumber numberWithBool:NO],
                                        [NSNull null],
                                        [NSNumber numberWithBool:YES]]];
           if (percentCompleteUploadingEntity == 1.0) {
@@ -1577,6 +1860,7 @@ locally.  The error is as follows:";
           [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                       [NSNumber numberWithBool:YES],
                                        [NSNumber numberWithBool:NO],
                                        [NSNull null],
                                        [NSNumber numberWithBool:NO]]];
@@ -1591,6 +1875,7 @@ locally.  The error is as follows:";
           [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[@"Temporary server error."],
+                                       [NSNumber numberWithBool:NO],
                                        [NSNumber numberWithBool:NO],
                                        [NSNull null],
                                        [NSNumber numberWithBool:NO]]];
@@ -1612,6 +1897,7 @@ locally.  The error is as follows:";
                                        [NSNumber numberWithBool:isErrorUserFixable],
                                        computedErrMsgs,
                                        [NSNumber numberWithBool:NO],
+                                       [NSNumber numberWithBool:NO],
                                        [NSNull null],
                                        [NSNumber numberWithBool:NO]]];
           if (percentCompleteUploadingEntity == 1.0) {
@@ -1626,6 +1912,7 @@ locally.  The error is as follows:";
           [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[[NSString stringWithFormat:@"Conflict."]],
+                                       [NSNumber numberWithBool:NO],
                                        [NSNumber numberWithBool:YES],
                                        latestEntity,
                                        [NSNumber numberWithBool:NO]]];
@@ -1636,11 +1923,12 @@ locally.  The error is as follows:";
         void(^syncAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
                                                                   NSString *mainMsgTitle,
                                                                   NSString *recordTitle) {
-          _receivedAuthReqdErrorOnSyncAttempt = YES;
+          receivedAuthReqdErrorOnSaveAttempt = YES;
           handleHudProgress(percentComplete);
           [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[@"Authentication required."],
+                                       [NSNumber numberWithBool:NO],
                                        [NSNumber numberWithBool:NO],
                                        [NSNull null],
                                        [NSNumber numberWithBool:NO]]];
@@ -1656,6 +1944,7 @@ locally.  The error is as follows:";
           [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[dependencyErrMsg],
+                                       [NSNumber numberWithBool:NO],
                                        [NSNumber numberWithBool:NO],
                                        [NSNull null],
                                        [NSNumber numberWithBool:NO]]];
@@ -1820,18 +2109,18 @@ locally.  The error is as follows:";
       // errorsForUpload[*][0]: Error title (string)
       // errorsForUpload[*][1]: Is error user-fixable (bool)
       // errorsForUpload[*][2]: An NSArray of sub-error messages (strings)
+      // errorsForUpload[*][3]: Is error type server-busy? (bool)
       //
       
       NSMutableArray *successMessageTitlesForUpload = [NSMutableArray array];
-      _receivedAuthReqdErrorOnSyncAttempt = NO;
+      __block BOOL receivedAuthReqdErrorOnAddAttempt = NO;
       void(^immediateSaveDone)(NSString *) = ^(NSString *mainMsgTitle) {
         BOOL isMultiStepAdd = ([errorsForUpload count] + [successMessageTitlesForUpload count]) > 1;
-        if ([errorsForUpload count] == 0) {
+        if ([errorsForUpload count] == 0) { // no errors
           dispatch_async(dispatch_get_main_queue(), ^{
             notificationSenderForAdd(_newEntity);
-            if (isMultiStepAdd) {
+            if (isMultiStepAdd) { // all successes
               [HUD hide:YES afterDelay:0];
-              // all successes
               NSString *title = [NSString stringWithFormat:@"Success %@.", mainMsgTitle];
               JGActionSheetSection *contentSection = [PEUIUtils successAlertSectionWithMsgs:successMessageTitlesForUpload
                                                                                       title:title
@@ -1853,8 +2142,7 @@ locally.  The error is as follows:";
                     break;
                 };}];
               [alertSheet showInView:[self view] animated:YES];
-            } else {
-              // single add success
+            } else { // single add success
               [HUD setLabelText:successMessageTitlesForUpload[0]];
               //[HUD setDetailsLabelText:@"(synced with server)"];
               UIImage *image = [UIImage imageNamed:@"hud-complete"];
@@ -1867,36 +2155,92 @@ locally.  The error is as follows:";
               });
             }
           });
-        } else {
-          // mixed results or only errors
+        } else { // mixed results or only errors
+          NSMutableArray *sections = [NSMutableArray array];
+          BOOL (^doesContainBusyError)(void) = ^{
+            BOOL containsBusyError = NO;
+            for (NSArray *failure in errorsForUpload) {
+              containsBusyError = [failure[3] boolValue];
+              break;
+            }
+            return containsBusyError;
+          };
+          BOOL (^areAllBusyErrors)(void) = ^{
+            BOOL allBusyErrors = YES;
+            for (NSArray *failure in errorsForUpload) {
+              if (![failure[3] boolValue]) {
+                allBusyErrors = NO;
+                break;
+              }
+            }
+            return allBusyErrors;
+          };
+          void (^addServerBusySection)(void) = ^{
+            NSString *msg;
+            if (isMultiStepAdd) {
+              msg = @"\
+While attempting to sync at least one your \
+records, the server reported it is busy \
+undergoing maintenance.  All your records \
+have been saved locally and can be synced \
+later.";
+            } else {
+              msg = @"\
+While attempting to sync your record, the \
+server reported that it is busy undergoing \
+maintenance.  Your record has been saved \
+locally.  Try syncing it later.";
+            }
+            [sections addObject:[PEUIUtils waitAlertSectionWithMsgs:nil
+                                                              title:@"Busy with maintenance."
+                                                   alertDescription:[[NSAttributedString alloc] initWithString:msg]
+                                                     relativeToView:self.view]];
+          };
+          NSArray *(^stripOutBusyErrors)(void) = ^ NSArray * {
+            NSMutableArray *errorsSansBusyErrs = [NSMutableArray array];
+            for (NSArray *failure in errorsForUpload) {
+              if (![failure[3] boolValue]) {
+                [errorsSansBusyErrs addObject:failure];
+              }
+            }
+            return errorsSansBusyErrs;
+          };
           dispatch_async(dispatch_get_main_queue(), ^{
             [HUD hide:YES afterDelay:0];
             NSDictionary *messageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0],
                                             NSForegroundColorAttributeName : [UIColor blueColor] };
             NSRange messageAttrsRange;
             NSMutableAttributedString *attrMessage;
-            if ([successMessageTitlesForUpload count] > 0) {
-              // mixed results
-              NSString *title = [NSString stringWithFormat:@"Mixed results %@.", mainMsgTitle];
-              NSString *message = @"\
-Some of the edits synced and some did not.\n\
-The ones that did not have been saved\n\
-locally and will need to be fixed individually.\n\
+            if ([successMessageTitlesForUpload count] > 0) { // mixed results
+              if (receivedAuthReqdErrorOnAddAttempt) {
+                [sections addObject:[self becameUnauthenticatedSection]];
+              }
+              if (doesContainBusyError()) {
+                addServerBusySection();
+              }
+              if (!areAllBusyErrors()) {
+                NSString *title = [NSString stringWithFormat:@"Mixed results %@.", mainMsgTitle];
+                NSString *message = @"\
+Some of the edits synced and some did not. \
+The ones that did not have been saved \
+locally and will need to be fixed individually. \
 The successful syncs are:";
-              messageAttrsRange = NSMakeRange(65, 88); // 'have...locally'
-              attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
-              [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
-              JGActionSheetSection *contentSection = [PEUIUtils mixedResultsAlertSectionWithSuccessMsgs:successMessageTitlesForUpload
-                                                                                                  title:title
-                                                                                       alertDescription:attrMessage
-                                                                                    failuresDescription:[[NSAttributedString alloc] initWithString:@"The errors are:"]
-                                                                                               failures:errorsForUpload
-                                                                                         relativeToView:self.view];
-              JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
-                                                                                    message:nil
-                                                                               buttonTitles:@[@"Okay."]
-                                                                                buttonStyle:JGActionSheetButtonStyleDefault];
-              JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
+                messageAttrsRange = NSMakeRange(65, 88); // 'have...locally'
+                attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
+                [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
+                [sections addObject:[PEUIUtils mixedResultsAlertSectionWithSuccessMsgs:successMessageTitlesForUpload
+                                                                                 title:title
+                                                                      alertDescription:attrMessage
+                                                                   failuresDescription:[[NSAttributedString alloc] initWithString:@"The errors are:"]
+                                                                              failures:stripOutBusyErrors()
+                                                                        relativeToView:self.view]];
+              }
+              // buttons section
+              [sections addObject:[JGActionSheetSection sectionWithTitle:nil
+                                                                 message:nil
+                                                            buttonTitles:@[@"Okay."]
+                                                             buttonStyle:JGActionSheetButtonStyleDefault]];
+              JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:sections];
               [alertSheet setDelegate:self];
               [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
               [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
@@ -1908,19 +2252,23 @@ The successful syncs are:";
                     break;
                 };}];
               [alertSheet showInView:[self view] animated:YES];
-            } else {
-              // only error(s)
+            } else { // only error(s)
               NSString *title;
               NSString *fixNowActionTitle;
               NSString *fixLaterActionTitle;
               NSString *dealWithLaterActionTitle;
               NSString *cancelActionTitle;
               NSString *message;
-              JGActionSheetSection *contentSection;
+              if (receivedAuthReqdErrorOnAddAttempt) {
+                [sections addObject:[self becameUnauthenticatedSection]];
+              }
+              if (doesContainBusyError()) {
+                addServerBusySection();
+              }
               if (isMultiStepAdd) {
                 message = @"\
-Although there were problems syncing your\n\
-edits to the server, they have been saved\n\
+Although there were problems syncing your \
+edits to the server, they have been saved \
 locally.  The details are as follows:";
                 messageAttrsRange = NSMakeRange(69, 23); // 'have...locally'
                 attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
@@ -1930,10 +2278,12 @@ locally.  The details are as follows:";
                 cancelActionTitle = @"Forget it.  Just cancel them.";
                 dealWithLaterActionTitle = @"I'll try syncing them later.";
                 title = [NSString stringWithFormat:@"Problems %@.", mainMsgTitle];
-                contentSection = [PEUIUtils multiErrorAlertSectionWithFailures:errorsForUpload
-                                                                         title:title
-                                                              alertDescription:attrMessage
-                                                                relativeToView:self.view];
+                if (!areAllBusyErrors()) {
+                  [sections addObject:[PEUIUtils multiErrorAlertSectionWithFailures:stripOutBusyErrors()
+                                                                              title:title
+                                                                   alertDescription:attrMessage
+                                                                     relativeToView:self.view]];
+                }
               } else {
                 dealWithLaterActionTitle = @"I'll try syncing it later.";
                 cancelActionTitle = @"Forget it.  Just cancel this.";
@@ -1941,8 +2291,8 @@ locally.  The details are as follows:";
                 if ([subErrors count] > 1) {
                   title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
                   message = @"\
-Although there were problems syncing your\n\
-edits to the server, they have been saved\n\
+Although there were problems syncing your \
+edits to the server, they have been saved \
 locally.  The errors are as follows:";
                   messageAttrsRange = NSMakeRange(68, 23); // 'have...locally'
                   fixNowActionTitle = @"I'll fix them now.";
@@ -1950,8 +2300,8 @@ locally.  The errors are as follows:";
                 } else {
                   title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
                   message = @"\
-Although there was a problem syncing your\n\
-edits to the server, they have been saved\n\
+Although there was a problem syncing your \
+edits to the server, they have been saved \
 locally.  The error is as follows:";
                   messageAttrsRange = NSMakeRange(68, 23); // 'have...locally'
                   fixLaterActionTitle = @"I'll fix it later.";
@@ -1959,12 +2309,13 @@ locally.  The error is as follows:";
                 }
                 attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
                 [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
-                contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
-                                                                title:title
-                                                     alertDescription:attrMessage
-                                                       relativeToView:self.view];
+                if (!areAllBusyErrors()) {
+                  [sections addObject:[PEUIUtils errorAlertSectionWithMsgs:subErrors
+                                                                     title:title
+                                                          alertDescription:attrMessage
+                                                            relativeToView:self.view]];
+                }
               }
-              JGActionSheetSection *becameUnauthSection = [self becameUnauthenticatedSection];
               JGActionSheetSection *buttonsSection;
               void (^buttonsPressedBlock)(JGActionSheet *, NSIndexPath *);
               if ([PEAddViewEditController areErrorsAllUserFixable:errorsForUpload]) {
@@ -2011,12 +2362,13 @@ locally.  The error is as follows:";
                   [sheet dismissAnimated:YES];
                 };
               }
-              JGActionSheet *alertSheet;
-              if (becameUnauthSection) {
+              [sections addObject:buttonsSection];
+              JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:sections];
+              /*if (becameUnauthSection) {
                 alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
               } else {
                 alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
-              }
+              }*/
               [alertSheet setDelegate:self];
               [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
               [alertSheet setButtonPressedBlock:buttonsPressedBlock];
@@ -2036,8 +2388,9 @@ locally.  The error is as follows:";
                                                                 NSString *recordTitle) {
         handleHudProgress(percentComplete);
         [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                    [NSNumber numberWithBool:NO],
-                                    @[[NSString stringWithFormat:@"Not found."]]]];
+                                     [NSNumber numberWithBool:NO],
+                                     @[[NSString stringWithFormat:@"Not found."]],
+                                     [NSNumber numberWithBool:NO]]];
         if (percentCompleteUploadingEntity == 1.0) {
           immediateSaveDone(mainMsgTitle);
         }
@@ -2057,8 +2410,9 @@ locally.  The error is as follows:";
                                                                             NSDate *retryAfter) {
         handleHudProgress(percentComplete);
         [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                   [NSNumber numberWithBool:NO],
-                                   @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]]]];
+                                     [NSNumber numberWithBool:NO],
+                                     @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                     [NSNumber numberWithBool:YES]]];
         if (percentCompleteUploadingEntity == 1.0) {
           immediateSaveDone(mainMsgTitle);
         }
@@ -2068,8 +2422,9 @@ locally.  The error is as follows:";
                                                                     NSString *recordTitle) {
         handleHudProgress(percentComplete);
         [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                   [NSNumber numberWithBool:NO],
-                                   @[@"Temporary server error."]]];
+                                     [NSNumber numberWithBool:NO],
+                                     @[@"Temporary server error."],
+                                     [NSNumber numberWithBool:NO]]];
         if (percentCompleteUploadingEntity == 1.0) {
           immediateSaveDone(mainMsgTitle);
         }
@@ -2085,8 +2440,9 @@ locally.  The error is as follows:";
           isErrorUserFixable = NO;
         }
         [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                   [NSNumber numberWithBool:isErrorUserFixable],
-                                   computedErrMsgs]];
+                                     [NSNumber numberWithBool:isErrorUserFixable],
+                                     computedErrMsgs,
+                                     [NSNumber numberWithBool:NO]]];
         if (percentCompleteUploadingEntity == 1.0) {
           immediateSaveDone(mainMsgTitle);
         }
@@ -2094,11 +2450,12 @@ locally.  The error is as follows:";
       void(^syncAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
                                                                 NSString *mainMsgTitle,
                                                                 NSString *recordTitle) {
-        _receivedAuthReqdErrorOnSyncAttempt = YES;
+        receivedAuthReqdErrorOnAddAttempt = YES;
         handleHudProgress(percentComplete);
         [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                   [NSNumber numberWithBool:NO],
-                                   @[@"Authentication required."]]];
+                                     [NSNumber numberWithBool:NO],
+                                     @[@"Authentication required."],
+                                     [NSNumber numberWithBool:NO]]];
         if (percentCompleteUploadingEntity == 1.0) {
           immediateSaveDone(mainMsgTitle);
         }
@@ -2109,8 +2466,9 @@ locally.  The error is as follows:";
                                                                                       NSString *dependencyErrMsg) {
         handleHudProgress(percentComplete);
         [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not synced.", recordTitle],
-                                    [NSNumber numberWithBool:NO],
-                                    @[dependencyErrMsg]]];
+                                     [NSNumber numberWithBool:NO],
+                                     @[dependencyErrMsg],
+                                     [NSNumber numberWithBool:NO]]];
         if (percentCompleteUploadingEntity == 1.0) {
           immediateSaveDone(mainMsgTitle);
         }

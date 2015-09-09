@@ -98,55 +98,59 @@
 
 #pragma mark - Helpers
 
-- (UIView *)paddedMessageWithString:(NSString *)message {
-  UILabel *label = [PEUIUtils labelWithKey:message
+- (UIView *)logoutPaddedMessage {
+  NSString *logoutMsg = @"\
+Logging out will disconnect this device from \
+your remote account.  This will remove your \
+fuel purchase data from this device only.";
+  CGFloat leftPadding = 8.0;
+  UILabel *label = [PEUIUtils labelWithKey:logoutMsg
                                       font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                            backgroundColor:[UIColor clearColor]
                                  textColor:[UIColor darkGrayColor]
-                       verticalTextPadding:3.0];
-  return [PEUIUtils leftPadView:label padding:8.0];
+                       verticalTextPadding:3.0
+                                fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - (leftPadding + 5.0)];
+  return [PEUIUtils leftPadView:label padding:leftPadding];
 }
 
-- (UIView *)logoutPaddedMessage {
-  NSString *logoutMsg = @"\
-Logging out will disconnect this device from\n\
-your remote account.  This will remove your\n\
-fuel purchase data from this device only.";
-  return [self paddedMessageWithString:logoutMsg];
-}
-
-- (UIView *)messagePanelWithMessage:(NSString *)message iconImage:(UIImage *)iconImage {
+- (UIView *)messagePanelWithMessage:(NSString *)message
+                          iconImage:(UIImage *)iconImage
+                     relativeToView:(UIView *)relativeToView {
+  CGFloat iconLeftPadding = 10.0;
+  CGFloat paddingBetweenIconAndLabel = 3.0;
+  CGFloat labelLeftPadding = 8.0;
   UIImageView *iconImageView = [[UIImageView alloc] initWithImage:iconImage];
   UILabel *messageLabel = [PEUIUtils labelWithKey:message
                                              font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                   backgroundColor:[UIColor clearColor]
                                         textColor:[UIColor darkGrayColor]
-                              verticalTextPadding:3.0];
-  UIView *messageLabelWithPad = [PEUIUtils leftPadView:messageLabel padding:8.0];
+                              verticalTextPadding:3.0
+                                       fitToWidth:(relativeToView.frame.size.width - (labelLeftPadding + iconImageView.frame.size.width + iconLeftPadding + paddingBetweenIconAndLabel))];
+  UIView *messageLabelWithPad = [PEUIUtils leftPadView:messageLabel padding:labelLeftPadding];
   UIView *messagePanel = [PEUIUtils panelWithWidthOf:1.0
-                                      relativeToView:_doesHaveAuthTokenPanel
+                                      relativeToView:relativeToView
                                          fixedHeight:messageLabelWithPad.frame.size.height];
   [PEUIUtils placeView:iconImageView
             inMiddleOf:messagePanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              hpadding:10.0];
+              hpadding:iconLeftPadding];
   [PEUIUtils placeView:messageLabelWithPad
           toTheRightOf:iconImageView
                   onto:messagePanel
          withAlignment:PEUIVerticalAlignmentTypeMiddle
-              hpadding:3.0];
+              hpadding:paddingBetweenIconAndLabel];
   return messagePanel;
 }
 
 - (void)displayOfflineModeInfoAlert {
   [PEUIUtils showInfoAlertWithTitle:@"Offline mode."
                    alertDescription:[[NSAttributedString alloc] initWithString:@"\
-Offline mode prevents upload attempts to\n\
+Offline mode prevents upload attempts to \
 the server, keeping all saves local-only.\n\n\
-Enable offline mode if you are making\n\
-many saves and you want them done\n\
-instantly.  Or enable offline mode if you\n\
-are making saves and you know you have a\n\
+Enable offline mode if you are making \
+many saves and you want them done \
+instantly.  Or enable offline mode if you \
+are making saves and you know you have a \
 poor internet connection.\n\n\
 Later, you can bulk-upload your edits via:\n\n\
 'Unsynced Edits' \u2794 'Sync All'"]
@@ -171,10 +175,12 @@ Later, you can bulk-upload your edits via:\n\n\
   [_doesHaveAuthTokenPanel setBounces:NO];
   
   NSString *accountSettingsMessage = @"\
-You are currently logged in.  From here\n\
-you can view and edit your account\n\
+You are currently logged in.  From here \
+you can view and edit your account \
 information and settings.";
-  UIView *accountSettingsMsgPanel = [self messagePanelWithMessage:accountSettingsMessage iconImage:[UIImage syncable]];
+  UIView *accountSettingsMsgPanel = [self messagePanelWithMessage:accountSettingsMessage
+                                                        iconImage:[UIImage syncable]
+                                                   relativeToView:_doesHaveAuthTokenPanel];
   UIButton *accountSettingsBtn = [_uitoolkit systemButtonMaker](@"Account Settings", nil, nil);
   [[accountSettingsBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:accountSettingsBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
@@ -184,10 +190,12 @@ information and settings.";
   } forControlEvents:UIControlEventTouchUpInside];
   
   NSString *changelogMessage = @"\
-Keeps your device synchronized with\n\
-your account in case you've made edits\n\
+Keeps your device synchronized with \
+your account in case you've made edits \
 and deletions on other devices.";
-  UIView *changelogMsgPanel = [self messagePanelWithMessage:changelogMessage iconImage:[UIImage imageNamed:@"download"]];
+  UIView *changelogMsgPanel = [self messagePanelWithMessage:changelogMessage
+                                                  iconImage:[UIImage imageNamed:@"download"]
+                                             relativeToView:_doesHaveAuthTokenPanel];
   UIButton *changelogBtn = [_uitoolkit systemButtonMaker](@"Synchronize All", nil, nil);
   [[changelogBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:changelogBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
@@ -200,7 +208,7 @@ and deletions on other devices.";
       [PEUIUtils showErrorAlertWithMsgs:nil
                                   title:@"Error."
                        alertDescription:[[NSAttributedString alloc] initWithString:@"\
-We're sorry, but an unexpected error has\n\
+We're sorry, but an unexpected error has \
 occurred.  Please try this again later."]
                                topInset:70.0
                             buttonTitle:@"Okay."
@@ -221,7 +229,7 @@ occurred.  Please try this again later."]
                               void (^displayAlreadySynchronizedAlert)(void) = ^{
                                 [PEUIUtils showSuccessAlertWithTitle:@"Already synchronized."
                                                     alertDescription:[[NSAttributedString alloc] initWithString:@"\
-Your device is already fully synchronized\n\
+Your device is already fully synchronized \
 with your account."]
                                                             topInset:70.0
                                                          buttonTitle:@"Okay."
@@ -235,7 +243,7 @@ with your account."]
                                 if (numUpdates > 0) {
                                   [PEUIUtils showSuccessAlertWithTitle:@"Synchronized."
                                                       alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You have successfully synchronized your\n\
+You have successfully synchronized your \
 account to this device."]
                                                               topInset:70.0
                                                            buttonTitle:@"Okay."
@@ -258,7 +266,7 @@ account to this device."]
                       [PEUIUtils showWaitAlertWithMsgs:nil
                                                  title:@"Server is busy."
                                       alertDescription:[[NSAttributedString alloc] initWithString:@"\
-The server is currently busy at the moment.\n\
+The server is currently busy at the moment. \
 Please try this again later."]
                                               topInset:70.0
                                            buttonTitle:@"Okay."
@@ -277,10 +285,10 @@ Please try this again later."]
                      [changelogHud hide:YES];
                      [APP refreshTabs];
                      NSString *becameUnauthMessage = @"\
-Well this is awkward.  While syncing\n\
-your account, the server is asking for you\n\
+Well this is awkward.  While syncing \
+your account, the server is asking for you \
 to re-authenticate.\n\n\
-To authenticate, tap the Re-authenticate\n\
+To authenticate, tap the Re-authenticate \
 button.";
                      NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
                      NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
@@ -300,30 +308,32 @@ button.";
                  }];
   } forControlEvents:UIControlEventTouchUpInside];
   NSString *offlineModeLabelText = @"\
-Offline mode.  Enables fast\n\
-saving (adds / edits only) in\n\
-poor-connection environments.";
+Offline mode.  Enables fast \
+saving (adds / edits only) in \
+poor connection environments.";
   NSMutableAttributedString *offlineModeLabelAttrText =
     [[NSMutableAttributedString alloc] initWithString:offlineModeLabelText];
   NSDictionary *attrs = @{ NSUnderlineStyleAttributeName : @(NSUnderlineStyleSingle),
                            NSForegroundColorAttributeName : [UIColor blueColor]};
   [offlineModeLabelAttrText setAttributes:attrs range:NSMakeRange(0, 12)];
-  UILabel *offlineModeLabel = [PEUIUtils labelWithAttributeText:offlineModeLabelAttrText
-                                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                                backgroundColor:[UIColor clearColor]
-                                                      textColor:[UIColor darkGrayColor]
-                                            verticalTextPadding:3.0];
-  [offlineModeLabel setUserInteractionEnabled:YES];
-  UITapGestureRecognizer *tapGesture =
-    [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(displayOfflineModeInfoAlert)];
-  [offlineModeLabel addGestureRecognizer:tapGesture];
-  UIView *offlineModeLabelPanelWithPad = [PEUIUtils leftPadView:offlineModeLabel padding:8.0];
   UISwitch *offlineModeSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
   [offlineModeSwitch setOn:[APP offlineMode]];
   [offlineModeSwitch bk_addEventHandler:^(id sender) {
     [APP setOfflineMode:offlineModeSwitch.on];
   } forControlEvents:UIControlEventTouchUpInside];
-
+  CGFloat labelLeftPadding = 8.0;
+  CGFloat switchPadding = 30.0;
+  UILabel *offlineModeLabel = [PEUIUtils labelWithAttributeText:offlineModeLabelAttrText
+                                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                backgroundColor:[UIColor clearColor]
+                                                      textColor:[UIColor darkGrayColor]
+                                            verticalTextPadding:3.0
+                                                     fitToWidth:(_doesHaveAuthTokenPanel.frame.size.width - labelLeftPadding - offlineModeSwitch.frame.size.width - switchPadding)];
+  [offlineModeLabel setUserInteractionEnabled:YES];
+  UITapGestureRecognizer *tapGesture =
+    [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(displayOfflineModeInfoAlert)];
+  [offlineModeLabel addGestureRecognizer:tapGesture];
+  UIView *offlineModeLabelPanelWithPad = [PEUIUtils leftPadView:offlineModeLabel padding:labelLeftPadding];
   UIView *logoutMsgLabelWithPad = [self logoutPaddedMessage];
   UIButton *logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
   [logoutBtn setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
@@ -357,13 +367,14 @@ poor-connection environments.";
           toTheRightOf:offlineModeLabelPanelWithPad
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIVerticalAlignmentTypeMiddle
-              hpadding:30.0];  
+              hpadding:switchPadding];
   divider = makeDivider(1.0);
   [PEUIUtils placeView:divider
                  below:offlineModeLabelPanelWithPad
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:20.0 hpadding:0.0];
+              vpadding:20.0
+              hpadding:0.0];
   [PEUIUtils placeView:changelogMsgPanel
                  below:divider
                   onto:_doesHaveAuthTokenPanel
@@ -398,13 +409,15 @@ poor-connection environments.";
 }
 
 - (void)makeDoesNotHaveAuthTokenPanel {
-  NSString *message = @"\
-For security reasons, we need you to\n\
-re-authenticate against your remote\n\
-account.";
-  UIView *messagePanel = [self messagePanelWithMessage:message iconImage:[UIImage unsyncable]];
   ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
   _doesNotHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
+  NSString *message = @"\
+For security reasons, we need you to \
+re-authenticate against your remote \
+account.";
+  UIView *messagePanel = [self messagePanelWithMessage:message
+                                             iconImage:[UIImage unsyncable]
+                                        relativeToView:_doesNotHaveAuthTokenPanel];
   UIButton *reauthenticateBtn = [_uitoolkit systemButtonMaker](@"Re-authenticate", nil, nil);
   [[reauthenticateBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:reauthenticateBtn ofWidth:1.0 relativeTo:_doesNotHaveAuthTokenPanel];
@@ -458,12 +471,14 @@ account.";
 }
 
 - (void)makeNotLoggedInPanel {
-  NSString *message = @"\
-This action will permanently delete your\n\
-fuel purchase data from this device.";
-  UIView *messagePanel = [self messagePanelWithMessage:message iconImage:[UIImage imageNamed:@"red-exclamation-icon"]];
   ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
   _notLoggedInPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
+  NSString *message = @"\
+This action will permanently delete your \
+fuel purchase data from this device.";
+  UIView *messagePanel = [self messagePanelWithMessage:message
+                                             iconImage:[UIImage imageNamed:@"red-exclamation-icon"]
+                                        relativeToView:_notLoggedInPanel];
   UIButton *loginBtn = [_uitoolkit systemButtonMaker](@"Log In", nil, nil);
   [[loginBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:loginBtn ofWidth:1.0 relativeTo:_notLoggedInPanel];
@@ -512,8 +527,8 @@ fuel purchase data from this device.";
 
 - (void)clearAllData {
   NSString *msg = @"\
-This will permanently delete your fuel\n\
-purchase data from this device and cannot\n\
+This will permanently delete your fuel \
+purchase data from this device and cannot \
 be undone.";
   JGActionSheetSection *contentSection = [PEUIUtils dangerAlertSectionWithTitle:@"Are you absolutely sure?"
                                                                 alertDescription:[[NSAttributedString alloc] initWithString:msg]
@@ -597,11 +612,11 @@ be undone.";
                                                           object:nil
                                                         userInfo:nil];
       NSString *msg = @"\
-You have been logged out successfully.\n\
-Your remote account is no longer connected\n\
-to this device and your fuel purchase data\n\
+You have been logged out successfully. \
+Your remote account is no longer connected \
+to this device and your fuel purchase data \
 has been removed.\n\n\
-You can still use the app.  Your data will\n\
+You can still use the app.  Your data will \
 simply be saved locally.";
       [PEUIUtils showSuccessAlertWithMsgs:nil
                                     title:@"Logout successful."
@@ -633,7 +648,7 @@ simply be saved locally.";
   if (numUnsyncedEdits > 0) {
     [PEUIUtils showWarningConfirmAlertWithTitle:@"You have unsynced edits."
                                alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You have unsynced edits.  If you log out,\n\
+You have unsynced edits.  If you log out, \
 they will be permanently deleted.\n\n\
 Are you sure you want to do continue?"]
                                        topInset:70.0

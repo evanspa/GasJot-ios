@@ -431,7 +431,7 @@
   JGActionSheetSection *becameUnauthSection = nil;
   if (_receivedAuthReqdErrorOnDeleteAttempt) {
     NSString *becameUnauthMessage = @"\
-It appears you are no longer authenticated.\n\
+It appears you are no longer authenticated. \
 To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
     NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
     NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
@@ -467,7 +467,7 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
             [PEUIUtils showWarningConfirmAlertWithMsgs:_itemChildrenMsgsBlk(item)
                                                  title:@"Are you sure?"
                                       alertDescription:[[NSAttributedString alloc] initWithString:@"\
-Deleting this record will result in the\n\
+Deleting this record will result in the \
 following child-records being deleted.\n\n\
 Are you sure you want to continue?"]
                                               topInset:70.0
@@ -516,14 +516,14 @@ Are you sure you want to continue?"]
                 NSArray *subErrors = _errorsForDelete[0][2];
                 if ([subErrors count] > 1) {
                   message = @"\
-There were problems deleting your\n\
-entity from the server.  The errors are\n\
+There were problems deleting your \
+entity from the server.  The errors are \
 as follows:";
                   title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
                 } else {
                   message = @"\
-There was a problem deleting your\n\
-entity from the server.  The error is\n\
+There was a problem deleting your \
+entity from the server.  The error is \
 as follows:";
                   title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
                 }
@@ -656,7 +656,7 @@ as follows:";
           [PEUIUtils showWarningAlertWithMsgs:@[]
                                         title:@"Oops"
                              alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You cannot delete anything because\n\
+You cannot delete anything because \
 you're currently not authenticated."]
                                      topInset:70.0
                                   buttonTitle:@"Okay."

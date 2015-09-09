@@ -101,9 +101,9 @@
                                        relativeToView:[self view]];
   [PEUIUtils setFrameHeightOfView:signInPnl ofHeight:1.0 relativeTo:[self view]];
   UILabel *signInMsgLabel = [PEUIUtils labelWithKey:@"\
-From here you can log into your remote\n\
-account, connecting this device to it.  Your\n\
-fuel purchase data will be downloaded to this\n\
+From here you can log into your remote \
+account, connecting this device to it.  Your \
+fuel purchase data will be downloaded to this \
 device.\n\n\
 Enter your credentials and tap 'Log In'."
                                                font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
@@ -166,13 +166,13 @@ Enter your credentials and tap 'Log In'."
         [PEUIUtils showLoginSuccessAlertWithTitle:@"Login success."
                                  alertDescription:[[NSAttributedString alloc] initWithString:@"\
 You have been successfully logged in.\n\n\
-Your remote account is now connected to\n\
-this device.  Any fuel purchase data that\n\
-you create and save will be synced to your\n\
+Your remote account is now connected to \
+this device.  Any fuel purchase data that \
+you create and save will be synced to your \
 remote account."]
                                   syncIconMessage:[[NSAttributedString alloc] initWithString:@"\
-The following icon will appear in the app\n\
-indicating that your are currently logged\n\
+The following icon will appear in the app \
+indicating that your are currently logged \
 into your remote account:"]
                                          topInset:70.0
                                       buttonTitle:@"Okay."
@@ -262,15 +262,15 @@ into your remote account:"]
                                                         [HUD hide:YES];
                                                         [PEUIUtils showLoginSuccessAlertWithTitle:@"Login & sync success."
                                                                                  alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You have been successfully logged in and\n\
+You have been successfully logged in and \
 your local edits have been synced.\n\n\
-Your remote account is now connected to\n\
-this device.  Any fuel purchase data that\n\
-you create and save will be synced to your\n\
+Your remote account is now connected to \
+this device.  Any fuel purchase data that \
+you create and save will be synced to your \
 remote account."]
                                                                                   syncIconMessage:[[NSAttributedString alloc] initWithString:@"\
-The following icon will appear in the app\n\
-indicating that your are currently logged\n\
+The following icon will appear in the app \
+indicating that your are currently logged \
 into your remote account:"]
                                                                                          topInset:70.0
                                                                                       buttonTitle:@"Okay."
@@ -288,16 +288,16 @@ into your remote account:"]
                                                         [HUD hide:YES];
                                                         NSString *title = @"Sync problems.";
                                                         NSString *message = @"\
-There were some problems syncing all of\n\
-your local edits.  You can try syncing them\n\
+There were some problems syncing all of \
+your local edits.  You can try syncing them \
 later.";
                                                         JGActionSheetSection *becameUnauthSection = nil;
                                                         if (_receivedAuthReqdErrorOnSyncAttempt) {
                                                           NSString *becameUnauthMessage = @"\
-This is awkward.  While syncing your local\n\
-edits, the server is asking for you to\n\
-authenticate again.  Sorry about that.\n\
-To authenticate, tap the Re-authenticate\n\
+This is awkward.  While syncing your local \
+edits, the server is asking for you to \
+authenticate again.  Sorry about that. \
+To authenticate, tap the Re-authenticate \
 button.";
                                                           NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
                                                           NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
@@ -361,9 +361,9 @@ button.";
     if (_preserveExistingLocalEntities == nil) { // first time asked
       if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {        
         NSString *msg = @"\
-It seems you've edited some records locally.\n\
-Would you like them to be synced to your\n\
-remote account upon logging in, or\n\
+It seems you've edited some records locally. \
+Would you like them to be synced to your \
+remote account upon logging in, or \
 would you like them to be deleted?";
         JGActionSheetSection *contentSection = [PEUIUtils questionAlertSectionWithTitle:@"Locally created records."
                                                                        alertDescription:[[NSAttributedString alloc] initWithString:msg]

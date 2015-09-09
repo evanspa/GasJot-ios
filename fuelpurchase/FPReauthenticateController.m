@@ -241,17 +241,17 @@
                                                         [HUD hide:YES];
                                                         NSString *title = @"Sync problems.";
                                                         NSString *message = @"\
-Although you became authenticated, there\n\
-were some problems syncing all your local\n\
+Although you became authenticated, there \
+were some problems syncing all your local \
 edits.";
                                                         NSMutableArray *sections = [NSMutableArray array];
                                                         JGActionSheetSection *becameUnauthSection = nil;
                                                         if (receivedUnauthedError) {
                                                           NSString *becameUnauthMessage = @"\
-This is awkward.  While syncing your local\n\
-edits, the server is asking for you to\n\
-authenticate again.  Sorry about that.\n\
-To authenticate, tap the Re-authenticate\n\
+This is awkward.  While syncing your local \
+edits, the server is asking for you to \
+authenticate again.  Sorry about that. \
+To authenticate, tap the Re-authenticate \
 button.";
                                                           NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
                                                           NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];

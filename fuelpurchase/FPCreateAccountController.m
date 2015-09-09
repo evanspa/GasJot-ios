@@ -105,9 +105,9 @@
   [PEUIUtils setFrameHeightOfView:createAcctPnl ofHeight:0.5 relativeTo:[self view]];
   
   UILabel *createAccountMsgLabel = [PEUIUtils labelWithKey:@"\
-From here you can create a remote account.\n\
-This will enable your fuel purchase data to be\n\
-synced to a server where you can access it\n\
+From here you can create a remote account. \
+This will enable your fuel purchase data to be \
+synced to a server where you can access it \
 from the FP web site or other devices.\n\n\
 Fill out the form below and tap 'Done'."
                                                font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
@@ -281,15 +281,15 @@ Fill out the form below and tap 'Done'."
                                                         [HUD hide:YES];
                                                         [PEUIUtils showLoginSuccessAlertWithTitle:@"Account creation & sync\nsuccess."
                                                                                  alertDescription:[[NSAttributedString alloc] initWithString:@"\
-Your remote account has been created and\n\
+Your remote account has been created and \
 your local edits have been synced.\n\n\
-Your account is now connected to this\n\
-device.  Any fuel purchase data that\n\
-you create and save will be synced to your\n\
+Your account is now connected to this \
+device.  Any fuel purchase data that \
+you create and save will be synced to your \
 remote account."]
                                                                                   syncIconMessage:[[NSAttributedString alloc] initWithString:@"\
-The following icon will appear in the app\n\
-indicating that your are currently logged\n\
+The following icon will appear in the app \
+indicating that your are currently logged \
 into your remote account:"]
                                                                                          topInset:70.0
                                                                                       buttonTitle:@"Okay."
@@ -306,16 +306,16 @@ into your remote account:"]
                                                         [HUD hide:YES];
                                                         NSString *title = @"Sync problems.";
                                                         NSString *message = @"\
-There were some problems syncing all of\n\
-your local edits.  You can try syncing them\n\
+There were some problems syncing all of \
+your local edits.  You can try syncing them \
 later.";
                                                         JGActionSheetSection *becameUnauthSection = nil;
                                                         if (_receivedAuthReqdErrorOnSyncAttempt) {
                                                           NSString *becameUnauthMessage = @"\
-This is awkward.  While syncing your local\n\
-edits, the server is asking for you to\n\
-authenticate again.  Sorry about that.\n\
-To authenticate, tap the Re-authenticate\n\
+This is awkward.  While syncing your local \
+edits, the server is asking for you to \
+authenticate again.  Sorry about that. \
+To authenticate, tap the Re-authenticate \
 button.";
                                                           NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
                                                           NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
@@ -370,9 +370,9 @@ button.";
     if (_preserveExistingLocalEntities == nil) { // first time asked
       if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {
         NSString *msg = @"\
-It seems you've edited some records locally.\n\
-Would you like them to be synced to your\n\
-remote account upon account creation, or\n\
+It seems you've edited some records locally. \
+Would you like them to be synced to your \
+remote account upon account creation, or \
 would you like them to be deleted?";
         JGActionSheetSection *contentSection = [PEUIUtils questionAlertSectionWithTitle:@"Locally created records."
                                                                        alertDescription:[[NSAttributedString alloc] initWithString:msg]
