@@ -100,6 +100,7 @@
                                           andHeightOf:1.0
                                        relativeToView:[self view]];
   [PEUIUtils setFrameHeightOfView:signInPnl ofHeight:1.0 relativeTo:[self view]];
+  CGFloat leftPadding = 8.0;
   UILabel *signInMsgLabel = [PEUIUtils labelWithKey:@"\
 From here you can log into your remote \
 account, connecting this device to it.  Your \
@@ -109,8 +110,9 @@ Enter your credentials and tap 'Log In'."
                                                font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor darkGrayColor]
-                                verticalTextPadding:3.0];
-  UIView *signInMsgPanel = [PEUIUtils leftPadView:signInMsgLabel padding:8.0];
+                                verticalTextPadding:3.0
+                                         fitToWidth:(signInPnl.frame.size.width - leftPadding - 3.0)];
+  UIView *signInMsgPanel = [PEUIUtils leftPadView:signInMsgLabel padding:leftPadding];
   TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:signInPnl];
   _siUsernameOrEmailTf = tfMaker(@"unauth.start.signin.emailusernmtf.pht");
   _siPasswordTf = tfMaker(@"unauth.start.signin.pwdtf.pht");

@@ -621,15 +621,6 @@ as follows:";
                                           @[@"Authentication required."]]];
             immediateDelDone(mainMsgTitle);
           };
-          void (^delDependencyUnsyncedBlk)(float, NSString *, NSString *, NSString *) = ^(float percentComplete,
-                                                                                          NSString *mainMsgTitle,
-                                                                                          NSString *recordTitle,
-                                                                                          NSString *dependencyErrMsg) {
-            [_errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
-                                          [NSNumber numberWithBool:NO],
-                                          @[dependencyErrMsg]]];
-            immediateDelDone(mainMsgTitle);
-          };
           void (^deleteRemoteItem)(void) = ^{
             HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
             HUD.delegate = self;
@@ -647,8 +638,7 @@ as follows:";
                            delServerTempError,
                            delServerError,
                            delConflictBlk,
-                           delAuthReqdBlk,
-                           delDependencyUnsyncedBlk);
+                           delAuthReqdBlk);
             });
           };
           doDeleteWithChildrenConfirm(deleteRemoteItem);

@@ -310,8 +310,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                  PESyncServerTempErrorBlk tempErrBlk,
                                  PESyncServerErrorBlk errBlk,
                                  PESyncConflictBlk conflictBlk,
-                                 PESyncAuthRequiredBlk authReqdBlk,
-                                 PESyncDependencyUnsynced depUnsyncedBlk) {
+                                 PESyncAuthRequiredBlk authReqdBlk) {
     NSString *mainMsgFragment = @"deleting vehicle";
     NSString *recordTitle = @"Vehicle";
     [_coordDao deleteVehicle:vehicle
@@ -782,8 +781,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                  PESyncServerTempErrorBlk tempErrBlk,
                                  PESyncServerErrorBlk errBlk,
                                  PESyncConflictBlk conflictBlk,
-                                 PESyncAuthRequiredBlk authReqdBlk,
-                                 PESyncDependencyUnsynced depUnsyncedBlk) {
+                                 PESyncAuthRequiredBlk authReqdBlk) {
     NSString *mainMsgFragment = @"deleting fuel station";
     NSString *recordTitle = @"Fuel station";
     [_coordDao deleteFuelStation:fuelStation
@@ -2018,8 +2016,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                  PESyncServerTempErrorBlk tempErrBlk,
                                  PESyncServerErrorBlk errBlk,
                                  PESyncConflictBlk conflictBlk,
-                                 PESyncAuthRequiredBlk authReqdBlk,
-                                 PESyncDependencyUnsynced depUnsyncedBlk) {
+                                 PESyncAuthRequiredBlk authReqdBlk) {
     NSString *mainMsgFragment = @"deleting fuel purchase log";
     NSString *recordTitle = @"Fuel purchase log";
     [_coordDao deleteFuelPurchaseLog:fplog
@@ -2657,8 +2654,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                  PESyncServerTempErrorBlk tempErrBlk,
                                  PESyncServerErrorBlk errBlk,
                                  PESyncConflictBlk conflictBlk,
-                                 PESyncAuthRequiredBlk authReqdBlk,
-                                 PESyncDependencyUnsynced depUnsyncedBlk) {
+                                 PESyncAuthRequiredBlk authReqdBlk) {
     NSString *mainMsgFragment = @"deleting environment log";
     NSString *recordTitle = @"Environment log";
     [_coordDao deleteEnvironmentLog:envlog

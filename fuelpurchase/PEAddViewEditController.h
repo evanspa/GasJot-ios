@@ -100,8 +100,7 @@ typedef void (^PEItemDeleter)(UIViewController *,
                               PESyncServerTempErrorBlk,
                               PESyncServerErrorBlk,
                               PESyncConflictBlk,
-                              PESyncAuthRequiredBlk,
-                              PESyncDependencyUnsynced);
+                              PESyncAuthRequiredBlk);
 typedef void (^PEItemLocalDeleter)(UIViewController *, id, NSIndexPath *);
 typedef void (^PEItemAddedBlk)(PEAddViewEditController *, id);
 typedef void (^PEItemChangedBlk)(id, NSIndexPath *);

@@ -97,13 +97,15 @@
   UIView *reauthPnl = [PEUIUtils panelWithWidthOf:1.0
                                       andHeightOf:1.0
                                    relativeToView:[self view]];
+  CGFloat leftPadding = 8.0;
   [PEUIUtils setFrameHeightOfView:reauthPnl ofHeight:0.5 relativeTo:[self view]];
-  UILabel *messageLabel = [PEUIUtils labelWithKey:@"Enter your password and hit 'Done' to\nre-authenticate."
+  UILabel *messageLabel = [PEUIUtils labelWithKey:@"Enter your password and hit 'Done' to re-authenticate."
                                              font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                   backgroundColor:[UIColor clearColor]
                                         textColor:[UIColor darkGrayColor]
-                              verticalTextPadding:3.0];
-  UIView *messageLabelWithPad = [PEUIUtils leftPadView:messageLabel padding:8.0];
+                              verticalTextPadding:3.0
+                                       fitToWidth:(reauthPnl.frame.size.width - leftPadding)];
+  UIView *messageLabelWithPad = [PEUIUtils leftPadView:messageLabel padding:leftPadding];
   TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:reauthPnl];
   _passwordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
   [_passwordTf setSecureTextEntry:YES];

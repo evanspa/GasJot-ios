@@ -602,9 +602,19 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
 
 - (void)doDelete {
   NSMutableArray *errorsForDelete = [NSMutableArray array];
+  // The meaning of the elements of the arrays found within errorsForDelete:
+  //
+  // errorsForDelete[*][0]: Error title (string)
+  // errorsForDelete[*][1]: Is error user-fixable (bool)
+  // errorsForDelete[*][2]: An NSArray of sub-error messages (strings)
+  // errorsForDelete[*][3]: Is error type server busy (bool)
+  // errorsForDelete[*][4]: Is error conflict-type (bool)
+  // errorsForDelete[*][5]: Latest entity for conflict error
+  // errorsForDelete[*][6]: Entity not found (bool)
+  //
   NSMutableArray *successMessageTitlesForDelete = [NSMutableArray array];
   __block BOOL receivedAuthReqdErrorOnDeleteAttempt = NO;
-  void (^reenableNavButtons)(void) = ^{
+  void (^postDeleteActivities)(void) = ^{
     [self.navigationItem setHidesBackButton:NO animated:YES];
     [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
     [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
@@ -625,9 +635,7 @@ Are you sure you want to continue?"]
                                    okayButtonTitle:@"Yes, delete."
                                   okayButtonAction:^{ deleter(); }
                                  cancelButtonTitle:@"No, cancel."
-                                cancelButtonAction:^{
-                                  reenableNavButtons();
-                                }
+                                cancelButtonAction:^{ postDeleteActivities(); }
                                     relativeToView:self.view];
       } else {
         deleter();
@@ -637,7 +645,7 @@ Are you sure you want to continue?"]
     }
   };
   if ([_entity globalIdentifier]) {
-    __block MBProgressHUD *deleteHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    __block MBProgressHUD *deleteHud;
     [self.navigationItem setHidesBackButton:YES animated:YES];
     [[[self navigationItem] leftBarButtonItem] setEnabled:NO];
     [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
@@ -656,7 +664,6 @@ Are you sure you want to continue?"]
           deleteHud.mode = MBProgressHUDModeCustomView;
           [deleteHud hide:YES afterDelay:1.0];
           dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-            [_listViewController handleRemovedEntity:_entity];
             [[self navigationController] popViewControllerAnimated:YES];
           });
         });
@@ -664,57 +671,75 @@ Are you sure you want to continue?"]
         dispatch_async(dispatch_get_main_queue(), ^{
           [deleteHud hide:YES afterDelay:0];
           
-          
-          
-          
-          
-          NSMutableAttributedString *attrMessage;
-          NSString *title;
-          NSString *message;
-          NSArray *subErrors = errorsForDelete[0][2];
-          if ([subErrors count] > 1) {
-            message = @"\
+          if ([errorsForDelete[0][4] boolValue]) { // conflict error
+            id latestEntity = errorsForDelete[0][5];
+            [PEUIUtils showDeleteConflictAlertWithTitle:@"Conflict"
+                                       alertDescription:[[NSAttributedString alloc] initWithString:@"\
+The remote copy of this entity has been \
+updated since you last downloaded it."]
+                                               topInset:70.0
+                            forceDeleteLocalButtonTitle:@"I don't care.  Delete it anyway."
+                                forceDeleteButtonAction:^{
+                                  [_entity setUpdatedAt:[latestEntity updatedAt]];
+                                  [self doDelete];
+                                }
+                                      cancelButtonTitle:@"Cancel."
+                                     cancelButtonAction:postDeleteActivities
+                                         relativeToView:self.view];
+            
+          } else if ([errorsForDelete[0][3] boolValue]) { // server is busy
+            [self handleServerBusyErrorWithAction:postDeleteActivities];
+          } else if ([errorsForDelete[0][6] boolValue]) { // not found
+            [self handleNotFoundError];
+          } else { // any other error type
+            NSMutableAttributedString *attrMessage;
+            NSString *title;
+            NSString *message;
+            NSArray *subErrors = errorsForDelete[0][2];
+            if ([subErrors count] > 1) {
+              message = @"\
 There were problems deleting your \
 entity from the server.  The errors are \
 as follows:";
-            title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
-          } else {
-            message = @"\
+              title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
+            } else {
+              message = @"\
 There was a problem deleting your \
 entity from the server.  The error is \
 as follows:";
-            title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
+              title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
+            }
+            attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
+            JGActionSheetSection *becameUnauthSection = nil;
+            if (receivedAuthReqdErrorOnDeleteAttempt) {
+              becameUnauthSection = [self becameUnauthenticatedSection];
+            }
+            JGActionSheetSection *contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
+                                                                                  title:title
+                                                                       alertDescription:attrMessage
+                                                                         relativeToView:self.view];
+            JGActionSheetSection *buttonsSection;
+            void (^buttonsPressedBlock)(JGActionSheet *, NSIndexPath *);
+            buttonsSection = [JGActionSheetSection sectionWithTitle:nil
+                                                            message:nil
+                                                       buttonTitles:@[@"Okay."]
+                                                        buttonStyle:JGActionSheetButtonStyleDefault];
+            [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:0];
+            buttonsPressedBlock = ^(JGActionSheet *sheet, NSIndexPath *btnIndexPath) {
+              postDeleteActivities();
+              [sheet dismissAnimated:YES];
+            };
+            JGActionSheet *alertSheet;
+            if (becameUnauthSection) {
+              alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
+            } else {
+              alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
+            }
+            [alertSheet setDelegate:self];
+            [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
+            [alertSheet setButtonPressedBlock:buttonsPressedBlock];
+            [alertSheet showInView:self.view animated:YES];
           }
-          attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
-          JGActionSheetSection *becameUnauthSection = nil;
-          if (receivedAuthReqdErrorOnDeleteAttempt) {
-            becameUnauthSection = [self becameUnauthenticatedSection];
-          }
-          JGActionSheetSection *contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
-                                                                                title:title
-                                                                     alertDescription:attrMessage
-                                                                       relativeToView:self.view];
-          JGActionSheetSection *buttonsSection;
-          void (^buttonsPressedBlock)(JGActionSheet *, NSIndexPath *);
-          buttonsSection = [JGActionSheetSection sectionWithTitle:nil
-                                                          message:nil
-                                                     buttonTitles:@[@"Okay."]
-                                                      buttonStyle:JGActionSheetButtonStyleDefault];
-          [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:0];
-          buttonsPressedBlock = ^(JGActionSheet *sheet, NSIndexPath *btnIndexPath) {
-            reenableNavButtons();
-            [sheet dismissAnimated:YES];
-          };
-          JGActionSheet *alertSheet;
-          if (becameUnauthSection) {
-            alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
-          } else {
-            alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
-          }
-          [alertSheet setDelegate:self];
-          [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
-          [alertSheet setButtonPressedBlock:buttonsPressedBlock];
-          [alertSheet showInView:self.view animated:YES];
         });
       }
     };
@@ -723,7 +748,11 @@ as follows:";
                                                              NSString *recordTitle) {
       [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
                                    [NSNumber numberWithBool:NO],
-                                   @[[NSString stringWithFormat:@"Not found."]]]];
+                                   @[[NSString stringWithFormat:@"Not found."],
+                                   [NSNumber numberWithBool:NO],
+                                   [NSNumber numberWithBool:NO],
+                                   [NSNull null],
+                                   [NSNumber numberWithBool:YES]]]];
       immediateDelDone(mainMsgTitle);
     };
     void(^delSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
@@ -738,7 +767,11 @@ as follows:";
                                                                          NSDate *retryAfter) {
       [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
                                    [NSNumber numberWithBool:NO],
-                                   @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]]]];
+                                   @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                   [NSNumber numberWithBool:YES],
+                                   [NSNumber numberWithBool:NO],
+                                   [NSNull null],
+                                   [NSNumber numberWithBool:NO]]];
       immediateDelDone(mainMsgTitle);
     };
     void (^delServerTempError)(float, NSString *, NSString *) = ^(float percentComplete,
@@ -746,7 +779,11 @@ as follows:";
                                                                   NSString *recordTitle) {
       [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
                                    [NSNumber numberWithBool:NO],
-                                   @[@"Temporary server error."]]];
+                                   @[@"Temporary server error."],
+                                   [NSNumber numberWithBool:NO],
+                                   [NSNumber numberWithBool:NO],
+                                   [NSNull null],
+                                   [NSNumber numberWithBool:NO]]];
       immediateDelDone(mainMsgTitle);
     };
     void (^delServerError)(float, NSString *, NSString *, NSArray *) = ^(float percentComplete,
@@ -760,7 +797,11 @@ as follows:";
       }
       [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
                                    [NSNumber numberWithBool:isErrorUserFixable],
-                                   computedErrMsgs]];
+                                   computedErrMsgs,
+                                   [NSNumber numberWithBool:NO],
+                                   [NSNumber numberWithBool:NO],
+                                   [NSNull null],
+                                   [NSNumber numberWithBool:NO]]];
       immediateDelDone(mainMsgTitle);
     };
     void(^delConflictBlk)(float, NSString *, NSString *, id) = ^(float percentComplete,
@@ -769,7 +810,11 @@ as follows:";
                                                                  id latestEntity) {
       [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
                                    [NSNumber numberWithBool:NO],
-                                   @[[NSString stringWithFormat:@"Conflict."]]]];
+                                   @[[NSString stringWithFormat:@"Conflict."]],
+                                   [NSNumber numberWithBool:NO],
+                                   [NSNumber numberWithBool:YES],
+                                   latestEntity,
+                                   [NSNumber numberWithBool:NO]]];
       immediateDelDone(mainMsgTitle);
     };
     void(^delAuthReqdBlk)(float, NSString *, NSString *) = ^(float percentComplete,
@@ -777,17 +822,12 @@ as follows:";
                                                              NSString *recordTitle) {
       receivedAuthReqdErrorOnDeleteAttempt = YES;
       [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
-                                    [NSNumber numberWithBool:NO],
-                                    @[@"Authentication required."]]];
-      immediateDelDone(mainMsgTitle);
-    };
-    void (^delDependencyUnsyncedBlk)(float, NSString *, NSString *, NSString *) = ^(float percentComplete,
-                                                                                    NSString *mainMsgTitle,
-                                                                                    NSString *recordTitle,
-                                                                                    NSString *dependencyErrMsg) {
-      [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
-                                    [NSNumber numberWithBool:NO],
-                                    @[dependencyErrMsg]]];
+                                   [NSNumber numberWithBool:NO],
+                                   @[@"Authentication required."],
+                                   [NSNumber numberWithBool:NO],
+                                   [NSNumber numberWithBool:NO],
+                                   [NSNull null],
+                                   [NSNumber numberWithBool:NO]]];
       immediateDelDone(mainMsgTitle);
     };
     void (^deleteRemoteItem)(void) = ^{
@@ -807,8 +847,7 @@ as follows:";
                      delServerTempError,
                      delServerError,
                      delConflictBlk,
-                     delAuthReqdBlk,
-                     delDependencyUnsyncedBlk);
+                     delAuthReqdBlk);
       });
     };
     doDeleteWithChildrenConfirm(deleteRemoteItem);
@@ -1075,10 +1114,10 @@ If you cancel, your local edits will be \
 retained."];
           NSDictionary *attrs = @{ NSFontAttributeName : [UIFont italicSystemFontOfSize:14.0] };
           [desc setAttributes:attrs range:NSMakeRange(99, 49)];
-          [self presentConflictAlertWithLatestEntity:latestEntity
-                                    alertDescription:desc
-                                        cancelAction:postUploadActivities];
-        } else if ([errorsForUpload[0][3] boolValue]) {
+          [self presentSaveConflictAlertWithLatestEntity:latestEntity
+                                        alertDescription:desc
+                                            cancelAction:postUploadActivities];
+        } else if ([errorsForUpload[0][3] boolValue]) { // server is busy
           [self handleServerBusyErrorWithAction:^{
             postUploadActivities();
           }];
@@ -1496,9 +1535,9 @@ merge conflicts.";
   return doMerge;
 }
 
-- (void)presentConflictAlertWithLatestEntity:(id)latestEntity
-                            alertDescription:(NSAttributedString *)desc
-                                cancelAction:(void(^)(void))cancelAction {
+- (void)presentSaveConflictAlertWithLatestEntity:(id)latestEntity
+                                alertDescription:(NSAttributedString *)desc
+                                    cancelAction:(void(^)(void))cancelAction {
   void (^reenableNavButtons)(void) = ^{
     [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
     [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
@@ -1539,7 +1578,7 @@ merge conflicts.";
                         [super setEditing:NO animated:YES];
                       }
                           cancelButtonTitle:@"Cancel.  I'll deal with this later."
-                         cancelButtonAction:^{ cancelAction(); /*postEditActivities();*/ }
+                         cancelButtonAction:^{ cancelAction(); }
                              relativeToView:self.view];
 }
 
@@ -1702,9 +1741,9 @@ If you cancel, your local edits will be \
 retained."];
                 NSDictionary *attrs = @{ NSFontAttributeName : [UIFont italicSystemFontOfSize:14.0] };
                 [desc setAttributes:attrs range:NSMakeRange(99, 49)];
-                [self presentConflictAlertWithLatestEntity:latestEntity
-                                          alertDescription:desc
-                                              cancelAction:postEditActivities];
+                [self presentSaveConflictAlertWithLatestEntity:latestEntity
+                                              alertDescription:desc
+                                                  cancelAction:postEditActivities];
               } else { // all other error types
                 NSDictionary *messageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0],
                                                 NSForegroundColorAttributeName : [UIColor blueColor] };

@@ -103,7 +103,7 @@
                                           andHeightOf:1.0
                                        relativeToView:[self view]];
   [PEUIUtils setFrameHeightOfView:createAcctPnl ofHeight:0.5 relativeTo:[self view]];
-  
+  CGFloat leftPadding = 8.0;
   UILabel *createAccountMsgLabel = [PEUIUtils labelWithKey:@"\
 From here you can create a remote account. \
 This will enable your fuel purchase data to be \
@@ -113,8 +113,9 @@ Fill out the form below and tap 'Done'."
                                                font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor darkGrayColor]
-                                verticalTextPadding:3.0];
-  UIView *createAccountMsgPanel = [PEUIUtils leftPadView:createAccountMsgLabel padding:8.0];
+                                verticalTextPadding:3.0
+                                         fitToWidth:(createAcctPnl.frame.size.width - leftPadding - 3.0)];
+  UIView *createAccountMsgPanel = [PEUIUtils leftPadView:createAccountMsgLabel padding:leftPadding];
   
   TextfieldMaker tfMaker =
     [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:createAcctPnl];

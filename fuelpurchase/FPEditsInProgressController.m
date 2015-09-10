@@ -51,6 +51,7 @@
 #pragma mark - Helpers
 
 - (UIView *)paddedEipsInfoMessage {
+  CGFloat leftPadding = 8.0;
   UILabel *infoMsgLabel = [PEUIUtils labelWithKey:@"\
 From here you can drill into all of your items \
 that have unsynced edits, are edit-in-progress \
@@ -58,11 +59,13 @@ or have known problems."
                                              font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                   backgroundColor:[UIColor clearColor]
                                         textColor:[UIColor darkGrayColor]
-                              verticalTextPadding:3.0];
-  return [PEUIUtils leftPadView:infoMsgLabel padding:8.0];
+                              verticalTextPadding:3.0
+                                       fitToWidth:self.view.frame.size.width - (leftPadding + 3.0)];
+  return [PEUIUtils leftPadView:infoMsgLabel padding:leftPadding];
 }
 
 - (UIView *)syncAllInfoMessage {
+  CGFloat leftPadding = 8.0;
   UILabel *infoMsgLabel = [PEUIUtils labelWithKey:@"\
 This action will attempt to upload all 'sync-able' \
 edits.  This include items that don't have \
@@ -71,18 +74,21 @@ mode."
                                              font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                   backgroundColor:[UIColor clearColor]
                                         textColor:[UIColor darkGrayColor]
-                              verticalTextPadding:3.0];
-  return [PEUIUtils leftPadView:infoMsgLabel padding:8.0];
+                              verticalTextPadding:3.0
+                                       fitToWidth:self.view.frame.size.width - (leftPadding + 3.0)];
+  return [PEUIUtils leftPadView:infoMsgLabel padding:leftPadding];
 }
 
 - (UIView *)paddedNoEipsInfoMessage {
+  CGFloat leftPadding = 8.0;
   UILabel *infoMsgLabel = [PEUIUtils labelWithKey:@"\
 You currently have no unsynced items."
                                              font:[UIFont boldSystemFontOfSize:16.0]
                                   backgroundColor:[UIColor clearColor]
                                         textColor:[UIColor darkGrayColor]
-                              verticalTextPadding:3.0];
-  return [PEUIUtils leftPadView:infoMsgLabel padding:8.0];
+                              verticalTextPadding:3.0
+                                       fitToWidth:self.view.frame.size.width - (leftPadding + 3.0)];
+  return [PEUIUtils leftPadView:infoMsgLabel padding:leftPadding];
 }
 
 - (UIView *)badgeForNum:(NSInteger)num
@@ -265,7 +271,7 @@ You currently have no unsynced items."
                 hpadding:0.0];
     topView = _envlogsButton;
   }
-  if (totalNumSyncNeeded > 0) {
+  if (totalNumSyncNeeded > 0 && [APP doesUserHaveValidAuthToken]) {
     [PEUIUtils placeView:_syncAllMessage
                    below:topView
                     onto:self.view
