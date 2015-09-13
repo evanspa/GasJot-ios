@@ -227,31 +227,46 @@ occurred.  Please try this again later."]
                             dispatch_async(dispatch_get_main_queue(), ^{
                               [changelogHud hide:YES];
                               void (^displayAlreadySynchronizedAlert)(void) = ^{
-                                [PEUIUtils showSuccessAlertWithTitle:@"Already synchronized."
-                                                    alertDescription:[[NSAttributedString alloc] initWithString:@"\
+                                [PEUIUtils showInfoAlertWithTitle:@"Already synchronized."
+                                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
 Your device is already fully synchronized \
 with your account."]
-                                                            topInset:70.0
-                                                         buttonTitle:@"Okay."
-                                                        buttonAction:^{ }
-                                                      relativeToView:self.tabBarController.view];
+                                                         topInset:70.0
+                                                      buttonTitle:@"Okay."
+                                                     buttonAction:^{ }
+                                                   relativeToView:self.tabBarController.view];
                               };
                               if (changelog) {
                                 DDLogDebug(@"in FPSettingsController/fetchChangelog success, calling [APP setChangelogUpdatedAt:(%@)", [PEUtils millisecondsFromDate:changelog.updatedAt]);
                                 [APP setChangelogUpdatedAt:changelog.updatedAt];
-                                NSInteger numUpdates = [_coordDao saveChangelog:changelog forUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
-                                if (numUpdates > 0) {
-                                  [PEUIUtils showSuccessAlertWithTitle:@"Synchronized."
-                                                      alertDescription:[[NSAttributedString alloc] initWithString:@"\
+                                NSArray *report = [_coordDao saveChangelog:changelog forUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
+                                NSInteger numDeletes = [report[0] integerValue];
+                                NSInteger numUpdates = [report[1] integerValue];
+                                NSInteger numInserts = [report[2] integerValue];
+                                if ((numDeletes + numUpdates + numInserts) > 0) {
+                                  NSMutableArray *msgs = [NSMutableArray array];
+                                  void (^addMessage)(NSInteger, NSString *) = ^(NSInteger value, NSString *desc) {
+                                    if (value == 1) {
+                                      [msgs addObject:[NSString stringWithFormat:@"%ld record %@.", (long)value, desc]];
+                                    } else if (value > 1) {
+                                      [msgs addObject:[NSString stringWithFormat:@"%ld records %@.", (long)value, desc]];
+                                    }
+                                  };
+                                  addMessage(numDeletes, @"removed");
+                                  addMessage(numUpdates, @"updated");
+                                  addMessage(numInserts, @"added");
+                                  [PEUIUtils showSuccessAlertWithMsgs:msgs
+                                                                title:@"Synchronized."
+                                                     alertDescription:[[NSAttributedString alloc] initWithString:@"\
 You have successfully synchronized your \
-account to this device."]
-                                                              topInset:70.0
-                                                           buttonTitle:@"Okay."
-                                                          buttonAction:^{
+account to this device, incorporating the following changes:"]
+                                                             topInset:70.0
+                                                          buttonTitle:@"Okay."
+                                                         buttonAction:^{
                                                             [APP refreshTabs];
                                                             [APP resetUserInterface];
                                                           }
-                                                        relativeToView:self.tabBarController.view];
+                                                       relativeToView:self.tabBarController.view];
                                 } else {
                                   displayAlreadySynchronizedAlert();
                                 }

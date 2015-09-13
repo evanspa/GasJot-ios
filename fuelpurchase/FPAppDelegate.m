@@ -34,6 +34,7 @@
 #import "FPScreenToolkit.h"
 #import "FPLogging.h"
 #import "FPAppNotificationNames.h"
+#import "FPSplashController.h"
 
 #ifdef FP_DEV
   #import <PEDev-Console/PDVScreen.h>
@@ -104,8 +105,8 @@ NSString * const FPAppKeychainService = @"fp-app";
   CLLocationManager *_locationManager;
   NSMutableArray *_locations;
   UICKeyChainStore *_keychainStore;
-  UITabBarController *_tabBarController;
   FPUser *_user;
+  UITabBarController *_tabBarController;
 
   #ifdef FP_DEV
     PDVUtils *_pdvUtils;
@@ -113,6 +114,11 @@ NSString * const FPAppKeychainService = @"fp-app";
 }
 
 #pragma mark - Methods
+
+- (void)setUser:(FPUser *)user tabBarController:(UITabBarController *)tabBarController {
+  _user = user;
+  _tabBarController = tabBarController;
+}
 
 - (CLLocation *)latestLocation {
   if ([_locations count] > 0) {
@@ -173,9 +179,10 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
 
 - (BOOL)application:(UIApplication *)application
 didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  [self initializeLocationTracking];
   [FPLogging initializeLogging];
   [self initializeStoreCoordinator];
+  [self initializeNotificationObserving];
+  self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
   _uitoolkit = [FPAppDelegate defaultUIToolkit];
   _screenToolkit = [[FPScreenToolkit alloc] initWithCoordinatorDao:_coordDao
                                                          uitoolkit:_uitoolkit
@@ -185,52 +192,36 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   _keychainStore = [UICKeyChainStore keyChainStoreWithService:@"name.paulevans.fpauth-token"];
   _user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
   if (_user) {
+    [self initializeLocationTracking];
     _authToken = [self storedAuthenticationTokenForUser:_user];
     if (_authToken) {
       [_coordDao setAuthToken:_authToken];
     }
-  } else {
-    _user = [_coordDao newLocalUserWithError:[FPUtils localSaveErrorHandlerMaker]()];
-  }
-  NSLog(@"in startup, user: %@", _user);
-  self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-  // Setup notification observing
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(resetUserInterface)
-                                               name:FPAppDeleteAllDataNotification
-                                             object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(resetUserInterface)
-                                               name:FPAppLogoutNotification
-                                             object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(resetUserInterface)
-                                               name:FPAppAccountCreationNotification
-                                             object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(resetUserInterface)
-                                               name:FPAppLoginNotification
-                                             object:nil];
-  if ([self isUserLoggedIn]) {
-    if ([self doesUserHaveValidAuthToken]) {
-      DDLogVerbose(@"User is logged in and has a valid authentication token.");
-      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:YES](_user);
-      [[self window] setRootViewController:_tabBarController];
+    if ([self isUserLoggedIn]) {
+      if ([self doesUserHaveValidAuthToken]) {
+        DDLogVerbose(@"User is logged in and has a valid authentication token.");
+        _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:YES](_user);
+        [[self window] setRootViewController:_tabBarController];
+      } else {
+        DDLogVerbose(@"User is logged in and does NOT have a valid authentication token.");
+        _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:YES](_user);
+        [[self window] setRootViewController:_tabBarController];
+      }
     } else {
-      DDLogVerbose(@"User is logged in and does NOT have a valid authentication token.");
-      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:YES](_user);
+      DDLogVerbose(@"User is NOT logged in.");
+      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:NO](_user);
       [[self window] setRootViewController:_tabBarController];
     }
+    if ([self isUserLoggedIn] && ![self doesUserHaveValidAuthToken]) {
+      [_tabBarController.tabBar.items[1] setBadgeValue:@"1"];
+    }
+    [_tabBarController setDelegate:self];
+    [self refreshTabs];
   } else {
-    DDLogVerbose(@"User is NOT logged in.");
-     _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:NO](_user);
-    [[self window] setRootViewController:_tabBarController];
+    FPSplashController *splashController =
+    [[FPSplashController alloc] initWithStoreCoordinator:_coordDao uitoolkit:_uitoolkit screenToolkit:_screenToolkit];
+    [[self window] setRootViewController:[PEUIUtils navigationControllerWithController:splashController]];
   }
-  if ([self isUserLoggedIn] && ![self doesUserHaveValidAuthToken]) {
-    [_tabBarController.tabBar.items[1] setBadgeValue:@"1"];
-  }
-  [_tabBarController setDelegate:self];
-  [self refreshTabs];
   [self.window setBackgroundColor:[UIColor whiteColor]];
   [self.window makeKeyAndVisible];
   return YES;
@@ -334,6 +325,61 @@ shouldSelectViewController:(UIViewController *)viewController {
 }
 
 #pragma mark - Initialization helpers
+
++ (PEUIToolkit *)defaultUIToolkit {
+  UIColor *fpBlue = [UIColor colorFromHexCode:@"0E51A7"];
+  [[UITabBarItem appearance] setTitleTextAttributes:@{ NSForegroundColorAttributeName : fpBlue }
+                                           forState:UIControlStateSelected];
+  return [[PEUIToolkit alloc] initWithColorForContentPanels:fpBlue
+                                 colorForNotificationPanels:[UIColor orangeColor]
+                                            colorForWindows:[UIColor cloudsColor]
+                           topBottomPaddingForContentPanels:15
+                                                accentColor:[UIColor colorFromHexCode:@"FFBF40"]
+                                             fontForButtons:[UIFont systemFontOfSize:[UIFont buttonFontSize]]
+                                     cornerRadiusForButtons:3
+                                  verticalPaddingForButtons:25
+                                horizontalPaddingForButtons:25
+                                   bgColorForWarningButtons:[UIColor carrotColor]
+                                 textColorForWarningButtons:[UIColor whiteColor]
+                                   bgColorForPrimaryButtons:[UIColor colorFromHexCode:@"05326D"]
+                                 textColorForPrimaryButtons:[UIColor whiteColor]
+                                    bgColorForDangerButtons:[UIColor alizarinColor]
+                                  textColorForDangerButtons:[UIColor whiteColor]
+                                       fontForHeader1Labels:[UIFont boldSystemFontOfSize:24]
+                                      colorForHeader1Labels:[UIColor whiteColor]
+                                      fontForHeaders2Labels:[UIFont boldSystemFontOfSize:18]
+                                      colorForHeader2Labels:[UIColor whiteColor]
+                                          fontForTextfields:[UIFont systemFontOfSize:18]
+                                         colorForTextfields:[UIColor whiteColor]
+                                  heightFactorForTextfields:1.7
+                               leftViewPaddingForTextfields:10
+                                     fontForTableCellTitles:[UIFont systemFontOfSize:16]
+                                    colorForTableCellTitles:[UIColor blackColor]
+                                  fontForTableCellSubtitles:[UIFont systemFontOfSize:10]
+                                 colorForTableCellSubtitles:[UIColor grayColor]
+                                  durationForFrameAnimation:0.5
+                                durationForFadeOutAnimation:2.0
+                                 downToYForFromTopAnimation:40];
+}
+
+- (void)initializeNotificationObserving {
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(resetUserInterface)
+                                               name:FPAppDeleteAllDataNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(resetUserInterface)
+                                               name:FPAppLogoutNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(resetUserInterface)
+                                               name:FPAppAccountCreationNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(resetUserInterface)
+                                               name:FPAppLoginNotification
+                                             object:nil];
+}
 
 - (void)initializeLocationTracking {
   _locations = [NSMutableArray array];
@@ -454,45 +500,6 @@ in an unauthenticated state.  Is main thread?  %@", [PEUtils yesNoFromBool:[NSTh
     authToken = [_keychainStore stringForKey:globalIdentifier];
   }
   return authToken;
-}
-
-#pragma mark - UI Toolkit maker
-
-+ (PEUIToolkit *)defaultUIToolkit {
-  UIColor *fpBlue = [UIColor colorFromHexCode:@"0E51A7"];
-  [[UITabBarItem appearance] setTitleTextAttributes:@{ NSForegroundColorAttributeName : fpBlue }
-                                           forState:UIControlStateSelected];
-  return [[PEUIToolkit alloc]
-           initWithColorForContentPanels:fpBlue
-              colorForNotificationPanels:[UIColor orangeColor]
-                         colorForWindows:[UIColor cloudsColor]
-        topBottomPaddingForContentPanels:15
-                             accentColor:[UIColor colorFromHexCode:@"FFBF40"]
-                          fontForButtons:[UIFont systemFontOfSize:[UIFont buttonFontSize]]
-                  cornerRadiusForButtons:3
-               verticalPaddingForButtons:25
-             horizontalPaddingForButtons:25
-                bgColorForWarningButtons:[UIColor carrotColor]
-              textColorForWarningButtons:[UIColor whiteColor]
-                bgColorForPrimaryButtons:[UIColor colorFromHexCode:@"05326D"]
-              textColorForPrimaryButtons:[UIColor whiteColor]
-                 bgColorForDangerButtons:[UIColor alizarinColor]
-               textColorForDangerButtons:[UIColor whiteColor]
-                    fontForHeader1Labels:[UIFont boldSystemFontOfSize:24]
-                   colorForHeader1Labels:[UIColor whiteColor]
-                   fontForHeaders2Labels:[UIFont boldSystemFontOfSize:18]
-                   colorForHeader2Labels:[UIColor whiteColor]
-                       fontForTextfields:[UIFont systemFontOfSize:18]
-                      colorForTextfields:[UIColor whiteColor]
-               heightFactorForTextfields:1.7
-            leftViewPaddingForTextfields:10
-                  fontForTableCellTitles:[UIFont systemFontOfSize:16]
-                 colorForTableCellTitles:[UIColor blackColor]
-               fontForTableCellSubtitles:[UIFont systemFontOfSize:10]
-              colorForTableCellSubtitles:[UIColor grayColor]
-               durationForFrameAnimation:0.5
-             durationForFadeOutAnimation:2.0
-              downToYForFromTopAnimation:40];
 }
 
 #ifdef FP_DEV

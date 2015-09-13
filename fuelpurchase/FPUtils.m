@@ -28,6 +28,31 @@
 
 @implementation FPUtils
 
+#pragma mark - Things For PEObjc-Commons
+
++ (NSInteger)daysFromDate:(NSDate *)fromDate toDate:(NSDate *)toDate {
+  NSCalendar *gregorianCalendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+  NSDateComponents *components = [gregorianCalendar components:NSCalendarUnitDay
+                                                      fromDate:fromDate
+                                                        toDate:toDate
+                                                       options:NSCalendarWrapComponents];
+  return [components day];
+}
+
++ (NSArray *)daysBetweenDates:(NSArray *)dates {
+  NSUInteger numDates = [dates count];
+  if (numDates <= 1) {
+    return nil;
+  } else {
+    NSMutableArray *intervals = [NSMutableArray arrayWithCapacity:numDates - 1];
+    NSInteger loopBoundary = numDates - 1;
+    for (NSUInteger i = 0; i < loopBoundary; i++) {
+      intervals[i] = @([FPUtils daysFromDate:dates[i] toDate:dates[i+1]]);
+    }
+    return intervals;
+  }
+}
+
 #pragma mark - User Helpers
 
 + (NSArray *)computeSignInErrMsgs:(NSUInteger)signInErrMask {
@@ -173,15 +198,18 @@
 + (ServerBusyHandlerMaker)serverBusyHandlerMakerForUI {
   return ^(MBProgressHUD *HUD, UIView *relativeToView) {
     return (^(NSDate *retryAfter) {
-      [HUD hide:YES];
-      [PEUIUtils showWaitAlertWithMsgs:nil
-                                 title:@"Server Busy."
-                      alertDescription:[[NSAttributedString alloc] initWithString:@"We apologize, but the server is currently\n\
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [HUD hide:YES];
+        [PEUIUtils showWaitAlertWithMsgs:nil
+                                   title:@"Server Busy."
+                        alertDescription:[[NSAttributedString alloc] initWithString:@"\
+We apologize, but the server is currently \
 busy.  Please retry your request shortly."]
-                              topInset:70.0
-                           buttonTitle:@"Okay."
-                          buttonAction:nil
-                        relativeToView:relativeToView];
+                                topInset:70.0
+                             buttonTitle:@"Okay."
+                            buttonAction:nil
+                          relativeToView:relativeToView];
+      });
     });
   };
 }

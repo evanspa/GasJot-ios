@@ -514,7 +514,7 @@ getterForNotification:(SEL)getterForNotification {
     if (_downloader) { [rightBarButtonItems addObject:_downloadBarButtonItem]; }
   }
   if (_itemDeleter) {
-    _deleteBarButtonItem = newImgItem(@"delete-icon", @selector(doDelete));
+    _deleteBarButtonItem = newImgItem(@"delete-icon", @selector(promptDoDelete));
     [rightBarButtonItems addObject:_deleteBarButtonItem];
   }
   [navItem setRightBarButtonItems:rightBarButtonItems animated:YES];
@@ -540,7 +540,7 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
   NSRange unauthMsgAttrsRange = NSMakeRange(72, 26); // 'Settings...Re-authenticate'
   [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
   return [PEUIUtils warningAlertSectionWithMsgs:nil
-                                          title:@"Authentication Failure."
+                                          title:@"Authentication failure."
                                alertDescription:attrBecameUnauthMessage
                                  relativeToView:self.view];
 }
@@ -598,6 +598,20 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
     }
   }
   [_deleteBarButtonItem setEnabled:enableDeleteItem];
+}
+
+- (void)promptDoDelete {
+  [PEUIUtils showConfirmAlertWithTitle:@"Are you sure?"
+                            titleImage:nil //[PEUIUtils bundleImageWithName:@"question"]
+                      alertDescription:[[NSAttributedString alloc] initWithString:@"Are you sure you want to delete this record?"]
+                              topInset:70.0
+                       okayButtonTitle:@"Yes.  Delete it."
+                      okayButtonAction:^{ [self doDelete]; }
+                       okayButtonStyle:JGActionSheetButtonStyleRed
+                     cancelButtonTitle:@"No.  Cancel."
+                    cancelButtonAction:^{}
+                      cancelButtonSyle:JGActionSheetButtonStyleDefault
+                        relativeToView:self.tabBarController.view];
 }
 
 - (void)doDelete {
@@ -669,8 +683,7 @@ Are you sure you want to continue?"]
         });
       } else { // error
         dispatch_async(dispatch_get_main_queue(), ^{
-          [deleteHud hide:YES afterDelay:0];
-          
+          [deleteHud hide:YES afterDelay:0];          
           if ([errorsForDelete[0][4] boolValue]) { // conflict error
             id latestEntity = errorsForDelete[0][5];
             [PEUIUtils showDeleteConflictAlertWithTitle:@"Conflict"
@@ -686,13 +699,22 @@ updated since you last downloaded it."]
                                       cancelButtonTitle:@"Cancel."
                                      cancelButtonAction:postDeleteActivities
                                          relativeToView:self.view];
-            
           } else if ([errorsForDelete[0][3] boolValue]) { // server is busy
             [self handleServerBusyErrorWithAction:postDeleteActivities];
           } else if ([errorsForDelete[0][6] boolValue]) { // not found
-            [self handleNotFoundError];
+            [PEUIUtils showInfoAlertWithTitle:@"Already deleted."
+                             alertDescription:[[NSAttributedString alloc] initWithString:@"\
+It looks like this record was already deleted from a different device. \
+It has now been removed from this device."]
+                                     topInset:70.0
+                                  buttonTitle:@"Okay."
+                                 buttonAction:^{
+                                   _itemLocalDeleter(self, _entity, _entityIndexPath);
+                                   [_listViewController handleRemovedEntity:_entity];
+                                   [[self navigationController] popViewControllerAnimated:YES];
+                                 }
+                               relativeToView:self.view];
           } else { // any other error type
-            NSMutableAttributedString *attrMessage;
             NSString *title;
             NSString *message;
             NSArray *subErrors = errorsForDelete[0][2];
@@ -709,35 +731,28 @@ entity from the server.  The error is \
 as follows:";
               title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
             }
-            attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
-            JGActionSheetSection *becameUnauthSection = nil;
+            NSMutableAttributedString *attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
+            NSMutableArray *sections = [NSMutableArray array];
             if (receivedAuthReqdErrorOnDeleteAttempt) {
-              becameUnauthSection = [self becameUnauthenticatedSection];
+              [sections addObject:[self becameUnauthenticatedSection]];
             }
-            JGActionSheetSection *contentSection = [PEUIUtils errorAlertSectionWithMsgs:subErrors
-                                                                                  title:title
-                                                                       alertDescription:attrMessage
-                                                                         relativeToView:self.view];
-            JGActionSheetSection *buttonsSection;
-            void (^buttonsPressedBlock)(JGActionSheet *, NSIndexPath *);
-            buttonsSection = [JGActionSheetSection sectionWithTitle:nil
-                                                            message:nil
-                                                       buttonTitles:@[@"Okay."]
-                                                        buttonStyle:JGActionSheetButtonStyleDefault];
+            [sections addObject:[PEUIUtils errorAlertSectionWithMsgs:subErrors
+                                                               title:title
+                                                    alertDescription:attrMessage
+                                                      relativeToView:self.view]];
+            JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
+                                                                                  message:nil
+                                                                             buttonTitles:@[@"Okay."]
+                                                                              buttonStyle:JGActionSheetButtonStyleDefault];
             [buttonsSection setButtonStyle:JGActionSheetButtonStyleRed forButtonAtIndex:0];
-            buttonsPressedBlock = ^(JGActionSheet *sheet, NSIndexPath *btnIndexPath) {
-              postDeleteActivities();
-              [sheet dismissAnimated:YES];
-            };
-            JGActionSheet *alertSheet;
-            if (becameUnauthSection) {
-              alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
-            } else {
-              alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
-            }
+            [sections addObject:buttonsSection];
+            JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:sections];
             [alertSheet setDelegate:self];
             [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
-            [alertSheet setButtonPressedBlock:buttonsPressedBlock];
+            [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *btnIndexPath) {
+              postDeleteActivities();
+              [sheet dismissAnimated:YES];
+            }];
             [alertSheet showInView:self.view animated:YES];
           }
         });
@@ -748,11 +763,11 @@ as follows:";
                                                              NSString *recordTitle) {
       [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
                                    [NSNumber numberWithBool:NO],
-                                   @[[NSString stringWithFormat:@"Not found."],
+                                   @[[NSString stringWithFormat:@"Not found."]],
                                    [NSNumber numberWithBool:NO],
                                    [NSNumber numberWithBool:NO],
                                    [NSNull null],
-                                   [NSNumber numberWithBool:YES]]]];
+                                   [NSNumber numberWithBool:YES]]];
       immediateDelDone(mainMsgTitle);
     };
     void(^delSuccessBlk)(float, NSString *, NSString *) = ^(float percentComplete,
@@ -882,7 +897,7 @@ as follows:";
   [_downloadBarButtonItem setEnabled:NO];
   [_uploadBarButtonItem setEnabled:NO];
   [_deleteBarButtonItem setEnabled:NO];
-  [downloadHud setLabelText:[NSString stringWithFormat:@"Downloading latest entity."]];
+  [downloadHud setLabelText:[NSString stringWithFormat:@"Downloading latest..."]];
   void (^handleHudProgress)(float) = ^(float percentComplete) {
     percentCompleteDownloadingEntity += percentComplete;
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -918,18 +933,17 @@ as follows:";
         [downloadHud hide:YES afterDelay:0.0];
         id downloadedEntity = successMsgsForEntityDownload[0][1];
         if ([downloadedEntity isEqual:[NSNull null]]) {
-          // we already have the latest version of _entity (server responded with 304)
-          [PEUIUtils showSuccessAlertWithTitle:@"You already have the latest."
-                              alertDescription:[[NSAttributedString alloc] initWithString:@"\
+          [PEUIUtils showInfoAlertWithTitle:@"You already have the latest."
+                           alertDescription:[[NSAttributedString alloc] initWithString:@"\
 You already have the latest version of this \
-entity on your device."]
-                                      topInset:70.0
-                                   buttonTitle:@"Okay."
-                                  buttonAction:^{
+record on your device."]
+                                   topInset:70.0
+                                buttonTitle:@"Okay."
+                               buttonAction:^{
                                     reenableNavButtons();
                                     [self setUploadDownloadDeleteBarButtonStates];
                                   }
-                                relativeToView:self.view];
+                             relativeToView:self.view];
         } else {
           void (^fetchDepsThenTakeAction)(void(^)(void)) = [self downloadDepsForEntity:downloadedEntity
                                                              dismissErrAlertPostAction:reenableNavButtons];
@@ -939,7 +953,7 @@ entity on your device."]
             // to be downloaded).  Also, this block executes on the main thread.
             [PEUIUtils showSuccessAlertWithTitle:@"Success."
                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
-The latest version of this entity has been \
+The latest version of this record has been \
 successfully downloaded to your device."]
                                         topInset:70.0
                                      buttonTitle:@"Okay."
@@ -965,7 +979,7 @@ successfully downloaded to your device."]
           [self handleNotFoundError];
         } else { // any other error type
           NSString *fetchErrMsg = @"\
-There was a problem downloading the entity.";
+There was a problem downloading the record.";
           [PEUIUtils showErrorAlertWithMsgs:errsForEntityDownload[0][2]
                                       title:@"Download error."
                            alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
@@ -1108,12 +1122,12 @@ There was a problem downloading the entity.";
           id latestEntity = errorsForUpload[0][5];
           NSMutableAttributedString *desc = [[NSMutableAttributedString alloc] initWithString:@"\
 The remote copy of this entity has been \
-updated since you last downloaded it.  You \
+updated since you started to edit it.  You \
 have a few options:\n\n\
 If you cancel, your local edits will be \
 retained."];
           NSDictionary *attrs = @{ NSFontAttributeName : [UIFont italicSystemFontOfSize:14.0] };
-          [desc setAttributes:attrs range:NSMakeRange(99, 49)];
+          [desc setAttributes:attrs range:NSMakeRange(103, 49)];
           [self presentSaveConflictAlertWithLatestEntity:latestEntity
                                         alertDescription:desc
                                             cancelAction:postUploadActivities];
@@ -1735,12 +1749,12 @@ can try to upload them later."]
                 id latestEntity = errorsForUpload[0][5];
                 NSMutableAttributedString *desc = [[NSMutableAttributedString alloc] initWithString:@"\
 The remote copy of this entity has been \
-updated since you downloaded it.  You have \
+updated since you started to edit it.  You have \
 a few options:\n\n\
 If you cancel, your local edits will be \
 retained."];
                 NSDictionary *attrs = @{ NSFontAttributeName : [UIFont italicSystemFontOfSize:14.0] };
-                [desc setAttributes:attrs range:NSMakeRange(99, 49)];
+                [desc setAttributes:attrs range:NSMakeRange(103, 49)];
                 [self presentSaveConflictAlertWithLatestEntity:latestEntity
                                               alertDescription:desc
                                                   cancelAction:postEditActivities];

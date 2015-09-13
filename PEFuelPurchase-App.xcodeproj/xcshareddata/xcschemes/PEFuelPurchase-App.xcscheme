@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "18D6DFA717F68005006B300D"
-               BuildableName = "Fuel Purchase.app"
+               BuildableName = "Gas Jot.app"
                BlueprintName = "PEFuelPurchase-App"
                ReferencedContainer = "container:PEFuelPurchase-App.xcodeproj">
             </BuildableReference>
@@ -43,7 +43,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "18D6DFA717F68005006B300D"
-            BuildableName = "Fuel Purchase.app"
+            BuildableName = "Gas Jot.app"
             BlueprintName = "PEFuelPurchase-App"
             ReferencedContainer = "container:PEFuelPurchase-App.xcodeproj">
          </BuildableReference>
@@ -63,7 +63,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "18D6DFA717F68005006B300D"
-            BuildableName = "Fuel Purchase.app"
+            BuildableName = "Gas Jot.app"
             BlueprintName = "PEFuelPurchase-App"
             ReferencedContainer = "container:PEFuelPurchase-App.xcodeproj">
          </BuildableReference>
@@ -82,7 +82,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "18D6DFA717F68005006B300D"
-            BuildableName = "Fuel Purchase.app"
+            BuildableName = "Gas Jot.app"
             BlueprintName = "PEFuelPurchase-App"
             ReferencedContainer = "container:PEFuelPurchase-App.xcodeproj">
          </BuildableReference>

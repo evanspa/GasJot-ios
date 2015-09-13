@@ -43,6 +43,8 @@
 		CA920C121B21F48900A848EA /* fpapi-resource.localdev.json in Resources */ = {isa = PBXBuildFile; fileRef = 18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */; };
 		CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */; };
 		CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = CAD8AE501B2B291000276F4F /* PELMUIUtils.m */; };
+		CAFC84651BA27EAB00FAEB66 /* FPSplashController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84641BA27EAB00FAEB66 /* FPSplashController.m */; };
+		CAFC84691BA363A600FAEB66 /* iCarousel.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84681BA363A600FAEB66 /* iCarousel.m */; };
 		F17D7730E485443DAEE57677 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 91349E0025D9467DBE585F0F /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -83,7 +85,7 @@
 		18CF523019C9D9C90020FC94 /* FPScreenToolkit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPScreenToolkit.h; sourceTree = "<group>"; };
 		18CF523119C9D9C90020FC94 /* FPScreenToolkit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPScreenToolkit.m; sourceTree = "<group>"; };
 		18D2F90B19F20CCE002D9869 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
-		18D6DFA817F68005006B300D /* Fuel Purchase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Fuel Purchase.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		18D6DFA817F68005006B300D /* Fuel Purchase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = "Fuel Purchase.app"; path = "Gas Jot.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		18D6DFAB17F68005006B300D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		18D6DFAD17F68005006B300D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		18D6DFAF17F68005006B300D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -125,6 +127,10 @@
 		CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPReauthenticateController.m; sourceTree = "<group>"; };
 		CAD8AE4F1B2B291000276F4F /* PELMUIUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PELMUIUtils.h; sourceTree = "<group>"; };
 		CAD8AE501B2B291000276F4F /* PELMUIUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PELMUIUtils.m; sourceTree = "<group>"; };
+		CAFC84631BA27EAB00FAEB66 /* FPSplashController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPSplashController.h; sourceTree = "<group>"; };
+		CAFC84641BA27EAB00FAEB66 /* FPSplashController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPSplashController.m; sourceTree = "<group>"; };
+		CAFC84671BA363A600FAEB66 /* iCarousel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iCarousel.h; sourceTree = "<group>"; };
+		CAFC84681BA363A600FAEB66 /* iCarousel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iCarousel.m; sourceTree = "<group>"; };
 		E12E20B44758C744FA39A49C /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -271,6 +277,7 @@
 		18AB99FB17F6832C002A8A69 /* Custom Screens */ = {
 			isa = PBXGroup;
 			children = (
+				CAFC84621BA27E8000FAEB66 /* Splash */,
 				CAB5E94D1B4B007E00144072 /* Re-authenticate */,
 				CA7D5A2B1B384FEE00433581 /* Account Login */,
 				CA7D5A2A1B384FDE00433581 /* Account Creation */,
@@ -437,6 +444,7 @@
 		CA7D5A281B384F4000433581 /* User Interface */ = {
 			isa = PBXGroup;
 			children = (
+				CAFC84661BA3637000FAEB66 /* iCarousel */,
 				18456CE719D39D840023A2A7 /* Panel Toolkit */,
 				18CF522F19C9D9990020FC94 /* Screen Toolkit */,
 				18AB99FB17F6832C002A8A69 /* Custom Screens */,
@@ -487,6 +495,24 @@
 				CAD8AE501B2B291000276F4F /* PELMUIUtils.m */,
 			);
 			name = "Local Data UI Utils";
+			sourceTree = "<group>";
+		};
+		CAFC84621BA27E8000FAEB66 /* Splash */ = {
+			isa = PBXGroup;
+			children = (
+				CAFC84631BA27EAB00FAEB66 /* FPSplashController.h */,
+				CAFC84641BA27EAB00FAEB66 /* FPSplashController.m */,
+			);
+			name = Splash;
+			sourceTree = "<group>";
+		};
+		CAFC84661BA3637000FAEB66 /* iCarousel */ = {
+			isa = PBXGroup;
+			children = (
+				CAFC84671BA363A600FAEB66 /* iCarousel.h */,
+				CAFC84681BA363A600FAEB66 /* iCarousel.m */,
+			);
+			name = iCarousel;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -608,7 +634,9 @@
 				180EDA3519C7C89B00C782A6 /* FPEditsInProgressController.m in Sources */,
 				18CC2CF817F680AC009DF2CE /* FPNames.m in Sources */,
 				18EC863019EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m in Sources */,
+				CAFC84691BA363A600FAEB66 /* iCarousel.m in Sources */,
 				CA7D5A271B383F5A00433581 /* FPAppNotificationNames.m in Sources */,
+				CAFC84651BA27EAB00FAEB66 /* FPSplashController.m in Sources */,
 				18CF523219C9D9C90020FC94 /* FPScreenToolkit.m in Sources */,
 				18CC2CFA17F680AC009DF2CE /* FPCreateAccountController.m in Sources */,
 				CA7D5A2E1B3851E200433581 /* FPAccountLoginController.m in Sources */,
@@ -666,7 +694,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
-				PRODUCT_NAME = "Fuel Purchase";
+				PRODUCT_NAME = "Gas Jot";
 				PROVISIONING_PROFILE = "0889e851-aaf0-45b3-ad8e-f5eef21ff25c";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -685,7 +713,7 @@
 				GCC_PREFIX_HEADER = "fuelpurchase/PEFuelPurchase-App-Prefix.pch";
 				INFOPLIST_FILE = "fuelpurchase/PEFuelPurchase-App-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
-				PRODUCT_NAME = "Fuel Purchase";
+				PRODUCT_NAME = "Gas Jot";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
@@ -722,7 +750,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_NAME = "Fuel Purchase";
+				PRODUCT_NAME = "Gas Jot";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -746,7 +774,7 @@
 				);
 				INFOPLIST_FILE = "fuelpurchase/PEFuelPurchase-App-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
-				PRODUCT_NAME = "Fuel Purchase";
+				PRODUCT_NAME = "Gas Jot";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;

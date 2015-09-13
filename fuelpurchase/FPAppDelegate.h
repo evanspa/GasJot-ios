@@ -61,10 +61,11 @@
 
 @property (nonatomic) BOOL offlineMode;
 
-/** The application window. */
 @property (strong, nonatomic) UIWindow *window;
 
 #pragma mark - Methods
+
+- (void)setUser:(FPUser *)user tabBarController:(UITabBarController *)tabBarController;
 
 - (CLLocation *)latestLocation;
 

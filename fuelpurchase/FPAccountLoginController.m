@@ -345,7 +345,20 @@ button.";
                                  password:[_siPasswordTf text]
              andLinkRemoteUserToLocalUser:_localUser
             preserveExistingLocalEntities:syncLocalEntities
-                          remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.tabBarController.view)
+                          remoteStoreBusy:^(NSDate *retryAfter) {
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                              [HUD hide:YES];
+                              [PEUIUtils showWaitAlertWithMsgs:nil
+                                                         title:@"Server Busy."
+                                              alertDescription:[[NSAttributedString alloc] initWithString:@"\
+We apologize, but the server is currently \
+busy.  Please try logging in a little later."]
+                                                      topInset:70.0
+                                                   buttonTitle:@"Okay."
+                                                  buttonAction:nil
+                                                relativeToView:self.tabBarController.view];
+                            });
+                          }
                         completionHandler:^(FPUser *user, NSError *err) {
                           [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(err);
                           if (user) {

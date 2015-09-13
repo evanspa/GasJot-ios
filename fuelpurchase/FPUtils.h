@@ -41,6 +41,12 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
  */
 @interface FPUtils : NSObject
 
+#pragma mark - Things For PEObjc-Commons
+
++ (NSInteger)daysFromDate:(NSDate *)fromDate toDate:(NSDate *)toDate;
+
++ (NSArray *)daysBetweenDates:(NSArray *)dates;
+
 #pragma mark - User Helpers
 
 + (NSArray *)computeSignInErrMsgs:(NSUInteger)signInErrMask;
