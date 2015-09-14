@@ -10,7 +10,9 @@
 #import <BlocksKit/UIControl+BlocksKit.h>
 #import <PEObjc-Commons/UIView+PERoundify.h>
 #import <FlatUIKit/UIColor+FlatUI.h>
+#import "FPUIUtils.h"
 #import "FPUtils.h"
+#import "UIColor+FPAdditions.h"
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
@@ -91,67 +93,6 @@ You currently have no unsynced items."
   return [PEUIUtils leftPadView:infoMsgLabel padding:leftPadding];
 }
 
-- (UIView *)badgeForNum:(NSInteger)num
-                  color:(UIColor *)color
-         badgeTextColor:(UIColor *)badgeTextColor {
-  if (num == 0) {
-    return nil;
-  }
-  CGFloat widthPadding = 30.0;
-  CGFloat heightFactor = 1.45;
-  CGFloat fontSize = [UIFont systemFontSize];
-  NSString *labelText;
-  if (num > 9999) {
-    fontSize = 10.0;
-    widthPadding = 10.0;
-    heightFactor = 1.95;
-    labelText = @"a plethora";
-  } else {
-    labelText = [NSString stringWithFormat:@"%ld", (long)num];
-  }
-  UILabel *label = [PEUIUtils labelWithKey:labelText
-                                      font:[UIFont boldSystemFontOfSize:fontSize]
-                           backgroundColor:[UIColor clearColor]
-                                 textColor:badgeTextColor
-                       verticalTextPadding:0.0];
-  UIView *badge = [PEUIUtils panelWithFixedWidth:label.frame.size.width + widthPadding fixedHeight:label.frame.size.height * heightFactor];
-  [badge addRoundedCorners:UIRectCornerAllCorners
-                 withRadii:CGSizeMake(20.0, 20.0)];
-  badge.alpha = 0.8;
-  badge.backgroundColor = color;
-  [PEUIUtils placeView:label
-            inMiddleOf:badge
-         withAlignment:PEUIHorizontalAlignmentTypeCenter
-              hpadding:0.0];
-  return badge;
-}
-
-- (UIButton *)buttonWithLabel:(NSString *)labelText
-                     badgeNum:(NSInteger)badgeNum
-                   badgeColor:(UIColor *)badgeColor
-               badgeTextColor:(UIColor *)badgeTextColor
-            addDisclosureIcon:(BOOL)addDisclosureIcon
-                      handler:(void(^)(void))handler {
-  if (badgeNum == 0) {
-    return nil;
-  }
-  UIButton *button = [_uitoolkit systemButtonMaker](labelText, nil, nil);
-  [[button layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:button ofWidth:1.0 relativeTo:self.view];
-  if (addDisclosureIcon) {
-    [PEUIUtils addDisclosureIndicatorToButton:button];
-  }
-  [button bk_addEventHandler:^(id sender) {
-    handler();
-  } forControlEvents:UIControlEventTouchUpInside];
-  UIView *badge = [self badgeForNum:badgeNum color:badgeColor badgeTextColor:badgeTextColor];
-  [PEUIUtils placeView:badge
-            inMiddleOf:button
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              hpadding:15.0];
-  return button;
-}
-
 #pragma mark - View Controller Lifecyle
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -178,50 +119,60 @@ You currently have no unsynced items."
   NSInteger totalNumSyncNeeded = [_coordDao totalNumSyncNeededEntitiesForUser:_user];
   UIColor *eipBadgeColor = [UIColor orangeColor];
   UIColor *eipBadgeTextColor = [UIColor blackColor];
-  _vehiclesButton = [self buttonWithLabel:@"Vehicles"
-                                 badgeNum:numEipVehicles
-                               badgeColor:eipBadgeColor
-                           badgeTextColor:eipBadgeTextColor
-                        addDisclosureIcon:YES
-                                  handler:^{
-                                    [PEUIUtils displayController:[_screenToolkit newViewUnsyncedVehiclesScreenMaker](_user)
-                                                  fromController:self
-                                                        animated:YES]; }];
-  _fuelStationsButton = [self buttonWithLabel:@"Fuel Stations"
-                                     badgeNum:numEipFuelStations
+  _vehiclesButton = [FPUIUtils buttonWithLabel:@"Vehicles"
+                                      badgeNum:numEipVehicles
+                                    badgeColor:eipBadgeColor
+                                badgeTextColor:eipBadgeTextColor
+                             addDisclosureIcon:YES
+                                       handler:^{
+                                         [PEUIUtils displayController:[_screenToolkit newViewUnsyncedVehiclesScreenMaker](_user)
+                                                       fromController:self
+                                                             animated:YES]; }
+                                     uitoolkit:_uitoolkit
+                                relativeToView:self.view];
+  _fuelStationsButton = [FPUIUtils buttonWithLabel:@"Fuel Stations"
+                                          badgeNum:numEipFuelStations
+                                        badgeColor:eipBadgeColor
+                                    badgeTextColor:eipBadgeTextColor
+                                 addDisclosureIcon:YES
+                                           handler:^{
+                                             [PEUIUtils displayController:[_screenToolkit newViewUnsyncedFuelStationsScreenMaker](_user)
+                                                           fromController:self
+                                                                 animated:YES]; }
+                                         uitoolkit:_uitoolkit
+                                    relativeToView:self.view];
+  _fplogsButton = [FPUIUtils buttonWithLabel:@"Fuel Purchase Logs"
+                                    badgeNum:numEipFpLogs
+                                  badgeColor:eipBadgeColor
+                              badgeTextColor:eipBadgeTextColor
+                           addDisclosureIcon:YES
+                                     handler:^{
+                                       [PEUIUtils displayController:[_screenToolkit newViewUnsyncedFuelPurchaseLogsScreenMaker](_user)
+                                                     fromController:self
+                                                           animated:YES]; }
+                                   uitoolkit:_uitoolkit
+                              relativeToView:self.view];
+  _envlogsButton = [FPUIUtils buttonWithLabel:@"Environment Logs"
+                                     badgeNum:numEipEnvLogs
                                    badgeColor:eipBadgeColor
                                badgeTextColor:eipBadgeTextColor
                             addDisclosureIcon:YES
                                       handler:^{
-                                        [PEUIUtils displayController:[_screenToolkit newViewUnsyncedFuelStationsScreenMaker](_user)
+                                        [PEUIUtils displayController:[_screenToolkit newViewUnsyncedEnvironmentLogsScreenMaker](_user)
                                                       fromController:self
-                                                            animated:YES]; }];
-  _fplogsButton = [self buttonWithLabel:@"Fuel Purchase Logs"
-                              badgeNum:numEipFpLogs
-                             badgeColor:eipBadgeColor
-                         badgeTextColor:eipBadgeTextColor
-                      addDisclosureIcon:YES
-                                handler:^{
-                                  [PEUIUtils displayController:[_screenToolkit newViewUnsyncedFuelPurchaseLogsScreenMaker](_user)
-                                                fromController:self
-                                                      animated:YES]; }];
-  _envlogsButton = [self buttonWithLabel:@"Environment Logs"
-                                badgeNum:numEipEnvLogs
-                              badgeColor:eipBadgeColor
-                          badgeTextColor:eipBadgeTextColor
-                       addDisclosureIcon:YES
-                                 handler:^{
-                                   [PEUIUtils displayController:[_screenToolkit newViewUnsyncedEnvironmentLogsScreenMaker](_user)
-                                                 fromController:self
-                                                       animated:YES]; }];
-  _syncAllButton = [self buttonWithLabel:@"Upload All"
-                                badgeNum:totalNumSyncNeeded
-                              badgeColor:[UIColor blueColor]
-                          badgeTextColor:[UIColor whiteColor]
-                       addDisclosureIcon:NO
-                                 handler:^{
-                                   [self syncAll];
-                                 }];
+                                                            animated:YES]; }
+                                    uitoolkit:_uitoolkit
+                               relativeToView:self.view];
+  _syncAllButton = [FPUIUtils buttonWithLabel:@"Upload All"
+                                     badgeNum:totalNumSyncNeeded
+                                   badgeColor:[UIColor fpAppBlue]
+                               badgeTextColor:[UIColor whiteColor]
+                            addDisclosureIcon:NO
+                                      handler:^{
+                                        [self syncAll];
+                                      }
+                                    uitoolkit:_uitoolkit
+                               relativeToView:self.view];
   // place the views
   UIView *messagePanel;
   if (totalNumEips > 0) {
@@ -232,7 +183,7 @@ You currently have no unsynced items."
   [PEUIUtils placeView:messagePanel
                atTopOf:self.view
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:80.0
+              vpadding:75.0
               hpadding:0.0];
   UIView *topView = messagePanel;
   if (_vehiclesButton) {
@@ -272,14 +223,9 @@ You currently have no unsynced items."
     topView = _envlogsButton;
   }
   if (totalNumSyncNeeded > 0 && [APP doesUserHaveValidAuthToken]) {
+    [PEUIUtils placeView:_syncAllButton atBottomOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:self.view.frame.size.height * 0.275 hpadding:0.0];
     [PEUIUtils placeView:_syncAllMessage
-                   below:topView
-                    onto:self.view
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:15.0
-                hpadding:0.0];
-    [PEUIUtils placeView:_syncAllButton
-                   below:_syncAllMessage
+                   below:_syncAllButton
                     onto:self.view
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0

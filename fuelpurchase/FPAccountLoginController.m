@@ -81,7 +81,7 @@
   [PEUIUtils placeView:[self panelForSignIn]
                atTopOf:[self view]
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:100.0
+              vpadding:75.0
               hpadding:0.0];
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Log In"];

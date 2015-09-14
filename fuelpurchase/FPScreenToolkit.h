@@ -17,8 +17,6 @@ typedef UIViewController * (^FPUnauthScreenMaker)(void);
 
 typedef UIViewController * (^FPAuthScreenMaker)(id);
 
-typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id);
-
 @interface FPScreenToolkit : NSObject
 
 #pragma mark - Initializers
@@ -101,6 +99,8 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id);
                                   defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
                                           listViewController:(PEListViewController *)listViewController;
 
+- (FPAuthScreenMaker)newViewFuelPurchaseLogsScreenMaker;
+
 - (FPAuthScreenMaker)newViewFuelPurchaseLogsScreenMakerForVehicleInCtx;
 
 - (FPAuthScreenMaker)newViewFuelPurchaseLogsScreenMakerForFuelStationInCtx;
@@ -117,9 +117,17 @@ typedef UIViewController * (^FPAuthScreenMakerWithTempNotification)(id);
 
 - (FPAuthScreenMaker)newViewUnsyncedEnvironmentLogsScreenMaker;
 
-#pragma mark - Quick Action Screen
+#pragma mark - Home Screen
 
-- (FPAuthScreenMakerWithTempNotification)newQuickActionMenuScreenMaker;
+- (FPAuthScreenMaker)newHomeScreenMaker;
+
+#pragma mark - Records Screen
+
+- (FPAuthScreenMaker)newRecordsScreenMaker;
+
+#pragma mark - Jot Screen
+
+- (FPAuthScreenMaker)newJotScreenMaker;
 
 #pragma mark - Tab-bar Authenticated Landing Screen
 

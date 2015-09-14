@@ -36,9 +36,6 @@
   PEUIToolkit *_uitoolkit;
   FPUser *_user;
   FPScreenToolkit *_screenToolkit;
-  dispatch_queue_t _junkQueue;
-  //UIView *_syncableStatusPanel;
-  //UIView *_unsyncableStatusPanel;
   UIButton *_syncedStatusButton;
   UIButton *_unsyncedStatusButton;
 }
@@ -55,8 +52,6 @@
     _coordDao = coordDao;
     _uitoolkit = uitoolkit;
     _screenToolkit = screenToolkit;
-    _junkQueue = dispatch_queue_create("name.paulevans.fuelpurchase.debug.computecoord",
-                                                       DISPATCH_QUEUE_SERIAL);
   }
   return self;
 }

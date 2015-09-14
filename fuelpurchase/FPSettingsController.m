@@ -31,8 +31,8 @@
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
-  UIScrollView *_doesHaveAuthTokenPanel;
-  UIView *_doesNotHaveAuthTokenPanel;
+  //UIScrollView *_doesHaveAuthTokenPanel;
+  UIView *_doesHaveAuthTokenPanel;
   UIView *_notLoggedInPanel;
 }
 
@@ -64,7 +64,6 @@
   [navItem setTitle:@"Settings"];
   [self makeNotLoggedInPanel];
   [self makeDoesHaveAuthTokenPanel];
-  [self makeDoesNotHaveAuthTokenPanel];
   [self setAutomaticallyAdjustsScrollViewInsets:NO]; // http://stackoverflow.com/questions/6523205/uiscrollview-adjusts-contentoffset-when-contentsize-changes
 }
 
@@ -72,21 +71,12 @@
   [super viewDidAppear:animated];
   [_notLoggedInPanel removeFromSuperview];
   [_doesHaveAuthTokenPanel removeFromSuperview];
-  [_doesNotHaveAuthTokenPanel removeFromSuperview];
   if ([APP isUserLoggedIn]) {
-    if ([APP doesUserHaveValidAuthToken]) {
-      [PEUIUtils placeView:_doesHaveAuthTokenPanel
-                   atTopOf:[self view]
-             withAlignment:PEUIHorizontalAlignmentTypeLeft
-                  vpadding:0.0
-                  hpadding:0.0];
-    } else {
-      [PEUIUtils placeView:_doesNotHaveAuthTokenPanel
-                   atTopOf:[self view]
-             withAlignment:PEUIHorizontalAlignmentTypeLeft
-                  vpadding:0.0
-                  hpadding:0.0];
-    }
+    [PEUIUtils placeView:_doesHaveAuthTokenPanel
+                 atTopOf:[self view]
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:0.0
+                hpadding:0.0];
   } else {
     [PEUIUtils placeView:_notLoggedInPanel
                  atTopOf:[self view]
@@ -98,18 +88,14 @@
 
 #pragma mark - Helpers
 
-- (UIView *)logoutPaddedMessage {
-  NSString *logoutMsg = @"\
-Logging out will disconnect this device from \
-your remote account.  This will remove your \
-fuel purchase data from this device only.";
+- (UIView *)leftPaddingMessageWithText:(NSString *)text {
   CGFloat leftPadding = 8.0;
-  UILabel *label = [PEUIUtils labelWithKey:logoutMsg
+  UILabel *label = [PEUIUtils labelWithKey:text
                                       font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                            backgroundColor:[UIColor clearColor]
                                  textColor:[UIColor darkGrayColor]
                        verticalTextPadding:3.0
-                                fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - (leftPadding + 5.0)];
+                                fitToWidth:self.view.frame.size.width - (leftPadding + 5.0)];
   return [PEUIUtils leftPadView:label padding:leftPadding];
 }
 
@@ -142,61 +128,35 @@ fuel purchase data from this device only.";
   return messagePanel;
 }
 
-- (void)displayOfflineModeInfoAlert {
-  [PEUIUtils showInfoAlertWithTitle:@"Offline mode."
-                   alertDescription:[[NSAttributedString alloc] initWithString:@"\
-Offline mode prevents upload attempts to \
-the server, keeping all saves local-only.\n\n\
-Enable offline mode if you are making \
-many saves and you want them done \
-instantly.  Or enable offline mode if you \
-are making saves and you know you have a \
-poor internet connection.\n\n\
-Later, you can bulk-upload your edits via:\n\n\
-'Unsynced Edits' \u2794 'Sync All'"]
-                           topInset:70.0 buttonTitle:@"Okay."
-                       buttonAction:^{}
-                     relativeToView:self.tabBarController.view];
-}
-
 #pragma mark - Panel Makers
 
 - (void)makeDoesHaveAuthTokenPanel {
-  CGFloat dividerHeight = (1.0 / [UIScreen mainScreen].scale);
+  /*CGFloat dividerHeight = (1.0 / [UIScreen mainScreen].scale);
   UIView *(^makeDivider)(CGFloat) = ^ UIView * (CGFloat widthOf) {
     UIView *divider = [PEUIUtils panelWithWidthOf:widthOf relativeToView:_doesHaveAuthTokenPanel fixedHeight:dividerHeight];
     [divider setBackgroundColor:[UIColor darkGrayColor]];
     return divider;
-  };
-  ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
-  _doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
+  };*/
+  /*_doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
   [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width,
                                                      1.19 * self.view.frame.size.height)];
-  [_doesHaveAuthTokenPanel setBounces:NO];
-  
-  NSString *accountSettingsMessage = @"\
-You are currently logged in.  From here \
-you can view and edit your account \
-information and settings.";
-  UIView *accountSettingsMsgPanel = [self messagePanelWithMessage:accountSettingsMessage
-                                                        iconImage:[UIImage syncable]
-                                                   relativeToView:_doesHaveAuthTokenPanel];
-  UIButton *accountSettingsBtn = [_uitoolkit systemButtonMaker](@"Account Settings", nil, nil);
-  [[accountSettingsBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:accountSettingsBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
-  [PEUIUtils addDisclosureIndicatorToButton:accountSettingsBtn];
-  [accountSettingsBtn bk_addEventHandler:^(id sender) {
-    [PEUIUtils displayController:[_screenToolkit newUserAccountDetailScreenMaker](_user) fromController:self animated:YES];
-  } forControlEvents:UIControlEventTouchUpInside];
-  
-  NSString *changelogMessage = @"\
+  [_doesHaveAuthTokenPanel setBounces:NO];*/
+  CGFloat labelLeftPadding = 8.0;
+  _doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
+  UIView *changelogMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"\
 Keeps your device synchronized with \
-your account in case you've made edits \
-and deletions on other devices.";
-  UIView *changelogMsgPanel = [self messagePanelWithMessage:changelogMessage
-                                                  iconImage:[UIImage imageNamed:@"download"]
-                                             relativeToView:_doesHaveAuthTokenPanel];
-  UIButton *changelogBtn = [_uitoolkit systemButtonMaker](@"Synchronize All", nil, nil);
+your remote account in case you've made edits \
+and deletions on other devices."
+                                                                        font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                             backgroundColor:[UIColor clearColor]
+                                                                   textColor:[UIColor darkGrayColor]
+                                                         verticalTextPadding:3.0
+                                                                  fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0]
+                                             padding:labelLeftPadding];
+  
+  
+  UIButton *changelogBtn = [_uitoolkit systemButtonMaker](@"Download All Changes", nil, nil);
+  [PEUIUtils placeView:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"download-icon"]] inMiddleOf:changelogBtn withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:15.0];
   [[changelogBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:changelogBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
   [changelogBtn bk_addEventHandler:^(id sender) {
@@ -227,7 +187,7 @@ occurred.  Please try this again later."]
                             dispatch_async(dispatch_get_main_queue(), ^{
                               [changelogHud hide:YES];
                               void (^displayAlreadySynchronizedAlert)(void) = ^{
-                                [PEUIUtils showInfoAlertWithTitle:@"Already synchronized."
+                                [PEUIUtils showInfoAlertWithTitle:@"Already up-to-date."
                                                  alertDescription:[[NSAttributedString alloc] initWithString:@"\
 Your device is already fully synchronized \
 with your account."]
@@ -322,7 +282,7 @@ button.";
                    });
                  }];
   } forControlEvents:UIControlEventTouchUpInside];
-  NSString *offlineModeLabelText = @"\
+  /*NSString *offlineModeLabelText = @"\
 Offline mode.  Enables fast \
 saving (adds / edits only) in \
 poor connection environments.";
@@ -330,159 +290,51 @@ poor connection environments.";
     [[NSMutableAttributedString alloc] initWithString:offlineModeLabelText];
   NSDictionary *attrs = @{ NSUnderlineStyleAttributeName : @(NSUnderlineStyleSingle),
                            NSForegroundColorAttributeName : [UIColor blueColor]};
-  [offlineModeLabelAttrText setAttributes:attrs range:NSMakeRange(0, 12)];
+  [offlineModeLabelAttrText setAttributes:attrs range:NSMakeRange(0, 12)];*/
   UISwitch *offlineModeSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
   [offlineModeSwitch setOn:[APP offlineMode]];
   [offlineModeSwitch bk_addEventHandler:^(id sender) {
     [APP setOfflineMode:offlineModeSwitch.on];
   } forControlEvents:UIControlEventTouchUpInside];
-  CGFloat labelLeftPadding = 8.0;
-  CGFloat switchPadding = 30.0;
-  UILabel *offlineModeLabel = [PEUIUtils labelWithAttributeText:offlineModeLabelAttrText
-                                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                                backgroundColor:[UIColor clearColor]
-                                                      textColor:[UIColor darkGrayColor]
-                                            verticalTextPadding:3.0
-                                                     fitToWidth:(_doesHaveAuthTokenPanel.frame.size.width - labelLeftPadding - offlineModeSwitch.frame.size.width - switchPadding)];
-  [offlineModeLabel setUserInteractionEnabled:YES];
+  //CGFloat switchPadding = 30.0;
+  /*UILabel *offlineModeDescLabel = [PEUIUtils labelWithAttributeText:offlineModeLabelAttrText
+                                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                    backgroundColor:[UIColor clearColor]
+                                                          textColor:[UIColor darkGrayColor]
+                                                verticalTextPadding:3.0
+                                                         fitToWidth:_doesHaveAuthTokenPanel.frame.size.width];  //(_doesHaveAuthTokenPanel.frame.size.width - labelLeftPadding - offlineModeSwitch.frame.size.width - switchPadding)];
+  [offlineModeDescLabel setUserInteractionEnabled:YES];
   UITapGestureRecognizer *tapGesture =
     [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(displayOfflineModeInfoAlert)];
-  [offlineModeLabel addGestureRecognizer:tapGesture];
-  UIView *offlineModeLabelPanelWithPad = [PEUIUtils leftPadView:offlineModeLabel padding:labelLeftPadding];
-  UIView *logoutMsgLabelWithPad = [self logoutPaddedMessage];
-  UIButton *logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
-  [logoutBtn setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
-  [[logoutBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
-  // place views onto panel
-  [PEUIUtils placeView:accountSettingsMsgPanel
-               atTopOf:_doesHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:80
-              hpadding:0.0];
-  [PEUIUtils placeView:accountSettingsBtn
-                 below:accountSettingsMsgPanel
-                  onto:_doesHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:7.0
-              hpadding:0.0];
-  UIView *divider = makeDivider(1.0);
-  [PEUIUtils placeView:divider below:accountSettingsBtn
-                  onto:_doesHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:20.0
-              hpadding:0.0];
-  [PEUIUtils placeView:offlineModeLabelPanelWithPad
-                 below:divider
-                  onto:_doesHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:20.0
-              hpadding:0.0];
-  [PEUIUtils placeView:offlineModeSwitch
-          toTheRightOf:offlineModeLabelPanelWithPad
-                  onto:_doesHaveAuthTokenPanel
-         withAlignment:PEUIVerticalAlignmentTypeMiddle
-              hpadding:switchPadding];
-  divider = makeDivider(1.0);
-  [PEUIUtils placeView:divider
-                 below:offlineModeLabelPanelWithPad
-                  onto:_doesHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:20.0
-              hpadding:0.0];
-  [PEUIUtils placeView:changelogMsgPanel
-                 below:divider
-                  onto:_doesHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:20.0
-              hpadding:0.0];
-  [PEUIUtils placeView:changelogBtn
-                 below:changelogMsgPanel
-                  onto:_doesHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:7.0
-              hpadding:0.0];
-  divider = makeDivider(1.0);
-  [PEUIUtils placeView:divider
-                 below:changelogBtn
-                  onto:_doesHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:20.0
-              hpadding:0.0];
-  [PEUIUtils placeView:logoutMsgLabelWithPad
-                 below:divider
-                  onto:_doesHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:20.0
-              hpadding:0.0];
-  [PEUIUtils placeView:logoutBtn
-                 below:logoutMsgLabelWithPad
-                  onto:_doesHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:7.0
-              hpadding:0.0];
-}
-
-- (void)makeDoesNotHaveAuthTokenPanel {
-  ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
-  _doesNotHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
-  NSString *message = @"\
-For security reasons, we need you to \
-re-authenticate against your remote \
-account.";
-  UIView *messagePanel = [self messagePanelWithMessage:message
-                                             iconImage:[UIImage unsyncable]
-                                        relativeToView:_doesNotHaveAuthTokenPanel];
-  UIButton *reauthenticateBtn = [_uitoolkit systemButtonMaker](@"Re-authenticate", nil, nil);
-  [[reauthenticateBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:reauthenticateBtn ofWidth:1.0 relativeTo:_doesNotHaveAuthTokenPanel];
-  [PEUIUtils addDisclosureIndicatorToButton:reauthenticateBtn];
-  [reauthenticateBtn bk_addEventHandler:^(id sender) {
-    [self presentReauthenticateScreen];
-  } forControlEvents:UIControlEventTouchUpInside];
-  UIView *logoutMsgLabelWithPad = [self logoutPaddedMessage];
-  UIButton *logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
-  [[logoutBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:_doesNotHaveAuthTokenPanel];    
-  UIView *exclamationView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
-  exclamationView.layer.cornerRadius = 10;
-  exclamationView.backgroundColor = [UIColor redColor];
-  [PEUIUtils placeView:[PEUIUtils labelWithKey:@"!"
-                                          font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                               backgroundColor:[UIColor clearColor]
-                                     textColor:[UIColor whiteColor]
-                           verticalTextPadding:0.0]
-            inMiddleOf:exclamationView
-         withAlignment:PEUIHorizontalAlignmentTypeCenter
-              hpadding:0.0];
-  [PEUIUtils placeView:exclamationView
-            inMiddleOf:reauthenticateBtn
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              hpadding:15.0];
+  [offlineModeDescLabel addGestureRecognizer:tapGesture];*/
+  UILabel *offlineModeDescLabel = [PEUIUtils labelWithKey:@"\
+Offline mode prevents upload attempts to \
+the server, keeping all saves local-only and very fast.\n\n\
+Enable offline mode if you are making \
+many saves and you want them done \
+instantly and you have a poor internet connection.  Later, you can bulk-upload your edits \
+from the 'Records' screen."
+                                                     font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                          backgroundColor:[UIColor clearColor]
+                                                textColor:[UIColor darkGrayColor]
+                                      verticalTextPadding:3.0
+                                               fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0];
+  UIView *offlineModeDescPanelWithPad = [PEUIUtils leftPadView:offlineModeDescLabel padding:labelLeftPadding];
   
-  // place views onto panel
-  [PEUIUtils placeView:messagePanel
-               atTopOf:_doesNotHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:100
-              hpadding:0];
-  [PEUIUtils placeView:reauthenticateBtn
-                 below:messagePanel
-                  onto:_doesNotHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:7.0
-              hpadding:0.0];
-  [PEUIUtils placeView:logoutMsgLabelWithPad
-            atBottomOf:_doesNotHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:175.0
-              hpadding:0.0];
-  [PEUIUtils placeView:logoutBtn
-                 below:logoutMsgLabelWithPad
-                  onto:_doesNotHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:7.0
-              hpadding:0.0];
+  UIView *offlineModeSwitchPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:_doesHaveAuthTokenPanel fixedHeight:40.0];
+  [offlineModeSwitchPanel setBackgroundColor:[UIColor whiteColor]];
+  UILabel *offlineModeLabel = [PEUIUtils labelWithKey:@"Offline mode"
+                                                 font:[UIFont systemFontOfSize:16.0]
+                                      backgroundColor:[UIColor clearColor]
+                                            textColor:[UIColor blackColor]
+                                  verticalTextPadding:3.0];
+  [PEUIUtils placeView:offlineModeLabel inMiddleOf:offlineModeSwitchPanel withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:15.0];
+  [PEUIUtils placeView:offlineModeSwitch inMiddleOf:offlineModeSwitchPanel withAlignment:PEUIHorizontalAlignmentTypeRight hpadding:15.0];
+  [PEUIUtils placeView:offlineModeSwitchPanel atTopOf:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:90.0 hpadding:0.0];
+  [PEUIUtils placeView:offlineModeDescPanelWithPad below:offlineModeSwitchPanel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:7.0 hpadding:0.0];
+  
+  [PEUIUtils placeView:changelogBtn atBottomOf:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:_doesHaveAuthTokenPanel.frame.size.height * 0.275 hpadding:0.0];
+  [PEUIUtils placeView:changelogMsgPanel below:changelogBtn onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:7.0 hpadding:0.0];
 }
 
 - (void)makeNotLoggedInPanel {
@@ -491,47 +343,24 @@ account.";
   NSString *message = @"\
 This action will permanently delete your \
 fuel purchase data from this device.";
-  UIView *messagePanel = [self messagePanelWithMessage:message
+  /*UIView *messagePanel = [self messagePanelWithMessage:message
                                              iconImage:[UIImage imageNamed:@"red-exclamation-icon"]
-                                        relativeToView:_notLoggedInPanel];
-  UIButton *loginBtn = [_uitoolkit systemButtonMaker](@"Log In", nil, nil);
-  [[loginBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:loginBtn ofWidth:1.0 relativeTo:_notLoggedInPanel];
-  [PEUIUtils addDisclosureIndicatorToButton:loginBtn];
-  [loginBtn bk_addEventHandler:^(id sender) {
-    [self presentLoginScreen];
-  } forControlEvents:UIControlEventTouchUpInside];
-  UIButton *createAccountBtn = [_uitoolkit systemButtonMaker](@"Create Account", nil, nil);
-  [[createAccountBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:createAccountBtn ofWidth:1.0 relativeTo:_notLoggedInPanel];
-  [PEUIUtils addDisclosureIndicatorToButton:createAccountBtn];
-  [createAccountBtn bk_addEventHandler:^(id sender) {
-    [self presentSetupRemoteAccountScreen];
-  } forControlEvents:UIControlEventTouchUpInside];
+                                        relativeToView:_notLoggedInPanel];*/
+  UIView *messagePanel = [self leftPaddingMessageWithText:message];
   UIButton *deleteAllDataBtn = buttonMaker(@"Delete All Data", self, @selector(clearAllData));
   [[deleteAllDataBtn layer] setCornerRadius:0.0];
   [deleteAllDataBtn setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+  [PEUIUtils placeView:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"red-exclamation-icon"]] inMiddleOf:deleteAllDataBtn withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:15.0];
   [PEUIUtils setFrameWidthOfView:deleteAllDataBtn ofWidth:1.0 relativeTo:_notLoggedInPanel];
   
   // place views onto panel
-  [PEUIUtils placeView:loginBtn
+  [PEUIUtils placeView:deleteAllDataBtn
                atTopOf:_notLoggedInPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:100
+              vpadding:90.0
               hpadding:0];
-  [PEUIUtils placeView:createAccountBtn
-                 below:loginBtn
-                  onto:_notLoggedInPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:10.0
-              hpadding:0.0];
   [PEUIUtils placeView:messagePanel
-            atBottomOf:_notLoggedInPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:175.0
-              hpadding:0.0];
-  [PEUIUtils placeView:deleteAllDataBtn
-                 below:messagePanel
+                 below:deleteAllDataBtn
                   onto:_notLoggedInPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:7.0

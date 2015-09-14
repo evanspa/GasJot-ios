@@ -10,6 +10,8 @@
 #import "FPEditsInProgressController.h"
 #import "FPSettingsController.h"
 #import "FPQuickActionMenuController.h"
+#import "FPRaisedCenterTabController.h"
+#import "FPRecordsController.h"
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/NSString+PEAdditions.h>
@@ -25,6 +27,8 @@
 #import "FPLogEnvLogComposite.h"
 #import "FPNames.h"
 #import "PELMUIUtils.h"
+#import "FPJotController.h"
+#import "FPAccountController.h"
 #import <FlatUIKit/UIColor+FlatUI.h>
 
 NSInteger const PAGINATION_PAGE_SIZE = 30;
@@ -2040,6 +2044,81 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
   };
 }
 
+- (FPAuthScreenMaker)newViewFuelPurchaseLogsScreenMaker {
+  return ^ UIViewController *(FPUser *user) {
+    void (^addFpLogAction)(PEListViewController *, PEItemAddedBlk) =
+    ^(PEListViewController *listViewCtrlr, PEItemAddedBlk itemAddedBlk) {
+      UIViewController *addFpLogScreen =
+      [self newAddFuelPurchaseLogScreenMakerWithBlk:itemAddedBlk
+                             defaultSelectedVehicle:[_coordDao defaultVehicleForNewFuelPurchaseLogForUser:user
+                                                                                                    error:[FPUtils localFetchErrorHandlerMaker]()]
+                         defaultSelectedFuelStation:[_coordDao defaultFuelStationForNewFuelPurchaseLogForUser:user
+                                                                                              currentLocation:[APP latestLocation]
+                                                                                                        error:[FPUtils localFetchErrorHandlerMaker]()]
+                                 listViewController:listViewCtrlr](user);
+      [listViewCtrlr presentViewController:[PEUIUtils navigationControllerWithController:addFpLogScreen navigationBarHidden:NO]
+                                  animated:YES
+                                completion:nil];
+    };
+    FPDetailViewMaker fpLogDetailViewMaker =
+    ^UIViewController *(PEListViewController *listViewCtrlr,
+                        id dataObject,
+                        NSIndexPath *indexPath,
+                        PEItemChangedBlk itemChangedBlk) {
+      return [self newFuelPurchaseLogDetailScreenMakerWithFpLog:dataObject
+                                                 fpLogIndexPath:indexPath
+                                                 itemChangedBlk:itemChangedBlk
+                                  listViewParentIsVehicleDetail:YES
+                              listViewParentIsFuelStationDetail:NO
+                                             listViewController:listViewCtrlr](user);
+    };
+    PEPageLoaderBlk pageLoader = ^ NSArray * (FPFuelPurchaseLog *lastFpLog) {
+      return [_coordDao fuelPurchaseLogsForUser:user
+                                       pageSize:PAGINATION_PAGE_SIZE
+                               beforeDateLogged:[lastFpLog purchasedAt]
+                                          error:[FPUtils localFetchErrorHandlerMaker]()];
+    };
+    NSArray *initialFpLogs = [_coordDao fuelPurchaseLogsForUser:user
+                                                       pageSize:PAGINATION_PAGE_SIZE
+                                                          error:[FPUtils localFetchErrorHandlerMaker]()];
+    PEDoesEntityBelongToListView doesEntityBelongToThisListViewBlk = ^BOOL(PELMMainSupport *entity) {
+      return YES;
+    };
+    PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
+      FPFuelPurchaseLog *fpLog = (FPFuelPurchaseLog *)entity;
+      return [_coordDao numFuelPurchaseLogsForUser:user
+                                         newerThan:[fpLog purchasedAt]
+                                             error:[FPUtils localFetchErrorHandlerMaker]()];
+    };
+    PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog) {return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];}
+                                                        alwaysTopifyTitleLabel:NO
+                                                                     uitoolkit:_uitoolkit
+                                                          subtitleLeftHPadding:15.0
+                                                                    isLoggedIn:[APP isUserLoggedIn]];
+    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
+                                                                    title:@"Gas Purchase Logs"
+                                                    isPaginatedDataSource:YES
+                                                          tableCellStyler:tableCellStyler
+                                                       itemSelectedAction:nil
+                                                      initialSelectedItem:nil
+                                                            addItemAction:addFpLogAction
+                                                           cellIdentifier:@"FPFuelPurchaseLogCell"
+                                                           initialObjects:initialFpLogs
+                                                               pageLoader:pageLoader
+                                                           heightForCells:52.0
+                                                          detailViewMaker:fpLogDetailViewMaker
+                                                                uitoolkit:_uitoolkit
+                                           doesEntityBelongToThisListView:doesEntityBelongToThisListViewBlk
+                                                     wouldBeIndexOfEntity:wouldBeIndexBlk
+                                                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      itemChildrenCounter:nil
+                                                      itemChildrenMsgsBlk:nil
+                                                              itemDeleter:[self fplogItemDeleterForUser:user]
+                                                         itemLocalDeleter:[self fplogItemLocalDeleter]];
+  };
+}
+
 - (FPAuthScreenMaker)newViewFuelPurchaseLogsScreenMakerForVehicleInCtx {
   return ^ UIViewController *(FPVehicle *vehicle) {
     FPUser *user = [_coordDao userForVehicle:vehicle error:[FPUtils localFetchErrorHandlerMaker]()];
@@ -2801,9 +2880,9 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
   };
 }
 
-#pragma mark - Quick Action Screen
+#pragma mark - Home Screen
 
-- (FPAuthScreenMakerWithTempNotification)newQuickActionMenuScreenMaker {
+- (FPAuthScreenMaker)newHomeScreenMaker {
   return ^ UIViewController *(FPUser *user) {
     return [[FPQuickActionMenuController alloc] initWithStoreCoordinator:_coordDao
                                                                     user:user
@@ -2812,13 +2891,77 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
   };
 }
 
+#pragma mark - Records Screen
+
+- (FPAuthScreenMaker)newRecordsScreenMaker {
+  return ^ UIViewController *(FPUser *user) {
+    return [[FPRecordsController alloc] initWithStoreCoordinator:_coordDao
+                                                            user:user
+                                                       uitoolkit:_uitoolkit
+                                                   screenToolkit:self];
+  };
+}
+
+#pragma mark - Jot Screen
+
+- (FPAuthScreenMaker)newJotScreenMaker {
+  return ^ UIViewController *(FPUser *user) {
+    return [[FPJotController alloc] initWithStoreCoordinator:_coordDao
+                                                        user:user
+                                                   uitoolkit:_uitoolkit
+                                               screenToolkit:self];
+  };
+}
+
+#pragma mark - Account Screen
+
+- (FPAuthScreenMaker)newAccountScreenMaker {
+  return ^ UIViewController *(FPUser *user) {
+    return [[FPAccountController alloc] initWithStoreCoordinator:_coordDao
+                                                            user:user
+                                                       uitoolkit:_uitoolkit
+                                                   screenToolkit:self];
+  };
+}
+
 #pragma mark - Tab-bar Authenticated Landing Screen
 
 - (FPAuthScreenMaker)newTabBarHomeLandingScreenMakerIsLoggedIn:(BOOL)isLoggedIn {
   return ^ UIViewController *(FPUser *user) {
-    UIViewController *quickActionMenuCtrl = [self newQuickActionMenuScreenMaker](user);
-    UIViewController *settingsMenuCtrl = [self newViewSettingsScreenMaker](user);
-    UITabBarController *tabBarCtrl =
+    UIViewController *homeController = [self newHomeScreenMaker](user);
+    UIViewController *recordsController = [self newRecordsScreenMaker](user);
+    UIViewController *jotController = [self newJotScreenMaker](user);
+    UIViewController *settingsController = [self newViewSettingsScreenMaker](user);
+    UIViewController *accountController = [self newAccountScreenMaker](user);
+    FPRaisedCenterTabController *tabBarCtrl = [[FPRaisedCenterTabController alloc] initWithNibName:nil bundle:nil];
+    jotController.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"" image:nil tag:0];
+    NSArray *controllers = @[[PEUIUtils navControllerWithRootController:homeController
+                                                    navigationBarHidden:NO
+                                                        tabBarItemTitle:@"Home"
+                                                        tabBarItemImage:[UIImage imageNamed:@"tab-home"]
+                                                tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-home"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]],
+                             [PEUIUtils navControllerWithRootController:recordsController
+                                                    navigationBarHidden:NO
+                                                        tabBarItemTitle:@"Records"
+                                                        tabBarItemImage:[UIImage imageNamed:@"tab-records"]
+                                                tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-records"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]],
+                             jotController,
+                             [PEUIUtils navControllerWithRootController:settingsController
+                                                    navigationBarHidden:NO
+                                                        tabBarItemTitle:@"Settings"
+                                                        tabBarItemImage:[UIImage imageNamed:@"tab-settings"]
+                                                tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-settings"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]],
+                             [PEUIUtils navControllerWithRootController:accountController
+                                                    navigationBarHidden:NO
+                                                        tabBarItemTitle:@"Account"
+                                                        tabBarItemImage:[UIImage imageNamed:@"tab-account"]
+                                                tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-account"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]]
+                             ];
+    [tabBarCtrl addCenterButtonWithImage:[UIImage imageNamed:@"tab-jot"] highlightImage:nil];
+    [tabBarCtrl setViewControllers:controllers];
+    [tabBarCtrl setSelectedIndex:0];
+    
+    /*UITabBarController *tabBarCtrl =
     [[UITabBarController alloc] initWithNibName:nil bundle:nil];
     NSMutableArray *controllers = [NSMutableArray array];
     [controllers addObject:[PEUIUtils navControllerWithRootController:quickActionMenuCtrl
@@ -2835,7 +2978,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       [controllers addObject:[self unsynedEditsViewControllerForUser:user]];
     }
     [tabBarCtrl setViewControllers:controllers animated:YES];
-    [tabBarCtrl setSelectedIndex:0];
+    [tabBarCtrl setSelectedIndex:0];*/
     return tabBarCtrl;
   };
 }

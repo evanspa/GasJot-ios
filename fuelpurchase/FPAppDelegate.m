@@ -80,6 +80,16 @@ NSString * const FPTimeoutForCoordDaoMainThreadOpsKey    = @"FP timeout for main
 NSString * const FPTimeIntervalForFlushToRemoteMasterKey = @"FP time interval for flush to remote master";
 NSString * const FPIsUserLoggedInIndicatorKey            = @"FP is user logged in indicator";
 
+// Tab-bar controller indexes
+typedef NS_ENUM(NSInteger, FPAppTabBarIndex) {
+  FPAppTabBarIndexHome,
+  FPAppTabBarIndexRecords,
+  FPAppTabBarIndexJot,
+  FPAppTabBarIndexSettings,
+  FPAppTabBarIndexProfile
+};
+
+
 // NSUserDefaults keys
 NSString * const FPChangelogUpdatedAtUserDefaultsKey = @"FP changelog updated at";
 
@@ -213,7 +223,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
       [[self window] setRootViewController:_tabBarController];
     }
     if ([self isUserLoggedIn] && ![self doesUserHaveValidAuthToken]) {
-      [_tabBarController.tabBar.items[1] setBadgeValue:@"1"];
+      [_tabBarController.tabBar.items[FPAppTabBarIndexSettings] setBadgeValue:@"!"];
     }
     [_tabBarController setDelegate:self];
     [self refreshTabs];
@@ -254,36 +264,40 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 - (void)refreshTabs {
   dispatch_async(dispatch_get_main_queue(), ^{
-    void (^clearBadge)(void) = ^{
-      [_tabBarController.tabBar.items[2] setBadgeValue:nil];
+    void (^clearEipsBadge)(void) = ^{
+      [_tabBarController.tabBar.items[FPAppTabBarIndexRecords] setBadgeValue:nil];
     };
-    NSArray *controllers = [_tabBarController viewControllers];
+    //NSArray *controllers = [_tabBarController viewControllers];
     if ([self isUserLoggedIn]) {
-      if ([controllers count] == 2) {
+      /*if ([controllers count] == 2) {
         // need to add 'unsynced edits' controller
-        [_tabBarController setViewControllers:@[controllers[0], controllers[1], [_screenToolkit unsynedEditsViewControllerForUser:_user]]
+        [_tabBarController setViewControllers:@[controllers[FPAppTabBarIndexHome],
+                                                controllers[FPAppTabBarIndexSettings],
+                                                [_screenToolkit unsynedEditsViewControllerForUser:_user]]
                                      animated:YES];
-      }
+      }*/
       if (_user) {
         NSInteger totalNumUnsyncedEdits = [_coordDao numUnsyncedVehiclesForUser:_user] +
         [_coordDao numUnsyncedFuelStationsForUser:_user] +
         [_coordDao numUnsyncedFuelPurchaseLogsForUser:_user] +
         [_coordDao numUnsyncedEnvironmentLogsForUser:_user];
         if (totalNumUnsyncedEdits > 0) {
-          [_tabBarController.tabBar.items[2] setBadgeValue:[NSString stringWithFormat:@"%ld", (long)totalNumUnsyncedEdits]];
+          [_tabBarController.tabBar.items[FPAppTabBarIndexRecords] setBadgeValue:[NSString stringWithFormat:@"%ld", (long)totalNumUnsyncedEdits]];
         } else {
-          clearBadge();
+          clearEipsBadge();
         }
       } else {
-        clearBadge();
+        clearEipsBadge();
       }
     } else {
-      [_tabBarController.tabBar.items[1] setBadgeValue:nil];
-      if ([controllers count] == 3) {
+      [_tabBarController.tabBar.items[FPAppTabBarIndexSettings] setBadgeValue:nil];
+      clearEipsBadge();
+      /*if ([controllers count] == 3) {
         // need to remove 'unsynced edits' controller
-        [_tabBarController setViewControllers:@[controllers[0], controllers[1]]
+        [_tabBarController setViewControllers:@[controllers[FPAppTabBarIndexHome],
+                                                controllers[FPAppTabBarIndexSettings]]
                                      animated:YES];
-      }
+      }*/
     }
   });
 }
@@ -291,12 +305,12 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 #pragma mark - Resetting the user interface and tab bar delegate
 
 - (void)resetUserInterface {
-  NSArray *controllers = [_tabBarController viewControllers];
-  [controllers[0] popToRootViewControllerAnimated:NO];
+  /*NSArray *controllers = [_tabBarController viewControllers];
+  [controllers[FPAppTabBarIndexHome] popToRootViewControllerAnimated:NO];
   if ([controllers count] == 3) {
-    [controllers[2] popToRootViewControllerAnimated:NO];
+    [controllers[FPAppTabBarIndexEditsInProgress] popToRootViewControllerAnimated:NO];
   }
-  [self refreshTabs];
+  [self refreshTabs];*/
 }
 
 - (BOOL)tabBarController:(UITabBarController *)tabBarController
@@ -306,22 +320,28 @@ shouldSelectViewController:(UIViewController *)viewController {
 
 - (void)tabBarController:(UITabBarController *)tabBarController
  didSelectViewController:(UIViewController *)viewController {
-  NSArray *controllers = [_tabBarController viewControllers];
-  if ([controllers count] == 3) {
+  //NSArray *controllers = [_tabBarController viewControllers];
+  //if ([controllers count] == 3) { (no need for this check anymore since we're always going to display the same tabs)
+  
+  /* meh - I'm not sure if I even need this anymore given my new tab layout stuff
+  
     // the following ensures that an entity cannot be displayed in 2 different list
     // or add/view/edit controllers simultaneously (i.e., a controller rooted from
     // the quick action screen, or a controller root from the unsynced edits screen).
     UINavigationController *navController = (UINavigationController *)viewController;
     if ([[navController topViewController] isKindOfClass:[FPQuickActionMenuController class]]) {
-      [controllers[2] popToRootViewControllerAnimated:NO];
+      [controllers[FPAppTabBarIndexEditsInProgress] popToRootViewControllerAnimated:NO];
     } else if ([[navController topViewController] isKindOfClass:[FPEditsInProgressController class]]) {
       // there's no need to pop to root if the unsynced-edits root is just the
       // info-message screen that there aren't any unsynced edits
       if ([_coordDao totalNumUnsyncedEntitiesForUser:_user] > 0) {
-        [controllers[0] popToRootViewControllerAnimated:NO];
+        [controllers[FPAppTabBarIndexHome] popToRootViewControllerAnimated:NO];
       }
     }
-  }
+   
+   */
+  
+  //}
 }
 
 #pragma mark - Initialization helpers
@@ -451,7 +471,7 @@ shouldSelectViewController:(UIViewController *)viewController {
 keychain under key: [%@].  Is main thread? %@", authToken, userGlobalIdentifier,
              [PEUtils yesNoFromBool:[NSThread isMainThread]]);
   [_keychainStore setString:authToken forKey:userGlobalIdentifier];
-  [_tabBarController.tabBar.items[1] setBadgeValue:nil];
+  [_tabBarController.tabBar.items[FPAppTabBarIndexSettings] setBadgeValue:nil];
 
   //[_keychainStore removeItemForKey:FPAuthenticationRequiredAtKey];
   // FYI, the reason we don't set the authToken on our _coordDao object is because
@@ -465,7 +485,7 @@ I'm going to insert this knowledge into the keychian so the app knows it's curre
 in an unauthenticated state.  Is main thread?  %@", [PEUtils yesNoFromBool:[NSThread isMainThread]]);
   [_keychainStore removeAllItems];
   if ([self isUserLoggedIn]) {
-    [_tabBarController.tabBar.items[1] setBadgeValue:@"!"];
+    [_tabBarController.tabBar.items[FPAppTabBarIndexSettings] setBadgeValue:@"!"];
   }
 }
 

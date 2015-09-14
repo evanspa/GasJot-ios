@@ -45,6 +45,13 @@
 		CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = CAD8AE501B2B291000276F4F /* PELMUIUtils.m */; };
 		CAFC84651BA27EAB00FAEB66 /* FPSplashController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84641BA27EAB00FAEB66 /* FPSplashController.m */; };
 		CAFC84691BA363A600FAEB66 /* iCarousel.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84681BA363A600FAEB66 /* iCarousel.m */; };
+		CAFC846E1BA64B5A00FAEB66 /* FPHomeScreenController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC846D1BA64B5A00FAEB66 /* FPHomeScreenController.m */; };
+		CAFC84721BA6691000FAEB66 /* FPRaisedCenterTabController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84711BA6691000FAEB66 /* FPRaisedCenterTabController.m */; };
+		CAFC84761BA66D3900FAEB66 /* FPRecordsController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84751BA66D3900FAEB66 /* FPRecordsController.m */; };
+		CAFC847A1BA6ECCA00FAEB66 /* FPJotController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84791BA6ECCA00FAEB66 /* FPJotController.m */; };
+		CAFC847E1BA71FD300FAEB66 /* FPAccountController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC847D1BA71FD300FAEB66 /* FPAccountController.m */; };
+		CAFC84821BA7479C00FAEB66 /* FPUIUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84811BA7479C00FAEB66 /* FPUIUtils.m */; };
+		CAFC84871BA749FB00FAEB66 /* UIColor+FPAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84861BA749FB00FAEB66 /* UIColor+FPAdditions.m */; };
 		F17D7730E485443DAEE57677 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 91349E0025D9467DBE585F0F /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -131,6 +138,20 @@
 		CAFC84641BA27EAB00FAEB66 /* FPSplashController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPSplashController.m; sourceTree = "<group>"; };
 		CAFC84671BA363A600FAEB66 /* iCarousel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iCarousel.h; sourceTree = "<group>"; };
 		CAFC84681BA363A600FAEB66 /* iCarousel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iCarousel.m; sourceTree = "<group>"; };
+		CAFC846C1BA64B5A00FAEB66 /* FPHomeScreenController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPHomeScreenController.h; sourceTree = "<group>"; };
+		CAFC846D1BA64B5A00FAEB66 /* FPHomeScreenController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPHomeScreenController.m; sourceTree = "<group>"; };
+		CAFC84701BA6691000FAEB66 /* FPRaisedCenterTabController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPRaisedCenterTabController.h; sourceTree = "<group>"; };
+		CAFC84711BA6691000FAEB66 /* FPRaisedCenterTabController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPRaisedCenterTabController.m; sourceTree = "<group>"; };
+		CAFC84741BA66D3900FAEB66 /* FPRecordsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPRecordsController.h; sourceTree = "<group>"; };
+		CAFC84751BA66D3900FAEB66 /* FPRecordsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPRecordsController.m; sourceTree = "<group>"; };
+		CAFC84781BA6ECCA00FAEB66 /* FPJotController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPJotController.h; sourceTree = "<group>"; };
+		CAFC84791BA6ECCA00FAEB66 /* FPJotController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPJotController.m; sourceTree = "<group>"; };
+		CAFC847C1BA71FD300FAEB66 /* FPAccountController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPAccountController.h; sourceTree = "<group>"; };
+		CAFC847D1BA71FD300FAEB66 /* FPAccountController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPAccountController.m; sourceTree = "<group>"; };
+		CAFC84801BA7479C00FAEB66 /* FPUIUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPUIUtils.h; sourceTree = "<group>"; };
+		CAFC84811BA7479C00FAEB66 /* FPUIUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPUIUtils.m; sourceTree = "<group>"; };
+		CAFC84851BA749FB00FAEB66 /* UIColor+FPAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+FPAdditions.h"; sourceTree = "<group>"; };
+		CAFC84861BA749FB00FAEB66 /* UIColor+FPAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+FPAdditions.m"; sourceTree = "<group>"; };
 		E12E20B44758C744FA39A49C /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -277,7 +298,11 @@
 		18AB99FB17F6832C002A8A69 /* Custom Screens */ = {
 			isa = PBXGroup;
 			children = (
-				CAFC84621BA27E8000FAEB66 /* Splash */,
+				CAFC847B1BA71FB700FAEB66 /* Account Scren */,
+				CAFC84771BA6ECB600FAEB66 /* Jot Screen */,
+				CAFC84731BA66D0600FAEB66 /* Records Screen */,
+				CAFC846B1BA6499A00FAEB66 /* Home Screen */,
+				CAFC84621BA27E8000FAEB66 /* Splash Screen */,
 				CAB5E94D1B4B007E00144072 /* Re-authenticate */,
 				CA7D5A2B1B384FEE00433581 /* Account Login */,
 				CA7D5A2A1B384FDE00433581 /* Account Creation */,
@@ -444,6 +469,9 @@
 		CA7D5A281B384F4000433581 /* User Interface */ = {
 			isa = PBXGroup;
 			children = (
+				CAFC84831BA749DD00FAEB66 /* Categories */,
+				CAFC847F1BA7478B00FAEB66 /* GUI Utils */,
+				CAFC846F1BA668B700FAEB66 /* Raised Center Tab Controller */,
 				CAFC84661BA3637000FAEB66 /* iCarousel */,
 				18456CE719D39D840023A2A7 /* Panel Toolkit */,
 				18CF522F19C9D9990020FC94 /* Screen Toolkit */,
@@ -497,13 +525,13 @@
 			name = "Local Data UI Utils";
 			sourceTree = "<group>";
 		};
-		CAFC84621BA27E8000FAEB66 /* Splash */ = {
+		CAFC84621BA27E8000FAEB66 /* Splash Screen */ = {
 			isa = PBXGroup;
 			children = (
 				CAFC84631BA27EAB00FAEB66 /* FPSplashController.h */,
 				CAFC84641BA27EAB00FAEB66 /* FPSplashController.m */,
 			);
-			name = Splash;
+			name = "Splash Screen";
 			sourceTree = "<group>";
 		};
 		CAFC84661BA3637000FAEB66 /* iCarousel */ = {
@@ -513,6 +541,77 @@
 				CAFC84681BA363A600FAEB66 /* iCarousel.m */,
 			);
 			name = iCarousel;
+			sourceTree = "<group>";
+		};
+		CAFC846B1BA6499A00FAEB66 /* Home Screen */ = {
+			isa = PBXGroup;
+			children = (
+				CAFC846C1BA64B5A00FAEB66 /* FPHomeScreenController.h */,
+				CAFC846D1BA64B5A00FAEB66 /* FPHomeScreenController.m */,
+			);
+			name = "Home Screen";
+			sourceTree = "<group>";
+		};
+		CAFC846F1BA668B700FAEB66 /* Raised Center Tab Controller */ = {
+			isa = PBXGroup;
+			children = (
+				CAFC84701BA6691000FAEB66 /* FPRaisedCenterTabController.h */,
+				CAFC84711BA6691000FAEB66 /* FPRaisedCenterTabController.m */,
+			);
+			name = "Raised Center Tab Controller";
+			sourceTree = "<group>";
+		};
+		CAFC84731BA66D0600FAEB66 /* Records Screen */ = {
+			isa = PBXGroup;
+			children = (
+				CAFC84741BA66D3900FAEB66 /* FPRecordsController.h */,
+				CAFC84751BA66D3900FAEB66 /* FPRecordsController.m */,
+			);
+			name = "Records Screen";
+			sourceTree = "<group>";
+		};
+		CAFC84771BA6ECB600FAEB66 /* Jot Screen */ = {
+			isa = PBXGroup;
+			children = (
+				CAFC84781BA6ECCA00FAEB66 /* FPJotController.h */,
+				CAFC84791BA6ECCA00FAEB66 /* FPJotController.m */,
+			);
+			name = "Jot Screen";
+			sourceTree = "<group>";
+		};
+		CAFC847B1BA71FB700FAEB66 /* Account Scren */ = {
+			isa = PBXGroup;
+			children = (
+				CAFC847C1BA71FD300FAEB66 /* FPAccountController.h */,
+				CAFC847D1BA71FD300FAEB66 /* FPAccountController.m */,
+			);
+			name = "Account Scren";
+			sourceTree = "<group>";
+		};
+		CAFC847F1BA7478B00FAEB66 /* GUI Utils */ = {
+			isa = PBXGroup;
+			children = (
+				CAFC84801BA7479C00FAEB66 /* FPUIUtils.h */,
+				CAFC84811BA7479C00FAEB66 /* FPUIUtils.m */,
+			);
+			name = "GUI Utils";
+			sourceTree = "<group>";
+		};
+		CAFC84831BA749DD00FAEB66 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				CAFC84841BA749E400FAEB66 /* UIColor */,
+			);
+			name = Categories;
+			sourceTree = "<group>";
+		};
+		CAFC84841BA749E400FAEB66 /* UIColor */ = {
+			isa = PBXGroup;
+			children = (
+				CAFC84851BA749FB00FAEB66 /* UIColor+FPAdditions.h */,
+				CAFC84861BA749FB00FAEB66 /* UIColor+FPAdditions.m */,
+			);
+			name = UIColor;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -625,6 +724,7 @@
 			files = (
 				180EDA3019C7C2D200C782A6 /* FPSettingsController.m in Sources */,
 				186ADB3219E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.m in Sources */,
+				CAFC84721BA6691000FAEB66 /* FPRaisedCenterTabController.m in Sources */,
 				CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */,
 				CA90F4241B45AB7F005FAB35 /* PEServerSyncActionSheet.m in Sources */,
 				18B17D5719DAE696001D2BF6 /* PEAddViewEditController.m in Sources */,
@@ -635,8 +735,13 @@
 				18CC2CF817F680AC009DF2CE /* FPNames.m in Sources */,
 				18EC863019EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m in Sources */,
 				CAFC84691BA363A600FAEB66 /* iCarousel.m in Sources */,
+				CAFC84871BA749FB00FAEB66 /* UIColor+FPAdditions.m in Sources */,
+				CAFC846E1BA64B5A00FAEB66 /* FPHomeScreenController.m in Sources */,
 				CA7D5A271B383F5A00433581 /* FPAppNotificationNames.m in Sources */,
+				CAFC847A1BA6ECCA00FAEB66 /* FPJotController.m in Sources */,
 				CAFC84651BA27EAB00FAEB66 /* FPSplashController.m in Sources */,
+				CAFC847E1BA71FD300FAEB66 /* FPAccountController.m in Sources */,
+				CAFC84761BA66D3900FAEB66 /* FPRecordsController.m in Sources */,
 				18CF523219C9D9C90020FC94 /* FPScreenToolkit.m in Sources */,
 				18CC2CFA17F680AC009DF2CE /* FPCreateAccountController.m in Sources */,
 				CA7D5A2E1B3851E200433581 /* FPAccountLoginController.m in Sources */,
@@ -648,6 +753,7 @@
 				18AC0722181ACC8C001FF24E /* FPLogging.m in Sources */,
 				1865B7D919FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m in Sources */,
 				18C3CD7419DC3B440092C002 /* FPPanelToolkit.m in Sources */,
+				CAFC84821BA7479C00FAEB66 /* FPUIUtils.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

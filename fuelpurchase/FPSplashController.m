@@ -10,6 +10,7 @@
 #import "FPNames.h"
 #import "FPUtils.h"
 #import "FPCreateAccountController.h"
+#import "UIColor+FPAdditions.h"
 
 @implementation FPSplashController {
   FPCoordinatorDao *_coordDao;
@@ -139,11 +140,7 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  UIColor *bgcolor = [UIColor colorWithRed:(0x27 / 255.0)
-                                     green:(0x5D / 255.0)
-                                      blue:(0x90 / 255.0)
-                                     alpha:1.0];
-  [self.view setBackgroundColor:bgcolor];
+  [self.view setBackgroundColor:[UIColor fpAppBlue]];
   iCarousel *carousel = [[iCarousel alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
   [carousel setDataSource:self];
   [carousel setDelegate:self];
