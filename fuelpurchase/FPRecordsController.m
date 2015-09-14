@@ -72,7 +72,7 @@ From here you can drill into all of your data records."
   [_vehiclesBtn removeFromSuperview];
   [_fuelstationsBtn removeFromSuperview];
   [_fplogsBtn removeFromSuperview];
-//  [_envlogsBtn removeFromSuperview];
+  [_envlogsBtn removeFromSuperview];
   _vehiclesBtn = [FPUIUtils buttonWithLabel:@"Vehicles"
                                    badgeNum:[_coordDao numVehiclesForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
                                  badgeColor:[UIColor fpAppBlue]
@@ -109,6 +109,18 @@ From here you can drill into all of your data records."
                                   }
                                 uitoolkit:_uitoolkit
                            relativeToView:self.view];
+  _envlogsBtn = [FPUIUtils buttonWithLabel:@"Odometer logs"
+                                  badgeNum:[_coordDao numEnvironmentLogsForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
+                                badgeColor:[UIColor fpAppBlue]
+                            badgeTextColor:[UIColor whiteColor]
+                         addDisclosureIcon:YES
+                                   handler:^{
+                                    [PEUIUtils displayController:[_screenToolkit newViewEnvironmentLogsScreenMaker](_user)
+                                                  fromController:self
+                                                        animated:YES];
+                                  }
+                                 uitoolkit:_uitoolkit
+                            relativeToView:self.view];
   [PEUIUtils placeView:_vehiclesBtn
                  below:_msgPanel
                   onto:self.view
@@ -127,10 +139,18 @@ From here you can drill into all of your data records."
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:10.0
               hpadding:0.0];
+  [PEUIUtils placeView:_envlogsBtn
+                 below:_fplogsBtn
+                  onto:self.view
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:10.0
+              hpadding:0.0];
+  
+  [_unsyncedEditsBtn removeFromSuperview];
   if ([APP isUserLoggedIn]) {
-    [_unsyncedEditsBtn removeFromSuperview];
-    _unsyncedEditsBtn = [self unsyncedEditsButton];
-    if (_unsyncedEditsBtn) {
+    NSInteger numUnsynced = [_coordDao totalNumUnsyncedEntitiesForUser:_user];
+    if (numUnsynced > 0) {
+      _unsyncedEditsBtn = [self unsyncedEditsButtonWithBadgeNum:numUnsynced];
       [PEUIUtils placeView:_unsyncedEditsBtn
                 atBottomOf:self.view
              withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -138,14 +158,13 @@ From here you can drill into all of your data records."
                   hpadding:0.0];
     }
   }
-  
 }
 
 #pragma mark - Helpers
 
-- (UIButton *)unsyncedEditsButton {
+- (UIButton *)unsyncedEditsButtonWithBadgeNum:(NSInteger)numUnsynced {
   return [FPUIUtils buttonWithLabel:@"Unsynced Edits"
-                           badgeNum:[_coordDao totalNumUnsyncedEntitiesForUser:_user]
+                           badgeNum:numUnsynced
                          badgeColor:[UIColor redColor]
                      badgeTextColor:[UIColor whiteColor]
                   addDisclosureIcon:YES

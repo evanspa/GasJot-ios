@@ -1520,11 +1520,11 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       float savePreFillupEnvLogPercentComplete = [selectionsAndPercentArray[5] floatValue];
       float savePostFillupEnvLogPercentComplete = [selectionsAndPercentArray[6] floatValue];
       
-      NSString *mainMsgFragment = @"uploading fuel purchase log";
+      NSString *mainMsgFragment = @"uploading gas log";
       if (savePreFillupEnvLogPercentComplete || savePostFillupEnvLogPercentComplete) {
-        mainMsgFragment = @"uploading fuel purchase\nand environment logs";
+        mainMsgFragment = @"uploading gas\nand odometer logs";
       }
-      NSString *recordTitle = @"Fuel purchase log";
+      NSString *recordTitle = @"Gas log";
       /*BOOL doSyncImmediate = [APP doesUserHaveValidAuthToken];
       if (doSyncImmediate) {*/
         [_coordDao saveNewAndSyncImmediateFuelPurchaseLog:[fpEnvLogComposite fpLog]
@@ -1643,7 +1643,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                            defaultPickedLogDate:[NSDate date]]
                      entityToPanelBinder:[_panelToolkit fpEnvLogCompositeToFpEnvLogCompositePanelBinder]
                      panelToEntityBinder:[_panelToolkit fpEnvLogCompositeFormPanelToFpEnvLogCompositeBinder]
-                             entityTitle:@"Fuel Purchase Log"
+                             entityTitle:@"Gas Log"
                        entityAddCanceler:addCanceler
                              entityMaker:[_panelToolkit fpEnvLogCompositeMaker]
                      newEntitySaverLocal:newFuelPurchaseLogSaverLocal
@@ -1721,8 +1721,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                 PESyncConflictBlk conflictBlk,
                                                                 PESyncAuthRequiredBlk authReqdBlk,
                                                                 PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading fuel purchase log";
-      NSString *recordTitle = @"Fuel purchase log";
+      NSString *mainMsgFragment = @"uploading gas log";
+      NSString *recordTitle = @"Gas log";
       [_coordDao markAsDoneEditingAndSyncFuelPurchaseLogImmediate:fpLog
                                                           forUser:user
                                               notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
@@ -1746,8 +1746,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                PESyncConflictBlk conflictBlk,
                                PESyncAuthRequiredBlk authReqdBlk,
                                PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading fuel purchase log";
-      NSString *recordTitle = @"Fuel purchase log";
+      NSString *mainMsgFragment = @"uploading gas log";
+      NSString *recordTitle = @"Gas log";
       [_coordDao flushUnsyncedChangesToFuelPurchaseLog:fpLog
                                                forUser:user
                                    notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
@@ -1935,8 +1935,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                        PESyncRetryAfterBlk retryAfterBlk,
                                        PESyncServerTempErrorBlk tempErrBlk,
                                        PESyncAuthRequiredBlk authReqdBlk) {
-      NSString *mainMsgFragment = @"fetching fuel purchase log";
-      NSString *recordTitle = @"Fuel purchase log";
+      NSString *mainMsgFragment = @"fetching gas log";
+      NSString *recordTitle = @"Gas log";
       float percentOfFetching = 1.0;
       [_coordDao fetchFuelPurchaseLogWithGlobalId:[fplog globalIdentifier]
                                   ifModifiedSince:[fplog updatedAt]
@@ -1979,7 +1979,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                   entityViewPanelMaker:[_panelToolkit fplogViewPanelMakerWithUser:user]
                    entityToPanelBinder:[_panelToolkit fplogToFplogPanelBinder]
                    panelToEntityBinder:[_panelToolkit fplogFormPanelToFplogBinder]
-                           entityTitle:@"Fuel Purchase Log"
+                           entityTitle:@"Gas Log"
                   panelEnablerDisabler:[_panelToolkit fplogFormPanelEnablerDisabler]
                      entityAddCanceler:nil
                     entityEditPreparer:fpLogEditPreparer
@@ -2021,8 +2021,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                  PESyncServerErrorBlk errBlk,
                                  PESyncConflictBlk conflictBlk,
                                  PESyncAuthRequiredBlk authReqdBlk) {
-    NSString *mainMsgFragment = @"deleting fuel purchase log";
-    NSString *recordTitle = @"Fuel purchase log";
+    NSString *mainMsgFragment = @"deleting gas log";
+    NSString *recordTitle = @"Gas log";
     [_coordDao deleteFuelPurchaseLog:fplog
                              forUser:user
                  notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
@@ -2176,7 +2176,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                     isLoggedIn:[APP isUserLoggedIn]];
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
-                                        title:@"Fuel Purchase Logs"
+                                        title:@"Gas Logs"
                         isPaginatedDataSource:YES
                               tableCellStyler:tableCellStyler
                            itemSelectedAction:nil
@@ -2254,7 +2254,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                     isLoggedIn:[APP isUserLoggedIn]];
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
-                                        title:@"Fuel Purchase Logs"
+                                        title:@"Gas Logs"
                         isPaginatedDataSource:YES
                               tableCellStyler:tableCellStyler
                            itemSelectedAction:nil
@@ -2304,7 +2304,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                     isLoggedIn:[APP isUserLoggedIn]];
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
-                                        title:@"Unsynced FP Logs"
+                                        title:@"Unsynced Gas Logs"
                         isPaginatedDataSource:NO
                               tableCellStyler:tableCellStyler
                            itemSelectedAction:nil
@@ -2374,8 +2374,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       FPEnvLogVehicleAndDateDataSourceDelegate *ds =
         (FPEnvLogVehicleAndDateDataSourceDelegate *)[(UITableView *)[entityPanel viewWithTag:FPEnvLogTagVehicleAndDate] dataSource];
       FPVehicle *selectedVehicle = [ds selectedVehicle];
-      NSString *mainMsgFragment = @"uploading environment log";
-      NSString *recordTitle = @"Environment log";
+      NSString *mainMsgFragment = @"uploading odometer log";
+      NSString *recordTitle = @"Odometer log";
       [_coordDao saveNewAndSyncImmediateEnvironmentLog:envLog
                                                forUser:user
                                                vehicle:selectedVehicle
@@ -2418,7 +2418,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                  defaultPickedLogDate:[NSDate date]]
                       entityToPanelBinder:[_panelToolkit envlogToEnvlogPanelBinder]
                       panelToEntityBinder:[_panelToolkit envlogFormPanelToEnvlogBinder]
-                              entityTitle:@"Environment Log"
+                              entityTitle:@"Odometer Log"
                         entityAddCanceler:addCanceler
                               entityMaker:[_panelToolkit envlogMaker]
                       newEntitySaverLocal:newEnvironmentLogSaverLocal
@@ -2488,8 +2488,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                PESyncConflictBlk conflictBlk,
                                                                PESyncAuthRequiredBlk authReqdBlk,
                                                                PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading environment log";
-      NSString *recordTitle = @"Environment log";
+      NSString *mainMsgFragment = @"uploading odometer log";
+      NSString *recordTitle = @"Odometer log";
       [_coordDao markAsDoneEditingAndSyncEnvironmentLogImmediate:envLog
                                                          forUser:user
                                              notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
@@ -2512,8 +2512,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                PESyncConflictBlk conflictBlk,
                                PESyncAuthRequiredBlk authReqdBlk,
                                PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading environment log";
-      NSString *recordTitle = @"Environment log";
+      NSString *mainMsgFragment = @"uploading odometer log";
+      NSString *recordTitle = @"Odometer log";
       [_coordDao flushUnsyncedChangesToEnvironmentLog:envLog
                                               forUser:user
                                   notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
@@ -2657,8 +2657,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                        PESyncRetryAfterBlk retryAfterBlk,
                                        PESyncServerTempErrorBlk tempErrBlk,
                                        PESyncAuthRequiredBlk authReqdBlk) {
-      NSString *mainMsgFragment = @"fetching environment log";
-      NSString *recordTitle = @"Environment log";
+      NSString *mainMsgFragment = @"fetching odometer log";
+      NSString *recordTitle = @"Odometer log";
       float percentOfFetching = 1.0;
       [_coordDao fetchEnvironmentLogWithGlobalId:[envLog globalIdentifier]
                                  ifModifiedSince:[envLog updatedAt]
@@ -2692,7 +2692,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                          entityViewPanelMaker:[_panelToolkit envlogViewPanelMakerWithUser:user]
                                           entityToPanelBinder:[_panelToolkit envlogToEnvlogPanelBinder]
                                           panelToEntityBinder:[_panelToolkit envlogFormPanelToEnvlogBinder]
-                                                  entityTitle:@"Environment Log"
+                                                  entityTitle:@"Odometer Log"
                                          panelEnablerDisabler:[_panelToolkit envlogFormPanelEnablerDisabler]
                                             entityAddCanceler:nil
                                            entityEditPreparer:envLogEditPreparer
@@ -2734,8 +2734,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                  PESyncServerErrorBlk errBlk,
                                  PESyncConflictBlk conflictBlk,
                                  PESyncAuthRequiredBlk authReqdBlk) {
-    NSString *mainMsgFragment = @"deleting environment log";
-    NSString *recordTitle = @"Environment log";
+    NSString *mainMsgFragment = @"deleting odometer log";
+    NSString *recordTitle = @"Odometer log";
     [_coordDao deleteEnvironmentLog:envlog
                             forUser:user
                 notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
@@ -2754,6 +2754,72 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
   return ^ (UIViewController *listViewController, FPEnvironmentLog *envlog, NSIndexPath *indexPath) {
     [[_coordDao localDao] deleteEnvironmentLog:envlog error:[FPUtils localSaveErrorHandlerMaker]()];
     [APP refreshTabs];
+  };
+}
+
+- (FPAuthScreenMaker)newViewEnvironmentLogsScreenMaker {
+  return ^ UIViewController *(FPUser *user) {
+    void (^addEnvLogAction)(PEListViewController *, PEItemAddedBlk) =
+    ^(PEListViewController *listViewCtrlr, PEItemAddedBlk itemAddedBlk) {
+      UIViewController *addEnvLogScreen =
+      [self newAddEnvironmentLogScreenMakerWithBlk:itemAddedBlk
+                            defaultSelectedVehicle:[_coordDao defaultVehicleForNewFuelPurchaseLogForUser:user
+                                                                                                   error:[FPUtils localFetchErrorHandlerMaker]()]
+                                listViewController:listViewCtrlr](user);
+      [listViewCtrlr presentViewController:[PEUIUtils navigationControllerWithController:addEnvLogScreen navigationBarHidden:NO]
+                                  animated:YES
+                                completion:nil];
+    };
+    FPDetailViewMaker envLogDetailViewMaker =
+    ^UIViewController *(PEListViewController *listViewCtrlr,
+                        id dataObject,
+                        NSIndexPath *indexPath,
+                        PEItemChangedBlk itemChangedBlk) {
+      return [self newEnvironmentLogDetailScreenMakerWithEnvLog:dataObject
+                                                envLogIndexPath:indexPath
+                                                 itemChangedBlk:itemChangedBlk
+                                             listViewController:listViewCtrlr](user);
+    };
+    PEPageLoaderBlk pageLoader = ^ NSArray * (FPEnvironmentLog *lastEnvLog) {
+      return [_coordDao environmentLogsForUser:user
+                                      pageSize:PAGINATION_PAGE_SIZE
+                              beforeDateLogged:[lastEnvLog logDate]
+                                         error:[FPUtils localFetchErrorHandlerMaker]()];
+    };
+    NSArray *initialEnvLogs = [_coordDao environmentLogsForUser:user pageSize:PAGINATION_PAGE_SIZE error:[FPUtils localFetchErrorHandlerMaker]()];
+    PEDoesEntityBelongToListView doesEntityBelongToThisListViewBlk = ^BOOL(PELMMainSupport *entity) {
+      return YES;
+    };
+    PEWouldBeIndexOfEntity wouldBeIndexBlk = ^ NSInteger (PELMMainSupport *entity) {
+      FPEnvironmentLog *envLog = (FPEnvironmentLog *)entity;
+      return [_coordDao numEnvironmentLogsForUser:user newerThan:[envLog logDate] error:[FPUtils localFetchErrorHandlerMaker]()];
+    };
+    PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPEnvironmentLog *envLog) {return [PEUtils stringFromDate:[envLog logDate] withPattern:@"MM/dd/YYYY"];}
+                                                        alwaysTopifyTitleLabel:NO
+                                                                     uitoolkit:_uitoolkit
+                                                          subtitleLeftHPadding:15.0
+                                                                    isLoggedIn:[APP isUserLoggedIn]];
+    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPEnvironmentLog class]
+                                                                    title:@"Odometer Logs"
+                                                    isPaginatedDataSource:YES
+                                                          tableCellStyler:tableCellStyler
+                                                       itemSelectedAction:nil
+                                                      initialSelectedItem:nil
+                                                            addItemAction:addEnvLogAction
+                                                           cellIdentifier:@"FPEnvironmentLogCell"
+                                                           initialObjects:initialEnvLogs
+                                                               pageLoader:pageLoader
+                                                           heightForCells:52.0
+                                                          detailViewMaker:envLogDetailViewMaker
+                                                                uitoolkit:_uitoolkit
+                                           doesEntityBelongToThisListView:doesEntityBelongToThisListViewBlk
+                                                     wouldBeIndexOfEntity:wouldBeIndexBlk
+                                                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      itemChildrenCounter:nil
+                                                      itemChildrenMsgsBlk:nil
+                                                              itemDeleter:[self envlogItemDeleterForUser:user]
+                                                         itemLocalDeleter:[self envlogItemLocalDeleter]];
   };
 }
 
@@ -2809,7 +2875,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                     isLoggedIn:[APP isUserLoggedIn]];
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPEnvironmentLog class]
-                                        title:@"Environment Logs"
+                                        title:@"Odometer Logs"
                         isPaginatedDataSource:YES
                               tableCellStyler:tableCellStyler
                            itemSelectedAction:nil
@@ -2857,7 +2923,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                     isLoggedIn:[APP isUserLoggedIn]];
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPEnvironmentLog class]
-                                        title:@"Unsynced Env Logs"
+                                        title:@"Unsynced Odometer Logs"
                         isPaginatedDataSource:NO
                               tableCellStyler:tableCellStyler
                            itemSelectedAction:nil

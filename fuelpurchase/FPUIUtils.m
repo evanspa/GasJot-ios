@@ -17,9 +17,6 @@
 + (UIView *)badgeForNum:(NSInteger)num
                   color:(UIColor *)color
          badgeTextColor:(UIColor *)badgeTextColor {
-  if (num == 0) {
-    return nil;
-  }
   CGFloat widthPadding = 30.0;
   CGFloat heightFactor = 1.45;
   CGFloat fontSize = [UIFont systemFontSize];
@@ -37,7 +34,8 @@
                            backgroundColor:[UIColor clearColor]
                                  textColor:badgeTextColor
                        verticalTextPadding:0.0];
-  UIView *badge = [PEUIUtils panelWithFixedWidth:label.frame.size.width + widthPadding fixedHeight:label.frame.size.height * heightFactor];
+  UIView *badge = [PEUIUtils panelWithFixedWidth:label.frame.size.width + widthPadding
+                                     fixedHeight:label.frame.size.height * heightFactor];
   [badge addRoundedCorners:UIRectCornerAllCorners
                  withRadii:CGSizeMake(20.0, 20.0)];
   badge.alpha = 0.8;
@@ -57,9 +55,6 @@
                       handler:(void(^)(void))handler
                     uitoolkit:(PEUIToolkit *)uitoolkit
                relativeToView:(UIView *)relativeToView {
-  if (badgeNum == 0) {
-    return nil;
-  }
   UIButton *button = [uitoolkit systemButtonMaker](labelText, nil, nil);
   [[button layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:button ofWidth:1.0 relativeTo:relativeToView];

@@ -35,6 +35,7 @@
 #import "FPLogging.h"
 #import "FPAppNotificationNames.h"
 #import "FPSplashController.h"
+#import "UIColor+FPAdditions.h"
 
 #ifdef FP_DEV
   #import <PEDev-Console/PDVScreen.h>
@@ -86,7 +87,7 @@ typedef NS_ENUM(NSInteger, FPAppTabBarIndex) {
   FPAppTabBarIndexRecords,
   FPAppTabBarIndexJot,
   FPAppTabBarIndexSettings,
-  FPAppTabBarIndexProfile
+  FPAppTabBarIndexAccount
 };
 
 
@@ -192,6 +193,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [FPLogging initializeLogging];
   [self initializeStoreCoordinator];
   [self initializeNotificationObserving];
+  [self initializeGlobalAppearanceSettings];
   self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
   _uitoolkit = [FPAppDelegate defaultUIToolkit];
   _screenToolkit = [[FPScreenToolkit alloc] initWithCoordinatorDao:_coordDao
@@ -311,6 +313,11 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [controllers[FPAppTabBarIndexEditsInProgress] popToRootViewControllerAnimated:NO];
   }
   [self refreshTabs];*/
+  NSArray *controllers = [_tabBarController viewControllers];
+  [controllers[FPAppTabBarIndexHome] popToRootViewControllerAnimated:NO];
+  [controllers[FPAppTabBarIndexRecords] popToRootViewControllerAnimated:NO];
+  [controllers[FPAppTabBarIndexSettings] popToRootViewControllerAnimated:NO];
+  [controllers[FPAppTabBarIndexAccount] popToRootViewControllerAnimated:NO];
 }
 
 - (BOOL)tabBarController:(UITabBarController *)tabBarController
@@ -408,13 +415,16 @@ shouldSelectViewController:(UIViewController *)viewController {
   [_locationManager requestWhenInUseAuthorization];
 }
 
-+ (NSString *)language {
-  return bundleVal(FPRestServicePreferredLanguageKey);
-}
-
-+ (HCCharset *)charset {
-  return [[HCCharset alloc] initWithEncoding:NSUTF8StringEncoding
-                                 description:@"UTF-8"];
+- (void)initializeGlobalAppearanceSettings {
+  NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+                              [UIColor fpAppBlue], NSForegroundColorAttributeName,
+                              nil];
+  [[UIBarButtonItem appearance] setTitleTextAttributes:attributes
+                                              forState:UIControlStateNormal];
+  [UIImageView appearanceWhenContainedIn:[UINavigationBar class], nil].tintColor = [UIColor fpAppBlue];
+  if ([UINavigationBar conformsToProtocol:@protocol(UIAppearanceContainer)]) {
+    [UINavigationBar appearance].tintColor = [UIColor fpAppBlue];
+  }
 }
 
 - (void)initializeStoreCoordinator {
@@ -437,7 +447,7 @@ shouldSelectViewController:(UIViewController *)viewController {
       localDatabaseCreationError:[FPUtils localDatabaseCreationErrorHandlerMaker]()
   timeoutForMainThreadOperations:intBundleVal(FPTimeoutForCoordDaoMainThreadOpsKey)
                    acceptCharset:[HCCharset UTF8]
-                  acceptLanguage:[FPAppDelegate language]
+                  acceptLanguage:bundleVal(FPRestServicePreferredLanguageKey)
               contentTypeCharset:[HCCharset UTF8]
                       authScheme:bundleVal(FPAuthenticationSchemeKey)
               authTokenParamName:bundleVal(FPAuthenticationTokenNameKey)

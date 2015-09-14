@@ -11,7 +11,7 @@
 /***************************************************************
  * Start Screen - Unauthenticated Space labels
  ***************************************************************/
-"unauth.start.signin.hdr" = "Fuel Purchase Sign-in";
+"unauth.start.signin.hdr" = "Gas Jot Sign-in";
 "unauth.start.signin.emailusernmtf.pht" = "E-mail or Username";
 "unauth.start.signin.pwdtf.pht" = "Password";
 "unauth.start.signin.btn.txt" = "Sign In";

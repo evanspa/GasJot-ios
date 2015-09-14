@@ -167,7 +167,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                    belowView:(UIView *)belowView
                         parentViewController:(PEAddViewEditController *)parentViewController {
   // View Fuel Purchase Logs button
-  UIButton *viewFpLogsBtn = [_uitoolkit systemButtonMaker](@"Fuel Purchase Logs", nil, nil);
+  UIButton *viewFpLogsBtn = [_uitoolkit systemButtonMaker](@"Gas Logs", nil, nil);
   [PEUIUtils setFrameWidthOfView:viewFpLogsBtn ofWidth:1.0 relativeTo:vehiclePanel];
   [PEUIUtils addDisclosureIndicatorToButton:viewFpLogsBtn];
   [viewFpLogsBtn bk_addEventHandler:^(id sender) {
@@ -183,7 +183,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
               vpadding:30
               hpadding:0];
   // View Environment Logs button
-  UIButton *viewEnvLogsBtn = [_uitoolkit systemButtonMaker](@"Environment Logs", nil, nil);
+  UIButton *viewEnvLogsBtn = [_uitoolkit systemButtonMaker](@"Odometer Logs", nil, nil);
   [PEUIUtils setFrameWidthOfView:viewEnvLogsBtn ofWidth:1.0 relativeTo:vehiclePanel];
   [PEUIUtils addDisclosureIndicatorToButton:viewEnvLogsBtn];
   [viewEnvLogsBtn bk_addEventHandler:^(id sender) {
@@ -334,7 +334,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
 - (UIButton *)placeViewLogsButtonOntoFuelstationPanel:(UIView *)fuelstationPanel
                                             belowView:(UIView *)belowView
                                  parentViewController:(PEAddViewEditController *)parentViewController {
-  UIButton *viewFpLogsBtn = [_uitoolkit systemButtonMaker](@"Fuel Purchase Logs", nil, nil);
+  UIButton *viewFpLogsBtn = [_uitoolkit systemButtonMaker](@"Gas Logs", nil, nil);
   [PEUIUtils setFrameWidthOfView:viewFpLogsBtn ofWidth:1.0 relativeTo:fuelstationPanel];
   [PEUIUtils addDisclosureIndicatorToButton:viewFpLogsBtn];
   [viewFpLogsBtn bk_addEventHandler:^(id sender) {

@@ -119,60 +119,75 @@ You currently have no unsynced items."
   NSInteger totalNumSyncNeeded = [_coordDao totalNumSyncNeededEntitiesForUser:_user];
   UIColor *eipBadgeColor = [UIColor orangeColor];
   UIColor *eipBadgeTextColor = [UIColor blackColor];
-  _vehiclesButton = [FPUIUtils buttonWithLabel:@"Vehicles"
-                                      badgeNum:numEipVehicles
+  _vehiclesButton = nil;
+  if (numEipVehicles > 0) {
+    _vehiclesButton = [FPUIUtils buttonWithLabel:@"Vehicles"
+                                        badgeNum:numEipVehicles
+                                      badgeColor:eipBadgeColor
+                                  badgeTextColor:eipBadgeTextColor
+                               addDisclosureIcon:YES
+                                         handler:^{
+                                           [PEUIUtils displayController:[_screenToolkit newViewUnsyncedVehiclesScreenMaker](_user)
+                                                         fromController:self
+                                                               animated:YES]; }
+                                       uitoolkit:_uitoolkit
+                                  relativeToView:self.view];
+  }
+  _fuelStationsButton = nil;
+  if (numEipFuelStations > 0) {
+    _fuelStationsButton = [FPUIUtils buttonWithLabel:@"Fuel Stations"
+                                            badgeNum:numEipFuelStations
+                                          badgeColor:eipBadgeColor
+                                      badgeTextColor:eipBadgeTextColor
+                                   addDisclosureIcon:YES
+                                             handler:^{
+                                               [PEUIUtils displayController:[_screenToolkit newViewUnsyncedFuelStationsScreenMaker](_user)
+                                                             fromController:self
+                                                                   animated:YES]; }
+                                           uitoolkit:_uitoolkit
+                                      relativeToView:self.view];
+  }
+  _fplogsButton = nil;
+  if (numEipFpLogs > 0) {
+    _fplogsButton = [FPUIUtils buttonWithLabel:@"Gas Logs"
+                                      badgeNum:numEipFpLogs
                                     badgeColor:eipBadgeColor
                                 badgeTextColor:eipBadgeTextColor
                              addDisclosureIcon:YES
                                        handler:^{
-                                         [PEUIUtils displayController:[_screenToolkit newViewUnsyncedVehiclesScreenMaker](_user)
+                                         [PEUIUtils displayController:[_screenToolkit newViewUnsyncedFuelPurchaseLogsScreenMaker](_user)
                                                        fromController:self
                                                              animated:YES]; }
                                      uitoolkit:_uitoolkit
                                 relativeToView:self.view];
-  _fuelStationsButton = [FPUIUtils buttonWithLabel:@"Fuel Stations"
-                                          badgeNum:numEipFuelStations
-                                        badgeColor:eipBadgeColor
-                                    badgeTextColor:eipBadgeTextColor
-                                 addDisclosureIcon:YES
-                                           handler:^{
-                                             [PEUIUtils displayController:[_screenToolkit newViewUnsyncedFuelStationsScreenMaker](_user)
-                                                           fromController:self
-                                                                 animated:YES]; }
-                                         uitoolkit:_uitoolkit
-                                    relativeToView:self.view];
-  _fplogsButton = [FPUIUtils buttonWithLabel:@"Fuel Purchase Logs"
-                                    badgeNum:numEipFpLogs
-                                  badgeColor:eipBadgeColor
-                              badgeTextColor:eipBadgeTextColor
-                           addDisclosureIcon:YES
-                                     handler:^{
-                                       [PEUIUtils displayController:[_screenToolkit newViewUnsyncedFuelPurchaseLogsScreenMaker](_user)
-                                                     fromController:self
-                                                           animated:YES]; }
-                                   uitoolkit:_uitoolkit
-                              relativeToView:self.view];
-  _envlogsButton = [FPUIUtils buttonWithLabel:@"Environment Logs"
-                                     badgeNum:numEipEnvLogs
-                                   badgeColor:eipBadgeColor
-                               badgeTextColor:eipBadgeTextColor
-                            addDisclosureIcon:YES
-                                      handler:^{
-                                        [PEUIUtils displayController:[_screenToolkit newViewUnsyncedEnvironmentLogsScreenMaker](_user)
-                                                      fromController:self
-                                                            animated:YES]; }
-                                    uitoolkit:_uitoolkit
-                               relativeToView:self.view];
-  _syncAllButton = [FPUIUtils buttonWithLabel:@"Upload All"
-                                     badgeNum:totalNumSyncNeeded
-                                   badgeColor:[UIColor fpAppBlue]
-                               badgeTextColor:[UIColor whiteColor]
-                            addDisclosureIcon:NO
-                                      handler:^{
-                                        [self syncAll];
-                                      }
-                                    uitoolkit:_uitoolkit
-                               relativeToView:self.view];
+  }
+  _envlogsButton = nil;
+  if (numEipEnvLogs > 0) {
+    _envlogsButton = [FPUIUtils buttonWithLabel:@"Odometer Logs"
+                                       badgeNum:numEipEnvLogs
+                                     badgeColor:eipBadgeColor
+                                 badgeTextColor:eipBadgeTextColor
+                              addDisclosureIcon:YES
+                                        handler:^{
+                                          [PEUIUtils displayController:[_screenToolkit newViewUnsyncedEnvironmentLogsScreenMaker](_user)
+                                                        fromController:self
+                                                              animated:YES]; }
+                                      uitoolkit:_uitoolkit
+                                 relativeToView:self.view];
+  }
+  _syncAllButton = nil;
+  if (totalNumSyncNeeded > 0) {
+    _syncAllButton = [FPUIUtils buttonWithLabel:@"Upload All"
+                                       badgeNum:totalNumSyncNeeded
+                                     badgeColor:[UIColor fpAppBlue]
+                                 badgeTextColor:[UIColor whiteColor]
+                              addDisclosureIcon:NO
+                                        handler:^{
+                                          [self syncAll];
+                                        }
+                                      uitoolkit:_uitoolkit
+                                 relativeToView:self.view];
+  }
   // place the views
   UIView *messagePanel;
   if (totalNumEips > 0) {

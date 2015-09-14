@@ -113,6 +113,8 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
                                      defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
                                          listViewController:(PEListViewController *)listViewController;
 
+- (FPAuthScreenMaker)newViewEnvironmentLogsScreenMaker;
+
 - (FPAuthScreenMaker)newViewEnvironmentLogsScreenMakerForVehicleInCtx;
 
 - (FPAuthScreenMaker)newViewUnsyncedEnvironmentLogsScreenMaker;
