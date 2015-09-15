@@ -30,6 +30,7 @@
 #import "FPJotController.h"
 #import "FPAccountController.h"
 #import <FlatUIKit/UIColor+FlatUI.h>
+#import <UIView+BlocksKit.h>
 
 NSInteger const PAGINATION_PAGE_SIZE = 30;
 
@@ -3024,32 +3025,141 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                 tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-account"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]]
                              ];
     __weak FPRaisedCenterTabController *weakTabBarCtrl = tabBarCtrl;
-    [tabBarCtrl addCenterButtonWithImage:[UIImage imageNamed:@"tab-jot"]
-                          highlightImage:nil
-                            buttonAction:^{
-                              [PEUIUtils showInfoAlertWithTitle:@"test" alertDescription:[[NSAttributedString alloc] initWithString:@"testing"] topInset:70.0 buttonTitle:@"okay" buttonAction:^{} relativeToView:weakTabBarCtrl.view];
-                            }];
+    __block BOOL jotting = NO;
+    CGFloat belowScreenY = weakTabBarCtrl.view.frame.size.height + 100;
+    UIImage *tabJotImg = [UIImage imageNamed:@"tab-jot"];
+    NSInteger jotPanelTag = 722;
+    NSInteger dimmedBgPanelTag = 723;
+    NSInteger addVehicleBtnTag = 724;
+    NSInteger addFuelstationBtnTag = 725;
+    NSInteger addGasLogBtnTag = 726;
+    NSInteger addOdometerLogBtnTag = 727;
+    UIButton *(^newButton)(NSString *, NSInteger, CGFloat, UIView *) = ^UIButton * (NSString *imgName, NSInteger tagValue, CGFloat hpaddingOnParentView, UIView *theJotPanel) {
+      UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 50.0, 50.0)];
+      [button setBackgroundImage:[UIImage imageNamed:imgName] forState:UIControlStateNormal];
+      [button setTag:tagValue];
+      [weakTabBarCtrl.view addSubview:button];
+      [PEUIUtils setFrameY:belowScreenY ofView:button];
+      [PEUIUtils setFrameX:[PEUIUtils XForWidth:button.frame.size.width
+                                  withAlignment:PEUIHorizontalAlignmentTypeLeft
+                                 relativeToView:theJotPanel
+                                       hpadding:hpaddingOnParentView]
+                    ofView:button];
+      button.transform = CGAffineTransformMakeScale(0.1, 0.1);
+      return button;
+    };
+    void (^jotAction)(UIButton *) = ^(UIButton *jotBtn) {
+      jotting = !jotting;
+      CGFloat rotationAmount = 0.0;
+      UIView *jotPanel = [weakTabBarCtrl.view viewWithTag:jotPanelTag];
+      weakTabBarCtrl.tabBar.userInteractionEnabled = !jotting;
+      CGFloat (^onscreenYForJotButtons)(UIView *, UIButton *) = ^ CGFloat (UIView *theJotPanel, UIButton *addButton) {
+        return (420 + (theJotPanel.frame.size.height/2) - (addButton.frame.size.height/2));
+      };
+      __block UIButton *addVehicleBtn;
+      __block UIButton *addFuelstationBtn;
+      __block UIButton *addGasLogBtn;
+      __block UIButton *addOdometerLogBtn;
+      void (^cancleJot)(void) = ^{
+        jotting = NO;
+        addVehicleBtn = (UIButton *)[weakTabBarCtrl.view viewWithTag:addVehicleBtnTag];
+        addFuelstationBtn = (UIButton *)[weakTabBarCtrl.view viewWithTag:addFuelstationBtnTag];
+        addOdometerLogBtn = (UIButton *)[weakTabBarCtrl.view viewWithTag:addOdometerLogBtnTag];
+        addGasLogBtn = (UIButton *)[weakTabBarCtrl.view viewWithTag:addGasLogBtnTag];
+        [UIView animateWithDuration:0.4
+                              delay:0.15
+                            options:UIViewAnimationOptionCurveEaseInOut
+                         animations:^{
+                           [PEUIUtils setFrameY:belowScreenY ofView:addVehicleBtn];
+                           [PEUIUtils setFrameY:belowScreenY ofView:addFuelstationBtn];
+                           [PEUIUtils setFrameY:belowScreenY ofView:addOdometerLogBtn];
+                           [PEUIUtils setFrameY:belowScreenY ofView:addGasLogBtn];
+                         }
+                         completion:^(BOOL finished) {
+                           [addVehicleBtn removeFromSuperview];
+                           [addFuelstationBtn removeFromSuperview];
+                           [addOdometerLogBtn removeFromSuperview];
+                           [addGasLogBtn removeFromSuperview];
+                         }];
+        [UIView animateWithDuration:0.8f
+                         animations:^{
+                           addVehicleBtn.transform = CGAffineTransformMakeScale(0.1, 0.1);
+                           addFuelstationBtn.transform = CGAffineTransformMakeScale(0.1, 0.1);
+                           addOdometerLogBtn.transform = CGAffineTransformMakeScale(0.1, 0.1);
+                           addGasLogBtn.transform = CGAffineTransformMakeScale(0.1, 0.1);
+                         }];
+        [UIView animateWithDuration:0.3f
+                         animations:^{
+                           jotPanel.transform = CGAffineTransformMakeRotation(rotationAmount);
+                           jotBtn.transform = CGAffineTransformMakeRotation(rotationAmount);
+                         } completion:^(BOOL finished) {
+                           UIView *dimmedBackgroundView = [weakTabBarCtrl.selectedViewController.view viewWithTag:dimmedBgPanelTag];
+                           [UIView animateWithDuration:0.18
+                                            animations:^{ dimmedBackgroundView.alpha = 0.0; }
+                                            completion:^(BOOL finished) { [dimmedBackgroundView removeFromSuperview]; }];
+                         }];
+      };
+      
+      if (jotting) {
+        addVehicleBtn = newButton(@"jot-vehicle", addVehicleBtnTag, 10, jotPanel);
+        addFuelstationBtn = newButton(@"jot-fuelstation", addFuelstationBtnTag, 77, jotPanel);
+        addGasLogBtn = newButton(@"jot-gas", addGasLogBtnTag, 144, jotPanel);
+        addOdometerLogBtn = newButton(@"jot-odometer", addOdometerLogBtnTag, 211, jotPanel);
+        rotationAmount = 180 * M_PI/180;
+        UIView *dimmedBackgroundView = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:weakTabBarCtrl.view];
+        [dimmedBackgroundView setTag:dimmedBgPanelTag];
+        [dimmedBackgroundView bk_whenTapped:^{ cancleJot(); }];
+        dimmedBackgroundView.backgroundColor = [UIColor blackColor];
+        dimmedBackgroundView.alpha = 0.0;
+        [weakTabBarCtrl.selectedViewController.view addSubview:dimmedBackgroundView];
+        CGFloat offscreenYValueForJotButtons = onscreenYForJotButtons(jotPanel, addVehicleBtn);
+        [UIView animateWithDuration:0.18
+                         animations:^{ dimmedBackgroundView.alpha = 0.6; }
+                         completion:^(BOOL finished) {
+                           [UIView animateWithDuration:0.8
+                                                 delay:0.0
+                                usingSpringWithDamping:0.8
+                                 initialSpringVelocity:1.0
+                                               options:UIViewAnimationOptionCurveLinear
+                                            animations:^{
+                                              [PEUIUtils setFrameY:offscreenYValueForJotButtons ofView:addVehicleBtn];
+                                              [PEUIUtils setFrameY:offscreenYValueForJotButtons ofView:addFuelstationBtn];
+                                              [PEUIUtils setFrameY:offscreenYValueForJotButtons ofView:addOdometerLogBtn];
+                                              [PEUIUtils setFrameY:offscreenYValueForJotButtons ofView:addGasLogBtn];
+                                            }
+                                            completion:nil];
+                           [UIView animateWithDuration:0.6f
+                                            animations:^{
+                                              addVehicleBtn.transform = CGAffineTransformIdentity;
+                                              addFuelstationBtn.transform = CGAffineTransformIdentity;
+                                              addOdometerLogBtn.transform = CGAffineTransformIdentity;
+                                              addGasLogBtn.transform = CGAffineTransformIdentity;
+                                            }];
+                           [UIView animateWithDuration:0.2f
+                                            animations:^{
+                                              jotPanel.transform = CGAffineTransformMakeRotation(rotationAmount);
+                                              jotBtn.transform = CGAffineTransformMakeRotation(rotationAmount);
+                                            }
+                                            completion:nil];
+                         }];
+      } else {
+        cancleJot();
+      }
+    };
+    UIButton *jotBtn = [tabBarCtrl addCenterButtonWithImage:tabJotImg highlightImage:nil buttonAction:jotAction];
+    UIView *jotPanel = [PEUIUtils panelWithWidthOf:0.85 andHeightOf:0.15 relativeToView:weakTabBarCtrl.view];
+    jotPanel.layer.cornerRadius = 5.0;
+    [jotPanel setTag:jotPanelTag];
+    [jotPanel setBackgroundColor:[UIColor whiteColor]];
+    jotPanel.layer.anchorPoint = CGPointMake(0.5, -0.4);
+    [PEUIUtils placeView:jotPanel
+                   below:jotBtn
+                    onto:weakTabBarCtrl.view
+           withAlignment:PEUIHorizontalAlignmentTypeCenter
+                vpadding:7.0
+                hpadding:0.0];
     [tabBarCtrl setViewControllers:controllers];
     [tabBarCtrl setSelectedIndex:0];
-    
-    /*UITabBarController *tabBarCtrl =
-    [[UITabBarController alloc] initWithNibName:nil bundle:nil];
-    NSMutableArray *controllers = [NSMutableArray array];
-    [controllers addObject:[PEUIUtils navControllerWithRootController:quickActionMenuCtrl
-                                                  navigationBarHidden:NO
-                                                      tabBarItemTitle:@"Quick Action Menu"
-                                                      tabBarItemImage:[UIImage imageNamed:@"tab-home"]
-                                              tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-home"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]]];
-    [controllers addObject:[PEUIUtils navControllerWithRootController:settingsMenuCtrl
-                                                  navigationBarHidden:NO
-                                                      tabBarItemTitle:@"Settings"
-                                                      tabBarItemImage:[UIImage imageNamed:@"tab-settings"]
-                                              tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-settings"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]]];
-    if (isLoggedIn) {
-      [controllers addObject:[self unsynedEditsViewControllerForUser:user]];
-    }
-    [tabBarCtrl setViewControllers:controllers animated:YES];
-    [tabBarCtrl setSelectedIndex:0];*/
     return tabBarCtrl;
   };
 }
