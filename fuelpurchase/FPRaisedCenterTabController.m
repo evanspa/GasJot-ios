@@ -7,6 +7,8 @@
 //
 
 #import "FPRaisedCenterTabController.h"
+#import <BlocksKit/UIControl+BlocksKit.h>
+#import <BlocksKit/UIView+BlocksKit.h>
 
 @implementation FPRaisedCenterTabController
 
@@ -20,7 +22,9 @@
 }
 
 // Create a custom UIButton and add it to the center of our tab bar
-- (void)addCenterButtonWithImage:(UIImage*)buttonImage highlightImage:(UIImage*)highlightImage {
+- (void)addCenterButtonWithImage:(UIImage*)buttonImage
+                  highlightImage:(UIImage*)highlightImage
+                    buttonAction:(void(^)(void))buttonAction {
   UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
   button.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
   button.frame = CGRectMake(0.0, 0.0, buttonImage.size.width, buttonImage.size.height);
@@ -34,6 +38,8 @@
     center.y = center.y - heightDifference / 2.0;
     button.center = center;
   }
+  [button bk_addEventHandler:^(id sender) { buttonAction(); }
+            forControlEvents:UIControlEventTouchUpInside];
   [self.view addSubview:button];
 }
 

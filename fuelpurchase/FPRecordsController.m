@@ -97,7 +97,7 @@ From here you can drill into all of your data records."
                                         }
                                       uitoolkit:_uitoolkit
                                  relativeToView:self.view];
-  _fplogsBtn = [FPUIUtils buttonWithLabel:@"Gas purchase logs"
+  _fplogsBtn = [FPUIUtils buttonWithLabel:@"Gas logs"
                                  badgeNum:[_coordDao numFuelPurchaseLogsForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
                                badgeColor:[UIColor fpAppBlue]
                            badgeTextColor:[UIColor whiteColor]

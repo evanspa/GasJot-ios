@@ -2096,7 +2096,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                           subtitleLeftHPadding:15.0
                                                                     isLoggedIn:[APP isUserLoggedIn]];
     return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
-                                                                    title:@"Gas Purchase Logs"
+                                                                    title:@"Gas Logs"
                                                     isPaginatedDataSource:YES
                                                           tableCellStyler:tableCellStyler
                                                        itemSelectedAction:nil
@@ -3023,7 +3023,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                         tabBarItemImage:[UIImage imageNamed:@"tab-account"]
                                                 tabBarItemSelectedImage:[[UIImage imageNamed:@"tab-account"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal]]
                              ];
-    [tabBarCtrl addCenterButtonWithImage:[UIImage imageNamed:@"tab-jot"] highlightImage:nil];
+    __weak FPRaisedCenterTabController *weakTabBarCtrl = tabBarCtrl;
+    [tabBarCtrl addCenterButtonWithImage:[UIImage imageNamed:@"tab-jot"]
+                          highlightImage:nil
+                            buttonAction:^{
+                              [PEUIUtils showInfoAlertWithTitle:@"test" alertDescription:[[NSAttributedString alloc] initWithString:@"testing"] topInset:70.0 buttonTitle:@"okay" buttonAction:^{} relativeToView:weakTabBarCtrl.view];
+                            }];
     [tabBarCtrl setViewControllers:controllers];
     [tabBarCtrl setSelectedIndex:0];
     

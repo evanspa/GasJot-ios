@@ -318,6 +318,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [controllers[FPAppTabBarIndexRecords] popToRootViewControllerAnimated:NO];
   [controllers[FPAppTabBarIndexSettings] popToRootViewControllerAnimated:NO];
   [controllers[FPAppTabBarIndexAccount] popToRootViewControllerAnimated:NO];
+  [self refreshTabs];
 }
 
 - (BOOL)tabBarController:(UITabBarController *)tabBarController

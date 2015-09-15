@@ -587,8 +587,9 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
     if (_isUserLoggedIn()) {
       if (_isAuthenticatedBlk() &&
           ([_entity synced] ||
-           ([_entity localMainIdentifier] == nil) ||
-           ([_entity editCount] == 0))) {
+           ([PEUtils isNil:[_entity localMainIdentifier]]) ||
+           ([_entity editCount] == 0) ||
+           ([PEUtils isNil:[_entity globalIdentifier]]))) {
         enableDeleteItem = YES;
       }
     } else {
@@ -868,6 +869,7 @@ as follows:";
     doDeleteWithChildrenConfirm(deleteRemoteItem);
    } else {
     doDeleteWithChildrenConfirm(^{
+      _itemLocalDeleter(self, _entity, _entityIndexPath);
       dispatch_async(dispatch_get_main_queue(), ^{
         [_listViewController handleRemovedEntity:_entity];
         [[self navigationController] popViewControllerAnimated:YES];

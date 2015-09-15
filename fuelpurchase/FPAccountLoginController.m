@@ -163,29 +163,27 @@ Enter your credentials and tap 'Log In'."
   if (!([self formStateMaskForSignIn] & FPSignInAnyIssues)) {
     __block MBProgressHUD *HUD;
     void (^nonLocalSyncSuccessBlk)(void) = ^{
-      dispatch_async(dispatch_get_main_queue(), ^{
-        [HUD hide:YES];
-        [PEUIUtils showLoginSuccessAlertWithTitle:@"Login success."
-                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
+      [HUD hide:YES];
+      [PEUIUtils showLoginSuccessAlertWithTitle:@"Login success."
+                               alertDescription:[[NSAttributedString alloc] initWithString:@"\
 You have been successfully logged in.\n\n\
 Your remote account is now connected to \
 this device.  Any fuel purchase data that \
 you create and save will be synced to your \
 remote account."]
-                                  syncIconMessage:[[NSAttributedString alloc] initWithString:@"\
+                                syncIconMessage:[[NSAttributedString alloc] initWithString:@"\
 The following icon will appear in the app \
 indicating that your are currently logged \
 into your remote account:"]
-                                         topInset:70.0
-                                      buttonTitle:@"Okay."
-                                     buttonAction:^{
-                                         [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
-                                                                                             object:nil
-                                                                                           userInfo:nil];
-                                         [[self navigationController] popViewControllerAnimated:YES];
-                                       }
-                                   relativeToView:self.tabBarController.view];
-      });
+                                       topInset:70.0
+                                    buttonTitle:@"Okay."
+                                   buttonAction:^{
+                                       [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
+                                                                                           object:nil
+                                                                                         userInfo:nil];
+                                       [[self navigationController] popViewControllerAnimated:YES];
+                                     }
+                                 relativeToView:self.tabBarController.view];
     };
     ErrMsgsMaker errMsgsMaker = ^ NSArray * (NSInteger errCode) {
       return [FPUtils computeSignInErrMsgs:errCode];
@@ -195,14 +193,9 @@ into your remote account:"]
       void (^successBlk)(void) = nil;
       if (syncLocalEntities) {
         successBlk = ^{
-          [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
-                                                              object:nil
-                                                            userInfo:nil];
-          dispatch_async(dispatch_get_main_queue(), ^{
-            HUD.labelText = @"You're now logged in.";
-            HUD.detailsLabelText = @"Proceeding to sync records...";
-            HUD.mode = MBProgressHUDModeDeterminate;
-          });
+          HUD.labelText = @"You're now logged in.";
+          HUD.detailsLabelText = @"Proceeding to sync records...";
+          HUD.mode = MBProgressHUDModeDeterminate;
           __block NSInteger numEntitiesSynced = 0;
           __block NSInteger syncAttemptErrors = 0;
           __block float overallSyncProgress = 0.0;
@@ -326,6 +319,9 @@ button.";
                                                         }
                                                         [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
                                                           [sheet dismissAnimated:YES];
+                                                          [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
+                                                                                                              object:nil
+                                                                                                            userInfo:nil];
                                                           [[self navigationController] popViewControllerAnimated:YES];
                                                         }];
                                                         [alertSheet showInView:self.tabBarController.view animated:YES];
@@ -333,7 +329,11 @@ button.";
                                                       });
                                                     }
                                                   }
-                                                    error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
+                                                    error:^(NSError *err, int code, NSString *desc) {
+                                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                                        [FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)(err, code, desc);
+                                                      });
+                                                    }];
         };
       } else {
         successBlk = nonLocalSyncSuccessBlk;
@@ -360,16 +360,18 @@ busy.  Please try logging in a little later."]
                             });
                           }
                         completionHandler:^(FPUser *user, NSError *err) {
-                          [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(err);
-                          if (user) {
-                            NSDate *mostRecentUpdatedAt =
+                          dispatch_async(dispatch_get_main_queue(), ^{
+                            [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(err);
+                            if (user) {
+                              NSDate *mostRecentUpdatedAt =
                               [[_coordDao localDao] mostRecentMasterUpdateForUser:user
                                                                             error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
-                            DDLogDebug(@"in FPAccountLoginController/handleSignIn, login success, mostRecentUpdatedAt: [%@](%@)", mostRecentUpdatedAt, [PEUtils millisecondsFromDate:mostRecentUpdatedAt]);
-                            if (mostRecentUpdatedAt) {
-                              [APP setChangelogUpdatedAt:mostRecentUpdatedAt];
+                              DDLogDebug(@"in FPAccountLoginController/handleSignIn, login success, mostRecentUpdatedAt: [%@](%@)", mostRecentUpdatedAt, [PEUtils millisecondsFromDate:mostRecentUpdatedAt]);
+                              if (mostRecentUpdatedAt) {
+                                [APP setChangelogUpdatedAt:mostRecentUpdatedAt];
+                              }
                             }
-                          }
+                          });
                         }
                     localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
     };
