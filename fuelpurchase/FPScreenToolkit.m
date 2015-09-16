@@ -30,7 +30,8 @@
 #import "FPJotController.h"
 #import "FPAccountController.h"
 #import <FlatUIKit/UIColor+FlatUI.h>
-#import <UIView+BlocksKit.h>
+#import <BlocksKit/UIView+BlocksKit.h>
+#import <BlocksKit/UIControl+BlocksKit.h>
 
 NSInteger const PAGINATION_PAGE_SIZE = 30;
 
@@ -3060,13 +3061,17 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       __block UIButton *addFuelstationBtn;
       __block UIButton *addGasLogBtn;
       __block UIButton *addOdometerLogBtn;
-      void (^cancleJot)(void) = ^{
+      void (^dismissJotPanel)(void) = ^ {
         jotting = NO;
+        weakTabBarCtrl.tabBar.userInteractionEnabled = !jotting;
         addVehicleBtn = (UIButton *)[weakTabBarCtrl.view viewWithTag:addVehicleBtnTag];
         addFuelstationBtn = (UIButton *)[weakTabBarCtrl.view viewWithTag:addFuelstationBtnTag];
         addOdometerLogBtn = (UIButton *)[weakTabBarCtrl.view viewWithTag:addOdometerLogBtnTag];
         addGasLogBtn = (UIButton *)[weakTabBarCtrl.view viewWithTag:addGasLogBtnTag];
-        [UIView animateWithDuration:0.4
+        CGFloat buttonDismissDuration = 0.4;
+        CGFloat buttonShrinkDuration = 0.8;
+        CGFloat panelRotateAwayDuration = 0.3;
+        [UIView animateWithDuration:buttonDismissDuration
                               delay:0.15
                             options:UIViewAnimationOptionCurveEaseInOut
                          animations:^{
@@ -3081,14 +3086,14 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                            [addOdometerLogBtn removeFromSuperview];
                            [addGasLogBtn removeFromSuperview];
                          }];
-        [UIView animateWithDuration:0.8f
+        [UIView animateWithDuration:buttonShrinkDuration
                          animations:^{
                            addVehicleBtn.transform = CGAffineTransformMakeScale(0.1, 0.1);
                            addFuelstationBtn.transform = CGAffineTransformMakeScale(0.1, 0.1);
                            addOdometerLogBtn.transform = CGAffineTransformMakeScale(0.1, 0.1);
                            addGasLogBtn.transform = CGAffineTransformMakeScale(0.1, 0.1);
                          }];
-        [UIView animateWithDuration:0.3f
+        [UIView animateWithDuration:panelRotateAwayDuration
                          animations:^{
                            jotPanel.transform = CGAffineTransformMakeRotation(rotationAmount);
                            jotBtn.transform = CGAffineTransformMakeRotation(rotationAmount);
@@ -3101,14 +3106,32 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       };
       
       if (jotting) {
-        addVehicleBtn = newButton(@"jot-vehicle", addVehicleBtnTag, 10, jotPanel);
-        addFuelstationBtn = newButton(@"jot-fuelstation", addFuelstationBtnTag, 77, jotPanel);
-        addGasLogBtn = newButton(@"jot-gas", addGasLogBtnTag, 144, jotPanel);
-        addOdometerLogBtn = newButton(@"jot-odometer", addOdometerLogBtnTag, 211, jotPanel);
+        addOdometerLogBtn = newButton(@"jot-odometer", addOdometerLogBtnTag, 10, jotPanel);
+        [addOdometerLogBtn bk_addEventHandler:^(id sender) {
+          PEItemAddedBlk itemAddedBlk = ^(PEAddViewEditController *addViewEditCtrl, FPEnvironmentLog *envLog) {
+            [[addViewEditCtrl navigationController] dismissViewControllerAnimated:YES completion:nil];
+          };
+          PEListViewController *listViewController = nil;
+          UIViewController *topVc = ((UINavigationController *)weakTabBarCtrl.selectedViewController).topViewController;
+          if ([topVc isKindOfClass:[PEListViewController class]]) {
+            listViewController = (PEListViewController *)topVc;
+          }          
+          UIViewController *addEnvLogCtrl =
+          [self newAddEnvironmentLogScreenMakerWithBlk:itemAddedBlk
+                                defaultSelectedVehicle:[_coordDao defaultVehicleForNewEnvironmentLogForUser:user error:[FPUtils localFetchErrorHandlerMaker]()]
+                                    listViewController:listViewController](user);
+          [weakTabBarCtrl.selectedViewController presentViewController:[PEUIUtils navigationControllerWithController:addEnvLogCtrl
+                                                                                                 navigationBarHidden:NO]
+                                                              animated:YES
+                                                            completion:^{ dismissJotPanel(); }];
+        } forControlEvents:UIControlEventTouchUpInside];
+        addGasLogBtn = newButton(@"jot-gas", addGasLogBtnTag, 77, jotPanel);
+        addFuelstationBtn = newButton(@"jot-fuelstation", addFuelstationBtnTag, 144, jotPanel);
+        addVehicleBtn = newButton(@"jot-vehicle", addVehicleBtnTag, 211, jotPanel);
         rotationAmount = 180 * M_PI/180;
         UIView *dimmedBackgroundView = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:weakTabBarCtrl.view];
         [dimmedBackgroundView setTag:dimmedBgPanelTag];
-        [dimmedBackgroundView bk_whenTapped:^{ cancleJot(); }];
+        [dimmedBackgroundView bk_whenTapped:^{ dismissJotPanel(); }];
         dimmedBackgroundView.backgroundColor = [UIColor blackColor];
         dimmedBackgroundView.alpha = 0.0;
         [weakTabBarCtrl.selectedViewController.view addSubview:dimmedBackgroundView];
@@ -3143,7 +3166,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                             completion:nil];
                          }];
       } else {
-        cancleJot();
+        dismissJotPanel();
       }
     };
     UIButton *jotBtn = [tabBarCtrl addCenterButtonWithImage:tabJotImg highlightImage:nil buttonAction:jotAction];

@@ -308,6 +308,8 @@
         }
       }
     }
+  } else {
+    DDLogDebug(@"PELVC/hAE, addedEntity is of a different class than the entities here.");
   }
   DDLogDebug(@"=== end === in PELVC/handleAddedEntity: (hAE)");
   return entityAdded;
