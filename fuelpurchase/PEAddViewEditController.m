@@ -496,12 +496,12 @@ getterForNotification:(SEL)getterForNotification {
     [item setImage:[UIImage imageNamed:imgName]];
     return item;
   };
-  //[navItem setTitleView:[self titleWithText:title]];
   if (_isView) {
     [rightBarButtonItems addObject:[self editButtonItem]];
   } else {
     [navItem setLeftBarButtonItem:newSysItem(UIBarButtonSystemItemCancel, @selector(cancelAddEdit))];
     if (_isAdd) {
+      [navItem setTitleView:[self titleWithText:title]]; // title only fits on adds
       [rightBarButtonItems addObject:newSysItem(UIBarButtonSystemItemDone, @selector(doneWithAdd))];
     } else {
       [rightBarButtonItems addObject:newSysItem(UIBarButtonSystemItemDone, @selector(doneWithEdit))];

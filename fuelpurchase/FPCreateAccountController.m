@@ -213,14 +213,9 @@ Fill out the form below and tap 'Done'."
       void (^successBlk)(FPUser *) = nil;
       if (syncLocalEntities) {
         successBlk = ^(FPUser *remoteUser) {
-          [[NSNotificationCenter defaultCenter] postNotificationName:FPAppAccountCreationNotification
-                                                              object:nil
-                                                            userInfo:nil];
-          dispatch_async(dispatch_get_main_queue(), ^{
-            HUD.labelText = @"Account Creation Success!";
-            HUD.detailsLabelText = @"Proceeding to sync records...";
-            HUD.mode = MBProgressHUDModeDeterminate;
-          });
+          HUD.labelText = @"Account Creation Success!";
+          HUD.detailsLabelText = @"Proceeding to sync records...";
+          HUD.mode = MBProgressHUDModeDeterminate;
           __block NSInteger numEntitiesSynced = 0;
           __block NSInteger syncAttemptErrors = 0;
           __block float overallSyncProgress = 0.0;
@@ -299,6 +294,7 @@ into your remote account:"]
                                                                                                                                            object:nil
                                                                                                                                          userInfo:nil];
                                                                                        [[self navigationController] popViewControllerAnimated:YES];
+                                                                                       [APP refreshTabs];
                                                                                      }
                                                                                    relativeToView:self.tabBarController.view];
                                                       });
@@ -350,7 +346,11 @@ button.";
                                                       });
                                                     }
                                                   }
-                                                    error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
+                                                    error:^(NSError *err, int code, NSString *desc) {
+                                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                                        [FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)(err, code, desc);
+                                                      });
+                                                    }];
         };
       } else {
         successBlk = nonLocalSyncSuccessBlk;
@@ -362,10 +362,13 @@ button.";
                       preserveExistingLocalEntities:syncLocalEntities
                                     remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.tabBarController.view)
                                   completionHandler:^(FPUser *user, NSError *err) {
+                                    dispatch_async(dispatch_get_main_queue(), ^{
                                     [FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(user, err);
                                     DDLogDebug(@"in FPCreateAccountController/handleAccountCreation, calling [APP setChangelogUpdatedAt:(%@)", [PEUtils millisecondsFromDate:user.updatedAt]);
                                     [APP setChangelogUpdatedAt:[user updatedAt]];
+                                    });
                                   }
+                                                   
                               localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
     };
     if (_preserveExistingLocalEntities == nil) { // first time asked

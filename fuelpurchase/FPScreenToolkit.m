@@ -3049,6 +3049,14 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       button.transform = CGAffineTransformMakeScale(0.1, 0.1);
       return button;
     };
+    PEListViewController *(^listViewController)(void) = ^PEListViewController * {
+      PEListViewController *listViewController = nil;
+      UIViewController *topVc = ((UINavigationController *)weakTabBarCtrl.selectedViewController).topViewController;
+      if ([topVc isKindOfClass:[PEListViewController class]]) {
+        listViewController = (PEListViewController *)topVc;
+      }
+      return listViewController;
+    };
     void (^jotAction)(UIButton *) = ^(UIButton *jotBtn) {
       jotting = !jotting;
       CGFloat rotationAmount = 0.0;
@@ -3104,30 +3112,49 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                             completion:^(BOOL finished) { [dimmedBackgroundView removeFromSuperview]; }];
                          }];
       };
-      
+      void (^configJotButton)(UIViewController *(^)(PEItemAddedBlk)) = ^(UIViewController *(^controllerMaker)(PEItemAddedBlk itemAddedBlk)) {
+        PEItemAddedBlk itemAddedBlk = ^(PEAddViewEditController *addViewEditCtrl, id record) {
+          [[addViewEditCtrl navigationController] dismissViewControllerAnimated:YES completion:nil];
+        };
+        UIViewController *addRecordController = controllerMaker(itemAddedBlk);
+        [weakTabBarCtrl.selectedViewController presentViewController:[PEUIUtils navigationControllerWithController:addRecordController
+                                                                                               navigationBarHidden:NO]
+                                                            animated:YES
+                                                          completion:^{ dismissJotPanel(); }];
+      };
       if (jotting) {
         addOdometerLogBtn = newButton(@"jot-odometer", addOdometerLogBtnTag, 10, jotPanel);
         [addOdometerLogBtn bk_addEventHandler:^(id sender) {
-          PEItemAddedBlk itemAddedBlk = ^(PEAddViewEditController *addViewEditCtrl, FPEnvironmentLog *envLog) {
-            [[addViewEditCtrl navigationController] dismissViewControllerAnimated:YES completion:nil];
-          };
-          PEListViewController *listViewController = nil;
-          UIViewController *topVc = ((UINavigationController *)weakTabBarCtrl.selectedViewController).topViewController;
-          if ([topVc isKindOfClass:[PEListViewController class]]) {
-            listViewController = (PEListViewController *)topVc;
-          }          
-          UIViewController *addEnvLogCtrl =
-          [self newAddEnvironmentLogScreenMakerWithBlk:itemAddedBlk
-                                defaultSelectedVehicle:[_coordDao defaultVehicleForNewEnvironmentLogForUser:user error:[FPUtils localFetchErrorHandlerMaker]()]
-                                    listViewController:listViewController](user);
-          [weakTabBarCtrl.selectedViewController presentViewController:[PEUIUtils navigationControllerWithController:addEnvLogCtrl
-                                                                                                 navigationBarHidden:NO]
-                                                              animated:YES
-                                                            completion:^{ dismissJotPanel(); }];
+          configJotButton(^UIViewController * (PEItemAddedBlk itemAddedBlk) {
+            return [self newAddEnvironmentLogScreenMakerWithBlk:itemAddedBlk
+                                         defaultSelectedVehicle:[_coordDao defaultVehicleForNewEnvironmentLogForUser:user error:[FPUtils localFetchErrorHandlerMaker]()]
+                                             listViewController:listViewController()](user);
+          });
         } forControlEvents:UIControlEventTouchUpInside];
         addGasLogBtn = newButton(@"jot-gas", addGasLogBtnTag, 77, jotPanel);
+        [addGasLogBtn bk_addEventHandler:^(id sender) {
+          configJotButton(^UIViewController * (PEItemAddedBlk itemAddedBlk) {
+            return [self newAddFuelPurchaseLogScreenMakerWithBlk:itemAddedBlk
+                                          defaultSelectedVehicle:[_coordDao defaultVehicleForNewFuelPurchaseLogForUser:user
+                                                                                                                 error:[FPUtils localFetchErrorHandlerMaker]()]
+                                      defaultSelectedFuelStation:[_coordDao defaultFuelStationForNewFuelPurchaseLogForUser:user
+                                                                                                           currentLocation:[APP latestLocation]
+                                                                                                                     error:[FPUtils localFetchErrorHandlerMaker]()]
+                                              listViewController:listViewController()](user);
+          });
+        } forControlEvents:UIControlEventTouchUpInside];
         addFuelstationBtn = newButton(@"jot-fuelstation", addFuelstationBtnTag, 144, jotPanel);
+        [addFuelstationBtn bk_addEventHandler:^(id sender) {
+          configJotButton(^UIViewController * (PEItemAddedBlk itemAddedBlk) {
+            return [self newAddFuelStationScreenMakerWithBlk:itemAddedBlk listViewController:listViewController()](user);
+          });
+        } forControlEvents:UIControlEventTouchUpInside];
         addVehicleBtn = newButton(@"jot-vehicle", addVehicleBtnTag, 211, jotPanel);
+        [addVehicleBtn bk_addEventHandler:^(id sender) {
+          configJotButton(^UIViewController * (PEItemAddedBlk itemAddedBlk) {
+            return [self newAddVehicleScreenMakerWithDelegate:itemAddedBlk listViewController:listViewController()](user);
+          });
+        } forControlEvents:UIControlEventTouchUpInside];
         rotationAmount = 180 * M_PI/180;
         UIView *dimmedBackgroundView = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:weakTabBarCtrl.view];
         [dimmedBackgroundView setTag:dimmedBgPanelTag];
