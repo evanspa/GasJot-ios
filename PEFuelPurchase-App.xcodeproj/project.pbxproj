@@ -92,7 +92,7 @@
 		18CF523019C9D9C90020FC94 /* FPScreenToolkit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPScreenToolkit.h; sourceTree = "<group>"; };
 		18CF523119C9D9C90020FC94 /* FPScreenToolkit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPScreenToolkit.m; sourceTree = "<group>"; };
 		18D2F90B19F20CCE002D9869 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
-		18D6DFA817F68005006B300D /* Fuel Purchase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = "Fuel Purchase.app"; path = "Gas Jot.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		18D6DFA817F68005006B300D /* Gas Jot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Gas Jot.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		18D6DFAB17F68005006B300D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		18D6DFAD17F68005006B300D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		18D6DFAF17F68005006B300D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -353,7 +353,7 @@
 		18D6DFA917F68005006B300D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				18D6DFA817F68005006B300D /* Fuel Purchase.app */,
+				18D6DFA817F68005006B300D /* Gas Jot.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -633,7 +633,7 @@
 			);
 			name = "PEFuelPurchase-App";
 			productName = fuelpurchase;
-			productReference = 18D6DFA817F68005006B300D /* Fuel Purchase.app */;
+			productReference = 18D6DFA817F68005006B300D /* Gas Jot.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -643,7 +643,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = FP;
-				LastUpgradeCheck = 0510;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Paul Evans";
 				TargetAttributes = {
 					18D6DFA717F68005006B300D = {
@@ -819,6 +819,7 @@
 				GCC_PREFIX_HEADER = "fuelpurchase/PEFuelPurchase-App-Prefix.pch";
 				INFOPLIST_FILE = "fuelpurchase/PEFuelPurchase-App-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				PRODUCT_BUNDLE_IDENTIFIER = "name.paulevans.fpapp.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "Gas Jot";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
@@ -847,6 +848,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -880,6 +882,7 @@
 				);
 				INFOPLIST_FILE = "fuelpurchase/PEFuelPurchase-App-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				PRODUCT_BUNDLE_IDENTIFIER = "name.paulevans.fpapp.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "Gas Jot";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;

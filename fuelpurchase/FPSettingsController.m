@@ -145,7 +145,10 @@
                                              padding:labelLeftPadding];
   [viewSplashScreenBtn bk_addEventHandler:^(id sender) {
     FPSplashController *splashController =
-      [[FPSplashController alloc] initWithStoreCoordinator:_coordDao uitoolkit:_uitoolkit screenToolkit:_screenToolkit];
+      [[FPSplashController alloc] initWithStoreCoordinator:_coordDao
+                                                 uitoolkit:_uitoolkit
+                                             screenToolkit:_screenToolkit
+                                       letsGoButtonEnabled:NO];
     [self.navigationController pushViewController:splashController animated:YES];
   } forControlEvents:UIControlEventTouchUpInside];
   return [PEUIUtils panelWithColumnOfViews:@[viewSplashScreenBtn, viewSplashScreenMsgPanel]
@@ -314,7 +317,7 @@ from the 'Records' screen."
   UIView *offlineModeSwitchPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:_doesHaveAuthTokenPanel fixedHeight:40.0];
   [offlineModeSwitchPanel setBackgroundColor:[UIColor whiteColor]];
   UILabel *offlineModeLabel = [PEUIUtils labelWithKey:@"Offline mode"
-                                                 font:[UIFont systemFontOfSize:16.0]
+                                                 font:[UIFont systemFontOfSize:18.0]
                                       backgroundColor:[UIColor clearColor]
                                             textColor:[UIColor blackColor]
                                   verticalTextPadding:3.0];

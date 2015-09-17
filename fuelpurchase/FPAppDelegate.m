@@ -231,7 +231,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [self refreshTabs];
   } else {
     FPSplashController *splashController =
-    [[FPSplashController alloc] initWithStoreCoordinator:_coordDao uitoolkit:_uitoolkit screenToolkit:_screenToolkit];
+    [[FPSplashController alloc] initWithStoreCoordinator:_coordDao
+                                               uitoolkit:_uitoolkit
+                                           screenToolkit:_screenToolkit
+                                     letsGoButtonEnabled:YES];
     [[self window] setRootViewController:[PEUIUtils navigationControllerWithController:splashController]];
   }
   [self.window setBackgroundColor:[UIColor whiteColor]];

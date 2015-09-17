@@ -18,6 +18,7 @@
 
 - (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
                      uitoolkit:(PEUIToolkit *)uitoolkit
-                 screenToolkit:(FPScreenToolkit *)screenToolkit;
+                 screenToolkit:(FPScreenToolkit *)screenToolkit
+           letsGoButtonEnabled:(BOOL)letsGoButtonEnabled;
 
 @end

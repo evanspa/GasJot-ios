@@ -57,7 +57,7 @@
 
 + (UILabel *)labelForRecordCount:(NSInteger)recordCount {
   return [PEUIUtils labelWithKey:[FPUIUtils labelTextForRecordCount:recordCount]
-                            font:[UIFont systemFontOfSize:12]
+                            font:[UIFont systemFontOfSize:10]
                  backgroundColor:[UIColor clearColor]
                        textColor:[UIColor darkGrayColor]
              verticalTextPadding:0.0];

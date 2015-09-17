@@ -19,18 +19,22 @@
   NSArray *_carouselViewMakers;
   NSInteger _numCarouselViewMakers;
   UIView *_dotsPanel;
+  BOOL _letsGoButtonEnabled;
+  iCarousel *_carousel;
 }
 
 #pragma mark - Initializers
 
 - (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
                      uitoolkit:(PEUIToolkit *)uitoolkit
-                 screenToolkit:(FPScreenToolkit *)screenToolkit {
+                 screenToolkit:(FPScreenToolkit *)screenToolkit
+           letsGoButtonEnabled:(BOOL)letsGoButtonEnabled {
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
     _coordDao = coordDao;
     _uitoolkit = uitoolkit;
     _screenToolkit = screenToolkit;
+    _letsGoButtonEnabled = letsGoButtonEnabled;
     _carouselViewMakers = @[^UIView *{ return [self rootCarouselView]; },
                             ^UIView *{ return [self rootCarouselView2]; }
                              ];
@@ -138,18 +142,23 @@
 
 #pragma mark - View controller lifecycle
 
+- (void)viewWillDisappear:(BOOL)animated {
+  [_carousel removeFromSuperview];
+  [super viewWillDisappear:animated];
+}
+
 - (void)viewDidLoad {
   [super viewDidLoad];
   [self.view setBackgroundColor:[UIColor fpAppBlue]];
-  iCarousel *carousel = [[iCarousel alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
-  [carousel setDataSource:self];
-  [carousel setDelegate:self];
-  [PEUIUtils setFrameWidthOfView:carousel ofWidth:1.0 relativeTo:self.view];
-  [PEUIUtils setFrameHeightOfView:carousel ofHeight:0.5 relativeTo:self.view];
-  [carousel setPagingEnabled:YES];
-  [carousel setBounceDistance:0.25];
-  [PEUIUtils placeView:carousel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
-  [self refreshDotsPanelWithCarousel:carousel];
+  _carousel = [[iCarousel alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+  [_carousel setDataSource:self];
+  [_carousel setDelegate:self];
+  [PEUIUtils setFrameWidthOfView:_carousel ofWidth:1.0 relativeTo:self.view];
+  [PEUIUtils setFrameHeightOfView:_carousel ofHeight:0.5 relativeTo:self.view];
+  [_carousel setPagingEnabled:YES];
+  [_carousel setBounceDistance:0.25];
+  [PEUIUtils placeView:_carousel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+  [self refreshDotsPanelWithCarousel:_carousel];
   UIView *southPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:0.5 relativeToView:self.view];
   UIButton *(^button)(NSString *, id, SEL) = ^UIButton *(NSString *title, id target, SEL sel) {
     UIButton *btn = [PEUIUtils buttonWithKey:title
@@ -170,6 +179,7 @@
     return btn;
   };
   UIButton *startUsing = button(@"Let's Go!", self, @selector(startUsing));
+  [startUsing setUserInteractionEnabled:_letsGoButtonEnabled];
   [PEUIUtils addDisclosureIndicatorToButton:startUsing];
   [PEUIUtils placeView:startUsing atBottomOf:southPanel withAlignment:PEUIHorizontalAlignmentTypeCenter vpadding:100.0 hpadding:0.0];
   [PEUIUtils placeView:southPanel atBottomOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
