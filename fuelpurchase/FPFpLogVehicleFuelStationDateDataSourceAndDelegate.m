@@ -103,25 +103,25 @@ displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
 - (void)fuelStationCoordinateComputeSuccess:(NSNotification *)notification {
   [self handleNotification:notification
    potentialMatchingEntity:_selectedFuelStation
-          tempNotification:@"Coordinate compute succeeded\nfor selected fuel station."];
+          tempNotification:@"Coordinate compute succeeded\nfor selected gas station."];
 }
 
 - (void)fuelStationObjectSyncInitiated:(NSNotification *)notification {
   [self handleNotification:notification
    potentialMatchingEntity:_selectedFuelStation
-          tempNotification:@"Sync initiated for selected fuel station."];
+          tempNotification:@"Sync initiated for selected gas station."];
 }
 
 - (void)fuelStationObjectSyncCompleted:(NSNotification *)notification {
   [self handleNotification:notification
    potentialMatchingEntity:_selectedFuelStation
-          tempNotification:@"Sync completed for selected fuel station."];
+          tempNotification:@"Sync completed for selected gas station."];
 }
 
 - (void)fuelStationObjectSyncFailed:(NSNotification *)notification {
   [self handleNotification:notification
    potentialMatchingEntity:_selectedFuelStation
-          tempNotification:@"Sync failed for selected fuel station."];
+          tempNotification:@"Sync failed for selected gas station."];
 }
 
 #pragma mark - Table view delegate
@@ -189,7 +189,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
       [[cell detailTextLabel] setText:(_selectedVehicle ? [_selectedVehicle name] : @"(no vehicles found)")];
       break;
     case 1:
-      [[cell textLabel] setText:@"Fuel station"];
+      [[cell textLabel] setText:@"Gas station"];
       CGFloat hpadding;
       if (_displayDisclosureIndicators) {
         hpadding = 5.0;
@@ -224,7 +224,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
                                             horizontalPadding:hpadding
                                               withFuelstation:_selectedFuelStation];
       } else {
-        [[cell detailTextLabel] setText:@"(no fuel stations found)"];
+        [[cell detailTextLabel] setText:@"(no gas stations found)"];
       }
       break;
     default:

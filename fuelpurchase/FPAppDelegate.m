@@ -225,7 +225,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
       [[self window] setRootViewController:_tabBarController];
     }
     if ([self isUserLoggedIn] && ![self doesUserHaveValidAuthToken]) {
-      [_tabBarController.tabBar.items[FPAppTabBarIndexSettings] setBadgeValue:@"!"];
+      [_tabBarController.tabBar.items[FPAppTabBarIndexAccount] setBadgeValue:@"!"];
     }
     [_tabBarController setDelegate:self];
     [self refreshTabs];
@@ -292,7 +292,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
         clearEipsBadge();
       }
     } else {
-      [_tabBarController.tabBar.items[FPAppTabBarIndexSettings] setBadgeValue:nil];
+      [_tabBarController.tabBar.items[FPAppTabBarIndexAccount] setBadgeValue:nil];
       clearEipsBadge();
       /*if ([controllers count] == 3) {
         // need to remove 'unsynced edits' controller
@@ -365,7 +365,7 @@ shouldSelectViewController:(UIViewController *)viewController {
                                                 accentColor:[UIColor colorFromHexCode:@"FFBF40"]
                                              fontForButtons:[UIFont systemFontOfSize:[UIFont buttonFontSize]]
                                      cornerRadiusForButtons:3
-                                  verticalPaddingForButtons:25
+                                  verticalPaddingForButtons:20
                                 horizontalPaddingForButtons:25
                                    bgColorForWarningButtons:[UIColor carrotColor]
                                  textColorForWarningButtons:[UIColor whiteColor]
@@ -482,7 +482,7 @@ shouldSelectViewController:(UIViewController *)viewController {
 keychain under key: [%@].  Is main thread? %@", authToken, userGlobalIdentifier,
              [PEUtils yesNoFromBool:[NSThread isMainThread]]);
   [_keychainStore setString:authToken forKey:userGlobalIdentifier];
-  [_tabBarController.tabBar.items[FPAppTabBarIndexSettings] setBadgeValue:nil];
+  [_tabBarController.tabBar.items[FPAppTabBarIndexAccount] setBadgeValue:nil];
 
   //[_keychainStore removeItemForKey:FPAuthenticationRequiredAtKey];
   // FYI, the reason we don't set the authToken on our _coordDao object is because
@@ -496,7 +496,7 @@ I'm going to insert this knowledge into the keychian so the app knows it's curre
 in an unauthenticated state.  Is main thread?  %@", [PEUtils yesNoFromBool:[NSThread isMainThread]]);
   [_keychainStore removeAllItems];
   if ([self isUserLoggedIn]) {
-    [_tabBarController.tabBar.items[FPAppTabBarIndexSettings] setBadgeValue:@"!"];
+    [_tabBarController.tabBar.items[FPAppTabBarIndexAccount] setBadgeValue:@"!"];
   }
 }
 

@@ -21,6 +21,7 @@
 #import "FPCreateAccountController.h"
 #import "FPAccountLoginController.h"
 #import "FPReauthenticateController.h"
+#import "FPSplashController.h"
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
@@ -130,17 +131,29 @@
 
 #pragma mark - Panel Makers
 
+- (UIView *)makeSplashScreenPanel {
+  CGFloat labelLeftPadding = 8.0;
+  UIButton *viewSplashScreenBtn = [_uitoolkit systemButtonMaker](@"View splash screen", nil, nil);
+  [PEUIUtils setFrameWidthOfView:viewSplashScreenBtn ofWidth:1.0 relativeTo:self.view];
+  [PEUIUtils addDisclosureIndicatorToButton:viewSplashScreenBtn];
+  UIView *viewSplashScreenMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"Want to see that splash screen again?"
+                                                                        font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                             backgroundColor:[UIColor clearColor]
+                                                                   textColor:[UIColor darkGrayColor]
+                                                         verticalTextPadding:3.0
+                                                                  fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0]
+                                             padding:labelLeftPadding];
+  [viewSplashScreenBtn bk_addEventHandler:^(id sender) {
+    FPSplashController *splashController =
+      [[FPSplashController alloc] initWithStoreCoordinator:_coordDao uitoolkit:_uitoolkit screenToolkit:_screenToolkit];
+    [self.navigationController pushViewController:splashController animated:YES];
+  } forControlEvents:UIControlEventTouchUpInside];
+  return [PEUIUtils panelWithColumnOfViews:@[viewSplashScreenBtn, viewSplashScreenMsgPanel]
+               verticalPaddingBetweenViews:4.0
+                            viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
+}
+
 - (void)makeDoesHaveAuthTokenPanel {
-  /*CGFloat dividerHeight = (1.0 / [UIScreen mainScreen].scale);
-  UIView *(^makeDivider)(CGFloat) = ^ UIView * (CGFloat widthOf) {
-    UIView *divider = [PEUIUtils panelWithWidthOf:widthOf relativeToView:_doesHaveAuthTokenPanel fixedHeight:dividerHeight];
-    [divider setBackgroundColor:[UIColor darkGrayColor]];
-    return divider;
-  };*/
-  /*_doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
-  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width,
-                                                     1.19 * self.view.frame.size.height)];
-  [_doesHaveAuthTokenPanel setBounces:NO];*/
   CGFloat labelLeftPadding = 8.0;
   _doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
   UIView *changelogMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"\
@@ -153,8 +166,6 @@ and deletions on other devices."
                                                          verticalTextPadding:3.0
                                                                   fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0]
                                              padding:labelLeftPadding];
-  
-  
   UIButton *changelogBtn = [_uitoolkit systemButtonMaker](@"Download All Changes", nil, nil);
   [PEUIUtils placeView:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"download-icon"]] inMiddleOf:changelogBtn withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:15.0];
   [[changelogBtn layer] setCornerRadius:0.0];
@@ -282,34 +293,14 @@ button.";
                    });
                  }];
   } forControlEvents:UIControlEventTouchUpInside];
-  /*NSString *offlineModeLabelText = @"\
-Offline mode.  Enables fast \
-saving (adds / edits only) in \
-poor connection environments.";
-  NSMutableAttributedString *offlineModeLabelAttrText =
-    [[NSMutableAttributedString alloc] initWithString:offlineModeLabelText];
-  NSDictionary *attrs = @{ NSUnderlineStyleAttributeName : @(NSUnderlineStyleSingle),
-                           NSForegroundColorAttributeName : [UIColor blueColor]};
-  [offlineModeLabelAttrText setAttributes:attrs range:NSMakeRange(0, 12)];*/
   UISwitch *offlineModeSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
   [offlineModeSwitch setOn:[APP offlineMode]];
   [offlineModeSwitch bk_addEventHandler:^(id sender) {
     [APP setOfflineMode:offlineModeSwitch.on];
   } forControlEvents:UIControlEventTouchUpInside];
-  //CGFloat switchPadding = 30.0;
-  /*UILabel *offlineModeDescLabel = [PEUIUtils labelWithAttributeText:offlineModeLabelAttrText
-                                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                                    backgroundColor:[UIColor clearColor]
-                                                          textColor:[UIColor darkGrayColor]
-                                                verticalTextPadding:3.0
-                                                         fitToWidth:_doesHaveAuthTokenPanel.frame.size.width];  //(_doesHaveAuthTokenPanel.frame.size.width - labelLeftPadding - offlineModeSwitch.frame.size.width - switchPadding)];
-  [offlineModeDescLabel setUserInteractionEnabled:YES];
-  UITapGestureRecognizer *tapGesture =
-    [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(displayOfflineModeInfoAlert)];
-  [offlineModeDescLabel addGestureRecognizer:tapGesture];*/
   UILabel *offlineModeDescLabel = [PEUIUtils labelWithKey:@"\
 Offline mode prevents upload attempts to \
-the server, keeping all saves local-only and very fast.\n\n\
+the server, keeping all saves local-only and very fast.  \
 Enable offline mode if you are making \
 many saves and you want them done \
 instantly and you have a poor internet connection.  Later, you can bulk-upload your edits \
@@ -320,7 +311,6 @@ from the 'Records' screen."
                                       verticalTextPadding:3.0
                                                fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0];
   UIView *offlineModeDescPanelWithPad = [PEUIUtils leftPadView:offlineModeDescLabel padding:labelLeftPadding];
-  
   UIView *offlineModeSwitchPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:_doesHaveAuthTokenPanel fixedHeight:40.0];
   [offlineModeSwitchPanel setBackgroundColor:[UIColor whiteColor]];
   UILabel *offlineModeLabel = [PEUIUtils labelWithKey:@"Offline mode"
@@ -331,10 +321,10 @@ from the 'Records' screen."
   [PEUIUtils placeView:offlineModeLabel inMiddleOf:offlineModeSwitchPanel withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:15.0];
   [PEUIUtils placeView:offlineModeSwitch inMiddleOf:offlineModeSwitchPanel withAlignment:PEUIHorizontalAlignmentTypeRight hpadding:15.0];
   [PEUIUtils placeView:offlineModeSwitchPanel atTopOf:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:90.0 hpadding:0.0];
-  [PEUIUtils placeView:offlineModeDescPanelWithPad below:offlineModeSwitchPanel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:7.0 hpadding:0.0];
-  
-  [PEUIUtils placeView:changelogBtn atBottomOf:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:_doesHaveAuthTokenPanel.frame.size.height * 0.275 hpadding:0.0];
-  [PEUIUtils placeView:changelogMsgPanel below:changelogBtn onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:7.0 hpadding:0.0];
+  [PEUIUtils placeView:offlineModeDescPanelWithPad below:offlineModeSwitchPanel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
+  [PEUIUtils placeView:changelogBtn below:offlineModeDescPanelWithPad onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:15.0 hpadding:0.0];
+  [PEUIUtils placeView:changelogMsgPanel below:changelogBtn onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
+  [PEUIUtils placeView:[self makeSplashScreenPanel] below:changelogMsgPanel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:15.0 hpadding:0.0];
 }
 
 - (void)makeNotLoggedInPanel {
@@ -343,16 +333,12 @@ from the 'Records' screen."
   NSString *message = @"\
 This action will permanently delete your \
 fuel purchase data from this device.";
-  /*UIView *messagePanel = [self messagePanelWithMessage:message
-                                             iconImage:[UIImage imageNamed:@"red-exclamation-icon"]
-                                        relativeToView:_notLoggedInPanel];*/
   UIView *messagePanel = [self leftPaddingMessageWithText:message];
   UIButton *deleteAllDataBtn = buttonMaker(@"Delete All Data", self, @selector(clearAllData));
   [[deleteAllDataBtn layer] setCornerRadius:0.0];
   [deleteAllDataBtn setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
   [PEUIUtils placeView:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"red-exclamation-icon"]] inMiddleOf:deleteAllDataBtn withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:15.0];
   [PEUIUtils setFrameWidthOfView:deleteAllDataBtn ofWidth:1.0 relativeTo:_notLoggedInPanel];
-  
   // place views onto panel
   [PEUIUtils placeView:deleteAllDataBtn
                atTopOf:_notLoggedInPanel

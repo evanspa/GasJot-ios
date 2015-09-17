@@ -59,7 +59,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We use your location in order to simplify fuel station selection when recording a fuel purchase log.</string>
+	<string>We use your location in order to simplify gas station selection when recording a gas log.</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

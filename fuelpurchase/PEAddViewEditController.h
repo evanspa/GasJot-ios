@@ -22,6 +22,7 @@ typedef void (^PEEnableDisablePanelBlk)(UIView *, BOOL);
 typedef BOOL (^PEEntityEditPreparerBlk)(PEAddViewEditController *, id);
 typedef void (^PEEntityEditCancelerBlk)(PEAddViewEditController *, id);
 typedef void (^PEEntityAddCancelerBlk)(PEAddViewEditController *, BOOL, id);
+typedef NSArray *(^PEEntitiesFromEntityBlk)(id);
 typedef id   (^PEEntityMakerBlk)(UIView *);
 typedef void (^PESaveEntityBlk)(PEAddViewEditController *, id);
 typedef void (^PESyncNotFoundBlk)(float, NSString *, NSString *);
@@ -105,7 +106,7 @@ typedef void (^PEItemLocalDeleter)(UIViewController *, id, NSIndexPath *);
 typedef void (^PEItemAddedBlk)(PEAddViewEditController *, id);
 typedef void (^PEItemChangedBlk)(id, NSIndexPath *);
 typedef void (^PEPrepareUIForUserInteractionBlk)(UIView *);
-typedef void (^PEViewDidAppearBlk)(UIView *);
+typedef void (^PEViewDidAppearBlk)(PEAddViewEditController *);
 typedef NSArray *(^PEEntityValidatorBlk)(UIView *);
 typedef NSArray *(^PEMessagesFromErrMask)(NSInteger);
 
@@ -155,7 +156,7 @@ conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
  itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
          itemDeleter:(PEItemDeleter)itemDeleter
     itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
-getterForNotification:(SEL)getterForNotification;
+entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity;
 
 #pragma mark - Factory functions
 
@@ -196,7 +197,7 @@ getterForNotification:(SEL)getterForNotification;
                                           isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                                            isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-                                   getterForNotification:(SEL)getterForNotification;
+                                   entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity;
 
 + (PEAddViewEditController *)viewEntityCtrlrWithEntity:(PELMMainSupport *)entity
                                     listViewController:(PEListViewController *)listViewController

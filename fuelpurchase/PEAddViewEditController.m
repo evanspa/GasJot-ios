@@ -44,7 +44,7 @@
   PEViewDidAppearBlk _viewDidAppearBlk;
   PEEntityValidatorBlk _entityValidator;
   PEEntityAddCancelerBlk _entityAddCanceler;
-  SEL _getterForNotification;
+  PEEntitiesFromEntityBlk _entitiesFromEntity;
   id _newEntity;
   PELMMainSupport *_entityCopyBeforeEdit;
   MBProgressHUDMode _syncImmediateMBProgressHUDMode;
@@ -115,7 +115,7 @@ conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
  itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
          itemDeleter:(PEItemDeleter)itemDeleter
     itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
-getterForNotification:(SEL)getterForNotification {
+entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity {
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
     _listViewController = listViewController;
@@ -164,7 +164,7 @@ getterForNotification:(SEL)getterForNotification {
     _itemChildrenMsgsBlk = itemChildrenMsgsBlk;
     _itemDeleter = itemDeleter;
     _itemLocalDeleter = itemLocalDeleter;
-    _getterForNotification = getterForNotification;
+    _entitiesFromEntity = entitiesFromEntity;
   }
   return self;
 }
@@ -207,7 +207,7 @@ getterForNotification:(SEL)getterForNotification {
                                                isUserLoggedIn:isUserLoggedIn
                                                 isOfflineMode:isOfflineMode
                                syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
-                                        getterForNotification:nil];
+                                        entitiesFromEntity:nil];
 }
 
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
@@ -228,7 +228,7 @@ getterForNotification:(SEL)getterForNotification {
                                           isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                                            isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-                                   getterForNotification:(SEL)getterForNotification {
+                                      entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity {
   return [[PEAddViewEditController alloc] initWithEntity:nil
                                       listViewController:listViewController
                                                    isAdd:YES
@@ -271,7 +271,7 @@ getterForNotification:(SEL)getterForNotification {
                                      itemChildrenMsgsBlk:nil
                                              itemDeleter:nil
                                         itemLocalDeleter:nil
-                                   getterForNotification:getterForNotification];
+                                   entitiesFromEntity:entitiesFromEntity];
 }
 
 + (PEAddViewEditController *)viewEntityCtrlrWithEntity:(PELMMainSupport *)entity
@@ -353,7 +353,7 @@ getterForNotification:(SEL)getterForNotification {
                                      itemChildrenMsgsBlk:itemChildrenMsgsBlk
                                              itemDeleter:itemDeleter
                                         itemLocalDeleter:itemLocalDeleter
-                                   getterForNotification:nil];
+                                      entitiesFromEntity:nil];
 }
 
 #pragma mark - Notification Observing
@@ -446,7 +446,7 @@ getterForNotification:(SEL)getterForNotification {
     }
   }
   if (_viewDidAppearBlk) {
-    _viewDidAppearBlk(_entityFormPanel);
+    _viewDidAppearBlk(/*_entityFormPanel, */self);
   }
 }
 
@@ -602,17 +602,40 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
 }
 
 - (void)promptDoDelete {
-  [PEUIUtils showConfirmAlertWithTitle:@"Are you sure?"
-                            titleImage:nil //[PEUIUtils bundleImageWithName:@"question"]
-                      alertDescription:[[NSAttributedString alloc] initWithString:@"Are you sure you want to delete this record?"]
-                              topInset:70.0
-                       okayButtonTitle:@"Yes.  Delete it."
-                      okayButtonAction:^{ [self doDelete]; }
-                       okayButtonStyle:JGActionSheetButtonStyleRed
-                     cancelButtonTitle:@"No.  Cancel."
-                    cancelButtonAction:^{}
-                      cancelButtonSyle:JGActionSheetButtonStyleDefault
-                        relativeToView:self.tabBarController.view];
+  void (^deleter)(void) = ^{
+    [PEUIUtils showConfirmAlertWithTitle:@"Are you sure?"
+                              titleImage:nil //[PEUIUtils bundleImageWithName:@"question"]
+                        alertDescription:[[NSAttributedString alloc] initWithString:@"Are you sure you want to delete this record?"]
+                                topInset:70.0
+                         okayButtonTitle:@"Yes.  Delete it."
+                        okayButtonAction:^{ [self doDelete]; }
+                         okayButtonStyle:JGActionSheetButtonStyleRed
+                       cancelButtonTitle:@"No.  Cancel."
+                      cancelButtonAction:^{}
+                        cancelButtonSyle:JGActionSheetButtonStyleDefault
+                          relativeToView:self.tabBarController.view];
+  };
+  if (_itemChildrenCounter) {
+    NSInteger numChildren = _itemChildrenCounter(_entity);
+    if (numChildren > 0) {
+      [PEUIUtils showWarningConfirmAlertWithMsgs:_itemChildrenMsgsBlk(_entity)
+                                           title:@"Are you sure?"
+                                alertDescription:[[NSAttributedString alloc] initWithString:@"\
+Deleting this record will result in the \
+following child-records being deleted.\n\n\
+Are you sure you want to continue?"]
+                                        topInset:70.0
+                                 okayButtonTitle:@"Yes, delete."
+                                okayButtonAction:^{ [self doDelete]; }
+                               cancelButtonTitle:@"No, cancel."
+                              cancelButtonAction:^{}
+                                  relativeToView:self.view];
+    } else {
+      deleter();
+    }
+  } else {
+    deleter();
+  }
 }
 
 - (void)doDelete {
@@ -635,29 +658,6 @@ To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
     [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
     [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
     [self setUploadDownloadDeleteBarButtonStates];
-  };
-  void (^doDeleteWithChildrenConfirm)(void(^)(void)) = ^(void(^deleter)(void)) {
-    if (_itemChildrenCounter) {
-      NSInteger numChildren = _itemChildrenCounter(_entity);
-      if (numChildren > 0) {
-        [PEUIUtils showWarningConfirmAlertWithMsgs:_itemChildrenMsgsBlk(_entity)
-                                             title:@"Are you sure?"
-                                  alertDescription:[[NSAttributedString alloc] initWithString:@"\
-Deleting this record will result in the \
-following child-records being deleted.\n\n\
-Are you sure you want to continue?"]
-                                          topInset:70.0
-                                   okayButtonTitle:@"Yes, delete."
-                                  okayButtonAction:^{ deleter(); }
-                                 cancelButtonTitle:@"No, cancel."
-                                cancelButtonAction:^{ postDeleteActivities(); }
-                                    relativeToView:self.view];
-      } else {
-        deleter();
-      }
-    } else {
-      deleter();
-    }
   };
   if ([_entity globalIdentifier]) {
     __block MBProgressHUD *deleteHud;
@@ -866,14 +866,12 @@ as follows:";
                      delAuthReqdBlk);
       });
     };
-    doDeleteWithChildrenConfirm(deleteRemoteItem);
+    deleteRemoteItem();
    } else {
-    doDeleteWithChildrenConfirm(^{
-      _itemLocalDeleter(self, _entity, _entityIndexPath);
-      dispatch_async(dispatch_get_main_queue(), ^{
-        [_listViewController handleRemovedEntity:_entity];
-        [[self navigationController] popViewControllerAnimated:YES];
-      });
+    _itemLocalDeleter(self, _entity, _entityIndexPath);
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [_listViewController handleRemovedEntity:_entity];
+      [[self navigationController] popViewControllerAnimated:YES];
     });
   }
 }
@@ -2130,15 +2128,27 @@ locally.  The error is as follows:";
   if (isValidEntity) {
     _newEntity = _entityMaker(_entityFormPanel);
     void (^notificationSenderForAdd)(id) = ^(id theNewEntity) {
-      id newEntityForNotification = theNewEntity;
-      if (_getterForNotification) {
+      /*id newEntityForNotification = theNewEntity;
+      if (_entitiesFromEntity) {
         #pragma clang diagnostic push
         #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-        newEntityForNotification = [theNewEntity performSelector:_getterForNotification];
+        newEntityForNotification = [theNewEntity performSelector:_entitiesFromEntity];
         #pragma clang diagnostic pop
       }
       if (_listViewController) {
+        NSLog(@"calling handleAdded with entity class: %@", NSStringFromClass([newEntityForNotification class]));
         [_listViewController handleAddedEntity:newEntityForNotification];
+      }*/
+      NSArray *entitiesFromEntity;
+      if (_entitiesFromEntity) {
+        entitiesFromEntity = _entitiesFromEntity(theNewEntity);
+      } else {
+        entitiesFromEntity = @[theNewEntity];
+      }
+      if (_listViewController) {
+        for (id entity in entitiesFromEntity) {
+          [_listViewController handleAddedEntity:entity];
+        }
       }
     };
     if (_isAuthenticatedBlk() && !_isOfflineMode()) {

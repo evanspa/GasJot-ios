@@ -74,9 +74,9 @@ From here you can drill into all of your data records."
   [_fplogsBtn removeFromSuperview];
   [_envlogsBtn removeFromSuperview];
   _vehiclesBtn = [FPUIUtils buttonWithLabel:@"Vehicles"
-                                   badgeNum:[_coordDao numVehiclesForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
-                                 badgeColor:[UIColor fpAppBlue]
-                             badgeTextColor:[UIColor whiteColor]
+                               tagForButton:nil
+                                recordCount:[_coordDao numVehiclesForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
+                     tagForRecordCountLabel:nil
                           addDisclosureIcon:YES
                                     handler:^{
                                       [PEUIUtils displayController:[_screenToolkit newViewVehiclesScreenMaker](_user)
@@ -85,10 +85,10 @@ From here you can drill into all of your data records."
                                     }
                                   uitoolkit:_uitoolkit
                              relativeToView:self.view];
-  _fuelstationsBtn = [FPUIUtils buttonWithLabel:@"Fuel stations"
-                                       badgeNum:[_coordDao numFuelStationsForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
-                                     badgeColor:[UIColor fpAppBlue]
-                                 badgeTextColor:[UIColor whiteColor]
+  _fuelstationsBtn = [FPUIUtils buttonWithLabel:@"Gas stations"
+                                   tagForButton:nil
+                                    recordCount:[_coordDao numFuelStationsForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
+                         tagForRecordCountLabel:nil
                               addDisclosureIcon:YES
                                         handler:^{
                                           [PEUIUtils displayController:[_screenToolkit newViewFuelStationsScreenMaker](_user)
@@ -98,9 +98,9 @@ From here you can drill into all of your data records."
                                       uitoolkit:_uitoolkit
                                  relativeToView:self.view];
   _fplogsBtn = [FPUIUtils buttonWithLabel:@"Gas logs"
-                                 badgeNum:[_coordDao numFuelPurchaseLogsForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
-                               badgeColor:[UIColor fpAppBlue]
-                           badgeTextColor:[UIColor whiteColor]
+                             tagForButton:nil
+                              recordCount:[_coordDao numFuelPurchaseLogsForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
+                   tagForRecordCountLabel:nil
                         addDisclosureIcon:YES
                                   handler:^{
                                     [PEUIUtils displayController:[_screenToolkit newViewFuelPurchaseLogsScreenMaker](_user)
@@ -110,9 +110,9 @@ From here you can drill into all of your data records."
                                 uitoolkit:_uitoolkit
                            relativeToView:self.view];
   _envlogsBtn = [FPUIUtils buttonWithLabel:@"Odometer logs"
-                                  badgeNum:[_coordDao numEnvironmentLogsForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
-                                badgeColor:[UIColor fpAppBlue]
-                            badgeTextColor:[UIColor whiteColor]
+                              tagForButton:nil
+                               recordCount:[_coordDao numEnvironmentLogsForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
+                    tagForRecordCountLabel:nil
                          addDisclosureIcon:YES
                                    handler:^{
                                     [PEUIUtils displayController:[_screenToolkit newViewEnvironmentLogsScreenMaker](_user)

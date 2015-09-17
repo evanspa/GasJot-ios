@@ -32,6 +32,7 @@
 #import <FlatUIKit/UIColor+FlatUI.h>
 #import <BlocksKit/UIView+BlocksKit.h>
 #import <BlocksKit/UIControl+BlocksKit.h>
+#import "FPUIUtils.h"
 
 NSInteger const PAGINATION_PAGE_SIZE = 30;
 
@@ -300,8 +301,14 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                              error:[FPUtils localFetchErrorHandlerMaker]()];
     NSInteger numEnvlogs = [_coordDao numEnvironmentLogsForVehicle:vehicle
                                                              error:[FPUtils localFetchErrorHandlerMaker]()];
-    return @[[NSString stringWithFormat:@"%ld fuel purchase log%@", (long)numFplogs, (numFplogs > 1 ? @"s" : @"")],
-             [NSString stringWithFormat:@"%ld environment log%@", (long)numEnvlogs, (numEnvlogs > 1 ? @"s" : @"")]];
+    NSMutableArray *msgs = [NSMutableArray array];
+    if (numFplogs > 0) {
+      [msgs addObject:[NSString stringWithFormat:@"%ld gas log%@", (long)numFplogs, (numFplogs > 1 ? @"s" : @"")]];
+    }
+    if (numEnvlogs > 0) {
+      [msgs addObject:[NSString stringWithFormat:@"%ld odometer log%@", (long)numEnvlogs, (numEnvlogs > 1 ? @"s" : @"")]];
+    }
+    return msgs;
   };
   return itemChildrenMsgs;
 }
@@ -717,6 +724,16 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                     FPVehicle *vehicle) {
       [[_coordDao localDao] saveMasterVehicle:downloadedVehicle forUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
     };
+    PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
+      UIButton *viewFplogsBtn = (UIButton *)[ctrl.view viewWithTag:FPVehicleTagViewFplogsBtn];
+      [FPUIUtils refreshRecordCountLabelOnButton:viewFplogsBtn
+                             recordCountLabelTag:FPVehicleTagViewFplogsBtnRecordCount
+                                     recordCount:[_coordDao numFuelPurchaseLogsForVehicle:vehicle error:[FPUtils localFetchErrorHandlerMaker]()]];
+      UIButton *viewEnvlogsBtn = (UIButton *)[ctrl.view viewWithTag:FPVehicleTagViewEnvlogsBtn];
+      [FPUIUtils refreshRecordCountLabelOnButton:viewEnvlogsBtn
+                             recordCountLabelTag:FPVehicleTagViewEnvlogsBtnRecordCount
+                                     recordCount:[_coordDao numEnvironmentLogsForVehicle:vehicle error:[FPUtils localFetchErrorHandlerMaker]()]];
+    };
     return [PEAddViewEditController
              viewEntityCtrlrWithEntity:vehicle
                     listViewController:listViewController
@@ -740,7 +757,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                          isOfflineMode:^{ return [APP offlineMode]; }
         syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
         prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
-                      viewDidAppearBlk:nil
+                      viewDidAppearBlk:viewDidAppearBlk
                        entityValidator:[self newVehicleValidator]
                               uploader:uploader
                  numRemoteDepsNotLocal:nil
@@ -772,7 +789,11 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
   PEItemChildrenMsgsBlk itemChildrenMsgs = ^ NSArray * (FPFuelStation *fuelStation) {
     NSInteger numFplogs = [_coordDao numFuelPurchaseLogsForFuelStation:fuelStation
                                                                  error:[FPUtils localFetchErrorHandlerMaker]()];
-    return @[[NSString stringWithFormat:@"%ld fuel purchase log%@", (long)numFplogs, (numFplogs > 1 ? @"s" : @"")]];
+    NSMutableArray *msgs = [NSMutableArray array];
+    if (numFplogs > 0) {
+      [msgs addObject:[NSString stringWithFormat:@"%ld gas log%@", (long)numFplogs, (numFplogs > 1 ? @"s" : @"")]];
+    }
+    return msgs;
   };
   return itemChildrenMsgs;
 }
@@ -788,8 +809,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                  PESyncServerErrorBlk errBlk,
                                  PESyncConflictBlk conflictBlk,
                                  PESyncAuthRequiredBlk authReqdBlk) {
-    NSString *mainMsgFragment = @"deleting fuel station";
-    NSString *recordTitle = @"Fuel station";
+    NSString *mainMsgFragment = @"deleting gas station";
+    NSString *recordTitle = @"Gas station";
     [_coordDao deleteFuelStation:fuelStation
                          forUser:user
              notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
@@ -865,7 +886,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     }
   } else {
     distance = compressLabel(cellSubtitleMaker(@"? away"));
-    unknownReason = compressLabel(cellSubtitleMaker(@"(fuel station loc. unknown)"));
+    unknownReason = compressLabel(cellSubtitleMaker(@"(gas station loc. unknown)"));
     [PEUIUtils placeView:distance atTopOf:contentView withAlignment:horizontalAlignment vpadding:verticalPadding hpadding:horizontalPadding];
     [PEUIUtils placeView:unknownReason below:distance onto:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:0.0 hpadding:0.0];
   }
@@ -895,8 +916,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                listViewController:listViewCtlr](user);
     };
     PEPageLoaderBlk pageLoader = ^ NSArray * (id lastObject) {
-      NSArray *fuelstations = [_coordDao fuelStationsForUser:user
-                                                       error:[FPUtils localFetchErrorHandlerMaker]()];
+      NSArray *fuelstations = [_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];
       fuelstations = [FPUtils sortFuelstations:fuelstations inAscOrderByDistanceFrom:[APP latestLocation]];
       return fuelstations;
     };
@@ -922,7 +942,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     };
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPFuelStation class]
-                                        title:@"Fuel Stations"
+                                        title:@"Gas Stations"
                         isPaginatedDataSource:NO
                               tableCellStyler:tableCellStyler
                            itemSelectedAction:nil
@@ -984,7 +1004,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     };
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPFuelStation class]
-                                        title:@"Unsynced Fuel Stations"
+                                        title:@"Unsynced Gas Stations"
                         isPaginatedDataSource:NO
                               tableCellStyler:tableCellStyler
                            itemSelectedAction:nil
@@ -1048,7 +1068,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     };
     return [[PEListViewController alloc]
              initWithClassOfDataSourceObjects:[FPFuelStation class]
-                                        title:@"Choose Fuel Station"
+                                        title:@"Choose Gas Station"
                         isPaginatedDataSource:NO
                               tableCellStyler:tableCellStyler
                            itemSelectedAction:itemSelectedAction
@@ -1098,8 +1118,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                          PESyncConflictBlk conflictBlk,
                                                                          PESyncAuthRequiredBlk authReqdBlk,
                                                                          PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading fuel station";
-      NSString *recordTitle = @"Fuel station";
+      NSString *mainMsgFragment = @"uploading gas station";
+      NSString *recordTitle = @"Gas station";
       [_coordDao saveNewAndSyncImmediateFuelStation:newFuelStation
                                             forUser:user
                                 notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
@@ -1134,7 +1154,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                     entityFormPanelMaker:[_panelToolkit fuelstationFormPanelMaker]
                      entityToPanelBinder:[_panelToolkit fuelstationToFuelstationPanelBinder]
                      panelToEntityBinder:[_panelToolkit fuelstationFormPanelToFuelstationBinder]
-                             entityTitle:@"Fuel Station"
+                             entityTitle:@"Gas Station"
                        entityAddCanceler:addCanceler
                              entityMaker:[_panelToolkit fuelstationMaker]
                      newEntitySaverLocal:newFuelStationSaverLocal
@@ -1187,8 +1207,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                                 PESyncConflictBlk conflictBlk,
                                                                                 PESyncAuthRequiredBlk authReqdBlk,
                                                                                 PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading fuel station";
-      NSString *recordTitle = @"Fuel station";
+      NSString *mainMsgFragment = @"uploading gas station";
+      NSString *recordTitle = @"Gas station";
       [_coordDao markAsDoneEditingAndSyncFuelStationImmediate:fuelStation
                                                       forUser:user
                                           notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
@@ -1210,8 +1230,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                PESyncConflictBlk conflictBlk,
                                PESyncAuthRequiredBlk authReqdBlk,
                                PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading fuel station";
-      NSString *recordTitle = @"Fuel station";
+      NSString *mainMsgFragment = @"uploading gas station";
+      NSString *recordTitle = @"Gas station";
       [_coordDao flushUnsyncedChangesToFuelStation:fuelStation
                                            forUser:user
                                notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
@@ -1240,7 +1260,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       [mergeConflicts enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         NSString *fieldName = key;
         if ([fieldName isEqualToString:FPFuelstationNameField]) {
-          [fields addObject:@[@"Fuel station name:", @(FPFuelStationTagName), [PEUtils emptyIfNil:[localFuelstation name]], [PEUtils emptyIfNil:[remoteFuelstation name]]]];
+          [fields addObject:@[@"Gas station name:", @(FPFuelStationTagName), [PEUtils emptyIfNil:[localFuelstation name]], [PEUtils emptyIfNil:[remoteFuelstation name]]]];
         } else if ([fieldName isEqualToString:FPFuelstationStreetField]) {
           [fields addObject:@[@"Street:", @(FPFuelStationTagStreet), [PEUtils emptyIfNil:[localFuelstation street]], [PEUtils emptyIfNil:[remoteFuelstation street]]]];
         } else if ([fieldName isEqualToString:FPFuelstationCityField]) {
@@ -1302,8 +1322,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                        PESyncRetryAfterBlk retryAfterBlk,
                                        PESyncServerTempErrorBlk tempErrBlk,
                                        PESyncAuthRequiredBlk authReqdBlk) {
-      NSString *mainMsgFragment = @"fetching fuelstation";
-      NSString *recordTitle = @"Fuel station";
+      NSString *mainMsgFragment = @"fetching gas station";
+      NSString *recordTitle = @"Gas station";
       float percentOfFetching = 1.0;
       [_coordDao fetchFuelstationWithGlobalId:[fuelstation globalIdentifier]
                               ifModifiedSince:[fuelstation updatedAt]
@@ -1319,6 +1339,12 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                     FPFuelStation *fuelstation) {
       [[_coordDao localDao] saveMasterFuelstation:downloadedFuelstation forUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
     };
+    PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
+      UIButton *viewFplogsBtn = (UIButton *)[ctrl.view viewWithTag:FPFuelStationTagViewFplogsBtn];
+      [FPUIUtils refreshRecordCountLabelOnButton:viewFplogsBtn
+                             recordCountLabelTag:FPFuelStationTagViewFplogsBtnRecordCount
+                                     recordCount:[_coordDao numFuelPurchaseLogsForFuelStation:fuelStation error:[FPUtils localFetchErrorHandlerMaker]()]];
+    };
     return [PEAddViewEditController
              viewEntityCtrlrWithEntity:fuelStation
                     listViewController:listViewController
@@ -1329,7 +1355,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                   entityViewPanelMaker:[_panelToolkit fuelstationViewPanelMaker]
                    entityToPanelBinder:[_panelToolkit fuelstationToFuelstationPanelBinder]
                    panelToEntityBinder:[_panelToolkit fuelstationFormPanelToFuelstationBinder]
-                           entityTitle:@"Fuel Station"
+                           entityTitle:@"Gas Station"
                   panelEnablerDisabler:[_panelToolkit fuelstationFormPanelEnablerDisabler]
                      entityAddCanceler:nil
                     entityEditPreparer:fuelStationEditPreparer
@@ -1342,7 +1368,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                          isOfflineMode:^{ return [APP offlineMode]; }
         syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
         prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
-                      viewDidAppearBlk:nil
+                      viewDidAppearBlk:viewDidAppearBlk
                        entityValidator:[self newFuelStationValidator]
                                 uploader:uploader
                  numRemoteDepsNotLocal:nil
@@ -1383,7 +1409,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       [errMsgs addObject:@"Must select a vehicle."];
     }
     if (!selectedFuelStation) {
-      [errMsgs addObject:@"Must select a fuel station."];
+      [errMsgs addObject:@"Must select a gas station."];
     }
     return errMsgs;
   };
@@ -1415,7 +1441,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                   defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
                                           listViewController:(PEListViewController *)listViewController {
   return ^ UIViewController * (FPUser *user) {
-    
     NSArray *(^selectionsAndPercents)(UIView *entityPanel, FPLogEnvLogComposite *) = ^ NSArray * (UIView *entityPanel, FPLogEnvLogComposite *fpEnvLogComposite) {
       FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
         (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[(UITableView *)[entityPanel viewWithTag:FPFpLogTagVehicleFuelStationAndDate] dataSource];
@@ -1450,7 +1475,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                @(savePreFillupEnvLogPercentComplete),
                @(savePostFillupEnvLogPercentComplete)];
     };
-    
     PESaveNewEntityLocalBlk newFuelPurchaseLogSaverLocal = ^(UIView *entityPanel, FPLogEnvLogComposite *fpEnvLogComposite) {
       NSArray *selectionsAndPercentArray = selectionsAndPercents(entityPanel, fpEnvLogComposite);
       FPVehicle *selectedVehicle = selectionsAndPercentArray[0];
@@ -1486,33 +1510,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                              PESyncConflictBlk conflictBlk,
                                                                              PESyncAuthRequiredBlk authReqdBlk,
                                                                              PESyncDependencyUnsynced depUnsyncedBlk) {
-      /*FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
-        (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)
-          [(UITableView *)[entityPanel viewWithTag:FPFpLogTagVehicleFuelStationAndDate] dataSource];
-      FPVehicle *selectedVehicle = [ds selectedVehicle];
-      FPFuelStation *selectedFuelStation = [ds selectedFuelStation];
-      NSArray *shouldSavePrePostFillupEnvLogs = [self shouldSavePrePostFillupEnvLogs:fpEnvLogComposite];
-      BOOL shouldSavePreFillupEnvLog = [shouldSavePrePostFillupEnvLogs[0] boolValue];
-      BOOL shouldSavePostFillupEnvLog = [shouldSavePrePostFillupEnvLogs[1] boolValue];
-      float saveFpLogPercentComplete = 0;
-      float savePreFillupEnvLogPercentComplete = 0;
-      float savePostFillupEnvLogPercentComplete = 0;
-      if (shouldSavePreFillupEnvLog) {
-        if (shouldSavePostFillupEnvLog) {
-          saveFpLogPercentComplete = 0.4;
-          savePreFillupEnvLogPercentComplete = 0.3;
-          savePostFillupEnvLogPercentComplete = 0.3;
-        } else {
-          saveFpLogPercentComplete = 0.5;
-          savePreFillupEnvLogPercentComplete = 0.5;
-        }
-      } else if (shouldSavePostFillupEnvLog) {
-        saveFpLogPercentComplete = 0.5;
-        savePostFillupEnvLogPercentComplete = 0.5;
-      } else {
-        saveFpLogPercentComplete = 1.0;
-      }*/
-      
       NSArray *selectionsAndPercentArray = selectionsAndPercents(entityPanel, fpEnvLogComposite);
       FPVehicle *selectedVehicle = selectionsAndPercentArray[0];
       FPFuelStation *selectedFuelStation = selectionsAndPercentArray[1];
@@ -1521,87 +1518,71 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       float saveFpLogPercentComplete = [selectionsAndPercentArray[4] floatValue];
       float savePreFillupEnvLogPercentComplete = [selectionsAndPercentArray[5] floatValue];
       float savePostFillupEnvLogPercentComplete = [selectionsAndPercentArray[6] floatValue];
-      
       NSString *mainMsgFragment = @"uploading gas log";
       if (savePreFillupEnvLogPercentComplete || savePostFillupEnvLogPercentComplete) {
         mainMsgFragment = @"uploading gas\nand odometer logs";
       }
       NSString *recordTitle = @"Gas log";
-      /*BOOL doSyncImmediate = [APP doesUserHaveValidAuthToken];
-      if (doSyncImmediate) {*/
-        [_coordDao saveNewAndSyncImmediateFuelPurchaseLog:[fpEnvLogComposite fpLog]
-                                                  forUser:user
-                                                  vehicle:selectedVehicle
-                                              fuelStation:selectedFuelStation
-                                      notFoundOnServerBlk:^{notFoundBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                           addlSuccessBlk:^{successBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                   addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                                   addlTempRemoteErrorBlk:^{tempErrBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                       addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
-                                          addlConflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
-                                      addlAuthRequiredBlk:^{authReqdBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                             skippedDueToVehicleNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
-                         skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The fuel station is not yet synced."); [APP refreshTabs];}
-                                                    error:[FPUtils localSaveErrorHandlerMaker]()];
-      /*} else {
-        [_coordDao saveNewFuelPurchaseLog:[fpEnvLogComposite fpLog]
-                                  forUser:user
-                                  vehicle:selectedVehicle
-                              fuelStation:selectedFuelStation
-                                    error:[FPUtils localSaveErrorHandlerMaker]()];
-        [APP refreshTabs];
-      }*/
+      [_coordDao saveNewAndSyncImmediateFuelPurchaseLog:[fpEnvLogComposite fpLog]
+                                                forUser:user
+                                                vehicle:selectedVehicle
+                                            fuelStation:selectedFuelStation
+                                    notFoundOnServerBlk:^{notFoundBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                         addlSuccessBlk:^{successBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                 addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                 addlTempRemoteErrorBlk:^{tempErrBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                     addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
+                                        addlConflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
+                                    addlAuthRequiredBlk:^{authReqdBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                           skippedDueToVehicleNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
+                       skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The gas station is not yet synced."); [APP refreshTabs];}
+                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
       if (shouldSavePreFillupEnvLog) {
-        recordTitle = @"Pre-fillup environment log";
-        //if (doSyncImmediate) {
-          [_coordDao saveNewAndSyncImmediateEnvironmentLog:[fpEnvLogComposite preFillupEnvLog]
-                                                   forUser:user
-                                                   vehicle:selectedVehicle
-                                       notFoundOnServerBlk:^{notFoundBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                            addlSuccessBlk:^{successBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                    addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                                    addlTempRemoteErrorBlk:^{tempErrBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                        addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
-                                           addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
-                                       addlAuthRequiredBlk:^{authReqdBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                              skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
-                                                     error:[FPUtils localSaveErrorHandlerMaker]()];
-        /*} else {
-          [_coordDao saveNewEnvironmentLog:[fpEnvLogComposite preFillupEnvLog]
-                                   forUser:user vehicle:selectedVehicle
-                                     error:[FPUtils localSaveErrorHandlerMaker]()];
-          [APP refreshTabs];
-        }*/
+        recordTitle = @"Pre-fillup odometer log";
+        [_coordDao saveNewAndSyncImmediateEnvironmentLog:[fpEnvLogComposite preFillupEnvLog]
+                                                 forUser:user
+                                                 vehicle:selectedVehicle
+                                     notFoundOnServerBlk:^{notFoundBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                          addlSuccessBlk:^{successBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                  addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                  addlTempRemoteErrorBlk:^{tempErrBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                      addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                         addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
+                                     addlAuthRequiredBlk:^{authReqdBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                            skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
+                                                   error:[FPUtils localSaveErrorHandlerMaker]()];
       }
       if (shouldSavePostFillupEnvLog) {
-        recordTitle = @"Post-fillup environment log";
-        //if (doSyncImmediate) {
-          [_coordDao saveNewAndSyncImmediateEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
-                                                   forUser:user
-                                                   vehicle:selectedVehicle
-                                       notFoundOnServerBlk:^{notFoundBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                            addlSuccessBlk:^{successBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                    addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                                    addlTempRemoteErrorBlk:^{tempErrBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                        addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
-                                           addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
-                                       addlAuthRequiredBlk:^{authReqdBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                              skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
-                                                     error:[FPUtils localSaveErrorHandlerMaker]()];
-        /*} else {
-          [_coordDao saveNewEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
-                                   forUser:user vehicle:selectedVehicle
-                                     error:[FPUtils localSaveErrorHandlerMaker]()];
-          [APP refreshTabs];
-        }*/
+        recordTitle = @"Post-fillup odometer log";
+        [_coordDao saveNewAndSyncImmediateEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
+                                                 forUser:user
+                                                 vehicle:selectedVehicle
+                                     notFoundOnServerBlk:^{notFoundBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                          addlSuccessBlk:^{successBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                  addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                  addlTempRemoteErrorBlk:^{tempErrBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                      addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
+                                         addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
+                                     addlAuthRequiredBlk:^{authReqdBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                            skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
+                                                   error:[FPUtils localSaveErrorHandlerMaker]()];
       }
     };
-    PEViewDidAppearBlk viewDidAppearBlk = ^(UIView *entityPanel) {
+    PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
       UITableView *vehicleFuelStationTable =
-        (UITableView *)[entityPanel viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
+        (UITableView *)[ctrl.view viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
       if ([vehicleFuelStationTable indexPathForSelectedRow]) {
         [vehicleFuelStationTable deselectRowAtIndexPath:[vehicleFuelStationTable indexPathForSelectedRow]
                                                animated:YES];
+      }
+    };
+    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
+      UITextField *octaneTf = (UITextField *)[entityPanel viewWithTag:FPFpLogTagOctane];
+      if (octaneTf.text.length == 0) {
+        [octaneTf becomeFirstResponder];
+      } else {
+        UITextField *prefillupDte = (UITextField *)[entityPanel viewWithTag:FPFpEnvLogCompositeTagPreFillupReportedDte];
+        [prefillupDte becomeFirstResponder];
       }
     };
     PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, BOOL dismissCtrlr, FPLogEnvLogComposite *fpEnvLogComposite) {
@@ -1635,6 +1616,19 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
       }
     };
+    PEEntitiesFromEntityBlk entitiesFromEntity = ^NSArray *(FPLogEnvLogComposite *fpEnvLogComposite) {
+      NSMutableArray *logs = [NSMutableArray array];
+      [logs addObject:[fpEnvLogComposite fpLog]];
+      FPEnvironmentLog *preFillupEnvlog = [fpEnvLogComposite preFillupEnvLog];
+      FPEnvironmentLog *postFillupEnvlog = [fpEnvLogComposite postFillupEnvLog];
+      if (preFillupEnvlog) {
+        [logs addObject:preFillupEnvlog];
+      }
+      if (postFillupEnvlog) {
+        [logs addObject:postFillupEnvlog];
+      }
+      return logs;
+    };
     return [PEAddViewEditController
              addEntityCtrlrWithUitoolkit:_uitoolkit
                       listViewController:listViewController
@@ -1650,14 +1644,14 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                              entityMaker:[_panelToolkit fpEnvLogCompositeMaker]
                      newEntitySaverLocal:newFuelPurchaseLogSaverLocal
              newEntitySaverImmediateSync:newFuelPurchaseLogSaverImmediateSync
-          prepareUIForUserInteractionBlk:nil
+          prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                         viewDidAppearBlk:viewDidAppearBlk
                          entityValidator:[self newFpEnvLogCompositeValidator]
                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
                            isOfflineMode:^{ return [APP offlineMode]; }
           syncImmediateMBProgressHUDMode:MBProgressHUDModeDeterminate
-                   getterForNotification:@selector(fpLog)];
+                      entitiesFromEntity:entitiesFromEntity];
   };
 }
 
@@ -1735,7 +1729,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                   addlConflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(1, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
                                               addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                      skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
-                                 skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The fuel station is not yet synced."); [APP refreshTabs];}
+                                 skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The gas station is not yet synced."); [APP refreshTabs];}
                                                             error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEUploaderBlk uploader = ^(PEAddViewEditController *ctrl,
@@ -1760,7 +1754,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                        addlConflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(1, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
                                    addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                           skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
-                      skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The fuel station is not yet synced."); [APP refreshTabs];}
+                      skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The gas station is not yet synced."); [APP refreshTabs];}
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PENumRemoteDepsNotLocal numRemoteDepsNotLocalBlk = ^ NSInteger (FPFuelPurchaseLog *remoteFplog) {
@@ -1797,8 +1791,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                 error:[FPUtils localSaveErrorHandlerMaker]()];
       }
       if (!fuelstation) {
-        NSString *mainMsgFragment = @"fetching fuelstation";
-        NSString *recordTitle = @"Fuelstation";
+        NSString *mainMsgFragment = @"fetching gas station";
+        NSString *recordTitle = @"Gas station";
         [_coordDao fetchAndSaveNewFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier]
                                                   forUser:user
                                       notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}
@@ -1854,7 +1848,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         if ([fieldName isEqualToString:FPFplogVehicleGlobalIdField]) {
           [fields addObject:@[@"Vehicle:", @(FPFpLogTagVehicle), orNil([vehicleForLocalFplog name]), orNil([vehicleForRemoteFplog name])]];
         } else if ([fieldName isEqualToString:FPFplogFuelstationGlobalIdField]) {
-          [fields addObject:@[@"Fuel station:", @(FPFpLogTagFuelstation), orNil([fuelstationForLocalFplog name]), orNil([fuelstationForRemoteFplog name])]];
+          [fields addObject:@[@"Gas station:", @(FPFpLogTagFuelstation), orNil([fuelstationForLocalFplog name]), orNil([fuelstationForRemoteFplog name])]];
         } else if ([fieldName isEqualToString:FPFplogPurchasedAtField]) {
           [fields addObject:@[@"Purchased date:", @(FPFpLogTagPurchasedDate), [PEUtils stringFromDate:[localFplog purchasedAt] withPattern:@"MM/dd/YYYY"], [PEUtils stringFromDate:[remoteFplog purchasedAt] withPattern:@"MM/dd/YYYY"]]];
         } else if ([fieldName isEqualToString:FPFplogOctaneField]) {
@@ -1967,6 +1961,10 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       [ds setSelectedFuelStation:fuelstationForDownloadedFplog];
       [vehFsAndDateTableView reloadData];
     };
+    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
+      UITextField *octaneTf = (UITextField *)[entityPanel viewWithTag:FPFpLogTagOctane];
+      [octaneTf becomeFirstResponder];
+    };
     return [PEAddViewEditController
              viewEntityCtrlrWithEntity:fpLog
                     listViewController:listViewController
@@ -1993,7 +1991,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                         isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
                          isOfflineMode:^{ return [APP offlineMode]; }
         syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
-        prepareUIForUserInteractionBlk:nil
+        prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                       viewDidAppearBlk:nil
                        entityValidator:[self newFuelPurchaseLogValidator]
                                 uploader:uploader
@@ -2391,12 +2389,11 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                           skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
-    PEViewDidAppearBlk viewDidAppearBlk = ^(UIView *entityPanel) {
+    PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
       UITableView *vehicleTable =
-      (UITableView *)[entityPanel viewWithTag:FPEnvLogTagVehicleAndDate];
+      (UITableView *)[ctrl.view viewWithTag:FPEnvLogTagVehicleAndDate];
       if ([vehicleTable indexPathForSelectedRow]) {
-        [vehicleTable deselectRowAtIndexPath:[vehicleTable indexPathForSelectedRow]
-                                    animated:YES];
+        [vehicleTable deselectRowAtIndexPath:[vehicleTable indexPathForSelectedRow] animated:YES];
       }
     };
     PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, BOOL dismissCtrlr, FPEnvironmentLog *newEnvLog) {
@@ -2410,6 +2407,10 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       if (dismissCtrlr) {
         [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
       }
+    };
+    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
+      UITextField *odometerTf = (UITextField *)[entityPanel viewWithTag:FPEnvLogTagOdometer];
+      [odometerTf becomeFirstResponder];
     };
     return [PEAddViewEditController
               addEntityCtrlrWithUitoolkit:_uitoolkit
@@ -2425,7 +2426,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                               entityMaker:[_panelToolkit envlogMaker]
                       newEntitySaverLocal:newEnvironmentLogSaverLocal
               newEntitySaverImmediateSync:newEnvironmentLogSaverImmediateSync
-           prepareUIForUserInteractionBlk:nil
+           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                          viewDidAppearBlk:viewDidAppearBlk
                           entityValidator:[self newEnvironmentLogValidator]
                           isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
@@ -2682,6 +2683,10 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       [ds setSelectedVehicle:vehicleForDownloadedEnvlog];
       [vehicleAndDateTableView reloadData];
     };
+    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
+      UITextField *odometerTf = (UITextField *)[entityPanel viewWithTag:FPEnvLogTagOdometer];
+      [odometerTf becomeFirstResponder];
+    };
     return [PEAddViewEditController viewEntityCtrlrWithEntity:envLog
                                            listViewController:listViewController
                                               entityIndexPath:envLogIndexPath
@@ -2706,7 +2711,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
                                                 isOfflineMode:^{ return [APP offlineMode]; }
                                syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
-                               prepareUIForUserInteractionBlk:nil
+                               prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                                              viewDidAppearBlk:nil
                                               entityValidator:[self newEnvironmentLogValidator]
                                                      uploader:uploader

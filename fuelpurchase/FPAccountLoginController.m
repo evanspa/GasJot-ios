@@ -104,7 +104,7 @@
   UILabel *signInMsgLabel = [PEUIUtils labelWithKey:@"\
 From here you can log into your remote \
 account, connecting this device to it.  Your \
-fuel purchase data will be downloaded to this \
+gas jot data will be downloaded to this \
 device.\n\n\
 Enter your credentials and tap 'Log In'."
                                                font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
@@ -168,7 +168,7 @@ Enter your credentials and tap 'Log In'."
                                alertDescription:[[NSAttributedString alloc] initWithString:@"\
 You have been successfully logged in.\n\n\
 Your remote account is now connected to \
-this device.  Any fuel purchase data that \
+this device.  Any gas jot data that \
 you create and save will be synced to your \
 remote account."]
                                 syncIconMessage:[[NSAttributedString alloc] initWithString:@"\
@@ -260,7 +260,7 @@ into your remote account:"]
 You have been successfully logged in and \
 your local edits have been synced.\n\n\
 Your remote account is now connected to \
-this device.  Any fuel purchase data that \
+this device.  Any gas jot data that \
 you create and save will be synced to your \
 remote account."]
                                                                                   syncIconMessage:[[NSAttributedString alloc] initWithString:@"\

@@ -135,7 +135,7 @@ You currently have no unsynced items."
   }
   _fuelStationsButton = nil;
   if (numEipFuelStations > 0) {
-    _fuelStationsButton = [FPUIUtils buttonWithLabel:@"Fuel Stations"
+    _fuelStationsButton = [FPUIUtils buttonWithLabel:@"Gas Stations"
                                             badgeNum:numEipFuelStations
                                           badgeColor:eipBadgeColor
                                       badgeTextColor:eipBadgeTextColor

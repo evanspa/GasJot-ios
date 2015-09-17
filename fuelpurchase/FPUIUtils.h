@@ -14,6 +14,21 @@
                   color:(UIColor *)color
          badgeTextColor:(UIColor *)badgeTextColor;
 
++ (NSString *)labelTextForRecordCount:(NSInteger)recordCount;
+
++ (void)refreshRecordCountLabelOnButton:(UIButton *)button
+                    recordCountLabelTag:(NSInteger)recordCountLabelTag
+                            recordCount:(NSInteger)recordCount;
+
++ (UIButton *)buttonWithLabel:(NSString *)labelText
+                 tagForButton:(NSNumber *)tagForButton
+                  recordCount:(NSInteger)recordCount
+       tagForRecordCountLabel:(NSNumber *)tagForRecordCountLabel
+            addDisclosureIcon:(BOOL)addDisclosureIcon
+                      handler:(void(^)(void))handler
+                    uitoolkit:(PEUIToolkit *)uitoolkit
+               relativeToView:(UIView *)relativeToView;
+
 + (UIButton *)buttonWithLabel:(NSString *)labelText
                      badgeNum:(NSInteger)badgeNum
                    badgeColor:(UIColor *)badgeColor

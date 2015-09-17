@@ -106,7 +106,7 @@
   CGFloat leftPadding = 8.0;
   UILabel *createAccountMsgLabel = [PEUIUtils labelWithKey:@"\
 From here you can create a remote account. \
-This will enable your fuel purchase data to be \
+This will enable your gas jot data to be \
 synced to a server where you can access it \
 from the FP web site or other devices.\n\n\
 Fill out the form below and tap 'Done'."
@@ -280,7 +280,7 @@ Fill out the form below and tap 'Done'."
 Your remote account has been created and \
 your local edits have been synced.\n\n\
 Your account is now connected to this \
-device.  Any fuel purchase data that \
+device.  Any gas jot data that \
 you create and save will be synced to your \
 remote account."]
                                                                                   syncIconMessage:[[NSAttributedString alloc] initWithString:@"\

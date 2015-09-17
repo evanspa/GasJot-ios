@@ -47,6 +47,66 @@
   return badge;
 }
 
++ (NSString *)labelTextForRecordCount:(NSInteger)recordCount {
+  NSString *trailerForLabel = @"";
+  if (recordCount > 1 || recordCount == 0) {
+    trailerForLabel = @"s";
+  }
+  return [NSString stringWithFormat:@"%ld record%@", (long)recordCount, trailerForLabel];
+}
+
++ (UILabel *)labelForRecordCount:(NSInteger)recordCount {
+  return [PEUIUtils labelWithKey:[FPUIUtils labelTextForRecordCount:recordCount]
+                            font:[UIFont systemFontOfSize:12]
+                 backgroundColor:[UIColor clearColor]
+                       textColor:[UIColor darkGrayColor]
+             verticalTextPadding:0.0];
+}
+
++ (void)placeRecordCountLabel:(UILabel *)recordCountLabel
+                   ontoButton:(UIButton *)button {
+  [PEUIUtils placeView:recordCountLabel
+            atBottomOf:button
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:5.0
+              hpadding:6.0];
+}
+
++ (void)refreshRecordCountLabelOnButton:(UIButton *)button
+                    recordCountLabelTag:(NSInteger)recordCountLabelTag
+                            recordCount:(NSInteger)recordCount {
+  UILabel *recordCountLabel = (UILabel *)[button viewWithTag:recordCountLabelTag];
+  [PEUIUtils setTextAndResize:[FPUIUtils labelTextForRecordCount:recordCount] forLabel:recordCountLabel];
+}
+
++ (UIButton *)buttonWithLabel:(NSString *)labelText
+                 tagForButton:(NSNumber *)tagForButton
+                  recordCount:(NSInteger)recordCount
+       tagForRecordCountLabel:(NSNumber *)tagForRecordCountLabel
+            addDisclosureIcon:(BOOL)addDisclosureIcon
+                      handler:(void(^)(void))handler
+                    uitoolkit:(PEUIToolkit *)uitoolkit
+               relativeToView:(UIView *)relativeToView {
+  UIButton *button = [uitoolkit systemButtonMaker](labelText, nil, nil);
+  if (tagForButton) {
+    [button setTag:[tagForButton integerValue]];
+  }
+  [[button layer] setCornerRadius:0.0];
+  [PEUIUtils setFrameWidthOfView:button ofWidth:1.0 relativeTo:relativeToView];
+  if (addDisclosureIcon) {
+    [PEUIUtils addDisclosureIndicatorToButton:button];
+  }
+  [button bk_addEventHandler:^(id sender) {
+    handler();
+  } forControlEvents:UIControlEventTouchUpInside];
+  UILabel *recordCountLabel = [FPUIUtils labelForRecordCount:recordCount];
+  if (tagForRecordCountLabel) {
+    [recordCountLabel setTag:[tagForRecordCountLabel integerValue]];
+  }
+  [FPUIUtils placeRecordCountLabel:recordCountLabel ontoButton:button];
+  return button;
+}
+
 + (UIButton *)buttonWithLabel:(NSString *)labelText
                      badgeNum:(NSInteger)badgeNum
                    badgeColor:(UIColor *)badgeColor

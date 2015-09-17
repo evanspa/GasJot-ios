@@ -116,7 +116,7 @@
   NSString *logoutMsg = @"\
 Logging out will disconnect this device from \
 your remote account.  This will remove your \
-fuel purchase data from this device only.";
+gas jot data from this device only.";
   return [self leftPaddingMessageWithText:logoutMsg];
 }
 
@@ -197,7 +197,7 @@ details.";
                  below:accountSettingsBtn
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:7.0
+              vpadding:4.0
               hpadding:0.0];
   /*UIView *divider = makeDivider(1.0);
   [PEUIUtils placeView:divider
@@ -221,7 +221,7 @@ details.";
                  below:logoutBtn
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:7.0
+              vpadding:4.0
               hpadding:0.0];
 }
 
@@ -232,9 +232,10 @@ details.";
 For security reasons, we need you to \
 re-authenticate against your remote \
 account.";
-  UIView *messagePanel = [self messagePanelWithMessage:message
+  /*UIView *messagePanel = [self messagePanelWithMessage:message
                                              iconImage:[UIImage unsyncable]
-                                        relativeToView:_doesNotHaveAuthTokenPanel];
+                                        relativeToView:_doesNotHaveAuthTokenPanel];*/
+  UIView *messagePanel = [self leftPaddingMessageWithText:message];
   UIButton *reauthenticateBtn = [_uitoolkit systemButtonMaker](@"Re-authenticate", nil, nil);
   [[reauthenticateBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:reauthenticateBtn ofWidth:1.0 relativeTo:_doesNotHaveAuthTokenPanel];
@@ -244,6 +245,7 @@ account.";
   } forControlEvents:UIControlEventTouchUpInside];
   UIView *logoutMsgLabelWithPad = [self logoutPaddedMessage];
   UIButton *logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
+  [logoutBtn setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
   [[logoutBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:_doesNotHaveAuthTokenPanel];
   UIView *exclamationView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
@@ -263,27 +265,27 @@ account.";
               hpadding:15.0];
   
   // place views onto panel
-  [PEUIUtils placeView:messagePanel
+  [PEUIUtils placeView:reauthenticateBtn
                atTopOf:_doesNotHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:90.0
               hpadding:0];
-  [PEUIUtils placeView:reauthenticateBtn
-                 below:messagePanel
+  [PEUIUtils placeView:messagePanel
+                 below:reauthenticateBtn
                   onto:_doesNotHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:7.0
+              vpadding:4.0
               hpadding:0.0];
-  [PEUIUtils placeView:logoutMsgLabelWithPad
+  [PEUIUtils placeView:logoutBtn
             atBottomOf:_doesNotHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:_doesHaveAuthTokenPanel.frame.size.height * 0.275
               hpadding:0.0];
-  [PEUIUtils placeView:logoutBtn
-                 below:logoutMsgLabelWithPad
+  [PEUIUtils placeView:logoutMsgLabelWithPad
+                 below:logoutBtn
                   onto:_doesNotHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:7.0
+              vpadding:4.0
               hpadding:0.0];
 }
 

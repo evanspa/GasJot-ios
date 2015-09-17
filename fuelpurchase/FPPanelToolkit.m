@@ -16,6 +16,7 @@
 #import "FPLogEnvLogComposite.h"
 #import "FPNames.h"
 #import "FPUtils.h"
+#import "FPUIUtils.h"
 
 NSString * const FPFpLogEntityMakerFpLogEntry = @"FPFpLogEntityMakerFpLogEntry";
 NSString * const FPFpLogEntityMakerVehicleEntry = @"FPFpLogEntityMakerVehicleEntry";
@@ -167,15 +168,20 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                    belowView:(UIView *)belowView
                         parentViewController:(PEAddViewEditController *)parentViewController {
   // View Fuel Purchase Logs button
-  UIButton *viewFpLogsBtn = [_uitoolkit systemButtonMaker](@"Gas Logs", nil, nil);
-  [PEUIUtils setFrameWidthOfView:viewFpLogsBtn ofWidth:1.0 relativeTo:vehiclePanel];
-  [PEUIUtils addDisclosureIndicatorToButton:viewFpLogsBtn];
-  [viewFpLogsBtn bk_addEventHandler:^(id sender) {
-    FPVehicle *vehicle = (FPVehicle *)[parentViewController entity];
-    FPAuthScreenMaker fpLogsScreenMaker =
-    [_screenToolkit newViewFuelPurchaseLogsScreenMakerForVehicleInCtx];
-    [PEUIUtils displayController:fpLogsScreenMaker(vehicle) fromController:parentViewController animated:YES];
-  } forControlEvents:UIControlEventTouchUpInside];
+  UIButton *viewFpLogsBtn = [FPUIUtils buttonWithLabel:@"Gas logs"
+                                          tagForButton:@(FPVehicleTagViewFplogsBtn)
+                                           recordCount:[_coordDao numFuelPurchaseLogsForVehicle:(FPVehicle *)[parentViewController entity] error:[FPUtils localFetchErrorHandlerMaker]()]
+                                tagForRecordCountLabel:@(FPVehicleTagViewFplogsBtnRecordCount)
+                                     addDisclosureIcon:YES
+                                               handler:^{
+                                                 FPAuthScreenMaker fpLogsScreenMaker =
+                                                 [_screenToolkit newViewFuelPurchaseLogsScreenMakerForVehicleInCtx];
+                                                 [PEUIUtils displayController:fpLogsScreenMaker((FPVehicle *)[parentViewController entity])
+                                                               fromController:parentViewController
+                                                                     animated:YES];
+                                               }
+                                             uitoolkit:_uitoolkit
+                                        relativeToView:parentViewController.view];
   [PEUIUtils placeView:viewFpLogsBtn
                  below:belowView
                   onto:vehiclePanel
@@ -183,20 +189,24 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
               vpadding:30
               hpadding:0];
   // View Environment Logs button
-  UIButton *viewEnvLogsBtn = [_uitoolkit systemButtonMaker](@"Odometer Logs", nil, nil);
-  [PEUIUtils setFrameWidthOfView:viewEnvLogsBtn ofWidth:1.0 relativeTo:vehiclePanel];
-  [PEUIUtils addDisclosureIndicatorToButton:viewEnvLogsBtn];
-  [viewEnvLogsBtn bk_addEventHandler:^(id sender) {
-    FPVehicle *vehicle = (FPVehicle *)[parentViewController entity];
-    FPAuthScreenMaker envLogsScreenMaker =
-    [_screenToolkit newViewEnvironmentLogsScreenMakerForVehicleInCtx];
-    [PEUIUtils displayController:envLogsScreenMaker(vehicle) fromController:parentViewController animated:YES];
-  } forControlEvents:UIControlEventTouchUpInside];
+  UIButton *viewEnvLogsBtn = [FPUIUtils buttonWithLabel:@"Odometer logs"
+                                           tagForButton:@(FPVehicleTagViewEnvlogsBtn)
+                                            recordCount:[_coordDao numEnvironmentLogsForVehicle:(FPVehicle *)[parentViewController entity] error:[FPUtils localFetchErrorHandlerMaker]()]
+                                 tagForRecordCountLabel:@(FPVehicleTagViewEnvlogsBtnRecordCount)
+                                      addDisclosureIcon:YES
+                                                handler:^{
+                                                  FPVehicle *vehicle = (FPVehicle *)[parentViewController entity];
+                                                  FPAuthScreenMaker envLogsScreenMaker =
+                                                  [_screenToolkit newViewEnvironmentLogsScreenMakerForVehicleInCtx];
+                                                  [PEUIUtils displayController:envLogsScreenMaker(vehicle) fromController:parentViewController animated:YES];
+                                                }
+                                              uitoolkit:_uitoolkit
+                                         relativeToView:parentViewController.view];  
   [PEUIUtils placeView:viewEnvLogsBtn
                  below:viewFpLogsBtn
                   onto:vehiclePanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:5
+              vpadding:10.0
               hpadding:0];
 }
 
@@ -334,7 +344,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
 - (UIButton *)placeViewLogsButtonOntoFuelstationPanel:(UIView *)fuelstationPanel
                                             belowView:(UIView *)belowView
                                  parentViewController:(PEAddViewEditController *)parentViewController {
-  UIButton *viewFpLogsBtn = [_uitoolkit systemButtonMaker](@"Gas Logs", nil, nil);
+  /*UIButton *viewFpLogsBtn = [_uitoolkit systemButtonMaker](@"Gas Logs", nil, nil);
   [PEUIUtils setFrameWidthOfView:viewFpLogsBtn ofWidth:1.0 relativeTo:fuelstationPanel];
   [PEUIUtils addDisclosureIndicatorToButton:viewFpLogsBtn];
   [viewFpLogsBtn bk_addEventHandler:^(id sender) {
@@ -342,7 +352,21 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     FPAuthScreenMaker fpLogsScreenMaker =
     [_screenToolkit newViewFuelPurchaseLogsScreenMakerForFuelStationInCtx];
     [PEUIUtils displayController:fpLogsScreenMaker(vehicle) fromController:parentViewController animated:YES];
-  } forControlEvents:UIControlEventTouchUpInside];
+  } forControlEvents:UIControlEventTouchUpInside];*/
+  UIButton *viewFpLogsBtn = [FPUIUtils buttonWithLabel:@"Gas logs"
+                                          tagForButton:@(FPFuelStationTagViewFplogsBtn)
+                                           recordCount:[_coordDao numFuelPurchaseLogsForFuelStation:(FPFuelStation *)[parentViewController entity] error:[FPUtils localFetchErrorHandlerMaker]()]
+                                tagForRecordCountLabel:@(FPFuelStationTagViewFplogsBtnRecordCount)
+                                     addDisclosureIcon:YES
+                                               handler:^{
+                                                 FPAuthScreenMaker fpLogsScreenMaker =
+                                                 [_screenToolkit newViewFuelPurchaseLogsScreenMakerForFuelStationInCtx];
+                                                 [PEUIUtils displayController:fpLogsScreenMaker((FPFuelStation *)[parentViewController entity])
+                                                               fromController:parentViewController
+                                                                     animated:YES];
+                                               }
+                                             uitoolkit:_uitoolkit
+                                        relativeToView:parentViewController.view];
   [PEUIUtils placeView:viewFpLogsBtn
                  below:belowView
                   onto:fuelstationPanel
@@ -381,7 +405,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
   return ^ UIView * (PEAddViewEditController *parentViewController, FPFuelStation *fuelstation) {
     UIView *parentView = [parentViewController view];
     UIView *fuelstationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *fuelstationDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Fuel station name", [PEUtils emptyIfNil:[fuelstation name]]],
+    UIView *fuelstationDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Gas station name", [PEUtils emptyIfNil:[fuelstation name]]],
                                                                       @[@"Street", [PEUtils emptyIfNil:[fuelstation street]]],
                                                                       @[@"City", [PEUtils emptyIfNil:[fuelstation city]]],
                                                                       @[@"State", [PEUtils emptyIfNil:[fuelstation state]]],
@@ -424,7 +448,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     UIView *parentView = [parentViewController view];
     UIView *fuelStationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.1 relativeToView:parentView];
     TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:fuelStationPanel];
-    UITextField *fuelStationNameTf = tfMaker(@"Fuel station name", FPFuelStationTagName);
+    UITextField *fuelStationNameTf = tfMaker(@"Gas station name", FPFuelStationTagName);
     UITextField *fuelStationStreetTf = tfMaker(@"Street", FPFuelStationTagStreet);
     UITextField *fuelStationCityTf = tfMaker(@"City", FPFuelStationTagCity);
     UITextField *fuelStationStateTf = tfMaker(@"State", FPFuelStationTagState);
@@ -727,7 +751,7 @@ location from the given address above."]
                 hpadding:0.0];
     
     NSNumber *defaultOctane = [defaultSelectedVehicle defaultOctane];
-    if (defaultOctane) {
+    if (![PEUtils isNil:defaultOctane]) {
       [octaneTf setText:[defaultOctane description]];
     }
     
@@ -923,7 +947,7 @@ location from the given address above."]
     UITextField *octaneTf = tfMaker(@"Octane", FPFpLogTagOctane);
     if (defaultSelectedVehicle) {
       NSNumber *defaultOctane = [defaultSelectedVehicle defaultOctane];
-      if (defaultOctane) {
+      if (![PEUtils isNil:defaultOctane]) {
         [octaneTf setText:[defaultOctane description]];
       }
     }
@@ -964,7 +988,7 @@ location from the given address above."]
        reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]] // 'Vehicle' is col-index 0
        withRowAnimation:UITableViewRowAnimationAutomatic];
       NSNumber *defaultOctane = [vehicle defaultOctane];
-      if (defaultOctane) {
+      if (![PEUtils isNil:defaultOctane]) {
         [octaneTf setText:[defaultOctane description]];
       } else {
         [octaneTf setText:@""];
