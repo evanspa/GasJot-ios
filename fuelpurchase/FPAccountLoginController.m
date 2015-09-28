@@ -43,7 +43,7 @@
 
 @implementation FPAccountLoginController {
   FPCoordinatorDao *_coordDao;
-  UITextField *_siUsernameOrEmailTf;
+  UITextField *_siEmailTf;
   UITextField *_siPasswordTf;
   UIButton *_siDoSignInBtn;
   CGFloat animatedDistance;
@@ -89,7 +89,7 @@
                                                                   style:UIBarButtonItemStylePlain
                                                                  target:self
                                                                  action:@selector(handleSignIn)]];
-  [_siUsernameOrEmailTf becomeFirstResponder];
+  [_siEmailTf becomeFirstResponder];
   _preserveExistingLocalEntities = nil;
 }
 
@@ -114,7 +114,7 @@ Enter your credentials and tap 'Log In'."
                                          fitToWidth:(signInPnl.frame.size.width - leftPadding - 3.0)];
   UIView *signInMsgPanel = [PEUIUtils leftPadView:signInMsgLabel padding:leftPadding];
   TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:signInPnl];
-  _siUsernameOrEmailTf = tfMaker(@"unauth.start.signin.emailusernmtf.pht");
+  _siEmailTf = tfMaker(@"unauth.start.signin.emailtf.pht");
   _siPasswordTf = tfMaker(@"unauth.start.signin.pwdtf.pht");
   [_siPasswordTf setSecureTextEntry:YES];
   
@@ -124,27 +124,27 @@ Enter your credentials and tap 'Log In'."
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:0.0
               hpadding:0.0];
-  [PEUIUtils placeView:_siUsernameOrEmailTf
+  [PEUIUtils placeView:_siEmailTf
                  below:signInMsgPanel
                   onto:signInPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:7.0
               hpadding:0.0];
   [PEUIUtils placeView:_siPasswordTf
-                 below:_siUsernameOrEmailTf
+                 below:_siEmailTf
                   onto:signInPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5.0
               hpadding:0.0];
   
   RAC(self, formStateMaskForSignIn) =
-    [RACSignal combineLatest:@[_siUsernameOrEmailTf.rac_textSignal,
+    [RACSignal combineLatest:@[_siEmailTf.rac_textSignal,
                                _siPasswordTf.rac_textSignal]
-                       reduce:^(NSString *usernameOrEmail,
+                       reduce:^(NSString *email,
                                 NSString *password) {
         NSUInteger signInErrMask = 0;
-        if ([usernameOrEmail length] == 0) {
-          signInErrMask = FPSignInUsernameOrEmailNotProvided |
+        if ([email length] == 0) {
+          signInErrMask = FPSignInEmailNotProvided |
             FPSignInAnyIssues;
         }
         if ([password length] == 0) {
@@ -160,6 +160,30 @@ Enter your credentials and tap 'Log In'."
 
 - (void)handleSignIn {
   [[self view] endEditing:YES];
+  void (^enableLocationServices)(void(^)(void)) = ^(void(^postAction)(void)) {
+    if (![APP locationServicesAuthorized] && ![APP locationServicesDenied]) {
+      [PEUIUtils showConfirmAlertWithTitle:@"Enable location services?"
+                                titleImage:[PEUIUtils bundleImageWithName:@"question"]
+                          alertDescription:[[NSAttributedString alloc] initWithString:@"\
+By enabling location services, selecting a gas station becomes easier when logging \
+gas purchases because the nearest gas station can be pre-selected.\n\n\
+If you would like to enable location services, tap 'Allow' in the next pop-up."]
+                                  topInset:70.0
+                           okayButtonTitle:@"Okay."
+                          okayButtonAction:^{
+                            [[APP locationManager] requestWhenInUseAuthorization];
+                            [APP setHasBeenAskedToEnableLocationServices:YES];
+                            postAction();
+                          }
+                           okayButtonStyle:JGActionSheetButtonStyleBlue
+                         cancelButtonTitle:@"No.  Not at this time."
+                        cancelButtonAction:^{ postAction(); }
+                          cancelButtonSyle:JGActionSheetButtonStyleDefault
+                            relativeToView:self.tabBarController.view];
+    } else {
+      postAction();
+    }
+  };
   if (!([self formStateMaskForSignIn] & FPSignInAnyIssues)) {
     __block MBProgressHUD *HUD;
     void (^nonLocalSyncSuccessBlk)(void) = ^{
@@ -178,11 +202,13 @@ into your remote account:"]
                                        topInset:70.0
                                     buttonTitle:@"Okay."
                                    buttonAction:^{
+                                     enableLocationServices(^{
                                        [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
                                                                                            object:nil
                                                                                          userInfo:nil];
                                        [[self navigationController] popViewControllerAnimated:YES];
-                                     }
+                                     });
+                                   }
                                  relativeToView:self.tabBarController.view];
     };
     ErrMsgsMaker errMsgsMaker = ^ NSArray * (NSInteger errCode) {
@@ -270,11 +296,13 @@ into your remote account:"]
                                                                                          topInset:70.0
                                                                                       buttonTitle:@"Okay."
                                                                                      buttonAction:^{
-                                                                                       [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
-                                                                                                                                           object:nil
-                                                                                                                                         userInfo:nil];
-                                                                                       [[self navigationController] popViewControllerAnimated:YES];
-                                                                                       [APP refreshTabs];
+                                                                                       enableLocationServices(^{
+                                                                                         [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
+                                                                                                                                             object:nil
+                                                                                                                                           userInfo:nil];
+                                                                                         [[self navigationController] popViewControllerAnimated:YES];
+                                                                                         [APP refreshTabs];
+                                                                                       });
                                                                                      }
                                                                                    relativeToView:self.tabBarController.view];
                                                       });
@@ -288,15 +316,16 @@ your local edits.  You can try syncing them \
 later.";
                                                         JGActionSheetSection *becameUnauthSection = nil;
                                                         if (_receivedAuthReqdErrorOnSyncAttempt) {
-                                                          NSString *becameUnauthMessage = @"\
+                                                          NSString *textToAccent = @"Re-authenticate";
+                                                          NSString *becameUnauthMessage = [NSString stringWithFormat:@"\
 This is awkward.  While syncing your local \
 edits, the server is asking for you to \
 authenticate again.  Sorry about that. \
-To authenticate, tap the Re-authenticate \
-button.";
-                                                          NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
+To authenticate, tap the %@ \
+button.", textToAccent];
+                                                          NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
                                                           NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
-                                                          NSRange unauthMsgAttrsRange = NSMakeRange(146, 15); // 'Re-authenticate'
+                                                          NSRange unauthMsgAttrsRange = [becameUnauthMessage rangeOfString:textToAccent];
                                                           [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
                                                           becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
                                                                                                                  title:@"Authentication Failure."
@@ -319,10 +348,12 @@ button.";
                                                         }
                                                         [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
                                                           [sheet dismissAnimated:YES];
-                                                          [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
-                                                                                                              object:nil
-                                                                                                            userInfo:nil];
-                                                          [[self navigationController] popViewControllerAnimated:YES];
+                                                          enableLocationServices(^{
+                                                            [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
+                                                                                                                object:nil
+                                                                                                              userInfo:nil];
+                                                            [[self navigationController] popViewControllerAnimated:YES];
+                                                          });
                                                         }];
                                                         [alertSheet showInView:self.tabBarController.view animated:YES];
                                                         [APP refreshTabs];
@@ -341,42 +372,42 @@ button.";
       HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
       HUD.delegate = self;
       HUD.labelText = @"Logging in...";
-      [_coordDao loginWithUsernameOrEmail:[_siUsernameOrEmailTf text]
-                                 password:[_siPasswordTf text]
-             andLinkRemoteUserToLocalUser:_localUser
-            preserveExistingLocalEntities:syncLocalEntities
-                          remoteStoreBusy:^(NSDate *retryAfter) {
-                            dispatch_async(dispatch_get_main_queue(), ^{
-                              [HUD hide:YES];
-                              [PEUIUtils showWaitAlertWithMsgs:nil
-                                                         title:@"Server Busy."
-                                              alertDescription:[[NSAttributedString alloc] initWithString:@"\
+      [_coordDao loginWithEmail:[_siEmailTf text]
+                       password:[_siPasswordTf text]
+   andLinkRemoteUserToLocalUser:_localUser
+  preserveExistingLocalEntities:syncLocalEntities
+                remoteStoreBusy:^(NSDate *retryAfter) {
+                  dispatch_async(dispatch_get_main_queue(), ^{
+                    [HUD hide:YES];
+                    [PEUIUtils showWaitAlertWithMsgs:nil
+                                               title:@"Server Busy."
+                                    alertDescription:[[NSAttributedString alloc] initWithString:@"\
 We apologize, but the server is currently \
 busy.  Please try logging in a little later."]
-                                                      topInset:70.0
-                                                   buttonTitle:@"Okay."
-                                                  buttonAction:nil
-                                                relativeToView:self.tabBarController.view];
-                            });
-                          }
-                        completionHandler:^(FPUser *user, NSError *err) {
-                          dispatch_async(dispatch_get_main_queue(), ^{
-                            [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(err);
-                            if (user) {
-                              NSDate *mostRecentUpdatedAt =
-                              [[_coordDao localDao] mostRecentMasterUpdateForUser:user
-                                                                            error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
-                              DDLogDebug(@"in FPAccountLoginController/handleSignIn, login success, mostRecentUpdatedAt: [%@](%@)", mostRecentUpdatedAt, [PEUtils millisecondsFromDate:mostRecentUpdatedAt]);
-                              if (mostRecentUpdatedAt) {
-                                [APP setChangelogUpdatedAt:mostRecentUpdatedAt];
-                              }
-                            }
-                          });
-                        }
-                    localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
+                                            topInset:70.0
+                                         buttonTitle:@"Okay."
+                                        buttonAction:nil
+                                      relativeToView:self.tabBarController.view];
+                  });
+                }
+              completionHandler:^(FPUser *user, NSError *err) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                  [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(err);
+                  if (user) {
+                    NSDate *mostRecentUpdatedAt =
+                    [[_coordDao localDao] mostRecentMasterUpdateForUser:user
+                                                                  error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
+                    DDLogDebug(@"in FPAccountLoginController/handleSignIn, login success, mostRecentUpdatedAt: [%@](%@)", mostRecentUpdatedAt, [PEUtils millisecondsFromDate:mostRecentUpdatedAt]);
+                    if (mostRecentUpdatedAt) {
+                      [APP setChangelogUpdatedAt:mostRecentUpdatedAt];
+                    }
+                  }
+                });
+              }
+          localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
     };
     if (_preserveExistingLocalEntities == nil) { // first time asked
-      if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {        
+      if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {
         NSString *msg = @"\
 It seems you've edited some records locally. \
 Would you like them to be synced to your \

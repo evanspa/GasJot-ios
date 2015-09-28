@@ -1,4 +1,4 @@
 { "_links": {
-  "users": { "href": "https://fprest.paulevans.name/fp/users" },
-  "login": { "href": "https://fprest.paulevans.name/fp/login" },
-  "light-login": { "href": "https://fprest.paulevans.name/fp/light-login" }}}
+  "users": { "href": "https://www.jotyourself.com/gasjot/d/users" },
+  "login": { "href": "https://www.jotyourself.com/gasjot/d/login" },
+  "light-login": { "href": "https://www.jotyourself.com/gasjot/d/light-login" }}}

@@ -55,10 +55,16 @@
 
 #pragma mark - User Helpers
 
++ (BOOL)validateEmailWithString:(NSString*)email {
+  NSString *emailRegex = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
+  NSPredicate *emailTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", emailRegex];
+  return [emailTest evaluateWithObject:email];
+}
+
 + (NSArray *)computeSignInErrMsgs:(NSUInteger)signInErrMask {
   NSMutableArray *errMsgs = [NSMutableArray arrayWithCapacity:1];
-  if (signInErrMask & FPSignInUsernameOrEmailNotProvided) {
-    [errMsgs addObject:LS(@"signin.username-or-email-notprovided")];
+  if (signInErrMask & FPSignInEmailNotProvided) {
+    [errMsgs addObject:LS(@"signin.email-notprovided")];
   }
   if (signInErrMask & FPSignInPasswordNotProvided) {
     [errMsgs addObject:LS(@"signin.password-notprovided")];
@@ -74,11 +80,8 @@
   if (saveUsrErrMask & FPSaveUsrInvalidEmail) {
     [errMsgs addObject:LS(@"saveusr.email-invalid")];
   }
-  if (saveUsrErrMask & FPSaveUsrUsernameAndEmailNotProvided) {
-    [errMsgs addObject:LS(@"saveusr.username-and-email-notprovided")];
-  }
-  if (saveUsrErrMask & FPSaveUsrUsernameAlreadyRegistered) {
-    [errMsgs addObject:LS(@"saveusr.username-already-registered")];
+  if (saveUsrErrMask & FPSaveUsrEmailNotProvided) {
+    [errMsgs addObject:LS(@"saveusr.email-notprovided")];
   }
   if (saveUsrErrMask & FPSaveUsrPasswordNotProvided) {
     [errMsgs addObject:LS(@"saveusr.password-notprovided")];

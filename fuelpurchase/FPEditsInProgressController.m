@@ -378,14 +378,9 @@ You currently have no unsynced items."
                                                                               relativeToView:self.view];
                                                 };
                                                 JGActionSheetSection *(^authErrSection)(NSString *) = ^JGActionSheetSection *(NSString *msg) {
-                                                  /*NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
-                                                  NSMutableAttributedString *attrBecameUnauthMessage =
-                                                    [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
-                                                  NSRange unauthMsgAttrsRange = NSMakeRange(123, 15); // 'Re-authenticate'
-                                                  [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];*/
                                                   return [PEUIUtils warningAlertSectionWithMsgs:nil
                                                                                           title:@"Authentication failure."
-                                                                               alertDescription:[[NSAttributedString alloc] initWithString:msg] //attrBecameUnauthMessage
+                                                                               alertDescription:[[NSAttributedString alloc] initWithString:msg]
                                                                                  relativeToView:self.tabBarController.view];
                                                 };
 // ------------------------------------------------------------------------------------------

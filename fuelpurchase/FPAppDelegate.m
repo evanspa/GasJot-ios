@@ -93,6 +93,9 @@ typedef NS_ENUM(NSInteger, FPAppTabBarIndex) {
 
 // NSUserDefaults keys
 NSString * const FPChangelogUpdatedAtUserDefaultsKey = @"FP changelog updated at";
+NSString * const FPAskedToEnableLocationServicesUserDefaultsKey = @"FPAskedToEnableLocationServicesUserDefaultsKey";
+NSString * const FPLocationServicesAuthorizedUserDefaultsKey = @"FPLocationServicesAuthorizedUserDefaultsKey";
+NSString * const FPLocationServicesDeniedUserDefaultsKey = @"FPLocationServicesDeniedUserDefaultsKey";
 
 #ifdef FP_DEV
   NSString * const FPAPIResourceFileName = @"fpapi-resource.localdev";
@@ -113,12 +116,11 @@ NSString * const FPAppKeychainService = @"fp-app";
   FPCoordinatorDao *_coordDao;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
-  CLLocationManager *_locationManager;
   NSMutableArray *_locations;
   UICKeyChainStore *_keychainStore;
   FPUser *_user;
   UITabBarController *_tabBarController;
-
+  BOOL __locationServicesAuthorized;
   #ifdef FP_DEV
     PDVUtils *_pdvUtils;
   #endif
@@ -148,6 +150,22 @@ NSString * const FPAppKeychainService = @"fp-app";
   [defaults setObject:updatedAt forKey:FPChangelogUpdatedAtUserDefaultsKey];
 }
 
+- (BOOL)hasBeenAskedToEnableLocationServices {
+  return [[NSUserDefaults standardUserDefaults] boolForKey:FPAskedToEnableLocationServicesUserDefaultsKey];
+}
+
+- (void)setHasBeenAskedToEnableLocationServices:(BOOL)beenAsked {
+  [[NSUserDefaults standardUserDefaults] setBool:beenAsked forKey:FPAskedToEnableLocationServicesUserDefaultsKey];
+}
+
+- (BOOL)locationServicesAuthorized {
+  return [[NSUserDefaults standardUserDefaults] boolForKey:FPLocationServicesAuthorizedUserDefaultsKey];
+}
+
+- (BOOL)locationServicesDenied {
+  return [[NSUserDefaults standardUserDefaults] boolForKey:FPLocationServicesDeniedUserDefaultsKey];
+}
+
 #pragma mark - Location Manager Delegate
 
 - (void)locationManager:(CLLocationManager *)manager
@@ -159,7 +177,8 @@ NSString * const FPAppKeychainService = @"fp-app";
 
 - (void)locationManager:(CLLocationManager *)manager
 didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
-  BOOL authorized = NO;
+  BOOL locationServicesAuthorized = NO;
+  BOOL locationServicesDenied = NO;
   switch (status) {
     case kCLAuthorizationStatusNotDetermined:
       DDLogDebug(@"locationManager auth status: Not Determined");
@@ -169,21 +188,26 @@ didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
       break;
     case kCLAuthorizationStatusDenied:
       DDLogDebug(@"locationManager auth status: Denied");
+      locationServicesDenied = YES;
       break;
     case kCLAuthorizationStatusAuthorizedAlways:
-      authorized = YES;
+      locationServicesAuthorized = YES;
       DDLogDebug(@"locationManager auth status: Always Authorized");
       break;
     case kCLAuthorizationStatusAuthorizedWhenInUse:
-      authorized = YES;
+      locationServicesAuthorized = YES;
       DDLogDebug(@"locationManager auth status: When-in-use Authorized");
       break;
   }
-  if (authorized) {
+  if (locationServicesAuthorized) {
     [_locationManager setDesiredAccuracy:kCLLocationAccuracyBest];
     [_locationManager setDistanceFilter:500]; // 500 meters
     [_locationManager startUpdatingLocation];
   }
+  [[NSUserDefaults standardUserDefaults] setBool:locationServicesAuthorized
+                                          forKey:FPLocationServicesAuthorizedUserDefaultsKey];
+  [[NSUserDefaults standardUserDefaults] setBool:locationServicesDenied
+                                          forKey:FPLocationServicesDeniedUserDefaultsKey];
 }
 
 #pragma mark - Application Lifecycle
@@ -203,8 +227,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [_coordDao pruneAllSyncedEntitiesWithError:[FPUtils localSaveErrorHandlerMaker]()];
   _keychainStore = [UICKeyChainStore keyChainStoreWithService:@"name.paulevans.fpauth-token"];
   _user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
-  if (_user) {
-    [self initializeLocationTracking];
+  _locations = [NSMutableArray array];
+  _locationManager = [[CLLocationManager alloc] init];
+  [_locationManager setDelegate:self];
+  if (_user) {    
     _authToken = [self storedAuthenticationTokenForUser:_user];
     if (_authToken) {
       [_coordDao setAuthToken:_authToken];
@@ -272,15 +298,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     void (^clearEipsBadge)(void) = ^{
       [_tabBarController.tabBar.items[FPAppTabBarIndexRecords] setBadgeValue:nil];
     };
-    //NSArray *controllers = [_tabBarController viewControllers];
     if ([self isUserLoggedIn]) {
-      /*if ([controllers count] == 2) {
-        // need to add 'unsynced edits' controller
-        [_tabBarController setViewControllers:@[controllers[FPAppTabBarIndexHome],
-                                                controllers[FPAppTabBarIndexSettings],
-                                                [_screenToolkit unsynedEditsViewControllerForUser:_user]]
-                                     animated:YES];
-      }*/
       if (_user) {
         NSInteger totalNumUnsyncedEdits = [_coordDao numUnsyncedVehiclesForUser:_user] +
         [_coordDao numUnsyncedFuelStationsForUser:_user] +
@@ -297,12 +315,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     } else {
       [_tabBarController.tabBar.items[FPAppTabBarIndexAccount] setBadgeValue:nil];
       clearEipsBadge();
-      /*if ([controllers count] == 3) {
-        // need to remove 'unsynced edits' controller
-        [_tabBarController setViewControllers:@[controllers[FPAppTabBarIndexHome],
-                                                controllers[FPAppTabBarIndexSettings]]
-                                     animated:YES];
-      }*/
     }
   });
 }
@@ -310,12 +322,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 #pragma mark - Resetting the user interface and tab bar delegate
 
 - (void)resetUserInterface {
-  /*NSArray *controllers = [_tabBarController viewControllers];
-  [controllers[FPAppTabBarIndexHome] popToRootViewControllerAnimated:NO];
-  if ([controllers count] == 3) {
-    [controllers[FPAppTabBarIndexEditsInProgress] popToRootViewControllerAnimated:NO];
-  }
-  [self refreshTabs];*/
   NSArray *controllers = [_tabBarController viewControllers];
   [controllers[FPAppTabBarIndexHome] popToRootViewControllerAnimated:NO];
   [controllers[FPAppTabBarIndexRecords] popToRootViewControllerAnimated:NO];
@@ -327,32 +333,6 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 - (BOOL)tabBarController:(UITabBarController *)tabBarController
 shouldSelectViewController:(UIViewController *)viewController {
   return YES;
-}
-
-- (void)tabBarController:(UITabBarController *)tabBarController
- didSelectViewController:(UIViewController *)viewController {
-  //NSArray *controllers = [_tabBarController viewControllers];
-  //if ([controllers count] == 3) { (no need for this check anymore since we're always going to display the same tabs)
-  
-  /* meh - I'm not sure if I even need this anymore given my new tab layout stuff
-  
-    // the following ensures that an entity cannot be displayed in 2 different list
-    // or add/view/edit controllers simultaneously (i.e., a controller rooted from
-    // the quick action screen, or a controller root from the unsynced edits screen).
-    UINavigationController *navController = (UINavigationController *)viewController;
-    if ([[navController topViewController] isKindOfClass:[FPQuickActionMenuController class]]) {
-      [controllers[FPAppTabBarIndexEditsInProgress] popToRootViewControllerAnimated:NO];
-    } else if ([[navController topViewController] isKindOfClass:[FPEditsInProgressController class]]) {
-      // there's no need to pop to root if the unsynced-edits root is just the
-      // info-message screen that there aren't any unsynced edits
-      if ([_coordDao totalNumUnsyncedEntitiesForUser:_user] > 0) {
-        [controllers[FPAppTabBarIndexHome] popToRootViewControllerAnimated:NO];
-      }
-    }
-   
-   */
-  
-  //}
 }
 
 #pragma mark - Initialization helpers
@@ -410,13 +390,6 @@ shouldSelectViewController:(UIViewController *)viewController {
                                            selector:@selector(resetUserInterface)
                                                name:FPAppLoginNotification
                                              object:nil];
-}
-
-- (void)initializeLocationTracking {
-  _locations = [NSMutableArray array];
-  _locationManager = [[CLLocationManager alloc] init];
-  [_locationManager setDelegate:self];
-  [_locationManager requestWhenInUseAuthorization];
 }
 
 - (void)initializeGlobalAppearanceSettings {

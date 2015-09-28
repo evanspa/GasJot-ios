@@ -61,6 +61,8 @@
 
 @property (nonatomic) BOOL offlineMode;
 
+@property (nonatomic, readonly) CLLocationManager *locationManager;
+
 @property (strong, nonatomic) UIWindow *window;
 
 #pragma mark - Methods
@@ -72,5 +74,13 @@
 - (NSDate *)changelogUpdatedAt;
 
 - (void)setChangelogUpdatedAt:(NSDate *)updatedAt;
+
+- (BOOL)hasBeenAskedToEnableLocationServices;
+
+- (void)setHasBeenAskedToEnableLocationServices:(BOOL)beenAsked;
+
+- (BOOL)locationServicesAuthorized;
+
+- (BOOL)locationServicesDenied;
 
 @end

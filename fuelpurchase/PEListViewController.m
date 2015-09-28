@@ -119,7 +119,7 @@
   return index;
 }
 
-- (UIView *)viewForAlerts {
+- (UIView *)parentViewForAlerts {
   if (self.tabBarController) {
     return self.tabBarController.view;
   }
@@ -430,17 +430,18 @@
 - (void)actionSheetDidDismiss:(JGActionSheet *)actionSheet {}
 
 - (JGActionSheetSection *)becameUnauthenticatedSection {
-  NSString *becameUnauthMessage = @"\
+  NSString *instructionText = @"Account \u2794 Re-authenticate";
+  NSString *becameUnauthMessage = [NSString stringWithFormat:@"\
 It appears you are no longer authenticated. \
-To re-authenticate, go to:\n\nSettings \u2794 Re-authenticate.";
-  NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
+To re-authenticate, go to:\n\n%@.", instructionText];
+  NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
   NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
-  NSRange unauthMsgAttrsRange = NSMakeRange(72, 26); // 'Settings...Re-authenticate'
+  NSRange unauthMsgAttrsRange = [becameUnauthMessage rangeOfString:instructionText];
   [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
   return [PEUIUtils warningAlertSectionWithMsgs:nil
                                           title:@"Authentication failure."
                                alertDescription:attrBecameUnauthMessage
-                                 relativeToView:[self viewForAlerts]];
+                                 relativeToView:[self parentViewForAlerts]];
 }
 
 #pragma mark - Do Deletion
@@ -474,7 +475,7 @@ Are you sure you want to continue?"]
                                   postDeleteAttemptActivities();
                                   [_tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
                                 }
-                                    relativeToView:[self viewForAlerts]];
+                                    relativeToView:[self parentViewForAlerts]];
       } else {
         deleter();
       }
@@ -538,7 +539,7 @@ updated since you last downloaded it."]
                                          [_tableView reloadRowsAtIndexPaths:@[indexPath]
                                                            withRowAnimation:UITableViewRowAnimationAutomatic];
                                        }
-                                           relativeToView:[self viewForAlerts]];
+                                           relativeToView:[self parentViewForAlerts]];
             } else if ([errorsForDelete[0][3] boolValue]) { // server is busy
               [PEUIUtils showWaitAlertWithMsgs:nil
                                          title:@"Busy with maintenance."
@@ -554,7 +555,7 @@ try this operation again later."]
                                     [_tableView reloadRowsAtIndexPaths:@[indexPath]
                                                       withRowAnimation:UITableViewRowAnimationAutomatic];
                                   }
-                                relativeToView:[self viewForAlerts]];
+                                relativeToView:[self parentViewForAlerts]];
             } else if ([errorsForDelete[0][6] boolValue]) { // not found
               [PEUIUtils showInfoAlertWithTitle:@"Already deleted."
                                alertDescription:[[NSAttributedString alloc] initWithString:@"\
@@ -566,7 +567,7 @@ It has now been removed from this device."]
                                      doLocalDelete();
                                      postDeleteAttemptActivities();
                                    }
-                                 relativeToView:[self viewForAlerts]];
+                                 relativeToView:[self parentViewForAlerts]];
             } else { // any other error type
               NSString *title;
               NSString *message;
@@ -584,14 +585,13 @@ entity from the server.  The error is \
 as follows:";
                 title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
               }
-              NSMutableAttributedString *attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
               NSMutableArray *sections = [NSMutableArray array];
               if (receivedAuthReqdErrorOnDeleteAttempt) {
                 [sections addObject:[self becameUnauthenticatedSection]];
               }
               [sections addObject:[PEUIUtils errorAlertSectionWithMsgs:subErrors
                                                                  title:title
-                                                      alertDescription:attrMessage
+                                                      alertDescription:[[NSAttributedString alloc] initWithString:message]
                                                         relativeToView:self.view]];              
               JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
                                                                                     message:nil
@@ -607,7 +607,7 @@ as follows:";
                 [sheet dismissAnimated:YES];
                 [_tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
               }];
-              [alertSheet showInView:[self viewForAlerts] animated:YES];
+              [alertSheet showInView:[self parentViewForAlerts] animated:YES];
             }
           });
         }
@@ -731,7 +731,7 @@ as follows:";
                              buttonAction:^{
                                [_tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
                              }
-                           relativeToView:[self viewForAlerts]];
+                           relativeToView:[self parentViewForAlerts]];
     }
   } else {
     doDeleteWithChildrenConfirm(^{

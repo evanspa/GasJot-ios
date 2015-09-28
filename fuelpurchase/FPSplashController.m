@@ -21,6 +21,7 @@
   UIView *_dotsPanel;
   BOOL _letsGoButtonEnabled;
   iCarousel *_carousel;
+  BOOL _isCarouselRemoved;
 }
 
 #pragma mark - Initializers
@@ -70,7 +71,7 @@
                                    textColor:[UIColor whiteColor]
                          verticalTextPadding:0.0];
   UIView *appName = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"splash-title"]];
-  UILabel *message = [PEUIUtils labelWithKey:@"Ready to track your gas usage?"
+  UILabel *message = [PEUIUtils labelWithKey:@"Ready to start having fun pumping gas?"
                                         font:[UIFont systemFontOfSize:14]
                              backgroundColor:[UIColor clearColor]
                                    textColor:[UIColor whiteColor]
@@ -144,7 +145,16 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
   [_carousel removeFromSuperview];
+  _isCarouselRemoved = YES;
   [super viewWillDisappear:animated];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  if (_isCarouselRemoved) {
+    [self.view addSubview:_carousel];
+    _isCarouselRemoved = NO;
+  }
 }
 
 - (void)viewDidLoad {
@@ -158,6 +168,7 @@
   [_carousel setPagingEnabled:YES];
   [_carousel setBounceDistance:0.25];
   [PEUIUtils placeView:_carousel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+  _isCarouselRemoved = NO;
   [self refreshDotsPanelWithCarousel:_carousel];
   UIView *southPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:0.5 relativeToView:self.view];
   UIButton *(^button)(NSString *, id, SEL) = ^UIButton *(NSString *title, id target, SEL sel) {

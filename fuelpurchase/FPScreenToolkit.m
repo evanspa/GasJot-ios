@@ -35,6 +35,7 @@
 #import "FPUIUtils.h"
 
 NSInteger const PAGINATION_PAGE_SIZE = 30;
+NSInteger const USER_ACCOUNT_STATUS_LABEL_TAG = 12;
 
 @implementation FPScreenToolkit {
   FPCoordinatorDao *_coordDao;
@@ -119,9 +120,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
     NSMutableArray *errMsgs = [NSMutableArray array];
     //NSString *name = [((UITextField *)[userAccountPanel viewWithTag:FPUserTagName]) text];
     NSString *email = [((UITextField *)[userAccountPanel viewWithTag:FPUserTagEmail]) text];
-    NSString *username = [((UITextField *)[userAccountPanel viewWithTag:FPUserTagUsername]) text];
-    if ([email isBlank] && [username isBlank]) {
-      [errMsgs addObject:@"Email and Username cannot both be blank."];
+    if ([email isBlank]) {
+      [errMsgs addObject:@"E-mail cannot be blank."];
     }
     return errMsgs;
   };
@@ -154,7 +154,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                          PESyncConflictBlk conflictBlk,
                                                                          PESyncAuthRequiredBlk authReqdBlk,
                                                                          PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading user account";
+      NSString *mainMsgFragment = @"saving user account to the server";
       NSString *recordTitle = @"User account";
       [_coordDao markAsDoneEditingAndSyncUserImmediate:user
                                    notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
@@ -185,8 +185,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
         NSString *fieldName = key;
         if ([fieldName isEqualToString:FPUserNameField]) {
           [fields addObject:@[@"Name:", @(FPUserTagName), [PEUtils emptyIfNil:[localUser name]], [PEUtils emptyIfNil:[remoteUser name]]]];
-        } else if ([fieldName isEqualToString:FPUserUsernameField]) {
-          [fields addObject:@[@"Username:", @(FPUserTagUsername), [PEUtils emptyIfNil:[localUser username]], [PEUtils emptyIfNil:[remoteUser username]]]];
         } else if ([fieldName isEqualToString:FPUserEmailField]) {
           [fields addObject:@[@"Email:", @(FPUserTagEmail), [PEUtils emptyIfNil:[localUser email]], [PEUtils emptyIfNil:[remoteUser email]]]];
         }
@@ -207,9 +205,6 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
           switch (remoteValue.tag) {
             case FPUserTagName:
               [resolvedUser setName:[remoteUser name]];
-              break;
-            case FPUserTagUsername:
-              [resolvedUser setUsername:[remoteUser username]];
               break;
             case FPUserTagEmail:
               [resolvedUser setEmail:[remoteUser email]];
@@ -242,6 +237,11 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                     FPUser *user) {
       [[_coordDao localDao] saveMasterUser:downloadedUser error:[FPUtils localSaveErrorHandlerMaker]()];
     };
+    PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
+      [FPPanelToolkit refreshAccountStatusPanelForUser:user
+                                         valueLabelTag:@(USER_ACCOUNT_STATUS_LABEL_TAG)
+                                        relativeToView:ctrl.view];
+    };
     return [PEAddViewEditController
               viewEntityCtrlrWithEntity:user
                      listViewController:nil
@@ -249,7 +249,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                               uitoolkit:_uitoolkit
                          itemChangedBlk:nil
                    entityFormPanelMaker:[_panelToolkit userAccountFormPanelMaker]
-                   entityViewPanelMaker:[_panelToolkit userAccountViewPanelMaker]
+                   entityViewPanelMaker:[_panelToolkit userAccountViewPanelMakerWithAccountStatusLabelTag:USER_ACCOUNT_STATUS_LABEL_TAG]
                     entityToPanelBinder:[_panelToolkit userToUserPanelBinder]
                     panelToEntityBinder:[_panelToolkit userFormPanelToUserBinder]
                             entityTitle:@"User Account"
@@ -265,7 +265,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                           isOfflineMode:^{ return [APP offlineMode]; }
          syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
          prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
-                       viewDidAppearBlk:nil
+                       viewDidAppearBlk:viewDidAppearBlk
                         entityValidator:[self newUserAccountValidator]
                                uploader:nil
                   numRemoteDepsNotLocal:nil
@@ -527,7 +527,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                      PESyncConflictBlk conflictBlk,
                                                                      PESyncAuthRequiredBlk authReqdBlk,
                                                                      PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading vehicle";
+      NSString *mainMsgFragment = @"saving vehicle to the server";
       NSString *recordTitle = @"Vehicle";
       [_coordDao saveNewAndSyncImmediateVehicle:newVehicle
                                         forUser:user
@@ -560,7 +560,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
              addEntityCtrlrWithUitoolkit:_uitoolkit
                       listViewController:listViewController
                             itemAddedBlk:itemAddedBlk
-                    entityFormPanelMaker:[_panelToolkit vehicleFormPanelMaker]
+                    entityFormPanelMaker:[_panelToolkit vehicleFormPanelMakerIncludeLogButtons:NO]
                      entityToPanelBinder:[_panelToolkit vehicleToVehiclePanelBinder]
                      panelToEntityBinder:[_panelToolkit vehicleFormPanelToVehicleBinder]
                              entityTitle:@"Vehicle"
@@ -612,7 +612,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                             PESyncConflictBlk conflictBlk,
                                                                             PESyncAuthRequiredBlk authReqdBlk,
                                                                             PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading vehicle";
+      NSString *mainMsgFragment = @"saving vehicle to the server";
       NSString *recordTitle = @"Vehicle";
       [_coordDao markAsDoneEditingAndSyncVehicleImmediate:vehicle
                                                   forUser:user
@@ -635,7 +635,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                PESyncConflictBlk conflictBlk,
                                PESyncAuthRequiredBlk authReqdBlk,
                                PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading vehicle";
+      NSString *mainMsgFragment = @"saving vehicle to the server";
       NSString *recordTitle = @"Vehicle";
       [_coordDao flushUnsyncedChangesToVehicle:vehicle
                                        forUser:user
@@ -740,7 +740,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                        entityIndexPath:vehicleIndexPath
                              uitoolkit:_uitoolkit
                         itemChangedBlk:itemChangedBlk
-                  entityFormPanelMaker:[_panelToolkit vehicleFormPanelMaker]
+                  entityFormPanelMaker:[_panelToolkit vehicleFormPanelMakerIncludeLogButtons:YES]
                   entityViewPanelMaker:[_panelToolkit vehicleViewPanelMaker]
                    entityToPanelBinder:[_panelToolkit vehicleToVehiclePanelBinder]
                    panelToEntityBinder:[_panelToolkit vehicleFormPanelToVehicleBinder]
@@ -1118,7 +1118,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                          PESyncConflictBlk conflictBlk,
                                                                          PESyncAuthRequiredBlk authReqdBlk,
                                                                          PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading gas station";
+      NSString *mainMsgFragment = @"saving gas station to the server";
       NSString *recordTitle = @"Gas station";
       [_coordDao saveNewAndSyncImmediateFuelStation:newFuelStation
                                             forUser:user
@@ -1151,7 +1151,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
              addEntityCtrlrWithUitoolkit:_uitoolkit
                       listViewController:listViewController
                             itemAddedBlk:itemAddedBlk
-                    entityFormPanelMaker:[_panelToolkit fuelstationFormPanelMaker]
+                    entityFormPanelMaker:[_panelToolkit fuelstationFormPanelMakerIncludeLogButton:NO]
                      entityToPanelBinder:[_panelToolkit fuelstationToFuelstationPanelBinder]
                      panelToEntityBinder:[_panelToolkit fuelstationFormPanelToFuelstationBinder]
                              entityTitle:@"Gas Station"
@@ -1207,7 +1207,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                                 PESyncConflictBlk conflictBlk,
                                                                                 PESyncAuthRequiredBlk authReqdBlk,
                                                                                 PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading gas station";
+      NSString *mainMsgFragment = @"saving gas station to the server";
       NSString *recordTitle = @"Gas station";
       [_coordDao markAsDoneEditingAndSyncFuelStationImmediate:fuelStation
                                                       forUser:user
@@ -1230,7 +1230,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                PESyncConflictBlk conflictBlk,
                                PESyncAuthRequiredBlk authReqdBlk,
                                PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading gas station";
+      NSString *mainMsgFragment = @"saving gas station to the server";
       NSString *recordTitle = @"Gas station";
       [_coordDao flushUnsyncedChangesToFuelStation:fuelStation
                                            forUser:user
@@ -1351,7 +1351,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                        entityIndexPath:fuelStationIndexPath
                              uitoolkit:_uitoolkit
                         itemChangedBlk:itemChangedBlk
-                  entityFormPanelMaker:[_panelToolkit fuelstationFormPanelMaker]
+                  entityFormPanelMaker:[_panelToolkit fuelstationFormPanelMakerIncludeLogButton:YES]
                   entityViewPanelMaker:[_panelToolkit fuelstationViewPanelMaker]
                    entityToPanelBinder:[_panelToolkit fuelstationToFuelstationPanelBinder]
                    panelToEntityBinder:[_panelToolkit fuelstationFormPanelToFuelstationBinder]
@@ -1518,9 +1518,9 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       float saveFpLogPercentComplete = [selectionsAndPercentArray[4] floatValue];
       float savePreFillupEnvLogPercentComplete = [selectionsAndPercentArray[5] floatValue];
       float savePostFillupEnvLogPercentComplete = [selectionsAndPercentArray[6] floatValue];
-      NSString *mainMsgFragment = @"uploading gas log";
+      NSString *mainMsgFragment = @"saving gas log to the server";
       if (savePreFillupEnvLogPercentComplete || savePostFillupEnvLogPercentComplete) {
-        mainMsgFragment = @"uploading gas\nand odometer logs";
+        mainMsgFragment = @"saving gas and odometer logs to the server";
       }
       NSString *recordTitle = @"Gas log";
       [_coordDao saveNewAndSyncImmediateFuelPurchaseLog:[fpEnvLogComposite fpLog]
@@ -1534,8 +1534,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                      addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
                                         addlConflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
                                     addlAuthRequiredBlk:^{authReqdBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                           skippedDueToVehicleNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
-                       skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The gas station is not yet synced."); [APP refreshTabs];}
+                           skippedDueToVehicleNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
+                       skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The gas station is not yet saved to the server."); [APP refreshTabs];}
                                                   error:[FPUtils localSaveErrorHandlerMaker]()];
       if (shouldSavePreFillupEnvLog) {
         recordTitle = @"Pre-fillup odometer log";
@@ -1549,7 +1549,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                       addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
                                          addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
                                      addlAuthRequiredBlk:^{authReqdBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                            skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
+                            skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
                                                    error:[FPUtils localSaveErrorHandlerMaker]()];
       }
       if (shouldSavePostFillupEnvLog) {
@@ -1564,7 +1564,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                       addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
                                          addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
                                      addlAuthRequiredBlk:^{authReqdBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                            skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
+                            skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
                                                    error:[FPUtils localSaveErrorHandlerMaker]()];
       }
     };
@@ -1639,7 +1639,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                            defaultPickedLogDate:[NSDate date]]
                      entityToPanelBinder:[_panelToolkit fpEnvLogCompositeToFpEnvLogCompositePanelBinder]
                      panelToEntityBinder:[_panelToolkit fpEnvLogCompositeFormPanelToFpEnvLogCompositeBinder]
-                             entityTitle:@"Gas Log"
+                             entityTitle:@"Gas (and odo.) Logs"
                        entityAddCanceler:addCanceler
                              entityMaker:[_panelToolkit fpEnvLogCompositeMaker]
                      newEntitySaverLocal:newFuelPurchaseLogSaverLocal
@@ -1717,7 +1717,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                 PESyncConflictBlk conflictBlk,
                                                                 PESyncAuthRequiredBlk authReqdBlk,
                                                                 PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading gas log";
+      NSString *mainMsgFragment = @"saving gas log to the server";
       NSString *recordTitle = @"Gas log";
       [_coordDao markAsDoneEditingAndSyncFuelPurchaseLogImmediate:fpLog
                                                           forUser:user
@@ -1728,8 +1728,8 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
                                                   addlConflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(1, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
                                               addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                     skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
-                                 skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The gas station is not yet synced."); [APP refreshTabs];}
+                                     skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
+                                 skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The gas station is not yet saved to the server."); [APP refreshTabs];}
                                                             error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEUploaderBlk uploader = ^(PEAddViewEditController *ctrl,
@@ -1742,7 +1742,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                PESyncConflictBlk conflictBlk,
                                PESyncAuthRequiredBlk authReqdBlk,
                                PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading gas log";
+      NSString *mainMsgFragment = @"saving gas log to the server";
       NSString *recordTitle = @"Gas log";
       [_coordDao flushUnsyncedChangesToFuelPurchaseLog:fpLog
                                                forUser:user
@@ -2374,7 +2374,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
       FPEnvLogVehicleAndDateDataSourceDelegate *ds =
         (FPEnvLogVehicleAndDateDataSourceDelegate *)[(UITableView *)[entityPanel viewWithTag:FPEnvLogTagVehicleAndDate] dataSource];
       FPVehicle *selectedVehicle = [ds selectedVehicle];
-      NSString *mainMsgFragment = @"uploading odometer log";
+      NSString *mainMsgFragment = @"saving odometer log to the server";
       NSString *recordTitle = @"Odometer log";
       [_coordDao saveNewAndSyncImmediateEnvironmentLog:envLog
                                                forUser:user
@@ -2386,7 +2386,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                     addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
                                        addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(1, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
                                    addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                          skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
+                          skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
@@ -2491,7 +2491,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                                                PESyncConflictBlk conflictBlk,
                                                                PESyncAuthRequiredBlk authReqdBlk,
                                                                PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading odometer log";
+      NSString *mainMsgFragment = @"saving odometer log to the server";
       NSString *recordTitle = @"Odometer log";
       [_coordDao markAsDoneEditingAndSyncEnvironmentLogImmediate:envLog
                                                          forUser:user
@@ -2502,7 +2502,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                               addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
                                                  addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(1, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
                                              addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                    skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
+                                    skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
                                                            error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEUploaderBlk uploader = ^(PEAddViewEditController *ctrl,
@@ -2515,7 +2515,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                PESyncConflictBlk conflictBlk,
                                PESyncAuthRequiredBlk authReqdBlk,
                                PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"uploading odometer log";
+      NSString *mainMsgFragment = @"saving odometer log to the server";
       NSString *recordTitle = @"Odometer log";
       [_coordDao flushUnsyncedChangesToEnvironmentLog:envLog
                                               forUser:user
@@ -2526,7 +2526,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
                                    addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
                                       addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(1, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
                                   addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                         skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
+                         skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
                                                 error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PENumRemoteDepsNotLocal numRemoteDepsNotLocalBlk = ^ NSInteger (FPEnvironmentLog *remoteEnvlog) {

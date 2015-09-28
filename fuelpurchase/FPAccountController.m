@@ -21,10 +21,14 @@
 #import "FPCreateAccountController.h"
 #import "FPAccountLoginController.h"
 #import "FPReauthenticateController.h"
+#import "FPPanelToolkit.h"
+#import <FlatUIKit/UIColor+FlatUI.h>
 
 #ifdef FP_DEV
 #import <PEDev-Console/UIViewController+PEDevConsole.h>
 #endif
+
+NSInteger const accountStatusLabelTag = 12;
 
 @implementation FPAccountController {
   FPCoordinatorDao *_coordDao;
@@ -81,6 +85,9 @@
              withAlignment:PEUIHorizontalAlignmentTypeLeft
                   vpadding:0.0
                   hpadding:0.0];
+      [FPPanelToolkit refreshAccountStatusPanelForUser:_user
+                                         valueLabelTag:@(accountStatusLabelTag)
+                                        relativeToView:_doesHaveAuthTokenPanel];
     } else {
       [navItem setTitle:@"User Account (auth required)"];
       [PEUIUtils placeView:_doesNotHaveAuthTokenPanel
@@ -169,9 +176,6 @@ gas jot data from this device only.";
 You are currently logged in.  From here \
 you can view and edit your remote account \
 details.";
-  /*UIView *accountSettingsMsgPanel = [self messagePanelWithMessage:accountSettingsMessage
-                                                        iconImage:[UIImage syncable]
-                                                   relativeToView:_doesHaveAuthTokenPanel];*/
   UIView *accountSettingsMsgPanel = [self leftPaddingMessageWithText:accountSettingsMessage];
   UIButton *accountSettingsBtn = [_uitoolkit systemButtonMaker](@"Remote account details", nil, nil);
   [[accountSettingsBtn layer] setCornerRadius:0.0];
@@ -180,8 +184,11 @@ details.";
   [accountSettingsBtn bk_addEventHandler:^(id sender) {
     [PEUIUtils displayController:[_screenToolkit newUserAccountDetailScreenMaker](_user) fromController:self animated:YES];
   } forControlEvents:UIControlEventTouchUpInside];
-  
- 
+  UIView *accountStatusPanel = [FPPanelToolkit accountStatusPanelForUser:_user
+                                                           valueLabelTag:@(accountStatusLabelTag)
+                                                               uitoolkit:_uitoolkit
+                                                          relativeToView:_doesHaveAuthTokenPanel];
+  [accountStatusPanel setBackgroundColor:[UIColor whiteColor]];
   UIView *logoutMsgLabelWithPad = [self logoutPaddedMessage];
   UIButton *logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
   [logoutBtn setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
@@ -198,6 +205,12 @@ details.";
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
+              hpadding:0.0];
+  [PEUIUtils placeView:accountStatusPanel
+                 below:accountSettingsMsgPanel
+                  onto:_doesHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:25.0
               hpadding:0.0];
   /*UIView *divider = makeDivider(1.0);
   [PEUIUtils placeView:divider
@@ -232,9 +245,6 @@ details.";
 For security reasons, we need you to \
 re-authenticate against your remote \
 account.";
-  /*UIView *messagePanel = [self messagePanelWithMessage:message
-                                             iconImage:[UIImage unsyncable]
-                                        relativeToView:_doesNotHaveAuthTokenPanel];*/
   UIView *messagePanel = [self leftPaddingMessageWithText:message];
   UIButton *reauthenticateBtn = [_uitoolkit systemButtonMaker](@"Re-authenticate", nil, nil);
   [[reauthenticateBtn layer] setCornerRadius:0.0];

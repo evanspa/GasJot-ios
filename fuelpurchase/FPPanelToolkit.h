@@ -14,10 +14,9 @@
 
 typedef NS_ENUM (NSInteger, FPUserTag) {
   FPUserTagName = 1,
-  FPUserTagEmail = 2,
-  FPUserTagUsername = 3,
-  FPUserTagPassword = 4,
-  FPUserTagConfirmPassword = 5
+  FPUserTagEmail,
+  FPUserTagPassword,
+  FPUserTagConfirmPassword
 };
 
 typedef NS_ENUM (NSInteger, FPVehicleTag) {
@@ -85,9 +84,9 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
                    uitoolkit:(PEUIToolkit *)uitoolkit
                        error:(PELMDaoErrorBlk)errorBlk;
 
-#pragma mark - User Account Panel
+#pragma mark - User Account Panels
 
-- (PEEntityViewPanelMakerBlk)userAccountViewPanelMaker;
+- (PEEntityViewPanelMakerBlk)userAccountViewPanelMakerWithAccountStatusLabelTag:(NSInteger)accountStatusLabelTag;
 
 - (PEEntityPanelMakerBlk)userAccountFormPanelMaker;
 
@@ -97,11 +96,20 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 
 - (PEEnableDisablePanelBlk)userFormPanelEnablerDisabler;
 
++ (UIView *)accountStatusPanelForUser:(FPUser *)user
+                        valueLabelTag:(NSNumber *)valueLabelTag
+                            uitoolkit:(PEUIToolkit *)uitoolkit
+                       relativeToView:(UIView *)relativeToView;
+
++ (void)refreshAccountStatusPanelForUser:(FPUser *)user
+                           valueLabelTag:(NSNumber *)valueLabelTag
+                          relativeToView:(UIView *)relativeToView;
+
 #pragma mark - Vehicle Panel
 
 - (PEEntityViewPanelMakerBlk)vehicleViewPanelMaker;
 
-- (PEEntityPanelMakerBlk)vehicleFormPanelMaker;
+- (PEEntityPanelMakerBlk)vehicleFormPanelMakerIncludeLogButtons:(BOOL)includeLogButtons;
 
 - (PEPanelToEntityBinderBlk)vehicleFormPanelToVehicleBinder;
 
@@ -115,7 +123,7 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 
 - (PEEntityViewPanelMakerBlk)fuelstationViewPanelMaker;
 
-- (PEEntityPanelMakerBlk)fuelstationFormPanelMaker;
+- (PEEntityPanelMakerBlk)fuelstationFormPanelMakerIncludeLogButton:(BOOL)includeLogButton;
 
 - (PEPanelToEntityBinderBlk)fuelstationFormPanelToFuelstationBinder;
 

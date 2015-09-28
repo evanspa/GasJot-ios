@@ -81,7 +81,7 @@
 		18AC0720181ACC8C001FF24E /* FPLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPLogging.h; sourceTree = "<group>"; };
 		18AC0721181ACC8C001FF24E /* FPLogging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPLogging.m; sourceTree = "<group>"; };
 		18B17D5519DAE696001D2BF6 /* PEAddViewEditController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PEAddViewEditController.h; sourceTree = "<group>"; };
-		18B17D5619DAE696001D2BF6 /* PEAddViewEditController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PEAddViewEditController.m; sourceTree = "<group>"; };
+		18B17D5619DAE696001D2BF6 /* PEAddViewEditController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = PEAddViewEditController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		18C3CD7219DC3B440092C002 /* FPPanelToolkit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPPanelToolkit.h; sourceTree = "<group>"; };
 		18C3CD7319DC3B440092C002 /* FPPanelToolkit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPPanelToolkit.m; sourceTree = "<group>"; };
 		18CC2CF217F680AC009DF2CE /* FPNames.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPNames.h; sourceTree = "<group>"; };
@@ -817,6 +817,11 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "fuelpurchase/PEFuelPurchase-App-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"COCOAPODS=1",
+					"XCODE_VERSION=$(XCODE_VERSION_MAJOR)",
+				);
 				INFOPLIST_FILE = "fuelpurchase/PEFuelPurchase-App-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
 				PRODUCT_BUNDLE_IDENTIFIER = "name.paulevans.fpapp.${PRODUCT_NAME:rfc1034identifier}";

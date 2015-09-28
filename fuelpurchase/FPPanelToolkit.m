@@ -14,6 +14,7 @@
 #import "FPEnvLogVehicleAndDateDataSourceDelegate.h"
 #import <BlocksKit/UIControl+BlocksKit.h>
 #import "FPLogEnvLogComposite.h"
+#import <FlatUIKit/UIColor+FlatUI.h>
 #import "FPNames.h"
 #import "FPUtils.h"
 #import "FPUIUtils.h"
@@ -49,12 +50,11 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
 
 #pragma mark - User Account Panel
 
-- (PEEntityViewPanelMakerBlk)userAccountViewPanelMaker {
+- (PEEntityViewPanelMakerBlk)userAccountViewPanelMakerWithAccountStatusLabelTag:(NSInteger)accountStatusLabelTag {
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user) {
     UIView *parentView = [parentViewController view];
     UIView *userAccountPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *userAccountDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Full name", [PEUtils emptyIfNil:[user name]]],
-                                                                      @[@"Username", [PEUtils emptyIfNil:[user username]]],
+    UIView *userAccountDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Name", [PEUtils emptyIfNil:[user name]]],
                                                                       @[@"Email", [PEUtils emptyIfNil:[user email]]]]
                                                      withCellHeight:36.5
                                                   labelLeftHPadding:10.0
@@ -73,11 +73,22 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                                panelBackgroundColor:[_uitoolkit colorForWindows]
                                                        dividerColor:nil
                                                      relativeToView:parentView];
+    UIView *accountStatusPanel = [FPPanelToolkit accountStatusPanelForUser:user
+                                                             valueLabelTag:@(accountStatusLabelTag)
+                                                                 uitoolkit:_uitoolkit
+                                                            relativeToView:parentView];
+    [accountStatusPanel setBackgroundColor:[UIColor whiteColor]];
     [PEUIUtils placeView:userAccountDataPanel
                  atTopOf:userAccountPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:15
+                vpadding:25
                 hpadding:0];
+    [PEUIUtils placeView:accountStatusPanel
+                   below:userAccountDataPanel
+                    onto:userAccountPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:15.0
+                hpadding:0.0];
     return userAccountPanel;
   };
 }
@@ -91,21 +102,14 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     TaggedTextfieldMaker tfMaker =
     [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:userAccountPanel];
     UITextField *nameTf = tfMaker(@"Name", FPUserTagName);
-    UITextField *usernameTf = tfMaker(@"Username", FPUserTagUsername);
-    UITextField *emailTf = tfMaker(@"Email", FPUserTagEmail);
+    UITextField *emailTf = tfMaker(@"E-mail", FPUserTagEmail);
     [PEUIUtils placeView:nameTf
                  atTopOf:userAccountPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:15
                 hpadding:0];
-    [PEUIUtils placeView:usernameTf
-                   below:nameTf
-                    onto:userAccountPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
     [PEUIUtils placeView:emailTf
-                   below:usernameTf
+                   below:nameTf
                     onto:userAccountPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
@@ -121,10 +125,6 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
        fromTextfieldWithTag:FPUserTagName
                    fromView:panel];
     [PEUIUtils bindToEntity:userAccount
-           withStringSetter:@selector(setUsername:)
-       fromTextfieldWithTag:FPUserTagUsername
-                   fromView:panel];
-    [PEUIUtils bindToEntity:userAccount
            withStringSetter:@selector(setEmail:)
        fromTextfieldWithTag:FPUserTagEmail
                    fromView:panel];
@@ -137,10 +137,6 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                fromView:panel
                              fromEntity:userAccount
                              withGetter:@selector(name)];
-    [PEUIUtils bindToTextControlWithTag:FPUserTagUsername
-                               fromView:panel
-                             fromEntity:userAccount
-                             withGetter:@selector(username)];
     [PEUIUtils bindToTextControlWithTag:FPUserTagEmail
                                fromView:panel
                              fromEntity:userAccount
@@ -153,13 +149,47 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     [PEUIUtils enableControlWithTag:FPUserTagName
                            fromView:panel
                              enable:enable];
-    [PEUIUtils enableControlWithTag:FPUserTagUsername
-                           fromView:panel
-                             enable:enable];
     [PEUIUtils enableControlWithTag:FPUserTagEmail
                            fromView:panel
                              enable:enable];
   };
+}
+
++ (UIView *)accountStatusPanelForUser:(FPUser *)user
+                        valueLabelTag:(NSNumber *)valueLabelTag
+                            uitoolkit:(PEUIToolkit *)uitoolkit
+                       relativeToView:(UIView *)relativeToView {
+  NSString *statusText;
+  UIColor *statusTextColor;
+  if (![PEUtils isNil:[user verifiedAt]]) {
+    statusText = @"verified";
+    statusTextColor = [UIColor greenSeaColor];
+  } else {
+    statusText = @"not verified";
+    statusTextColor = [UIColor sunflowerColor];
+  }
+  return [PEUIUtils labelValuePanelWithCellHeight:36.75
+                                      labelString:@"Account status"
+                                        labelFont:[uitoolkit fontForTextfields]
+                                   labelTextColor:[UIColor blackColor]
+                                labelLeftHPadding:10.0
+                                      valueString:statusText
+                                        valueFont:[uitoolkit fontForTextfields]
+                                   valueTextColor:statusTextColor
+                               valueRightHPadding:15.0
+                                    valueLabelTag:valueLabelTag
+                   minPaddingBetweenLabelAndValue:10.0
+                                   relativeToView:relativeToView];
+}
+
++ (void)refreshAccountStatusPanelForUser:(FPUser *)user
+                           valueLabelTag:(NSNumber *)valueLabelTag
+                          relativeToView:(UIView *)relativeToView {
+  UILabel *accountStatusLabel = (UILabel *)[relativeToView viewWithTag:[valueLabelTag integerValue]];
+  if (![PEUtils isNil:[user verifiedAt]]) {
+    [PEUIUtils setTextAndResize:@"verified" forLabel:accountStatusLabel];
+    [accountStatusLabel setTextColor:[UIColor greenSeaColor]];
+  }
 }
 
 #pragma mark - Vehicle Panel
@@ -246,7 +276,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
   };
 }
 
-- (PEEntityPanelMakerBlk)vehicleFormPanelMaker {
+- (PEEntityPanelMakerBlk)vehicleFormPanelMakerIncludeLogButtons:(BOOL)includeLogButtons {
   return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
     UIView *vehiclePanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
@@ -274,9 +304,11 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    [self placeViewLogsButtonsOntoVehiclePanel:vehiclePanel
-                                     belowView:vehicleFuelCapacityTf
-                          parentViewController:parentViewController];
+    if (includeLogButtons) {
+      [self placeViewLogsButtonsOntoVehiclePanel:vehiclePanel
+                                       belowView:vehicleFuelCapacityTf
+                            parentViewController:parentViewController];
+    }
     return vehiclePanel;
   };
 }
@@ -344,15 +376,6 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
 - (UIButton *)placeViewLogsButtonOntoFuelstationPanel:(UIView *)fuelstationPanel
                                             belowView:(UIView *)belowView
                                  parentViewController:(PEAddViewEditController *)parentViewController {
-  /*UIButton *viewFpLogsBtn = [_uitoolkit systemButtonMaker](@"Gas Logs", nil, nil);
-  [PEUIUtils setFrameWidthOfView:viewFpLogsBtn ofWidth:1.0 relativeTo:fuelstationPanel];
-  [PEUIUtils addDisclosureIndicatorToButton:viewFpLogsBtn];
-  [viewFpLogsBtn bk_addEventHandler:^(id sender) {
-    FPVehicle *vehicle = (FPVehicle *)[parentViewController entity];
-    FPAuthScreenMaker fpLogsScreenMaker =
-    [_screenToolkit newViewFuelPurchaseLogsScreenMakerForFuelStationInCtx];
-    [PEUIUtils displayController:fpLogsScreenMaker(vehicle) fromController:parentViewController animated:YES];
-  } forControlEvents:UIControlEventTouchUpInside];*/
   UIButton *viewFpLogsBtn = [FPUIUtils buttonWithLabel:@"Gas logs"
                                           tagForButton:@(FPFuelStationTagViewFplogsBtn)
                                            recordCount:[_coordDao numFuelPurchaseLogsForFuelStation:(FPFuelStation *)[parentViewController entity] error:[FPUtils localFetchErrorHandlerMaker]()]
@@ -443,7 +466,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
   };
 }
 
-- (PEEntityPanelMakerBlk)fuelstationFormPanelMaker {
+- (PEEntityPanelMakerBlk)fuelstationFormPanelMakerIncludeLogButton:(BOOL)includeLogButton {
   return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
     UIView *fuelStationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.1 relativeToView:parentView];
@@ -492,11 +515,60 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     UIButton *useCurrentLocationBtn = [_uitoolkit systemButtonMaker](@"Use Current Location", nil, nil);
     [useCurrentLocationBtn setTag:FPFuelStationTagUseCurrentLocation];
     [useCurrentLocationBtn bk_addEventHandler:^(id sender) {
-      CLLocation *currentLocation = [APP latestLocation];
-      if (currentLocation) {
-        [ds setLatitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].latitude]];
-        [ds setLongitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].longitude]];
-        [coordinatesTableView reloadData];
+      void (^doUseCurrentLocation)(void) = ^{
+        CLLocation *currentLocation = [APP latestLocation];
+        if (currentLocation) {
+          [ds setLatitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].latitude]];
+          [ds setLongitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].longitude]];
+          [coordinatesTableView reloadData];
+        }
+      };
+      if ([PEUtils isNil:[APP latestLocation]]) {
+        if ([APP locationServicesAuthorized]) {
+          NSString *instructionText = @"Settings app \u2794 Privacy \u2794 Location Services \u2794 Gas Jot";
+          NSString *desc = [NSString stringWithFormat:@"Your current location cannot be determined.  \
+Make sure you have location services enabled for Gas Jot.  You can check this by going to:\n\n%@", instructionText];
+          NSDictionary *attrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
+          NSMutableAttributedString *attrDescTextWithInstructionalText =
+          [[NSMutableAttributedString alloc] initWithString:desc];
+          NSRange instructionTextRange  = [desc rangeOfString:instructionText];
+          [attrDescTextWithInstructionalText setAttributes:attrs range:instructionTextRange];
+          [PEUIUtils showWarningAlertWithMsgs:nil
+                                        title:@"Hmm."
+                             alertDescription:attrDescTextWithInstructionalText
+                                     topInset:70.0
+                                  buttonTitle:@"Okay."
+                                 buttonAction:^{}
+                               relativeToView:parentView];
+        } else {
+          if ([APP hasBeenAskedToEnableLocationServices]) {
+            [PEUIUtils showInstructionalAlertWithTitle:@"Enable location services."
+                                  alertDescriptionText:@"To compute your current location, you need to enable location services for Gas Jot.  To do this, go to:\n\n"
+                                       instructionText:@"Settings app \u2794 Privacy \u2794 Location Services \u2794 Gas Jot"
+                                              topInset:70.0
+                                           buttonTitle:@"Okay."
+                                          buttonAction:^{}
+                                        relativeToView:parentView];
+          } else {
+            [PEUIUtils showConfirmAlertWithTitle:@"Enable location services?"
+                                      titleImage:[PEUIUtils bundleImageWithName:@"question"]
+                                alertDescription:[[NSAttributedString alloc] initWithString:@"\
+To compute your location, you need to enable location services for Gas Jot.  If you would like to do this, tap 'Allow' in the next pop-up."]
+                                        topInset:70.0
+                                 okayButtonTitle:@"Okay."
+                                okayButtonAction:^{
+                                  [[APP locationManager] requestWhenInUseAuthorization];
+                                  [APP setHasBeenAskedToEnableLocationServices:YES];
+                                }
+                                 okayButtonStyle:JGActionSheetButtonStyleBlue
+                               cancelButtonTitle:@"No.  Not at this time."
+                              cancelButtonAction:^{ }
+                                cancelButtonSyle:JGActionSheetButtonStyleDefault
+                                  relativeToView:parentView];
+          }
+        }
+      } else {
+        doUseCurrentLocation();
       }
     } forControlEvents:UIControlEventTouchUpInside];
     [PEUIUtils setFrameWidthOfView:useCurrentLocationBtn ofWidth:1.0 relativeTo:fuelStationPanel];
@@ -546,9 +618,11 @@ location from the given address above."]
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:10.0
                 hpadding:0];
-    [self placeViewLogsButtonOntoFuelstationPanel:fuelStationPanel
-                                        belowView:recomputeCoordsBtn
-                             parentViewController:parentViewController];
+    if (includeLogButton) {
+      [self placeViewLogsButtonOntoFuelstationPanel:fuelStationPanel
+                                          belowView:recomputeCoordsBtn
+                               parentViewController:parentViewController];
+    }
     // wrap fuel station panel in scroll view (so everything can "fit")
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelStationPanel frame]];
     [scrollView setContentSize:CGSizeMake(fuelStationPanel.frame.size.width, 1.25 * fuelStationPanel.frame.size.height)];

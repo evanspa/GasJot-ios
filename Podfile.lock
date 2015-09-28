@@ -47,7 +47,7 @@ PODS:
   - FMDB/standard (2.5):
     - FMDB/common
   - IQKeyboardManager (3.2.1.2)
-  - JBChartView (2.8.15)
+  - JBChartView (2.8.16)
   - JGActionSheet (1.0.5)
   - KissXML (5.0)
   - MBProgressHUD (0.9.1)
@@ -59,18 +59,18 @@ PODS:
     - PESimu-Select (~> 1.0.3)
   - PEFuelPurchase-Common (1.0.8):
     - PEHateoas-Client (~> 1.0.2)
-  - PEFuelPurchase-Model (1.0.108):
+  - PEFuelPurchase-Model (1.0.115):
     - CocoaLumberjack (~> 1.9)
     - FMDB (~> 2.5)
     - PEFuelPurchase-Common (~> 1.0.8)
     - PEHateoas-Client (~> 1.0.6)
-    - PEObjc-Commons (~> 1.0.54)
+    - PEObjc-Commons (~> 1.0.59)
     - UICKeyChainStore (~> 2.0.4)
   - PEHateoas-Client (1.0.6):
     - AFNetworking (~> 2.5.4)
     - CocoaLumberjack (~> 1.9)
     - PEObjc-Commons (~> 1.0.43)
-  - PEObjc-Commons (1.0.54):
+  - PEObjc-Commons (1.0.59):
     - BlocksKit (~> 2.2.5)
     - JGActionSheet (~> 1.0.4)
   - PESimu-Select (1.0.3):
@@ -106,8 +106,8 @@ DEPENDENCIES:
   - OHHTTPStubs (~> 3.1.12)
   - PEDev-Console (~> 1.0.4)
   - PEFuelPurchase-Common (~> 1.0.8)
-  - PEFuelPurchase-Model (~> 1.0.108)
-  - PEObjc-Commons (~> 1.0.54)
+  - PEFuelPurchase-Model (~> 1.0.114)
+  - PEObjc-Commons (~> 1.0.59)
   - ReactiveCocoa (~> 2.4.7)
   - UICKeyChainStore (~> 2.0.5)
 
@@ -118,16 +118,16 @@ SPEC CHECKSUMS:
   FlatUIKit: 1b41f0d4952ce8d970d8479ce79df54a960242c4
   FMDB: 96e8f1bcc1329e269330f99770ad4285d9003e52
   IQKeyboardManager: 4adcd7cc9c17440a7cb74755f6f6c8389919c6bf
-  JBChartView: d77d6a713a32547b24ccfaeba90958e7274f0c9d
+  JBChartView: 8e65b7fbb4e7f1f2c0197575734fce4af1c19e17
   JGActionSheet: 2cfca820b57a11ec4b4a5655d45ee599fbeddc05
   KissXML: ce643413d618ad69886d0d43c3792b7dedfe476e
   MBProgressHUD: c47f2c166c126cf2ce36498d80f33e754d4e93ad
   OHHTTPStubs: 8cf0cfe6f34f13fc88fdf5b2a1b2c2536e8c0261
   PEDev-Console: e950c909066280c4cd17e717c30f2977eb3a0ebe
   PEFuelPurchase-Common: 315cd43955e69e5be94373405f1b55b6723d30b6
-  PEFuelPurchase-Model: edfff17db99b493b50f44802730de679f046ca40
+  PEFuelPurchase-Model: d8c4f0453ee28fef0a5fe3619dc4e71749f98634
   PEHateoas-Client: 0a08b2f02833411ea1fab2a92d8949efd14035d8
-  PEObjc-Commons: 282c92ab184ce6f8068550b87013b875c6d10a35
+  PEObjc-Commons: 47b469a8e78d78f2e4b1fd847be285c6fa5bf0b3
   PESimu-Select: 9ad38adb78e42e79c9f9365f71c9b05215b6ac10
   PEWire-Control: 2aeefa4014575adbc52cfbf3206395d9a7c07b22
   PEXML-Utils: f7e0759b8e4e2ec3a39c781b362d7fb233fc8421

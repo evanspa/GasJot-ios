@@ -49,6 +49,8 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
 
 #pragma mark - User Helpers
 
++ (BOOL)validateEmailWithString:(NSString*)email;
+
 + (NSArray *)computeSignInErrMsgs:(NSUInteger)signInErrMask;
 
 + (NSArray *)computeSaveUsrErrMsgs:(NSInteger)saveUsrErrMask;

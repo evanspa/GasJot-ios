@@ -136,7 +136,7 @@
   UIButton *viewSplashScreenBtn = [_uitoolkit systemButtonMaker](@"View splash screen", nil, nil);
   [PEUIUtils setFrameWidthOfView:viewSplashScreenBtn ofWidth:1.0 relativeTo:self.view];
   [PEUIUtils addDisclosureIndicatorToButton:viewSplashScreenBtn];
-  UIView *viewSplashScreenMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"Want to see that splash screen again?"
+  UIView *viewSplashScreenMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"Want to see the splash screen again?"
                                                                         font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                                              backgroundColor:[UIColor clearColor]
                                                                    textColor:[UIColor darkGrayColor]
@@ -273,15 +273,16 @@ Please try this again later."]
                    dispatch_async(dispatch_get_main_queue(), ^{
                      [changelogHud hide:YES];
                      [APP refreshTabs];
-                     NSString *becameUnauthMessage = @"\
+                     NSString *textToAccent = @"Re-authenticate";
+                     NSString *becameUnauthMessage = [NSString stringWithFormat:@"\
 Well this is awkward.  While syncing \
 your account, the server is asking for you \
 to re-authenticate.\n\n\
-To authenticate, tap the Re-authenticate \
-button.";
-                     NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
+To authenticate, tap the %@ \
+button.", textToAccent];
+                     NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
                      NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
-                     NSRange unauthMsgAttrsRange = NSMakeRange(126, 15); // 'Re-authenticate'
+                     NSRange unauthMsgAttrsRange = [becameUnauthMessage rangeOfString:textToAccent];
                      [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
                      [PEUIUtils showWarningAlertWithMsgs:nil
                                                    title:@"Authentication Failure."

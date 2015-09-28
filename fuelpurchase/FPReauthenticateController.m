@@ -249,15 +249,16 @@ edits.";
                                                         NSMutableArray *sections = [NSMutableArray array];
                                                         JGActionSheetSection *becameUnauthSection = nil;
                                                         if (receivedUnauthedError) {
-                                                          NSString *becameUnauthMessage = @"\
+                                                          NSString *textToAccent = @"Re-authenticate";
+                                                          NSString *becameUnauthMessage = [NSString stringWithFormat:@"\
 This is awkward.  While syncing your local \
 edits, the server is asking for you to \
 authenticate again.  Sorry about that. \
-To authenticate, tap the Re-authenticate \
-button.";
-                                                          NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
+To authenticate, tap the %@ \
+button.", textToAccent];
+                                                          NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
                                                           NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
-                                                          NSRange unauthMsgAttrsRange = NSMakeRange(146, 15); // 'Re-authenticate'
+                                                          NSRange unauthMsgAttrsRange = [becameUnauthMessage rangeOfString:textToAccent];
                                                           [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
                                                           becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
                                                                                                                  title:@"Authentication Failure."

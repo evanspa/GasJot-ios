@@ -45,7 +45,7 @@
 @implementation FPCreateAccountController {
   FPCoordinatorDao *_coordDao;
   UITextField *_caFullNameTf;
-  UITextField *_caEmailOrUsernameTf;
+  UITextField *_caEmailTf;
   UITextField *_caPasswordTf;
   CGFloat animatedDistance;
   PEUIToolkit *_uitoolkit;
@@ -120,7 +120,7 @@ Fill out the form below and tap 'Done'."
   TextfieldMaker tfMaker =
     [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:createAcctPnl];
   _caFullNameTf = tfMaker(@"unauth.start.ca.fullnametf.pht");
-  _caEmailOrUsernameTf = tfMaker(@"unauth.start.ca.emailorusernametf.pht");
+  _caEmailTf = tfMaker(@"unauth.start.ca.emailtf.pht");
   _caPasswordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
   [_caPasswordTf setSecureTextEntry:YES];
   
@@ -136,14 +136,14 @@ Fill out the form below and tap 'Done'."
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:7.0
               hpadding:0];
-  [PEUIUtils placeView:_caEmailOrUsernameTf
+  [PEUIUtils placeView:_caEmailTf
                  below:_caFullNameTf
                   onto:createAcctPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5
               hpadding:0];
   [PEUIUtils placeView:_caPasswordTf
-                 below:_caEmailOrUsernameTf
+                 below:_caEmailTf
                   onto:createAcctPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5
@@ -151,15 +151,17 @@ Fill out the form below and tap 'Done'."
   
   RAC(self, formStateMaskForAcctCreation) =
     [RACSignal combineLatest:@[_caFullNameTf.rac_textSignal,
-                               _caEmailOrUsernameTf.rac_textSignal,
+                               _caEmailTf.rac_textSignal,
                                _caPasswordTf.rac_textSignal]
                       reduce:^(NSString *fullName,
-                               NSString *emailOrUsername,
+                               NSString *email,
                                NSString *password) {
         NSUInteger createUsrErrMask = 0;
-        if ([emailOrUsername length] == 0) {
-          createUsrErrMask = createUsrErrMask | FPSaveUsrUsernameAndEmailNotProvided
+        if ([email length] == 0) {
+          createUsrErrMask = createUsrErrMask | FPSaveUsrEmailNotProvided
               | FPSaveUsrAnyIssues;
+        } else if (![FPUtils validateEmailWithString:email]) {
+          createUsrErrMask = createUsrErrMask | FPSaveUsrInvalidEmail | FPSaveUsrAnyIssues;
         }
         if ([password length] == 0) {
           createUsrErrMask = createUsrErrMask | FPSaveUsrPasswordNotProvided |
@@ -175,17 +177,8 @@ Fill out the form below and tap 'Done'."
 - (void)handleAccountCreation {
   [[self view] endEditing:YES];
   if (!([self formStateMaskForAcctCreation] & FPSaveUsrAnyIssues)) {
-    NSString *emailOrUsername = [_caEmailOrUsernameTf text];
-    NSString *email = nil;
-    NSString *username = nil;
-    if ([emailOrUsername containsString:@"@"]) {
-      email = emailOrUsername;
-    } else {
-      username = emailOrUsername;
-    }
     [_localUser setName:[_caFullNameTf text]];
-    [_localUser setEmail:email];
-    [_localUser setUsername:username];
+    [_localUser setEmail:[_caEmailTf text]];
     [_localUser setPassword:[_caPasswordTf text]];
     __block MBProgressHUD *HUD;    
     void (^nonLocalSyncSuccessBlk)(FPUser *) = ^(FPUser *user){
@@ -308,15 +301,16 @@ your local edits.  You can try syncing them \
 later.";
                                                         JGActionSheetSection *becameUnauthSection = nil;
                                                         if (_receivedAuthReqdErrorOnSyncAttempt) {
-                                                          NSString *becameUnauthMessage = @"\
+                                                          NSString *textToAccent = @"Re-authenticate";
+                                                          NSString *becameUnauthMessage = [NSString stringWithFormat:@"\
 This is awkward.  While syncing your local \
 edits, the server is asking for you to \
 authenticate again.  Sorry about that. \
-To authenticate, tap the Re-authenticate \
-button.";
-                                                          NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0] };
+To authenticate, tap the %@ \
+button.", textToAccent];
+                                                          NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
                                                           NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
-                                                          NSRange unauthMsgAttrsRange = NSMakeRange(146, 15); // 'Re-authenticate'
+                                                          NSRange unauthMsgAttrsRange = [becameUnauthMessage rangeOfString:textToAccent];
                                                           [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
                                                           becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
                                                                                                                  title:@"Authentication Failure."
