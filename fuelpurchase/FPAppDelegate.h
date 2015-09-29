@@ -28,6 +28,8 @@
   #import <PEDev-Console/PDVDevEnabled.h>
 #endif
 
+FOUNDATION_EXPORT NSInteger const FPJotButtonTag;
+
 /**
   Application delegate.
  */
@@ -66,6 +68,8 @@
 @property (strong, nonatomic) UIWindow *window;
 
 #pragma mark - Methods
+
+- (void)enableJotButton:(BOOL)enableJotButton;
 
 - (void)setUser:(FPUser *)user tabBarController:(UITabBarController *)tabBarController;
 

@@ -133,7 +133,8 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
 
 #pragma mark - Tab-bar Authenticated Landing Screen
 
-- (FPAuthScreenMaker)newTabBarHomeLandingScreenMakerIsLoggedIn:(BOOL)isLoggedIn;
+- (FPAuthScreenMaker)newTabBarHomeLandingScreenMakerIsLoggedIn:(BOOL)isLoggedIn
+                                               tagForJotButton:(NSInteger)tagForJotButton;
 
 - (UIViewController *)unsynedEditsViewControllerForUser:(FPUser *)user;
 

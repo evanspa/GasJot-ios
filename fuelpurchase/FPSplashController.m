@@ -198,7 +198,8 @@
 
 - (void)startUsing {
   FPUser *user = [_coordDao newLocalUserWithError:[FPUtils localSaveErrorHandlerMaker]()];
-  UITabBarController *tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:NO](user);
+  UITabBarController *tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:NO
+                                                                                                         tagForJotButton:FPJotButtonTag](user);
   [APP setUser:user tabBarController:tabBarController];
   [[self navigationController] pushViewController:tabBarController animated:YES];
 }

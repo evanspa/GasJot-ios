@@ -28,7 +28,7 @@
 #import <PEDev-Console/UIViewController+PEDevConsole.h>
 #endif
 
-NSInteger const accountStatusLabelTag = 12;
+NSInteger const kAccountStatusPanelTag = 12;
 
 @implementation FPAccountController {
   FPCoordinatorDao *_coordDao;
@@ -86,8 +86,12 @@ NSInteger const accountStatusLabelTag = 12;
                   vpadding:0.0
                   hpadding:0.0];
       [FPPanelToolkit refreshAccountStatusPanelForUser:_user
-                                         valueLabelTag:@(accountStatusLabelTag)
-                                        relativeToView:_doesHaveAuthTokenPanel];
+                                              panelTag:@(kAccountStatusPanelTag)
+                                  includeRefreshButton:YES
+                                        coordinatorDao:_coordDao
+                                             uitoolkit:_uitoolkit
+                                        relativeToView:_doesHaveAuthTokenPanel
+                                            controller:self];
     } else {
       [navItem setTitle:@"User Account (auth required)"];
       [PEUIUtils placeView:_doesNotHaveAuthTokenPanel
@@ -185,9 +189,12 @@ details.";
     [PEUIUtils displayController:[_screenToolkit newUserAccountDetailScreenMaker](_user) fromController:self animated:YES];
   } forControlEvents:UIControlEventTouchUpInside];
   UIView *accountStatusPanel = [FPPanelToolkit accountStatusPanelForUser:_user
-                                                           valueLabelTag:@(accountStatusLabelTag)
+                                                                panelTag:@(kAccountStatusPanelTag)
+                                                    includeRefreshButton:YES
+                                                          coordinatorDao:_coordDao
                                                                uitoolkit:_uitoolkit
-                                                          relativeToView:_doesHaveAuthTokenPanel];
+                                                          relativeToView:_doesHaveAuthTokenPanel
+                                                              controller:self];
   [accountStatusPanel setBackgroundColor:[UIColor whiteColor]];
   UIView *logoutMsgLabelWithPad = [self logoutPaddedMessage];
   UIButton *logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));

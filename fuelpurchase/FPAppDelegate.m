@@ -36,6 +36,7 @@
 #import "FPAppNotificationNames.h"
 #import "FPSplashController.h"
 #import "UIColor+FPAdditions.h"
+#import "FPJotController.h"
 
 #ifdef FP_DEV
   #import <PEDev-Console/PDVScreen.h>
@@ -90,6 +91,8 @@ typedef NS_ENUM(NSInteger, FPAppTabBarIndex) {
   FPAppTabBarIndexAccount
 };
 
+// tag for jot button
+NSInteger const FPJotButtonTag = 29;
 
 // NSUserDefaults keys
 NSString * const FPChangelogUpdatedAtUserDefaultsKey = @"FP changelog updated at";
@@ -127,6 +130,11 @@ NSString * const FPAppKeychainService = @"fp-app";
 }
 
 #pragma mark - Methods
+
+- (void)enableJotButton:(BOOL)enableJotButton {
+  UIButton *jotBtn = (UIButton *)[_tabBarController.view viewWithTag:FPJotButtonTag];
+  [jotBtn setEnabled:enableJotButton];
+}
 
 - (void)setUser:(FPUser *)user tabBarController:(UITabBarController *)tabBarController {
   _user = user;
@@ -238,16 +246,19 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     if ([self isUserLoggedIn]) {
       if ([self doesUserHaveValidAuthToken]) {
         DDLogVerbose(@"User is logged in and has a valid authentication token.");
-        _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:YES](_user);
+        _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:YES
+                                                                                            tagForJotButton:FPJotButtonTag](_user);
         [[self window] setRootViewController:_tabBarController];
       } else {
         DDLogVerbose(@"User is logged in and does NOT have a valid authentication token.");
-        _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:YES](_user);
+        _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:YES
+                                                                                            tagForJotButton:FPJotButtonTag](_user);
         [[self window] setRootViewController:_tabBarController];
       }
     } else {
       DDLogVerbose(@"User is NOT logged in.");
-      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:NO](_user);
+      _tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:NO
+                                                                                          tagForJotButton:FPJotButtonTag](_user);
       [[self window] setRootViewController:_tabBarController];
     }
     if ([self isUserLoggedIn] && ![self doesUserHaveValidAuthToken]) {
@@ -332,6 +343,10 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 - (BOOL)tabBarController:(UITabBarController *)tabBarController
 shouldSelectViewController:(UIViewController *)viewController {
+  // prevents placeholder 'center tab' controller from being selected
+  if ([viewController isKindOfClass:[FPJotController class]]) {
+    return NO;
+  }
   return YES;
 }
 
@@ -533,10 +548,12 @@ in an unauthenticated state.  Is main thread?  %@", [PEUtils yesNoFromBool:[NSTh
       // Authenticated landing screen
       [[PDVScreen alloc] initWithDisplayName:@"Authenticated Landing"
                                  description:@"Authenticated landing screen of pre-existing user with resident auth token."
-                         viewControllerMaker:^{return [_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:NO]([_coordDao userWithError:nil]);}],
+                         viewControllerMaker:^{return [_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:NO
+                                                                                                tagForJotButton:FPJotButtonTag]([_coordDao userWithError:nil]);}],
       [[PDVScreen alloc] initWithDisplayName:@"Authenticated Landing"
                                  description:@"Authenticated landing screen which occurs when a user creates an account."
-                         viewControllerMaker:^{return [_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:NO]([_coordDao userWithError:nil]);}]]];
+                         viewControllerMaker:^{return [_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:NO
+                                                                                                tagForJotButton:FPJotButtonTag]([_coordDao userWithError:nil]);}]]];
   return @[ createAcctScreenGroup ];
 }
 

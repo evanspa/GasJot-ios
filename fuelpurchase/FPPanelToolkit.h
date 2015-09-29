@@ -97,13 +97,20 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 - (PEEnableDisablePanelBlk)userFormPanelEnablerDisabler;
 
 + (UIView *)accountStatusPanelForUser:(FPUser *)user
-                        valueLabelTag:(NSNumber *)valueLabelTag
+                             panelTag:(NSNumber *)panelTag
+                 includeRefreshButton:(BOOL)includeRefreshButton
+                       coordinatorDao:(FPCoordinatorDao *)coordDao
                             uitoolkit:(PEUIToolkit *)uitoolkit
-                       relativeToView:(UIView *)relativeToView;
+                       relativeToView:(UIView *)relativeToView
+                           controller:(UIViewController *)controller;
 
 + (void)refreshAccountStatusPanelForUser:(FPUser *)user
-                           valueLabelTag:(NSNumber *)valueLabelTag
-                          relativeToView:(UIView *)relativeToView;
+                                panelTag:(NSNumber *)panelTag
+                    includeRefreshButton:(BOOL)includeRefreshButton
+                          coordinatorDao:(FPCoordinatorDao *)coordDao
+                               uitoolkit:(PEUIToolkit *)uitoolkit
+                          relativeToView:(UIView *)relativeToView
+                              controller:(UIViewController *)controller;
 
 #pragma mark - Vehicle Panel
 

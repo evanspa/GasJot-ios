@@ -69,6 +69,8 @@
   PEItemChildrenMsgsBlk _itemChildrenMsgsBlk;
   PEItemDeleter _itemDeleter;
   PEItemLocalDeleter _itemLocalDeleter;
+  PEModalOperationStarted _modalOperationStarted;
+  PEModalOperationDone _modalOperationDone;
 }
 
 #pragma mark - Initializers
@@ -115,7 +117,9 @@ conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
  itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
          itemDeleter:(PEItemDeleter)itemDeleter
     itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
-entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity {
+entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity
+modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
+  modalOperationDone:(PEModalOperationDone)modalOperationDone {
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
     _listViewController = listViewController;
@@ -165,6 +169,8 @@ entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity {
     _itemDeleter = itemDeleter;
     _itemLocalDeleter = itemLocalDeleter;
     _entitiesFromEntity = entitiesFromEntity;
+    _modalOperationStarted = modalOperationStarted;
+    _modalOperationDone = modalOperationDone;
   }
   return self;
 }
@@ -188,11 +194,13 @@ entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity {
                                          isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
                                           isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                                            isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
-                          syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode {
+                          syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
+                                   modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
+                                      modalOperationDone:(PEModalOperationDone)modalOperationDone {
   return [PEAddViewEditController addEntityCtrlrWithUitoolkit:uitoolkit
                                            listViewController:listViewController
                                                  itemAddedBlk:itemAddedBlk
-                                             entityFormPanelMaker:entityFormPanelMaker
+                                         entityFormPanelMaker:entityFormPanelMaker
                                           entityToPanelBinder:entityToPanelBinder
                                           panelToEntityBinder:panelToEntityBinder
                                                   entityTitle:entityTitle
@@ -207,7 +215,9 @@ entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity {
                                                isUserLoggedIn:isUserLoggedIn
                                                 isOfflineMode:isOfflineMode
                                syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
-                                        entitiesFromEntity:nil];
+                                           entitiesFromEntity:nil
+                                        modalOperationStarted:modalOperationStarted
+                                           modalOperationDone:modalOperationDone];
 }
 
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
@@ -228,7 +238,9 @@ entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity {
                                           isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                                            isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-                                      entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity {
+                                      entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity
+                                   modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
+                                      modalOperationDone:(PEModalOperationDone)modalOperationDone {
   return [[PEAddViewEditController alloc] initWithEntity:nil
                                       listViewController:listViewController
                                                    isAdd:YES
@@ -258,7 +270,7 @@ entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity {
                           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:viewDidAppearBlk
                                          entityValidator:entityValidator
-                                                  uploader:nil
+                                                uploader:nil
                                    numRemoteDepsNotLocal:nil
                                                    merge:nil
                                        fetchDependencies:nil
@@ -271,7 +283,9 @@ entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity {
                                      itemChildrenMsgsBlk:nil
                                              itemDeleter:nil
                                         itemLocalDeleter:nil
-                                   entitiesFromEntity:entitiesFromEntity];
+                                      entitiesFromEntity:entitiesFromEntity
+                                   modalOperationStarted:modalOperationStarted
+                                      modalOperationDone:modalOperationDone];
 }
 
 + (PEAddViewEditController *)viewEntityCtrlrWithEntity:(PELMMainSupport *)entity
@@ -310,7 +324,9 @@ entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity {
                                    itemChildrenCounter:(PEItemChildrenCounter)itemChildrenCounter
                                    itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
                                            itemDeleter:(PEItemDeleter)itemDeleter
-                                      itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter {
+                                      itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
+                                 modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
+                                    modalOperationDone:(PEModalOperationDone)modalOperationDone {
   return [[PEAddViewEditController alloc] initWithEntity:entity
                                       listViewController:listViewController
                                                    isAdd:NO
@@ -340,7 +356,7 @@ entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity {
                           prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
                                         viewDidAppearBlk:viewDidAppearBlk
                                          entityValidator:entityValidator
-                                                  uploader:uploader
+                                                uploader:uploader
                                    numRemoteDepsNotLocal:numRemoteDepsNotLocal
                                                    merge:merge
                                        fetchDependencies:fetchDependencies
@@ -353,7 +369,9 @@ entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity {
                                      itemChildrenMsgsBlk:itemChildrenMsgsBlk
                                              itemDeleter:itemDeleter
                                         itemLocalDeleter:itemLocalDeleter
-                                      entitiesFromEntity:nil];
+                                      entitiesFromEntity:nil
+                                   modalOperationStarted:modalOperationStarted
+                                      modalOperationDone:modalOperationDone];
 }
 
 #pragma mark - Notification Observing
@@ -658,6 +676,7 @@ Are you sure you want to continue?"]
     [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
     [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
     [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+    if (_modalOperationDone) { _modalOperationDone(); }
     [self setUploadDownloadDeleteBarButtonStates];
   };
   if ([_entity globalIdentifier]) {
@@ -666,6 +685,7 @@ Are you sure you want to continue?"]
     [[[self navigationItem] leftBarButtonItem] setEnabled:NO];
     [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
     [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+    if (_modalOperationStarted) { _modalOperationStarted(); }
     [_downloadBarButtonItem setEnabled:NO];
     [_uploadBarButtonItem setEnabled:NO];
     [_deleteBarButtonItem setEnabled:NO];
@@ -680,6 +700,7 @@ Are you sure you want to continue?"]
           deleteHud.mode = MBProgressHUDModeCustomView;
           [deleteHud hide:YES afterDelay:1.0];
           dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            if (_modalOperationDone) { _modalOperationDone(); }
             [[self navigationController] popViewControllerAnimated:YES];
           });
         });
@@ -713,6 +734,7 @@ It has now been removed from this device."]
                                  buttonAction:^{
                                    _itemLocalDeleter(self, _entity, _entityIndexPath);
                                    [_listViewController handleRemovedEntity:_entity];
+                                   if (_modalOperationDone) { _modalOperationDone(); }
                                    [[self navigationController] popViewControllerAnimated:YES];
                                  }
                                relativeToView:[self parentViewForAlerts]];
@@ -871,6 +893,7 @@ as follows:";
     _itemLocalDeleter(self, _entity, _entityIndexPath);
     dispatch_async(dispatch_get_main_queue(), ^{
       [_listViewController handleRemovedEntity:_entity];
+      if (_modalOperationDone) { _modalOperationDone(); }
       [[self navigationController] popViewControllerAnimated:YES];
     });
   }
@@ -894,6 +917,7 @@ as follows:";
   [[[self navigationItem] leftBarButtonItem] setEnabled:NO];
   [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
   [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+  if (_modalOperationStarted) { _modalOperationStarted(); }
   [_downloadBarButtonItem setEnabled:NO];
   [_uploadBarButtonItem setEnabled:NO];
   [_deleteBarButtonItem setEnabled:NO];
@@ -909,6 +933,7 @@ as follows:";
     [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
     [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
     [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+    if (_modalOperationDone) { _modalOperationDone(); }
   };
   void (^postDownloadActivities)(void) = ^{
     if (_itemChangedBlk) {
@@ -1069,6 +1094,7 @@ There was a problem downloading the record.";
     [self.navigationItem setHidesBackButton:NO animated:YES];
     [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
     [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+    if (_modalOperationDone) { _modalOperationDone(); }
     //[[self navigationItem] setTitle:_entityTitle];
     //[[self navigationItem] setTitleView:[self titleWithText:_entityTitle]];
     _panelEnablerDisabler(_entityFormPanel, NO);
@@ -1083,6 +1109,7 @@ There was a problem downloading the record.";
   [_uploadBarButtonItem setEnabled:NO];
   [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
   [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+  if (_modalOperationStarted) { _modalOperationStarted(); }
   HUD.delegate = self;
   HUD.mode = _syncImmediateMBProgressHUDMode;
   HUD.labelText = @"Uploading to server.";
@@ -1366,6 +1393,7 @@ with your remote account, it will be removed now.";
                        buttonAction:^{
                          _itemLocalDeleter(self, _entity, _entityIndexPath);
                          [_listViewController handleRemovedEntity:_entity];
+                         if (_modalOperationDone) { _modalOperationDone(); }
                          [[self navigationController] popViewControllerAnimated:YES];
                        }
                      relativeToView:[self parentViewForAlerts]];
@@ -1663,6 +1691,7 @@ merge conflicts.";
     [self.navigationItem setHidesBackButton:NO animated:YES];
     [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
     [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+    if (_modalOperationDone) { _modalOperationDone(); }
     [[self navigationItem] setLeftBarButtonItem:_backButton];
     [[self navigationItem] setRightBarButtonItem:[self editButtonItem]];
     //[[self navigationItem] setTitleView:[self titleWithText:_entityTitle]];
@@ -1702,6 +1731,7 @@ merge conflicts.";
         [[[self navigationItem] leftBarButtonItem] setEnabled:NO];
         [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
         [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+        if (_modalOperationStarted) { _modalOperationStarted(); }
         HUD.delegate = self;
         HUD.mode = _syncImmediateMBProgressHUDMode;
         HUD.labelText = @"Saving to the server.";
@@ -2031,6 +2061,7 @@ edits to the server, %@.  The error is as follows:", textToAccent];
         [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // cancel btn (so they can't cancel it after we'ved saved and we're displaying the HUD)
         [[[self navigationItem] rightBarButtonItem] setEnabled:NO]; // done btn
         [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+        if (_modalOperationStarted) { _modalOperationStarted(); }
         _doneEditingEntityLocalSync(self, _entity);
         MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         HUD.delegate = self;
@@ -2155,12 +2186,14 @@ edits to the server, %@.  The error is as follows:", textToAccent];
         [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
         [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
         [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+        if (_modalOperationDone) { _modalOperationDone(); }
       };
       MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
       [self.navigationItem setHidesBackButton:YES animated:YES];
       [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // cancel btn (so they can't cancel it while HUD is displaying)
       [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
       [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+      if (_modalOperationStarted) { _modalOperationStarted(); }
       HUD.delegate = self;
       HUD.mode = _syncImmediateMBProgressHUDMode;
       HUD.labelText = @"Syncing to the server...";
@@ -2202,6 +2235,7 @@ edits to the server, %@.  The error is as follows:", textToAccent];
                   case 0: // okay
                     notificationSenderForAdd(_newEntity);
                     _itemAddedBlk(self, _newEntity);
+                    if (_modalOperationDone) { _modalOperationDone(); }
                     [sheet dismissAnimated:YES];
                     break;
                 };}];
@@ -2218,6 +2252,7 @@ edits to the server, %@.  The error is as follows:", textToAccent];
                                        buttonTitle:@"Okay."
                                       buttonAction:^{
                                         _itemAddedBlk(self, _newEntity);  // this is what causes this controller to be dismissed
+                                        if (_modalOperationDone) { _modalOperationDone(); }
                                       }
                                     relativeToView:[self parentViewForAlerts]];
             }
@@ -2555,6 +2590,7 @@ edits to the server, %@.  The error is as follows:", textToAccent];
       [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // cancel btn (so they can't cancel it after we'ved saved and we're displaying the HUD)
       [[[self navigationItem] rightBarButtonItem] setEnabled:NO]; // done btn
       [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+      if (_modalOperationStarted) { _modalOperationStarted(); }
       MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
       HUD.delegate = self;
       [HUD setLabelText:[NSString stringWithFormat:@"%@ Saved.", _entityTitle]];

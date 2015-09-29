@@ -74,10 +74,12 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                                        dividerColor:nil
                                                      relativeToView:parentView];
     UIView *accountStatusPanel = [FPPanelToolkit accountStatusPanelForUser:user
-                                                             valueLabelTag:@(accountStatusLabelTag)
+                                                                  panelTag:@(accountStatusLabelTag)
+                                                      includeRefreshButton:NO
+                                                            coordinatorDao:_coordDao
                                                                  uitoolkit:_uitoolkit
-                                                            relativeToView:parentView];
-    [accountStatusPanel setBackgroundColor:[UIColor whiteColor]];
+                                                            relativeToView:parentView
+                                                                controller:parentViewController];
     [PEUIUtils placeView:userAccountDataPanel
                  atTopOf:userAccountPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -155,41 +157,257 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
   };
 }
 
-+ (UIView *)accountStatusPanelForUser:(FPUser *)user
-                        valueLabelTag:(NSNumber *)valueLabelTag
-                            uitoolkit:(PEUIToolkit *)uitoolkit
-                       relativeToView:(UIView *)relativeToView {
-  NSString *statusText;
-  UIColor *statusTextColor;
++ (NSArray *)accountStatusTextForUser:(FPUser *)user {
   if (![PEUtils isNil:[user verifiedAt]]) {
-    statusText = @"verified";
-    statusTextColor = [UIColor greenSeaColor];
+    return @[@"verified", [UIColor greenSeaColor]];
   } else {
-    statusText = @"not verified";
-    statusTextColor = [UIColor sunflowerColor];
+    return @[@"not verified", [UIColor sunflowerColor]];
   }
-  return [PEUIUtils labelValuePanelWithCellHeight:36.75
-                                      labelString:@"Account status"
-                                        labelFont:[uitoolkit fontForTextfields]
-                                   labelTextColor:[UIColor blackColor]
-                                labelLeftHPadding:10.0
-                                      valueString:statusText
-                                        valueFont:[uitoolkit fontForTextfields]
-                                   valueTextColor:statusTextColor
-                               valueRightHPadding:15.0
-                                    valueLabelTag:valueLabelTag
-                   minPaddingBetweenLabelAndValue:10.0
-                                   relativeToView:relativeToView];
+}
+
++ (UIView *)accountStatusPanelForUser:(FPUser *)user
+                             panelTag:(NSNumber *)panelTag
+                 includeRefreshButton:(BOOL)includeRefreshButton
+                       coordinatorDao:(FPCoordinatorDao *)coordDao
+                            uitoolkit:(PEUIToolkit *)uitoolkit
+                       relativeToView:(UIView *)relativeToView
+                           controller:(UIViewController *)controller {
+  NSArray *accountStatusText = [FPPanelToolkit accountStatusTextForUser:user];
+  UIView *statusPanel = [PEUIUtils labelValuePanelWithCellHeight:36.75
+                                                     labelString:@"Account status"
+                                                       labelFont:[uitoolkit fontForTextfields]
+                                                  labelTextColor:[UIColor blackColor]
+                                               labelLeftHPadding:10.0
+                                                     valueString:accountStatusText[0]
+                                                       valueFont:[uitoolkit fontForTextfields]
+                                                  valueTextColor:accountStatusText[1]
+                                              valueRightHPadding:15.0
+                                                   valueLabelTag:nil
+                                  minPaddingBetweenLabelAndValue:10.0
+                                                  relativeToView:relativeToView];
+  [statusPanel setBackgroundColor:[UIColor whiteColor]];
+  UIView *panel;
+  if ([PEUtils isNil:[user verifiedAt]]) {
+    UIButton * (^makeSendEmailBtn)(void) = ^ UIButton * {
+      UIButton *sendEmailBtn = [PEUIUtils buttonWithKey:@"re-send verification email"
+                                                   font:[UIFont systemFontOfSize:14]
+                                        backgroundColor:[UIColor concreteColor]
+                                              textColor:[UIColor whiteColor]
+                           disabledStateBackgroundColor:nil
+                                 disabledStateTextColor:nil
+                                        verticalPadding:8.5
+                                      horizontalPadding:20.0
+                                           cornerRadius:5.0
+                                                 target:nil
+                                                 action:nil];
+      return sendEmailBtn;
+    };
+    panel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:relativeToView fixedHeight:80];
+    [panel setBackgroundColor:[UIColor clearColor]];
+    UIView *buttonsView = [PEUIUtils panelWithWidthOf:1.0 relativeToView:relativeToView fixedHeight:30];
+    [buttonsView setBackgroundColor:[UIColor clearColor]];
+    if (includeRefreshButton) {
+      UIButton *refreshBtn = [PEUIUtils buttonWithKey:@"refresh"
+                                                 font:[UIFont systemFontOfSize:14]
+                                      backgroundColor:[UIColor concreteColor]
+                                            textColor:[UIColor whiteColor]
+                         disabledStateBackgroundColor:nil
+                               disabledStateTextColor:nil
+                                      verticalPadding:8.5
+                                    horizontalPadding:20.0
+                                         cornerRadius:5.0
+                                               target:nil
+                                               action:nil];
+      [refreshBtn bk_addEventHandler:^(id sender) {
+        
+        void (^postRefreshActivities)(void) = ^{
+          [[[controller tabBarController] tabBar] setUserInteractionEnabled:YES];
+          [APP enableJotButton:YES];
+        };
+        __block BOOL receivedAuthReqdErrorOnDownloadAttempt = NO;
+        NSMutableArray *successMsgsForRefresh = [NSMutableArray array];
+        NSMutableArray *errsForRefresh = [NSMutableArray array];
+        // The meaning of the elements of the arrays found within errsForRefresh:
+        //
+        // errsForRefresh[*][0]: Error title (string)
+        // errsForRefresh[*][1]: Is error user-fixable (bool)
+        // errsForRefresh[*][2]: An NSArray of sub-error messages (strings)
+        // errsForRefresh[*][3]: Is error type server-busy? (bool)
+        // errsForRefresh[*][4]: Is entity not found (bool)
+        //
+        MBProgressHUD *refreshHud = [MBProgressHUD showHUDAddedTo:controller.view animated:YES];
+        [[[controller tabBarController] tabBar] setUserInteractionEnabled:NO];
+        [APP enableJotButton:NO];
+        [refreshHud setLabelText:[NSString stringWithFormat:@"Refreshing account status..."]];
+        
+        void(^refreshDone)(NSString *) = ^(NSString *mainMsgTitle) {
+          if ([errsForRefresh count] == 0) { // success
+            dispatch_async(dispatch_get_main_queue(), ^{
+              [refreshHud hide:YES afterDelay:0.0];
+              id downloadedUser = successMsgsForRefresh[0][1];
+              void (^stillNotVerifiedAlert)(void) = ^{
+                [PEUIUtils showInfoAlertWithTitle:@"Still not verified."
+                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
+You're account is still not verified.  \
+Use the 're-send verification email' button to \
+receive a new account verification link to your email inbox."]
+                                         topInset:70.0
+                                      buttonTitle:@"Okay."
+                                     buttonAction:^{ postRefreshActivities(); }
+                                   relativeToView:controller.tabBarController.view];
+              };
+              if ([downloadedUser isEqual:[NSNull null]]) { // user account not modified
+                stillNotVerifiedAlert();
+              } else { // user account modified
+                [user setUpdatedAt:[downloadedUser updatedAt]];
+                [user overwriteDomainProperties:downloadedUser];
+                [[coordDao localDao] saveMasterUser:downloadedUser error:[FPUtils localSaveErrorHandlerMaker]()];
+                if ([PEUtils isNil:[user verifiedAt]]) {  // user account modified, but still not verified
+                  stillNotVerifiedAlert();
+                } else {  // user account verified
+                  [PEUIUtils showSuccessAlertWithTitle:@"Account verified."
+                                      alertDescription:[[NSAttributedString alloc] initWithString:@"Thank you.  Your account is now verified."]
+                                              topInset:70.0
+                                           buttonTitle:@"Okay."
+                                          buttonAction:^{
+                                            postRefreshActivities();
+                                            [FPPanelToolkit refreshAccountStatusPanelForUser:user
+                                                                                    panelTag:panelTag
+                                                                        includeRefreshButton:includeRefreshButton
+                                                                              coordinatorDao:coordDao
+                                                                                   uitoolkit:uitoolkit
+                                                                              relativeToView:relativeToView
+                                                                                  controller:controller];
+                                          }
+                                        relativeToView:controller.tabBarController.view];
+                }
+              }
+            });
+          } else { // error(s)
+            dispatch_async(dispatch_get_main_queue(), ^{
+              [refreshHud hide:YES afterDelay:0.0];
+              if ([errsForRefresh[0][3] boolValue]) { // server busy
+                [PEUIUtils showWaitAlertWithMsgs:nil
+                                           title:@"Busy with maintenance."
+                                alertDescription:[[NSAttributedString alloc] initWithString:@"\
+The server is currently busy at the moment \
+undergoing maintenance.\n\n\
+We apologize for the inconvenience.  Please \
+try refreshing later."]
+                                        topInset:70.0
+                                     buttonTitle:@"Okay."
+                                    buttonAction:^{ postRefreshActivities(); }
+                                  relativeToView:controller.tabBarController.view];
+              } else if ([errsForRefresh[0][4] boolValue]) { // not found
+                NSString *fetchErrMsg = @"Oops.  Something appears to be wrong with your account.  Try logging off and logging back in.";
+                [PEUIUtils showErrorAlertWithMsgs:nil
+                                            title:@"Something went wrong."
+                                 alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
+                                         topInset:70.0
+                                      buttonTitle:@"Okay."
+                                     buttonAction:^{ postRefreshActivities(); }
+                                   relativeToView:controller.tabBarController.view];
+                
+              } else { // any other error type
+                NSString *fetchErrMsg = @"Oops.  There was a problem attempting to refresh.  Try it again a little later.";
+                [PEUIUtils showErrorAlertWithMsgs:errsForRefresh[0][2]
+                                            title:@"Something went wrong."
+                                 alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
+                                         topInset:70.0
+                                      buttonTitle:@"Okay."
+                                     buttonAction:^{ postRefreshActivities(); }
+                                   relativeToView:controller.tabBarController.view];
+              }
+            });
+          }
+        };
+        void(^refreshNotFoundBlk)(NSString *, NSString *) = ^(NSString *mainMsgTitle, NSString *recordTitle) {
+          [errsForRefresh addObject:@[[NSString stringWithFormat:@"%@ not downloaded.", recordTitle],
+                                             [NSNumber numberWithBool:NO],
+                                             @[[NSString stringWithFormat:@"Not found."]],
+                                             [NSNumber numberWithBool:NO],
+                                             [NSNumber numberWithBool:YES]]];
+          refreshDone(mainMsgTitle);
+        };
+        void (^refreshSuccessBlk)(NSString *, NSString *, id) = ^(NSString *mainMsgTitle, NSString *recordTitle, id downloadedEntity) {
+          if (downloadedEntity == nil) { // server responded with 304
+            downloadedEntity = [NSNull null];
+          }
+          [successMsgsForRefresh addObject:@[[NSString stringWithFormat:@"%@ downloaded.", recordTitle],
+                                                    downloadedEntity]];
+          refreshDone(mainMsgTitle);
+        };
+        void(^refreshRetryAfterBlk)(NSString *, NSString *, NSDate *) = ^(NSString *mainMsgTitle, NSString *recordTitle, NSDate *retryAfter) {
+          [errsForRefresh addObject:@[[NSString stringWithFormat:@"%@ not downloaded.", recordTitle],
+                                             [NSNumber numberWithBool:NO],
+                                             @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                             [NSNumber numberWithBool:YES],
+                                             [NSNumber numberWithBool:NO]]];
+          refreshDone(mainMsgTitle);
+        };
+        void (^refreshServerTempError)(NSString *, NSString *) = ^(NSString *mainMsgTitle, NSString *recordTitle) {
+          [errsForRefresh addObject:@[[NSString stringWithFormat:@"%@ not downloaded.", recordTitle],
+                                             [NSNumber numberWithBool:NO],
+                                             @[@"Temporary server error."],
+                                             [NSNumber numberWithBool:NO],
+                                             [NSNumber numberWithBool:NO]]];
+          refreshDone(mainMsgTitle);
+        };
+        void(^refreshAuthReqdBlk)(NSString *, NSString *) = ^(NSString *mainMsgTitle, NSString *recordTitle) {
+          receivedAuthReqdErrorOnDownloadAttempt = YES;
+          [errsForRefresh addObject:@[[NSString stringWithFormat:@"%@ not downloaded.", recordTitle],
+                                             [NSNumber numberWithBool:NO],
+                                             @[@"Authentication required."],
+                                             [NSNumber numberWithBool:NO],
+                                             [NSNumber numberWithBool:NO]]];
+          refreshDone(mainMsgTitle);
+        };
+        NSString *mainMsgFragment = @"refreshing account status";
+        NSString *recordTitle = @"Account status";
+        [coordDao fetchUser:user
+            ifModifiedSince:[user updatedAt]
+        notFoundOnServerBlk:^{refreshNotFoundBlk(mainMsgFragment, recordTitle);}
+                 successBlk:^(FPUser *fetchedUser) {refreshSuccessBlk(mainMsgFragment, recordTitle, fetchedUser);}
+         remoteStoreBusyBlk:^(NSDate *retryAfter){refreshRetryAfterBlk(mainMsgFragment, recordTitle, retryAfter);}
+         tempRemoteErrorBlk:^{refreshServerTempError(mainMsgFragment, recordTitle);}
+        addlAuthRequiredBlk:^{refreshAuthReqdBlk(mainMsgFragment, recordTitle); [APP refreshTabs];}];        
+      } forControlEvents:UIControlEventTouchUpInside];
+      [PEUIUtils placeView:refreshBtn inMiddleOf:buttonsView withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:8.0];
+      UIButton *resendEmailBtn = makeSendEmailBtn();
+      [PEUIUtils placeView:resendEmailBtn toTheRightOf:refreshBtn onto:buttonsView withAlignment:PEUIVerticalAlignmentTypeMiddle hpadding:10.0];
+    } else {
+      UIButton *resendEmailBtn = makeSendEmailBtn();
+      [PEUIUtils placeView:resendEmailBtn inMiddleOf:buttonsView withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:10.0];
+    }
+    [PEUIUtils placeView:statusPanel atTopOf:panel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+    [PEUIUtils placeView:buttonsView below:statusPanel onto:panel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:3.0 hpadding:0.0];
+  } else {
+    panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:statusPanel];
+    [PEUIUtils placeView:statusPanel atTopOf:panel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+  }
+  [panel setTag:[panelTag integerValue]];
+  return panel;
 }
 
 + (void)refreshAccountStatusPanelForUser:(FPUser *)user
-                           valueLabelTag:(NSNumber *)valueLabelTag
-                          relativeToView:(UIView *)relativeToView {
-  UILabel *accountStatusLabel = (UILabel *)[relativeToView viewWithTag:[valueLabelTag integerValue]];
-  if (![PEUtils isNil:[user verifiedAt]]) {
-    [PEUIUtils setTextAndResize:@"verified" forLabel:accountStatusLabel];
-    [accountStatusLabel setTextColor:[UIColor greenSeaColor]];
-  }
+                                panelTag:(NSNumber *)panelTag
+                    includeRefreshButton:(BOOL)includeRefreshButton
+                          coordinatorDao:(FPCoordinatorDao *)coordDao
+                               uitoolkit:(PEUIToolkit *)uitoolkit
+                          relativeToView:(UIView *)relativeToView
+                              controller:(UIViewController *)controller {
+  UIView *accountStatusPanel = [relativeToView viewWithTag:[panelTag integerValue]];
+  UIView *superView = accountStatusPanel.superview;
+  [accountStatusPanel removeFromSuperview];
+  UIView *newStatusPanel = [FPPanelToolkit accountStatusPanelForUser:user
+                                                            panelTag:panelTag
+                                                includeRefreshButton:includeRefreshButton
+                                                      coordinatorDao:coordDao
+                                                           uitoolkit:uitoolkit
+                                                      relativeToView:relativeToView
+                                                          controller:controller];
+  newStatusPanel.frame = accountStatusPanel.frame;
+  [superView addSubview:newStatusPanel];
 }
 
 #pragma mark - Vehicle Panel

@@ -109,6 +109,8 @@ typedef void (^PEPrepareUIForUserInteractionBlk)(UIView *);
 typedef void (^PEViewDidAppearBlk)(PEAddViewEditController *);
 typedef NSArray *(^PEEntityValidatorBlk)(UIView *);
 typedef NSArray *(^PEMessagesFromErrMask)(NSInteger);
+typedef void (^PEModalOperationStarted)(void);
+typedef void (^PEModalOperationDone)(void);
 
 @interface PEAddViewEditController : UIViewController <MBProgressHUDDelegate>
 
@@ -156,7 +158,9 @@ conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
  itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
          itemDeleter:(PEItemDeleter)itemDeleter
     itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
-entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity;
+entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity
+modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
+  modalOperationDone:(PEModalOperationDone)modalOperationDone;
 
 #pragma mark - Factory functions
 
@@ -177,7 +181,9 @@ entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity;
                                          isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
                                           isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                                            isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
-                          syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode;
+                          syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
+                                   modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
+                                      modalOperationDone:(PEModalOperationDone)modalOperationDone;
 
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
                                       listViewController:(PEListViewController *)listViewController
@@ -197,7 +203,9 @@ entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity;
                                           isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
                                            isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-                                   entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity;
+                                      entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity
+                                   modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
+                                      modalOperationDone:(PEModalOperationDone)modalOperationDone;
 
 + (PEAddViewEditController *)viewEntityCtrlrWithEntity:(PELMMainSupport *)entity
                                     listViewController:(PEListViewController *)listViewController
@@ -235,7 +243,9 @@ entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity;
                                    itemChildrenCounter:(PEItemChildrenCounter)itemChildrenCounter
                                    itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
                                            itemDeleter:(PEItemDeleter)itemDeleter
-                                      itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter;
+                                      itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
+                                 modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
+                                    modalOperationDone:(PEModalOperationDone)modalOperationDone;
 
 #pragma mark - Properties
 
