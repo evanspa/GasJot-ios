@@ -200,6 +200,45 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                            cornerRadius:5.0
                                                  target:nil
                                                  action:nil];
+      [sendEmailBtn bk_addEventHandler:^(id sender) {
+        void (^postSendActivities)(void) = ^{
+          [[[controller tabBarController] tabBar] setUserInteractionEnabled:YES];
+          [APP enableJotButton:YES];
+        };
+        MBProgressHUD *sendVerificationEmailHud = [MBProgressHUD showHUDAddedTo:relativeToView animated:YES];
+        sendVerificationEmailHud.labelText = @"Sending verification email...";
+        [coordDao resendVerificationEmailForUser:user
+                              remoteStoreBusyBlk:^(NSDate *retryAfter) {
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                  [sendVerificationEmailHud hide:YES afterDelay:0.0];
+                                  [PEUIUtils showWaitAlertWithMsgs:nil
+                                                             title:@"Busy with maintenance."
+                                                  alertDescription:[[NSAttributedString alloc] initWithString:@"\
+The server is currently busy at the moment undergoing maintenance.\n\n\
+We apologize for the inconvenience.  Please try re-sending the verification email later."]
+                                                          topInset:70.0
+                                                       buttonTitle:@"Okay."
+                                                      buttonAction:^{ postSendActivities(); }
+                                                    relativeToView:controller.tabBarController.view];
+                                });
+                              }
+                               completionBlk:^{
+                                 dispatch_async(dispatch_get_main_queue(), ^{
+                                   [sendVerificationEmailHud hide:YES afterDelay:0.0];
+                                   NSDictionary *messageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]]};
+                                   NSString *accountSettingsMessage = [NSString stringWithFormat:@"The verification e-mail was sent to your e-mail address: %@.", [user email]];
+                                   NSRange messageAttrsRange = [accountSettingsMessage rangeOfString:[user email]];
+                                   NSMutableAttributedString *attrMessage = [[NSMutableAttributedString alloc] initWithString:accountSettingsMessage];
+                                   [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
+                                   [PEUIUtils showSuccessAlertWithTitle:@"Verification e-mail sent."
+                                                       alertDescription:attrMessage
+                                                               topInset:70.0
+                                                            buttonTitle:@"Okay."
+                                                           buttonAction:^{ postSendActivities(); }
+                                                         relativeToView:controller.tabBarController.view];
+                                 });
+                               }];
+      } forControlEvents:UIControlEventTouchUpInside];
       return sendEmailBtn;
     };
     panel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:relativeToView fixedHeight:80];
@@ -219,7 +258,6 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                                target:nil
                                                action:nil];
       [refreshBtn bk_addEventHandler:^(id sender) {
-        
         void (^postRefreshActivities)(void) = ^{
           [[[controller tabBarController] tabBar] setUserInteractionEnabled:YES];
           [APP enableJotButton:YES];
@@ -239,7 +277,6 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
         [[[controller tabBarController] tabBar] setUserInteractionEnabled:NO];
         [APP enableJotButton:NO];
         [refreshHud setLabelText:[NSString stringWithFormat:@"Refreshing account status..."]];
-        
         void(^refreshDone)(NSString *) = ^(NSString *mainMsgTitle) {
           if ([errsForRefresh count] == 0) { // success
             dispatch_async(dispatch_get_main_queue(), ^{
