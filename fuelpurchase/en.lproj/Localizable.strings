@@ -35,7 +35,7 @@
 /***************************************************************
  * REST service invocation common error messages
  ***************************************************************/
-"nsurlerr.serverdown" = "The remote FuelPurchase services appear to be unavailable at the moment.";
+"nsurlerr.serverdown" = "The central Gas Jot server appears to be unavailable at the moment.";
 "nsurlerr.noinetconn" = "You do not appear to have a working internet connection.  Unable to connect to remote FuelPurchase services.";
 "nsurlerr.dnslkupfailed" = "There was a problem attempting to resolve the location of the remote FuelPurchase services.";
 "nsurlerr.timeout" = "It took too long to connect to the remote FuelPurchase services.";

@@ -218,7 +218,7 @@ busy.  Please retry your request shortly."]
 }
 
 + (SynchUnitOfWorkHandlerMakerZeroArg)loginHandlerWithErrMsgsMaker:(ErrMsgsMaker)errMsgsMaker {
-  return ^(MBProgressHUD *hud, void (^successBlock)(void), UIView *relativeToView) {
+  return ^(MBProgressHUD *hud, void(^successBlock)(void), void(^notAuthedAlertAction)(void), UIView *relativeToView) {
     return (^(NSError *error) {
       if (error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -246,7 +246,7 @@ busy.  Please retry your request shortly."]
                            alertDescription:[[NSAttributedString alloc] initWithString:message]
                                    topInset:70.0
                                 buttonTitle:@"Okay."
-                               buttonAction:nil
+                               buttonAction:notAuthedAlertAction
                              relativeToView:relativeToView];
         });
       } else {
@@ -291,7 +291,7 @@ follows:"]
 }
 
 + (SynchUnitOfWorkHandlerMakerZeroArg)synchUnitOfWorkZeroArgHandlerMakerWithErrMsgsMaker:(ErrMsgsMaker)errMsgsMaker {
-  return ^(MBProgressHUD *hud, void (^successBlock)(void), UIView *relativeToView) {
+  return ^(MBProgressHUD *hud, void(^successBlock)(void), void(^errAlertAction)(void), UIView *relativeToView) {
     return (^(NSError *error) {
       if (error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -310,11 +310,10 @@ follows:"]
           }
           [PEUIUtils showErrorAlertWithMsgs:errMsgs
                                       title:@"Oops."
-                           alertDescription:[[NSAttributedString alloc] initWithString:@"An error has occurred.  The details are as\n\
-follows:"]
+                           alertDescription:[[NSAttributedString alloc] initWithString:@"An error has occurred.  The details are as follows:"]
                                    topInset:70.0
                                 buttonTitle:@"Okay."
-                               buttonAction:nil
+                               buttonAction:errAlertAction
                              relativeToView:relativeToView];
         });
       } else {

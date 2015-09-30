@@ -179,13 +179,10 @@ gas jot data from this device only.";
   //[_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width,
   //                                                   1.19 * self.view.frame.size.height)];
   //[_doesHaveAuthTokenPanel setBounces:NO];
-  NSDictionary *messageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]],
-                                  NSForegroundColorAttributeName : [UIColor greenSeaColor]};
-  NSString *textToAccent = @"You are currently logged in";
-  NSString *accountSettingsMessage = [NSString stringWithFormat:@"%@.  From here you can view and edit your remote account details.", textToAccent];
-  NSRange messageAttrsRange = [accountSettingsMessage rangeOfString:textToAccent];
-  NSMutableAttributedString *attrMessage = [[NSMutableAttributedString alloc] initWithString:accountSettingsMessage];
-  [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
+  NSAttributedString *attrMessage = [PEUIUtils attributedTextWithTemplate:@"%@.  From here you can view and edit your remote account details."
+                                                             textToAccent:@"You are currently logged in"
+                                                           accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                          accentTextColor:[UIColor greenSeaColor]];
   UIView *accountSettingsMsgPanel = [self leftPaddingMessageWithAttributedText:attrMessage];
   UIButton *accountSettingsBtn = [_uitoolkit systemButtonMaker](@"Remote account details", nil, nil);
   [[accountSettingsBtn layer] setCornerRadius:0.0];
@@ -238,13 +235,25 @@ gas jot data from this device only.";
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:20.0
               hpadding:0.0];*/
-  [PEUIUtils placeView:logoutBtn
+  
+  /*[PEUIUtils placeView:logoutBtn
             atBottomOf:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:_doesHaveAuthTokenPanel.frame.size.height * 0.275
               hpadding:0.0];
   [PEUIUtils placeView:logoutMsgLabelWithPad
                  below:logoutBtn
+                  onto:_doesHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:4.0
+              hpadding:0.0];*/
+  [PEUIUtils placeView:logoutMsgLabelWithPad
+            atBottomOf:_doesHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:(10.0 + [APP jotButtonHeight])
+              hpadding:0.0];
+  [PEUIUtils placeView:logoutBtn
+                 above:logoutMsgLabelWithPad
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
@@ -299,13 +308,24 @@ account.";
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
-  [PEUIUtils placeView:logoutBtn
+  /*[PEUIUtils placeView:logoutBtn
             atBottomOf:_doesNotHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:_doesHaveAuthTokenPanel.frame.size.height * 0.275
               hpadding:0.0];
   [PEUIUtils placeView:logoutMsgLabelWithPad
                  below:logoutBtn
+                  onto:_doesNotHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:4.0
+              hpadding:0.0];*/
+  [PEUIUtils placeView:logoutMsgLabelWithPad
+            atBottomOf:_doesNotHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:(10.0 + [APP jotButtonHeight])
+              hpadding:0.0];
+  [PEUIUtils placeView:logoutBtn
+                 above:logoutMsgLabelWithPad
                   onto:_doesNotHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
@@ -404,6 +424,8 @@ simply be saved locally.";
                                  topInset:70.0
                               buttonTitle:@"Okay."
                              buttonAction:^{
+                               [APP enableJotButton:YES];
+                               [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
                                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
                                  [self viewDidAppear:YES];
                                });
@@ -413,6 +435,8 @@ simply be saved locally.";
   };
   void (^doLogout)(void) = ^{
     HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    [APP enableJotButton:NO];
+    [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
     HUD.delegate = self;
     HUD.labelText = @"Logging out...";
     // even if the logout fails, we don't care; we'll still

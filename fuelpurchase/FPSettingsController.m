@@ -273,17 +273,11 @@ Please try this again later."]
                    dispatch_async(dispatch_get_main_queue(), ^{
                      [changelogHud hide:YES];
                      [APP refreshTabs];
-                     NSString *textToAccent = @"Re-authenticate";
-                     NSString *becameUnauthMessage = [NSString stringWithFormat:@"\
-Well this is awkward.  While syncing \
-your account, the server is asking for you \
-to re-authenticate.\n\n\
-To authenticate, tap the %@ \
-button.", textToAccent];
-                     NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
-                     NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
-                     NSRange unauthMsgAttrsRange = [becameUnauthMessage rangeOfString:textToAccent];
-                     [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
+                     NSAttributedString *attrBecameUnauthMessage =
+                     [PEUIUtils attributedTextWithTemplate:@"Re-authenticate"
+                                              textToAccent:@"Well this is awkward.  While syncing your account, the server is asking for you \
+to re-authenticate.\n\nTo authenticate, tap the %@ button."
+                                            accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
                      [PEUIUtils showWarningAlertWithMsgs:nil
                                                    title:@"Authentication Failure."
                                         alertDescription:attrBecameUnauthMessage
@@ -334,9 +328,7 @@ from the 'Records' screen."
 - (void)makeNotLoggedInPanel {
   ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
   _notLoggedInPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
-  NSString *message = @"\
-This action will permanently delete your \
-fuel purchase data from this device.";
+  NSString *message = @"This action will permanently delete your Gas Jot data from this device.";
   UIView *messagePanel = [self leftPaddingMessageWithText:message];
   UIButton *deleteAllDataBtn = buttonMaker(@"Delete All Data", self, @selector(clearAllData));
   [[deleteAllDataBtn layer] setCornerRadius:0.0];
@@ -353,17 +345,14 @@ fuel purchase data from this device.";
                  below:deleteAllDataBtn
                   onto:_notLoggedInPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:7.0
+              vpadding:4.0
               hpadding:0.0];
 }
 
 #pragma mark - Clear All Data
 
 - (void)clearAllData {
-  NSString *msg = @"\
-This will permanently delete your fuel \
-purchase data from this device and cannot \
-be undone.";
+  NSString *msg = @"This will permanently delete your Gas Jot data from this device and cannot be undone.";
   JGActionSheetSection *contentSection = [PEUIUtils dangerAlertSectionWithTitle:@"Are you absolutely sure?"
                                                                 alertDescription:[[NSAttributedString alloc] initWithString:msg]
                                                                   relativeToView:self.tabBarController.view];

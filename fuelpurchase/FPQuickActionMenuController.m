@@ -149,17 +149,12 @@ connected to your remote account."]
 }
 
 - (void)unsynchronizationStatusInfo {
-  NSString *instructionText = @"Account \u2794 Re-authenticate";
-  NSString *message = [NSString stringWithFormat:@"\
-Just letting you know that although this \
-device is connected to your remote account, \
-your edits are not able to sync because you \
-need to re-authenticate. \
-To re-authenticate, go to:\n\n\
-%@.", instructionText];
-  NSDictionary *attrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
-  NSMutableAttributedString *attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
-  [attrMessage setAttributes:attrs range:[message rangeOfString:instructionText]];
+  NSAttributedString *attrMessage =
+  [PEUIUtils attributedTextWithTemplate:@"Just letting you know that although this \
+device is connected to your remote account, your edits are not able to sync because you \
+need to re-authenticate. To re-authenticate, go to:\n\n\%@."
+                           textToAccent:@"Account \u2794 Re-authenticate"
+                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
   [PEUIUtils showAlertWithTitle:@"Heads up!  You are currently unable to sync."
                      titleImage:[UIImage unsyncable]
                alertDescription:attrMessage

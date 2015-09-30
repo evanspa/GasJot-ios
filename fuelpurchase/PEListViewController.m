@@ -430,14 +430,10 @@
 - (void)actionSheetDidDismiss:(JGActionSheet *)actionSheet {}
 
 - (JGActionSheetSection *)becameUnauthenticatedSection {
-  NSString *instructionText = @"Account \u2794 Re-authenticate";
-  NSString *becameUnauthMessage = [NSString stringWithFormat:@"\
-It appears you are no longer authenticated. \
-To re-authenticate, go to:\n\n%@.", instructionText];
-  NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
-  NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
-  NSRange unauthMsgAttrsRange = [becameUnauthMessage rangeOfString:instructionText];
-  [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
+  NSAttributedString *attrBecameUnauthMessage =
+  [PEUIUtils attributedTextWithTemplate:@"It appears you are no longer authenticated.  To re-authenticate, go to:\n\n%@."
+                           textToAccent:@"Account \u2794 Re-authenticate"
+                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
   return [PEUIUtils warningAlertSectionWithMsgs:nil
                                           title:@"Authentication failure."
                                alertDescription:attrBecameUnauthMessage

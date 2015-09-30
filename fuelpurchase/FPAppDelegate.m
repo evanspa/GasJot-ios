@@ -136,6 +136,10 @@ NSString * const FPAppKeychainService = @"fp-app";
   [jotBtn setEnabled:enableJotButton];
 }
 
+- (CGFloat)jotButtonHeight {
+  return [_tabBarController.view viewWithTag:FPJotButtonTag].frame.size.height;
+}
+
 - (void)setUser:(FPUser *)user tabBarController:(UITabBarController *)tabBarController {
   _user = user;
   _tabBarController = tabBarController;

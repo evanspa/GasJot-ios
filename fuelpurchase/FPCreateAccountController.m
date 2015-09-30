@@ -104,12 +104,8 @@
                                        relativeToView:[self view]];
   [PEUIUtils setFrameHeightOfView:createAcctPnl ofHeight:0.5 relativeTo:[self view]];
   CGFloat leftPadding = 8.0;
-  UILabel *createAccountMsgLabel = [PEUIUtils labelWithKey:@"\
-From here you can create a remote account. \
-This will enable your gas jot data to be \
-synced to a server where you can access it \
-from the FP web site or other devices.\n\n\
-Fill out the form below and tap 'Done'."
+  UILabel *createAccountMsgLabel = [PEUIUtils labelWithKey:@"From here you can create a remote account. This will \
+enable your data records to be synced to Gas Jot's central server so you can access it from your other devices."
                                                font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor darkGrayColor]
@@ -148,6 +144,21 @@ Fill out the form below and tap 'Done'."
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5
               hpadding:0];
+  UILabel *instructionLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"Fill out the form and tap %@."
+                                                                                         textToAccent:@"Done"
+                                                                                       accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
+                                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                backgroundColor:[UIColor clearColor]
+                                                      textColor:[UIColor darkGrayColor]
+                                            verticalTextPadding:3.0];
+  [PEUIUtils setFrameWidthOfView:instructionLabel ofWidth:1.05 relativeTo:instructionLabel];
+  UIView *instructionPanel = [PEUIUtils leftPadView:instructionLabel padding:leftPadding];
+  [PEUIUtils placeView:instructionPanel
+                 below:_caPasswordTf
+                  onto:createAcctPnl
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:4.0
+              hpadding:0.0];
   
   RAC(self, formStateMaskForAcctCreation) =
     [RACSignal combineLatest:@[_caFullNameTf.rac_textSignal,
@@ -295,23 +306,14 @@ into your remote account:"]
                                                       dispatch_async(dispatch_get_main_queue(), ^{
                                                         [HUD hide:YES];
                                                         NSString *title = @"Sync problems.";
-                                                        NSString *message = @"\
-There were some problems syncing all of \
-your local edits.  You can try syncing them \
-later.";
+                                                        NSString *message = @"There were some problems syncing all of your local edits.  You can try syncing them later.";
                                                         JGActionSheetSection *becameUnauthSection = nil;
                                                         if (_receivedAuthReqdErrorOnSyncAttempt) {
-                                                          NSString *textToAccent = @"Re-authenticate";
-                                                          NSString *becameUnauthMessage = [NSString stringWithFormat:@"\
-This is awkward.  While syncing your local \
-edits, the server is asking for you to \
-authenticate again.  Sorry about that. \
-To authenticate, tap the %@ \
-button.", textToAccent];
-                                                          NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
-                                                          NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
-                                                          NSRange unauthMsgAttrsRange = [becameUnauthMessage rangeOfString:textToAccent];
-                                                          [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
+                                                          NSAttributedString *attrBecameUnauthMessage =
+                                                          [PEUIUtils attributedTextWithTemplate:@"This is awkward.  While syncing your local edits, the Gas Jot server \
+is asking for you to authenticate again.  Sorry about that. To authenticate, tap the %@ button."
+                                                                                   textToAccent:@"Re-authenticate"
+                                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
                                                           becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
                                                                                                                  title:@"Authentication Failure."
                                                                                                       alertDescription:attrBecameUnauthMessage

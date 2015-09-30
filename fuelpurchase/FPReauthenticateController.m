@@ -83,7 +83,7 @@
   [PEUIUtils placeView:[self panelForReauthentication]
                atTopOf:[self view]
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:100.0
+              vpadding:90.0
               hpadding:0.0];
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Re-authenticate"];
@@ -112,16 +112,16 @@
   [_passwordTf setSecureTextEntry:YES];
   
   // place views
-  [PEUIUtils placeView:messageLabelWithPad
+  [PEUIUtils placeView:_passwordTf
                atTopOf:reauthPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:0.0
               hpadding:0.0];
-  [PEUIUtils placeView:_passwordTf
-                 below:messageLabelWithPad
+  [PEUIUtils placeView:messageLabelWithPad
+                 below:_passwordTf
                   onto:reauthPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:10.0
+              vpadding:4.0
               hpadding:0.0];
   RAC(self, formStateMaskForLightLogin) =
     [RACSignal combineLatest:@[_passwordTf.rac_textSignal]
@@ -151,6 +151,8 @@
                                    topInset:70.0
                                 buttonTitle:@"Okay."
                                buttonAction:^{
+                                 [APP enableJotButton:YES];
+                                 [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
                                  [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification object:nil userInfo:nil];
                                  [[self navigationController] popViewControllerAnimated:YES];
                                }
@@ -229,28 +231,27 @@
                                                           [HUD hide:YES];
                                                           [PEUIUtils showSuccessAlertWithMsgs:nil
                                                                                         title:@"Authentication Success."
-                                                                             alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You have become authenticated again and\nyour records have been synced."]
+                                                                             alertDescription:[[NSAttributedString alloc] initWithString:@"You have become authenticated again and your records have been synced."]
                                                                                      topInset:70.0
                                                                                   buttonTitle:@"Okay."
-                                                                                 buttonAction:^{ [[self navigationController] popViewControllerAnimated:YES]; }
+                                                                                 buttonAction:^{
+                                                                                   [APP enableJotButton:YES];
+                                                                                   [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+                                                                                   [[self navigationController] popViewControllerAnimated:YES];
+                                                                                 }
                                                                                relativeToView:self.tabBarController.view];
                                                         } else {
                                                           [HUD hide:YES];
                                                           NSString *title = @"Sync problems.";
-                                                          NSString *message = @"Although you became authenticated, there \
-were some problems syncing all your local edits.";
+                                                          NSString *message = @"Although you became authenticated, there were some problems syncing all your local edits.";
                                                           NSMutableArray *sections = [NSMutableArray array];
                                                           JGActionSheetSection *becameUnauthSection = nil;
                                                           if (receivedUnauthedError) {
-                                                            NSString *textToAccent = @"Re-authenticate";
-                                                            NSString *becameUnauthMessage = [NSString stringWithFormat:@"\
-This is awkward.  While syncing your local edits, the server is asking for you to authenticate again.  Sorry about that. \
-To authenticate, tap the %@ button.", textToAccent];
-                                                            NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
-                                                            NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
-                                                            NSRange unauthMsgAttrsRange = [becameUnauthMessage rangeOfString:textToAccent];
-                                                            [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
+                                                            NSAttributedString *attrBecameUnauthMessage =
+                                                            [PEUIUtils attributedTextWithTemplate:@"This is awkward.  While syncing your local edits, the  Gas Jot server is asking for you to \
+authenticate again.  Sorry about that.  To authenticate, tap the %@ button."
+                                                                                     textToAccent:@"Re-authenticate"
+                                                                                   accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
                                                             becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
                                                                                                                    title:@"Authentication Failure."
                                                                                                         alertDescription:attrBecameUnauthMessage
@@ -283,6 +284,8 @@ To authenticate, tap the %@ button.", textToAccent];
                                                           [sections addObject:buttonsSection];
                                                           JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:sections];
                                                           [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
+                                                            [APP enableJotButton:YES];
+                                                            [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
                                                             [sheet dismissAnimated:YES];
                                                             [[self navigationController] popViewControllerAnimated:YES];
                                                           }];
@@ -297,13 +300,25 @@ To authenticate, tap the %@ button.", textToAccent];
         successBlk = nonLocalSyncSuccessBlk;
       }
       HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+      [APP enableJotButton:NO];
+      [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
       HUD.delegate = self;
       HUD.labelText = @"Re-authenticating...";
       [_coordDao lightLoginForUser:_user
                           password:[_passwordTf text]
                    remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.tabBarController.view)
                  completionHandler:^(NSError *err) {
-                   [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(err);
+                   //[FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(err);
+                   dispatch_async(dispatch_get_main_queue(), ^{
+                     if (err) {
+                       [APP enableJotButton:YES];
+                       [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+                     }
+                     [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD,
+                                                                         successBlk,
+                                                                         ^{[APP enableJotButton:YES]; [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];},
+                                                                         self.tabBarController.view)(err);
+                   });
                  }
              localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
     };

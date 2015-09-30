@@ -101,12 +101,8 @@
                                        relativeToView:[self view]];
   [PEUIUtils setFrameHeightOfView:signInPnl ofHeight:1.0 relativeTo:[self view]];
   CGFloat leftPadding = 8.0;
-  UILabel *signInMsgLabel = [PEUIUtils labelWithKey:@"\
-From here you can log into your remote \
-account, connecting this device to it.  Your \
-gas jot data will be downloaded to this \
-device.\n\n\
-Enter your credentials and tap 'Log In'."
+  UILabel *signInMsgLabel = [PEUIUtils labelWithKey:@"From here you can log into your remote \
+account, connecting this device to it.  Your Gas Jot data will be downloaded to this device."
                                                font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor darkGrayColor]
@@ -136,7 +132,21 @@ Enter your credentials and tap 'Log In'."
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5.0
               hpadding:0.0];
-  
+  UILabel *instructionLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"Enter your credentials and tap %@."
+                                                                                         textToAccent:@"Log In"
+                                                                                       accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
+                                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                backgroundColor:[UIColor clearColor]
+                                                      textColor:[UIColor darkGrayColor]
+                                            verticalTextPadding:3.0];
+  [PEUIUtils setFrameWidthOfView:instructionLabel ofWidth:1.05 relativeTo:instructionLabel];
+  UIView *instructionPanel = [PEUIUtils leftPadView:instructionLabel padding:leftPadding];
+  [PEUIUtils placeView:instructionPanel
+                 below:_siPasswordTf
+                  onto:signInPnl
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:4.0
+              hpadding:0.0];
   RAC(self, formStateMaskForSignIn) =
     [RACSignal combineLatest:@[_siEmailTf.rac_textSignal,
                                _siPasswordTf.rac_textSignal]
@@ -203,6 +213,8 @@ into your remote account:"]
                                     buttonTitle:@"Okay."
                                    buttonAction:^{
                                      enableLocationServices(^{
+                                       [APP enableJotButton:YES];
+                                       [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
                                        [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
                                                                                            object:nil
                                                                                          userInfo:nil];
@@ -297,6 +309,8 @@ into your remote account:"]
                                                                                       buttonTitle:@"Okay."
                                                                                      buttonAction:^{
                                                                                        enableLocationServices(^{
+                                                                                         [APP enableJotButton:YES];
+                                                                                         [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
                                                                                          [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
                                                                                                                                              object:nil
                                                                                                                                            userInfo:nil];
@@ -310,23 +324,14 @@ into your remote account:"]
                                                       dispatch_async(dispatch_get_main_queue(), ^{
                                                         [HUD hide:YES];
                                                         NSString *title = @"Sync problems.";
-                                                        NSString *message = @"\
-There were some problems syncing all of \
-your local edits.  You can try syncing them \
-later.";
+                                                        NSString *message = @"There were some problems syncing all of your local edits.  You can try syncing them later.";
                                                         JGActionSheetSection *becameUnauthSection = nil;
                                                         if (_receivedAuthReqdErrorOnSyncAttempt) {
-                                                          NSString *textToAccent = @"Re-authenticate";
-                                                          NSString *becameUnauthMessage = [NSString stringWithFormat:@"\
-This is awkward.  While syncing your local \
-edits, the server is asking for you to \
-authenticate again.  Sorry about that. \
-To authenticate, tap the %@ \
-button.", textToAccent];
-                                                          NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
-                                                          NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
-                                                          NSRange unauthMsgAttrsRange = [becameUnauthMessage rangeOfString:textToAccent];
-                                                          [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
+                                                          NSAttributedString *attrBecameUnauthMessage =
+                                                          [PEUIUtils attributedTextWithTemplate:@"This is awkward.  While syncing your local \
+edits, the Gas Jot server is asking for you to authenticate again.  Sorry about that. To authenticate, tap the %@ button."
+                                                                                   textToAccent:@"Re-authenticate"
+                                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
                                                           becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
                                                                                                                  title:@"Authentication Failure."
                                                                                                       alertDescription:attrBecameUnauthMessage
@@ -349,6 +354,8 @@ button.", textToAccent];
                                                         [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
                                                           [sheet dismissAnimated:YES];
                                                           enableLocationServices(^{
+                                                            [APP enableJotButton:YES];
+                                                            [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
                                                             [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
                                                                                                                 object:nil
                                                                                                               userInfo:nil];
@@ -372,6 +379,8 @@ button.", textToAccent];
       HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
       HUD.delegate = self;
       HUD.labelText = @"Logging in...";
+      [APP enableJotButton:NO];
+      [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
       [_coordDao loginWithEmail:[_siEmailTf text]
                        password:[_siPasswordTf text]
    andLinkRemoteUserToLocalUser:_localUser
@@ -381,18 +390,23 @@ button.", textToAccent];
                     [HUD hide:YES];
                     [PEUIUtils showWaitAlertWithMsgs:nil
                                                title:@"Server Busy."
-                                    alertDescription:[[NSAttributedString alloc] initWithString:@"\
-We apologize, but the server is currently \
+                                    alertDescription:[[NSAttributedString alloc] initWithString:@"We apologize, but the Gas Jot server is currently \
 busy.  Please try logging in a little later."]
                                             topInset:70.0
                                          buttonTitle:@"Okay."
-                                        buttonAction:nil
+                                        buttonAction:^{
+                                          [APP enableJotButton:YES];
+                                          [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+                                        }
                                       relativeToView:self.tabBarController.view];
                   });
                 }
               completionHandler:^(FPUser *user, NSError *err) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                  [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(err);
+                  [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD,
+                                                                      successBlk,
+                                                                      ^{ [APP enableJotButton:YES]; [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];},
+                                                                      self.tabBarController.view)(err);
                   if (user) {
                     NSDate *mostRecentUpdatedAt =
                     [[_coordDao localDao] mostRecentMasterUpdateForUser:user

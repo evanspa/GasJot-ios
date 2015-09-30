@@ -423,28 +423,28 @@ Drill into its detail screen to fix it.";
 // ------------------------------------------------------------------------------------------
                                                 NSString *theRecordWaitMsg = @"\
 While attempting to sync your record, the \
-server reported that it is busy undergoing \
+Gas Jot server reported that it is busy undergoing \
 maintenance.  Try syncing it later.";
                                                 NSString *aRecordWaitMsg = @"\
 While attempting to sync at least one your \
-records, the server reported it is busy \
+records, the Gas Jot server reported it is busy \
 undergoing maintenance.  Try syncing \
 your edits later.";
                                                 NSString *oneRecordWaitMsg = @"\
 While attempting to sync one of your records, \
-the server reported it is busy undergoing \
+the Gas Jot server reported it is busy undergoing \
 maintenance.  Try syncing it later.";
 // ------------------------------------------------------------------------------------------
                                                 NSString *theRecordUnauthMsg = @"\
 While attempting to sync your record, the \
-server has asked for you to re-authenticate.";
+Gas Jot server has asked for you to re-authenticate.";
                                                 NSString *aRecordUnauthMsg = @"\
 While attempting to sync at least one one \
-your records, the server has asked for you to \
+your records, the Gas Jot server has asked for you to \
 re-authenticate.";
                                                 NSString *oneRecordUnauthMsg = @"\
 While attempting to sync one your records, \
-the server has asked for you to \
+the Gas Jot server has asked for you to \
 re-authenticate.";
 // ------------------------------------------------------------------------------------------
                                                 NSString *theRecordTempErrMsg = @"\

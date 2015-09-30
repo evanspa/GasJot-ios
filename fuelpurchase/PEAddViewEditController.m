@@ -550,14 +550,10 @@ modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
 - (void)actionSheetDidDismiss:(JGActionSheet *)actionSheet {}
 
 - (JGActionSheetSection *)becameUnauthenticatedSection {
-  NSString *instructionText = @"Account \u2794 Re-authenticate";
-  NSString *becameUnauthMessage = [NSString stringWithFormat:@"\
-It appears you are no longer authenticated. \
-To re-authenticate, go to:\n\n%@.", instructionText];
-  NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
-  NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
-  NSRange unauthMsgAttrsRange = [becameUnauthMessage rangeOfString:instructionText];
-  [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
+  NSAttributedString *attrBecameUnauthMessage =
+  [PEUIUtils attributedTextWithTemplate:@"It appears you're no longer authenticated.  To re-authenticate, go to:\n\n%@."
+                           textToAccent:@"Account \u2794 Re-authenticate"
+                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
   return [PEUIUtils warningAlertSectionWithMsgs:nil
                                           title:@"Authentication failure."
                                alertDescription:attrBecameUnauthMessage
@@ -743,16 +739,10 @@ It has now been removed from this device."]
             NSString *message;
             NSArray *subErrors = errorsForDelete[0][2];
             if ([subErrors count] > 1) {
-              message = @"\
-There were problems deleting your \
-entity from the server.  The errors are \
-as follows:";
+              message = @"There were problems deleting your entity from the server.  The errors are as follows:";
               title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
             } else {
-              message = @"\
-There was a problem deleting your \
-entity from the server.  The error is \
-as follows:";
+              message = @"There was a problem deleting your entity from the server.  The error is as follows:";
               title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
             }
             NSMutableArray *sections = [NSMutableArray array];
@@ -761,7 +751,7 @@ as follows:";
             }
             [sections addObject:[PEUIUtils errorAlertSectionWithMsgs:subErrors
                                                                title:title
-                                                    alertDescription:[[NSMutableAttributedString alloc] initWithString:message]
+                                                    alertDescription:[[NSAttributedString alloc] initWithString:message]
                                                       relativeToView:[self parentViewForAlerts]]];
             JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
                                                                                   message:nil
@@ -1147,15 +1137,11 @@ There was a problem downloading the record.";
         [HUD hide:YES afterDelay:0];
         if ([errorsForUpload[0][4] boolValue]) { // conflict error
           id latestEntity = errorsForUpload[0][5];
-          NSString *textToAccent = @"your local edits will be retained";
-          NSString *msg = [NSString stringWithFormat:@"\
-The remote copy of this entity has been \
-updated since you started to edit it.  You \
-have a few options:\n\n\
-If you cancel, %@.", textToAccent];
-          NSMutableAttributedString *desc = [[NSMutableAttributedString alloc] initWithString:msg];
-          NSDictionary *attrs = @{ NSFontAttributeName : [UIFont italicSystemFontOfSize:[UIFont systemFontSize]] };
-          [desc setAttributes:attrs range:[msg rangeOfString:textToAccent]];
+          NSAttributedString *desc =
+          [PEUIUtils attributedTextWithTemplate:@"The remote copy of this record has been \
+updated since you started to edit it.  You have a few options:\n\nIf you cancel, %@."
+                                   textToAccent:@"your local edits will be retained"
+                                 accentTextFont:[UIFont italicSystemFontOfSize:[UIFont systemFontSize]]];
           [self presentSaveConflictAlertWithLatestEntity:latestEntity
                                         alertDescription:desc
                                             cancelAction:postUploadActivities];
@@ -1171,12 +1157,10 @@ If you cancel, %@.", textToAccent];
           NSString *message;
           NSArray *subErrors = errorsForUpload[0][2];
           if ([subErrors count] > 1) {
-            message = @"There were problems uploading to the server. \
-The errors are as follows:";
+            message = @"There were problems uploading to the server.  The errors are as follows:";
             title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
           } else {
-            message = @"There was a problem uploading to the server. \
-The error is as follows:";
+            message = @"There was a problem uploading to the server.  The error is as follows:";
             title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
           }
           JGActionSheetSection *becameUnauthSection = nil;
@@ -1786,35 +1770,27 @@ can try to upload them later."]
                                   relativeToView:[self parentViewForAlerts]];
               } else if ([errorsForUpload[0][4] boolValue]) { // conflict error
                 id latestEntity = errorsForUpload[0][5];
-                NSString *textToAccent = @"your local edits will be retained";
-                NSString *msg = [NSString stringWithFormat:@"\
-The remote copy of this entity has been \
-updated since you started to edit it.  You have \
-a few options:\n\n\
-If you cancel, %@.", textToAccent];
-                NSMutableAttributedString *desc = [[NSMutableAttributedString alloc] initWithString:msg];
-                NSDictionary *attrs = @{ NSFontAttributeName : [UIFont italicSystemFontOfSize:[UIFont systemFontSize]] };
-                [desc setAttributes:attrs range:[msg rangeOfString:textToAccent]];
+                NSAttributedString *desc =
+                [PEUIUtils attributedTextWithTemplate:@"The remote copy of this record has been \
+updated since you started to edit it.  You have a few options:\n\nIf you cancel, %@."
+                                         textToAccent:@"your local edits will be retained"
+                                       accentTextFont:[UIFont italicSystemFontOfSize:[UIFont systemFontSize]]];
                 [self presentSaveConflictAlertWithLatestEntity:latestEntity
                                               alertDescription:desc
                                                   cancelAction:postEditActivities];
               } else { // all other error types
-                NSDictionary *messageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
+                NSString *messageTemplate;
                 NSString *textToAccent;
-                NSRange messageAttrsRange;
-                NSMutableAttributedString *attrMessage;
+                NSAttributedString *attrMessage;
                 NSString *title;
                 NSString *fixNowActionTitle;
                 NSString *fixLaterActionTitle;
                 NSString *dealWithLaterActionTitle;
                 NSString *cancelActionTitle;
-                NSString *message;
                 NSArray *subErrors = errorsForUpload[0][2]; // because only single-record edit, we can skip the "not saved" msg title, and just display the sub-errors
                 if ([subErrors count] > 1) {
                   textToAccent = @"they have been saved locally";
-                  message = [NSString stringWithFormat:@"\
-Although there were problems syncing your \
-edits to the server, %@.  The errors are as follows:", textToAccent];
+                  messageTemplate = @"Although there were problems syncing your edits to the server, %@.  The errors are as follows:";
                   fixNowActionTitle = @"I'll fix them now.";
                   fixLaterActionTitle = @"I'll fix them later.";
                   dealWithLaterActionTitle = @"I'll try syncing them later.";
@@ -1822,18 +1798,16 @@ edits to the server, %@.  The errors are as follows:", textToAccent];
                   title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
                 } else {
                   textToAccent = @"they have been saved locally";
-                  message = [NSString stringWithFormat:@"\
-Although there was a problem syncing your \
-edits to the server, %@.  The error is as follows:", textToAccent];
+                  messageTemplate = @"Although there was a problem syncing your edits to the server, %@.  The error is as follows:";
                   fixLaterActionTitle = @"I'll fix it later.";
                   fixNowActionTitle = @"I'll fix it now.";
                   dealWithLaterActionTitle = @"I'll try syncing it later.";
                   cancelActionTitle = @"Forget it.  Just cancel it.";
                   title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
                 }
-                messageAttrsRange = [message rangeOfString:textToAccent];
-                attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
-                [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
+                attrMessage = [PEUIUtils attributedTextWithTemplate:messageTemplate
+                                                       textToAccent:textToAccent
+                                                     accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
                 JGActionSheetSection *becameUnauthSection = nil;
                 if (receivedAuthReqdErrorOnSaveAttempt) {
                   becameUnauthSection = [self becameUnauthenticatedSection];
@@ -2309,9 +2283,6 @@ locally.  Try uploading it later.";
           };
           dispatch_async(dispatch_get_main_queue(), ^{
             [HUD hide:YES afterDelay:0];
-            NSDictionary *messageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
-            NSRange messageAttrsRange;
-            NSMutableAttributedString *attrMessage;
             if ([successMessageTitlesForUpload count] > 0) { // mixed results
               if (receivedAuthReqdErrorOnAddAttempt) {
                 [sections addObject:[self becameUnauthenticatedSection]];
@@ -2321,14 +2292,10 @@ locally.  Try uploading it later.";
               }
               if (!areAllBusyErrors()) {
                 NSString *title = [NSString stringWithFormat:@"Mixed results %@.", mainMsgTitle];
-                NSString *textToAccent = @"have been saved locally";
-                NSString *message = [NSString stringWithFormat:@"\
-Some of the edits were saved to the server and some were not. \
-The ones that did not %@ and will need to be fixed individually. \
-The ones uploaded are:", textToAccent];
-                messageAttrsRange = [message rangeOfString:textToAccent];
-                attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
-                [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
+                NSAttributedString *attrMessage = [PEUIUtils attributedTextWithTemplate:@"Some of the edits were saved to the server and some were not. \
+The ones that did not %@ and will need to be fixed individually.  The ones uploaded are:"
+                                                       textToAccent:@"have been saved locally"
+                                                     accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
                 [sections addObject:[PEUIUtils mixedResultsAlertSectionWithSuccessMsgs:successMessageTitlesForUpload
                                                                                  title:title
                                                                       alertDescription:attrMessage
@@ -2359,7 +2326,6 @@ The ones uploaded are:", textToAccent];
               NSString *fixLaterActionTitle;
               NSString *dealWithLaterActionTitle;
               NSString *cancelActionTitle;
-              NSString *message;
               if (receivedAuthReqdErrorOnAddAttempt) {
                 [sections addObject:[self becameUnauthenticatedSection]];
               }
@@ -2368,12 +2334,7 @@ The ones uploaded are:", textToAccent];
               }
               if (isMultiStepAdd) {
                 NSString *textToAccent = @"they have been saved locally";
-                message = [NSString stringWithFormat:@"\
-Although there were problems saving your \
-edits to the server, %@.  The details are as follows:", textToAccent];
-                messageAttrsRange = [message rangeOfString:textToAccent];
-                attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
-                [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
+                NSString *messageTemplate = @"Although there were problems saving your edits to the server, %@.  The details are as follows:";
                 fixNowActionTitle = @"I'll fix them now.";
                 fixLaterActionTitle = @"I'll fix them later.";
                 cancelActionTitle = @"Forget it.  Just cancel them.";
@@ -2382,37 +2343,34 @@ edits to the server, %@.  The details are as follows:", textToAccent];
                 if (!areAllBusyErrors()) {
                   [sections addObject:[PEUIUtils multiErrorAlertSectionWithFailures:stripOutBusyErrors()
                                                                               title:title
-                                                                   alertDescription:attrMessage
+                                                                   alertDescription:[PEUIUtils attributedTextWithTemplate:messageTemplate
+                                                                                                             textToAccent:textToAccent
+                                                                                                           accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
                                                                      relativeToView:[self parentViewForAlerts]]];
                 }
               } else {
+                NSString *messageTemplate;
                 NSString *textToAccent = @"they have been saved locally";
                 dealWithLaterActionTitle = @"I'll try uploading it later.";
                 cancelActionTitle = @"Forget it.  Just cancel this.";
                 NSArray *subErrors = errorsForUpload[0][2]; // because only single-record add, we can skip the "not saved" msg title, and just display the sub-errors
                 if ([subErrors count] > 1) {
                   title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
-                  message = [NSString stringWithFormat:@"\
-Although there were problems saving your \
-edits to the server, %@.  The errors are as follows:", textToAccent];
-                  messageAttrsRange = [message rangeOfString:textToAccent];
+                  messageTemplate = @"Although there were problems saving your edits to the server, %@.  The errors are as follows:";
                   fixNowActionTitle = @"I'll fix them now.";
                   fixLaterActionTitle = @"I'll fix them later.";
                 } else {
                   title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
-                  message = [NSString stringWithFormat:@"\
-Although there was a problem saving your \
-edits to the server, %@.  The error is as follows:", textToAccent];
-                  messageAttrsRange = [message rangeOfString:textToAccent];
+                  messageTemplate = @"Although there was a problem saving your edits to the server, %@.  The error is as follows:";
                   fixLaterActionTitle = @"I'll fix it later.";
                   fixNowActionTitle = @"I'll fix it now.";
                 }
-                attrMessage = [[NSMutableAttributedString alloc] initWithString:message];
-                [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
                 if (!areAllBusyErrors()) {
                   [sections addObject:[PEUIUtils errorAlertSectionWithMsgs:subErrors
                                                                      title:title
-                                                          alertDescription:attrMessage
+                                                          alertDescription:[PEUIUtils attributedTextWithTemplate:messageTemplate
+                                                                                                    textToAccent:textToAccent
+                                                                                                  accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
                                                             relativeToView:[self parentViewForAlerts]]];
                 }
               }

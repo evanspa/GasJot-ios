@@ -166,7 +166,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                          PESyncConflictBlk conflictBlk,
                                                                          PESyncAuthRequiredBlk authReqdBlk,
                                                                          PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"saving user account to the server";
+      NSString *mainMsgFragment = @"saving user account to the Gas Jot server";
       NSString *recordTitle = @"User account";
       [_coordDao markAsDoneEditingAndSyncUserImmediate:user
                                    notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
@@ -544,7 +544,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                      PESyncConflictBlk conflictBlk,
                                                                      PESyncAuthRequiredBlk authReqdBlk,
                                                                      PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"saving vehicle to the server";
+      NSString *mainMsgFragment = @"saving vehicle to the Gas Jot server";
       NSString *recordTitle = @"Vehicle";
       [_coordDao saveNewAndSyncImmediateVehicle:newVehicle
                                         forUser:user
@@ -630,7 +630,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                             PESyncConflictBlk conflictBlk,
                                                                             PESyncAuthRequiredBlk authReqdBlk,
                                                                             PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"saving vehicle to the server";
+      NSString *mainMsgFragment = @"saving vehicle to the Gas Jot server";
       NSString *recordTitle = @"Vehicle";
       [_coordDao markAsDoneEditingAndSyncVehicleImmediate:vehicle
                                                   forUser:user
@@ -653,7 +653,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                PESyncConflictBlk conflictBlk,
                                PESyncAuthRequiredBlk authReqdBlk,
                                PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"saving vehicle to the server";
+      NSString *mainMsgFragment = @"saving vehicle to the Gas Jot server";
       NSString *recordTitle = @"Vehicle";
       [_coordDao flushUnsyncedChangesToVehicle:vehicle
                                        forUser:user
@@ -1137,7 +1137,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                          PESyncConflictBlk conflictBlk,
                                                                          PESyncAuthRequiredBlk authReqdBlk,
                                                                          PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"saving gas station to the server";
+      NSString *mainMsgFragment = @"saving gas station to the Gas Jot server";
       NSString *recordTitle = @"Gas station";
       [_coordDao saveNewAndSyncImmediateFuelStation:newFuelStation
                                             forUser:user
@@ -1227,7 +1227,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                                 PESyncConflictBlk conflictBlk,
                                                                                 PESyncAuthRequiredBlk authReqdBlk,
                                                                                 PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"saving gas station to the server";
+      NSString *mainMsgFragment = @"saving gas station to the Gas Jot server";
       NSString *recordTitle = @"Gas station";
       [_coordDao markAsDoneEditingAndSyncFuelStationImmediate:fuelStation
                                                       forUser:user
@@ -1250,7 +1250,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                PESyncConflictBlk conflictBlk,
                                PESyncAuthRequiredBlk authReqdBlk,
                                PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"saving gas station to the server";
+      NSString *mainMsgFragment = @"saving gas station to the Gas Jot server";
       NSString *recordTitle = @"Gas station";
       [_coordDao flushUnsyncedChangesToFuelStation:fuelStation
                                            forUser:user
@@ -1539,9 +1539,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       float saveFpLogPercentComplete = [selectionsAndPercentArray[4] floatValue];
       float savePreFillupEnvLogPercentComplete = [selectionsAndPercentArray[5] floatValue];
       float savePostFillupEnvLogPercentComplete = [selectionsAndPercentArray[6] floatValue];
-      NSString *mainMsgFragment = @"saving gas log to the server";
+      NSString *mainMsgFragment = @"saving gas log to the Gas Jot server";
       if (savePreFillupEnvLogPercentComplete || savePostFillupEnvLogPercentComplete) {
-        mainMsgFragment = @"saving gas and odometer logs to the server";
+        mainMsgFragment = @"saving gas and odometer logs to the Gas Jot server";
       }
       NSString *recordTitle = @"Gas log";
       [_coordDao saveNewAndSyncImmediateFuelPurchaseLog:[fpEnvLogComposite fpLog]
@@ -1739,7 +1739,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                 PESyncConflictBlk conflictBlk,
                                                                 PESyncAuthRequiredBlk authReqdBlk,
                                                                 PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"saving gas log to the server";
+      NSString *mainMsgFragment = @"saving gas log to the Gas Jot server";
       NSString *recordTitle = @"Gas log";
       [_coordDao markAsDoneEditingAndSyncFuelPurchaseLogImmediate:fpLog
                                                           forUser:user
@@ -1750,8 +1750,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
                                                   addlConflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(1, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
                                               addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                     skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
-                                 skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The gas station is not yet saved to the server."); [APP refreshTabs];}
+                                     skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the Gas Jot server."); [APP refreshTabs];}
+                                 skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The gas station is not yet saved to the Gas Jot server."); [APP refreshTabs];}
                                                             error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEUploaderBlk uploader = ^(PEAddViewEditController *ctrl,
@@ -1764,7 +1764,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                PESyncConflictBlk conflictBlk,
                                PESyncAuthRequiredBlk authReqdBlk,
                                PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"saving gas log to the server";
+      NSString *mainMsgFragment = @"saving gas log to the Gas Jot server";
       NSString *recordTitle = @"Gas log";
       [_coordDao flushUnsyncedChangesToFuelPurchaseLog:fpLog
                                                forUser:user
@@ -1775,8 +1775,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                     addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
                                        addlConflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(1, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
                                    addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                          skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet synced."); [APP refreshTabs];}
-                      skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The gas station is not yet synced."); [APP refreshTabs];}
+                          skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the Gas Jot server."); [APP refreshTabs];}
+                      skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The gas station is not yet saved to the Gas Jot server."); [APP refreshTabs];}
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PENumRemoteDepsNotLocal numRemoteDepsNotLocalBlk = ^ NSInteger (FPFuelPurchaseLog *remoteFplog) {
@@ -2396,7 +2396,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       FPEnvLogVehicleAndDateDataSourceDelegate *ds =
         (FPEnvLogVehicleAndDateDataSourceDelegate *)[(UITableView *)[entityPanel viewWithTag:FPEnvLogTagVehicleAndDate] dataSource];
       FPVehicle *selectedVehicle = [ds selectedVehicle];
-      NSString *mainMsgFragment = @"saving odometer log to the server";
+      NSString *mainMsgFragment = @"saving odometer log to the Gas Jot server";
       NSString *recordTitle = @"Odometer log";
       [_coordDao saveNewAndSyncImmediateEnvironmentLog:envLog
                                                forUser:user
@@ -2408,7 +2408,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                     addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
                                        addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(1, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
                                    addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                          skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
+                          skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the Gas Jot server."); [APP refreshTabs];}
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
@@ -2514,7 +2514,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                PESyncConflictBlk conflictBlk,
                                                                PESyncAuthRequiredBlk authReqdBlk,
                                                                PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"saving odometer log to the server";
+      NSString *mainMsgFragment = @"saving odometer log to the Gas Jot server";
       NSString *recordTitle = @"Odometer log";
       [_coordDao markAsDoneEditingAndSyncEnvironmentLogImmediate:envLog
                                                          forUser:user
@@ -2525,7 +2525,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                               addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
                                                  addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(1, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
                                              addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                    skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
+                                    skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the Gas Jot server."); [APP refreshTabs];}
                                                            error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEUploaderBlk uploader = ^(PEAddViewEditController *ctrl,
@@ -2538,7 +2538,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                PESyncConflictBlk conflictBlk,
                                PESyncAuthRequiredBlk authReqdBlk,
                                PESyncDependencyUnsynced depUnsyncedBlk) {
-      NSString *mainMsgFragment = @"saving odometer log to the server";
+      NSString *mainMsgFragment = @"saving odometer log to the Gas Jot server";
       NSString *recordTitle = @"Odometer log";
       [_coordDao flushUnsyncedChangesToEnvironmentLog:envLog
                                               forUser:user
@@ -2549,7 +2549,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                    addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
                                       addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(1, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
                                   addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                         skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
+                         skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the Gas Jot server."); [APP refreshTabs];}
                                                 error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PENumRemoteDepsNotLocal numRemoteDepsNotLocalBlk = ^ NSInteger (FPEnvironmentLog *remoteEnvlog) {

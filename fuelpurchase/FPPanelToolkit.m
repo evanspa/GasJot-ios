@@ -225,11 +225,10 @@ We apologize for the inconvenience.  Please try re-sending the verification emai
                                completionBlk:^{
                                  dispatch_async(dispatch_get_main_queue(), ^{
                                    [sendVerificationEmailHud hide:YES afterDelay:0.0];
-                                   NSDictionary *messageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]]};
-                                   NSString *accountSettingsMessage = [NSString stringWithFormat:@"The verification e-mail was sent to your e-mail address: %@.", [user email]];
-                                   NSRange messageAttrsRange = [accountSettingsMessage rangeOfString:[user email]];
-                                   NSMutableAttributedString *attrMessage = [[NSMutableAttributedString alloc] initWithString:accountSettingsMessage];
-                                   [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
+                                   NSAttributedString *attrMessage =
+                                   [PEUIUtils attributedTextWithTemplate:@"The verification e-mail was sent to your e-mail address: %@."
+                                                            textToAccent:[user email]
+                                                          accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
                                    [PEUIUtils showSuccessAlertWithTitle:@"Verification e-mail sent."
                                                        alertDescription:attrMessage
                                                                topInset:70.0
@@ -284,10 +283,10 @@ We apologize for the inconvenience.  Please try re-sending the verification emai
               id downloadedUser = successMsgsForRefresh[0][1];
               void (^stillNotVerifiedAlert)(void) = ^{
                 [PEUIUtils showInfoAlertWithTitle:@"Still not verified."
-                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You're account is still not verified.  \
-Use the 're-send verification email' button to \
-receive a new account verification link to your email inbox."]
+                                 alertDescription:[PEUIUtils attributedTextWithTemplate:@"Your account is still not verified.  \
+Use the %@ button to receive a new account verification link to your e-mail inbox."
+                                                                           textToAccent:@"re-send verification email"
+                                                                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
                                          topInset:70.0
                                       buttonTitle:@"Okay."
                                      buttonAction:^{ postRefreshActivities(); }
@@ -326,11 +325,8 @@ receive a new account verification link to your email inbox."]
               if ([errsForRefresh[0][3] boolValue]) { // server busy
                 [PEUIUtils showWaitAlertWithMsgs:nil
                                            title:@"Busy with maintenance."
-                                alertDescription:[[NSAttributedString alloc] initWithString:@"\
-The server is currently busy at the moment \
-undergoing maintenance.\n\n\
-We apologize for the inconvenience.  Please \
-try refreshing later."]
+                                alertDescription:[[NSAttributedString alloc] initWithString:@"The server is currently busy at the moment \
+undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refreshing later."]
                                         topInset:70.0
                                      buttonTitle:@"Okay."
                                     buttonAction:^{ postRefreshActivities(); }
@@ -780,14 +776,11 @@ try refreshing later."]
       };
       if ([PEUtils isNil:[APP latestLocation]]) {
         if ([APP locationServicesAuthorized]) {
-          NSString *instructionText = @"Settings app \u2794 Privacy \u2794 Location Services \u2794 Gas Jot";
-          NSString *desc = [NSString stringWithFormat:@"Your current location cannot be determined.  \
-Make sure you have location services enabled for Gas Jot.  You can check this by going to:\n\n%@", instructionText];
-          NSDictionary *attrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
-          NSMutableAttributedString *attrDescTextWithInstructionalText =
-          [[NSMutableAttributedString alloc] initWithString:desc];
-          NSRange instructionTextRange  = [desc rangeOfString:instructionText];
-          [attrDescTextWithInstructionalText setAttributes:attrs range:instructionTextRange];
+          NSAttributedString *attrDescTextWithInstructionalText =
+          [PEUIUtils attributedTextWithTemplate:@"Your current location cannot be determined.  \
+Make sure you have location services enabled for Gas Jot.  You can check this by going to:\n\n%@"
+                                   textToAccent:@"Settings app \u2794 Privacy \u2794 Location Services \u2794 Gas Jot"
+                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
           [PEUIUtils showWarningAlertWithMsgs:nil
                                         title:@"Hmm."
                              alertDescription:attrDescTextWithInstructionalText

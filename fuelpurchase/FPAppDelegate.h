@@ -71,6 +71,8 @@ FOUNDATION_EXPORT NSInteger const FPJotButtonTag;
 
 - (void)enableJotButton:(BOOL)enableJotButton;
 
+- (CGFloat)jotButtonHeight;
+
 - (void)setUser:(FPUser *)user tabBarController:(UITabBarController *)tabBarController;
 
 - (CLLocation *)latestLocation;
