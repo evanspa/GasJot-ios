@@ -113,13 +113,17 @@ NSInteger const kAccountStatusPanelTag = 12;
 #pragma mark - Helpers
 
 - (UIView *)leftPaddingMessageWithText:(NSString *)text {
+  return [self leftPaddingMessageWithAttributedText:[[NSAttributedString alloc] initWithString:text]];
+}
+
+- (UIView *)leftPaddingMessageWithAttributedText:(NSAttributedString *)attrText {
   CGFloat leftPadding = 8.0;
-  UILabel *label = [PEUIUtils labelWithKey:text
-                                      font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                           backgroundColor:[UIColor clearColor]
-                                 textColor:[UIColor darkGrayColor]
-                       verticalTextPadding:3.0
-                                fitToWidth:self.view.frame.size.width - (leftPadding + 5.0)];
+  UILabel *label = [PEUIUtils labelWithAttributeText:attrText
+                                                font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                     backgroundColor:[UIColor clearColor]
+                                           textColor:[UIColor darkGrayColor]
+                                 verticalTextPadding:3.0
+                                          fitToWidth:self.view.frame.size.width - (leftPadding + 5.0)];
   return [PEUIUtils leftPadView:label padding:leftPadding];
 }
 
@@ -175,12 +179,14 @@ gas jot data from this device only.";
   //[_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width,
   //                                                   1.19 * self.view.frame.size.height)];
   //[_doesHaveAuthTokenPanel setBounces:NO];
-  
-  NSString *accountSettingsMessage = @"\
-You are currently logged in.  From here \
-you can view and edit your remote account \
-details.";
-  UIView *accountSettingsMsgPanel = [self leftPaddingMessageWithText:accountSettingsMessage];
+  NSDictionary *messageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]],
+                                  NSForegroundColorAttributeName : [UIColor greenSeaColor]};
+  NSString *textToAccent = @"You are currently logged in";
+  NSString *accountSettingsMessage = [NSString stringWithFormat:@"%@.  From here you can view and edit your remote account details.", textToAccent];
+  NSRange messageAttrsRange = [accountSettingsMessage rangeOfString:textToAccent];
+  NSMutableAttributedString *attrMessage = [[NSMutableAttributedString alloc] initWithString:accountSettingsMessage];
+  [attrMessage setAttributes:messageAttrs range:messageAttrsRange];
+  UIView *accountSettingsMsgPanel = [self leftPaddingMessageWithAttributedText:attrMessage];
   UIButton *accountSettingsBtn = [_uitoolkit systemButtonMaker](@"Remote account details", nil, nil);
   [[accountSettingsBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:accountSettingsBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
@@ -217,7 +223,7 @@ details.";
                  below:accountSettingsMsgPanel
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:25.0
+              vpadding:35.0
               hpadding:0.0];
   /*UIView *divider = makeDivider(1.0);
   [PEUIUtils placeView:divider

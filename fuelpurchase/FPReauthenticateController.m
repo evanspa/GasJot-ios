@@ -22,6 +22,7 @@
 #import <ReactiveCocoa/RACSubscriptingAssignmentTrampoline.h>
 #import <ReactiveCocoa/RACSignal+Operations.h>
 #import <PEObjc-Commons/PEUIUtils.h>
+#import <PEObjc-Commons/PEUtils.h>
 #import <PEFuelPurchase-Model/FPErrorDomainsAndCodes.h>
 #import "FPReauthenticateController.h"
 #import "FPAuthenticationAssertionSerializer.h"
@@ -150,9 +151,7 @@
                                    topInset:70.0
                                 buttonTitle:@"Okay."
                                buttonAction:^{
-                                 [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
-                                                                                     object:nil
-                                                                                   userInfo:nil];
+                                 [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification object:nil userInfo:nil];
                                  [[self navigationController] popViewControllerAnimated:YES];
                                }
                              relativeToView:self.tabBarController.view];
@@ -161,145 +160,138 @@
     ErrMsgsMaker errMsgsMaker = ^ NSArray * (NSInteger errCode) {
       return [FPUtils computeSignInErrMsgs:errCode];
     };
-    void (^doLightLogin)(BOOL) = ^ (BOOL syncLocalEntities) {
+    void (^doLightLogin)(BOOL) = ^(BOOL syncLocalEntities) {
       void (^successBlk)(void) = nil;
       if (syncLocalEntities) {
         successBlk = ^{
-          [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
-                                                              object:nil
-                                                            userInfo:nil];
           dispatch_async(dispatch_get_main_queue(), ^{
             HUD.labelText = @"Proceeding to sync records...";
             HUD.mode = MBProgressHUDModeDeterminate;
-          });
-          __block NSInteger numEntitiesSynced = 0;
-          __block BOOL receivedUnauthedError = NO;
-          __block NSInteger syncAttemptErrors = 0;
-          __block float overallSyncProgress = 0.0;
-          [_coordDao flushAllUnsyncedEditsToRemoteForUser:_user
-                                        entityNotFoundBlk:^(float progress) {
-                                          syncAttemptErrors++;
-                                          overallSyncProgress += progress;
-                                          dispatch_async(dispatch_get_main_queue(), ^{
-                                            [HUD setProgress:overallSyncProgress];
-                                          });
-                                        }
-                                               successBlk:^(float progress) {
-                                                 numEntitiesSynced++;
-                                                 overallSyncProgress += progress;
-                                                 dispatch_async(dispatch_get_main_queue(), ^{
-                                                   [HUD setProgress:overallSyncProgress];
-                                                 });
-                                               }
-                                       remoteStoreBusyBlk:^(float progress, NSDate *retryAfter) {
-                                         syncAttemptErrors++;
-                                         overallSyncProgress += progress;
-                                         dispatch_async(dispatch_get_main_queue(), ^{
-                                           [HUD setProgress:overallSyncProgress];
-                                         });
-                                       }
-                                       tempRemoteErrorBlk:^(float progress) {
-                                         syncAttemptErrors++;
-                                         overallSyncProgress += progress;
-                                         dispatch_async(dispatch_get_main_queue(), ^{
-                                           [HUD setProgress:overallSyncProgress];
-                                         });
-                                       }
-                                           remoteErrorBlk:^(float progress, NSInteger errMask) {
-                                             syncAttemptErrors++;
-                                             overallSyncProgress += progress;
-                                             dispatch_async(dispatch_get_main_queue(), ^{
-                                               [HUD setProgress:overallSyncProgress];
-                                             });
-                                           }
-                                        conflictBlk:^(float progress, id e) {
-                                          syncAttemptErrors++;
-                                          overallSyncProgress += progress;
-                                          dispatch_async(dispatch_get_main_queue(), ^{
-                                            [HUD setProgress:overallSyncProgress];
-                                          });
-                                        }
-                                          authRequiredBlk:^(float progress) {
-                                            overallSyncProgress += progress;
-                                            receivedUnauthedError = YES;
+            __block NSInteger numEntitiesSynced = 0;
+            __block BOOL receivedUnauthedError = NO;
+            __block NSInteger syncAttemptErrors = 0;
+            __block float overallSyncProgress = 0.0;
+            [_coordDao flushAllUnsyncedEditsToRemoteForUser:_user
+                                          entityNotFoundBlk:^(float progress) {
                                             dispatch_async(dispatch_get_main_queue(), ^{
+                                              syncAttemptErrors++;
+                                              overallSyncProgress += progress;
                                               [HUD setProgress:overallSyncProgress];
                                             });
                                           }
-                                                  allDone:^{
-                                                    dispatch_async(dispatch_get_main_queue(), ^{
-                                                      [APP refreshTabs];
-                                                      if (syncAttemptErrors == 0 && !receivedUnauthedError) {
-                                                        // 100% sync success
-                                                        [HUD hide:YES];
-                                                        [PEUIUtils showSuccessAlertWithMsgs:nil
-                                                                                      title:@"Authentication Success."
-                                                                           alertDescription:[[NSAttributedString alloc] initWithString:@"You have become authenticated again and\nyour records have been synced."]
-                                                                                   topInset:70.0
-                                                                                buttonTitle:@"Okay."
-                                                                               buttonAction:^{ [[self navigationController] popViewControllerAnimated:YES]; }
-                                                                             relativeToView:self.tabBarController.view];
-                                                      } else {
-                                                        [HUD hide:YES];
-                                                        NSString *title = @"Sync problems.";
-                                                        NSString *message = @"\
-Although you became authenticated, there \
-were some problems syncing all your local \
-edits.";
-                                                        NSMutableArray *sections = [NSMutableArray array];
-                                                        JGActionSheetSection *becameUnauthSection = nil;
-                                                        if (receivedUnauthedError) {
-                                                          NSString *textToAccent = @"Re-authenticate";
-                                                          NSString *becameUnauthMessage = [NSString stringWithFormat:@"\
-This is awkward.  While syncing your local \
-edits, the server is asking for you to \
-authenticate again.  Sorry about that. \
-To authenticate, tap the %@ \
-button.", textToAccent];
-                                                          NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
-                                                          NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
-                                                          NSRange unauthMsgAttrsRange = [becameUnauthMessage rangeOfString:textToAccent];
-                                                          [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
-                                                          becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
-                                                                                                                 title:@"Authentication Failure."
-                                                                                                      alertDescription:attrBecameUnauthMessage
-                                                                                                        relativeToView:self.tabBarController.view];
+                                                 successBlk:^(float progress) {
+                                                   dispatch_async(dispatch_get_main_queue(), ^{
+                                                     numEntitiesSynced++;
+                                                     overallSyncProgress += progress;
+                                                     [HUD setProgress:overallSyncProgress];
+                                                   });
+                                                 }
+                                         remoteStoreBusyBlk:^(float progress, NSDate *retryAfter) {
+                                           dispatch_async(dispatch_get_main_queue(), ^{
+                                             syncAttemptErrors++;
+                                             overallSyncProgress += progress;
+                                             [HUD setProgress:overallSyncProgress];
+                                           });
+                                         }
+                                         tempRemoteErrorBlk:^(float progress) {
+                                           dispatch_async(dispatch_get_main_queue(), ^{
+                                             syncAttemptErrors++;
+                                             overallSyncProgress += progress;
+                                             [HUD setProgress:overallSyncProgress];
+                                           });
+                                         }
+                                             remoteErrorBlk:^(float progress, NSInteger errMask) {
+                                               dispatch_async(dispatch_get_main_queue(), ^{
+                                                 syncAttemptErrors++;
+                                                 overallSyncProgress += progress;
+                                                 [HUD setProgress:overallSyncProgress];
+                                               });
+                                             }
+                                                conflictBlk:^(float progress, id e) {
+                                                  dispatch_async(dispatch_get_main_queue(), ^{
+                                                    syncAttemptErrors++;
+                                                    overallSyncProgress += progress;
+                                                    [HUD setProgress:overallSyncProgress];
+                                                  });
+                                                }
+                                            authRequiredBlk:^(float progress) {
+                                              dispatch_async(dispatch_get_main_queue(), ^{
+                                                overallSyncProgress += progress;
+                                                receivedUnauthedError = YES;
+                                                [HUD setProgress:overallSyncProgress];
+                                              });
+                                            }
+                                                    allDone:^{
+                                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                                        [APP refreshTabs];
+                                                        if (syncAttemptErrors == 0 && !receivedUnauthedError) {
+                                                          // 100% sync success
+                                                          [HUD hide:YES];
+                                                          [PEUIUtils showSuccessAlertWithMsgs:nil
+                                                                                        title:@"Authentication Success."
+                                                                             alertDescription:[[NSAttributedString alloc] initWithString:@"\
+You have become authenticated again and\nyour records have been synced."]
+                                                                                     topInset:70.0
+                                                                                  buttonTitle:@"Okay."
+                                                                                 buttonAction:^{ [[self navigationController] popViewControllerAnimated:YES]; }
+                                                                               relativeToView:self.tabBarController.view];
+                                                        } else {
+                                                          [HUD hide:YES];
+                                                          NSString *title = @"Sync problems.";
+                                                          NSString *message = @"Although you became authenticated, there \
+were some problems syncing all your local edits.";
+                                                          NSMutableArray *sections = [NSMutableArray array];
+                                                          JGActionSheetSection *becameUnauthSection = nil;
+                                                          if (receivedUnauthedError) {
+                                                            NSString *textToAccent = @"Re-authenticate";
+                                                            NSString *becameUnauthMessage = [NSString stringWithFormat:@"\
+This is awkward.  While syncing your local edits, the server is asking for you to authenticate again.  Sorry about that. \
+To authenticate, tap the %@ button.", textToAccent];
+                                                            NSDictionary *unauthMessageAttrs = @{ NSFontAttributeName : [UIFont boldSystemFontOfSize:[UIFont systemFontSize]] };
+                                                            NSMutableAttributedString *attrBecameUnauthMessage = [[NSMutableAttributedString alloc] initWithString:becameUnauthMessage];
+                                                            NSRange unauthMsgAttrsRange = [becameUnauthMessage rangeOfString:textToAccent];
+                                                            [attrBecameUnauthMessage setAttributes:unauthMessageAttrs range:unauthMsgAttrsRange];
+                                                            becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
+                                                                                                                   title:@"Authentication Failure."
+                                                                                                        alertDescription:attrBecameUnauthMessage
+                                                                                                          relativeToView:self.tabBarController.view];
+                                                          }
+                                                          JGActionSheetSection *successSection = [PEUIUtils successAlertSectionWithMsgs:nil
+                                                                                                                                  title:@"Authentication Success."
+                                                                                                                       alertDescription:[[NSAttributedString alloc] initWithString:@"You have become authenticated again."]
+                                                                                                                         relativeToView:self.tabBarController.view];
+                                                          JGActionSheetSection *warningSection = nil;
+                                                          if (syncAttemptErrors > 0) {
+                                                            warningSection = [PEUIUtils warningAlertSectionWithMsgs:nil
+                                                                                                              title:title
+                                                                                                   alertDescription:[[NSAttributedString alloc] initWithString:message]
+                                                                                                     relativeToView:self.tabBarController.view];
+                                                          }
+                                                          JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
+                                                                                                                                message:nil
+                                                                                                                           buttonTitles:@[@"Okay."]
+                                                                                                                            buttonStyle:JGActionSheetButtonStyleDefault];
+                                                          if (!receivedUnauthedError) {
+                                                            [sections addObject:successSection];
+                                                          }
+                                                          if (warningSection) {
+                                                            [sections addObject:warningSection];
+                                                          }
+                                                          if (becameUnauthSection) {
+                                                            [sections addObject:becameUnauthSection];
+                                                          }
+                                                          [sections addObject:buttonsSection];
+                                                          JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:sections];
+                                                          [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
+                                                            [sheet dismissAnimated:YES];
+                                                            [[self navigationController] popViewControllerAnimated:YES];
+                                                          }];
+                                                          [alertSheet showInView:self.tabBarController.view animated:YES];
                                                         }
-                                                        JGActionSheetSection *successSection = [PEUIUtils successAlertSectionWithMsgs:nil
-                                                                                                                                title:@"Authentication Success."
-                                                                                                                     alertDescription:[[NSAttributedString alloc] initWithString:@"You have become authenticated again."]
-                                                                                                                       relativeToView:self.tabBarController.view];
-                                                        JGActionSheetSection *warningSection = nil;
-                                                        if (syncAttemptErrors > 0) {
-                                                          warningSection = [PEUIUtils warningAlertSectionWithMsgs:nil
-                                                                                                            title:title
-                                                                                                 alertDescription:[[NSAttributedString alloc] initWithString:message]
-                                                                                                   relativeToView:self.tabBarController.view];
-                                                        }
-                                                        JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
-                                                                                                                              message:nil
-                                                                                                                         buttonTitles:@[@"Okay."]
-                                                                                                                          buttonStyle:JGActionSheetButtonStyleDefault];
-                                                        if (!receivedUnauthedError) {
-                                                          [sections addObject:successSection];
-                                                        }
-                                                        if (warningSection) {
-                                                          [sections addObject:warningSection];
-                                                        }
-                                                        if (becameUnauthSection) {
-                                                          [sections addObject:becameUnauthSection];
-                                                        }
-                                                        [sections addObject:buttonsSection];
-                                                        JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:sections];
-                                                        [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
-                                                          [sheet dismissAnimated:YES];
-                                                          [[self navigationController] popViewControllerAnimated:YES];
-                                                        }];
-                                                        [alertSheet showInView:self.tabBarController.view animated:YES];
-                                                      }
-                                                    });
-                                                  }
-                                                    error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
+                                                      });
+                                                    }
+                                                      error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
+          });
         };
       } else {
         successBlk = nonLocalSyncSuccessBlk;
@@ -310,7 +302,9 @@ button.", textToAccent];
       [_coordDao lightLoginForUser:_user
                           password:[_passwordTf text]
                    remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.tabBarController.view)
-                 completionHandler:[FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)
+                 completionHandler:^(NSError *err) {
+                   [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(err);
+                 }
              localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
     };
     doLightLogin([_coordDao doesUserHaveAnyUnsyncedEntities:_user]);
