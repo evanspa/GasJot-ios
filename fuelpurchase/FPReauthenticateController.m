@@ -33,6 +33,7 @@
 #import "FPAppNotificationNames.h"
 #import "FPNames.h"
 #import <FlatUIKit/UIColor+FlatUI.h>
+#import "FPUIUtils.h"
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
@@ -100,12 +101,14 @@
                                    relativeToView:[self view]];
   CGFloat leftPadding = 8.0;
   [PEUIUtils setFrameHeightOfView:reauthPnl ofHeight:0.5 relativeTo:[self view]];
-  UILabel *messageLabel = [PEUIUtils labelWithKey:@"Enter your password and hit 'Done' to re-authenticate."
-                                             font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                  backgroundColor:[UIColor clearColor]
-                                        textColor:[UIColor darkGrayColor]
-                              verticalTextPadding:3.0
-                                       fitToWidth:(reauthPnl.frame.size.width - leftPadding)];
+  UILabel *messageLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"Enter your password and hit %@ to re-authenticate."
+                                                                                     textToAccent:@"Done"
+                                                                                   accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
+                                                       font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                            backgroundColor:[UIColor clearColor]
+                                                  textColor:[UIColor darkGrayColor]
+                                        verticalTextPadding:3.0
+                                                 fitToWidth:(reauthPnl.frame.size.width - leftPadding)];
   UIView *messageLabelWithPad = [PEUIUtils leftPadView:messageLabel padding:leftPadding];
   TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:reauthPnl];
   _passwordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
@@ -138,6 +141,7 @@
 #pragma mark - Login event handling
 
 - (void)handleLightLogin {
+  FPEnableUserInteractionBlk enableUserInteraction = [FPUIUtils makeUserEnabledBlockForController:self];
   [[self view] endEditing:YES];
   if (!([self formStateMaskForLightLogin] & FPSignInAnyIssues)) {
     __block MBProgressHUD *HUD;
@@ -151,8 +155,7 @@
                                    topInset:70.0
                                 buttonTitle:@"Okay."
                                buttonAction:^{
-                                 [APP enableJotButton:YES];
-                                 [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+                                 enableUserInteraction(YES);
                                  [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification object:nil userInfo:nil];
                                  [[self navigationController] popViewControllerAnimated:YES];
                                }
@@ -231,12 +234,11 @@
                                                           [HUD hide:YES];
                                                           [PEUIUtils showSuccessAlertWithMsgs:nil
                                                                                         title:@"Authentication Success."
-                                                                             alertDescription:[[NSAttributedString alloc] initWithString:@"You have become authenticated again and your records have been synced."]
+                                                                             alertDescription:[[NSAttributedString alloc] initWithString:@"You have become authenticated again and your records have been synced up to the Gas Jot server."]
                                                                                      topInset:70.0
                                                                                   buttonTitle:@"Okay."
                                                                                  buttonAction:^{
-                                                                                   [APP enableJotButton:YES];
-                                                                                   [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+                                                                                   enableUserInteraction(YES);
                                                                                    [[self navigationController] popViewControllerAnimated:YES];
                                                                                  }
                                                                                relativeToView:self.tabBarController.view];
@@ -284,8 +286,7 @@ authenticate again.  Sorry about that.  To authenticate, tap the %@ button."
                                                           [sections addObject:buttonsSection];
                                                           JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:sections];
                                                           [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
-                                                            [APP enableJotButton:YES];
-                                                            [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+                                                            enableUserInteraction(YES);
                                                             [sheet dismissAnimated:YES];
                                                             [[self navigationController] popViewControllerAnimated:YES];
                                                           }];
@@ -300,8 +301,7 @@ authenticate again.  Sorry about that.  To authenticate, tap the %@ button."
         successBlk = nonLocalSyncSuccessBlk;
       }
       HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-      [APP enableJotButton:NO];
-      [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+      enableUserInteraction(NO);
       HUD.delegate = self;
       HUD.labelText = @"Re-authenticating...";
       [_coordDao lightLoginForUser:_user
@@ -311,12 +311,11 @@ authenticate again.  Sorry about that.  To authenticate, tap the %@ button."
                    //[FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(err);
                    dispatch_async(dispatch_get_main_queue(), ^{
                      if (err) {
-                       [APP enableJotButton:YES];
-                       [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+                       enableUserInteraction(YES);
                      }
                      [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD,
                                                                          successBlk,
-                                                                         ^{[APP enableJotButton:YES]; [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];},
+                                                                         ^{ enableUserInteraction(YES); },
                                                                          self.tabBarController.view)(err);
                    });
                  }

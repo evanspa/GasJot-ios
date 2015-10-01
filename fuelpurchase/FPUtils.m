@@ -257,7 +257,7 @@ busy.  Please retry your request shortly."]
 }
 
 + (SynchUnitOfWorkHandlerMaker)synchUnitOfWorkHandlerMakerWithErrMsgsMaker:(ErrMsgsMaker)errMsgsMaker {
-  return ^(MBProgressHUD *hud, void (^successBlock)(FPUser *), UIView *relativeToView) {
+  return ^(MBProgressHUD *hud, void (^successBlock)(FPUser *), void(^errAlertAction)(void), UIView *relativeToView) {
     return (^(FPUser *newUser, NSError *error) {
       if (error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -280,7 +280,7 @@ busy.  Please retry your request shortly."]
 follows:"]
                                    topInset:70.0
                                 buttonTitle:@"Okay."
-                               buttonAction:nil
+                               buttonAction:errAlertAction
                              relativeToView:relativeToView];
         });
       } else {

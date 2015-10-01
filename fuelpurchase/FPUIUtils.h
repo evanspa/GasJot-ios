@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+typedef void (^FPEnableUserInteractionBlk)(BOOL);
+
 @interface FPUIUtils : NSObject
 
 + (UIView *)badgeForNum:(NSInteger)num
@@ -37,5 +39,7 @@
                       handler:(void(^)(void))handler
                     uitoolkit:(PEUIToolkit *)uitoolkit
                relativeToView:(UIView *)relativeToView;
+
++ (FPEnableUserInteractionBlk)makeUserEnabledBlockForController:(UIViewController *)controller;
 
 @end

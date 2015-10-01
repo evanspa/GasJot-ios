@@ -172,6 +172,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                             uitoolkit:(PEUIToolkit *)uitoolkit
                        relativeToView:(UIView *)relativeToView
                            controller:(UIViewController *)controller {
+  FPEnableUserInteractionBlk enableUserInteraction = [FPUIUtils makeUserEnabledBlockForController:controller];
   NSArray *accountStatusText = [FPPanelToolkit accountStatusTextForUser:user];
   UIView *statusPanel = [PEUIUtils labelValuePanelWithCellHeight:36.75
                                                      labelString:@"Account status"
@@ -202,10 +203,10 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                                  action:nil];
       [sendEmailBtn bk_addEventHandler:^(id sender) {
         void (^postSendActivities)(void) = ^{
-          [[[controller tabBarController] tabBar] setUserInteractionEnabled:YES];
-          [APP enableJotButton:YES];
+          enableUserInteraction(YES);
         };
         MBProgressHUD *sendVerificationEmailHud = [MBProgressHUD showHUDAddedTo:relativeToView animated:YES];
+        enableUserInteraction(NO);
         sendVerificationEmailHud.labelText = @"Sending verification email...";
         [coordDao resendVerificationEmailForUser:user
                               remoteStoreBusyBlk:^(NSDate *retryAfter) {
@@ -226,7 +227,7 @@ We apologize for the inconvenience.  Please try re-sending the verification emai
                                  dispatch_async(dispatch_get_main_queue(), ^{
                                    [sendVerificationEmailHud hide:YES afterDelay:0.0];
                                    NSAttributedString *attrMessage =
-                                   [PEUIUtils attributedTextWithTemplate:@"The verification e-mail was sent to your e-mail address: %@."
+                                   [PEUIUtils attributedTextWithTemplate:@"The verification email was sent to at: %@."
                                                             textToAccent:[user email]
                                                           accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
                                    [PEUIUtils showSuccessAlertWithTitle:@"Verification e-mail sent."
@@ -258,8 +259,7 @@ We apologize for the inconvenience.  Please try re-sending the verification emai
                                                action:nil];
       [refreshBtn bk_addEventHandler:^(id sender) {
         void (^postRefreshActivities)(void) = ^{
-          [[[controller tabBarController] tabBar] setUserInteractionEnabled:YES];
-          [APP enableJotButton:YES];
+          enableUserInteraction(YES);
         };
         __block BOOL receivedAuthReqdErrorOnDownloadAttempt = NO;
         NSMutableArray *successMsgsForRefresh = [NSMutableArray array];
@@ -273,8 +273,7 @@ We apologize for the inconvenience.  Please try re-sending the verification emai
         // errsForRefresh[*][4]: Is entity not found (bool)
         //
         MBProgressHUD *refreshHud = [MBProgressHUD showHUDAddedTo:controller.view animated:YES];
-        [[[controller tabBarController] tabBar] setUserInteractionEnabled:NO];
-        [APP enableJotButton:NO];
+        enableUserInteraction(NO);
         [refreshHud setLabelText:[NSString stringWithFormat:@"Refreshing account status..."]];
         void(^refreshDone)(NSString *) = ^(NSString *mainMsgTitle) {
           if ([errsForRefresh count] == 0) { // success
@@ -284,7 +283,7 @@ We apologize for the inconvenience.  Please try re-sending the verification emai
               void (^stillNotVerifiedAlert)(void) = ^{
                 [PEUIUtils showInfoAlertWithTitle:@"Still not verified."
                                  alertDescription:[PEUIUtils attributedTextWithTemplate:@"Your account is still not verified.  \
-Use the %@ button to receive a new account verification link to your e-mail inbox."
+Use the %@ button to have a new account verification link emailed to you."
                                                                            textToAccent:@"re-send verification email"
                                                                          accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
                                          topInset:70.0

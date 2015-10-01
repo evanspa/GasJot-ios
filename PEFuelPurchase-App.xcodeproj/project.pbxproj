@@ -298,7 +298,7 @@
 		18AB99FB17F6832C002A8A69 /* Custom Screens */ = {
 			isa = PBXGroup;
 			children = (
-				CAFC847B1BA71FB700FAEB66 /* Account Scren */,
+				CAFC847B1BA71FB700FAEB66 /* Account Screen */,
 				CAFC84771BA6ECB600FAEB66 /* Jot Screen */,
 				CAFC84731BA66D0600FAEB66 /* Records Screen */,
 				CAFC846B1BA6499A00FAEB66 /* Home Screen */,
@@ -579,13 +579,13 @@
 			name = "Jot Screen";
 			sourceTree = "<group>";
 		};
-		CAFC847B1BA71FB700FAEB66 /* Account Scren */ = {
+		CAFC847B1BA71FB700FAEB66 /* Account Screen */ = {
 			isa = PBXGroup;
 			children = (
 				CAFC847C1BA71FD300FAEB66 /* FPAccountController.h */,
 				CAFC847D1BA71FD300FAEB66 /* FPAccountController.m */,
 			);
-			name = "Account Scren";
+			name = "Account Screen";
 			sourceTree = "<group>";
 		};
 		CAFC847F1BA7478B00FAEB66 /* GUI Utils */ = {

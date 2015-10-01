@@ -28,7 +28,7 @@ typedef NSArray * (^ErrMsgsMaker)(NSInteger errCode);
 
 typedef void (^(^ServerBusyHandlerMaker)(MBProgressHUD *, UIView *))(NSDate *);
 
-typedef void (^(^SynchUnitOfWorkHandlerMaker)(MBProgressHUD *, void(^)(FPUser *), UIView *))(FPUser *, NSError *);
+typedef void (^(^SynchUnitOfWorkHandlerMaker)(MBProgressHUD *, void(^)(FPUser *), void(^)(void), UIView *))(FPUser *, NSError *);
 
 typedef void (^(^SynchUnitOfWorkHandlerMakerZeroArg)(MBProgressHUD *, void(^)(void), void(^)(void), UIView *))(NSError *);
 

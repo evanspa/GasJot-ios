@@ -266,6 +266,8 @@ You currently have no unsynced items."
 }
 
 - (void)syncAll {
+  FPEnableUserInteractionBlk enableUserInteraction = [FPUIUtils makeUserEnabledBlockForController:self];
+  enableUserInteraction(NO);
   MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
   HUD.labelText = @"Uploading records...";
   HUD.mode = MBProgressHUDModeDeterminate;
@@ -350,7 +352,10 @@ You currently have no unsynced items."
                                                                    alertDescription:[[NSAttributedString alloc] initWithString:msg]
                                                                            topInset:70.0
                                                                         buttonTitle:@"Okay."
-                                                                       buttonAction:^{ [self viewWillAppear:YES]; }
+                                                                       buttonAction:^{
+                                                                         enableUserInteraction(YES);
+                                                                         [self viewWillAppear:YES];
+                                                                       }
                                                                      relativeToView:self.tabBarController.view];
                                               } else {
                                                 [HUD hide:YES];
@@ -514,6 +519,7 @@ one of your records.  Try syncing it later.";
                                                 [sections addObject:buttonsSection];
                                                 JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:sections];
                                                 [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
+                                                  enableUserInteraction(YES);
                                                   [sheet dismissAnimated:YES];
                                                   [self viewWillAppear:YES];
                                                 }];

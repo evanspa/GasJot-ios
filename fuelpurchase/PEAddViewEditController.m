@@ -600,11 +600,11 @@ modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
   BOOL enableDeleteItem = NO;
   if (_entity) {
     if (_isUserLoggedIn()) {
-      if (_isAuthenticatedBlk() &&
-          ([_entity synced] ||
+      if (_isAuthenticatedBlk() && YES // I can't remember why I put those below conditions in-place for enabling the delete icon
+          /*([_entity synced] ||
            ([PEUtils isNil:[_entity localMainIdentifier]]) ||
            ([_entity editCount] == 0) ||
-           ([PEUtils isNil:[_entity globalIdentifier]]))) {
+           ([PEUtils isNil:[_entity globalIdentifier]]))*/) {
         enableDeleteItem = YES;
       }
     } else {
@@ -667,24 +667,9 @@ Are you sure you want to continue?"]
   //
   NSMutableArray *successMessageTitlesForDelete = [NSMutableArray array];
   __block BOOL receivedAuthReqdErrorOnDeleteAttempt = NO;
-  void (^postDeleteActivities)(void) = ^{
-    [self.navigationItem setHidesBackButton:NO animated:YES];
-    [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
-    [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
-    [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
-    if (_modalOperationDone) { _modalOperationDone(); }
-    [self setUploadDownloadDeleteBarButtonStates];
-  };
   if ([_entity globalIdentifier]) {
     __block MBProgressHUD *deleteHud;
-    [self.navigationItem setHidesBackButton:YES animated:YES];
-    [[[self navigationItem] leftBarButtonItem] setEnabled:NO];
-    [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
-    [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
-    if (_modalOperationStarted) { _modalOperationStarted(); }
-    [_downloadBarButtonItem setEnabled:NO];
-    [_uploadBarButtonItem setEnabled:NO];
-    [_deleteBarButtonItem setEnabled:NO];
+    [self disableUi];
     void(^immediateDelDone)(NSString *) = ^(NSString *mainMsgTitle) {
       if ([errorsForDelete count] == 0) { // success
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -707,8 +692,7 @@ Are you sure you want to continue?"]
             id latestEntity = errorsForDelete[0][5];
             [PEUIUtils showDeleteConflictAlertWithTitle:@"Conflict"
                                        alertDescription:[[NSAttributedString alloc] initWithString:@"\
-The remote copy of this entity has been \
-updated since you last downloaded it."]
+The remote copy of this record has been updated since you last downloaded it."]
                                                topInset:70.0
                             forceDeleteLocalButtonTitle:@"I don't care.  Delete it anyway."
                                 forceDeleteButtonAction:^{
@@ -716,10 +700,10 @@ updated since you last downloaded it."]
                                   [self doDelete];
                                 }
                                       cancelButtonTitle:@"Cancel."
-                                     cancelButtonAction:postDeleteActivities
+                                     cancelButtonAction:^{ [self enableUi]; }
                                          relativeToView:[self parentViewForAlerts]];
           } else if ([errorsForDelete[0][3] boolValue]) { // server is busy
-            [self handleServerBusyErrorWithAction:postDeleteActivities];
+            [self handleServerBusyErrorWithAction:^{ [self enableUi]; }];
           } else if ([errorsForDelete[0][6] boolValue]) { // not found
             [PEUIUtils showInfoAlertWithTitle:@"Already deleted."
                              alertDescription:[[NSAttributedString alloc] initWithString:@"\
@@ -763,7 +747,7 @@ It has now been removed from this device."]
             [alertSheet setDelegate:self];
             [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
             [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *btnIndexPath) {
-              postDeleteActivities();
+              [self enableUi];
               [sheet dismissAnimated:YES];
             }];
             [alertSheet showInView:self.view animated:YES];
@@ -903,14 +887,7 @@ It has now been removed from this device."]
   // errsForEntityDownload[*][4]: Is entity not found (bool)
   //
   MBProgressHUD *downloadHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-  [self.navigationItem setHidesBackButton:YES animated:YES];
-  [[[self navigationItem] leftBarButtonItem] setEnabled:NO];
-  [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
-  [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
-  if (_modalOperationStarted) { _modalOperationStarted(); }
-  [_downloadBarButtonItem setEnabled:NO];
-  [_uploadBarButtonItem setEnabled:NO];
-  [_deleteBarButtonItem setEnabled:NO];
+  [self disableUi];
   [downloadHud setLabelText:[NSString stringWithFormat:@"Downloading latest..."]];
   void (^handleHudProgress)(float) = ^(float percentComplete) {
     percentCompleteDownloadingEntity += percentComplete;
@@ -918,22 +895,14 @@ It has now been removed from this device."]
       downloadHud.progress = percentCompleteDownloadingEntity;
     });
   };
-  void (^reenableNavButtons)(void) = ^{
-    [self.navigationItem setHidesBackButton:NO animated:YES];
-    [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
-    [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
-    [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
-    if (_modalOperationDone) { _modalOperationDone(); }
-  };
   void (^postDownloadActivities)(void) = ^{
     if (_itemChangedBlk) {
       _itemChangedBlk(_entity, _entityIndexPath);
     }
-    reenableNavButtons();
+    [self enableUi];
     if (_listViewController) {
       [_listViewController handleUpdatedEntity:_entity];
     }
-    [self setUploadDownloadDeleteBarButtonStates];
     [_entityViewPanel removeFromSuperview];
     _entityViewPanel = _entityViewPanelMaker(self, _entity);
     [PEUIUtils placeView:_entityViewPanel
@@ -950,26 +919,21 @@ It has now been removed from this device."]
         if ([downloadedEntity isEqual:[NSNull null]]) {
           [PEUIUtils showInfoAlertWithTitle:@"You already have the latest."
                            alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You already have the latest version of this \
-record on your device."]
+You already have the latest version of this record on your device."]
                                    topInset:70.0
                                 buttonTitle:@"Okay."
-                               buttonAction:^{
-                                    reenableNavButtons();
-                                    [self setUploadDownloadDeleteBarButtonStates];
-                                  }
+                               buttonAction:^{ [self enableUi]; }
                              relativeToView:[self parentViewForAlerts]];
         } else {
           void (^fetchDepsThenTakeAction)(void(^)(void)) = [self downloadDepsForEntity:downloadedEntity
-                                                             dismissErrAlertPostAction:reenableNavButtons];
+                                                             dismissErrAlertPostAction:^{ [self enableUi]; }];
           fetchDepsThenTakeAction(^{
             // If we're here, it means the entity was downloaded, and if it had any
             // dependencies, they were also successfully downloaded (if they *needed*
             // to be downloaded).  Also, this block executes on the main thread.
             [PEUIUtils showSuccessAlertWithTitle:@"Success."
                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
-The latest version of this record has been \
-successfully downloaded to your device."]
+The latest version of this record has been successfully downloaded to your device."]
                                         topInset:70.0
                                      buttonTitle:@"Okay."
                                     buttonAction:^{
@@ -986,10 +950,7 @@ successfully downloaded to your device."]
       dispatch_async(dispatch_get_main_queue(), ^{
         [downloadHud hide:YES afterDelay:0.0];
         if ([errsForEntityDownload[0][3] boolValue]) { // server busy
-          [self handleServerBusyErrorWithAction:^{
-            reenableNavButtons();
-            [self setUploadDownloadDeleteBarButtonStates];
-          }];
+          [self handleServerBusyErrorWithAction:^{ [self enableUi]; }];
         } else if ([errsForEntityDownload[0][4] boolValue]) { // not found
           [self handleNotFoundError];
         } else { // any other error type
@@ -1000,10 +961,7 @@ There was a problem downloading the record.";
                            alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
                                    topInset:70.0
                                 buttonTitle:@"Okay."
-                               buttonAction:^{
-                                 reenableNavButtons();
-                                 [self setUploadDownloadDeleteBarButtonStates];
-                               }
+                               buttonAction:^{ [self enableUi]; }
                              relativeToView:[self parentViewForAlerts]];
         }
       });
@@ -1081,25 +1039,14 @@ There was a problem downloading the record.";
     if (_itemChangedBlk) {
       _itemChangedBlk(_entity, _entityIndexPath);
     }
-    [self.navigationItem setHidesBackButton:NO animated:YES];
-    [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
-    [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
-    if (_modalOperationDone) { _modalOperationDone(); }
-    //[[self navigationItem] setTitle:_entityTitle];
-    //[[self navigationItem] setTitleView:[self titleWithText:_entityTitle]];
+    [self enableUi];
     _panelEnablerDisabler(_entityFormPanel, NO);
     if (_listViewController) {
       [_listViewController handleUpdatedEntity:_entity];
     }
-    [self setUploadDownloadDeleteBarButtonStates];
   };
   MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-  [self.navigationItem setHidesBackButton:YES animated:YES];
-  [[[self navigationItem] leftBarButtonItem] setEnabled:NO];
-  [_uploadBarButtonItem setEnabled:NO];
-  [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
-  [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
-  if (_modalOperationStarted) { _modalOperationStarted(); }
+  [self disableUi];
   HUD.delegate = self;
   HUD.mode = _syncImmediateMBProgressHUDMode;
   HUD.labelText = @"Uploading to server.";
@@ -1157,10 +1104,10 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
           NSString *message;
           NSArray *subErrors = errorsForUpload[0][2];
           if ([subErrors count] > 1) {
-            message = @"There were problems uploading to the server.  The errors are as follows:";
+            message = @"There were problems uploading to the Gas Jot server.  The errors are as follows:";
             title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
           } else {
-            message = @"There was a problem uploading to the server.  The error is as follows:";
+            message = @"There was a problem uploading to the Gas Jot server.  The error is as follows:";
             title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
           }
           JGActionSheetSection *becameUnauthSection = nil;
@@ -1205,7 +1152,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                               NSString *mainMsgTitle,
                                                               NSString *recordTitle) {
     handleHudProgress(percentComplete);
-    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                  [NSNumber numberWithBool:NO],
                                  @[[NSString stringWithFormat:@"Not found."]],
                                  [NSNumber numberWithBool:NO],
@@ -1220,7 +1167,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                              NSString *mainMsgTitle,
                                                              NSString *recordTitle) {
     handleHudProgress(percentComplete);
-    [successMessageTitlesForUpload addObject:[NSString stringWithFormat:@"%@ saved to the server.", recordTitle]];
+    [successMessageTitlesForUpload addObject:[NSString stringWithFormat:@"%@ saved to the Gas Jot server.", recordTitle]];
     if (percentCompleteUploadingEntity == 1.0) {
       uploadDone(mainMsgTitle);
     }
@@ -1230,7 +1177,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                           NSString *recordTitle,
                                                                           NSDate *retryAfter) {
     handleHudProgress(percentComplete);
-    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                  [NSNumber numberWithBool:NO],
                                  @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
                                  [NSNumber numberWithBool:YES],
@@ -1245,7 +1192,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                   NSString *mainMsgTitle,
                                                                   NSString *recordTitle) {
     handleHudProgress(percentComplete);
-    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                  [NSNumber numberWithBool:NO],
                                  @[@"Temporary server error."],
                                  [NSNumber numberWithBool:NO],
@@ -1266,7 +1213,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
       computedErrMsgs = @[@"Unknown server error."];
       isErrorUserFixable = NO;
     }
-    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                  [NSNumber numberWithBool:isErrorUserFixable],
                                  computedErrMsgs,
                                  [NSNumber numberWithBool:NO],
@@ -1627,7 +1574,6 @@ merge conflicts.";
         _prepareUIForUserInteractionBlk(_entityFormPanel);
       }
       [self setUploadDownloadDeleteBarButtonStates];
-      //_backButton = [[self navigationItem] leftBarButtonItem]; // i just added this
     }
   } else {
     if ([self stopEditing]) {
@@ -1637,6 +1583,26 @@ merge conflicts.";
 }
 
 #pragma mark - UI state changes
+
+- (void)disableUi {
+  [self.navigationItem setHidesBackButton:YES animated:YES];
+  [[[self navigationItem] leftBarButtonItem] setEnabled:NO];
+  [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
+  [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+  [_uploadBarButtonItem setEnabled:NO];
+  [_downloadBarButtonItem setEnabled:NO];
+  [_deleteBarButtonItem setEnabled:NO];
+  if (_modalOperationStarted) { _modalOperationStarted(); }
+}
+
+- (void)enableUi {
+  [self.navigationItem setHidesBackButton:NO animated:YES];
+  [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
+  [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
+  [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+  if (_modalOperationDone) { _modalOperationDone(); }
+  [self setUploadDownloadDeleteBarButtonStates];
+}
 
 - (UILabel *)titleWithText:(NSString *)titleText {
   return [PEUIUtils labelWithKey:titleText
@@ -1652,7 +1618,6 @@ merge conflicts.";
     editPrepareSuccess = _entityEditPreparer(self, _entity);
   }
   if (editPrepareSuccess) {
-    //[[self navigationItem] setTitleView:[self titleWithText:@"(editing mode)"]]; //[NSString stringWithFormat:@"Edit %@", _entityTitle]]];
     [[self navigationItem] setLeftBarButtonItem:[[UIBarButtonItem alloc]
                                                  initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
                                                  target:self
@@ -1672,18 +1637,13 @@ merge conflicts.";
     if (_itemChangedBlk) {
       _itemChangedBlk(_entity, _entityIndexPath);
     }
-    [self.navigationItem setHidesBackButton:NO animated:YES];
-    [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
-    [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
-    if (_modalOperationDone) { _modalOperationDone(); }
+    [self enableUi];
     [[self navigationItem] setLeftBarButtonItem:_backButton];
     [[self navigationItem] setRightBarButtonItem:[self editButtonItem]];
-    //[[self navigationItem] setTitleView:[self titleWithText:_entityTitle]];
     _panelEnablerDisabler(_entityFormPanel, NO);
     if (_listViewController) {
       [_listViewController handleUpdatedEntity:_entity];
     }
-    [self setUploadDownloadDeleteBarButtonStates];
     [_entityFormPanel removeFromSuperview];
     _entityViewPanel = _entityViewPanelMaker(self, _entity);
     [PEUIUtils placeView:_entityViewPanel
@@ -1711,14 +1671,10 @@ merge conflicts.";
       _entitySaver(self, _entity);
       if (_isAuthenticatedBlk() && (!_isOfflineMode() || (_doneEditingEntityLocalSync == nil))) {
         MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-        [self.navigationItem setHidesBackButton:YES animated:YES];
-        [[[self navigationItem] leftBarButtonItem] setEnabled:NO];
-        [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
-        [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
-        if (_modalOperationStarted) { _modalOperationStarted(); }
+        [self disableUi];
         HUD.delegate = self;
         HUD.mode = _syncImmediateMBProgressHUDMode;
-        HUD.labelText = @"Saving to the server.";
+        HUD.labelText = @"Saving to the Gas Jot server.";
         __block float percentCompleteUploadingEntity = 0.0;
         HUD.progress = percentCompleteUploadingEntity;
         NSMutableArray *errorsForUpload = [NSMutableArray array];
@@ -1790,7 +1746,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                 NSArray *subErrors = errorsForUpload[0][2]; // because only single-record edit, we can skip the "not saved" msg title, and just display the sub-errors
                 if ([subErrors count] > 1) {
                   textToAccent = @"they have been saved locally";
-                  messageTemplate = @"Although there were problems syncing your edits to the server, %@.  The errors are as follows:";
+                  messageTemplate = @"Although there were problems syncing your edits to the Gas Jot server, %@.  The errors are as follows:";
                   fixNowActionTitle = @"I'll fix them now.";
                   fixLaterActionTitle = @"I'll fix them later.";
                   dealWithLaterActionTitle = @"I'll try syncing them later.";
@@ -1798,7 +1754,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                   title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
                 } else {
                   textToAccent = @"they have been saved locally";
-                  messageTemplate = @"Although there was a problem syncing your edits to the server, %@.  The error is as follows:";
+                  messageTemplate = @"Although there was a problem syncing your edits to the Gas Jot server, %@.  The error is as follows:";
                   fixLaterActionTitle = @"I'll fix it later.";
                   fixNowActionTitle = @"I'll fix it now.";
                   dealWithLaterActionTitle = @"I'll try syncing it later.";
@@ -1899,7 +1855,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                   NSString *mainMsgTitle,
                                                                   NSString *recordTitle) {
           handleHudProgress(percentComplete);
-          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[[NSString stringWithFormat:@"Not found."]],
                                        [NSNumber numberWithBool:NO],
@@ -1914,7 +1870,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                  NSString *mainMsgTitle,
                                                                  NSString *recordTitle) {
           handleHudProgress(percentComplete);
-          [successMessageTitlesForUpload addObject:[NSString stringWithFormat:@"%@ saved to the server.", recordTitle]];
+          [successMessageTitlesForUpload addObject:[NSString stringWithFormat:@"%@ saved to the Gas Jot server.", recordTitle]];
           if (percentCompleteUploadingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
@@ -1924,7 +1880,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                               NSString *recordTitle,
                                                                               NSDate *retryAfter) {
           handleHudProgress(percentComplete);
-          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
                                        [NSNumber numberWithBool:YES],
@@ -1939,7 +1895,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                        NSString *mainMsgTitle,
                                                                        NSString *recordTitle) {
           handleHudProgress(percentComplete);
-          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[@"Temporary server error."],
                                        [NSNumber numberWithBool:NO],
@@ -1960,7 +1916,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
             computedErrMsgs = @[@"Unknown server error."];
             isErrorUserFixable = NO;
           }
-          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                        [NSNumber numberWithBool:isErrorUserFixable],
                                        computedErrMsgs,
                                        [NSNumber numberWithBool:NO],
@@ -1976,7 +1932,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                       NSString *recordTitle,
                                                                       id latestEntity) {
           handleHudProgress(percentComplete);
-          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[[NSString stringWithFormat:@"Conflict."]],
                                        [NSNumber numberWithBool:NO],
@@ -1992,7 +1948,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                   NSString *recordTitle) {
           receivedAuthReqdErrorOnSaveAttempt = YES;
           handleHudProgress(percentComplete);
-          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[@"Authentication required."],
                                        [NSNumber numberWithBool:NO],
@@ -2008,7 +1964,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                                          NSString *recordTitle,
                                                                                          NSString *dependencyErrMsg) {
           handleHudProgress(percentComplete);
-          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[dependencyErrMsg],
                                        [NSNumber numberWithBool:NO],
@@ -2156,25 +2112,14 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
       }
     };
     if (_isAuthenticatedBlk() && !_isOfflineMode()) {
-      void (^reenableScreen)(void) = ^{
-        [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
-        [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
-        [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
-        if (_modalOperationDone) { _modalOperationDone(); }
-      };
       MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-      [self.navigationItem setHidesBackButton:YES animated:YES];
-      [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // cancel btn (so they can't cancel it while HUD is displaying)
-      [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
-      [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
-      if (_modalOperationStarted) { _modalOperationStarted(); }
+      [self disableUi];
       HUD.delegate = self;
       HUD.mode = _syncImmediateMBProgressHUDMode;
-      HUD.labelText = @"Syncing to the server...";
+      HUD.labelText = @"Saving to the Gas Jot server...";
       __block float percentCompleteUploadingEntity = 0.0;
       HUD.progress = percentCompleteUploadingEntity;
       NSMutableArray *errorsForUpload = [NSMutableArray array];
-      
       // The meaning of the elements of the arrays found within errorsForUpload:
       //
       // errorsForUpload[*][0]: Error title (string)
@@ -2182,7 +2127,6 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
       // errorsForUpload[*][2]: An NSArray of sub-error messages (strings)
       // errorsForUpload[*][3]: Is error type server-busy? (bool)
       //
-      
       NSMutableArray *successMessageTitlesForUpload = [NSMutableArray array];
       __block BOOL receivedAuthReqdErrorOnAddAttempt = NO;
       void(^immediateSaveDone)(NSString *) = ^(NSString *mainMsgTitle) {
@@ -2195,7 +2139,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
               NSString *title = [NSString stringWithFormat:@"Success %@.", mainMsgTitle];
               JGActionSheetSection *contentSection = [PEUIUtils successAlertSectionWithMsgs:successMessageTitlesForUpload
                                                                                       title:title
-                                                                           alertDescription:[[NSAttributedString alloc] initWithString:@"Your records have been successfully saved to the server."]
+                                                                           alertDescription:[[NSAttributedString alloc] initWithString:@"Your records have been successfully saved to the Gas Jot server."]
                                                                              relativeToView:[self view]];
               JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
                                                                                     message:nil
@@ -2292,7 +2236,7 @@ locally.  Try uploading it later.";
               }
               if (!areAllBusyErrors()) {
                 NSString *title = [NSString stringWithFormat:@"Mixed results %@.", mainMsgTitle];
-                NSAttributedString *attrMessage = [PEUIUtils attributedTextWithTemplate:@"Some of the edits were saved to the server and some were not. \
+                NSAttributedString *attrMessage = [PEUIUtils attributedTextWithTemplate:@"Some of the edits were saved to the Gas Jot server and some were not. \
 The ones that did not %@ and will need to be fixed individually.  The ones uploaded are:"
                                                        textToAccent:@"have been saved locally"
                                                      accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
@@ -2334,7 +2278,7 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
               }
               if (isMultiStepAdd) {
                 NSString *textToAccent = @"they have been saved locally";
-                NSString *messageTemplate = @"Although there were problems saving your edits to the server, %@.  The details are as follows:";
+                NSString *messageTemplate = @"Although there were problems saving your edits to the Gas Jot server, %@.  The details are as follows:";
                 fixNowActionTitle = @"I'll fix them now.";
                 fixLaterActionTitle = @"I'll fix them later.";
                 cancelActionTitle = @"Forget it.  Just cancel them.";
@@ -2356,12 +2300,12 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
                 NSArray *subErrors = errorsForUpload[0][2]; // because only single-record add, we can skip the "not saved" msg title, and just display the sub-errors
                 if ([subErrors count] > 1) {
                   title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
-                  messageTemplate = @"Although there were problems saving your edits to the server, %@.  The errors are as follows:";
+                  messageTemplate = @"Although there were problems saving your edits to the Gas Jot server, %@.  The errors are as follows:";
                   fixNowActionTitle = @"I'll fix them now.";
                   fixLaterActionTitle = @"I'll fix them later.";
                 } else {
                   title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
-                  messageTemplate = @"Although there was a problem saving your edits to the server, %@.  The error is as follows:";
+                  messageTemplate = @"Although there was a problem saving your edits to the Gas Jot server, %@.  The error is as follows:";
                   fixLaterActionTitle = @"I'll fix it later.";
                   fixNowActionTitle = @"I'll fix it now.";
                 }
@@ -2388,7 +2332,7 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
                   switch ([indexPath row]) {
                     case 0: // fix now
                       _entityAddCanceler(self, NO, _newEntity);
-                      reenableScreen();
+                      [self enableUi];
                       break;
                     case 1: // fix later
                       notificationSenderForAdd(_newEntity);
@@ -2398,6 +2342,7 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
                       _entityAddCanceler(self, YES, _newEntity);
                       break;
                   }
+                  if (_modalOperationDone) { _modalOperationDone(); }
                   [sheet dismissAnimated:YES];
                 };
               } else {
@@ -2417,6 +2362,7 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
                       _entityAddCanceler(self, YES, _newEntity);
                       break;
                   }
+                 if (_modalOperationDone) { _modalOperationDone(); }
                   [sheet dismissAnimated:YES];
                 };
               }
@@ -2445,7 +2391,7 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
                                                                 NSString *mainMsgTitle,
                                                                 NSString *recordTitle) {
         handleHudProgress(percentComplete);
-        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                      [NSNumber numberWithBool:NO],
                                      @[[NSString stringWithFormat:@"Not found."]],
                                      [NSNumber numberWithBool:NO]]];
@@ -2457,7 +2403,7 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
                                                                NSString *mainMsgTitle,
                                                                NSString *recordTitle) {
         handleHudProgress(percentComplete);
-        [successMessageTitlesForUpload addObject:[NSString stringWithFormat:@"%@ saved to the server.", recordTitle]];
+        [successMessageTitlesForUpload addObject:[NSString stringWithFormat:@"%@ saved to the Gas Jot server.", recordTitle]];
         if (percentCompleteUploadingEntity == 1.0) {
           immediateSaveDone(mainMsgTitle);
         }
@@ -2467,7 +2413,7 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
                                                                             NSString *recordTitle,
                                                                             NSDate *retryAfter) {
         handleHudProgress(percentComplete);
-        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                      [NSNumber numberWithBool:NO],
                                      @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
                                      [NSNumber numberWithBool:YES]]];
@@ -2479,7 +2425,7 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
                                                                     NSString *mainMsgTitle,
                                                                     NSString *recordTitle) {
         handleHudProgress(percentComplete);
-        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                      [NSNumber numberWithBool:NO],
                                      @[@"Temporary server error."],
                                      [NSNumber numberWithBool:NO]]];
@@ -2497,7 +2443,7 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
           computedErrMsgs = @[@"Unknown server error."];
           isErrorUserFixable = NO;
         }
-        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                      [NSNumber numberWithBool:isErrorUserFixable],
                                      computedErrMsgs,
                                      [NSNumber numberWithBool:NO]]];
@@ -2510,7 +2456,7 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
                                                                 NSString *recordTitle) {
         receivedAuthReqdErrorOnAddAttempt = YES;
         handleHudProgress(percentComplete);
-        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                      [NSNumber numberWithBool:NO],
                                      @[@"Authentication required."],
                                      [NSNumber numberWithBool:NO]]];
@@ -2523,7 +2469,7 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
                                                                                       NSString *recordTitle,
                                                                                       NSString *dependencyErrMsg) {
         handleHudProgress(percentComplete);
-        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
+        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
                                      [NSNumber numberWithBool:NO],
                                      @[dependencyErrMsg],
                                      [NSNumber numberWithBool:NO]]];
@@ -2567,6 +2513,7 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
       HUD.mode = MBProgressHUDModeCustomView;
       [HUD hide:YES afterDelay:1.0];
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        if (_modalOperationDone) { _modalOperationDone(); }
         notificationSenderForAdd(_newEntity);
         _itemAddedBlk(self, _newEntity);  // this is what causes this controller to be dismissed
       });
@@ -2577,7 +2524,7 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
                        alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
                                topInset:70.0
                             buttonTitle:@"Okay."
-                           buttonAction:nil
+                           buttonAction:^{  }
                          relativeToView:[self view]];
   }
 }

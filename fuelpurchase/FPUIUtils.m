@@ -132,4 +132,13 @@
   return button;
 }
 
++ (FPEnableUserInteractionBlk)makeUserEnabledBlockForController:(UIViewController *)controller {
+  return ^(BOOL enable) {
+    [APP enableJotButton:enable];
+    [[[controller navigationItem] leftBarButtonItem] setEnabled:enable];
+    [[[controller navigationItem] rightBarButtonItem] setEnabled:enable];
+    [[[controller tabBarController] tabBar] setUserInteractionEnabled:enable];
+  };
+}
+
 @end

@@ -23,6 +23,7 @@
 #import "FPReauthenticateController.h"
 #import "FPPanelToolkit.h"
 #import <FlatUIKit/UIColor+FlatUI.h>
+#import "FPUIUtils.h"
 
 #ifdef FP_DEV
 #import <PEDev-Console/UIViewController+PEDevConsole.h>
@@ -79,7 +80,7 @@ NSInteger const kAccountStatusPanelTag = 12;
   [_doesNotHaveAuthTokenPanel removeFromSuperview];
   if ([APP isUserLoggedIn]) {
     if ([APP doesUserHaveValidAuthToken]) {
-      [navItem setTitle:@"User Account"];
+      [navItem setTitle:@"Your Gas Jot Account"];
       [PEUIUtils placeView:_doesHaveAuthTokenPanel
                    atTopOf:[self view]
              withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -93,7 +94,7 @@ NSInteger const kAccountStatusPanelTag = 12;
                                         relativeToView:_doesHaveAuthTokenPanel
                                             controller:self];
     } else {
-      [navItem setTitle:@"User Account (auth required)"];
+      [navItem setTitle:@"Your Gas Jot Account"];
       [PEUIUtils placeView:_doesNotHaveAuthTokenPanel
                    atTopOf:[self view]
              withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -101,7 +102,7 @@ NSInteger const kAccountStatusPanelTag = 12;
                   hpadding:0.0];
     }
   } else {
-    [navItem setTitle:@"Log in or create account"];
+    [navItem setTitle:@"Log In or Create Account"];
     [PEUIUtils placeView:_notLoggedInPanel
                  atTopOf:[self view]
            withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -341,6 +342,7 @@ account.";
   [loginBtn bk_addEventHandler:^(id sender) {
     [self presentLoginScreen];
   } forControlEvents:UIControlEventTouchUpInside];
+  UIView *loginMsgPanel = [self leftPaddingMessageWithAttributedText:[[NSAttributedString alloc] initWithString:@"Log into your Gas Jot account."]];
   UIButton *createAccountBtn = [_uitoolkit systemButtonMaker](@"Create Account", nil, nil);
   [[createAccountBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:createAccountBtn ofWidth:1.0 relativeTo:_notLoggedInPanel];
@@ -348,6 +350,7 @@ account.";
   [createAccountBtn bk_addEventHandler:^(id sender) {
     [self presentSetupRemoteAccountScreen];
   } forControlEvents:UIControlEventTouchUpInside];
+  UIView *createAcctMsgPanel = [self leftPaddingMessageWithAttributedText:[[NSAttributedString alloc] initWithString:@"Create a Gas Jot account."]];
   
   // place views onto panel
   [PEUIUtils placeView:loginBtn
@@ -355,11 +358,23 @@ account.";
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:90.0
               hpadding:0];
-  [PEUIUtils placeView:createAccountBtn
+  [PEUIUtils placeView:loginMsgPanel
                  below:loginBtn
                   onto:_notLoggedInPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:10.0
+              vpadding:4.0
+              hpadding:0.0];
+  [PEUIUtils placeView:createAccountBtn
+                 below:loginMsgPanel
+                  onto:_notLoggedInPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:30.0
+              hpadding:0.0];
+  [PEUIUtils placeView:createAcctMsgPanel
+                 below:createAccountBtn
+                  onto:_notLoggedInPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:4.0
               hpadding:0.0];
 }
 
@@ -402,6 +417,7 @@ account.";
 #pragma mark - Logout
 
 - (void)logout {
+  FPEnableUserInteractionBlk enableUserInteraction = [FPUIUtils makeUserEnabledBlockForController:self];
   __block MBProgressHUD *HUD;
   void (^postAuthTokenNoMatterWhat)(void) = ^{
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -414,7 +430,7 @@ account.";
       NSString *msg = @"\
 You have been logged out successfully. \
 Your remote account is no longer connected \
-to this device and your fuel purchase data \
+to this device and your Gas Jot data \
 has been removed.\n\n\
 You can still use the app.  Your data will \
 simply be saved locally.";
@@ -424,9 +440,8 @@ simply be saved locally.";
                                  topInset:70.0
                               buttonTitle:@"Okay."
                              buttonAction:^{
-                               [APP enableJotButton:YES];
-                               [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
                                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                                 enableUserInteraction(YES);
                                  [self viewDidAppear:YES];
                                });
                              }
@@ -435,8 +450,7 @@ simply be saved locally.";
   };
   void (^doLogout)(void) = ^{
     HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    [APP enableJotButton:NO];
-    [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+    enableUserInteraction(NO);
     HUD.delegate = self;
     HUD.labelText = @"Logging out...";
     // even if the logout fails, we don't care; we'll still

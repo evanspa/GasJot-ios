@@ -131,7 +131,7 @@
 "saveusr.email-invalid" = "Invalid e-mail address.";
 "saveusr.email-notprovided" = "E-mail must be provided.";
 "saveusr.password-notprovided" = "Password cannot be empty.";
-"saveusr.email-already-registered" = "An account with this e-mail address already exists.";
+"saveusr.email-already-registered" = "An account with this email address already exists.";
 
 /***************************************************************
  * 'Sign In' error messages

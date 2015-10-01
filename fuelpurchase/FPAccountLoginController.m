@@ -32,6 +32,7 @@
 #import "FPUtils.h"
 #import "FPAppNotificationNames.h"
 #import "FPNames.h"
+#import "FPUIUtils.h"
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
@@ -102,7 +103,7 @@
   [PEUIUtils setFrameHeightOfView:signInPnl ofHeight:1.0 relativeTo:[self view]];
   CGFloat leftPadding = 8.0;
   UILabel *signInMsgLabel = [PEUIUtils labelWithKey:@"From here you can log into your remote \
-account, connecting this device to it.  Your Gas Jot data will be downloaded to this device."
+Gas Jot account, connecting this device to it.  Your Gas Jot data will be downloaded to this device."
                                                font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor darkGrayColor]
@@ -169,6 +170,7 @@ account, connecting this device to it.  Your Gas Jot data will be downloaded to 
 #pragma mark - Login event handling
 
 - (void)handleSignIn {
+  FPEnableUserInteractionBlk enableUserInteraction = [FPUIUtils makeUserEnabledBlockForController:self];
   [[self view] endEditing:YES];
   void (^enableLocationServices)(void(^)(void)) = ^(void(^postAction)(void)) {
     if (![APP locationServicesAuthorized] && ![APP locationServicesDenied]) {
@@ -200,21 +202,15 @@ If you would like to enable location services, tap 'Allow' in the next pop-up."]
       [HUD hide:YES];
       [PEUIUtils showLoginSuccessAlertWithTitle:@"Login success."
                                alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You have been successfully logged in.\n\n\
-Your remote account is now connected to \
-this device.  Any gas jot data that \
-you create and save will be synced to your \
-remote account."]
+You have been successfully logged in.\n\nYour remote account is now connected to this device.  \
+Any gas jot data that you create and save will be synced to your remote account."]
                                 syncIconMessage:[[NSAttributedString alloc] initWithString:@"\
-The following icon will appear in the app \
-indicating that your are currently logged \
-into your remote account:"]
+The following icon will appear in the app indicating that your are currently logged into your remote account:"]
                                        topInset:70.0
                                     buttonTitle:@"Okay."
                                    buttonAction:^{
                                      enableLocationServices(^{
-                                       [APP enableJotButton:YES];
-                                       [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+                                       enableUserInteraction(YES);
                                        [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
                                                                                            object:nil
                                                                                          userInfo:nil];
@@ -309,8 +305,7 @@ into your remote account:"]
                                                                                       buttonTitle:@"Okay."
                                                                                      buttonAction:^{
                                                                                        enableLocationServices(^{
-                                                                                         [APP enableJotButton:YES];
-                                                                                         [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+                                                                                         enableUserInteraction(YES);
                                                                                          [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
                                                                                                                                              object:nil
                                                                                                                                            userInfo:nil];
@@ -354,14 +349,14 @@ edits, the Gas Jot server is asking for you to authenticate again.  Sorry about 
                                                         [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
                                                           [sheet dismissAnimated:YES];
                                                           enableLocationServices(^{
-                                                            [APP enableJotButton:YES];
-                                                            [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+                                                            enableUserInteraction(YES);
                                                             [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
                                                                                                                 object:nil
                                                                                                               userInfo:nil];
                                                             [[self navigationController] popViewControllerAnimated:YES];
                                                           });
                                                         }];
+                                                        [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
                                                         [alertSheet showInView:self.tabBarController.view animated:YES];
                                                         [APP refreshTabs];
                                                       });
@@ -379,8 +374,7 @@ edits, the Gas Jot server is asking for you to authenticate again.  Sorry about 
       HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
       HUD.delegate = self;
       HUD.labelText = @"Logging in...";
-      [APP enableJotButton:NO];
-      [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+      enableUserInteraction(NO);
       [_coordDao loginWithEmail:[_siEmailTf text]
                        password:[_siPasswordTf text]
    andLinkRemoteUserToLocalUser:_localUser
@@ -395,8 +389,7 @@ busy.  Please try logging in a little later."]
                                             topInset:70.0
                                          buttonTitle:@"Okay."
                                         buttonAction:^{
-                                          [APP enableJotButton:YES];
-                                          [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+                                          enableUserInteraction(YES);
                                         }
                                       relativeToView:self.tabBarController.view];
                   });
@@ -405,7 +398,7 @@ busy.  Please try logging in a little later."]
                 dispatch_async(dispatch_get_main_queue(), ^{
                   [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD,
                                                                       successBlk,
-                                                                      ^{ [APP enableJotButton:YES]; [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];},
+                                                                      ^{ enableUserInteraction(YES); },
                                                                       self.tabBarController.view)(err);
                   if (user) {
                     NSDate *mostRecentUpdatedAt =

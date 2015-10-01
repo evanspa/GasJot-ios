@@ -33,6 +33,7 @@
 #import "FPAppNotificationNames.h"
 #import "FPNames.h"
 #import <JGActionSheet/JGActionSheet.h>
+#import "FPUIUtils.h"
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
@@ -104,8 +105,8 @@
                                        relativeToView:[self view]];
   [PEUIUtils setFrameHeightOfView:createAcctPnl ofHeight:0.5 relativeTo:[self view]];
   CGFloat leftPadding = 8.0;
-  UILabel *createAccountMsgLabel = [PEUIUtils labelWithKey:@"From here you can create a remote account. This will \
-enable your data records to be synced to Gas Jot's central server so you can access it from your other devices."
+  UILabel *createAccountMsgLabel = [PEUIUtils labelWithKey:@"From here you can create a remote Gas Jot account. This will \
+enable your data records to be synced to Gas Jot's central server so you can access them from your other devices."
                                                font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor darkGrayColor]
@@ -186,6 +187,7 @@ enable your data records to be synced to Gas Jot's central server so you can acc
 #pragma mark - Event handling
 
 - (void)handleAccountCreation {
+  FPEnableUserInteractionBlk enableUserInteraction = [FPUIUtils makeUserEnabledBlockForController:self];  
   [[self view] endEditing:YES];
   if (!([self formStateMaskForAcctCreation] & FPSaveUsrAnyIssues)) {
     [_localUser setName:[_caFullNameTf text]];
@@ -197,10 +199,14 @@ enable your data records to be synced to Gas Jot's central server so you can acc
         [HUD hide:YES];
         [PEUIUtils showSuccessAlertWithMsgs:nil
                                       title:@"Success."
-                           alertDescription:[[NSAttributedString alloc] initWithString:@"Account creation success."]
+                           alertDescription:[[NSAttributedString alloc] initWithString:@"\
+Your account has been created successfully.\n\nFrom this point on, any new records that you create \
+will be saved on your device AND the Gas Jot central server.\n\nAn account verification link has been \
+emailed to you."]
                                    topInset:70.0
                                 buttonTitle:@"Okay."
                                buttonAction:^{
+                                 enableUserInteraction(YES);
                                  [[NSNotificationCenter defaultCenter] postNotificationName:FPAppAccountCreationNotification
                                                                                      object:nil
                                                                                    userInfo:nil];
@@ -217,7 +223,7 @@ enable your data records to be synced to Gas Jot's central server so you can acc
       void (^successBlk)(FPUser *) = nil;
       if (syncLocalEntities) {
         successBlk = ^(FPUser *remoteUser) {
-          HUD.labelText = @"Account Creation Success!";
+          HUD.labelText = @"Account creation success!";
           HUD.detailsLabelText = @"Proceeding to sync records...";
           HUD.mode = MBProgressHUDModeDeterminate;
           __block NSInteger numEntitiesSynced = 0;
@@ -294,6 +300,7 @@ into your remote account:"]
                                                                                          topInset:70.0
                                                                                       buttonTitle:@"Okay."
                                                                                      buttonAction:^{
+                                                                                       enableUserInteraction(YES);
                                                                                        [[NSNotificationCenter defaultCenter] postNotificationName:FPAppAccountCreationNotification
                                                                                                                                            object:nil
                                                                                                                                          userInfo:nil];
@@ -334,6 +341,7 @@ is asking for you to authenticate again.  Sorry about that. To authenticate, tap
                                                           alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
                                                         }
                                                         [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
+                                                          enableUserInteraction(YES);
                                                           [sheet dismissAnimated:YES];
                                                           [[self navigationController] popViewControllerAnimated:YES];
                                                         }];
@@ -352,6 +360,7 @@ is asking for you to authenticate again.  Sorry about that. To authenticate, tap
         successBlk = nonLocalSyncSuccessBlk;
       }
       HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+      enableUserInteraction(NO);
       HUD.delegate = self;
       HUD.labelText = @"Creating account...";
       [_coordDao establishRemoteAccountForLocalUser:_localUser
@@ -359,7 +368,10 @@ is asking for you to authenticate again.  Sorry about that. To authenticate, tap
                                     remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.tabBarController.view)
                                   completionHandler:^(FPUser *user, NSError *err) {
                                     dispatch_async(dispatch_get_main_queue(), ^{
-                                    [FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(user, err);
+                                    [FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD,
+                                                                                                       successBlk,
+                                                                                                       ^{ enableUserInteraction(YES); },
+                                                                                                       self.tabBarController.view)(user, err);
                                     DDLogDebug(@"in FPCreateAccountController/handleAccountCreation, calling [APP setChangelogUpdatedAt:(%@)", [PEUtils millisecondsFromDate:user.updatedAt]);
                                     [APP setChangelogUpdatedAt:[user updatedAt]];
                                     });
@@ -369,11 +381,8 @@ is asking for you to authenticate again.  Sorry about that. To authenticate, tap
     };
     if (_preserveExistingLocalEntities == nil) { // first time asked
       if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {
-        NSString *msg = @"\
-It seems you've edited some records locally. \
-Would you like them to be synced to your \
-remote account upon account creation, or \
-would you like them to be deleted?";
+        NSString *msg = @"It seems you've edited some records locally. Would you like them to be synced to your \
+remote account upon account creation, or would you like them to be deleted?";
         JGActionSheetSection *contentSection = [PEUIUtils questionAlertSectionWithTitle:@"Locally created records."
                                                                        alertDescription:[[NSAttributedString alloc] initWithString:msg]
                                                                          relativeToView:self.tabBarController.view];
