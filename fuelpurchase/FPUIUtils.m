@@ -138,6 +138,7 @@
     [[[controller navigationItem] leftBarButtonItem] setEnabled:enable];
     [[[controller navigationItem] rightBarButtonItem] setEnabled:enable];
     [[[controller tabBarController] tabBar] setUserInteractionEnabled:enable];
+    [controller.navigationItem setHidesBackButton:!enable animated:YES];
   };
 }
 

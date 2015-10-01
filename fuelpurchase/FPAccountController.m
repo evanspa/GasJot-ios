@@ -350,7 +350,7 @@ account.";
   [createAccountBtn bk_addEventHandler:^(id sender) {
     [self presentSetupRemoteAccountScreen];
   } forControlEvents:UIControlEventTouchUpInside];
-  UIView *createAcctMsgPanel = [self leftPaddingMessageWithAttributedText:[[NSAttributedString alloc] initWithString:@"Create a Gas Jot account."]];
+  UIView *createAcctMsgPanel = [self leftPaddingMessageWithAttributedText:[[NSAttributedString alloc] initWithString:@"Create a Gas Jot account."]];  
   
   // place views onto panel
   [PEUIUtils placeView:loginBtn

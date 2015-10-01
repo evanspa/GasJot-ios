@@ -25,15 +25,12 @@
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEFuelPurchase-Model/FPErrorDomainsAndCodes.h>
 #import "FPReauthenticateController.h"
-#import "FPAuthenticationAssertionSerializer.h"
-#import "FPUserSerializer.h"
-#import "FPAuthenticationAssertion.h"
-#import "FPQuickActionMenuController.h"
 #import "FPUtils.h"
 #import "FPAppNotificationNames.h"
 #import "FPNames.h"
 #import <FlatUIKit/UIColor+FlatUI.h>
 #import "FPUIUtils.h"
+#import "FPPanelToolkit.h"
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
@@ -126,6 +123,12 @@
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
+  [PEUIUtils placeView:[FPPanelToolkit forgotPasswordButtonForUser:_user coordinatorDao:_coordDao uitoolkit:_uitoolkit controller:self]
+                 below:messageLabelWithPad
+                  onto:reauthPnl
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:20.0
+              hpadding:leftPadding];
   RAC(self, formStateMaskForLightLogin) =
     [RACSignal combineLatest:@[_passwordTf.rac_textSignal]
                       reduce:^(NSString *password) {

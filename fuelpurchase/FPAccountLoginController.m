@@ -18,6 +18,7 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
+#import <BlocksKit/UIControl+BlocksKit.h>
 #import <ReactiveCocoa/UITextField+RACSignalSupport.h>
 #import <ReactiveCocoa/RACSubscriptingAssignmentTrampoline.h>
 #import <ReactiveCocoa/RACSignal+Operations.h>
@@ -25,14 +26,12 @@
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEFuelPurchase-Model/FPErrorDomainsAndCodes.h>
 #import "FPAccountLoginController.h"
-#import "FPAuthenticationAssertionSerializer.h"
-#import "FPUserSerializer.h"
-#import "FPAuthenticationAssertion.h"
-#import "FPQuickActionMenuController.h"
 #import "FPUtils.h"
 #import "FPAppNotificationNames.h"
 #import "FPNames.h"
 #import "FPUIUtils.h"
+#import <FlatUIKit/UIColor+FlatUI.h>
+#import "FPPanelToolkit.h"
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
@@ -90,8 +89,12 @@
                                                                   style:UIBarButtonItemStylePlain
                                                                  target:self
                                                                  action:@selector(handleSignIn)]];
-  [_siEmailTf becomeFirstResponder];
   _preserveExistingLocalEntities = nil;
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  [_siEmailTf becomeFirstResponder];
 }
 
 #pragma mark - GUI construction (making panels)
@@ -114,6 +117,15 @@ Gas Jot account, connecting this device to it.  Your Gas Jot data will be downlo
   _siEmailTf = tfMaker(@"unauth.start.signin.emailtf.pht");
   _siPasswordTf = tfMaker(@"unauth.start.signin.pwdtf.pht");
   [_siPasswordTf setSecureTextEntry:YES];
+  UILabel *instructionLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"Enter your credentials and tap %@."
+                                                                                         textToAccent:@"Log In"
+                                                                                       accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
+                                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                backgroundColor:[UIColor clearColor]
+                                                      textColor:[UIColor darkGrayColor]
+                                            verticalTextPadding:3.0];
+  [PEUIUtils setFrameWidthOfView:instructionLabel ofWidth:1.05 relativeTo:instructionLabel];
+  UIView *instructionPanel = [PEUIUtils leftPadView:instructionLabel padding:leftPadding];
   
   // place views
   [PEUIUtils placeView:signInMsgPanel
@@ -133,21 +145,19 @@ Gas Jot account, connecting this device to it.  Your Gas Jot data will be downlo
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5.0
               hpadding:0.0];
-  UILabel *instructionLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"Enter your credentials and tap %@."
-                                                                                         textToAccent:@"Log In"
-                                                                                       accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
-                                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                                backgroundColor:[UIColor clearColor]
-                                                      textColor:[UIColor darkGrayColor]
-                                            verticalTextPadding:3.0];
-  [PEUIUtils setFrameWidthOfView:instructionLabel ofWidth:1.05 relativeTo:instructionLabel];
-  UIView *instructionPanel = [PEUIUtils leftPadView:instructionLabel padding:leftPadding];
   [PEUIUtils placeView:instructionPanel
                  below:_siPasswordTf
                   onto:signInPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
+  [PEUIUtils placeView:[FPPanelToolkit forgotPasswordButtonForUser:nil coordinatorDao:_coordDao uitoolkit:_uitoolkit controller:self]
+                 below:instructionPanel
+                  onto:signInPnl
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:20.0
+              hpadding:leftPadding];
+  
   RAC(self, formStateMaskForSignIn) =
     [RACSignal combineLatest:@[_siEmailTf.rac_textSignal,
                                _siPasswordTf.rac_textSignal]

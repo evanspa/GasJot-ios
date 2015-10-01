@@ -43,6 +43,7 @@
 		CA920C121B21F48900A848EA /* fpapi-resource.localdev.json in Resources */ = {isa = PBXBuildFile; fileRef = 18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */; };
 		CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */; };
 		CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = CAD8AE501B2B291000276F4F /* PELMUIUtils.m */; };
+		CAE873F71BBDA64900E5A81F /* FPForgotPasswordController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAE873F61BBDA64900E5A81F /* FPForgotPasswordController.m */; settings = {ASSET_TAGS = (); }; };
 		CAFC84651BA27EAB00FAEB66 /* FPSplashController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84641BA27EAB00FAEB66 /* FPSplashController.m */; };
 		CAFC84691BA363A600FAEB66 /* iCarousel.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84681BA363A600FAEB66 /* iCarousel.m */; };
 		CAFC846E1BA64B5A00FAEB66 /* FPHomeScreenController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC846D1BA64B5A00FAEB66 /* FPHomeScreenController.m */; };
@@ -134,6 +135,8 @@
 		CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPReauthenticateController.m; sourceTree = "<group>"; };
 		CAD8AE4F1B2B291000276F4F /* PELMUIUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PELMUIUtils.h; sourceTree = "<group>"; };
 		CAD8AE501B2B291000276F4F /* PELMUIUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PELMUIUtils.m; sourceTree = "<group>"; };
+		CAE873F51BBDA64900E5A81F /* FPForgotPasswordController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPForgotPasswordController.h; sourceTree = "<group>"; };
+		CAE873F61BBDA64900E5A81F /* FPForgotPasswordController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPForgotPasswordController.m; sourceTree = "<group>"; };
 		CAFC84631BA27EAB00FAEB66 /* FPSplashController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPSplashController.h; sourceTree = "<group>"; };
 		CAFC84641BA27EAB00FAEB66 /* FPSplashController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPSplashController.m; sourceTree = "<group>"; };
 		CAFC84671BA363A600FAEB66 /* iCarousel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iCarousel.h; sourceTree = "<group>"; };
@@ -298,6 +301,7 @@
 		18AB99FB17F6832C002A8A69 /* Custom Screens */ = {
 			isa = PBXGroup;
 			children = (
+				CAE873F41BBDA55800E5A81F /* Forgot Password Screen */,
 				CAFC847B1BA71FB700FAEB66 /* Account Screen */,
 				CAFC84771BA6ECB600FAEB66 /* Jot Screen */,
 				CAFC84731BA66D0600FAEB66 /* Records Screen */,
@@ -525,6 +529,15 @@
 			name = "Local Data UI Utils";
 			sourceTree = "<group>";
 		};
+		CAE873F41BBDA55800E5A81F /* Forgot Password Screen */ = {
+			isa = PBXGroup;
+			children = (
+				CAE873F51BBDA64900E5A81F /* FPForgotPasswordController.h */,
+				CAE873F61BBDA64900E5A81F /* FPForgotPasswordController.m */,
+			);
+			name = "Forgot Password Screen";
+			sourceTree = "<group>";
+		};
 		CAFC84621BA27E8000FAEB66 /* Splash Screen */ = {
 			isa = PBXGroup;
 			children = (
@@ -745,6 +758,7 @@
 				18CF523219C9D9C90020FC94 /* FPScreenToolkit.m in Sources */,
 				18CC2CFA17F680AC009DF2CE /* FPCreateAccountController.m in Sources */,
 				CA7D5A2E1B3851E200433581 /* FPAccountLoginController.m in Sources */,
+				CAE873F71BBDA64900E5A81F /* FPForgotPasswordController.m in Sources */,
 				186E0B7C19CD237B00CE4B3A /* PEListViewController.m in Sources */,
 				CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */,
 				189AC7561A78034500A6CFE3 /* FPLogEnvLogComposite.m in Sources */,

@@ -25,12 +25,12 @@
 #import <UICKeyChainStore/UICKeyChainStore.h>
 #import "FPAppDelegate.h"
 #import <PEFuelPurchase-Model/FPUser.h>
-#import "FPQuickActionMenuController.h"
 #import <IQKeyboardManager/IQKeyboardManager.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPUtils.h"
 #import "FPSettingsController.h"
 #import "FPEditsInProgressController.h"
+#import "FPQuickActionMenuController.h"
 #import "FPScreenToolkit.h"
 #import "FPLogging.h"
 #import "FPAppNotificationNames.h"

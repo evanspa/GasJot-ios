@@ -18,6 +18,7 @@
 #import "FPNames.h"
 #import "FPUtils.h"
 #import "FPUIUtils.h"
+#import "FPForgotPasswordController.h"
 
 NSString * const FPFpLogEntityMakerFpLogEntry = @"FPFpLogEntityMakerFpLogEntry";
 NSString * const FPFpLogEntityMakerVehicleEntry = @"FPFpLogEntityMakerVehicleEntry";
@@ -202,9 +203,6 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                                  target:nil
                                                  action:nil];
       [sendEmailBtn bk_addEventHandler:^(id sender) {
-        void (^postSendActivities)(void) = ^{
-          enableUserInteraction(YES);
-        };
         MBProgressHUD *sendVerificationEmailHud = [MBProgressHUD showHUDAddedTo:relativeToView animated:YES];
         enableUserInteraction(NO);
         sendVerificationEmailHud.labelText = @"Sending verification email...";
@@ -219,7 +217,7 @@ The server is currently busy at the moment undergoing maintenance.\n\n\
 We apologize for the inconvenience.  Please try re-sending the verification email later."]
                                                           topInset:70.0
                                                        buttonTitle:@"Okay."
-                                                      buttonAction:^{ postSendActivities(); }
+                                                      buttonAction:^{ enableUserInteraction(YES); }
                                                     relativeToView:controller.tabBarController.view];
                                 });
                               }
@@ -234,7 +232,7 @@ We apologize for the inconvenience.  Please try re-sending the verification emai
                                                        alertDescription:attrMessage
                                                                topInset:70.0
                                                             buttonTitle:@"Okay."
-                                                           buttonAction:^{ postSendActivities(); }
+                                                           buttonAction:^{ enableUserInteraction(YES); }
                                                          relativeToView:controller.tabBarController.view];
                                  });
                                }];
@@ -258,9 +256,6 @@ We apologize for the inconvenience.  Please try re-sending the verification emai
                                                target:nil
                                                action:nil];
       [refreshBtn bk_addEventHandler:^(id sender) {
-        void (^postRefreshActivities)(void) = ^{
-          enableUserInteraction(YES);
-        };
         __block BOOL receivedAuthReqdErrorOnDownloadAttempt = NO;
         NSMutableArray *successMsgsForRefresh = [NSMutableArray array];
         NSMutableArray *errsForRefresh = [NSMutableArray array];
@@ -288,7 +283,7 @@ Use the %@ button to have a new account verification link emailed to you."
                                                                          accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
                                          topInset:70.0
                                       buttonTitle:@"Okay."
-                                     buttonAction:^{ postRefreshActivities(); }
+                                     buttonAction:^{ enableUserInteraction(YES); }
                                    relativeToView:controller.tabBarController.view];
               };
               if ([downloadedUser isEqual:[NSNull null]]) { // user account not modified
@@ -305,7 +300,7 @@ Use the %@ button to have a new account verification link emailed to you."
                                               topInset:70.0
                                            buttonTitle:@"Okay."
                                           buttonAction:^{
-                                            postRefreshActivities();
+                                            enableUserInteraction(YES);
                                             [FPPanelToolkit refreshAccountStatusPanelForUser:user
                                                                                     panelTag:panelTag
                                                                         includeRefreshButton:includeRefreshButton
@@ -328,7 +323,7 @@ Use the %@ button to have a new account verification link emailed to you."
 undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refreshing later."]
                                         topInset:70.0
                                      buttonTitle:@"Okay."
-                                    buttonAction:^{ postRefreshActivities(); }
+                                    buttonAction:^{ enableUserInteraction(YES); }
                                   relativeToView:controller.tabBarController.view];
               } else if ([errsForRefresh[0][4] boolValue]) { // not found
                 NSString *fetchErrMsg = @"Oops.  Something appears to be wrong with your account.  Try logging off and logging back in.";
@@ -337,7 +332,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                  alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
                                          topInset:70.0
                                       buttonTitle:@"Okay."
-                                     buttonAction:^{ postRefreshActivities(); }
+                                     buttonAction:^{ enableUserInteraction(YES); }
                                    relativeToView:controller.tabBarController.view];
                 
               } else { // any other error type
@@ -347,7 +342,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                  alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
                                          topInset:70.0
                                       buttonTitle:@"Okay."
-                                     buttonAction:^{ postRefreshActivities(); }
+                                     buttonAction:^{ enableUserInteraction(YES); }
                                    relativeToView:controller.tabBarController.view];
               }
             });
@@ -440,6 +435,36 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                                           controller:controller];
   newStatusPanel.frame = accountStatusPanel.frame;
   [superView addSubview:newStatusPanel];
+}
+
++ (UIButton *)forgotPasswordButtonForUser:(FPUser *)user
+                           coordinatorDao:(FPCoordinatorDao *)coordDao
+                                uitoolkit:(PEUIToolkit *)uitoolkit
+                               controller:(UIViewController *)controller {
+  UIButton *forgotPasswordBtn = [PEUIUtils buttonWithKey:@"Forgot password?"
+                                                    font:[UIFont systemFontOfSize:14]
+                                         backgroundColor:[UIColor concreteColor]
+                                               textColor:[UIColor whiteColor]
+                            disabledStateBackgroundColor:nil
+                                  disabledStateTextColor:nil
+                                         verticalPadding:8.5
+                                       horizontalPadding:20.0
+                                            cornerRadius:5.0
+                                                  target:nil
+                                                  action:nil];
+  [forgotPasswordBtn bk_addEventHandler:^(id sender) {
+    /*
+     [weakTabBarCtrl.selectedViewController presentViewController:[PEUIUtils navigationControllerWithController:addRecordController
+     navigationBarHidden:NO]
+     animated:YES
+     completion:^{ dismissJotPanel(); }];
+     */
+    [controller presentViewController:[PEUIUtils navigationControllerWithController:[[FPForgotPasswordController alloc] initWithStoreCoordinator:coordDao user:user uitoolkit:uitoolkit]
+                                                                navigationBarHidden:NO]
+                             animated:YES
+                           completion:^{}];
+  } forControlEvents:UIControlEventTouchUpInside];
+  return forgotPasswordBtn;
 }
 
 #pragma mark - Vehicle Panel

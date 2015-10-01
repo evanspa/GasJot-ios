@@ -112,6 +112,11 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
                           relativeToView:(UIView *)relativeToView
                               controller:(UIViewController *)controller;
 
++ (UIButton *)forgotPasswordButtonForUser:(FPUser *)user
+                           coordinatorDao:(FPCoordinatorDao *)coordDao
+                                uitoolkit:(PEUIToolkit *)uitoolkit
+                               controller:(UIViewController *)controller;
+
 #pragma mark - Vehicle Panel
 
 - (PEEntityViewPanelMakerBlk)vehicleViewPanelMaker;

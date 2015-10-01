@@ -723,10 +723,10 @@ It has now been removed from this device."]
             NSString *message;
             NSArray *subErrors = errorsForDelete[0][2];
             if ([subErrors count] > 1) {
-              message = @"There were problems deleting your entity from the server.  The errors are as follows:";
+              message = @"There were problems deleting your record from the server.  The errors are as follows:";
               title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
             } else {
-              message = @"There was a problem deleting your entity from the server.  The error is as follows:";
+              message = @"There was a problem deleting your record from the server.  The error is as follows:";
               title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
             }
             NSMutableArray *sections = [NSMutableArray array];
