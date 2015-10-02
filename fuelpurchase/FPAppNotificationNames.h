@@ -13,3 +13,6 @@ FOUNDATION_EXPORT NSString * const FPAppLogoutNotification;
 FOUNDATION_EXPORT NSString * const FPAppAccountCreationNotification;
 FOUNDATION_EXPORT NSString * const FPAppLoginNotification;
 FOUNDATION_EXPORT NSString * const FPAppReauthNotification;
+FOUNDATION_EXPORT NSString * const FPEntityAddedNotification;
+FOUNDATION_EXPORT NSString * const FPEntityUpdatedNotification;
+FOUNDATION_EXPORT NSString * const FPEntityDeletedNotification;

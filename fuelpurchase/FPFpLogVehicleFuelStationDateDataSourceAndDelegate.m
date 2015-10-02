@@ -158,22 +158,21 @@ heightForFooterInSection:(NSInteger)section {
 didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
   switch ([indexPath section]) {
     case 0:
-      [PEUIUtils displayController:[_screenToolkit
-                                      newVehiclesForSelectionScreenMakerWithItemSelectedAction:_vehicleSelectedAction
-                                                                        initialSelectedVehicle:_selectedVehicle](_user)
+      [PEUIUtils displayController:[_screenToolkit newVehiclesForSelectionScreenMakerWithItemSelectedAction:_vehicleSelectedAction
+                                                                                     initialSelectedVehicle:_selectedVehicle](_user)
                     fromController:_controllerCtx
                           animated:YES];
       break;
     case 1:
-      [PEUIUtils displayController:[_screenToolkit
-                                    newFuelStationsForSelectionScreenMakerWithItemSelectedAction:_fuelStationSelectedAction
-                                    initialSelectedFuelStation:_selectedFuelStation](_user)
+      [PEUIUtils displayController:[_screenToolkit newFuelStationsForSelectionScreenMakerWithItemSelectedAction:_fuelStationSelectedAction
+                                                                                     initialSelectedFuelStation:_selectedFuelStation](_user)
                     fromController:_controllerCtx
                           animated:YES];
       break;
     default:
-      [PEUIUtils displayController:[_screenToolkit
-                                    newDatePickerScreenMakerWithTitle:@"Log Date" initialSelectedDate:_pickedLogDate logDatePickedAction:_logDatePickedAction](_user)
+      [PEUIUtils displayController:[_screenToolkit newDatePickerScreenMakerWithTitle:@"Log Date"
+                                                                 initialSelectedDate:_pickedLogDate
+                                                                 logDatePickedAction:_logDatePickedAction](_user)
                     fromController:_controllerCtx
                           animated:YES];
       break;

@@ -160,7 +160,10 @@ conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
     itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
 entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity
 modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
-  modalOperationDone:(PEModalOperationDone)modalOperationDone;
+  modalOperationDone:(PEModalOperationDone)modalOperationDone
+entityAddedNotificationName:(NSString *)entityAddedNotificationName
+entityUpdatedNotificationName:(NSString *)entityUpdatedNotificationName
+entityRemovedNotificationName:(NSString *)entityRemovedNotificationName;
 
 #pragma mark - Factory functions
 
@@ -183,7 +186,8 @@ modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
                                            isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                                    modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
-                                      modalOperationDone:(PEModalOperationDone)modalOperationDone;
+                                      modalOperationDone:(PEModalOperationDone)modalOperationDone
+                             entityAddedNotificationName:(NSString *)entityAddedNotificationName;
 
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
                                       listViewController:(PEListViewController *)listViewController
@@ -205,7 +209,8 @@ modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                                       entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity
                                    modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
-                                      modalOperationDone:(PEModalOperationDone)modalOperationDone;
+                                      modalOperationDone:(PEModalOperationDone)modalOperationDone
+                             entityAddedNotificationName:(NSString *)entityAddedNotificationName;
 
 + (PEAddViewEditController *)viewEntityCtrlrWithEntity:(PELMMainSupport *)entity
                                     listViewController:(PEListViewController *)listViewController
@@ -245,7 +250,9 @@ modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
                                            itemDeleter:(PEItemDeleter)itemDeleter
                                       itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
                                  modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
-                                    modalOperationDone:(PEModalOperationDone)modalOperationDone;
+                                    modalOperationDone:(PEModalOperationDone)modalOperationDone
+                         entityUpdatedNotificationName:(NSString *)entityUpdatedNotificationName
+                         entityRemovedNotificationName:(NSString *)entityRemovedNotificationName;
 
 #pragma mark - Properties
 

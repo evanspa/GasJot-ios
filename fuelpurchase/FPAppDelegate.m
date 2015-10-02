@@ -412,10 +412,7 @@ shouldSelectViewController:(UIViewController *)viewController {
 }
 
 - (void)initializeGlobalAppearanceSettings {
-  NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
-                              [UIColor fpAppBlue], NSForegroundColorAttributeName,
-                              nil];
-  [[UIBarButtonItem appearance] setTitleTextAttributes:attributes
+  [[UIBarButtonItem appearance] setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor fpAppBlue]}
                                               forState:UIControlStateNormal];
   [UIImageView appearanceWhenContainedIn:[UINavigationBar class], nil].tintColor = [UIColor fpAppBlue];
   if ([UINavigationBar conformsToProtocol:@protocol(UIAppearanceContainer)]) {
@@ -437,35 +434,33 @@ shouldSelectViewController:(UIViewController *)viewController {
                                      FPDataFileExtension]];
   DDLogInfo(@"About to load local database from: [%@]", [localSqlLiteDataFileUrl absoluteString]);
   NSString *restServiceMtVersion = bundleVal(FPRestServiceMtVersionKey);
-  _coordDao =
-    [[FPCoordinatorDao alloc]
-      initWithSqliteDataFilePath:[localSqlLiteDataFileUrl absoluteString]
-      localDatabaseCreationError:[FPUtils localDatabaseCreationErrorHandlerMaker]()
-  timeoutForMainThreadOperations:intBundleVal(FPTimeoutForCoordDaoMainThreadOpsKey)
-                   acceptCharset:[HCCharset UTF8]
-                  acceptLanguage:bundleVal(FPRestServicePreferredLanguageKey)
-              contentTypeCharset:[HCCharset UTF8]
-                      authScheme:bundleVal(FPAuthenticationSchemeKey)
-              authTokenParamName:bundleVal(FPAuthenticationTokenNameKey)
-                       authToken:nil
-             errorMaskHeaderName:bundleVal(FPErrorMaskHeaderNameKey)
-      establishSessionHeaderName:bundleVal(FPEstablishSessionHeaderNameKey)
-     authTokenResponseHeaderName:bundleVal(FPAuthTokenResponseHeaderNameKey)
-       ifModifiedSinceHeaderName:bundleVal(FPIfModifiedSinceHeaderNameKey)
-     ifUnmodifiedSinceHeaderName:bundleVal(FPIfUnmodifiedSinceHeaderNameKey)
-     loginFailedReasonHeaderName:bundleVal(FPLoginFailedReasonHeaderNameKey)
-   accountClosedReasonHeaderName:bundleVal(FPAccountClosedReasonHeaderNameKey)
-    bundleHoldingApiJsonResource:mainBundle
-       nameOfApiJsonResourceFile:FPAPIResourceFileName
-                 apiResMtVersion:restServiceMtVersion
-           changelogResMtVersion:restServiceMtVersion
-                userResMtVersion:restServiceMtVersion
-             vehicleResMtVersion:restServiceMtVersion
-         fuelStationResMtVersion:restServiceMtVersion
-     fuelPurchaseLogResMtVersion:restServiceMtVersion
-      environmentLogResMtVersion:restServiceMtVersion
-               authTokenDelegate:self
-        allowInvalidCertificates:YES];
+  _coordDao = [[FPCoordinatorDao alloc] initWithSqliteDataFilePath:[localSqlLiteDataFileUrl absoluteString]
+                                        localDatabaseCreationError:[FPUtils localDatabaseCreationErrorHandlerMaker]()
+                                    timeoutForMainThreadOperations:intBundleVal(FPTimeoutForCoordDaoMainThreadOpsKey)
+                                                     acceptCharset:[HCCharset UTF8]
+                                                    acceptLanguage:bundleVal(FPRestServicePreferredLanguageKey)
+                                                contentTypeCharset:[HCCharset UTF8]
+                                                        authScheme:bundleVal(FPAuthenticationSchemeKey)
+                                                authTokenParamName:bundleVal(FPAuthenticationTokenNameKey)
+                                                         authToken:nil
+                                               errorMaskHeaderName:bundleVal(FPErrorMaskHeaderNameKey)
+                                        establishSessionHeaderName:bundleVal(FPEstablishSessionHeaderNameKey)
+                                       authTokenResponseHeaderName:bundleVal(FPAuthTokenResponseHeaderNameKey)
+                                         ifModifiedSinceHeaderName:bundleVal(FPIfModifiedSinceHeaderNameKey)
+                                       ifUnmodifiedSinceHeaderName:bundleVal(FPIfUnmodifiedSinceHeaderNameKey)
+                                       loginFailedReasonHeaderName:bundleVal(FPLoginFailedReasonHeaderNameKey)
+                                     accountClosedReasonHeaderName:bundleVal(FPAccountClosedReasonHeaderNameKey)
+                                      bundleHoldingApiJsonResource:mainBundle
+                                         nameOfApiJsonResourceFile:FPAPIResourceFileName
+                                                   apiResMtVersion:restServiceMtVersion
+                                             changelogResMtVersion:restServiceMtVersion
+                                                  userResMtVersion:restServiceMtVersion
+                                               vehicleResMtVersion:restServiceMtVersion
+                                           fuelStationResMtVersion:restServiceMtVersion
+                                       fuelPurchaseLogResMtVersion:restServiceMtVersion
+                                        environmentLogResMtVersion:restServiceMtVersion
+                                                 authTokenDelegate:self
+                                          allowInvalidCertificates:YES];
   [_coordDao initializeLocalDatabaseWithError:[FPUtils localSaveErrorHandlerMaker]()];
 }
 

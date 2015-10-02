@@ -71,6 +71,9 @@
   PEItemLocalDeleter _itemLocalDeleter;
   PEModalOperationStarted _modalOperationStarted;
   PEModalOperationDone _modalOperationDone;
+  NSString *_entityAddedNotificationName;
+  NSString *_entityUpdatedNotificationName;
+  NSString *_entityRemovedNotificationName;
 }
 
 #pragma mark - Initializers
@@ -119,7 +122,10 @@ conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
     itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
 entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity
 modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
-  modalOperationDone:(PEModalOperationDone)modalOperationDone {
+  modalOperationDone:(PEModalOperationDone)modalOperationDone
+entityAddedNotificationName:(NSString *)entityAddedNotificationName
+entityUpdatedNotificationName:(NSString *)entityUpdatedNotificationName
+entityRemovedNotificationName:(NSString *)entityRemovedNotificationName {
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
     _listViewController = listViewController;
@@ -171,6 +177,9 @@ modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
     _entitiesFromEntity = entitiesFromEntity;
     _modalOperationStarted = modalOperationStarted;
     _modalOperationDone = modalOperationDone;
+    _entityAddedNotificationName = entityAddedNotificationName;
+    _entityUpdatedNotificationName = entityUpdatedNotificationName;
+    _entityRemovedNotificationName = entityRemovedNotificationName;
   }
   return self;
 }
@@ -196,7 +205,8 @@ modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
                                            isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                                    modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
-                                      modalOperationDone:(PEModalOperationDone)modalOperationDone {
+                                      modalOperationDone:(PEModalOperationDone)modalOperationDone
+                             entityAddedNotificationName:(NSString *)entityAddedNotificationName {
   return [PEAddViewEditController addEntityCtrlrWithUitoolkit:uitoolkit
                                            listViewController:listViewController
                                                  itemAddedBlk:itemAddedBlk
@@ -217,7 +227,8 @@ modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
                                syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
                                            entitiesFromEntity:nil
                                         modalOperationStarted:modalOperationStarted
-                                           modalOperationDone:modalOperationDone];
+                                           modalOperationDone:modalOperationDone
+                                  entityAddedNotificationName:entityAddedNotificationName];
 }
 
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
@@ -240,7 +251,8 @@ modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                                       entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity
                                    modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
-                                      modalOperationDone:(PEModalOperationDone)modalOperationDone {
+                                      modalOperationDone:(PEModalOperationDone)modalOperationDone
+                                  entityAddedNotificationName:(NSString *)entityAddedNotificationName {
   return [[PEAddViewEditController alloc] initWithEntity:nil
                                       listViewController:listViewController
                                                    isAdd:YES
@@ -285,7 +297,10 @@ modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
                                         itemLocalDeleter:nil
                                       entitiesFromEntity:entitiesFromEntity
                                    modalOperationStarted:modalOperationStarted
-                                      modalOperationDone:modalOperationDone];
+                                      modalOperationDone:modalOperationDone
+                             entityAddedNotificationName:entityAddedNotificationName
+                           entityUpdatedNotificationName:nil
+                           entityRemovedNotificationName:nil];
 }
 
 + (PEAddViewEditController *)viewEntityCtrlrWithEntity:(PELMMainSupport *)entity
@@ -326,7 +341,9 @@ modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
                                            itemDeleter:(PEItemDeleter)itemDeleter
                                       itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
                                  modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
-                                    modalOperationDone:(PEModalOperationDone)modalOperationDone {
+                                    modalOperationDone:(PEModalOperationDone)modalOperationDone
+                                entityUpdatedNotificationName:(NSString *)entityUpdatedNotificationName
+                                entityRemovedNotificationName:(NSString *)entityRemovedNotificationName {
   return [[PEAddViewEditController alloc] initWithEntity:entity
                                       listViewController:listViewController
                                                    isAdd:NO
@@ -371,88 +388,20 @@ modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
                                         itemLocalDeleter:itemLocalDeleter
                                       entitiesFromEntity:nil
                                    modalOperationStarted:modalOperationStarted
-                                      modalOperationDone:modalOperationDone];
-}
-
-#pragma mark - Notification Observing
-
-- (void)dataObjectLocallyUpdated:(NSNotification *)notification {
-  // this can only happen while the user is viewing the entity (because by definition,
-  // if the user is editing the entity, nothing else locally would have the ability
-  // to (as per our design vis-a-vis the 'editInProgress' flag)
-  NSNumber *indexOfNotifEntity =
-    [PELMNotificationUtils indexOfEntityRef:_entity notification:notification];
-  if (indexOfNotifEntity) {
-    PELMMainSupport *locallyUpdatedEntity =
-      [PELMNotificationUtils entityAtIndex:[indexOfNotifEntity integerValue]
-                              notification:notification];
-    DDLogDebug(@"PEAVEC/locallyUpdatedEntity: %@", locallyUpdatedEntity);
-    // the thing is, THIS view controller will raise 'object updated' notifications
-    // associated with _entity, and so will receive them!  So, we do a reference-compare;
-    // if the notification is for the entity in our context, we can safely ignore it.
-    if (_entity != locallyUpdatedEntity) {
-      [_entity overwrite:(PELMMainSupport *)locallyUpdatedEntity];
-      _entityToPanelBinder(_entity, _entityFormPanel);
-    } else {
-      DDLogDebug(@"in PEAVEC/dataObjectLocallyUpdated:, ignoring notification due to equality match w/_entity.");
-    }
-  }
-}
-
-- (void)dataObjectSyncInitiated:(NSNotification *)notification {
-  if (!_isAuthenticatedBlk()) {
-    NSNumber *indexOfNotifEntity =
-      [PELMNotificationUtils indexOfEntityRef:_entity notification:notification];
-    if (indexOfNotifEntity) {
-      [PEUIUtils displayTempNotification:@"Sync initiated for this record."
-                           forController:self
-                               uitoolkit:_uitoolkit];
-    }
-  }
-}
-
-- (void)dataObjectSynced:(NSNotification *)notification {
-  if (!_isAuthenticatedBlk()) {
-    NSNumber *indexOfNotifEntity =
-      [PELMNotificationUtils indexOfEntityRef:_entity notification:notification];
-    if (indexOfNotifEntity) {
-      [PEUIUtils displayTempNotification:@"Sync complete for this record."
-                           forController:self
-                               uitoolkit:_uitoolkit];
-    }
-  }
-}
-
-- (void)dataObjectSyncFailed:(NSNotification *)notification {
-  if (!_isAuthenticatedBlk()) {
-    NSNumber *indexOfNotifEntity =
-      [PELMNotificationUtils indexOfEntityRef:_entity notification:notification];
-    if (indexOfNotifEntity) {
-      [PEUIUtils displayTempNotification:@"Sync failed for this record."
-                           forController:self
-                               uitoolkit:_uitoolkit];
-    }
-  }
-}
-
-#pragma mark - NSObject
-
-- (void)dealloc {
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
+                                      modalOperationDone:modalOperationDone
+                             entityAddedNotificationName:nil
+                           entityUpdatedNotificationName:entityUpdatedNotificationName
+                           entityRemovedNotificationName:entityRemovedNotificationName];
 }
 
 #pragma mark - View Controller Lifecyle
 
 - (void)viewWillDisappear:(BOOL)animated {
-  if ([self isMovingFromParentViewController]) {
-    DDLogDebug(@"Removing PEAVEC as a notification observer.");
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-  }
   if ([_entity editInProgress]) {
     _panelToEntityBinder(_entityFormPanel, _entity);
     _entitySaver(self, _entity);
-    DDLogDebug(@"in viewWillDisappear:, saved entity");
   }
+  [self.view endEditing:NO];
   [super viewWillDisappear:animated];
 }
 
@@ -464,7 +413,7 @@ modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
     }
   }
   if (_viewDidAppearBlk) {
-    _viewDidAppearBlk(/*_entityFormPanel, */self);
+    _viewDidAppearBlk(self);
   }
 }
 
@@ -673,7 +622,9 @@ Are you sure you want to continue?"]
     void(^immediateDelDone)(NSString *) = ^(NSString *mainMsgTitle) {
       if ([errorsForDelete count] == 0) { // success
         dispatch_async(dispatch_get_main_queue(), ^{
-          [_listViewController handleRemovedEntity:_entity];
+          [[NSNotificationCenter defaultCenter] postNotificationName:_entityRemovedNotificationName
+                                                              object:_entity
+                                                            userInfo:nil];
           [deleteHud setLabelText:successMessageTitlesForDelete[0]];
           UIImage *image = [UIImage imageNamed:@"hud-complete"];
           UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
@@ -713,7 +664,9 @@ It has now been removed from this device."]
                                   buttonTitle:@"Okay."
                                  buttonAction:^{
                                    _itemLocalDeleter(self, _entity, _entityIndexPath);
-                                   [_listViewController handleRemovedEntity:_entity];
+                                   [[NSNotificationCenter defaultCenter] postNotificationName:_entityRemovedNotificationName
+                                                                                       object:_entity
+                                                                                     userInfo:nil];
                                    if (_modalOperationDone) { _modalOperationDone(); }
                                    [[self navigationController] popViewControllerAnimated:YES];
                                  }
@@ -866,7 +819,9 @@ It has now been removed from this device."]
    } else {
     _itemLocalDeleter(self, _entity, _entityIndexPath);
     dispatch_async(dispatch_get_main_queue(), ^{
-      [_listViewController handleRemovedEntity:_entity];
+      [[NSNotificationCenter defaultCenter] postNotificationName:_entityRemovedNotificationName
+                                                          object:_entity
+                                                        userInfo:nil];
       if (_modalOperationDone) { _modalOperationDone(); }
       [[self navigationController] popViewControllerAnimated:YES];
     });
@@ -900,9 +855,9 @@ It has now been removed from this device."]
       _itemChangedBlk(_entity, _entityIndexPath);
     }
     [self enableUi];
-    if (_listViewController) {
-      [_listViewController handleUpdatedEntity:_entity];
-    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:_entityUpdatedNotificationName
+                                                        object:_entity
+                                                      userInfo:nil];
     [_entityViewPanel removeFromSuperview];
     _entityViewPanel = _entityViewPanelMaker(self, _entity);
     [PEUIUtils placeView:_entityViewPanel
@@ -1041,9 +996,9 @@ There was a problem downloading the record.";
     }
     [self enableUi];
     _panelEnablerDisabler(_entityFormPanel, NO);
-    if (_listViewController) {
-      [_listViewController handleUpdatedEntity:_entity];
-    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:_entityUpdatedNotificationName
+                                                        object:_entity
+                                                      userInfo:nil];
   };
   MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
   [self disableUi];
@@ -1323,7 +1278,9 @@ with your remote account, it will be removed now.";
                         buttonTitle:@"Okay."
                        buttonAction:^{
                          _itemLocalDeleter(self, _entity, _entityIndexPath);
-                         [_listViewController handleRemovedEntity:_entity];
+                         [[NSNotificationCenter defaultCenter] postNotificationName:_entityRemovedNotificationName
+                                                                             object:_entity
+                                                                           userInfo:nil];
                          if (_modalOperationDone) { _modalOperationDone(); }
                          [[self navigationController] popViewControllerAnimated:YES];
                        }
@@ -1641,9 +1598,9 @@ merge conflicts.";
     [[self navigationItem] setLeftBarButtonItem:_backButton];
     [[self navigationItem] setRightBarButtonItem:[self editButtonItem]];
     _panelEnablerDisabler(_entityFormPanel, NO);
-    if (_listViewController) {
-      [_listViewController handleUpdatedEntity:_entity];
-    }
+    [[NSNotificationCenter defaultCenter] postNotificationName:_entityUpdatedNotificationName
+                                                        object:_entity
+                                                      userInfo:nil];
     [_entityFormPanel removeFromSuperview];
     _entityViewPanel = _entityViewPanelMaker(self, _entity);
     [PEUIUtils placeView:_entityViewPanel
@@ -2105,10 +2062,10 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
       } else {
         entitiesFromEntity = @[theNewEntity];
       }
-      if (_listViewController) {
-        for (id entity in entitiesFromEntity) {
-          [_listViewController handleAddedEntity:entity];
-        }
+      for (id entity in entitiesFromEntity) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:_entityAddedNotificationName
+                                                            object:entity
+                                                          userInfo:nil];
       }
     };
     if (_isAuthenticatedBlk() && !_isOfflineMode()) {

@@ -13,6 +13,7 @@
 #import "PEObjc-Commons/NSMutableArray+PEAdditions.h"
 #import "UIScrollView+PEAdditions.h"
 #import "FPLogging.h"
+#import "FPAppNotificationNames.h"
 
 @interface PEListViewController () <JGActionSheetDelegate>
 @end
@@ -315,6 +316,30 @@
   return entityAdded;
 }
 
+#pragma mark - Notification observing setup
+
+- (void)initializeNotificationObserving {
+  NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
+  [notificationCenter addObserverForName:FPEntityAddedNotification
+                                  object:nil
+                                   queue:[NSOperationQueue mainQueue]
+                              usingBlock:^(NSNotification * _Nonnull note) {
+                                [self handleAddedEntity:note.object];
+                              }];
+  [notificationCenter addObserverForName:FPEntityUpdatedNotification
+                                  object:nil
+                                   queue:[NSOperationQueue mainQueue]
+                              usingBlock:^(NSNotification * _Nonnull note) {
+                                [self handleUpdatedEntity:note.object];
+                              }];
+  [notificationCenter addObserverForName:FPEntityDeletedNotification
+                                  object:nil
+                                   queue:[NSOperationQueue mainQueue]
+                              usingBlock:^(NSNotification * _Nonnull note) {
+                                [self handleRemovedEntity:note.object];
+                              }];
+}
+
 #pragma mark - NSObject
 
 - (void)dealloc {
@@ -356,6 +381,7 @@
               hpadding:0.0];
   [_tableView registerClass:[UITableViewCell class]
      forCellReuseIdentifier:_cellIdentifier];
+  [self initializeNotificationObserving];
 }
 
 #pragma mark - UIScrollViewDelegate

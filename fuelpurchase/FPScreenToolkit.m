@@ -33,6 +33,7 @@
 #import <BlocksKit/UIView+BlocksKit.h>
 #import <BlocksKit/UIControl+BlocksKit.h>
 #import "FPUIUtils.h"
+#import "FPAppNotificationNames.h"
 
 NSInteger const PAGINATION_PAGE_SIZE = 30;
 NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
@@ -91,13 +92,23 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   };
 }
 
+- (void)deselectSelectedRowForTableOnView:(UIView *)parentView tableViewTag:(NSInteger)tableViewTag {
+  UITableView *tableView = (UITableView *)[parentView viewWithTag:tableViewTag];
+  if ([tableView indexPathForSelectedRow]) {
+    [tableView deselectRowAtIndexPath:[tableView indexPathForSelectedRow] animated:YES];
+  }
+}
+
 #pragma mark - Generic Screens
 
 - (FPAuthScreenMaker)newDatePickerScreenMakerWithTitle:(NSString *)title
                                    initialSelectedDate:(NSDate *)date
                                    logDatePickedAction:(void(^)(NSDate *))logDatePickedAction {
   return ^UIViewController *(FPUser *user) {
-    return [[PEDatePickerController alloc] initWithTitle:title initialDate:date logDatePickedAction:logDatePickedAction];
+    return [[PEDatePickerController alloc] initWithTitle:title
+                                        heightPercentage:0.70
+                                             initialDate:date
+                                     logDatePickedAction:logDatePickedAction];
   };
 }
 
@@ -296,7 +307,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                   itemDeleter:nil
                                              itemLocalDeleter:nil
                                         modalOperationStarted:[self commonModalOperationStartedBlock]
-                                           modalOperationDone:[self commonModalOperationDoneBlock]];
+                                           modalOperationDone:[self commonModalOperationDoneBlock]
+                                entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -592,7 +605,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                   isOfflineMode:^{ return [APP offlineMode]; }
                                  syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
                                           modalOperationStarted:[self commonModalOperationStartedBlock]
-                                             modalOperationDone:[self commonModalOperationDoneBlock]];
+                                             modalOperationDone:[self commonModalOperationDoneBlock]
+                                    entityAddedNotificationName:FPEntityAddedNotification];
   };
 }
 
@@ -790,7 +804,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                   itemDeleter:[self vehicleItemDeleterForUser:user]
                                              itemLocalDeleter:[self vehicleItemLocalDeleter]
                                         modalOperationStarted:[self commonModalOperationStartedBlock]
-                                           modalOperationDone:[self commonModalOperationDoneBlock]];
+                                           modalOperationDone:[self commonModalOperationDoneBlock]
+                                entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -1185,7 +1201,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                   isOfflineMode:^{ return [APP offlineMode]; }
                                  syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
                                           modalOperationStarted:[self commonModalOperationStartedBlock]
-                                             modalOperationDone:[self commonModalOperationDoneBlock]];
+                                             modalOperationDone:[self commonModalOperationDoneBlock]
+                                    entityAddedNotificationName:FPEntityAddedNotification];
   };
 }
 
@@ -1403,7 +1420,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                   itemDeleter:[self fuelStationItemDeleterForUser:user]
                                              itemLocalDeleter:[self fuelStationItemLocalDeleter]
                                         modalOperationStarted:[self commonModalOperationStartedBlock]
-                                           modalOperationDone:[self commonModalOperationDoneBlock]];
+                                           modalOperationDone:[self commonModalOperationDoneBlock]
+                                entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -1590,12 +1609,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       }
     };
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
-      UITableView *vehicleFuelStationTable =
-        (UITableView *)[ctrl.view viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
-      if ([vehicleFuelStationTable indexPathForSelectedRow]) {
-        [vehicleFuelStationTable deselectRowAtIndexPath:[vehicleFuelStationTable indexPathForSelectedRow]
-                                               animated:YES];
-      }
+      [self deselectSelectedRowForTableOnView:ctrl.view tableViewTag:FPFpLogTagVehicleFuelStationAndDate];
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
       UITextField *octaneTf = (UITextField *)[entityPanel viewWithTag:FPFpLogTagOctane];
@@ -1673,7 +1687,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                  syncImmediateMBProgressHUDMode:MBProgressHUDModeDeterminate
                                              entitiesFromEntity:entitiesFromEntity
                                           modalOperationStarted:[self commonModalOperationStartedBlock]
-                                             modalOperationDone:[self commonModalOperationDoneBlock]];
+                                             modalOperationDone:[self commonModalOperationDoneBlock]
+                                    entityAddedNotificationName:FPEntityAddedNotification];
   };
 }
 
@@ -1987,6 +2002,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       UITextField *octaneTf = (UITextField *)[entityPanel viewWithTag:FPFpLogTagOctane];
       [octaneTf becomeFirstResponder];
     };
+    PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
+      [self deselectSelectedRowForTableOnView:ctrl.view tableViewTag:FPFpLogTagVehicleFuelStationAndDate];
+    };
     return [PEAddViewEditController viewEntityCtrlrWithEntity:fpLog
                                            listViewController:listViewController
                                               entityIndexPath:fpLogIndexPath
@@ -2012,7 +2030,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                 isOfflineMode:^{ return [APP offlineMode]; }
                                syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
                                prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
-                                             viewDidAppearBlk:nil
+                                             viewDidAppearBlk:viewDidAppearBlk
                                               entityValidator:[self newFuelPurchaseLogValidator]
                                                      uploader:uploader
                                         numRemoteDepsNotLocal:numRemoteDepsNotLocalBlk
@@ -2028,7 +2046,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                   itemDeleter:[self fplogItemDeleterForUser:user]
                                              itemLocalDeleter:[self fplogItemLocalDeleter]
                                         modalOperationStarted:[self commonModalOperationStartedBlock]
-                                           modalOperationDone:[self commonModalOperationDoneBlock]];
+                                           modalOperationDone:[self commonModalOperationDoneBlock]
+                                entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -2412,11 +2432,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
-      UITableView *vehicleTable =
-      (UITableView *)[ctrl.view viewWithTag:FPEnvLogTagVehicleAndDate];
-      if ([vehicleTable indexPathForSelectedRow]) {
-        [vehicleTable deselectRowAtIndexPath:[vehicleTable indexPathForSelectedRow] animated:YES];
-      }
+      [self deselectSelectedRowForTableOnView:ctrl.view tableViewTag:FPEnvLogTagVehicleAndDate];
     };
     PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, BOOL dismissCtrlr, FPEnvironmentLog *newEnvLog) {
       if (newEnvLog && [newEnvLog localMainIdentifier]) {
@@ -2455,7 +2471,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                   isOfflineMode:^{ return [APP offlineMode]; }
                                  syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
                                           modalOperationStarted:[self commonModalOperationStartedBlock]
-                                             modalOperationDone:[self commonModalOperationDoneBlock]];
+                                             modalOperationDone:[self commonModalOperationDoneBlock]
+                                    entityAddedNotificationName:FPEntityAddedNotification];
   };
 }
 
@@ -2710,6 +2727,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       UITextField *odometerTf = (UITextField *)[entityPanel viewWithTag:FPEnvLogTagOdometer];
       [odometerTf becomeFirstResponder];
     };
+    PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
+      [self deselectSelectedRowForTableOnView:ctrl.view tableViewTag:FPEnvLogTagVehicleAndDate];
+    };
     return [PEAddViewEditController viewEntityCtrlrWithEntity:envLog
                                            listViewController:listViewController
                                               entityIndexPath:envLogIndexPath
@@ -2735,7 +2755,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                 isOfflineMode:^{ return [APP offlineMode]; }
                                syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
                                prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
-                                             viewDidAppearBlk:nil
+                                             viewDidAppearBlk:viewDidAppearBlk
                                               entityValidator:[self newEnvironmentLogValidator]
                                                      uploader:uploader
                                         numRemoteDepsNotLocal:numRemoteDepsNotLocalBlk
@@ -2751,7 +2771,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                   itemDeleter:[self envlogItemDeleterForUser:user]
                                              itemLocalDeleter:[self envlogItemLocalDeleter]
                                         modalOperationStarted:[self commonModalOperationStartedBlock]
-                                           modalOperationDone:[self commonModalOperationDoneBlock]];
+                                           modalOperationDone:[self commonModalOperationDoneBlock]
+                                entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
