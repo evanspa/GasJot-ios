@@ -221,7 +221,7 @@ We apologize for the inconvenience.  Please try re-sending the verification emai
                                                     relativeToView:controller.tabBarController.view];
                                 });
                               }
-                               completionBlk:^{
+                               successBlk:^{
                                  dispatch_async(dispatch_get_main_queue(), ^{
                                    [sendVerificationEmailHud hide:YES afterDelay:0.0];
                                    NSAttributedString *attrMessage =
@@ -235,7 +235,20 @@ We apologize for the inconvenience.  Please try re-sending the verification emai
                                                            buttonAction:^{ enableUserInteraction(YES); }
                                                          relativeToView:controller.tabBarController.view];
                                  });
-                               }];
+                               }
+                                        errorBlk:^{
+                                          dispatch_async(dispatch_get_main_queue(), ^{
+                                            [sendVerificationEmailHud hide:YES afterDelay:0.0];
+                                            [PEUIUtils showErrorAlertWithMsgs:nil
+                                                                        title:@"Something went wrong."
+                                                             alertDescription:[[NSAttributedString alloc] initWithString:@"\
+Oops.  Something went wrong in attempting to send you a verification email.  Please try this again a little later."]
+                                                                     topInset:70.0
+                                                                  buttonTitle:@"Okay."
+                                                                 buttonAction:^{}
+                                                               relativeToView:controller.tabBarController.view];
+                                          });
+                                        }];
       } forControlEvents:UIControlEventTouchUpInside];
       return sendEmailBtn;
     };

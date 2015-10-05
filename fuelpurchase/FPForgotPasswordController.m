@@ -149,7 +149,12 @@
 #pragma mark - Login event handling
 
 - (void)handleSendPasswordResetLink {
-  FPEnableUserInteractionBlk enableUserInteraction = [FPUIUtils makeUserEnabledBlockForController:self];
+  FPEnableUserInteractionBlk enableUserInteraction = ^(BOOL enable) {
+    [APP enableJotButton:enable];
+    [[[self navigationItem] leftBarButtonItem] setEnabled:enable];
+    [[[self navigationItem] rightBarButtonItem] setEnabled:enable];
+    [[[self tabBarController] tabBar] setUserInteractionEnabled:enable];
+  };
   MBProgressHUD *sendPasswordResetEmailHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
   enableUserInteraction(NO);
   sendPasswordResetEmailHud.labelText = @"Sending password reset email...";
@@ -169,7 +174,7 @@ We apologize for the inconvenience.  Please try this again later."]
                                                relativeToView:self.tabBarController.view];
                            });
                          }
-                              completionBlk:^{
+                              successBlk:^{
                                 dispatch_async(dispatch_get_main_queue(), ^{
                                   [sendPasswordResetEmailHud hide:YES afterDelay:0.0];
                                   NSAttributedString *attrMessage =
@@ -180,10 +185,40 @@ We apologize for the inconvenience.  Please try this again later."]
                                                       alertDescription:attrMessage
                                                               topInset:70.0
                                                            buttonTitle:@"Okay."
-                                                          buttonAction:^{ enableUserInteraction(YES); }
-                                                        relativeToView:self.tabBarController.view];
+                                                          buttonAction:^{
+                                                            [self dismissViewControllerAnimated:YES completion:^{
+                                                              enableUserInteraction(YES);
+                                                            }];
+                                                          }
+                                                        relativeToView:self.view];
                                 });
-                              }];
+                              }
+                           unknownEmailBlk:^{
+                             dispatch_async(dispatch_get_main_queue(), ^{
+                               [sendPasswordResetEmailHud hide:YES afterDelay:0.0];
+                               [PEUIUtils showErrorAlertWithMsgs:nil
+                                                                  title:@"Unknown e-mail address."
+                                                       alertDescription:[[NSAttributedString alloc] initWithString:@"\
+The email address you provided is not associated with any Gas Jot accounts."]
+                                                               topInset:70.0
+                                                            buttonTitle:@"Okay."
+                                                           buttonAction:^{ enableUserInteraction(YES); }
+                                                         relativeToView:self.view];
+                             });
+                           }
+                                  errorBlk:^{
+                                    dispatch_async(dispatch_get_main_queue(), ^{
+                                      [sendPasswordResetEmailHud hide:YES afterDelay:0.0];
+                                      [PEUIUtils showErrorAlertWithMsgs:nil
+                                                                  title:@"Something went wrong."
+                                                       alertDescription:[[NSAttributedString alloc] initWithString:@"\
+Oops.  Something went wrong in attempting to send you a password reset email.  Please try this again a little later."]
+                                                               topInset:70.0
+                                                            buttonTitle:@"Okay."
+                                                           buttonAction:^{ enableUserInteraction(YES); }
+                                                         relativeToView:self.view];
+                                    });
+                                  }];
 }
 
 @end
