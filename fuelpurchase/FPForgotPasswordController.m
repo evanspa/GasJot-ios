@@ -149,10 +149,10 @@
 #pragma mark - Login event handling
 
 - (void)handleSendPasswordResetLink {
-  /*FPEnableUserInteractionBlk enableUserInteraction = [FPUIUtils makeUserEnabledBlockForController:self];
+  FPEnableUserInteractionBlk enableUserInteraction = [FPUIUtils makeUserEnabledBlockForController:self];
   MBProgressHUD *sendPasswordResetEmailHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
   enableUserInteraction(NO);
-  sendVerificationEmailHud.labelText = @"Sending password reset email...";
+  sendPasswordResetEmailHud.labelText = @"Sending password reset email...";
   NSString *emailAddress = [_emailTf text];
   [_coordDao sendPasswordResetEmailToEmail:emailAddress
                          remoteStoreBusyBlk:^(NSDate *retryAfter) {
@@ -183,7 +183,7 @@ We apologize for the inconvenience.  Please try this again later."]
                                                           buttonAction:^{ enableUserInteraction(YES); }
                                                         relativeToView:self.tabBarController.view];
                                 });
-                              }];*/
+                              }];
 }
 
 @end

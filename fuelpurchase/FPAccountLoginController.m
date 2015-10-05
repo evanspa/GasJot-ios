@@ -84,7 +84,7 @@
               vpadding:75.0
               hpadding:0.0];
   UINavigationItem *navItem = [self navigationItem];
-  [navItem setTitle:@"Log In"];
+  [navItem setTitle:@"Account Log In"];
   [navItem setRightBarButtonItem:[[UIBarButtonItem alloc] initWithTitle:@"Log In"
                                                                   style:UIBarButtonItemStylePlain
                                                                  target:self
@@ -165,12 +165,12 @@ Gas Jot account, connecting this device to it.  Your Gas Jot data will be downlo
                                 NSString *password) {
         NSUInteger signInErrMask = 0;
         if ([email length] == 0) {
-          signInErrMask = FPSignInEmailNotProvided |
-            FPSignInAnyIssues;
+          signInErrMask = FPSignInEmailNotProvided | FPSignInAnyIssues;
+        } else if (![FPUtils validateEmailWithString:email]) {
+          signInErrMask = signInErrMask | FPSignInInvalidEmail | FPSignInAnyIssues;
         }
         if ([password length] == 0) {
-          signInErrMask = signInErrMask | FPSignInPasswordNotProvided |
-            FPSignInAnyIssues;
+          signInErrMask = signInErrMask | FPSignInPasswordNotProvided | FPSignInAnyIssues;
         }
         return @(signInErrMask);
       }];
@@ -463,7 +463,7 @@ would you like them to be deleted?";
       doLogin([_preserveExistingLocalEntities boolValue]);
     }
   } else {
-    NSArray *errMsgs = [FPUtils computeSaveUsrErrMsgs:_formStateMaskForSignIn];
+    NSArray *errMsgs = [FPUtils computeSignInErrMsgs:_formStateMaskForSignIn];
     [PEUIUtils showWarningAlertWithMsgs:errMsgs
                                   title:@"Oops"
                        alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]

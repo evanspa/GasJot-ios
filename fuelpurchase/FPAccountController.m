@@ -221,7 +221,7 @@ gas jot data from this device only.";
                  below:accountSettingsMsgPanel
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:35.0
+              vpadding:30.0
               hpadding:0.0];
   /*UIView *divider = makeDivider(1.0);
   [PEUIUtils placeView:divider

@@ -136,7 +136,7 @@
   UIButton *viewSplashScreenBtn = [_uitoolkit systemButtonMaker](@"View splash screen", nil, nil);
   [PEUIUtils setFrameWidthOfView:viewSplashScreenBtn ofWidth:1.0 relativeTo:self.view];
   [PEUIUtils addDisclosureIndicatorToButton:viewSplashScreenBtn];
-  UIView *viewSplashScreenMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"Want to see the splash screen again?"
+  UIView *viewSplashScreenMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"Care to see Gas Jot's splash screen again?"
                                                                         font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                                              backgroundColor:[UIColor clearColor]
                                                                    textColor:[UIColor darkGrayColor]
@@ -160,8 +160,7 @@
   CGFloat labelLeftPadding = 8.0;
   _doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
   UIView *changelogMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"\
-Keeps your device synchronized with \
-your remote account in case you've made edits \
+Keeps your device synchronized with your remote account in case you've made edits \
 and deletions on other devices."
                                                                         font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                                              backgroundColor:[UIColor clearColor]
@@ -170,7 +169,10 @@ and deletions on other devices."
                                                                   fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0]
                                              padding:labelLeftPadding];
   UIButton *changelogBtn = [_uitoolkit systemButtonMaker](@"Download All Changes", nil, nil);
-  [PEUIUtils placeView:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"download-icon"]] inMiddleOf:changelogBtn withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:15.0];
+  [PEUIUtils placeView:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"download-icon"]]
+            inMiddleOf:changelogBtn
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              hpadding:15.0];
   [[changelogBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:changelogBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
   [changelogBtn bk_addEventHandler:^(id sender) {
@@ -181,9 +183,7 @@ and deletions on other devices."
     void (^displayUnexpectedErrorAlert)(void) = ^{
       [PEUIUtils showErrorAlertWithMsgs:nil
                                   title:@"Error."
-                       alertDescription:[[NSAttributedString alloc] initWithString:@"\
-We're sorry, but an unexpected error has \
-occurred.  Please try this again later."]
+                       alertDescription:[[NSAttributedString alloc] initWithString:@"We're sorry, but an unexpected error has occurred.  Please try this again later."]
                                topInset:70.0
                             buttonTitle:@"Okay."
                            buttonAction:^{}
@@ -202,9 +202,7 @@ occurred.  Please try this again later."]
                               [changelogHud hide:YES];
                               void (^displayAlreadySynchronizedAlert)(void) = ^{
                                 [PEUIUtils showInfoAlertWithTitle:@"Already up-to-date."
-                                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
-Your device is already fully synchronized \
-with your account."]
+                                                 alertDescription:[[NSAttributedString alloc] initWithString:@"Your device is already fully synchronized with your account."]
                                                          topInset:70.0
                                                       buttonTitle:@"Okay."
                                                      buttonAction:^{ }
@@ -232,8 +230,7 @@ with your account."]
                                   [PEUIUtils showSuccessAlertWithMsgs:msgs
                                                                 title:@"Synchronized."
                                                      alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You have successfully synchronized your \
-account to this device, incorporating the following changes:"]
+You have successfully synchronized your account to this device, incorporating the following changes:"]
                                                              topInset:70.0
                                                           buttonTitle:@"Okay."
                                                          buttonAction:^{
@@ -255,8 +252,7 @@ account to this device, incorporating the following changes:"]
                       [PEUIUtils showWaitAlertWithMsgs:nil
                                                  title:@"Server is busy."
                                       alertDescription:[[NSAttributedString alloc] initWithString:@"\
-The server is currently busy at the moment. \
-Please try this again later."]
+The server is currently busy at the moment. Please try this again later."]
                                               topInset:70.0
                                            buttonTitle:@"Okay."
                                           buttonAction:^{}
@@ -320,9 +316,9 @@ from the 'Records' screen."
   [PEUIUtils placeView:offlineModeSwitch inMiddleOf:offlineModeSwitchPanel withAlignment:PEUIHorizontalAlignmentTypeRight hpadding:15.0];
   [PEUIUtils placeView:offlineModeSwitchPanel atTopOf:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:90.0 hpadding:0.0];
   [PEUIUtils placeView:offlineModeDescPanelWithPad below:offlineModeSwitchPanel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
-  [PEUIUtils placeView:changelogBtn below:offlineModeDescPanelWithPad onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:15.0 hpadding:0.0];
+  [PEUIUtils placeView:changelogBtn below:offlineModeDescPanelWithPad onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
   [PEUIUtils placeView:changelogMsgPanel below:changelogBtn onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
-  [PEUIUtils placeView:[self makeSplashScreenPanel] below:changelogMsgPanel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:15.0 hpadding:0.0];
+  [PEUIUtils placeView:[self makeSplashScreenPanel] below:changelogMsgPanel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
 }
 
 - (void)makeNotLoggedInPanel {

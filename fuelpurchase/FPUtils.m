@@ -66,6 +66,9 @@
   if (signInErrMask & FPSignInEmailNotProvided) {
     [errMsgs addObject:LS(@"signin.email-notprovided")];
   }
+  if (signInErrMask & FPSignInInvalidEmail) {
+    [errMsgs addObject:LS(@"signin.email-invalid")];
+  }
   if (signInErrMask & FPSignInPasswordNotProvided) {
     [errMsgs addObject:LS(@"signin.password-notprovided")];
   }
