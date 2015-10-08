@@ -1,5 +1,5 @@
 { "_links": {
-  "users": { "href": "http://localhost:4040/gasjot/d/users" },
-  "login": { "href": "http://localhost:4040/gasjot/d/login" },
-  "light-login": { "href": "http://localhost:4040/gasjot/d/light-login" },
-  "send-password-reset-email" : { "href": "http://localhost:4040/gasjot/d/password-reset" }}}
+  "users": { "href": "http://localhost/gasjot/d/users" },
+  "login": { "href": "http://localhost/gasjot/d/login" },
+  "light-login": { "href": "http://localhost/gasjot/d/light-login" },
+  "send-password-reset-email" : { "href": "http://localhost/gasjot/d/send-password-reset-email" }}}

@@ -111,7 +111,7 @@ Gas Jot account, connecting this device to it.  Your Gas Jot data will be downlo
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor darkGrayColor]
                                 verticalTextPadding:3.0
-                                         fitToWidth:(signInPnl.frame.size.width - leftPadding - 3.0)];
+                                         fitToWidth:(signInPnl.frame.size.width - leftPadding - 10.0)];
   UIView *signInMsgPanel = [PEUIUtils leftPadView:signInMsgLabel padding:leftPadding];
   TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:signInPnl];
   _siEmailTf = tfMaker(@"unauth.start.signin.emailtf.pht");
@@ -210,24 +210,22 @@ If you would like to enable location services, tap 'Allow' in the next pop-up."]
     __block MBProgressHUD *HUD;
     void (^nonLocalSyncSuccessBlk)(void) = ^{
       [HUD hide:YES];
-      [PEUIUtils showLoginSuccessAlertWithTitle:@"Login success."
-                               alertDescription:[[NSAttributedString alloc] initWithString:@"\
+      [PEUIUtils showSuccessAlertWithTitle:@"Login success."
+                          alertDescription:[[NSAttributedString alloc] initWithString:@"\
 You have been successfully logged in.\n\nYour remote account is now connected to this device.  \
-Any gas jot data that you create and save will be synced to your remote account."]
-                                syncIconMessage:[[NSAttributedString alloc] initWithString:@"\
-The following icon will appear in the app indicating that your are currently logged into your remote account:"]
-                                       topInset:70.0
-                                    buttonTitle:@"Okay."
-                                   buttonAction:^{
-                                     enableLocationServices(^{
-                                       enableUserInteraction(YES);
-                                       [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
-                                                                                           object:nil
-                                                                                         userInfo:nil];
-                                       [[self navigationController] popViewControllerAnimated:YES];
-                                     });
-                                   }
-                                 relativeToView:self.tabBarController.view];
+Any Gas Jot data that you create and save will be synced to your remote account."]
+                                   topInset:70.0
+                                buttonTitle:@"Okay."
+                               buttonAction:^{
+                                 enableLocationServices(^{
+                                   enableUserInteraction(YES);
+                                   [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
+                                                                                       object:nil
+                                                                                     userInfo:nil];
+                                   [[self navigationController] popViewControllerAnimated:YES];
+                                 });
+                               }
+                            relativeToView:self.tabBarController.view];
     };
     ErrMsgsMaker errMsgsMaker = ^ NSArray * (NSInteger errCode) {
       return [FPUtils computeSignInErrMsgs:errCode];

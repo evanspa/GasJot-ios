@@ -22,6 +22,7 @@
 #import "FPAccountLoginController.h"
 #import "FPReauthenticateController.h"
 #import "FPSplashController.h"
+#import <FlatUIKit/UIColor+FlatUI.h>
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
@@ -32,8 +33,8 @@
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
-  //UIScrollView *_doesHaveAuthTokenPanel;
-  UIView *_doesHaveAuthTokenPanel;
+  UIScrollView *_doesHaveAuthTokenPanel;
+  //UIView *_doesHaveAuthTokenPanel;
   UIView *_notLoggedInPanel;
 }
 
@@ -158,7 +159,10 @@
 
 - (void)makeDoesHaveAuthTokenPanel {
   CGFloat labelLeftPadding = 8.0;
-  _doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
+  //_doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
+  _doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
+  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.08 * self.view.frame.size.height)];
+  [_doesHaveAuthTokenPanel setBounces:NO];
   UIView *changelogMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"\
 Keeps your device synchronized with your remote account in case you've made edits \
 and deletions on other devices."
@@ -291,19 +295,31 @@ to re-authenticate.\n\nTo authenticate, tap the %@ button."
   [offlineModeSwitch setOn:[APP offlineMode]];
   [offlineModeSwitch bk_addEventHandler:^(id sender) {
     [APP setOfflineMode:offlineModeSwitch.on];
+    if (offlineModeSwitch.on) {
+      [PEUIUtils applyBorderToView:[APP window] withColor:[UIColor carrotColor] width:2.25];
+    } else {
+      [APP window].layer.borderColor = [UIColor clearColor].CGColor;
+      [APP window].layer.borderWidth = 0.0;
+    }
   } forControlEvents:UIControlEventTouchUpInside];
-  UILabel *offlineModeDescLabel = [PEUIUtils labelWithKey:@"\
+  NSAttributedString *offlineDesc = [PEUIUtils attributedTextWithTemplate:@"\
 Offline mode prevents upload attempts to \
-the server, keeping all saves local-only and very fast.  \
+the server, keeping all saves local-only and thus very fast.  \
 Enable offline mode if you are making \
 many saves and you want them done \
 instantly and you have a poor internet connection.  Later, you can bulk-upload your edits \
-from the 'Records' screen."
-                                                     font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                          backgroundColor:[UIColor clearColor]
-                                                textColor:[UIColor darkGrayColor]
-                                      verticalTextPadding:3.0
-                                               fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0];
+from the 'Records' screen.\n\n\
+When offline mode is enabled, an %@ will appear \
+to remind you it's enabled."
+                                                             textToAccent:@"orange border"
+                                                           accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                          accentTextColor:[UIColor carrotColor]];
+  UILabel *offlineModeDescLabel = [PEUIUtils labelWithAttributeText:offlineDesc
+                                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                    backgroundColor:[UIColor clearColor]
+                                                          textColor:[UIColor darkGrayColor]
+                                                verticalTextPadding:3.0
+                                                         fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0];
   UIView *offlineModeDescPanelWithPad = [PEUIUtils leftPadView:offlineModeDescLabel padding:labelLeftPadding];
   UIView *offlineModeSwitchPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:_doesHaveAuthTokenPanel fixedHeight:40.0];
   [offlineModeSwitchPanel setBackgroundColor:[UIColor whiteColor]];

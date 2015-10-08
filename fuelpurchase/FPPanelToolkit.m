@@ -245,7 +245,7 @@ We apologize for the inconvenience.  Please try re-sending the verification emai
 Oops.  Something went wrong in attempting to send you a verification email.  Please try this again a little later."]
                                                                      topInset:70.0
                                                                   buttonTitle:@"Okay."
-                                                                 buttonAction:^{}
+                                                                 buttonAction:^{ enableUserInteraction(YES); }
                                                                relativeToView:controller.tabBarController.view];
                                           });
                                         }];

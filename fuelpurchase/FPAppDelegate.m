@@ -238,6 +238,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [_coordDao globalCancelSyncInProgressWithError:[FPUtils localSaveErrorHandlerMaker]()];
   [_coordDao pruneAllSyncedEntitiesWithError:[FPUtils localSaveErrorHandlerMaker]()];
   _keychainStore = [UICKeyChainStore keyChainStoreWithService:@"name.paulevans.fpauth-token"];
+  _keychainStore.accessibility = UICKeyChainStoreAccessibilityWhenUnlocked;
   _user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
   _locations = [NSMutableArray array];
   _locationManager = [[CLLocationManager alloc] init];

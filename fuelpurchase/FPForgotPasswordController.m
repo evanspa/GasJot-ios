@@ -155,6 +155,7 @@
     [[[self navigationItem] rightBarButtonItem] setEnabled:enable];
     [[[self tabBarController] tabBar] setUserInteractionEnabled:enable];
   };
+  [self.view endEditing:NO];
   MBProgressHUD *sendPasswordResetEmailHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
   enableUserInteraction(NO);
   sendPasswordResetEmailHud.labelText = @"Sending password reset email...";

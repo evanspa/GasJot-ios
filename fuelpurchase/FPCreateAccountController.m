@@ -107,7 +107,7 @@ enable your data records to be synced to Gas Jot's central server so you can acc
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor darkGrayColor]
                                 verticalTextPadding:3.0
-                                         fitToWidth:(createAcctPnl.frame.size.width - leftPadding - 3.0)];
+                                         fitToWidth:(createAcctPnl.frame.size.width - leftPadding - 10.0)];
   UIView *createAccountMsgPanel = [PEUIUtils leftPadView:createAccountMsgLabel padding:leftPadding];
   
   TextfieldMaker tfMaker =
