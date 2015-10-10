@@ -2093,28 +2093,18 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
             notificationSenderForAdd(_newEntity);
             if (isMultiStepAdd) { // all successes
               [HUD hide:YES afterDelay:0];
-              NSString *title = [NSString stringWithFormat:@"Success %@.", mainMsgTitle];
-              JGActionSheetSection *contentSection = [PEUIUtils successAlertSectionWithMsgs:successMessageTitlesForUpload
-                                                                                      title:title
-                                                                           alertDescription:[[NSAttributedString alloc] initWithString:@"Your records have been successfully saved to the Gas Jot server."]
-                                                                             relativeToView:[self view]];
-              JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
-                                                                                    message:nil
-                                                                               buttonTitles:@[@"Okay."]
-                                                                                buttonStyle:JGActionSheetButtonStyleDefault];
-              JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
-              [alertSheet setDelegate:self];
-              [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
-              [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
-                switch ([indexPath row]) {
-                  case 0: // okay
-                    notificationSenderForAdd(_newEntity);
-                    _itemAddedBlk(self, _newEntity);
-                    if (_modalOperationDone) { _modalOperationDone(); }
-                    [sheet dismissAnimated:YES];
-                    break;
-                };}];
-              [alertSheet showInView:[self view] animated:YES];
+              [PEUIUtils showSuccessAlertWithMsgs:successMessageTitlesForUpload
+                                            title:[NSString stringWithFormat:@"Success %@.", mainMsgTitle]
+                                 alertDescription:[[NSAttributedString alloc] initWithString:@"Your records have been successfully saved to the Gas Jot server."]
+                         additionalContentSection:nil // TODO
+                                         topInset:70.0
+                                      buttonTitle:@"Okay."
+                                     buttonAction:^{
+                                       notificationSenderForAdd(_newEntity);
+                                       _itemAddedBlk(self, _newEntity);
+                                       if (_modalOperationDone) { _modalOperationDone(); }
+                                     }
+                                   relativeToView:self.view];
             } else { // single add success
               UIImage *image = [UIImage imageNamed:@"hud-complete"];
               UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
@@ -2123,6 +2113,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
               [HUD hide:YES];
               [PEUIUtils showSuccessAlertWithTitle:@"Success."
                                   alertDescription:[[NSAttributedString alloc] initWithString:successMessageTitlesForUpload[0]]
+                          additionalContentSection:nil // TODO
                                           topInset:70.0
                                        buttonTitle:@"Okay."
                                       buttonAction:^{
@@ -2325,11 +2316,6 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
               }
               [sections addObject:buttonsSection];
               JGActionSheet *alertSheet = [JGActionSheet actionSheetWithSections:sections];
-              /*if (becameUnauthSection) {
-                alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, becameUnauthSection, buttonsSection]];
-              } else {
-                alertSheet = [JGActionSheet actionSheetWithSections:@[contentSection, buttonsSection]];
-              }*/
               [alertSheet setDelegate:self];
               [alertSheet setInsets:UIEdgeInsetsMake(0.0f, 0.0f, 0.0f, 0.0f)];
               [alertSheet setButtonPressedBlock:buttonsPressedBlock];
@@ -2447,33 +2433,57 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
                         syncDependencyUnsyncedBlk);
       });
     } else {
-      _newEntitySaverLocal(_entityFormPanel, _newEntity);
+      NSArray *saveResult = _newEntitySaverLocal(_entityFormPanel, _newEntity);
+      NSString *saveTitle = saveResult[0];
+      NSArray *saveMessages = saveResult[1];
       [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // cancel btn (so they can't cancel it after we'ved saved and we're displaying the HUD)
       [[[self navigationItem] rightBarButtonItem] setEnabled:NO]; // done btn
       [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
       if (_modalOperationStarted) { _modalOperationStarted(); }
-      MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-      HUD.delegate = self;
-      [HUD setLabelText:[NSString stringWithFormat:@"%@ Saved.", _entityTitle]];
-      NSString *hudDetailText = nil;
+      
+      NSMutableAttributedString *descSubtext = [NSMutableAttributedString new];
       if (_isOfflineMode() && _isAuthenticatedBlk()) {
-        hudDetailText = @"(offline mode enabled)";
+        [descSubtext appendAttributedString:[PEUIUtils attributedTextWithTemplate:@"\n\n(%@)"
+                                                                     textToAccent:@"offline mode enabled"
+                                                                   accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                                  accentTextColor:[UIColor blackColor]]];
       } else if (_isUserLoggedIn() && !_isAuthenticatedBlk()) {
-        hudDetailText = @"(not saved to the server)";
+        [descSubtext appendAttributedString:[PEUIUtils attributedTextWithTemplate:@"\n\n(%@)"
+                                                                     textToAccent:@"not saved to the server"
+                                                                   accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                                  accentTextColor:[UIColor blackColor]]];
       }
-      if (hudDetailText) {
-        [HUD setDetailsLabelText:hudDetailText];
+      if ([saveMessages count] > 1) {
+        NSMutableAttributedString *desc = [NSMutableAttributedString new];
+        [desc appendAttributedString:[[NSAttributedString alloc] initWithString:@"Your records have been saved locally."]];
+        [desc appendAttributedString:descSubtext];
+        [PEUIUtils showSuccessAlertWithMsgs:saveMessages
+                                      title:saveTitle
+                           alertDescription:desc
+                                   topInset:70.0
+                                buttonTitle:@"Okay."
+                               buttonAction:^{
+                                 if (_modalOperationDone) { _modalOperationDone(); }
+                                 notificationSenderForAdd(_newEntity);
+                                 _itemAddedBlk(self, _newEntity);
+                               }
+                             relativeToView:self.view];
+      } else {
+        NSMutableAttributedString *desc = [NSMutableAttributedString new];
+        [desc appendAttributedString:[[NSAttributedString alloc] initWithString:@"Your record has been saved locally."]];
+        [desc appendAttributedString:descSubtext];
+        [PEUIUtils showSuccessAlertWithTitle:saveTitle
+                            alertDescription:desc
+                    additionalContentSection:nil // TODO
+                                    topInset:70.0
+                                 buttonTitle:@"Okay."
+                                buttonAction:^{
+                                  if (_modalOperationDone) { _modalOperationDone(); }
+                                  notificationSenderForAdd(_newEntity);
+                                  _itemAddedBlk(self, _newEntity);
+                                }
+                              relativeToView:self.view];
       }
-      UIImage *image = [UIImage imageNamed:@"hud-complete"];
-      UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
-      [HUD setCustomView:imageView];
-      HUD.mode = MBProgressHUDModeCustomView;
-      [HUD hide:YES afterDelay:1.0];
-      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        if (_modalOperationDone) { _modalOperationDone(); }
-        notificationSenderForAdd(_newEntity);
-        _itemAddedBlk(self, _newEntity);  // this is what causes this controller to be dismissed
-      });
     }
   } else {
     [PEUIUtils showWarningAlertWithMsgs:errMsgs

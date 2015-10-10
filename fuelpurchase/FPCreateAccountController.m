@@ -281,29 +281,25 @@ emailed to you."]
                                                       // 100% sync success
                                                       dispatch_async(dispatch_get_main_queue(), ^{
                                                         [HUD hide:YES];
-                                                        [PEUIUtils showLoginSuccessAlertWithTitle:@"Account creation & sync\nsuccess."
-                                                                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
+                                                        [PEUIUtils showSuccessAlertWithTitle:@"Account creation & sync\nsuccess."
+                                                                            alertDescription:[[NSAttributedString alloc] initWithString:@"\
 Your remote account has been created and \
 your local edits have been synced.\n\n\
 Your account is now connected to this \
 device.  Any gas jot data that \
 you create and save will be synced to your \
 remote account."]
-                                                                                  syncIconMessage:[[NSAttributedString alloc] initWithString:@"\
-The following icon will appear in the app \
-indicating that your are currently logged \
-into your remote account:"]
-                                                                                         topInset:70.0
-                                                                                      buttonTitle:@"Okay."
-                                                                                     buttonAction:^{
-                                                                                       enableUserInteraction(YES);
-                                                                                       [[NSNotificationCenter defaultCenter] postNotificationName:FPAppAccountCreationNotification
-                                                                                                                                           object:nil
-                                                                                                                                         userInfo:nil];
-                                                                                       [[self navigationController] popViewControllerAnimated:YES];
-                                                                                       [APP refreshTabs];
-                                                                                     }
-                                                                                   relativeToView:self.tabBarController.view];
+                                                                                    topInset:70.0
+                                                                                 buttonTitle:@"Okay."
+                                                                                buttonAction:^{
+                                                                                  enableUserInteraction(YES);
+                                                                                  [[NSNotificationCenter defaultCenter] postNotificationName:FPAppAccountCreationNotification
+                                                                                                                                      object:nil
+                                                                                                                                    userInfo:nil];
+                                                                                  [[self navigationController] popViewControllerAnimated:YES];
+                                                                                  [APP refreshTabs];
+                                                                                }
+                                                                              relativeToView:self.tabBarController.view];
                                                       });
                                                     } else {
                                                       dispatch_async(dispatch_get_main_queue(), ^{

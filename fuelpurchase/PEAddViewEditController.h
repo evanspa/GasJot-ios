@@ -81,7 +81,7 @@ typedef void (^PEUploaderBlk)(PEAddViewEditController *,
                               PESyncConflictBlk,
                               PESyncAuthRequiredBlk,
                               PESyncDependencyUnsynced);
-typedef void (^PESaveNewEntityLocalBlk)(UIView *, id);
+typedef NSArray * (^PESaveNewEntityLocalBlk)(UIView *, id);
 typedef void (^PESaveNewEntityImmediateSyncBlk)(UIView *,
                                                 id,
                                                 PESyncNotFoundBlk,

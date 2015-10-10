@@ -297,31 +297,27 @@ Any Gas Jot data that you create and save will be synced to your remote account.
                                                       // 100% sync success
                                                       dispatch_async(dispatch_get_main_queue(), ^{
                                                         [HUD hide:YES];
-                                                        [PEUIUtils showLoginSuccessAlertWithTitle:@"Login & sync success."
-                                                                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
+                                                        [PEUIUtils showSuccessAlertWithTitle:@"Login & sync success."
+                                                                            alertDescription:[[NSAttributedString alloc] initWithString:@"\
 You have been successfully logged in and \
 your local edits have been synced.\n\n\
 Your remote account is now connected to \
 this device.  Any gas jot data that \
 you create and save will be synced to your \
 remote account."]
-                                                                                  syncIconMessage:[[NSAttributedString alloc] initWithString:@"\
-The following icon will appear in the app \
-indicating that your are currently logged \
-into your remote account:"]
-                                                                                         topInset:70.0
-                                                                                      buttonTitle:@"Okay."
-                                                                                     buttonAction:^{
-                                                                                       enableLocationServices(^{
-                                                                                         enableUserInteraction(YES);
-                                                                                         [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
-                                                                                                                                             object:nil
-                                                                                                                                           userInfo:nil];
-                                                                                         [[self navigationController] popViewControllerAnimated:YES];
-                                                                                         [APP refreshTabs];
-                                                                                       });
-                                                                                     }
-                                                                                   relativeToView:self.tabBarController.view];
+                                                                                    topInset:70.0
+                                                                                 buttonTitle:@"Okay."
+                                                                                buttonAction:^{
+                                                                                  enableLocationServices(^{
+                                                                                    enableUserInteraction(YES);
+                                                                                    [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
+                                                                                                                                        object:nil
+                                                                                                                                      userInfo:nil];
+                                                                                    [[self navigationController] popViewControllerAnimated:YES];
+                                                                                    [APP refreshTabs];
+                                                                                  });
+                                                                                }
+                                                                              relativeToView:self.tabBarController.view];
                                                       });
                                                     } else {
                                                       dispatch_async(dispatch_get_main_queue(), ^{

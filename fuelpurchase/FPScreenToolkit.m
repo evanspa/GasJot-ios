@@ -543,9 +543,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 - (FPAuthScreenMaker)newAddVehicleScreenMakerWithDelegate:(PEItemAddedBlk)itemAddedBlk
                                        listViewController:(PEListViewController *)listViewController {
   return ^ UIViewController * (FPUser *user) {
-    PESaveNewEntityLocalBlk newVehicleSaverLocal = ^(UIView *entityPanel, FPVehicle *newVehicle) {
+    PESaveNewEntityLocalBlk newVehicleSaverLocal = ^NSArray *(UIView *entityPanel, FPVehicle *newVehicle) {
       [_coordDao saveNewVehicle:newVehicle forUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
       [APP refreshTabs];
+      return @[@"Vehicle saved.", @[@"Vehicle saved locally."]];
     };
     PESaveNewEntityImmediateSyncBlk newVehicleSaverImmediateSync = ^(UIView *entityPanel,
                                                                      FPVehicle *newVehicle,
@@ -1139,9 +1140,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 - (FPAuthScreenMaker)newAddFuelStationScreenMakerWithBlk:(PEItemAddedBlk)itemAddedBlk
                                       listViewController:(PEListViewController *)listViewController {
   return ^ UIViewController * (FPUser *user) {
-    PESaveNewEntityLocalBlk newFuelStationSaverLocal = ^(UIView *entityPanel, FPFuelStation *newFuelStation) {
+    PESaveNewEntityLocalBlk newFuelStationSaverLocal = ^NSArray *(UIView *entityPanel, FPFuelStation *newFuelStation) {
       [_coordDao saveNewFuelStation:newFuelStation forUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
       [APP refreshTabs];
+      return @[@"Gas station saved.", @[@"Gas station saved locally."]];
     };
     PESaveNewEntityImmediateSyncBlk newFuelStationSaverImmediateSync = ^(UIView *entityPanel,
                                                                          FPFuelStation *newFuelStation,
@@ -1515,30 +1517,43 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                @(savePreFillupEnvLogPercentComplete),
                @(savePostFillupEnvLogPercentComplete)];
     };
-    PESaveNewEntityLocalBlk newFuelPurchaseLogSaverLocal = ^(UIView *entityPanel, FPLogEnvLogComposite *fpEnvLogComposite) {
+    PESaveNewEntityLocalBlk newFuelPurchaseLogSaverLocal = ^NSArray *(UIView *entityPanel, FPLogEnvLogComposite *fpEnvLogComposite) {
       NSArray *selectionsAndPercentArray = selectionsAndPercents(entityPanel, fpEnvLogComposite);
       FPVehicle *selectedVehicle = selectionsAndPercentArray[0];
       FPFuelStation *selectedFuelStation = selectionsAndPercentArray[1];
       BOOL shouldSavePreFillupEnvLog = [selectionsAndPercentArray[2] boolValue];
       BOOL shouldSavePostFillupEnvLog = [selectionsAndPercentArray[3] boolValue];
+      NSMutableArray *saveMessages = [NSMutableArray array];
+      [saveMessages addObject:@"Gas log saved locally."];
       [_coordDao saveNewFuelPurchaseLog:[fpEnvLogComposite fpLog]
                                 forUser:user
                                 vehicle:selectedVehicle
                             fuelStation:selectedFuelStation
                                   error:[FPUtils localSaveErrorHandlerMaker]()];
       if (shouldSavePreFillupEnvLog) {
+        [saveMessages addObject:@"Pre-fillup odometer log saved locally."];
         [_coordDao saveNewEnvironmentLog:[fpEnvLogComposite preFillupEnvLog]
                                  forUser:user
                                  vehicle:selectedVehicle
                                    error:[FPUtils localSaveErrorHandlerMaker]()];
       }
       if (shouldSavePostFillupEnvLog) {
+        [saveMessages addObject:@"Post-fillup odometer log saved locally."];
         [_coordDao saveNewEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
                                  forUser:user
                                  vehicle:selectedVehicle
                                    error:[FPUtils localSaveErrorHandlerMaker]()];
       }
+      NSString *saveTitle = @"Gas log saved.";
+      if (shouldSavePostFillupEnvLog || shouldSavePreFillupEnvLog) {
+        if (shouldSavePostFillupEnvLog && shouldSavePreFillupEnvLog) {
+          saveTitle = @"Gas and odometer logs saved.";
+        } else {
+          saveTitle = @"Gas and odometer log saved.";
+        }
+      }
       [APP refreshTabs];
+      return @[saveTitle, saveMessages];
     };
     PESaveNewEntityImmediateSyncBlk newFuelPurchaseLogSaverImmediateSync = ^(UIView *entityPanel,
                                                                              FPLogEnvLogComposite *fpEnvLogComposite,
@@ -1574,8 +1589,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                      addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
                                         addlConflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
                                     addlAuthRequiredBlk:^{authReqdBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                           skippedDueToVehicleNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the Gas Jot server."); [APP refreshTabs];}
-                       skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The gas station is not yet saved to the Gas Jot server."); [APP refreshTabs];}
+                           skippedDueToVehicleNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
+                       skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The gas station is not yet saved to the server."); [APP refreshTabs];}
                                                   error:[FPUtils localSaveErrorHandlerMaker]()];
       if (shouldSavePreFillupEnvLog) {
         recordTitle = @"Pre-fillup odometer log";
@@ -1589,7 +1604,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                       addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
                                          addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
                                      addlAuthRequiredBlk:^{authReqdBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                            skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the Gas Jot server."); [APP refreshTabs];}
+                            skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePreFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
                                                    error:[FPUtils localSaveErrorHandlerMaker]()];
       }
       if (shouldSavePostFillupEnvLog) {
@@ -1604,7 +1619,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                       addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
                                          addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
                                      addlAuthRequiredBlk:^{authReqdBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                            skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the Gas Jot server."); [APP refreshTabs];}
+                            skippedDueToVehicleNotSynced:^{depUnsyncedBlk(savePostFillupEnvLogPercentComplete, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
                                                    error:[FPUtils localSaveErrorHandlerMaker]()];
       }
     };
@@ -1765,8 +1780,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
                                                   addlConflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(1, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
                                               addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                     skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the Gas Jot server."); [APP refreshTabs];}
-                                 skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The gas station is not yet saved to the Gas Jot server."); [APP refreshTabs];}
+                                     skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
+                                 skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The gas station is not yet saved to the server."); [APP refreshTabs];}
                                                             error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEUploaderBlk uploader = ^(PEAddViewEditController *ctrl,
@@ -1790,8 +1805,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                     addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeFpLogErrMsgs:errMask]); [APP refreshTabs];}
                                        addlConflictBlk:^(FPFuelPurchaseLog *latestFplog) {conflictBlk(1, mainMsgFragment, recordTitle, latestFplog); [APP refreshTabs];}
                                    addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                          skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the Gas Jot server."); [APP refreshTabs];}
-                      skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The gas station is not yet saved to the Gas Jot server."); [APP refreshTabs];}
+                          skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
+                      skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The gas station is not yet saved to the server."); [APP refreshTabs];}
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PENumRemoteDepsNotLocal numRemoteDepsNotLocalBlk = ^ NSInteger (FPFuelPurchaseLog *remoteFplog) {
@@ -2393,7 +2408,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                      defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
                                          listViewController:(PEListViewController *)listViewController {
   return ^ UIViewController * (FPUser *user) {
-    PESaveNewEntityLocalBlk newEnvironmentLogSaverLocal = ^(UIView *entityPanel, FPEnvironmentLog *envLog) {
+    PESaveNewEntityLocalBlk newEnvironmentLogSaverLocal = ^NSArray *(UIView *entityPanel, FPEnvironmentLog *envLog) {
       FPEnvLogVehicleAndDateDataSourceDelegate *ds =
         (FPEnvLogVehicleAndDateDataSourceDelegate *)[(UITableView *)[entityPanel viewWithTag:FPEnvLogTagVehicleAndDate] dataSource];
       FPVehicle *selectedVehicle = [ds selectedVehicle];
@@ -2402,6 +2417,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                vehicle:selectedVehicle
                                  error:[FPUtils localSaveErrorHandlerMaker]()];
       [APP refreshTabs];
+      return @[@"Odometer log saved.", @[@"Odometer log saved locally."]];
     };
     PESaveNewEntityImmediateSyncBlk newEnvironmentLogSaverImmediateSync = ^(UIView *entityPanel,
                                                                             FPEnvironmentLog *envLog,
@@ -2428,7 +2444,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                     addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
                                        addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(1, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
                                    addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                          skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the Gas Jot server."); [APP refreshTabs];}
+                          skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
@@ -2542,7 +2558,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                               addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
                                                  addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(1, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
                                              addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                    skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the Gas Jot server."); [APP refreshTabs];}
+                                    skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
                                                            error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEUploaderBlk uploader = ^(PEAddViewEditController *ctrl,
@@ -2566,7 +2582,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                    addlRemoteErrorBlk:^(NSInteger errMask){errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeEnvLogErrMsgs:errMask]); [APP refreshTabs];}
                                       addlConflictBlk:^(FPEnvironmentLog *latestEnvlog) {conflictBlk(1, mainMsgFragment, recordTitle, latestEnvlog); [APP refreshTabs];}
                                   addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                         skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the Gas Jot server."); [APP refreshTabs];}
+                         skippedDueToVehicleNotSynced:^{depUnsyncedBlk(1, mainMsgFragment, recordTitle, @"The vehicle is not yet saved to the server."); [APP refreshTabs];}
                                                 error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PENumRemoteDepsNotLocal numRemoteDepsNotLocalBlk = ^ NSInteger (FPEnvironmentLog *remoteEnvlog) {
