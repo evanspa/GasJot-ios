@@ -587,6 +587,17 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
         [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
       }
     };
+    PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, FPVehicle *newVehicle) {
+      NSString *infoText;
+      if ([[_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()] count] == 0) {
+        infoText = @"You can now create gas and odometer logs for this vehicle.  When creating your first gas log, you'll need to create the gas station record for it too.";
+      } else {
+        infoText = @"You can now create gas and odometer logs for this vehicle.";
+      }
+      return [PEUIUtils infoAlertSectionWithTitle:@"Tip"
+                                 alertDescription:[[NSAttributedString alloc] initWithString:infoText]
+                                   relativeToView:ctrl.view];
+    };
     return [PEAddViewEditController addEntityCtrlrWithUitoolkit:_uitoolkit
                                              listViewController:listViewController
                                                    itemAddedBlk:itemAddedBlk
@@ -607,7 +618,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                  syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
                                           modalOperationStarted:[self commonModalOperationStartedBlock]
                                              modalOperationDone:[self commonModalOperationDoneBlock]
-                                    entityAddedNotificationName:FPEntityAddedNotification];
+                                    entityAddedNotificationName:FPEntityAddedNotification
+                                             addlContentSection:addlContentSection];
   };
 }
 
@@ -1184,6 +1196,17 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
         [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
       }
     };
+    PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, FPFuelStation *newFuelstation) {
+      NSString *infoText;
+      if ([[_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()] count] == 0) {
+        infoText = @"You can now create gas logs for this gas station.  When creating your first gas log, you'll need to create the vehicle record for it too.";
+      } else {
+        infoText = @"You can now create gas logs for this gas station.";
+      }
+      return [PEUIUtils infoAlertSectionWithTitle:@"Tip"
+                                 alertDescription:[[NSAttributedString alloc] initWithString:infoText]
+                                   relativeToView:ctrl.view];
+    };
     return [PEAddViewEditController addEntityCtrlrWithUitoolkit:_uitoolkit
                                              listViewController:listViewController
                                                    itemAddedBlk:itemAddedBlk
@@ -1204,7 +1227,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                  syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
                                           modalOperationStarted:[self commonModalOperationStartedBlock]
                                              modalOperationDone:[self commonModalOperationDoneBlock]
-                                    entityAddedNotificationName:FPEntityAddedNotification];
+                                    entityAddedNotificationName:FPEntityAddedNotification
+                                             addlContentSection:addlContentSection];
   };
 }
 
@@ -1573,9 +1597,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       float saveFpLogPercentComplete = [selectionsAndPercentArray[4] floatValue];
       float savePreFillupEnvLogPercentComplete = [selectionsAndPercentArray[5] floatValue];
       float savePostFillupEnvLogPercentComplete = [selectionsAndPercentArray[6] floatValue];
-      NSString *mainMsgFragment = @"saving gas log to the Gas Jot server";
+      NSString *mainMsgFragment = @"Gas log";
       if (savePreFillupEnvLogPercentComplete || savePostFillupEnvLogPercentComplete) {
-        mainMsgFragment = @"saving gas and odometer logs to the Gas Jot server";
+        mainMsgFragment = @"Gas and odometer logs";
       }
       NSString *recordTitle = @"Gas log";
       [_coordDao saveNewAndSyncImmediateFuelPurchaseLog:[fpEnvLogComposite fpLog]
@@ -1679,6 +1703,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       }
       return logs;
     };
+    PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, FPLogEnvLogComposite *fpEnvLogComposite) {
+      NSString *infoText = @"something interesting";
+      return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact"
+                                 alertDescription:[[NSAttributedString alloc] initWithString:infoText]
+                                   relativeToView:ctrl.view];
+    };
     return [PEAddViewEditController addEntityCtrlrWithUitoolkit:_uitoolkit
                                              listViewController:listViewController
                                                    itemAddedBlk:itemAddedBlk
@@ -1703,7 +1733,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                              entitiesFromEntity:entitiesFromEntity
                                           modalOperationStarted:[self commonModalOperationStartedBlock]
                                              modalOperationDone:[self commonModalOperationDoneBlock]
-                                    entityAddedNotificationName:FPEntityAddedNotification];
+                                    entityAddedNotificationName:FPEntityAddedNotification
+                                             addlContentSection:addlContentSection];
   };
 }
 
@@ -2466,6 +2497,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       UITextField *odometerTf = (UITextField *)[entityPanel viewWithTag:FPEnvLogTagOdometer];
       [odometerTf becomeFirstResponder];
     };
+    PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, FPEnvironmentLog *fpEnvlog) {
+      NSString *infoText = @"something interesting";
+      return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact"
+                                 alertDescription:[[NSAttributedString alloc] initWithString:infoText]
+                                   relativeToView:ctrl.view];
+    };
     return [PEAddViewEditController addEntityCtrlrWithUitoolkit:_uitoolkit
                                              listViewController:listViewController
                                                    itemAddedBlk:itemAddedBlk
@@ -2488,7 +2525,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                  syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
                                           modalOperationStarted:[self commonModalOperationStartedBlock]
                                              modalOperationDone:[self commonModalOperationDoneBlock]
-                                    entityAddedNotificationName:FPEntityAddedNotification];
+                                    entityAddedNotificationName:FPEntityAddedNotification
+                                             addlContentSection:addlContentSection];
   };
 }
 

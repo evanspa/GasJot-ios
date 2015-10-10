@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
+#import <PEObjc-Commons/PEUIUtils.h>
 #import <PEFuelPurchase-Model/PELMMainSupport.h>
 #import <MBProgressHUD/MBProgressHUD.h>
 
@@ -111,6 +112,7 @@ typedef NSArray *(^PEEntityValidatorBlk)(UIView *);
 typedef NSArray *(^PEMessagesFromErrMask)(NSInteger);
 typedef void (^PEModalOperationStarted)(void);
 typedef void (^PEModalOperationDone)(void);
+typedef JGActionSheetSection *(^PEAddlContentSection)(PEAddViewEditController *, id);
 
 @interface PEAddViewEditController : UIViewController <MBProgressHUDDelegate>
 
@@ -163,7 +165,8 @@ modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
   modalOperationDone:(PEModalOperationDone)modalOperationDone
 entityAddedNotificationName:(NSString *)entityAddedNotificationName
 entityUpdatedNotificationName:(NSString *)entityUpdatedNotificationName
-entityRemovedNotificationName:(NSString *)entityRemovedNotificationName;
+entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
+  addlContentSection:(PEAddlContentSection)addlContentSection;
 
 #pragma mark - Factory functions
 
@@ -187,7 +190,8 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName;
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                                    modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
                                       modalOperationDone:(PEModalOperationDone)modalOperationDone
-                             entityAddedNotificationName:(NSString *)entityAddedNotificationName;
+                             entityAddedNotificationName:(NSString *)entityAddedNotificationName
+                                      addlContentSection:(PEAddlContentSection)addlContentSection;
 
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
                                       listViewController:(PEListViewController *)listViewController
@@ -210,7 +214,8 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName;
                                       entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity
                                    modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
                                       modalOperationDone:(PEModalOperationDone)modalOperationDone
-                             entityAddedNotificationName:(NSString *)entityAddedNotificationName;
+                             entityAddedNotificationName:(NSString *)entityAddedNotificationName
+                                      addlContentSection:(PEAddlContentSection)addlContentSection;
 
 + (PEAddViewEditController *)viewEntityCtrlrWithEntity:(PELMMainSupport *)entity
                                     listViewController:(PEListViewController *)listViewController

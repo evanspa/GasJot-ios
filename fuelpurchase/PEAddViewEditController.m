@@ -74,6 +74,7 @@
   NSString *_entityAddedNotificationName;
   NSString *_entityUpdatedNotificationName;
   NSString *_entityRemovedNotificationName;
+  PEAddlContentSection _addlContentSection;
 }
 
 #pragma mark - Initializers
@@ -125,7 +126,8 @@ modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
   modalOperationDone:(PEModalOperationDone)modalOperationDone
 entityAddedNotificationName:(NSString *)entityAddedNotificationName
 entityUpdatedNotificationName:(NSString *)entityUpdatedNotificationName
-entityRemovedNotificationName:(NSString *)entityRemovedNotificationName {
+entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
+  addlContentSection:(PEAddlContentSection)addlContentSection {
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
     _listViewController = listViewController;
@@ -180,6 +182,7 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName {
     _entityAddedNotificationName = entityAddedNotificationName;
     _entityUpdatedNotificationName = entityUpdatedNotificationName;
     _entityRemovedNotificationName = entityRemovedNotificationName;
+    _addlContentSection = addlContentSection;
   }
   return self;
 }
@@ -206,7 +209,8 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName {
                           syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
                                    modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
                                       modalOperationDone:(PEModalOperationDone)modalOperationDone
-                             entityAddedNotificationName:(NSString *)entityAddedNotificationName {
+                             entityAddedNotificationName:(NSString *)entityAddedNotificationName
+                                      addlContentSection:(PEAddlContentSection)addlContentSection {
   return [PEAddViewEditController addEntityCtrlrWithUitoolkit:uitoolkit
                                            listViewController:listViewController
                                                  itemAddedBlk:itemAddedBlk
@@ -228,7 +232,8 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName {
                                            entitiesFromEntity:nil
                                         modalOperationStarted:modalOperationStarted
                                            modalOperationDone:modalOperationDone
-                                  entityAddedNotificationName:entityAddedNotificationName];
+                                  entityAddedNotificationName:entityAddedNotificationName
+                                           addlContentSection:addlContentSection];
 }
 
 + (PEAddViewEditController *)addEntityCtrlrWithUitoolkit:(PEUIToolkit *)uitoolkit
@@ -252,7 +257,8 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName {
                                       entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity
                                    modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
                                       modalOperationDone:(PEModalOperationDone)modalOperationDone
-                                  entityAddedNotificationName:(NSString *)entityAddedNotificationName {
+                             entityAddedNotificationName:(NSString *)entityAddedNotificationName
+                                      addlContentSection:(PEAddlContentSection)addlContentSection {
   return [[PEAddViewEditController alloc] initWithEntity:nil
                                       listViewController:listViewController
                                                    isAdd:YES
@@ -300,7 +306,8 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName {
                                       modalOperationDone:modalOperationDone
                              entityAddedNotificationName:entityAddedNotificationName
                            entityUpdatedNotificationName:nil
-                           entityRemovedNotificationName:nil];
+                           entityRemovedNotificationName:nil
+                                      addlContentSection:addlContentSection];
 }
 
 + (PEAddViewEditController *)viewEntityCtrlrWithEntity:(PELMMainSupport *)entity
@@ -391,7 +398,8 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName {
                                       modalOperationDone:modalOperationDone
                              entityAddedNotificationName:nil
                            entityUpdatedNotificationName:entityUpdatedNotificationName
-                           entityRemovedNotificationName:entityRemovedNotificationName];
+                           entityRemovedNotificationName:entityRemovedNotificationName
+                                      addlContentSection:nil];
 }
 
 #pragma mark - View Controller Lifecyle
@@ -886,7 +894,7 @@ You already have the latest version of this record on your device."]
             // If we're here, it means the entity was downloaded, and if it had any
             // dependencies, they were also successfully downloaded (if they *needed*
             // to be downloaded).  Also, this block executes on the main thread.
-            [PEUIUtils showSuccessAlertWithTitle:@"Success."
+            [PEUIUtils showSuccessAlertWithTitle:[NSString stringWithFormat:@"%@ downloaded.", _entityTitle]
                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
 The latest version of this record has been successfully downloaded to your device."]
                                         topInset:70.0
@@ -909,8 +917,7 @@ The latest version of this record has been successfully downloaded to your devic
         } else if ([errsForEntityDownload[0][4] boolValue]) { // not found
           [self handleNotFoundError];
         } else { // any other error type
-          NSString *fetchErrMsg = @"\
-There was a problem downloading the record.";
+          NSString *fetchErrMsg = @"There was a problem downloading the record.";
           [PEUIUtils showErrorAlertWithMsgs:errsForEntityDownload[0][2]
                                       title:@"Download error."
                            alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
@@ -1655,7 +1662,7 @@ merge conflicts.";
               [HUD setCustomView:imageView];
               HUD.mode = MBProgressHUDModeCustomView;
               [HUD hide:YES];
-              [PEUIUtils showSuccessAlertWithTitle:@"Success."
+              [PEUIUtils showSuccessAlertWithTitle:[NSString stringWithFormat:@"%@ saved.", _entityTitle]
                                   alertDescription:[[NSAttributedString alloc] initWithString:successMessageTitlesForUpload[0]]
                                           topInset:70.0
                                        buttonTitle:@"Okay."
@@ -2094,9 +2101,9 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
             if (isMultiStepAdd) { // all successes
               [HUD hide:YES afterDelay:0];
               [PEUIUtils showSuccessAlertWithMsgs:successMessageTitlesForUpload
-                                            title:[NSString stringWithFormat:@"Success %@.", mainMsgTitle]
+                                            title:[NSString stringWithFormat:@"%@ saved.", mainMsgTitle]
                                  alertDescription:[[NSAttributedString alloc] initWithString:@"Your records have been successfully saved to the Gas Jot server."]
-                         additionalContentSection:nil // TODO
+                         additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _newEntity) : nil
                                          topInset:70.0
                                       buttonTitle:@"Okay."
                                      buttonAction:^{
@@ -2111,9 +2118,9 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
               [HUD setCustomView:imageView];
               HUD.mode = MBProgressHUDModeCustomView;
               [HUD hide:YES];
-              [PEUIUtils showSuccessAlertWithTitle:@"Success."
+              [PEUIUtils showSuccessAlertWithTitle:[NSString stringWithFormat:@"%@ saved.", _entityTitle]
                                   alertDescription:[[NSAttributedString alloc] initWithString:successMessageTitlesForUpload[0]]
-                          additionalContentSection:nil // TODO
+                          additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _newEntity) : nil
                                           topInset:70.0
                                        buttonTitle:@"Okay."
                                       buttonAction:^{
@@ -2460,6 +2467,7 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
         [PEUIUtils showSuccessAlertWithMsgs:saveMessages
                                       title:saveTitle
                            alertDescription:desc
+                   additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _newEntity) : nil
                                    topInset:70.0
                                 buttonTitle:@"Okay."
                                buttonAction:^{
@@ -2474,7 +2482,7 @@ The ones that did not %@ and will need to be fixed individually.  The ones uploa
         [desc appendAttributedString:descSubtext];
         [PEUIUtils showSuccessAlertWithTitle:saveTitle
                             alertDescription:desc
-                    additionalContentSection:nil // TODO
+                    additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _newEntity) : nil
                                     topInset:70.0
                                  buttonTitle:@"Okay."
                                 buttonAction:^{
