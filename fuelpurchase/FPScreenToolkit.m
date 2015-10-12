@@ -34,6 +34,7 @@
 #import <BlocksKit/UIControl+BlocksKit.h>
 #import "FPUIUtils.h"
 #import "FPAppNotificationNames.h"
+#import "FPReports.h"
 
 NSInteger const PAGINATION_PAGE_SIZE = 30;
 NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
@@ -42,6 +43,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   FPCoordinatorDao *_coordDao;
   FPPanelToolkit *_panelToolkit;
   PELMDaoErrorBlk _errorBlk;
+  FPReports *_reports;
 }
 
 #pragma mark - Initializers
@@ -57,6 +59,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                      screenToolkit:self
                                                          uitoolkit:uitoolkit
                                                              error:errorBlk];
+    _reports = [[FPReports alloc] initWithLocalDao:_coordDao.localDao];
   }
   return self;
 }
@@ -97,6 +100,25 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   if ([tableView indexPathForSelectedRow]) {
     [tableView deselectRowAtIndexPath:[tableView indexPathForSelectedRow] animated:YES];
   }
+}
+
++ (JGActionSheetSection *)funFactSectionWithNumFunFacts:(NSInteger)numFunFacts
+                                         nextFunFactBlk:(FPFunFact(^)(void))nextFunFactBlk
+                                                 record:(id)record
+                                                   user:(FPUser *)user
+                                         relativeToView:(UIView *)relativeToView {
+  FPFunFact funFact = nextFunFactBlk();
+  JGActionSheetSection *funFactSection = funFact(record, user, relativeToView);
+  NSInteger funFactsAttempted = 1;
+  while (funFactSection == nil) {
+    if (funFactsAttempted == numFunFacts) {
+      break;
+    }
+    funFact = nextFunFactBlk();
+    funFactSection = funFact(record, user, relativeToView);
+    funFactsAttempted++;
+  }
+  return funFactSection;
 }
 
 #pragma mark - Generic Screens
@@ -2498,10 +2520,11 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       [odometerTf becomeFirstResponder];
     };
     PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, FPEnvironmentLog *fpEnvlog) {
-      NSString *infoText = @"something interesting";
-      return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact"
-                                 alertDescription:[[NSAttributedString alloc] initWithString:infoText]
-                                   relativeToView:ctrl.view];
+      return [FPScreenToolkit funFactSectionWithNumFunFacts:[_reports numOdometerFunFacts]
+                                             nextFunFactBlk:^{ return [_reports nextOdometerFunFact]; }
+                                                     record:fpEnvlog
+                                                       user:user
+                                             relativeToView:ctrl.view];
     };
     return [PEAddViewEditController addEntityCtrlrWithUitoolkit:_uitoolkit
                                              listViewController:listViewController

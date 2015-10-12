@@ -137,7 +137,7 @@
  * 'Sign In' error messages
  ***************************************************************/
 "signin.email-notprovided" = "E-mail must be provided.";
-"signin.invalid-email" = "Invalid e-mail address.";
+"signin.email-invalid" = "Invalid e-mail address.";
 "signin.password-notprovided" = "Password cannot be empty.";
 "signin.credentials-invalid" = "Credentials invalid.";
 

@@ -1779,7 +1779,6 @@ location from the given address above."]
       (UITableView *)[panel viewWithTag:FPEnvLogTagVehicleAndDate];
     FPEnvLogVehicleAndDateDataSourceDelegate *ds =
       (FPEnvLogVehicleAndDateDataSourceDelegate *)[vehicleAndDateTableView dataSource];
-    
     FPEnvironmentLog *envlog = [_coordDao environmentLogWithOdometer:tfdec(FPEnvLogTagOdometer)
                                                       reportedAvgMpg:tfdec(FPEnvLogTagReportedAvgMpg)
                                                       reportedAvgMph:tfdec(FPEnvLogTagReportedAvgMph)
