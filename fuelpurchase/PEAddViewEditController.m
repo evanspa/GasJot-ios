@@ -2104,7 +2104,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                             title:[NSString stringWithFormat:@"%@ saved.", mainMsgTitle]
                                  alertDescription:[[NSAttributedString alloc] initWithString:@"Your records have been successfully saved to the Gas Jot server."]
                          additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _entityFormPanel, _newEntity) : nil
-                                         topInset:70.0
+                                         topInset:50.0
                                       buttonTitle:@"Okay."
                                      buttonAction:^{
                                        notificationSenderForAdd(_newEntity);

@@ -37,14 +37,16 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 #pragma mark - Helpers
 
 - (NSAttributedString *)gallonPriceOfFplog:(FPFuelPurchaseLog *)fplog
-                        comparedToAvgPrice:(NSDecimalNumber *)avgPrice
+                           comparedToPrice:(NSDecimalNumber *)price
                          currencyFormatter:(NSNumberFormatter *)numFormatter
-                          avgQualifierText:(NSString *)avgQualifierText {
+                             qualifierText:(NSString *)qualifierText
+                             priceTypeText:(NSString *)priceTypeText
+                         textIfPricesMatch:(NSString *)textIfPricesMatch {
   NSAttributedString *funFact;
-  NSDecimalNumber *diff = [fplog.gallonPrice decimalNumberBySubtracting:avgPrice];
+  NSDecimalNumber *diff = [fplog.gallonPrice decimalNumberBySubtracting:price];
   if ([diff compare:[NSDecimalNumber zero]] == NSOrderedDescending) {
     // diff is positive and thus fplog.gallonPrice is HIGHER than YTD average
-    NSString *templateText = [NSString stringWithFormat:@"The gallon-price of this purchase is HIGHER than the %@ average by %@.", avgQualifierText, @"%@"];
+    NSString *templateText = [NSString stringWithFormat:@"\n\nThe gallon-price of this purchase is HIGHER than the %@ %@ by %@.", qualifierText, priceTypeText, @"%@"];
     funFact = [PEUIUtils attributedTextWithTemplate:templateText
                                        textToAccent:[numFormatter stringFromNumber:diff]
                                      accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
@@ -52,30 +54,234 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
   } else if ([diff compare:[NSDecimalNumber zero]] == NSOrderedAscending) {
     // diff is negative and thus fplog.gallonPrice is LOWER than YTD average
     diff = [diff decimalNumberByMultiplyingBy:[[NSDecimalNumber alloc] initWithInteger:-1]];
-    NSString *templateText = [NSString stringWithFormat:@"The gallon-price of this purchase is LOWER than the %@ average by %@.", avgQualifierText, @"%@"];
+    NSString *templateText = [NSString stringWithFormat:@"\n\nThe gallon-price of this purchase is LOWER than the %@ %@ by %@.", qualifierText, priceTypeText, @"%@"];
     funFact = [PEUIUtils attributedTextWithTemplate:templateText
                                        textToAccent:[numFormatter stringFromNumber:diff]
                                      accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
                                     accentTextColor:[UIColor nephritisColor]];
   } else {
     // diff is zero
-    funFact = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"The gallon-price of this log entry is exacty equal to the %@ average.", avgQualifierText]];
+    //funFact = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"The gallon-price of this log entry is exacty equal to the %@ average.", avgQualifierText]];
+    funFact = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"\n\n%@", textIfPricesMatch]];
   }
   return funFact;
 }
 
-- (NSNumberFormatter *)currencyFormatter {
-  NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-  [formatter setNumberStyle:NSNumberFormatterCurrencyStyle];
-  return formatter;
+#pragma mark - Gas Log Fun Facts
+
+- (FPFunFact)overallMaxPricePerGallonForFuelstationFunFact {
+  return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
+    FPFuelPurchaseLog *fplog = logVehFs[0];
+    FPFuelStation *fuelstation = logVehFs[2];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
+    NSDecimalNumber *maxPrice = [_reports overallMaxPricePerGallonForFuelstation:fuelstation octane:fplog.octane];
+    if (maxPrice) {
+      NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"Since recording, the max price you've paid is %@ per gallon"
+                                                                 textToAccent:[currencyFormatter stringFromNumber:maxPrice]
+                                                               accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart2 = [PEUIUtils attributedTextWithTemplate:@" for %@ gas at this gas station: "
+                                                                  textToAccent:[NSString stringWithFormat:@"%@ octane", [fplog.octane description]]
+                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart3 = [PEUIUtils attributedTextWithTemplate:@" %@.  "
+                                                                  textToAccent:[fuelstation name]
+                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart4 = [self gallonPriceOfFplog:fplog
+                                                  comparedToPrice:maxPrice
+                                                currencyFormatter:currencyFormatter
+                                                    qualifierText:@"overall"
+                                                    priceTypeText:@"max"
+                                                textIfPricesMatch:@"Ouch.  The gallon-price of this entry IS the new high one for this gas station."];
+      NSMutableAttributedString *funFact = [[NSMutableAttributedString alloc] initWithAttributedString:funFactPart];
+      [funFact appendAttributedString:funFactPart2];
+      [funFact appendAttributedString:funFactPart3];
+      [funFact appendAttributedString:funFactPart4];
+      return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact" alertDescription:funFact relativeToView:relativeToView];
+    }
+    return nil;
+  };
 }
 
-#pragma mark - Gas Log Fun Facts
+- (FPFunFact)overallMaxPricePerGallonForUserFunFact {
+  return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
+    FPFuelPurchaseLog *fplog = logVehFs[0];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
+    NSDecimalNumber *maxPrice = [_reports yearToDateMaxPricePerGallonForUser:user octane:fplog.octane];
+    if (maxPrice) {
+      NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"Since recording, the max price you've ever paid is %@ per gallon"
+                                                                 textToAccent:[currencyFormatter stringFromNumber:maxPrice]
+                                                               accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart2 = [PEUIUtils attributedTextWithTemplate:@" for %@ gas.  "
+                                                                  textToAccent:[NSString stringWithFormat:@"%@ octane", [fplog.octane description]]
+                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart3 = [self gallonPriceOfFplog:fplog
+                                                  comparedToPrice:maxPrice
+                                                currencyFormatter:currencyFormatter
+                                                    qualifierText:@"overall"
+                                                    priceTypeText:@"max"
+                                                textIfPricesMatch:@"Ouch.  The gallon-price of this entry IS the new high one."];
+      NSMutableAttributedString *funFact = [[NSMutableAttributedString alloc] initWithAttributedString:funFactPart];
+      [funFact appendAttributedString:funFactPart2];
+      [funFact appendAttributedString:funFactPart3];
+      return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact" alertDescription:funFact relativeToView:relativeToView];
+    }
+    return nil;
+  };
+}
+
+- (FPFunFact)yearToDateMaxPricePerGallonForFuelstationFunFact {
+  return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
+    FPFuelPurchaseLog *fplog = logVehFs[0];
+    FPFuelStation *fuelstation = logVehFs[2];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
+    NSDecimalNumber *maxPrice = [_reports yearToDateMaxPricePerGallonForFuelstation:fuelstation octane:fplog.octane];
+    if (maxPrice) {
+      NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"So far this year, the max price you've paid is %@ per gallon"
+                                                                 textToAccent:[currencyFormatter stringFromNumber:maxPrice]
+                                                               accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart2 = [PEUIUtils attributedTextWithTemplate:@" for %@ gas at this gas station: "
+                                                                  textToAccent:[NSString stringWithFormat:@"%@ octane", [fplog.octane description]]
+                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart3 = [PEUIUtils attributedTextWithTemplate:@" %@.  "
+                                                                  textToAccent:[fuelstation name]
+                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart4 = [self gallonPriceOfFplog:fplog
+                                                  comparedToPrice:maxPrice
+                                                currencyFormatter:currencyFormatter
+                                                    qualifierText:@"YTD"
+                                                    priceTypeText:@"max"
+                                                textIfPricesMatch:@"Ouch.  The gallon-price of this entry IS the new high one for this year."];
+      NSMutableAttributedString *funFact = [[NSMutableAttributedString alloc] initWithAttributedString:funFactPart];
+      [funFact appendAttributedString:funFactPart2];
+      [funFact appendAttributedString:funFactPart3];
+      [funFact appendAttributedString:funFactPart4];
+      return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact" alertDescription:funFact relativeToView:relativeToView];
+    }
+    return nil;
+  };
+}
+
+- (FPFunFact)yearToDateMaxPricePerGallonForUserFunFact {
+  return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
+    FPFuelPurchaseLog *fplog = logVehFs[0];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
+    NSDecimalNumber *maxPrice = [_reports yearToDateMaxPricePerGallonForUser:user octane:fplog.octane];
+    if (maxPrice) {
+      NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"So far this year, the max price you've paid is %@ per gallon"
+                                                                 textToAccent:[currencyFormatter stringFromNumber:maxPrice]
+                                                               accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart2 = [PEUIUtils attributedTextWithTemplate:@" for %@ gas.  "
+                                                                  textToAccent:[NSString stringWithFormat:@"%@ octane", [fplog.octane description]]
+                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart3 = [self gallonPriceOfFplog:fplog
+                                                  comparedToPrice:maxPrice
+                                                currencyFormatter:currencyFormatter
+                                                    qualifierText:@"YTD"
+                                                    priceTypeText:@"max"
+                                                textIfPricesMatch:@"Ouch.  The gallon-price of this entry IS the new high one for this year, for this gas station."];
+      NSMutableAttributedString *funFact = [[NSMutableAttributedString alloc] initWithAttributedString:funFactPart];
+      [funFact appendAttributedString:funFactPart2];
+      [funFact appendAttributedString:funFactPart3];
+      return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact" alertDescription:funFact relativeToView:relativeToView];
+    }
+    return nil;
+  };
+}
+
+- (FPFunFact)overallAvgPricePerGallonForFuelstationFunFact {
+  return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
+    FPFuelPurchaseLog *fplog = logVehFs[0];
+    FPFuelStation *fuelstation = logVehFs[2];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
+    NSDecimalNumber *avgPrice = [_reports overallAvgPricePerGallonForFuelstation:fuelstation octane:fplog.octane];
+    if (avgPrice) {
+      NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"Since recording, you've paid an average of %@ per gallon"
+                                                                 textToAccent:[currencyFormatter stringFromNumber:avgPrice]
+                                                               accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart2 = [PEUIUtils attributedTextWithTemplate:@" for %@ gas at this gas station: "
+                                                                  textToAccent:[NSString stringWithFormat:@"%@ octane", [fplog.octane description]]
+                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart3 = [PEUIUtils attributedTextWithTemplate:@" %@.  "
+                                                                  textToAccent:[fuelstation name]
+                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart4 = [self gallonPriceOfFplog:fplog
+                                                  comparedToPrice:avgPrice
+                                                currencyFormatter:currencyFormatter
+                                                 qualifierText:@"overall"
+                                                    priceTypeText:@"average"
+                                                textIfPricesMatch:@"The gallon-price of this log entry is exacty equal to the overall average."];
+      NSMutableAttributedString *funFact = [[NSMutableAttributedString alloc] initWithAttributedString:funFactPart];
+      [funFact appendAttributedString:funFactPart2];
+      [funFact appendAttributedString:funFactPart3];
+      [funFact appendAttributedString:funFactPart4];
+      return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact" alertDescription:funFact relativeToView:relativeToView];
+    }
+    return nil;
+  };
+}
+
+- (FPFunFact)overallAvgPricePerGallonForUserFunFact {
+  return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
+    FPFuelPurchaseLog *fplog = logVehFs[0];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
+    NSDecimalNumber *avgPrice = [_reports yearToDateAvgPricePerGallonForUser:user octane:fplog.octane];
+    if (avgPrice) {
+      NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"Since recording, you've paid an average of %@ per gallon"
+                                                                 textToAccent:[currencyFormatter stringFromNumber:avgPrice]
+                                                               accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart2 = [PEUIUtils attributedTextWithTemplate:@" for %@ gas.  "
+                                                                  textToAccent:[NSString stringWithFormat:@"%@ octane", [fplog.octane description]]
+                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart3 = [self gallonPriceOfFplog:fplog
+                                                  comparedToPrice:avgPrice
+                                                currencyFormatter:currencyFormatter
+                                                 qualifierText:@"overall"
+                                                    priceTypeText:@"average"
+                                                textIfPricesMatch:@"The gallon-price of this log entry is exacty equal to the overall average."];
+      NSMutableAttributedString *funFact = [[NSMutableAttributedString alloc] initWithAttributedString:funFactPart];
+      [funFact appendAttributedString:funFactPart2];
+      [funFact appendAttributedString:funFactPart3];
+      return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact" alertDescription:funFact relativeToView:relativeToView];
+    }
+    return nil;
+  };
+}
+
+- (FPFunFact)yearToDateAvgPricePerGallonForFuelstationFunFact {
+  return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
+    FPFuelPurchaseLog *fplog = logVehFs[0];
+    FPFuelStation *fuelstation = logVehFs[2];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
+    NSDecimalNumber *avgPrice = [_reports yearToDateAvgPricePerGallonForFuelstation:fuelstation octane:fplog.octane];
+    if (avgPrice) {
+      NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"So far this year, you've paid an average of %@ per gallon"
+                                                                 textToAccent:[currencyFormatter stringFromNumber:avgPrice]
+                                                               accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart2 = [PEUIUtils attributedTextWithTemplate:@" for %@ gas at this gas station: "
+                                                                  textToAccent:[NSString stringWithFormat:@"%@ octane", [fplog.octane description]]
+                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart3 = [PEUIUtils attributedTextWithTemplate:@" %@.  "
+                                                                  textToAccent:[fuelstation name]
+                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSAttributedString *funFactPart4 = [self gallonPriceOfFplog:fplog
+                                                  comparedToPrice:avgPrice
+                                                currencyFormatter:currencyFormatter
+                                                 qualifierText:@"YTD"
+                                                    priceTypeText:@"average"
+                                                textIfPricesMatch:@"The gallon-price of this log entry is exacty equal to the YTD average."];
+      NSMutableAttributedString *funFact = [[NSMutableAttributedString alloc] initWithAttributedString:funFactPart];
+      [funFact appendAttributedString:funFactPart2];
+      [funFact appendAttributedString:funFactPart3];
+      [funFact appendAttributedString:funFactPart4];
+      return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact" alertDescription:funFact relativeToView:relativeToView];
+    }
+    return nil;
+  };
+}
 
 - (FPFunFact)yearToDateAvgPricePerGallonForUserFunFact {
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
     FPFuelPurchaseLog *fplog = logVehFs[0];
-    NSNumberFormatter *currencyFormatter = [self currencyFormatter];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
     NSDecimalNumber *avgPrice = [_reports yearToDateAvgPricePerGallonForUser:user octane:fplog.octane];
     if (avgPrice) {
       NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"So far this year, you've paid an average of %@ per gallon"
@@ -84,7 +290,12 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
       NSAttributedString *funFactPart2 = [PEUIUtils attributedTextWithTemplate:@" for %@ gas.  "
                                                                   textToAccent:[NSString stringWithFormat:@"%@ octane", [fplog.octane description]]
                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
-      NSAttributedString *funFactPart3 = [self gallonPriceOfFplog:fplog comparedToAvgPrice:avgPrice currencyFormatter:currencyFormatter avgQualifierText:@"YTD"];
+      NSAttributedString *funFactPart3 = [self gallonPriceOfFplog:fplog
+                                                  comparedToPrice:avgPrice
+                                                currencyFormatter:currencyFormatter
+                                                 qualifierText:@"YTD"
+                                                    priceTypeText:@"average"
+                                                textIfPricesMatch:@"The gallon-price of this log entry is exacty equal to the YTD average."];
       NSMutableAttributedString *funFact = [[NSMutableAttributedString alloc] initWithAttributedString:funFactPart];
       [funFact appendAttributedString:funFactPart2];
       [funFact appendAttributedString:funFactPart3];
@@ -98,7 +309,7 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
     FPFuelStation *fuelstation = logVehFs[2];
     NSDecimalNumber *spentOnGas = [_reports totalSpentOnGasForFuelstation:fuelstation];
-    NSNumberFormatter *currencyFormatter = [self currencyFormatter];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
     NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"Since recording, you've spent %@ on gas"
                                                                textToAccent:[currencyFormatter stringFromNumber:spentOnGas]
                                                              accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
@@ -114,7 +325,7 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
     FPVehicle *vehicle = logVehFs[1];
     NSDecimalNumber *spentOnGas = [_reports totalSpentOnGasForVehicle:vehicle];
-    NSNumberFormatter *currencyFormatter = [self currencyFormatter];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
     NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"Since recording, you've spent %@ on gas"
                                                                textToAccent:[currencyFormatter stringFromNumber:spentOnGas]
                                                              accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
@@ -129,7 +340,7 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 - (FPFunFact)totalSpentOnGasForUserFunFact {
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
     NSDecimalNumber *spentOnGas = [_reports totalSpentOnGasForUser:user];
-    NSNumberFormatter *currencyFormatter = [self currencyFormatter];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
     NSAttributedString *funFact = [PEUIUtils attributedTextWithTemplate:@"Since recording, you've spent %@ on gas across all your vehicles."
                                                            textToAccent:[currencyFormatter stringFromNumber:spentOnGas]
                                                          accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
@@ -140,7 +351,7 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 - (FPFunFact)yearToDateSpentOnGasForFuelstationFunFact {
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
     FPFuelStation *fuelstation = logVehFs[2];
-    NSNumberFormatter *currencyFormatter = [self currencyFormatter];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
     NSDecimalNumber *spentOnGas = [_reports yearToDateSpentOnGasForFuelstation:fuelstation];
     NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"So far this year you've spent %@ on gas"
                                                                textToAccent:[currencyFormatter stringFromNumber:spentOnGas]
@@ -156,7 +367,7 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 - (FPFunFact)yearToDateSpentOnGasForVehicleFunFact {
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
     FPVehicle *vehicle = logVehFs[1];
-    NSNumberFormatter *currencyFormatter = [self currencyFormatter];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
     NSDecimalNumber *spentOnGas = [_reports yearToDateSpentOnGasForVehicle:vehicle];
     NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"So far this year you've spent %@ on gas"
                                                                textToAccent:[currencyFormatter stringFromNumber:spentOnGas]
@@ -174,7 +385,7 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 - (FPFunFact)yearToDateSpentOnGasForUserFunFact {
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
     NSDecimalNumber *spentOnGas = [_reports yearToDateSpentOnGasForUser:user];
-    NSNumberFormatter *currencyFormatter = [self currencyFormatter];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
     NSAttributedString *funFact = [PEUIUtils attributedTextWithTemplate:@"So far this year you've spent %@ on gas across all your vehicles."
                                                            textToAccent:[currencyFormatter stringFromNumber:spentOnGas]
                                                          accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
@@ -247,25 +458,11 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 }
 
 - (NSArray *)gasLogFunFacts {
-  
-  /*- <DONE> (NSDecimalNumber *)yearToDateSpentOnGasForUser:(FPUser *)user;
-   - <DONE> (NSDecimalNumber *)yearToDateSpentOnGasForVehicle:(FPVehicle *)vehicle;
-   - <DONE> (NSDecimalNumber *)yearToDateSpentOnGasForFuelstation:(FPFuelStation *)vehicle;
-   - <DONE> (NSDecimalNumber *)totalSpentOnGasForUser:(FPUser *)user;
-   - <DONE> (NSDecimalNumber *)totalSpentOnGasForVehicle:(FPVehicle *)vehicle;
-   - <DONE> (NSDecimalNumber *)totalSpentOnGasForFuelstation:(FPFuelStation *)vehicle;
-   - <DONE> (NSDecimalNumber *)yearToDateAvgPricePerGallonForUser:(FPUser *)user octane:(NSNumber *)octane;
-   - (NSDecimalNumber *)yearToDateAvgPricePerGallonForVehicle:(FPVehicle *)vehicle octane:(NSNumber *)octane;
-   - (NSDecimalNumber *)yearToDateAvgPricePerGallonForFuelstation:(FPFuelStation *)fuelstation octane:(NSNumber *)octane;
-   - (NSDecimalNumber *)overallAvgPricePerGallonForUser:(FPUser *)user octane:(NSNumber *)octane;
-   - (NSDecimalNumber *)overallAvgPricePerGallonForVehicle:(FPVehicle *)vehicle octane:(NSNumber *)octane;
-   - (NSDecimalNumber *)overallAvgPricePerGallonForFuelstation:(FPFuelStation *)fuelstation octane:(NSNumber *)octane;
-   - (NSDecimalNumber *)yearToDateMaxPricePerGallonForUser:(FPUser *)user octane:(NSNumber *)octane;
-   - (NSDecimalNumber *)yearToDateMaxPricePerGallonForVehicle:(FPVehicle *)vehicle octane:(NSNumber *)octane;
-   - (NSDecimalNumber *)yearToDateMaxPricePerGallonForFuelstation:(FPFuelStation *)fuelstation octane:(NSNumber *)octane;
-   - (NSDecimalNumber *)overallMaxPricePerGallonForUser:(FPUser *)user octane:(NSNumber *)octane;
-   - (NSDecimalNumber *)overallMaxPricePerGallonForVehicle:(FPVehicle *)vehicle octane:(NSNumber *)octane;
-   - (NSDecimalNumber *)overallMaxPricePerGallonForFuelstation:(FPFuelStation *)fuelstation octane:(NSNumber *)octane;*/
+  FPFunFact f12 = [self overallMaxPricePerGallonForUserFunFact];
+  FPFunFact f11 = [self overallMaxPricePerGallonForFuelstationFunFact];
+  FPFunFact f10 = [self yearToDateMaxPricePerGallonForUserFunFact];
+  FPFunFact f9 = [self yearToDateMaxPricePerGallonForFuelstationFunFact];
+  FPFunFact f8 = [self yearToDateAvgPricePerGallonForFuelstationFunFact];
   FPFunFact f7 = [self yearToDateAvgPricePerGallonForUserFunFact];
   FPFunFact f6 = [self totalSpentOnGasForFuelStationFunFact];
   FPFunFact f5 = [self totalSpentOnGasForVehicleFunFact];
@@ -273,7 +470,7 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
   FPFunFact f3 = [self yearToDateSpentOnGasForFuelstationFunFact];
   FPFunFact f2 = [self yearToDateSpentOnGasForVehicleFunFact];
   FPFunFact f1 = [self yearToDateSpentOnGasForUserFunFact];
-  return @[f1, f2, f3, f4, f5, f6, f7];
+  return @[f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12];
 }
 
 + (NSNumber *)nextIndexForUserDefaultsKey:(NSString *)userDefaultsIndexKey

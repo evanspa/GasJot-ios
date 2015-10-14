@@ -19,6 +19,7 @@
 #import "FPUtils.h"
 #import "FPUIUtils.h"
 #import "FPForgotPasswordController.h"
+#import <PEFuelPurchase-Model/FPReports.h>
 
 NSString * const FPFpLogEntityMakerFpLogEntry = @"FPFpLogEntityMakerFpLogEntry";
 NSString * const FPFpLogEntityMakerVehicleEntry = @"FPFpLogEntityMakerVehicleEntry";
@@ -30,6 +31,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
   FPScreenToolkit *_screenToolkit;
   NSMutableArray *_tableViewDataSources;
   PELMDaoErrorBlk _errorBlk;
+  FPReports *_reports;
 }
 
 #pragma mark - Initializers
@@ -45,8 +47,32 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     _screenToolkit = screenToolkit;
     _tableViewDataSources = [NSMutableArray array];
     _errorBlk = errorBlk;
+    _reports = [[FPReports alloc] initWithLocalDao:_coordDao.localDao errorBlk:errorBlk];
   }
   return self;
+}
+
+#pragma mark - Helpers
+
+- (UIView *)dataPanelWithRowData:(NSArray *)rowData parentView:(UIView *)parentView {
+  return [PEUIUtils tablePanelWithRowData:rowData
+                           withCellHeight:36.5
+                        labelLeftHPadding:10.0
+                       valueRightHPadding:12.5
+                                labelFont:[UIFont systemFontOfSize:16] //[_uitoolkit fontForTextfields]
+                                valueFont:[UIFont systemFontOfSize:16] //[_uitoolkit fontForTextfields]
+                           labelTextColor:[UIColor blackColor]
+                           valueTextColor:[UIColor grayColor]
+           minPaddingBetweenLabelAndValue:10.0
+                        includeTopDivider:NO
+                     includeBottomDivider:NO
+                     includeInnerDividers:NO
+                  innerDividerWidthFactor:0.95
+                           dividerPadding:3.5
+                  rowPanelBackgroundColor:[UIColor whiteColor]
+                     panelBackgroundColor:[_uitoolkit colorForWindows]
+                             dividerColor:nil
+                           relativeToView:parentView];
 }
 
 #pragma mark - User Account Panel
@@ -55,25 +81,9 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user) {
     UIView *parentView = [parentViewController view];
     UIView *userAccountPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *userAccountDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Name", [PEUtils emptyIfNil:[user name]]],
-                                                                      @[@"Email", [PEUtils emptyIfNil:[user email]]]]
-                                                     withCellHeight:36.5
-                                                  labelLeftHPadding:10.0
-                                                 valueRightHPadding:15.0
-                                                          labelFont:[_uitoolkit fontForTextfields]
-                                                          valueFont:[_uitoolkit fontForTextfields]
-                                                     labelTextColor:[UIColor blackColor]
-                                                     valueTextColor:[UIColor grayColor]
-                                     minPaddingBetweenLabelAndValue:10.0
-                                                  includeTopDivider:NO
-                                               includeBottomDivider:NO
-                                               includeInnerDividers:NO
-                                            innerDividerWidthFactor:0.95
-                                                     dividerPadding:3.5
-                                            rowPanelBackgroundColor:[UIColor whiteColor]
-                                               panelBackgroundColor:[_uitoolkit colorForWindows]
-                                                       dividerColor:nil
-                                                     relativeToView:parentView];
+    UIView *userAccountDataPanel = [self dataPanelWithRowData:@[@[@"Name", [PEUtils emptyIfNil:[user name]]],
+                                                                @[@"Email", [PEUtils emptyIfNil:[user email]]]]
+                                                   parentView:parentView];
     UIView *accountStatusPanel = [FPPanelToolkit accountStatusPanelForUser:user
                                                                   panelTag:@(accountStatusLabelTag)
                                                       includeRefreshButton:NO
@@ -532,33 +542,27 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
   return ^ UIView * (PEAddViewEditController *parentViewController, FPVehicle *vehicle) {
     UIView *parentView = [parentViewController view];
     UIView *vehiclePanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *vehicleDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Vehicle name", [PEUtils emptyIfNil:[vehicle name]]],
-                                                                  @[@"Default octane", [PEUtils descriptionOrEmptyIfNil:[vehicle defaultOctane]]],
-                                                                  @[@"Fuel capacity", [PEUtils descriptionOrEmptyIfNil:[vehicle fuelCapacity]]]]
-                                                 withCellHeight:36.5
-                                              labelLeftHPadding:10.0
-                                             valueRightHPadding:15.0
-                                                      labelFont:[_uitoolkit fontForTextfields]
-                                                      valueFont:[_uitoolkit fontForTextfields]
-                                                 labelTextColor:[UIColor blackColor]
-                                                 valueTextColor:[UIColor grayColor]
-                                 minPaddingBetweenLabelAndValue:10.0
-                                              includeTopDivider:NO
-                                           includeBottomDivider:NO
-                                           includeInnerDividers:NO
-                                        innerDividerWidthFactor:0.95
-                                                 dividerPadding:3.5
-                                        rowPanelBackgroundColor:[UIColor whiteColor]
-                                           panelBackgroundColor:[_uitoolkit colorForWindows]
-                                                   dividerColor:nil
-                                                 relativeToView:parentView];
+    UIView *vehicleDataPanel = [self dataPanelWithRowData:@[@[@"Vehicle name", [PEUtils emptyIfNil:[vehicle name]]],
+                                                            @[@"Default octane", [PEUtils descriptionOrEmptyIfNil:[vehicle defaultOctane]]],
+                                                            @[@"Fuel capacity", [PEUtils descriptionOrEmptyIfNil:[vehicle fuelCapacity]]]]
+                                               parentView:parentView];
     [PEUIUtils placeView:vehicleDataPanel
                  atTopOf:vehiclePanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:15.0
                 hpadding:0.0];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
+    UIView *funFactsDataPanel = [self dataPanelWithRowData:@[@[@"YTD spent on gas", [currencyFormatter stringFromNumber:[_reports yearToDateSpentOnGasForVehicle:vehicle]]],
+                                                             @[@"All-time spent on gas", [currencyFormatter stringFromNumber:[_reports totalSpentOnGasForVehicle:vehicle]]]]
+                                                parentView:parentView];
+    [PEUIUtils placeView:funFactsDataPanel
+                   below:vehicleDataPanel
+                    onto:vehiclePanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:30.0
+                hpadding:0.0];
     [self placeViewLogsButtonsOntoVehiclePanel:vehiclePanel
-                                     belowView:vehicleDataPanel
+                                     belowView:funFactsDataPanel
                           parentViewController:parentViewController];
     return vehiclePanel;
   };
@@ -715,29 +719,13 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
 - (PEEntityViewPanelMakerBlk)fuelstationViewPanelMaker {
   return ^ UIView * (PEAddViewEditController *parentViewController, FPFuelStation *fuelstation) {
     UIView *parentView = [parentViewController view];
-    UIView *fuelstationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *fuelstationDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Gas station name", [PEUtils emptyIfNil:[fuelstation name]]],
-                                                                      @[@"Street", [PEUtils emptyIfNil:[fuelstation street]]],
-                                                                      @[@"City", [PEUtils emptyIfNil:[fuelstation city]]],
-                                                                      @[@"State", [PEUtils emptyIfNil:[fuelstation state]]],
-                                                                      @[@"Zip", [PEUtils emptyIfNil:[fuelstation zip]]]]
-                                                     withCellHeight:36.5
-                                                  labelLeftHPadding:10.0
-                                                 valueRightHPadding:15.0
-                                                          labelFont:[_uitoolkit fontForTextfields]
-                                                          valueFont:[_uitoolkit fontForTextfields]
-                                                     labelTextColor:[UIColor blackColor]
-                                                     valueTextColor:[UIColor grayColor]
-                                     minPaddingBetweenLabelAndValue:10.0
-                                                  includeTopDivider:NO
-                                               includeBottomDivider:NO
-                                               includeInnerDividers:NO
-                                            innerDividerWidthFactor:0.95
-                                                     dividerPadding:3.5
-                                            rowPanelBackgroundColor:[UIColor whiteColor]
-                                               panelBackgroundColor:[_uitoolkit colorForWindows]
-                                                       dividerColor:nil
-                                                     relativeToView:parentView];
+    UIView *fuelstationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.6 relativeToView:parentView];
+    UIView *fuelstationDataPanel = [self dataPanelWithRowData:@[@[@"Gas station name", [PEUtils emptyIfNil:[fuelstation name]]],
+                                                                @[@"Street", [PEUtils emptyIfNil:[fuelstation street]]],
+                                                                @[@"City", [PEUtils emptyIfNil:[fuelstation city]]],
+                                                                @[@"State", [PEUtils emptyIfNil:[fuelstation state]]],
+                                                                @[@"Zip", [PEUtils emptyIfNil:[fuelstation zip]]]]
+                                                   parentView:parentView];
     [PEUIUtils placeView:fuelstationDataPanel
                  atTopOf:fuelstationPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -747,17 +735,50 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                                                             fuelstation:fuelstation
                                                                               belowView:fuelstationDataPanel
                                                                    parentViewController:parentViewController][0];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
+    UIView *funFactsDataPanel1 = [self dataPanelWithRowData:@[@[@"YTD avg price (87 octane)", [currencyFormatter stringFromNumber:[_reports yearToDateAvgPricePerGallonForFuelstation:fuelstation octane:@(87)]]],
+                                                              @[@"All time avg price (87 octane)", [currencyFormatter stringFromNumber:[_reports overallAvgPricePerGallonForFuelstation:fuelstation octane:@(87)]]]]
+                                                 parentView:parentView];
+    [PEUIUtils placeView:funFactsDataPanel1
+                   below:coordinatesTableView
+                    onto:fuelstationPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:30.0
+                hpadding:0.0];
+    UIView *funFactsDataPanel2 = [self dataPanelWithRowData:@[@[@"YTD max price (87 octane)", [currencyFormatter stringFromNumber:[_reports yearToDateMaxPricePerGallonForFuelstation:fuelstation octane:@(87)]]],
+                                                              @[@"All time max price (87 octane)", [currencyFormatter stringFromNumber:[_reports overallMaxPricePerGallonForFuelstation:fuelstation octane:@(87)]]]]
+                                                 parentView:parentView];
+    [PEUIUtils placeView:funFactsDataPanel2
+                   below:funFactsDataPanel1
+                    onto:fuelstationPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:15.0
+                hpadding:0.0];
+    UIView *funFactsDataPanel3 = [self dataPanelWithRowData:@[@[@"YTD spent on gas", [currencyFormatter stringFromNumber:[_reports yearToDateSpentOnGasForFuelstation:fuelstation]]],
+                                                              @[@"All-time spent on gas", [currencyFormatter stringFromNumber:[_reports totalSpentOnGasForFuelstation:fuelstation]]]]
+                                                 parentView:parentView];
+    [PEUIUtils placeView:funFactsDataPanel3
+                   below:funFactsDataPanel2
+                    onto:fuelstationPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:15.0
+                hpadding:0.0];
     [self placeViewLogsButtonOntoFuelstationPanel:fuelstationPanel
-                                        belowView:coordinatesTableView
+                                        belowView:funFactsDataPanel3
                              parentViewController:parentViewController];
-    return fuelstationPanel;
+    // wrap fuel station panel in scroll view (so everything can "fit")
+    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelstationPanel frame]];
+    [scrollView setContentSize:CGSizeMake(fuelstationPanel.frame.size.width, 1.35 * fuelstationPanel.frame.size.height)];
+    [scrollView addSubview:fuelstationPanel];
+    [scrollView setBounces:NO];
+    return scrollView;
   };
 }
 
 - (PEEntityPanelMakerBlk)fuelstationFormPanelMakerIncludeLogButton:(BOOL)includeLogButton {
   return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
-    UIView *fuelStationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.1 relativeToView:parentView];
+    UIView *fuelStationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.4 relativeToView:parentView];
     TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:fuelStationPanel];
     UITextField *fuelStationNameTf = tfMaker(@"Gas station name", FPFuelStationTagName);
     UITextField *fuelStationStreetTf = tfMaker(@"Street", FPFuelStationTagStreet);
@@ -910,7 +931,7 @@ location from the given address above."]
     }
     // wrap fuel station panel in scroll view (so everything can "fit")
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelStationPanel frame]];
-    [scrollView setContentSize:CGSizeMake(fuelStationPanel.frame.size.width, 1.25 * fuelStationPanel.frame.size.height)];
+    [scrollView setContentSize:CGSizeMake(fuelStationPanel.frame.size.width, 1.2 * fuelStationPanel.frame.size.height)];
     [scrollView addSubview:fuelStationPanel];
     [scrollView setBounces:NO];
     return scrollView;
@@ -1227,28 +1248,12 @@ location from the given address above."]
   return ^ UIView * (PEAddViewEditController *parentViewController, FPFuelPurchaseLog *fplog) {
     UIView *parentView = [parentViewController view];
     UIView *fplogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *fplogDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Octane", [PEUtils descriptionOrEmptyIfNil:[fplog octane]]],
-                                                                @[@"Price per gallon", [PEUtils descriptionOrEmptyIfNil:[fplog gallonPrice]]],
-                                                                @[@"Car wash per-gallon discount", [PEUtils descriptionOrEmptyIfNil:[fplog carWashPerGallonDiscount]]],
-                                                                @[@"Got car wash?", [PEUtils yesNoFromBool:[fplog gotCarWash]]],
-                                                                @[@"Num gallons", [PEUtils descriptionOrEmptyIfNil:[fplog numGallons]]]]
-                                               withCellHeight:36.5
-                                            labelLeftHPadding:10.0
-                                           valueRightHPadding:15.0
-                                                    labelFont:[_uitoolkit fontForTextfields]
-                                                    valueFont:[_uitoolkit fontForTextfields]
-                                               labelTextColor:[UIColor blackColor]
-                                               valueTextColor:[UIColor grayColor]
-                               minPaddingBetweenLabelAndValue:10.0
-                                            includeTopDivider:NO
-                                         includeBottomDivider:NO
-                                         includeInnerDividers:NO
-                                      innerDividerWidthFactor:0.95
-                                               dividerPadding:3.5
-                                      rowPanelBackgroundColor:[UIColor whiteColor]
-                                         panelBackgroundColor:[_uitoolkit colorForWindows]
-                                                 dividerColor:nil
-                                               relativeToView:parentView];
+    UIView *fplogDataPanel = [self dataPanelWithRowData:@[@[@"Octane", [PEUtils descriptionOrEmptyIfNil:[fplog octane]]],
+                                                          @[@"Price per gallon", [PEUtils descriptionOrEmptyIfNil:[fplog gallonPrice]]],
+                                                          @[@"Car wash per-gallon discount", [PEUtils descriptionOrEmptyIfNil:[fplog carWashPerGallonDiscount]]],
+                                                          @[@"Got car wash?", [PEUtils yesNoFromBool:[fplog gotCarWash]]],
+                                                          @[@"Num gallons", [PEUtils descriptionOrEmptyIfNil:[fplog numGallons]]]]
+                                             parentView:parentView];
     FPVehicle *vehicle = [_coordDao vehicleForFuelPurchaseLog:fplog error:[FPUtils localFetchErrorHandlerMaker]()];
     FPFuelStation *fuelstation = [_coordDao fuelStationForFuelPurchaseLog:fplog error:[FPUtils localFetchErrorHandlerMaker]()];
     NSDictionary *components = [self fplogFormComponentsWithUser:user
@@ -1529,28 +1534,12 @@ location from the given address above."]
   return ^ UIView * (PEAddViewEditController *parentViewController, FPEnvironmentLog *envlog) {
     UIView *parentView = [parentViewController view];
     UIView *envlogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *envlogDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Odometer", [PEUtils descriptionOrEmptyIfNil:[envlog odometer]]],
-                                                                 @[@"Reported DTE", [PEUtils descriptionOrEmptyIfNil:[envlog reportedDte]]],
-                                                                 @[@"Reported avg mpg", [PEUtils descriptionOrEmptyIfNil:[envlog reportedAvgMpg]]],
-                                                                 @[@"Reported avg mph", [PEUtils descriptionOrEmptyIfNil:[envlog reportedAvgMph]]],
-                                                                 @[@"Reported outside temperature", [PEUtils descriptionOrEmptyIfNil:[envlog reportedOutsideTemp]]]]
-                                                withCellHeight:36.5
-                                             labelLeftHPadding:10.0
-                                            valueRightHPadding:15.0
-                                                     labelFont:[_uitoolkit fontForTextfields]
-                                                     valueFont:[_uitoolkit fontForTextfields]
-                                                labelTextColor:[UIColor blackColor]
-                                                valueTextColor:[UIColor grayColor]
-                                minPaddingBetweenLabelAndValue:10.0
-                                             includeTopDivider:NO
-                                          includeBottomDivider:NO
-                                          includeInnerDividers:NO
-                                       innerDividerWidthFactor:0.95
-                                                dividerPadding:3.5
-                                       rowPanelBackgroundColor:[UIColor whiteColor]
-                                          panelBackgroundColor:[_uitoolkit colorForWindows]
-                                                  dividerColor:nil
-                                                relativeToView:parentView];
+    UIView *envlogDataPanel = [self dataPanelWithRowData:@[@[@"Odometer", [PEUtils descriptionOrEmptyIfNil:[envlog odometer]]],
+                                                           @[@"Reported DTE", [PEUtils descriptionOrEmptyIfNil:[envlog reportedDte]]],
+                                                           @[@"Reported avg mpg", [PEUtils descriptionOrEmptyIfNil:[envlog reportedAvgMpg]]],
+                                                           @[@"Reported avg mph", [PEUtils descriptionOrEmptyIfNil:[envlog reportedAvgMph]]],
+                                                           @[@"Reported outside temperature", [PEUtils descriptionOrEmptyIfNil:[envlog reportedOutsideTemp]]]]
+                                              parentView:parentView];
     NSDictionary *components = [self envlogFormComponentsWithUser:user
                                       displayDisclosureIndicators:NO
                                            defaultSelectedVehicle:[_coordDao vehicleForEnvironmentLog:envlog error:[FPUtils localFetchErrorHandlerMaker]()]

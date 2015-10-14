@@ -30,6 +30,12 @@
 
 #pragma mark - Things For PEObjc-Commons
 
++ (NSNumberFormatter *)currencyFormatter {
+  NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+  [formatter setNumberStyle:NSNumberFormatterCurrencyStyle];
+  return formatter;
+}
+
 + (NSInteger)daysFromDate:(NSDate *)fromDate toDate:(NSDate *)toDate {
   NSCalendar *gregorianCalendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
   NSDateComponents *components = [gregorianCalendar components:NSCalendarUnitDay

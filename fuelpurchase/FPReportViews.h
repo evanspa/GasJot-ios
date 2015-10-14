@@ -21,6 +21,12 @@ typedef JGActionSheetSection *(^FPFunFact)(id, FPUser *, UIView *);
 
 #pragma mark - Gas Log Fun Facts
 
+- (FPFunFact)overallAvgPricePerGallonForFuelstationFunFact;
+
+- (FPFunFact)overallAvgPricePerGallonForUserFunFact;
+
+- (FPFunFact)yearToDateAvgPricePerGallonForFuelstationFunFact;
+
 - (FPFunFact)yearToDateAvgPricePerGallonForUserFunFact;
 
 - (FPFunFact)totalSpentOnGasForFuelStationFunFact;

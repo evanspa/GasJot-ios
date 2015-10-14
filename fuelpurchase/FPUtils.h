@@ -43,6 +43,8 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
 
 #pragma mark - Things For PEObjc-Commons
 
++ (NSNumberFormatter *)currencyFormatter;
+
 + (NSInteger)daysFromDate:(NSDate *)fromDate toDate:(NSDate *)toDate;
 
 + (NSArray *)daysBetweenDates:(NSArray *)dates;
