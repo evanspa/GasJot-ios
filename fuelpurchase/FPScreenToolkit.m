@@ -609,7 +609,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
         [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
       }
     };
-    PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, FPVehicle *newVehicle) {
+    PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, UIView *entityFormPanel, FPVehicle *newVehicle) {
       NSString *infoText;
       if ([[_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()] count] == 0) {
         infoText = @"You can now create gas and odometer logs for this vehicle.  When creating your first gas log, you'll need to create the gas station record for it too.";
@@ -1218,7 +1218,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
         [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
       }
     };
-    PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, FPFuelStation *newFuelstation) {
+    PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, UIView *entityFormPanel, FPFuelStation *newFuelstation) {
       NSString *infoText;
       if ([[_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()] count] == 0) {
         infoText = @"You can now create gas logs for this gas station.  When creating your first gas log, you'll need to create the vehicle record for it too.";
@@ -1725,10 +1725,13 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       }
       return logs;
     };
-    PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, FPLogEnvLogComposite *fpEnvLogComposite) {
+    PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, UIView *entityFormPanel, FPLogEnvLogComposite *fpEnvLogComposite) {
+      NSArray *selectionsAndPercentArray = selectionsAndPercents(entityFormPanel, fpEnvLogComposite);
+      FPVehicle *selectedVehicle = selectionsAndPercentArray[0];
+      FPFuelStation *selectedFuelStation = selectionsAndPercentArray[1];
       return [FPScreenToolkit funFactSectionWithNumFunFacts:[_reportViews numGasFunFacts]
                                              nextFunFactBlk:^{ return [_reportViews nextGasFunFact]; }
-                                                     record:fpEnvLogComposite.fpLog
+                                                     record:@[fpEnvLogComposite.fpLog, selectedVehicle, selectedFuelStation]
                                                        user:user
                                              relativeToView:ctrl.view];
     };
@@ -2520,7 +2523,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       UITextField *odometerTf = (UITextField *)[entityPanel viewWithTag:FPEnvLogTagOdometer];
       [odometerTf becomeFirstResponder];
     };
-    PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, FPEnvironmentLog *fpEnvlog) {
+    PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, UIView *entityFormPanel, FPEnvironmentLog *fpEnvlog) {
       return [FPScreenToolkit funFactSectionWithNumFunFacts:[_reportViews numOdometerFunFacts]
                                              nextFunFactBlk:^{ return [_reportViews nextOdometerFunFact]; }
                                                      record:fpEnvlog

@@ -2103,7 +2103,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
               [PEUIUtils showSuccessAlertWithMsgs:successMessageTitlesForUpload
                                             title:[NSString stringWithFormat:@"%@ saved.", mainMsgTitle]
                                  alertDescription:[[NSAttributedString alloc] initWithString:@"Your records have been successfully saved to the Gas Jot server."]
-                         additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _newEntity) : nil
+                         additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _entityFormPanel, _newEntity) : nil
                                          topInset:70.0
                                       buttonTitle:@"Okay."
                                      buttonAction:^{
@@ -2120,7 +2120,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
               [HUD hide:YES];
               [PEUIUtils showSuccessAlertWithTitle:[NSString stringWithFormat:@"%@ saved.", _entityTitle]
                                   alertDescription:[[NSAttributedString alloc] initWithString:successMessageTitlesForUpload[0]]
-                          additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _newEntity) : nil
+                          additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _entityFormPanel, _newEntity) : nil
                                           topInset:70.0
                                        buttonTitle:@"Okay."
                                       buttonAction:^{
@@ -2467,7 +2467,7 @@ The ones that did not %@ and will need to be fixed individually."
         [PEUIUtils showSuccessAlertWithMsgs:saveMessages
                                       title:saveTitle
                            alertDescription:desc
-                   additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _newEntity) : nil
+                   additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _entityFormPanel, _newEntity) : nil
                                    topInset:70.0
                                 buttonTitle:@"Okay."
                                buttonAction:^{
@@ -2482,7 +2482,7 @@ The ones that did not %@ and will need to be fixed individually."
         [desc appendAttributedString:descSubtext];
         [PEUIUtils showSuccessAlertWithTitle:saveTitle
                             alertDescription:desc
-                    additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _newEntity) : nil
+                    additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _entityFormPanel, _newEntity) : nil
                                     topInset:70.0
                                  buttonTitle:@"Okay."
                                 buttonAction:^{

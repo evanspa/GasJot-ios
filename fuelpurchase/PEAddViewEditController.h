@@ -112,7 +112,7 @@ typedef NSArray *(^PEEntityValidatorBlk)(UIView *);
 typedef NSArray *(^PEMessagesFromErrMask)(NSInteger);
 typedef void (^PEModalOperationStarted)(void);
 typedef void (^PEModalOperationDone)(void);
-typedef JGActionSheetSection *(^PEAddlContentSection)(PEAddViewEditController *, id);
+typedef JGActionSheetSection *(^PEAddlContentSection)(PEAddViewEditController *, UIView *, id);
 
 @interface PEAddViewEditController : UIViewController <MBProgressHUDDelegate>
 
