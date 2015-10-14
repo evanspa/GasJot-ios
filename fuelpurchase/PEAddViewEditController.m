@@ -11,7 +11,7 @@
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import <MBProgressHUD/MBProgressHUD.h>
-#import <JGActionSheet/JGActionSheet.h>
+#import <PEObjc-Commons/JGActionSheet.h>
 #import "FPLogging.h"
 #import "PEListViewController.h"
 
@@ -2190,15 +2190,15 @@ locally.  Try uploading it later.";
                 addServerBusySection();
               }
               if (!areAllBusyErrors()) {
-                NSString *title = [NSString stringWithFormat:@"Mixed results %@.", mainMsgTitle];
+                NSString *title = [NSString stringWithFormat:@"Mixed results saving %@.", [mainMsgTitle lowercaseString]];
                 NSAttributedString *attrMessage = [PEUIUtils attributedTextWithTemplate:@"Some of the edits were saved to the Gas Jot server and some were not. \
-The ones that did not %@ and will need to be fixed individually.  The ones uploaded are:"
+The ones that did not %@ and will need to be fixed individually."
                                                        textToAccent:@"have been saved locally"
                                                      accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
                 [sections addObject:[PEUIUtils mixedResultsAlertSectionWithSuccessMsgs:successMessageTitlesForUpload
                                                                                  title:title
                                                                       alertDescription:attrMessage
-                                                                   failuresDescription:[[NSAttributedString alloc] initWithString:@"The errors are:"]
+                                                                   failuresDescription:[[NSAttributedString alloc] initWithString:@"The problems are:"]
                                                                               failures:stripOutBusyErrors()
                                                                         relativeToView:[self parentViewForAlerts]]];
               }

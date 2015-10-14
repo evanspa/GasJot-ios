@@ -1,94 +1,78 @@
 //
-//  FPReports.m
+//  FPReportViews.m
 //  PEFuelPurchase-App
 //
 //  Created by Paul Evans on 10/10/15.
 //  Copyright © 2015 Paul Evans. All rights reserved.
 //
 
-#import "FPReports.h"
+#import "FPReportViews.h"
 #import "FPUtils.h"
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEObjc-Commons/PEUIUtils.h>
 #import "NSDate+PEAdditions.h"
 
 NSString * const FPOdometerLogFunFactIndexDefaultsKey = @"FPOdometerLogFunFactIndex";
+NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 
-@implementation FPReports {
-  FPLocalDao *_localDao;
+@implementation FPReportViews {
+  FPReports *_reports;
   NSArray *_odometerLogFunFacts;
+  NSArray *_gasLogFunFacts;
 }
 
 #pragma mark - Initializers
 
-- (id)initWithLocalDao:(FPLocalDao *)localDao {
+- (id)initWithReports:(FPReports *)reports {
   self = [super init];
   if (self) {
-    _localDao = localDao;
+    _reports = reports;
     _odometerLogFunFacts = [self odometerLogFunFacts];
+    _gasLogFunFacts = [self gasLogFunFacts];
   }
   return self;
 }
 
-#pragma mark - Odometer Log Fun Fact Definitions
+#pragma mark - Gas Log Fun Facts Collection
 
-- (NSDecimalNumber *)milesDrivenSinceLastOdometerLogAndLog:(FPEnvironmentLog *)odometerLog
-                                                      user:(FPUser *)user {
-  NSDecimalNumber *odometer = [odometerLog odometer];
-  if (![PEUtils isNil:odometer]) {
-    NSArray *odometerLogs =
-      [_localDao environmentLogsForUser:user pageSize:1 beforeDateLogged:[odometerLog logDate] error:[FPUtils localFetchErrorHandlerMaker]()];
-    if ([odometerLogs count] > 0) {
-      NSDecimalNumber *lastOdometer = [odometerLogs[0] odometer];
-      if (![PEUtils isNil:lastOdometer]) {
-        return [odometer decimalNumberBySubtracting:lastOdometer];
-      }
-    }
-  }
-  return nil;
+- (NSArray *)gasLogFunFacts {
+  JGActionSheetSection *(^funFactIfFirstGasRecord)(UIView *) = ^(UIView *relativeToView) {
+    return [PEUIUtils alertSectionWithTitle:nil
+                                 titleImage:nil
+                           alertDescription:[[NSAttributedString alloc] initWithString:@"Your first gas log.  Nice."]
+                             relativeToView:relativeToView];
+  };
+  NSNumberFormatter *numFormatter = [[NSNumberFormatter alloc] init];
+  [numFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
+  
+/*- <DONE> (NSDecimalNumber *)yearToDateSpentOnGasForUser:(FPUser *)user;
+  - (NSDecimalNumber *)yearToDateSpentOnGasForVehicle:(FPVehicle *)vehicle;
+  - (NSDecimalNumber *)yearToDateSpentOnGasForFuelstation:(FPFuelStation *)vehicle;
+  - (NSDecimalNumber *)totalSpentOnGasForUser:(FPUser *)user;
+  - (NSDecimalNumber *)totalSpentOnGasForVehicle:(FPVehicle *)vehicle;
+  - (NSDecimalNumber *)totalSpentOnGasForFuelstation:(FPFuelStation *)vehicle;
+  - (NSDecimalNumber *)yearToDateAvgPricePerGallonForUser:(FPUser *)user octane:(NSNumber *)octane;
+  - (NSDecimalNumber *)yearToDateAvgPricePerGallonForVehicle:(FPVehicle *)vehicle octane:(NSNumber *)octane;
+  - (NSDecimalNumber *)yearToDateAvgPricePerGallonForFuelstation:(FPFuelStation *)fuelstation octane:(NSNumber *)octane;
+  - (NSDecimalNumber *)overallAvgPricePerGallonForUser:(FPUser *)user octane:(NSNumber *)octane;
+  - (NSDecimalNumber *)overallAvgPricePerGallonForVehicle:(FPVehicle *)vehicle octane:(NSNumber *)octane;
+  - (NSDecimalNumber *)overallAvgPricePerGallonForFuelstation:(FPFuelStation *)fuelstation octane:(NSNumber *)octane;
+  - (NSDecimalNumber *)yearToDateMaxPricePerGallonForUser:(FPUser *)user octane:(NSNumber *)octane;
+  - (NSDecimalNumber *)yearToDateMaxPricePerGallonForVehicle:(FPVehicle *)vehicle octane:(NSNumber *)octane;
+  - (NSDecimalNumber *)yearToDateMaxPricePerGallonForFuelstation:(FPFuelStation *)fuelstation octane:(NSNumber *)octane;
+  - (NSDecimalNumber *)overallMaxPricePerGallonForUser:(FPUser *)user octane:(NSNumber *)octane;
+  - (NSDecimalNumber *)overallMaxPricePerGallonForVehicle:(FPVehicle *)vehicle octane:(NSNumber *)octane;
+  - (NSDecimalNumber *)overallMaxPricePerGallonForFuelstation:(FPFuelStation *)fuelstation octane:(NSNumber *)octane;*/
+  
+  FPFunFact f1 = ^JGActionSheetSection *(FPFuelPurchaseLog *gasLog, FPUser *user, UIView *relativeToView) {
+    NSDecimalNumber *spentOnGas = [_reports yearToDateSpentOnGasForUser:user];
+    NSAttributedString *funFact = [PEUIUtils attributedTextWithTemplate:@"This year, you've spent %@ on gas across all your vehicles."
+                                                          textToAccent:[numFormatter stringFromNumber:spentOnGas]
+                                                        accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+    return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact" alertDescription:funFact relativeToView:relativeToView];
+  };
+  return @[f1];
 }
-
-- (NSNumber *)daysSinceLastOdometerLogAndLog:(FPEnvironmentLog *)odometerLog
-                                        user:(FPUser *)user {
-  NSArray *odometerLogs =
-    [_localDao environmentLogsForUser:user pageSize:1 beforeDateLogged:[odometerLog logDate] error:[FPUtils localFetchErrorHandlerMaker]()];
-  if ([odometerLogs count] > 0) {
-    NSDate *dateOfLastLog = [odometerLogs[0] logDate];
-    if (dateOfLastLog) {
-      return @([[odometerLog logDate] daysFromDate:dateOfLastLog]);
-    }
-  }
-  return nil;
-}
-
-- (NSNumber *)temperatureLastYearFromLog:(FPEnvironmentLog *)odometerLog
-                                    user:(FPUser *)user {
-  NSInteger plusMinusDays = 15;
-  NSDate *logDate = [odometerLog logDate];
-  if (logDate) {
-    NSDate *oneYearAgo = [[NSCalendar currentCalendar] dateByAddingUnit:NSCalendarUnitYear value:-1 toDate:logDate options:0];
-    NSDate *oneYearAgoMinusSome = [[NSCalendar currentCalendar] dateByAddingUnit:NSCalendarUnitDay value:plusMinusDays toDate:oneYearAgo options:0];
-    NSArray *odometerLogs =
-      [_localDao environmentLogsForUser:user pageSize:5 beforeDateLogged:oneYearAgoMinusSome error:[FPUtils localFetchErrorHandlerMaker]()];
-    if ([odometerLogs count] > 0) {
-      // so we got at most 5 hits; use the one nearest to our 1-year-ago date.
-      FPEnvironmentLog *nearestToAYearAgoLog = odometerLogs[0];
-      for (NSInteger i = 1; i < odometerLogs.count; i++) {
-        NSDate *atLeastYearAgoLogDate = [odometerLogs[i] logDate];
-        if ([atLeastYearAgoLogDate daysFromDate:oneYearAgo] < [nearestToAYearAgoLog.logDate daysFromDate:oneYearAgo]) {
-          nearestToAYearAgoLog = odometerLogs[i];
-        }
-      }
-      // so we have our odometer log that is neareset to 1-year-ago, but, is it
-      // within our plus/minus variance?
-      if ([nearestToAYearAgoLog.logDate daysFromDate:oneYearAgo] <= plusMinusDays) {
-        return [nearestToAYearAgoLog reportedOutsideTemp];
-      }
-    }
-  }
-  return nil;
-}
-
 
 #pragma mark - Odometer Log Fun Facts Collection
 
@@ -100,7 +84,7 @@ NSString * const FPOdometerLogFunFactIndexDefaultsKey = @"FPOdometerLogFunFactIn
                              relativeToView:relativeToView];
   };
   FPFunFact f1 = ^JGActionSheetSection *(FPEnvironmentLog *odometerLog, FPUser *user, UIView *relativeToView) {
-    NSDecimalNumber *milesDrivenSinceLastLog = [self milesDrivenSinceLastOdometerLogAndLog:odometerLog user:user];
+    NSDecimalNumber *milesDrivenSinceLastLog = [_reports milesDrivenSinceLastOdometerLogAndLog:odometerLog user:user];
     if (milesDrivenSinceLastLog) {
       NSAttributedString *funFact = [PEUIUtils attributedTextWithTemplate:@"You have driven %@ miles since your last odometer log was recorded."
                                                              textToAccent:[milesDrivenSinceLastLog description]
@@ -111,7 +95,7 @@ NSString * const FPOdometerLogFunFactIndexDefaultsKey = @"FPOdometerLogFunFactIn
     }
   };
   FPFunFact f2 = ^JGActionSheetSection *(FPEnvironmentLog *odometerLog, FPUser *user, UIView *relativeToView) {
-    NSNumber *daysSinceLastLog = [self daysSinceLastOdometerLogAndLog:odometerLog user:user];
+    NSNumber *daysSinceLastLog = [_reports daysSinceLastOdometerLogAndLog:odometerLog user:user];
     if (daysSinceLastLog) {
       NSAttributedString *funFact = [PEUIUtils attributedTextWithTemplate:@"It has been %@ days since your last odometer log was recorded."
                                                              textToAccent:[daysSinceLastLog description]
@@ -122,7 +106,7 @@ NSString * const FPOdometerLogFunFactIndexDefaultsKey = @"FPOdometerLogFunFactIn
     }
   };
   FPFunFact f3 = ^JGActionSheetSection *(FPEnvironmentLog *odometerLog, FPUser *user, UIView *relativeToView) {
-    NSNumber *temperateLastYear = [self temperatureLastYearFromLog:odometerLog user:user];
+    NSNumber *temperateLastYear = [_reports temperatureLastYearFromLog:odometerLog user:user];
     if (temperateLastYear) {
       NSAttributedString *funFact = [PEUIUtils attributedTextWithTemplate:@"A year ago the temperature was %@ degrees."
                                                              textToAccent:[temperateLastYear description]
@@ -167,16 +151,26 @@ NSString * const FPOdometerLogFunFactIndexDefaultsKey = @"FPOdometerLogFunFactIn
   return funFactIndex;
 }
 
-#pragma mark - 'Next' Fun Fact
+#pragma mark - 'Next' Odometer Log Fun Fact
 
 - (NSInteger)numOdometerFunFacts {
   return [_odometerLogFunFacts count];
 }
 
 - (FPFunFact)nextOdometerFunFact {
-  NSNumber *odometerFunFactIndex =
-    [FPReports nextIndexForUserDefaultsKey:FPOdometerLogFunFactIndexDefaultsKey funFacts:_odometerLogFunFacts];
+  NSNumber *odometerFunFactIndex = [FPReportViews nextIndexForUserDefaultsKey:FPOdometerLogFunFactIndexDefaultsKey funFacts:_odometerLogFunFacts];
   return _odometerLogFunFacts[odometerFunFactIndex.integerValue];
+}
+
+#pragma mark - 'Next' Gas Log Fun Fact
+
+- (NSInteger)numGasFunFacts {
+  return [_gasLogFunFacts count];
+}
+
+- (FPFunFact)nextGasFunFact {
+  NSNumber *gasFunFactIndex = [FPReportViews nextIndexForUserDefaultsKey:FPGasLogFunFactIndexDefaultsKey funFacts:_gasLogFunFacts];
+  return _gasLogFunFacts[gasFunFactIndex.integerValue];
 }
 
 @end

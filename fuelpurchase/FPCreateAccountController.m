@@ -28,7 +28,7 @@
 #import "FPUtils.h"
 #import "FPAppNotificationNames.h"
 #import "FPNames.h"
-#import <JGActionSheet/JGActionSheet.h>
+#import <PEObjc-Commons/JGActionSheet.h>
 #import "FPUIUtils.h"
 
 #ifdef FP_DEV

@@ -44,8 +44,7 @@
 		CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */; };
 		CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = CAD8AE501B2B291000276F4F /* PELMUIUtils.m */; };
 		CAE873F71BBDA64900E5A81F /* FPForgotPasswordController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAE873F61BBDA64900E5A81F /* FPForgotPasswordController.m */; settings = {ASSET_TAGS = (); }; };
-		CAEE0C9A1BC9830E00FAB0BF /* FPReports.m in Sources */ = {isa = PBXBuildFile; fileRef = CAEE0C991BC9830E00FAB0BF /* FPReports.m */; settings = {ASSET_TAGS = (); }; };
-		CAEE0C9F1BCA900A00FAB0BF /* NSDate+PEAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = CAEE0C9E1BCA900A00FAB0BF /* NSDate+PEAdditions.m */; settings = {ASSET_TAGS = (); }; };
+		CAEE0C9A1BC9830E00FAB0BF /* FPReportViews.m in Sources */ = {isa = PBXBuildFile; fileRef = CAEE0C991BC9830E00FAB0BF /* FPReportViews.m */; settings = {ASSET_TAGS = (); }; };
 		CAFC84651BA27EAB00FAEB66 /* FPSplashController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84641BA27EAB00FAEB66 /* FPSplashController.m */; };
 		CAFC84691BA363A600FAEB66 /* iCarousel.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84681BA363A600FAEB66 /* iCarousel.m */; };
 		CAFC846E1BA64B5A00FAEB66 /* FPHomeScreenController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC846D1BA64B5A00FAEB66 /* FPHomeScreenController.m */; };
@@ -139,10 +138,8 @@
 		CAD8AE501B2B291000276F4F /* PELMUIUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PELMUIUtils.m; sourceTree = "<group>"; };
 		CAE873F51BBDA64900E5A81F /* FPForgotPasswordController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPForgotPasswordController.h; sourceTree = "<group>"; };
 		CAE873F61BBDA64900E5A81F /* FPForgotPasswordController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPForgotPasswordController.m; sourceTree = "<group>"; };
-		CAEE0C981BC9830E00FAB0BF /* FPReports.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPReports.h; sourceTree = "<group>"; };
-		CAEE0C991BC9830E00FAB0BF /* FPReports.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPReports.m; sourceTree = "<group>"; };
-		CAEE0C9D1BCA900A00FAB0BF /* NSDate+PEAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+PEAdditions.h"; sourceTree = "<group>"; };
-		CAEE0C9E1BCA900A00FAB0BF /* NSDate+PEAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+PEAdditions.m"; sourceTree = "<group>"; };
+		CAEE0C981BC9830E00FAB0BF /* FPReportViews.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPReportViews.h; sourceTree = "<group>"; };
+		CAEE0C991BC9830E00FAB0BF /* FPReportViews.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPReportViews.m; sourceTree = "<group>"; };
 		CAFC84631BA27EAB00FAEB66 /* FPSplashController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPSplashController.h; sourceTree = "<group>"; };
 		CAFC84641BA27EAB00FAEB66 /* FPSplashController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPSplashController.m; sourceTree = "<group>"; };
 		CAFC84671BA363A600FAEB66 /* iCarousel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iCarousel.h; sourceTree = "<group>"; };
@@ -401,11 +398,9 @@
 		18D6DFB117F68005006B300D /* PEFuelPurchase-App */ = {
 			isa = PBXGroup;
 			children = (
-				CAEE0C9B1BCA8FD500FAB0BF /* PE Commons */,
 				186E0B7819CD1BDD00CE4B3A /* PE UI Commons */,
 				189AC7521A78030D00A6CFE3 /* Model */,
 				185D38CC1815952B0007587A /* App Delegate */,
-				CAEE0C961BC982D500FAB0BF /* Reports */,
 				CA7D5A241B383F4500433581 /* Notifications */,
 				18AB99FA17F6831C002A8A69 /* Utils */,
 				CA7D5A281B384F4000433581 /* User Interface */,
@@ -481,6 +476,7 @@
 		CA7D5A281B384F4000433581 /* User Interface */ = {
 			isa = PBXGroup;
 			children = (
+				CAEE0C961BC982D500FAB0BF /* Reporting Views */,
 				CAFC84831BA749DD00FAEB66 /* Categories */,
 				CAFC847F1BA7478B00FAEB66 /* GUI Utils */,
 				CAFC846F1BA668B700FAEB66 /* Raised Center Tab Controller */,
@@ -546,30 +542,13 @@
 			name = "Forgot Password Screen";
 			sourceTree = "<group>";
 		};
-		CAEE0C961BC982D500FAB0BF /* Reports */ = {
+		CAEE0C961BC982D500FAB0BF /* Reporting Views */ = {
 			isa = PBXGroup;
 			children = (
-				CAEE0C981BC9830E00FAB0BF /* FPReports.h */,
-				CAEE0C991BC9830E00FAB0BF /* FPReports.m */,
+				CAEE0C981BC9830E00FAB0BF /* FPReportViews.h */,
+				CAEE0C991BC9830E00FAB0BF /* FPReportViews.m */,
 			);
-			name = Reports;
-			sourceTree = "<group>";
-		};
-		CAEE0C9B1BCA8FD500FAB0BF /* PE Commons */ = {
-			isa = PBXGroup;
-			children = (
-				CAEE0C9C1BCA8FDE00FAB0BF /* NSDate Category */,
-			);
-			name = "PE Commons";
-			sourceTree = "<group>";
-		};
-		CAEE0C9C1BCA8FDE00FAB0BF /* NSDate Category */ = {
-			isa = PBXGroup;
-			children = (
-				CAEE0C9D1BCA900A00FAB0BF /* NSDate+PEAdditions.h */,
-				CAEE0C9E1BCA900A00FAB0BF /* NSDate+PEAdditions.m */,
-			);
-			name = "NSDate Category";
+			name = "Reporting Views";
 			sourceTree = "<group>";
 		};
 		CAFC84621BA27E8000FAEB66 /* Splash Screen */ = {
@@ -673,6 +652,7 @@
 				18D6DFA517F68005006B300D /* Frameworks */,
 				18D6DFA617F68005006B300D /* Resources */,
 				5A314A635D3C4E149517F500 /* Copy Pods Resources */,
+				D7C1EE63FFD57AA05C9912DB /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -762,6 +742,21 @@
 			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
+		D7C1EE63FFD57AA05C9912DB /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -776,7 +771,7 @@
 				CA90F4241B45AB7F005FAB35 /* PEServerSyncActionSheet.m in Sources */,
 				18B17D5719DAE696001D2BF6 /* PEAddViewEditController.m in Sources */,
 				18F61A891A96133000BA631A /* UIScrollView+PEAdditions.m in Sources */,
-				CAEE0C9A1BC9830E00FAB0BF /* FPReports.m in Sources */,
+				CAEE0C9A1BC9830E00FAB0BF /* FPReportViews.m in Sources */,
 				18D6DFBC17F68005006B300D /* FPAppDelegate.m in Sources */,
 				18D6DFB817F68005006B300D /* main.m in Sources */,
 				180EDA3519C7C89B00C782A6 /* FPEditsInProgressController.m in Sources */,
@@ -799,7 +794,6 @@
 				189AC7561A78034500A6CFE3 /* FPLogEnvLogComposite.m in Sources */,
 				18010C5A180E4752005F5CEB /* FPQuickActionMenuController.m in Sources */,
 				183E1416180237A2009E9085 /* FPUtils.m in Sources */,
-				CAEE0C9F1BCA900A00FAB0BF /* NSDate+PEAdditions.m in Sources */,
 				18AC0722181ACC8C001FF24E /* FPLogging.m in Sources */,
 				1865B7D919FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m in Sources */,
 				18C3CD7419DC3B440092C002 /* FPPanelToolkit.m in Sources */,
