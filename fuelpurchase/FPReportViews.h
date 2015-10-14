@@ -19,36 +19,6 @@ typedef JGActionSheetSection *(^FPFunFact)(id, FPUser *, UIView *);
 
 - (id)initWithReports:(FPReports *)reports;
 
-#pragma mark - Gas Log Fun Facts
-
-- (FPFunFact)overallAvgPricePerGallonForFuelstationFunFact;
-
-- (FPFunFact)overallAvgPricePerGallonForUserFunFact;
-
-- (FPFunFact)yearToDateAvgPricePerGallonForFuelstationFunFact;
-
-- (FPFunFact)yearToDateAvgPricePerGallonForUserFunFact;
-
-- (FPFunFact)totalSpentOnGasForFuelStationFunFact;
-
-- (FPFunFact)totalSpentOnGasForVehicleFunFact;
-
-- (FPFunFact)totalSpentOnGasForUserFunFact;
-
-- (FPFunFact)yearToDateSpentOnGasForFuelstationFunFact;
-
-- (FPFunFact)yearToDateSpentOnGasForVehicleFunFact;
-
-- (FPFunFact)yearToDateSpentOnGasForUserFunFact;
-
-#pragma mark - Odometer Log Fun Facts
-
-- (FPFunFact)milesDrivenSinceLastOdometerLogAndLogFunFact;
-
-- (FPFunFact)daysSinceLastOdometerLogAndLogFunFact;
-
-- (FPFunFact)temperatureLastYearFromLogFunFact;
-
 #pragma mark - Odometer Log Fun Fact Iteration
 
 - (NSInteger)numOdometerFunFacts;

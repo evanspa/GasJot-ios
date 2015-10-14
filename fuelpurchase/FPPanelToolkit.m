@@ -719,7 +719,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
 - (PEEntityViewPanelMakerBlk)fuelstationViewPanelMaker {
   return ^ UIView * (PEAddViewEditController *parentViewController, FPFuelStation *fuelstation) {
     UIView *parentView = [parentViewController view];
-    UIView *fuelstationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.6 relativeToView:parentView];
+    UIView *fuelstationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.1 relativeToView:parentView];
     UIView *fuelstationDataPanel = [self dataPanelWithRowData:@[@[@"Gas station name", [PEUtils emptyIfNil:[fuelstation name]]],
                                                                 @[@"Street", [PEUtils emptyIfNil:[fuelstation street]]],
                                                                 @[@"City", [PEUtils emptyIfNil:[fuelstation city]]],
@@ -734,41 +734,34 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     UITableView *coordinatesTableView = [self placeCoordinatesTableOntoFuelstationPanel:fuelstationPanel
                                                                             fuelstation:fuelstation
                                                                               belowView:fuelstationDataPanel
-                                                                   parentViewController:parentViewController][0];
+                                                                   parentViewController:parentViewController][0];    
     NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
-    UIView *funFactsDataPanel1 = [self dataPanelWithRowData:@[@[@"YTD avg price (87 octane)", [currencyFormatter stringFromNumber:[_reports yearToDateAvgPricePerGallonForFuelstation:fuelstation octane:@(87)]]],
-                                                              @[@"All time avg price (87 octane)", [currencyFormatter stringFromNumber:[_reports overallAvgPricePerGallonForFuelstation:fuelstation octane:@(87)]]]]
-                                                 parentView:parentView];
-    [PEUIUtils placeView:funFactsDataPanel1
+    NSArray *octanes = [_coordDao.localDao distinctOctanesForFuelstation:fuelstation error:[FPUtils localFetchErrorHandlerMaker]()];
+    NSMutableArray *priceDataPanels = [NSMutableArray array];
+    for (NSNumber *octane in octanes) {
+      UIView *funFactsDataPanel = [self dataPanelWithRowData:@[@[[NSString stringWithFormat:@"YTD avg price (%@ octane)", octane], [currencyFormatter stringFromNumber:[_reports yearToDateAvgPricePerGallonForFuelstation:fuelstation octane:octane]]],
+                                                               @[[NSString stringWithFormat:@"All time avg price (%@ octane)", octane], [currencyFormatter stringFromNumber:[_reports overallAvgPricePerGallonForFuelstation:fuelstation octane:octane]]],
+                                                               @[[NSString stringWithFormat:@"YTD min price (%@ octane)", octane], [currencyFormatter stringFromNumber:[_reports yearToDateMinPricePerGallonForFuelstation:fuelstation octane:octane]]],
+                                                               @[[NSString stringWithFormat:@"All time min price (%@ octane)", octane], [currencyFormatter stringFromNumber:[_reports overallMinPricePerGallonForFuelstation:fuelstation octane:octane]]],
+                                                               @[[NSString stringWithFormat:@"YTD max price (%@ octane)", octane], [currencyFormatter stringFromNumber:[_reports yearToDateMaxPricePerGallonForFuelstation:fuelstation octane:octane]]],
+                                                               @[[NSString stringWithFormat:@"All time max price (%@ octane)", octane], [currencyFormatter stringFromNumber:[_reports overallMaxPricePerGallonForFuelstation:fuelstation octane:octane]]]]
+                                                  parentView:parentView];
+      [priceDataPanels addObject:funFactsDataPanel];
+    }
+    UIView *priceDataPanelsColumn = [PEUIUtils panelWithColumnOfViews:priceDataPanels verticalPaddingBetweenViews:15.0 viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
+    [PEUIUtils setFrameHeight:(fuelstationPanel.frame.size.height + priceDataPanelsColumn.frame.size.height) ofView:fuelstationPanel];
+    [PEUIUtils placeView:priceDataPanelsColumn
                    below:coordinatesTableView
                     onto:fuelstationPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:30.0
                 hpadding:0.0];
-    UIView *funFactsDataPanel2 = [self dataPanelWithRowData:@[@[@"YTD max price (87 octane)", [currencyFormatter stringFromNumber:[_reports yearToDateMaxPricePerGallonForFuelstation:fuelstation octane:@(87)]]],
-                                                              @[@"All time max price (87 octane)", [currencyFormatter stringFromNumber:[_reports overallMaxPricePerGallonForFuelstation:fuelstation octane:@(87)]]]]
-                                                 parentView:parentView];
-    [PEUIUtils placeView:funFactsDataPanel2
-                   below:funFactsDataPanel1
-                    onto:fuelstationPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:15.0
-                hpadding:0.0];
-    UIView *funFactsDataPanel3 = [self dataPanelWithRowData:@[@[@"YTD spent on gas", [currencyFormatter stringFromNumber:[_reports yearToDateSpentOnGasForFuelstation:fuelstation]]],
-                                                              @[@"All-time spent on gas", [currencyFormatter stringFromNumber:[_reports totalSpentOnGasForFuelstation:fuelstation]]]]
-                                                 parentView:parentView];
-    [PEUIUtils placeView:funFactsDataPanel3
-                   below:funFactsDataPanel2
-                    onto:fuelstationPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:15.0
-                hpadding:0.0];
     [self placeViewLogsButtonOntoFuelstationPanel:fuelstationPanel
-                                        belowView:funFactsDataPanel3
+                                        belowView:priceDataPanelsColumn
                              parentViewController:parentViewController];
     // wrap fuel station panel in scroll view (so everything can "fit")
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelstationPanel frame]];
-    [scrollView setContentSize:CGSizeMake(fuelstationPanel.frame.size.width, 1.35 * fuelstationPanel.frame.size.height)];
+    [scrollView setContentSize:CGSizeMake(fuelstationPanel.frame.size.width, (1.05 + (.1625 * priceDataPanels.count)) * fuelstationPanel.frame.size.height)];
     [scrollView addSubview:fuelstationPanel];
     [scrollView setBounces:NO];
     return scrollView;
