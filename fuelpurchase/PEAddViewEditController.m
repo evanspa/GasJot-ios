@@ -431,6 +431,7 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
   UINavigationItem *navItem = [self navigationItem];
   _backButton = [navItem leftBarButtonItem];
   [self setEdgesForExtendedLayout:UIRectEdgeNone];
+  [self setAutomaticallyAdjustsScrollViewInsets:NO];
   _entityFormPanel = _entityFormPanelMaker(self);
   if (_entityViewPanelMaker) {
     _entityViewPanel = _entityViewPanelMaker(self, _entity);

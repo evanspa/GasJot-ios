@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <PEObjc-Commons/JGActionSheet.h>
 #import <PEFuelPurchase-Model/FPLocalDao.h>
-#import <PEFuelPurchase-Model/FPReports.h>
+#import <PEFuelPurchase-Model/FPStats.h>
 
 typedef JGActionSheetSection *(^FPFunFact)(id, FPUser *, UIView *);
 
@@ -17,7 +17,7 @@ typedef JGActionSheetSection *(^FPFunFact)(id, FPUser *, UIView *);
 
 #pragma mark - Initializers
 
-- (id)initWithReports:(FPReports *)reports;
+- (id)initWithStats:(FPStats *)stats;
 
 #pragma mark - Odometer Log Fun Fact Iteration
 

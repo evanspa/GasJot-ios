@@ -59,7 +59,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                      screenToolkit:self
                                                          uitoolkit:uitoolkit
                                                              error:errorBlk];
-    _reportViews = [[FPReportViews alloc] initWithReports:[[FPReports alloc] initWithLocalDao:_coordDao.localDao errorBlk:errorBlk]];
+    _reportViews = [[FPReportViews alloc] initWithReports:[[FPStats alloc] initWithLocalDao:_coordDao.localDao errorBlk:errorBlk]];
   }
   return self;
 }

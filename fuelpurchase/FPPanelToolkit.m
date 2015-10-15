@@ -19,7 +19,7 @@
 #import "FPUtils.h"
 #import "FPUIUtils.h"
 #import "FPForgotPasswordController.h"
-#import <PEFuelPurchase-Model/FPReports.h>
+#import <PEFuelPurchase-Model/FPStats.h>
 
 NSString * const FPFpLogEntityMakerFpLogEntry = @"FPFpLogEntityMakerFpLogEntry";
 NSString * const FPFpLogEntityMakerVehicleEntry = @"FPFpLogEntityMakerVehicleEntry";
@@ -31,7 +31,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
   FPScreenToolkit *_screenToolkit;
   NSMutableArray *_tableViewDataSources;
   PELMDaoErrorBlk _errorBlk;
-  FPReports *_reports;
+  FPStats *_stats;
 }
 
 #pragma mark - Initializers
@@ -47,14 +47,31 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     _screenToolkit = screenToolkit;
     _tableViewDataSources = [NSMutableArray array];
     _errorBlk = errorBlk;
-    _reports = [[FPReports alloc] initWithLocalDao:_coordDao.localDao errorBlk:errorBlk];
+    _stats = [[FPStats alloc] initWithLocalDao:_coordDao.localDao errorBlk:errorBlk];
   }
   return self;
 }
 
 #pragma mark - Helpers
 
-- (UIView *)dataPanelWithRowData:(NSArray *)rowData parentView:(UIView *)parentView {
+- (NSInteger)currentYear {
+  return [[NSCalendar currentCalendar] component:NSCalendarUnitYear fromDate:[NSDate date]];
+}
+
+- (UIView *)dataPanelWithRowData:(NSArray *)rowData
+                      parentView:(UIView *)parentView {
+  return [self dataPanelWithRowData:rowData
+               footerAttributedText:nil
+     footerFontForHeightCalculation:nil
+              footerVerticalPadding:0.0
+                         parentView:parentView];
+}
+
+- (UIView *)dataPanelWithRowData:(NSArray *)rowData
+            footerAttributedText:(NSAttributedString *)footerAttributedText
+  footerFontForHeightCalculation:(UIFont *)footerFontForHeightCalculation
+           footerVerticalPadding:(CGFloat)footerVerticalPadding
+                      parentView:(UIView *)parentView {
   return [PEUIUtils tablePanelWithRowData:rowData
                            withCellHeight:36.5
                         labelLeftHPadding:10.0
@@ -72,6 +89,9 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                   rowPanelBackgroundColor:[UIColor whiteColor]
                      panelBackgroundColor:[_uitoolkit colorForWindows]
                              dividerColor:nil
+                     footerAttributedText:footerAttributedText
+           footerFontForHeightCalculation:footerFontForHeightCalculation
+                    footerVerticalPadding:footerVerticalPadding
                            relativeToView:parentView];
 }
 
@@ -552,8 +572,16 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                 vpadding:15.0
                 hpadding:0.0];
     NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
-    UIView *funFactsDataPanel = [self dataPanelWithRowData:@[@[@"YTD spent on gas", [currencyFormatter stringFromNumber:[_reports yearToDateSpentOnGasForVehicle:vehicle]]],
-                                                             @[@"All-time spent on gas", [currencyFormatter stringFromNumber:[_reports totalSpentOnGasForVehicle:vehicle]]]]
+    NSAttributedString *footerText =
+    [PEUIUtils attributedTextWithTemplate:@"Aggregate spend (%@)."
+                             textToAccent:@"all octanes"
+                           accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+    NSInteger currentYear = [self currentYear];
+    UIView *funFactsDataPanel = [self dataPanelWithRowData:@[@[[NSString stringWithFormat:@"%ld YTD spent on gas", (long)currentYear], [currencyFormatter stringFromNumber:[_stats yearToDateSpentOnGasForVehicle:vehicle]]],
+                                                             @[@"All-time spent on gas", [currencyFormatter stringFromNumber:[_stats totalSpentOnGasForVehicle:vehicle]]]]
+                                      footerAttributedText:footerText
+                            footerFontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                     footerVerticalPadding:3.0
                                                 parentView:parentView];
     [PEUIUtils placeView:funFactsDataPanel
                    below:vehicleDataPanel
@@ -719,7 +747,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
 - (PEEntityViewPanelMakerBlk)fuelstationViewPanelMaker {
   return ^ UIView * (PEAddViewEditController *parentViewController, FPFuelStation *fuelstation) {
     UIView *parentView = [parentViewController view];
-    UIView *fuelstationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.1 relativeToView:parentView];
+    UIView *fuelstationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.2 relativeToView:parentView];
     UIView *fuelstationDataPanel = [self dataPanelWithRowData:@[@[@"Gas station name", [PEUtils emptyIfNil:[fuelstation name]]],
                                                                 @[@"Street", [PEUtils emptyIfNil:[fuelstation street]]],
                                                                 @[@"City", [PEUtils emptyIfNil:[fuelstation city]]],
@@ -734,17 +762,45 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     UITableView *coordinatesTableView = [self placeCoordinatesTableOntoFuelstationPanel:fuelstationPanel
                                                                             fuelstation:fuelstation
                                                                               belowView:fuelstationDataPanel
-                                                                   parentViewController:parentViewController][0];    
+                                                                   parentViewController:parentViewController][0];
+    NSInteger currentYear = [self currentYear];
     NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
     NSArray *octanes = [_coordDao.localDao distinctOctanesForFuelstation:fuelstation error:[FPUtils localFetchErrorHandlerMaker]()];
     NSMutableArray *priceDataPanels = [NSMutableArray array];
     for (NSNumber *octane in octanes) {
-      UIView *funFactsDataPanel = [self dataPanelWithRowData:@[@[[NSString stringWithFormat:@"YTD avg price (%@ octane)", octane], [currencyFormatter stringFromNumber:[_reports yearToDateAvgPricePerGallonForFuelstation:fuelstation octane:octane]]],
-                                                               @[[NSString stringWithFormat:@"All time avg price (%@ octane)", octane], [currencyFormatter stringFromNumber:[_reports overallAvgPricePerGallonForFuelstation:fuelstation octane:octane]]],
-                                                               @[[NSString stringWithFormat:@"YTD min price (%@ octane)", octane], [currencyFormatter stringFromNumber:[_reports yearToDateMinPricePerGallonForFuelstation:fuelstation octane:octane]]],
-                                                               @[[NSString stringWithFormat:@"All time min price (%@ octane)", octane], [currencyFormatter stringFromNumber:[_reports overallMinPricePerGallonForFuelstation:fuelstation octane:octane]]],
-                                                               @[[NSString stringWithFormat:@"YTD max price (%@ octane)", octane], [currencyFormatter stringFromNumber:[_reports yearToDateMaxPricePerGallonForFuelstation:fuelstation octane:octane]]],
-                                                               @[[NSString stringWithFormat:@"All time max price (%@ octane)", octane], [currencyFormatter stringFromNumber:[_reports overallMaxPricePerGallonForFuelstation:fuelstation octane:octane]]]]
+      NSAttributedString *footerText =
+        [PEUIUtils attributedTextWithTemplate:@"Aggregate price information for %@."
+                                 textToAccent:[NSString stringWithFormat:@"%@ octane", octane]
+                               accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSMutableArray *dataRows = [NSMutableArray array];
+      NSDecimalNumber *val = [_stats yearToDateAvgPricePerGallonForFuelstation:fuelstation octane:octane];
+      if (val) {
+        [dataRows addObject:@[[NSString stringWithFormat:@"%ld YTD avg price (%@ octane)", (long)currentYear, octane], [currencyFormatter stringFromNumber:val]]];
+      }
+      val = [_stats overallAvgPricePerGallonForFuelstation:fuelstation octane:octane];
+      if (val) {
+        [dataRows addObject:@[[NSString stringWithFormat:@"All time avg price (%@)", octane], [currencyFormatter stringFromNumber:val]]];
+      }
+      val = [_stats yearToDateMinPricePerGallonForFuelstation:fuelstation octane:octane];
+      if (val) {
+        [dataRows addObject:@[[NSString stringWithFormat:@"%ld YTD min price (%@)", (long)currentYear, octane], [currencyFormatter stringFromNumber:val]]];
+      }
+      val = [_stats overallMinPricePerGallonForFuelstation:fuelstation octane:octane];
+      if (val) {
+        [dataRows addObject:@[[NSString stringWithFormat:@"All time min price (%@)", octane], [currencyFormatter stringFromNumber:val]]];
+      }
+      val = [_stats yearToDateMaxPricePerGallonForFuelstation:fuelstation octane:octane];
+      if (val) {
+        [dataRows addObject:@[[NSString stringWithFormat:@"%ld YTD max price (%@)", (long)currentYear, octane], [currencyFormatter stringFromNumber:val]]];
+      }
+      val = [_stats overallMaxPricePerGallonForFuelstation:fuelstation octane:octane];
+      if (val) {
+        [dataRows addObject:@[[NSString stringWithFormat:@"All time max price (%@)", octane], [currencyFormatter stringFromNumber:val]]];
+      }
+      UIView *funFactsDataPanel = [self dataPanelWithRowData:dataRows
+                                        footerAttributedText:footerText
+                              footerFontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                       footerVerticalPadding:3.0
                                                   parentView:parentView];
       [priceDataPanels addObject:funFactsDataPanel];
     }
@@ -759,12 +815,22 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     [self placeViewLogsButtonOntoFuelstationPanel:fuelstationPanel
                                         belowView:priceDataPanelsColumn
                              parentViewController:parentViewController];
-    // wrap fuel station panel in scroll view (so everything can "fit")
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelstationPanel frame]];
-    [scrollView setContentSize:CGSizeMake(fuelstationPanel.frame.size.width, (1.05 + (.1625 * priceDataPanels.count)) * fuelstationPanel.frame.size.height)];
-    [scrollView addSubview:fuelstationPanel];
-    [scrollView setBounces:NO];
-    return scrollView;
+    if (priceDataPanels.count > 0) {
+      // wrap fuel station panel in scroll view (so everything can "fit")
+      CGFloat contentHeight;
+      if (priceDataPanels.count == 1) {
+        contentHeight = 1.35 * fuelstationPanel.frame.size.height;
+      } else {
+        contentHeight = (1.05 + (.18 * priceDataPanels.count)) * fuelstationPanel.frame.size.height;
+      }
+      UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelstationPanel frame]];
+      [scrollView setContentSize:CGSizeMake(fuelstationPanel.frame.size.width, contentHeight)];
+      [scrollView addSubview:fuelstationPanel];
+      [scrollView setBounces:NO];
+      return scrollView;
+    } else {
+      return fuelstationPanel;
+    }
   };
 }
 
@@ -924,7 +990,7 @@ location from the given address above."]
     }
     // wrap fuel station panel in scroll view (so everything can "fit")
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelStationPanel frame]];
-    [scrollView setContentSize:CGSizeMake(fuelStationPanel.frame.size.width, 1.2 * fuelStationPanel.frame.size.height)];
+    [scrollView setContentSize:CGSizeMake(fuelStationPanel.frame.size.width, 1.3 * fuelStationPanel.frame.size.height)];
     [scrollView addSubview:fuelStationPanel];
     [scrollView setBounces:NO];
     return scrollView;
