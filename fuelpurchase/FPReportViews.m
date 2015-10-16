@@ -69,6 +69,33 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 
 #pragma mark - Gas Log Fun Facts
 
+- (FPFunFact)overallGasCostPerMileForVehicleFunFact {
+  return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
+    FPVehicle *vehicle = logVehFs[1];
+    NSDecimalNumber *gasCostPerMile = [_stats overallGasCostPerMileForVehicle:vehicle];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
+    NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"Since recording, you're paying %@ per mile on gas"
+                                                               textToAccent:[currencyFormatter stringFromNumber:gasCostPerMile]
+                                                             accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+    NSMutableAttributedString *funFact = [[NSMutableAttributedString alloc] initWithAttributedString:funFactPart];
+    [funFact appendAttributedString:[PEUIUtils attributedTextWithTemplate:@" for your vehicle: %@."
+                                                             textToAccent:[vehicle name]
+                                                           accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]];
+    return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact" alertDescription:funFact relativeToView:relativeToView];
+  };
+}
+
+- (FPFunFact)overallGasCostPerMileForUserFunFact {
+  return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
+    NSDecimalNumber *gasCostPerMile = [_stats overallGasCostPerMileForUser:user];
+    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
+    NSAttributedString *funFact = [PEUIUtils attributedTextWithTemplate:@"Since recording, you're paying %@ per mile on gas across all your vehicles."
+                                                           textToAccent:[currencyFormatter stringFromNumber:gasCostPerMile]
+                                                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+    return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact" alertDescription:funFact relativeToView:relativeToView];
+  };
+}
+
 - (FPFunFact)yearToDateGasCostPerMileForVehicleFunFact {
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
     FPVehicle *vehicle = logVehFs[1];
@@ -89,7 +116,7 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
     NSDecimalNumber *gasCostPerMile = [_stats yearToDateGasCostPerMileForUser:user];
     NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
-    NSAttributedString *funFact = [PEUIUtils attributedTextWithTemplate:@"So far this year, you're paying %@ per mile on gas."
+    NSAttributedString *funFact = [PEUIUtils attributedTextWithTemplate:@"So far this year, you're paying %@ per mile on gas across all your vehicles."
                                                                textToAccent:[currencyFormatter stringFromNumber:gasCostPerMile]
                                                              accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
     return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact" alertDescription:funFact relativeToView:relativeToView];
@@ -603,6 +630,10 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 }
 
 - (NSArray *)gasLogFunFacts {
+  FPFunFact f20 = [self overallGasCostPerMileForUserFunFact];
+  FPFunFact f19 = [self overallGasCostPerMileForVehicleFunFact];
+  FPFunFact f18 = [self yearToDateGasCostPerMileForUserFunFact];
+  FPFunFact f17 = [self yearToDateGasCostPerMileForVehicleFunFact];
   FPFunFact f16 = [self overallMinPricePerGallonForUserFunFact];
   FPFunFact f15 = [self overallMinPricePerGallonForFuelstationFunFact];
   FPFunFact f14 = [self yearToDateMinPricePerGallonForUserFunFact];
@@ -619,7 +650,7 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
   FPFunFact f3 = [self yearToDateSpentOnGasForFuelstationFunFact];
   FPFunFact f2 = [self yearToDateSpentOnGasForVehicleFunFact];
   FPFunFact f1 = [self yearToDateSpentOnGasForUserFunFact];
-  return @[f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16];
+  return @[f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18, f19, f20];
 }
 
 + (NSNumber *)nextIndexForUserDefaultsKey:(NSString *)userDefaultsIndexKey

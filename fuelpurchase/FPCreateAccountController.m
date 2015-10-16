@@ -286,7 +286,7 @@ emailed to you."]
 Your remote account has been created and \
 your local edits have been synced.\n\n\
 Your account is now connected to this \
-device.  Any gas jot data that \
+device.  Any Gas Jot data that \
 you create and save will be synced to your \
 remote account."]
                                                                                     topInset:70.0

@@ -302,18 +302,18 @@ to re-authenticate.\n\nTo authenticate, tap the %@ button."
       [APP window].layer.borderWidth = 0.0;
     }
   } forControlEvents:UIControlEventTouchUpInside];
-  NSAttributedString *offlineDesc = [PEUIUtils attributedTextWithTemplate:@"\
-Offline mode prevents upload attempts to \
-the server, keeping all saves local-only and thus very fast.  \
-Enable offline mode if you are making \
-many saves and you want them done \
-instantly and you have a poor internet connection.  Later, you can bulk-upload your edits \
-from the 'Records' screen.\n\n\
-When offline mode is enabled, an %@ will appear \
-to remind you it's enabled."
-                                                             textToAccent:@"orange border"
-                                                           accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
-                                                          accentTextColor:[UIColor carrotColor]];
+  NSMutableAttributedString *offlineDesc = [[NSMutableAttributedString alloc] initWithString:@"\
+Offline mode prevents upload attempts to the server, keeping all saves local-only and thus very fast.  \
+Enable offline mode if you are making many saves and you want them done instantly and you have a poor internet connection.  "];
+  NSAttributedString *offlineDescPart2 = [PEUIUtils attributedTextWithTemplate:@"Later, you can bulk-upload your edits from the %@ screen.\n\n"
+                                                                  textToAccent:@"Records"
+                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+  NSAttributedString *offlineDescPart3 = [PEUIUtils attributedTextWithTemplate:@"When offline mode is enabled, an %@ will appear to remind you it's enabled."
+                                                                  textToAccent:@"orange border"
+                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                               accentTextColor:[UIColor carrotColor]];
+  [offlineDesc appendAttributedString:offlineDescPart2];
+  [offlineDesc appendAttributedString:offlineDescPart3];
   UILabel *offlineModeDescLabel = [PEUIUtils labelWithAttributeText:offlineDesc
                                                                font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                                     backgroundColor:[UIColor clearColor]

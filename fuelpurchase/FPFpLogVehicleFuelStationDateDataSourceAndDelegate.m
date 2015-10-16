@@ -144,7 +144,7 @@ heightForRowAtIndexPath:(NSIndexPath *)indexPath {
 - (CGFloat)tableView:(UITableView *)tableView
 heightForHeaderInSection:(NSInteger)section {
   if (section == 0) {
-    return 5;
+    return 15;
   }
   return 0;
 }

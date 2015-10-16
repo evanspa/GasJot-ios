@@ -1354,7 +1354,7 @@ location from the given address above."]
     [vehicleFuelStationDateTableView setScrollEnabled:NO];
     [vehicleFuelStationDateTableView setTag:FPFpLogTagVehicleFuelStationAndDate];
     [PEUIUtils setFrameWidthOfView:vehicleFuelStationDateTableView ofWidth:1.0 relativeTo:parentView];
-    [PEUIUtils setFrameHeight:170.0 ofView:vehicleFuelStationDateTableView];
+    [PEUIUtils setFrameHeight:180.0 ofView:vehicleFuelStationDateTableView];
     vehicleFuelStationDateTableView.sectionHeaderHeight = 2.0;
     vehicleFuelStationDateTableView.sectionFooterHeight = 2.0;
     components[@(FPFpLogTagVehicleFuelStationAndDate)] = vehicleFuelStationDateTableView;
