@@ -76,7 +76,9 @@
                     recordCountLabelTag:(NSInteger)recordCountLabelTag
                             recordCount:(NSInteger)recordCount {
   UILabel *recordCountLabel = (UILabel *)[button viewWithTag:recordCountLabelTag];
-  [PEUIUtils setTextAndResize:[FPUIUtils labelTextForRecordCount:recordCount] forLabel:recordCountLabel];
+  if (recordCountLabel) {
+    [PEUIUtils setTextAndResize:[FPUIUtils labelTextForRecordCount:recordCount] forLabel:recordCountLabel];
+  }
 }
 
 + (UIButton *)buttonWithLabel:(NSString *)labelText

@@ -79,55 +79,56 @@
 
 #pragma mark - Initializers
 
-- (id)initWithEntity:(PELMMainSupport *)entity
-  listViewController:(PEListViewController *)listViewController
-               isAdd:(BOOL)isAdd
-           indexPath:(NSIndexPath *)indexPath
-           uitoolkit:(PEUIToolkit *)uitoolkit
-        itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
-      itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
-entityFormPanelMaker:(PEEntityPanelMakerBlk)entityFormPanelMaker
-entityViewPanelMaker:(PEEntityViewPanelMakerBlk)entityViewPanelMaker
- entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
- panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
-         entityTitle:(NSString *)entityTitle
-panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
-   entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
-  entityEditPreparer:(PEEntityEditPreparerBlk)entityEditPreparer
-  entityEditCanceler:(PEEntityEditCancelerBlk)entityEditCanceler
-         entityMaker:(PEEntityMakerBlk)entityMaker
-         entitySaver:(PESaveEntityBlk)entitySaver
- newEntitySaverLocal:(PESaveNewEntityLocalBlk)newEntitySaverLocal
+- (id)initWithParentEntity:(PELMMainSupport *)parentEntity
+                    entity:(PELMMainSupport *)entity
+        listViewController:(PEListViewController *)listViewController
+                     isAdd:(BOOL)isAdd
+                 indexPath:(NSIndexPath *)indexPath
+                 uitoolkit:(PEUIToolkit *)uitoolkit
+              itemAddedBlk:(PEItemAddedBlk)itemAddedBlk
+            itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
+      entityFormPanelMaker:(PEEntityPanelMakerBlk)entityFormPanelMaker
+      entityViewPanelMaker:(PEEntityViewPanelMakerBlk)entityViewPanelMaker
+       entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
+       panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
+               entityTitle:(NSString *)entityTitle
+      panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
+         entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
+        entityEditPreparer:(PEEntityEditPreparerBlk)entityEditPreparer
+        entityEditCanceler:(PEEntityEditCancelerBlk)entityEditCanceler
+               entityMaker:(PEEntityMakerBlk)entityMaker
+               entitySaver:(PESaveEntityBlk)entitySaver
+       newEntitySaverLocal:(PESaveNewEntityLocalBlk)newEntitySaverLocal
 newEntitySaverImmediateSync:(PESaveNewEntityImmediateSyncBlk)newEntitySaverImmediateSync
-doneEditingEntityLocal:(PEMarkAsDoneEditingLocalBlk)doneEditingEntityLocal
+    doneEditingEntityLocal:(PEMarkAsDoneEditingLocalBlk)doneEditingEntityLocal
 doneEditingEntityImmediateSync:(PEMarkAsDoneEditingImmediateSyncBlk)doneEditingEntityImmediateSync
-     isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
-      isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
-       isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
+           isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
+            isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
+             isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
 syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
 prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
-    viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
-     entityValidator:(PEEntityValidatorBlk)entityValidator
-            uploader:(PEUploaderBlk)uploader
-numRemoteDepsNotLocal:(PENumRemoteDepsNotLocal)numRemoteDepsNotLocal
-               merge:(PEMergeBlk)merge
-   fetchDependencies:(PEDependencyFetcherBlk)fetchDependencies
-     updateDepsPanel:(PEUpdateDepsPanel)updateDepsPanel
-          downloader:(PEDownloaderBlk)downloader
-   postDownloadSaver:(PEPostDownloaderSaver)postDownloadSaver
-conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
-conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
- itemChildrenCounter:(PEItemChildrenCounter)itemChildrenCounter
- itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
-         itemDeleter:(PEItemDeleter)itemDeleter
-    itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
-entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity
-modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
-  modalOperationDone:(PEModalOperationDone)modalOperationDone
+          viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
+           entityValidator:(PEEntityValidatorBlk)entityValidator
+                  uploader:(PEUploaderBlk)uploader
+     numRemoteDepsNotLocal:(PENumRemoteDepsNotLocal)numRemoteDepsNotLocal
+                     merge:(PEMergeBlk)merge
+         fetchDependencies:(PEDependencyFetcherBlk)fetchDependencies
+           updateDepsPanel:(PEUpdateDepsPanel)updateDepsPanel
+                downloader:(PEDownloaderBlk)downloader
+         postDownloadSaver:(PEPostDownloaderSaver)postDownloadSaver
+     conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
+    conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
+       itemChildrenCounter:(PEItemChildrenCounter)itemChildrenCounter
+       itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
+               itemDeleter:(PEItemDeleter)itemDeleter
+          itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
+        entitiesFromEntity:(PEEntitiesFromEntityBlk)entitiesFromEntity
+     modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
+        modalOperationDone:(PEModalOperationDone)modalOperationDone
 entityAddedNotificationName:(NSString *)entityAddedNotificationName
 entityUpdatedNotificationName:(NSString *)entityUpdatedNotificationName
 entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
-  addlContentSection:(PEAddlContentSection)addlContentSection {
+        addlContentSection:(PEAddlContentSection)addlContentSection {
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
     _listViewController = listViewController;
@@ -136,6 +137,7 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
       _isEdit = [entity editInProgress];
       _isView = !_isEdit;
     }
+    _parentEntity = parentEntity;
     _entity = entity;
     _entityIndexPath = indexPath;
     _uitoolkit = uitoolkit;
@@ -259,147 +261,150 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
                                       modalOperationDone:(PEModalOperationDone)modalOperationDone
                              entityAddedNotificationName:(NSString *)entityAddedNotificationName
                                       addlContentSection:(PEAddlContentSection)addlContentSection {
-  return [[PEAddViewEditController alloc] initWithEntity:nil
-                                      listViewController:listViewController
-                                                   isAdd:YES
-                                               indexPath:nil
-                                               uitoolkit:uitoolkit
-                                            itemAddedBlk:itemAddedBlk
-                                          itemChangedBlk:nil
-                                    entityFormPanelMaker:entityFormPanelMaker
-                                    entityViewPanelMaker:nil
-                                     entityToPanelBinder:entityToPanelBinder
-                                     panelToEntityBinder:panelToEntityBinder
-                                             entityTitle:entityTitle
-                                    panelEnablerDisabler:nil
-                                       entityAddCanceler:entityAddCanceler
-                                      entityEditPreparer:nil
-                                      entityEditCanceler:nil
-                                             entityMaker:entityMaker
-                                             entitySaver:nil
-                                     newEntitySaverLocal:newEntitySaverLocal
-                             newEntitySaverImmediateSync:newEntitySaverImmediateSync
-                                  doneEditingEntityLocal:nil
-                          doneEditingEntityImmediateSync:nil
-                                         isAuthenticated:isAuthenticated
-                                          isUserLoggedIn:isUserLoggedIn
-                                           isOfflineMode:isOfflineMode
-                          syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
-                          prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
-                                        viewDidAppearBlk:viewDidAppearBlk
-                                         entityValidator:entityValidator
-                                                uploader:nil
-                                   numRemoteDepsNotLocal:nil
-                                                   merge:nil
-                                       fetchDependencies:nil
-                                         updateDepsPanel:nil
-                                              downloader:nil
-                                       postDownloadSaver:nil
-                                   conflictResolveFields:nil
-                                  conflictResolvedEntity:nil
-                                     itemChildrenCounter:nil
-                                     itemChildrenMsgsBlk:nil
-                                             itemDeleter:nil
-                                        itemLocalDeleter:nil
-                                      entitiesFromEntity:entitiesFromEntity
-                                   modalOperationStarted:modalOperationStarted
-                                      modalOperationDone:modalOperationDone
-                             entityAddedNotificationName:entityAddedNotificationName
-                           entityUpdatedNotificationName:nil
-                           entityRemovedNotificationName:nil
-                                      addlContentSection:addlContentSection];
+  return [[PEAddViewEditController alloc] initWithParentEntity:nil
+                                                        entity:nil
+                                            listViewController:listViewController
+                                                         isAdd:YES
+                                                     indexPath:nil
+                                                     uitoolkit:uitoolkit
+                                                  itemAddedBlk:itemAddedBlk
+                                                itemChangedBlk:nil
+                                          entityFormPanelMaker:entityFormPanelMaker
+                                          entityViewPanelMaker:nil
+                                           entityToPanelBinder:entityToPanelBinder
+                                           panelToEntityBinder:panelToEntityBinder
+                                                   entityTitle:entityTitle
+                                          panelEnablerDisabler:nil
+                                             entityAddCanceler:entityAddCanceler
+                                            entityEditPreparer:nil
+                                            entityEditCanceler:nil
+                                                   entityMaker:entityMaker
+                                                   entitySaver:nil
+                                           newEntitySaverLocal:newEntitySaverLocal
+                                   newEntitySaverImmediateSync:newEntitySaverImmediateSync
+                                        doneEditingEntityLocal:nil
+                                doneEditingEntityImmediateSync:nil
+                                               isAuthenticated:isAuthenticated
+                                                isUserLoggedIn:isUserLoggedIn
+                                                 isOfflineMode:isOfflineMode
+                                syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
+                                prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
+                                              viewDidAppearBlk:viewDidAppearBlk
+                                               entityValidator:entityValidator
+                                                      uploader:nil
+                                         numRemoteDepsNotLocal:nil
+                                                         merge:nil
+                                             fetchDependencies:nil
+                                               updateDepsPanel:nil
+                                                    downloader:nil
+                                             postDownloadSaver:nil
+                                         conflictResolveFields:nil
+                                        conflictResolvedEntity:nil
+                                           itemChildrenCounter:nil
+                                           itemChildrenMsgsBlk:nil
+                                                   itemDeleter:nil
+                                              itemLocalDeleter:nil
+                                            entitiesFromEntity:entitiesFromEntity
+                                         modalOperationStarted:modalOperationStarted
+                                            modalOperationDone:modalOperationDone
+                                   entityAddedNotificationName:entityAddedNotificationName
+                                 entityUpdatedNotificationName:nil
+                                 entityRemovedNotificationName:nil
+                                            addlContentSection:addlContentSection];
 }
 
-+ (PEAddViewEditController *)viewEntityCtrlrWithEntity:(PELMMainSupport *)entity
-                                    listViewController:(PEListViewController *)listViewController
-                                       entityIndexPath:(NSIndexPath *)entityIndexPath
-                                             uitoolkit:(PEUIToolkit *)uitoolkit
-                                        itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
-                                  entityFormPanelMaker:(PEEntityPanelMakerBlk)entityFormPanelMaker
-                                  entityViewPanelMaker:(PEEntityViewPanelMakerBlk)entityViewPanelMaker
-                                   entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
-                                   panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
-                                           entityTitle:(NSString *)entityTitle
-                                  panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
-                                     entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
-                                    entityEditPreparer:(PEEntityEditPreparerBlk)entityEditPreparer
-                                    entityEditCanceler:(PEEntityEditCancelerBlk)entityEditCanceler
-                                           entitySaver:(PESaveEntityBlk)entitySaver
-                                doneEditingEntityLocal:(PEMarkAsDoneEditingLocalBlk)doneEditingEntityLocal
-                        doneEditingEntityImmediateSync:(PEMarkAsDoneEditingImmediateSyncBlk)doneEditingEntityImmediateSync
-                                       isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
-                                        isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
-                                         isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
-                        syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
-                        prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
-                                      viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
-                                       entityValidator:(PEEntityValidatorBlk)entityValidator
-                                              uploader:(PEUploaderBlk)uploader
-                                 numRemoteDepsNotLocal:(PENumRemoteDepsNotLocal)numRemoteDepsNotLocal
-                                                 merge:(PEMergeBlk)merge
-                                     fetchDependencies:(PEDependencyFetcherBlk)fetchDependencies
-                                       updateDepsPanel:(PEUpdateDepsPanel)updateDepsPanel
-                                            downloader:(PEDownloaderBlk)downloader
-                                     postDownloadSaver:(PEPostDownloaderSaver)postDownloadSaver
-                                 conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
-                                conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
-                                   itemChildrenCounter:(PEItemChildrenCounter)itemChildrenCounter
-                                   itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
-                                           itemDeleter:(PEItemDeleter)itemDeleter
-                                      itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
-                                 modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
-                                    modalOperationDone:(PEModalOperationDone)modalOperationDone
-                                entityUpdatedNotificationName:(NSString *)entityUpdatedNotificationName
-                                entityRemovedNotificationName:(NSString *)entityRemovedNotificationName {
-  return [[PEAddViewEditController alloc] initWithEntity:entity
-                                      listViewController:listViewController
-                                                   isAdd:NO
-                                               indexPath:entityIndexPath
-                                               uitoolkit:uitoolkit
-                                            itemAddedBlk:nil
-                                          itemChangedBlk:itemChangedBlk
-                                    entityFormPanelMaker:entityFormPanelMaker
-                                    entityViewPanelMaker:entityViewPanelMaker
-                                     entityToPanelBinder:entityToPanelBinder
-                                     panelToEntityBinder:panelToEntityBinder
-                                             entityTitle:entityTitle
-                                    panelEnablerDisabler:panelEnablerDisabler
-                                       entityAddCanceler:entityAddCanceler
-                                      entityEditPreparer:entityEditPreparer
-                                      entityEditCanceler:entityEditCanceler
-                                             entityMaker:nil
-                                             entitySaver:entitySaver
-                                     newEntitySaverLocal:nil
-                             newEntitySaverImmediateSync:nil
-                                  doneEditingEntityLocal:doneEditingEntityLocal
-                          doneEditingEntityImmediateSync:doneEditingEntityImmediateSync
-                                         isAuthenticated:isAuthenticated
-                                          isUserLoggedIn:isUserLoggedIn
-                                           isOfflineMode:isOfflineMode
-                          syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
-                          prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
-                                        viewDidAppearBlk:viewDidAppearBlk
-                                         entityValidator:entityValidator
-                                                uploader:uploader
-                                   numRemoteDepsNotLocal:numRemoteDepsNotLocal
-                                                   merge:merge
-                                       fetchDependencies:fetchDependencies
-                                         updateDepsPanel:updateDepsPanel
-                                              downloader:downloader
-                                       postDownloadSaver:postDownloadSaver
-                                   conflictResolveFields:conflictResolveFields
-                                  conflictResolvedEntity:conflictResolvedEntity
-                                     itemChildrenCounter:itemChildrenCounter
-                                     itemChildrenMsgsBlk:itemChildrenMsgsBlk
-                                             itemDeleter:itemDeleter
-                                        itemLocalDeleter:itemLocalDeleter
-                                      entitiesFromEntity:nil
-                                   modalOperationStarted:modalOperationStarted
-                                      modalOperationDone:modalOperationDone
-                             entityAddedNotificationName:nil
-                           entityUpdatedNotificationName:entityUpdatedNotificationName
-                           entityRemovedNotificationName:entityRemovedNotificationName
-                                      addlContentSection:nil];
++ (PEAddViewEditController *)viewEntityCtrlrWithParentEntity:(PELMMainSupport *)parentEntity
+                                                      entity:(PELMMainSupport *)entity
+                                          listViewController:(PEListViewController *)listViewController
+                                             entityIndexPath:(NSIndexPath *)entityIndexPath
+                                                   uitoolkit:(PEUIToolkit *)uitoolkit
+                                              itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
+                                        entityFormPanelMaker:(PEEntityPanelMakerBlk)entityFormPanelMaker
+                                        entityViewPanelMaker:(PEEntityViewPanelMakerBlk)entityViewPanelMaker
+                                         entityToPanelBinder:(PEEntityToPanelBinderBlk)entityToPanelBinder
+                                         panelToEntityBinder:(PEPanelToEntityBinderBlk)panelToEntityBinder
+                                                 entityTitle:(NSString *)entityTitle
+                                        panelEnablerDisabler:(PEEnableDisablePanelBlk)panelEnablerDisabler
+                                           entityAddCanceler:(PEEntityAddCancelerBlk)entityAddCanceler
+                                          entityEditPreparer:(PEEntityEditPreparerBlk)entityEditPreparer
+                                          entityEditCanceler:(PEEntityEditCancelerBlk)entityEditCanceler
+                                                 entitySaver:(PESaveEntityBlk)entitySaver
+                                      doneEditingEntityLocal:(PEMarkAsDoneEditingLocalBlk)doneEditingEntityLocal
+                              doneEditingEntityImmediateSync:(PEMarkAsDoneEditingImmediateSyncBlk)doneEditingEntityImmediateSync
+                                             isAuthenticated:(PEIsAuthenticatedBlk)isAuthenticated
+                                              isUserLoggedIn:(PEIsLoggedInBlk)isUserLoggedIn
+                                               isOfflineMode:(PEIsOfflineModeBlk)isOfflineMode
+                              syncImmediateMBProgressHUDMode:(MBProgressHUDMode)syncImmediateMBProgressHUDMode
+                              prepareUIForUserInteractionBlk:(PEPrepareUIForUserInteractionBlk)prepareUIForUserInteractionBlk
+                                            viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk
+                                             entityValidator:(PEEntityValidatorBlk)entityValidator
+                                                    uploader:(PEUploaderBlk)uploader
+                                       numRemoteDepsNotLocal:(PENumRemoteDepsNotLocal)numRemoteDepsNotLocal
+                                                       merge:(PEMergeBlk)merge
+                                           fetchDependencies:(PEDependencyFetcherBlk)fetchDependencies
+                                             updateDepsPanel:(PEUpdateDepsPanel)updateDepsPanel
+                                                  downloader:(PEDownloaderBlk)downloader
+                                           postDownloadSaver:(PEPostDownloaderSaver)postDownloadSaver
+                                       conflictResolveFields:(PEConflictResolveFields)conflictResolveFields
+                                      conflictResolvedEntity:(PEConflictResolvedEntity)conflictResolvedEntity
+                                         itemChildrenCounter:(PEItemChildrenCounter)itemChildrenCounter
+                                         itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
+                                                 itemDeleter:(PEItemDeleter)itemDeleter
+                                            itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
+                                       modalOperationStarted:(PEModalOperationStarted)modalOperationStarted
+                                          modalOperationDone:(PEModalOperationDone)modalOperationDone
+                               entityUpdatedNotificationName:(NSString *)entityUpdatedNotificationName
+                               entityRemovedNotificationName:(NSString *)entityRemovedNotificationName {
+  return [[PEAddViewEditController alloc] initWithParentEntity:parentEntity
+                                                        entity:entity
+                                            listViewController:listViewController
+                                                         isAdd:NO
+                                                     indexPath:entityIndexPath
+                                                     uitoolkit:uitoolkit
+                                                  itemAddedBlk:nil
+                                                itemChangedBlk:itemChangedBlk
+                                          entityFormPanelMaker:entityFormPanelMaker
+                                          entityViewPanelMaker:entityViewPanelMaker
+                                           entityToPanelBinder:entityToPanelBinder
+                                           panelToEntityBinder:panelToEntityBinder
+                                                   entityTitle:entityTitle
+                                          panelEnablerDisabler:panelEnablerDisabler
+                                             entityAddCanceler:entityAddCanceler
+                                            entityEditPreparer:entityEditPreparer
+                                            entityEditCanceler:entityEditCanceler
+                                                   entityMaker:nil
+                                                   entitySaver:entitySaver
+                                           newEntitySaverLocal:nil
+                                   newEntitySaverImmediateSync:nil
+                                        doneEditingEntityLocal:doneEditingEntityLocal
+                                doneEditingEntityImmediateSync:doneEditingEntityImmediateSync
+                                               isAuthenticated:isAuthenticated
+                                                isUserLoggedIn:isUserLoggedIn
+                                                 isOfflineMode:isOfflineMode
+                                syncImmediateMBProgressHUDMode:syncImmediateMBProgressHUDMode
+                                prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
+                                              viewDidAppearBlk:viewDidAppearBlk
+                                               entityValidator:entityValidator
+                                                      uploader:uploader
+                                         numRemoteDepsNotLocal:numRemoteDepsNotLocal
+                                                         merge:merge
+                                             fetchDependencies:fetchDependencies
+                                               updateDepsPanel:updateDepsPanel
+                                                    downloader:downloader
+                                             postDownloadSaver:postDownloadSaver
+                                         conflictResolveFields:conflictResolveFields
+                                        conflictResolvedEntity:conflictResolvedEntity
+                                           itemChildrenCounter:itemChildrenCounter
+                                           itemChildrenMsgsBlk:itemChildrenMsgsBlk
+                                                   itemDeleter:itemDeleter
+                                              itemLocalDeleter:itemLocalDeleter
+                                            entitiesFromEntity:nil
+                                         modalOperationStarted:modalOperationStarted
+                                            modalOperationDone:modalOperationDone
+                                   entityAddedNotificationName:nil
+                                 entityUpdatedNotificationName:entityUpdatedNotificationName
+                                 entityRemovedNotificationName:entityRemovedNotificationName
+                                            addlContentSection:nil];
 }
 
 #pragma mark - View Controller Lifecyle
@@ -434,7 +439,7 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
   [self setAutomaticallyAdjustsScrollViewInsets:NO];
   _entityFormPanel = _entityFormPanelMaker(self);
   if (_entityViewPanelMaker) {
-    _entityViewPanel = _entityViewPanelMaker(self, _entity);
+    _entityViewPanel = _entityViewPanelMaker(self, _parentEntity, _entity);
   }
   void (^placeAndBindEntityPanel)(UIView *, BOOL) = ^(UIView *entityPanel, BOOL doBind) {
     [PEUIUtils placeView:entityPanel
@@ -868,7 +873,7 @@ It has now been removed from this device."]
                                                         object:_entity
                                                       userInfo:nil];
     [_entityViewPanel removeFromSuperview];
-    _entityViewPanel = _entityViewPanelMaker(self, _entity);
+    _entityViewPanel = _entityViewPanelMaker(self, _parentEntity, _entity);
     [PEUIUtils placeView:_entityViewPanel
                  atTopOf:[self view]
            withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -1610,7 +1615,7 @@ merge conflicts.";
                                                         object:_entity
                                                       userInfo:nil];
     [_entityFormPanel removeFromSuperview];
-    _entityViewPanel = _entityViewPanelMaker(self, _entity);
+    _entityViewPanel = _entityViewPanelMaker(self, _parentEntity, _entity);
     [PEUIUtils placeView:_entityViewPanel
                  atTopOf:[self view]
            withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -1953,9 +1958,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                    syncDependencyUnsyncedBlk);
         });
       } else {
-        [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // cancel btn (so they can't cancel it after we'ved saved and we're displaying the HUD)
-        [[[self navigationItem] rightBarButtonItem] setEnabled:NO]; // done btn
-        [[[self tabBarController] tabBar] setUserInteractionEnabled:NO];
+        [self disableUi];
         if (_modalOperationStarted) { _modalOperationStarted(); }
         _doneEditingEntityLocalSync(self, _entity);
         MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];

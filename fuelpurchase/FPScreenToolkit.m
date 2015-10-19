@@ -291,47 +291,48 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                         relativeToView:ctrl.view
                                             controller:ctrl];
     };
-    return [PEAddViewEditController viewEntityCtrlrWithEntity:user
-                                           listViewController:nil
-                                              entityIndexPath:nil
-                                                    uitoolkit:_uitoolkit
-                                               itemChangedBlk:nil
-                                         entityFormPanelMaker:[_panelToolkit userAccountFormPanelMaker]
-                                         entityViewPanelMaker:[_panelToolkit userAccountViewPanelMakerWithAccountStatusLabelTag:USER_ACCOUNT_STATUS_PANEL_TAG]
-                                          entityToPanelBinder:[_panelToolkit userToUserPanelBinder]
-                                          panelToEntityBinder:[_panelToolkit userFormPanelToUserBinder]
-                                                  entityTitle:@"User Account"
-                                         panelEnablerDisabler:[_panelToolkit userFormPanelEnablerDisabler]
-                                            entityAddCanceler:nil
-                                           entityEditPreparer:userEditPreparer
-                                           entityEditCanceler:userEditCanceler
-                                                  entitySaver:userSaver
-                                       doneEditingEntityLocal:nil
-                               doneEditingEntityImmediateSync:doneEditingUserImmediateSync
-                                              isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                                               isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                                                isOfflineMode:^{ return [APP offlineMode]; }
-                               syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
-                               prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
-                                             viewDidAppearBlk:viewDidAppearBlk
-                                              entityValidator:[self newUserAccountValidator]
-                                                     uploader:nil
-                                        numRemoteDepsNotLocal:nil
-                                                        merge:mergeBlk
-                                            fetchDependencies:nil
-                                              updateDepsPanel:nil
-                                                   downloader:downloaderBlk
-                                            postDownloadSaver:postDownloadSaverBlk
-                                        conflictResolveFields:conflictResolveFieldsBlk
-                                       conflictResolvedEntity:conflictResolvedEntityBlk
-                                          itemChildrenCounter:nil
-                                          itemChildrenMsgsBlk:nil
-                                                  itemDeleter:nil
-                                             itemLocalDeleter:nil
-                                        modalOperationStarted:[self commonModalOperationStartedBlock]
-                                           modalOperationDone:[self commonModalOperationDoneBlock]
-                                entityUpdatedNotificationName:FPEntityUpdatedNotification
-                                entityRemovedNotificationName:FPEntityDeletedNotification];
+    return [PEAddViewEditController viewEntityCtrlrWithParentEntity:nil
+                                                             entity:user
+                                                 listViewController:nil
+                                                    entityIndexPath:nil
+                                                          uitoolkit:_uitoolkit
+                                                     itemChangedBlk:nil
+                                               entityFormPanelMaker:[_panelToolkit userAccountFormPanelMaker]
+                                               entityViewPanelMaker:[_panelToolkit userAccountViewPanelMakerWithAccountStatusLabelTag:USER_ACCOUNT_STATUS_PANEL_TAG]
+                                                entityToPanelBinder:[_panelToolkit userToUserPanelBinder]
+                                                panelToEntityBinder:[_panelToolkit userFormPanelToUserBinder]
+                                                        entityTitle:@"User Account"
+                                               panelEnablerDisabler:[_panelToolkit userFormPanelEnablerDisabler]
+                                                  entityAddCanceler:nil
+                                                 entityEditPreparer:userEditPreparer
+                                                 entityEditCanceler:userEditCanceler
+                                                        entitySaver:userSaver
+                                             doneEditingEntityLocal:nil
+                                     doneEditingEntityImmediateSync:doneEditingUserImmediateSync
+                                                    isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                     isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      isOfflineMode:^{ return [APP offlineMode]; }
+                                     syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
+                                     prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
+                                                   viewDidAppearBlk:viewDidAppearBlk
+                                                    entityValidator:[self newUserAccountValidator]
+                                                           uploader:nil
+                                              numRemoteDepsNotLocal:nil
+                                                              merge:mergeBlk
+                                                  fetchDependencies:nil
+                                                    updateDepsPanel:nil
+                                                         downloader:downloaderBlk
+                                                  postDownloadSaver:postDownloadSaverBlk
+                                              conflictResolveFields:conflictResolveFieldsBlk
+                                             conflictResolvedEntity:conflictResolvedEntityBlk
+                                                itemChildrenCounter:nil
+                                                itemChildrenMsgsBlk:nil
+                                                        itemDeleter:nil
+                                                   itemLocalDeleter:nil
+                                              modalOperationStarted:[self commonModalOperationStartedBlock]
+                                                 modalOperationDone:[self commonModalOperationDoneBlock]
+                                      entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                      entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -801,47 +802,48 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                              recordCountLabelTag:FPVehicleTagViewEnvlogsBtnRecordCount
                                      recordCount:[_coordDao numEnvironmentLogsForVehicle:vehicle error:[FPUtils localFetchErrorHandlerMaker]()]];
     };
-    return [PEAddViewEditController viewEntityCtrlrWithEntity:vehicle
-                                           listViewController:listViewController
-                                              entityIndexPath:vehicleIndexPath
-                                                    uitoolkit:_uitoolkit
-                                               itemChangedBlk:itemChangedBlk
-                                         entityFormPanelMaker:[_panelToolkit vehicleFormPanelMakerIncludeLogButtons:YES]
-                                         entityViewPanelMaker:[_panelToolkit vehicleViewPanelMaker]
-                                          entityToPanelBinder:[_panelToolkit vehicleToVehiclePanelBinder]
-                                          panelToEntityBinder:[_panelToolkit vehicleFormPanelToVehicleBinder]
-                                                  entityTitle:@"Vehicle"
-                                         panelEnablerDisabler:[_panelToolkit vehicleFormPanelEnablerDisabler]
-                                            entityAddCanceler:nil
-                                           entityEditPreparer:vehicleEditPreparer
-                                           entityEditCanceler:vehicleEditCanceler
-                                                  entitySaver:vehicleSaver
-                                       doneEditingEntityLocal:doneEditingVehicleLocal
-                               doneEditingEntityImmediateSync:doneEditingVehicleImmediateSync
-                                              isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                                               isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                                                isOfflineMode:^{ return [APP offlineMode]; }
-                               syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
-                               prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
-                                             viewDidAppearBlk:viewDidAppearBlk
-                                              entityValidator:[self newVehicleValidator]
-                                                     uploader:uploader
-                                        numRemoteDepsNotLocal:nil
-                                                        merge:mergeBlk
-                                            fetchDependencies:nil
-                                              updateDepsPanel:nil
-                                                   downloader:downloaderBlk
-                                            postDownloadSaver:postDownloadSaverBlk
-                                        conflictResolveFields:conflictResolveFieldsBlk
-                                       conflictResolvedEntity:conflictResolvedEntityBlk
-                                          itemChildrenCounter:[self vehicleItemChildrenCounter]
-                                          itemChildrenMsgsBlk:[self vehicleItemChildrenMsgs]
-                                                  itemDeleter:[self vehicleItemDeleterForUser:user]
-                                             itemLocalDeleter:[self vehicleItemLocalDeleter]
-                                        modalOperationStarted:[self commonModalOperationStartedBlock]
-                                           modalOperationDone:[self commonModalOperationDoneBlock]
-                                entityUpdatedNotificationName:FPEntityUpdatedNotification
-                                entityRemovedNotificationName:FPEntityDeletedNotification];
+    return [PEAddViewEditController viewEntityCtrlrWithParentEntity:user
+                                                             entity:vehicle
+                                                 listViewController:listViewController
+                                                    entityIndexPath:vehicleIndexPath
+                                                          uitoolkit:_uitoolkit
+                                                     itemChangedBlk:itemChangedBlk
+                                               entityFormPanelMaker:[_panelToolkit vehicleFormPanelMakerIncludeLogButtons:YES]
+                                               entityViewPanelMaker:[_panelToolkit vehicleViewPanelMaker]
+                                                entityToPanelBinder:[_panelToolkit vehicleToVehiclePanelBinder]
+                                                panelToEntityBinder:[_panelToolkit vehicleFormPanelToVehicleBinder]
+                                                        entityTitle:@"Vehicle"
+                                               panelEnablerDisabler:[_panelToolkit vehicleFormPanelEnablerDisabler]
+                                                  entityAddCanceler:nil
+                                                 entityEditPreparer:vehicleEditPreparer
+                                                 entityEditCanceler:vehicleEditCanceler
+                                                        entitySaver:vehicleSaver
+                                             doneEditingEntityLocal:doneEditingVehicleLocal
+                                     doneEditingEntityImmediateSync:doneEditingVehicleImmediateSync
+                                                    isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                     isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      isOfflineMode:^{ return [APP offlineMode]; }
+                                     syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
+                                     prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
+                                                   viewDidAppearBlk:viewDidAppearBlk
+                                                    entityValidator:[self newVehicleValidator]
+                                                           uploader:uploader
+                                              numRemoteDepsNotLocal:nil
+                                                              merge:mergeBlk
+                                                  fetchDependencies:nil
+                                                    updateDepsPanel:nil
+                                                         downloader:downloaderBlk
+                                                  postDownloadSaver:postDownloadSaverBlk
+                                              conflictResolveFields:conflictResolveFieldsBlk
+                                             conflictResolvedEntity:conflictResolvedEntityBlk
+                                                itemChildrenCounter:[self vehicleItemChildrenCounter]
+                                                itemChildrenMsgsBlk:[self vehicleItemChildrenMsgs]
+                                                        itemDeleter:[self vehicleItemDeleterForUser:user]
+                                                   itemLocalDeleter:[self vehicleItemLocalDeleter]
+                                              modalOperationStarted:[self commonModalOperationStartedBlock]
+                                                 modalOperationDone:[self commonModalOperationDoneBlock]
+                                      entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                      entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -1430,47 +1432,48 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                              recordCountLabelTag:FPFuelStationTagViewFplogsBtnRecordCount
                                      recordCount:[_coordDao numFuelPurchaseLogsForFuelStation:fuelStation error:[FPUtils localFetchErrorHandlerMaker]()]];
     };
-    return [PEAddViewEditController viewEntityCtrlrWithEntity:fuelStation
-                                           listViewController:listViewController
-                                              entityIndexPath:fuelStationIndexPath
-                                                    uitoolkit:_uitoolkit
-                                               itemChangedBlk:itemChangedBlk
-                                         entityFormPanelMaker:[_panelToolkit fuelstationFormPanelMakerIncludeLogButton:YES]
-                                         entityViewPanelMaker:[_panelToolkit fuelstationViewPanelMaker]
-                                          entityToPanelBinder:[_panelToolkit fuelstationToFuelstationPanelBinder]
-                                          panelToEntityBinder:[_panelToolkit fuelstationFormPanelToFuelstationBinder]
-                                                  entityTitle:@"Gas Station"
-                                         panelEnablerDisabler:[_panelToolkit fuelstationFormPanelEnablerDisabler]
-                                            entityAddCanceler:nil
-                                           entityEditPreparer:fuelStationEditPreparer
-                                           entityEditCanceler:fuelStationEditCanceler
-                                                  entitySaver:fuelStationSaver
-                                       doneEditingEntityLocal:doneEditingFuelStationLocal
-                               doneEditingEntityImmediateSync:doneEditingFuelStationImmediateSync
-                                              isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                                               isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                                                isOfflineMode:^{ return [APP offlineMode]; }
-                               syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
-                               prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
-                                             viewDidAppearBlk:viewDidAppearBlk
-                                              entityValidator:[self newFuelStationValidator]
-                                                     uploader:uploader
-                                        numRemoteDepsNotLocal:nil
-                                                        merge:mergeBlk
-                                            fetchDependencies:nil
-                                              updateDepsPanel:nil
-                                                   downloader:downloaderBlk
-                                            postDownloadSaver:postDownloadSaverBlk
-                                        conflictResolveFields:conflictResolveFieldsBlk
-                                       conflictResolvedEntity:conflictResolvedEntityBlk
-                                          itemChildrenCounter:[self fuelStationItemChildrenCounter]
-                                          itemChildrenMsgsBlk:[self fuelStationItemChildrenMsgs]
-                                                  itemDeleter:[self fuelStationItemDeleterForUser:user]
-                                             itemLocalDeleter:[self fuelStationItemLocalDeleter]
-                                        modalOperationStarted:[self commonModalOperationStartedBlock]
-                                           modalOperationDone:[self commonModalOperationDoneBlock]
-                                entityUpdatedNotificationName:FPEntityUpdatedNotification
-                                entityRemovedNotificationName:FPEntityDeletedNotification];
+    return [PEAddViewEditController viewEntityCtrlrWithParentEntity:user
+                                                             entity:fuelStation
+                                                 listViewController:listViewController
+                                                    entityIndexPath:fuelStationIndexPath
+                                                          uitoolkit:_uitoolkit
+                                                     itemChangedBlk:itemChangedBlk
+                                               entityFormPanelMaker:[_panelToolkit fuelstationFormPanelMakerIncludeLogButton:YES]
+                                               entityViewPanelMaker:[_panelToolkit fuelstationViewPanelMaker]
+                                                entityToPanelBinder:[_panelToolkit fuelstationToFuelstationPanelBinder]
+                                                panelToEntityBinder:[_panelToolkit fuelstationFormPanelToFuelstationBinder]
+                                                        entityTitle:@"Gas Station"
+                                               panelEnablerDisabler:[_panelToolkit fuelstationFormPanelEnablerDisabler]
+                                                  entityAddCanceler:nil
+                                                 entityEditPreparer:fuelStationEditPreparer
+                                                 entityEditCanceler:fuelStationEditCanceler
+                                                        entitySaver:fuelStationSaver
+                                             doneEditingEntityLocal:doneEditingFuelStationLocal
+                                     doneEditingEntityImmediateSync:doneEditingFuelStationImmediateSync
+                                                    isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                     isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      isOfflineMode:^{ return [APP offlineMode]; }
+                                     syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
+                                     prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
+                                                   viewDidAppearBlk:viewDidAppearBlk
+                                                    entityValidator:[self newFuelStationValidator]
+                                                           uploader:uploader
+                                              numRemoteDepsNotLocal:nil
+                                                              merge:mergeBlk
+                                                  fetchDependencies:nil
+                                                    updateDepsPanel:nil
+                                                         downloader:downloaderBlk
+                                                  postDownloadSaver:postDownloadSaverBlk
+                                              conflictResolveFields:conflictResolveFieldsBlk
+                                             conflictResolvedEntity:conflictResolvedEntityBlk
+                                                itemChildrenCounter:[self fuelStationItemChildrenCounter]
+                                                itemChildrenMsgsBlk:[self fuelStationItemChildrenMsgs]
+                                                        itemDeleter:[self fuelStationItemDeleterForUser:user]
+                                                   itemLocalDeleter:[self fuelStationItemLocalDeleter]
+                                              modalOperationStarted:[self commonModalOperationStartedBlock]
+                                                 modalOperationDone:[self commonModalOperationDoneBlock]
+                                      entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                      entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -2077,50 +2080,51 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
       [self deselectSelectedRowForTableOnView:ctrl.view tableViewTag:FPFpLogTagVehicleFuelStationAndDate];
     };
-    return [PEAddViewEditController viewEntityCtrlrWithEntity:fpLog
-                                           listViewController:listViewController
-                                              entityIndexPath:fpLogIndexPath
-                                                    uitoolkit:_uitoolkit
-                                               itemChangedBlk:itemChangedBlk
-                                         entityFormPanelMaker:[_panelToolkit fplogFormPanelMakerWithUser:user
-                                                                                  defaultSelectedVehicle:^{return [_coordDao vehicleForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()];}
-                                                                              defaultSelectedFuelStation:^{return [_coordDao fuelStationForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()];}
-                                                                                    defaultPickedLogDate:[fpLog purchasedAt]]
-                                         entityViewPanelMaker:[_panelToolkit fplogViewPanelMakerWithUser:user]
-                                          entityToPanelBinder:[_panelToolkit fplogToFplogPanelBinder]
-                                          panelToEntityBinder:[_panelToolkit fplogFormPanelToFplogBinder]
-                                                  entityTitle:@"Gas Log"
-                                         panelEnablerDisabler:[_panelToolkit fplogFormPanelEnablerDisabler]
-                                            entityAddCanceler:nil
-                                           entityEditPreparer:fpLogEditPreparer
-                                           entityEditCanceler:fpLogEditCanceler
-                                                  entitySaver:fpLogSaver
-                                       doneEditingEntityLocal:doneEditingFuelPurchaseLogLocal
-                               doneEditingEntityImmediateSync:doneEditingFuelPurchaseLogImmediateSync
-                                              isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                                               isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                                                isOfflineMode:^{ return [APP offlineMode]; }
-                               syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
-                               prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
-                                             viewDidAppearBlk:viewDidAppearBlk
-                                              entityValidator:[self newFuelPurchaseLogValidator]
-                                                     uploader:uploader
-                                        numRemoteDepsNotLocal:numRemoteDepsNotLocalBlk
-                                                        merge:mergeBlk
-                                            fetchDependencies:depFetcherBlk
-                                              updateDepsPanel:updateDepsPanel
-                                                   downloader:downloaderBlk
-                                            postDownloadSaver:postDownloadSaverBlk
-                                        conflictResolveFields:conflictResolveFieldsBlk
-                                       conflictResolvedEntity:conflictResolvedEntityBlk
-                                          itemChildrenCounter:nil
-                                          itemChildrenMsgsBlk:nil
-                                                  itemDeleter:[self fplogItemDeleterForUser:user]
-                                             itemLocalDeleter:[self fplogItemLocalDeleter]
-                                        modalOperationStarted:[self commonModalOperationStartedBlock]
-                                           modalOperationDone:[self commonModalOperationDoneBlock]
-                                entityUpdatedNotificationName:FPEntityUpdatedNotification
-                                entityRemovedNotificationName:FPEntityDeletedNotification];
+    return [PEAddViewEditController viewEntityCtrlrWithParentEntity:user
+                                                             entity:fpLog
+                                                 listViewController:listViewController
+                                                    entityIndexPath:fpLogIndexPath
+                                                          uitoolkit:_uitoolkit
+                                                     itemChangedBlk:itemChangedBlk
+                                               entityFormPanelMaker:[_panelToolkit fplogFormPanelMakerWithUser:user
+                                                                                        defaultSelectedVehicle:^{return [_coordDao vehicleForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                                                    defaultSelectedFuelStation:^{return [_coordDao fuelStationForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                                                          defaultPickedLogDate:[fpLog purchasedAt]]
+                                               entityViewPanelMaker:[_panelToolkit fplogViewPanelMakerWithUser:user]
+                                                entityToPanelBinder:[_panelToolkit fplogToFplogPanelBinder]
+                                                panelToEntityBinder:[_panelToolkit fplogFormPanelToFplogBinder]
+                                                        entityTitle:@"Gas Log"
+                                               panelEnablerDisabler:[_panelToolkit fplogFormPanelEnablerDisabler]
+                                                  entityAddCanceler:nil
+                                                 entityEditPreparer:fpLogEditPreparer
+                                                 entityEditCanceler:fpLogEditCanceler
+                                                        entitySaver:fpLogSaver
+                                             doneEditingEntityLocal:doneEditingFuelPurchaseLogLocal
+                                     doneEditingEntityImmediateSync:doneEditingFuelPurchaseLogImmediateSync
+                                                    isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                     isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      isOfflineMode:^{ return [APP offlineMode]; }
+                                     syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
+                                     prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
+                                                   viewDidAppearBlk:viewDidAppearBlk
+                                                    entityValidator:[self newFuelPurchaseLogValidator]
+                                                           uploader:uploader
+                                              numRemoteDepsNotLocal:numRemoteDepsNotLocalBlk
+                                                              merge:mergeBlk
+                                                  fetchDependencies:depFetcherBlk
+                                                    updateDepsPanel:updateDepsPanel
+                                                         downloader:downloaderBlk
+                                                  postDownloadSaver:postDownloadSaverBlk
+                                              conflictResolveFields:conflictResolveFieldsBlk
+                                             conflictResolvedEntity:conflictResolvedEntityBlk
+                                                itemChildrenCounter:nil
+                                                itemChildrenMsgsBlk:nil
+                                                        itemDeleter:[self fplogItemDeleterForUser:user]
+                                                   itemLocalDeleter:[self fplogItemLocalDeleter]
+                                              modalOperationStarted:[self commonModalOperationStartedBlock]
+                                                 modalOperationDone:[self commonModalOperationDoneBlock]
+                                      entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                      entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -2811,50 +2815,51 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
       [self deselectSelectedRowForTableOnView:ctrl.view tableViewTag:FPEnvLogTagVehicleAndDate];
     };
-    return [PEAddViewEditController viewEntityCtrlrWithEntity:envLog
-                                           listViewController:listViewController
-                                              entityIndexPath:envLogIndexPath
-                                                    uitoolkit:_uitoolkit
-                                               itemChangedBlk:itemChangedBlk
-                                         entityFormPanelMaker:[_panelToolkit envlogFormPanelMakerWithUser:user
-                                                                                   defaultSelectedVehicle:^{ return [_coordDao vehicleForEnvironmentLog:envLog
-                                                                                                                                                  error:[FPUtils localFetchErrorHandlerMaker]()]; }
-                                                                                     defaultPickedLogDate:[envLog logDate]]
-                                         entityViewPanelMaker:[_panelToolkit envlogViewPanelMakerWithUser:user]
-                                          entityToPanelBinder:[_panelToolkit envlogToEnvlogPanelBinder]
-                                          panelToEntityBinder:[_panelToolkit envlogFormPanelToEnvlogBinder]
-                                                  entityTitle:@"Odometer Log"
-                                         panelEnablerDisabler:[_panelToolkit envlogFormPanelEnablerDisabler]
-                                            entityAddCanceler:nil
-                                           entityEditPreparer:envLogEditPreparer
-                                           entityEditCanceler:envLogEditCanceler
-                                                  entitySaver:envLogSaver
-                                       doneEditingEntityLocal:doneEditingEnvironmentLogLocal
-                               doneEditingEntityImmediateSync:doneEditingEnvironmentLogImmediateSync
-                                              isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                                               isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                                                isOfflineMode:^{ return [APP offlineMode]; }
-                               syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
-                               prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
-                                             viewDidAppearBlk:viewDidAppearBlk
-                                              entityValidator:[self newEnvironmentLogValidator]
-                                                     uploader:uploader
-                                        numRemoteDepsNotLocal:numRemoteDepsNotLocalBlk
-                                                        merge:mergeBlk
-                                            fetchDependencies:depFetcherBlk
-                                              updateDepsPanel:updateDepsPanel
-                                                   downloader:downloaderBlk
-                                            postDownloadSaver:postDownloadSaverBlk
-                                        conflictResolveFields:conflictResolveFieldsBlk
-                                       conflictResolvedEntity:conflictResolvedEntityBlk
-                                          itemChildrenCounter:nil
-                                          itemChildrenMsgsBlk:nil
-                                                  itemDeleter:[self envlogItemDeleterForUser:user]
-                                             itemLocalDeleter:[self envlogItemLocalDeleter]
-                                        modalOperationStarted:[self commonModalOperationStartedBlock]
-                                           modalOperationDone:[self commonModalOperationDoneBlock]
-                                entityUpdatedNotificationName:FPEntityUpdatedNotification
-                                entityRemovedNotificationName:FPEntityDeletedNotification];
+    return [PEAddViewEditController viewEntityCtrlrWithParentEntity:user
+                                                             entity:envLog
+                                                 listViewController:listViewController
+                                                    entityIndexPath:envLogIndexPath
+                                                          uitoolkit:_uitoolkit
+                                                     itemChangedBlk:itemChangedBlk
+                                               entityFormPanelMaker:[_panelToolkit envlogFormPanelMakerWithUser:user
+                                                                                         defaultSelectedVehicle:^{ return [_coordDao vehicleForEnvironmentLog:envLog
+                                                                                                                                                        error:[FPUtils localFetchErrorHandlerMaker]()]; }
+                                                                                           defaultPickedLogDate:[envLog logDate]]
+                                               entityViewPanelMaker:[_panelToolkit envlogViewPanelMakerWithUser:user]
+                                                entityToPanelBinder:[_panelToolkit envlogToEnvlogPanelBinder]
+                                                panelToEntityBinder:[_panelToolkit envlogFormPanelToEnvlogBinder]
+                                                        entityTitle:@"Odometer Log"
+                                               panelEnablerDisabler:[_panelToolkit envlogFormPanelEnablerDisabler]
+                                                  entityAddCanceler:nil
+                                                 entityEditPreparer:envLogEditPreparer
+                                                 entityEditCanceler:envLogEditCanceler
+                                                        entitySaver:envLogSaver
+                                             doneEditingEntityLocal:doneEditingEnvironmentLogLocal
+                                     doneEditingEntityImmediateSync:doneEditingEnvironmentLogImmediateSync
+                                                    isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                     isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      isOfflineMode:^{ return [APP offlineMode]; }
+                                     syncImmediateMBProgressHUDMode:MBProgressHUDModeIndeterminate
+                                     prepareUIForUserInteractionBlk:prepareUIForUserInteractionBlk
+                                                   viewDidAppearBlk:viewDidAppearBlk
+                                                    entityValidator:[self newEnvironmentLogValidator]
+                                                           uploader:uploader
+                                              numRemoteDepsNotLocal:numRemoteDepsNotLocalBlk
+                                                              merge:mergeBlk
+                                                  fetchDependencies:depFetcherBlk
+                                                    updateDepsPanel:updateDepsPanel
+                                                         downloader:downloaderBlk
+                                                  postDownloadSaver:postDownloadSaverBlk
+                                              conflictResolveFields:conflictResolveFieldsBlk
+                                             conflictResolvedEntity:conflictResolvedEntityBlk
+                                                itemChildrenCounter:nil
+                                                itemChildrenMsgsBlk:nil
+                                                        itemDeleter:[self envlogItemDeleterForUser:user]
+                                                   itemLocalDeleter:[self envlogItemLocalDeleter]
+                                              modalOperationStarted:[self commonModalOperationStartedBlock]
+                                                 modalOperationDone:[self commonModalOperationDoneBlock]
+                                      entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                      entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 

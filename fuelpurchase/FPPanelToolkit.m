@@ -20,6 +20,7 @@
 #import "FPUIUtils.h"
 #import "FPForgotPasswordController.h"
 #import <PEFuelPurchase-Model/FPStats.h>
+#import "FPVehicleStatsController.h"
 
 NSString * const FPFpLogEntityMakerFpLogEntry = @"FPFpLogEntityMakerFpLogEntry";
 NSString * const FPFpLogEntityMakerVehicleEntry = @"FPFpLogEntityMakerVehicleEntry";
@@ -98,7 +99,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
 #pragma mark - User Account Panel
 
 - (PEEntityViewPanelMakerBlk)userAccountViewPanelMakerWithAccountStatusLabelTag:(NSInteger)accountStatusLabelTag {
-  return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user) {
+  return ^ UIView * (PEAddViewEditController *parentViewController, id nilParent, FPUser *user) {
     UIView *parentView = [parentViewController view];
     UIView *userAccountPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
     UIView *userAccountDataPanel = [self dataPanelWithRowData:@[@[@"Name", [PEUtils emptyIfNil:[user name]]],
@@ -496,12 +497,6 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                                   target:nil
                                                   action:nil];
   [forgotPasswordBtn bk_addEventHandler:^(id sender) {
-    /*
-     [weakTabBarCtrl.selectedViewController presentViewController:[PEUIUtils navigationControllerWithController:addRecordController
-     navigationBarHidden:NO]
-     animated:YES
-     completion:^{ dismissJotPanel(); }];
-     */
     [controller presentViewController:[PEUIUtils navigationControllerWithController:[[FPForgotPasswordController alloc] initWithStoreCoordinator:coordDao user:user uitoolkit:uitoolkit]
                                                                 navigationBarHidden:NO]
                              animated:YES
@@ -554,12 +549,25 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                  below:viewFpLogsBtn
                   onto:vehiclePanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:10.0
+              vpadding:8.0
+              hpadding:0];
+  UIView *msgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into the gas and odometer logs associated with this vehicle."
+                                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                    backgroundColor:[UIColor clearColor]
+                                                          textColor:[UIColor darkGrayColor]
+                                                verticalTextPadding:3.0
+                                                         fitToWidth:parentViewController.view.frame.size.width - 15.0]
+                                    padding:8.0];
+  [PEUIUtils placeView:msgPanel
+                 below:viewEnvLogsBtn
+                  onto:vehiclePanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:4.0
               hpadding:0];
 }
 
 - (PEEntityViewPanelMakerBlk)vehicleViewPanelMaker {
-  return ^ UIView * (PEAddViewEditController *parentViewController, FPVehicle *vehicle) {
+  return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPVehicle *vehicle) {
     UIView *parentView = [parentViewController view];
     UIView *vehiclePanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
     UIView *vehicleDataPanel = [self dataPanelWithRowData:@[@[@"Vehicle name", [PEUtils emptyIfNil:[vehicle name]]],
@@ -571,7 +579,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:15.0
                 hpadding:0.0];
-    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
+    /*NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
     NSAttributedString *footerText =
     [PEUIUtils attributedTextWithTemplate:@"Aggregate spend (%@)."
                              textToAccent:@"all octanes"
@@ -588,9 +596,40 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                     onto:vehiclePanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:30.0
+                hpadding:0.0];*/
+    UIButton *statsBtn = [_uitoolkit systemButtonMaker](@"Stats", nil, nil);
+    [[statsBtn layer] setCornerRadius:0.0];
+    [PEUIUtils setFrameWidthOfView:statsBtn ofWidth:1.0 relativeTo:parentView];
+    [PEUIUtils addDisclosureIndicatorToButton:statsBtn];
+    [statsBtn bk_addEventHandler:^(id sender) {
+      FPVehicleStatsController *vehicleStatsCtrl = [[FPVehicleStatsController alloc] initWithStoreCoordinator:_coordDao
+                                                                                                         user:user
+                                                                                                      vehicle:vehicle
+                                                                                                    uitoolkit:_uitoolkit
+                                                                                                screenToolkit:_screenToolkit];
+      [[parentViewController navigationController] pushViewController:vehicleStatsCtrl animated:YES];
+    } forControlEvents:UIControlEventTouchUpInside];
+    UIView *statsMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into the stats and trends associated with this vehicle."
+                                                                      font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                           backgroundColor:[UIColor clearColor]
+                                                                 textColor:[UIColor darkGrayColor]
+                                                       verticalTextPadding:3.0
+                                                                fitToWidth:parentView.frame.size.width - 15.0]
+                                           padding:8.0];
+    [PEUIUtils placeView:statsBtn
+                   below:vehicleDataPanel
+                    onto:vehiclePanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:30.0
+                hpadding:0.0];
+    [PEUIUtils placeView:statsMsgPanel
+                   below:statsBtn
+                    onto:vehiclePanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:4.0
                 hpadding:0.0];
     [self placeViewLogsButtonsOntoVehiclePanel:vehiclePanel
-                                     belowView:funFactsDataPanel
+                                     belowView:statsMsgPanel
                           parentViewController:parentViewController];
     return vehiclePanel;
   };
@@ -625,9 +664,11 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                 vpadding:5.0
                 hpadding:0.0];
     if (includeLogButtons) {
-      [self placeViewLogsButtonsOntoVehiclePanel:vehiclePanel
+      // I can't remember why I thought it was a good idea to include the
+      // view-log buttons on the form/edit screen...oh well...
+      /*[self placeViewLogsButtonsOntoVehiclePanel:vehiclePanel
                                        belowView:vehicleFuelCapacityTf
-                            parentViewController:parentViewController];
+                            parentViewController:parentViewController];*/
     }
     return vehiclePanel;
   };
@@ -716,6 +757,19 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:30
               hpadding:0];
+  UIView *msgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into the gas logs associated with this gas station."
+                                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                    backgroundColor:[UIColor clearColor]
+                                                          textColor:[UIColor darkGrayColor]
+                                                verticalTextPadding:3.0
+                                                         fitToWidth:parentViewController.view.frame.size.width - 15.0]
+                                    padding:8.0];
+  [PEUIUtils placeView:msgPanel
+                 below:viewFpLogsBtn
+                  onto:fuelstationPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:4.0
+              hpadding:0];
   return viewFpLogsBtn;
 }
 
@@ -745,7 +799,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
 }
 
 - (PEEntityViewPanelMakerBlk)fuelstationViewPanelMaker {
-  return ^ UIView * (PEAddViewEditController *parentViewController, FPFuelStation *fuelstation) {
+  return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPFuelStation *fuelstation) {
     UIView *parentView = [parentViewController view];
     UIView *fuelstationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.2 relativeToView:parentView];
     UIView *fuelstationDataPanel = [self dataPanelWithRowData:@[@[@"Gas station name", [PEUtils emptyIfNil:[fuelstation name]]],
@@ -880,9 +934,20 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                                      parentViewController:parentViewController];
     UITableView *coordinatesTableView = tableAndDs[0];
     FPFuelStationCoordinatesTableDataSource *ds = tableAndDs[1];
-    UIButton *useCurrentLocationBtn = [_uitoolkit systemButtonMaker](@"Use Current Location", nil, nil);
+    UIButton *useCurrentLocationBtn = [PEUIUtils buttonWithKey:@"Use current location"
+                                                          font:[UIFont systemFontOfSize:14]
+                                               backgroundColor:[UIColor concreteColor]
+                                                     textColor:[UIColor whiteColor]
+                                  disabledStateBackgroundColor:nil
+                                        disabledStateTextColor:nil
+                                               verticalPadding:8.5
+                                             horizontalPadding:20.0
+                                                  cornerRadius:5.0
+                                                        target:nil
+                                                        action:nil];
     [useCurrentLocationBtn setTag:FPFuelStationTagUseCurrentLocation];
     [useCurrentLocationBtn bk_addEventHandler:^(id sender) {
+      [parentViewController.view endEditing:YES];
       void (^doUseCurrentLocation)(void) = ^{
         CLLocation *currentLocation = [APP latestLocation];
         if (currentLocation) {
@@ -936,64 +1001,89 @@ To compute your location, you need to enable location services for Gas Jot.  If 
         doUseCurrentLocation();
       }
     } forControlEvents:UIControlEventTouchUpInside];
-    [PEUIUtils setFrameWidthOfView:useCurrentLocationBtn ofWidth:1.0 relativeTo:fuelStationPanel];
     [PEUIUtils placeView:useCurrentLocationBtn
                    below:coordinatesTableView
                     onto:fuelStationPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:10.0
-                hpadding:0];
-    UIButton *recomputeCoordsBtn = [_uitoolkit systemButtonMaker](@"Compute Location from Address", nil, nil);
+                vpadding:8.0
+                hpadding:8.0];
+    UIButton *recomputeCoordsBtn = [PEUIUtils buttonWithKey:@"Compute coordinates from address above"
+                                                       font:[UIFont systemFontOfSize:14]
+                                            backgroundColor:[UIColor concreteColor]
+                                                  textColor:[UIColor whiteColor]
+                               disabledStateBackgroundColor:nil
+                                     disabledStateTextColor:nil
+                                            verticalPadding:8.5
+                                          horizontalPadding:20.0
+                                               cornerRadius:5.0
+                                                     target:nil
+                                                     action:nil];
     [recomputeCoordsBtn setTag:FPFuelStationTagRecomputeCoordinates];
     [recomputeCoordsBtn bk_addEventHandler:^(id sender) {
-      MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:parentView animated:YES];
-      hud.delegate = parentViewController;
-      hud.labelText = @"Computing Location Coordinates";
-      CLGeocoder *geocoder = [[CLGeocoder alloc] init];
-      [geocoder geocodeAddressString:[PEUtils addressStringFromStreet:[fuelStationStreetTf text]
-                                                                 city:[fuelStationCityTf text]
-                                                                state:[fuelStationStateTf text]
-                                                                  zip:[fuelStationZipTf text]]
-                   completionHandler:^(NSArray *placemarks, NSError *error) {
-                     if (placemarks && ([placemarks count] > 0)) {
-                       CLPlacemark *placemark = placemarks[0];
-                       CLLocation *location = [placemark location];
-                       CLLocationCoordinate2D coordinate = [location coordinate];
-                       [ds setLatitude:[PEUtils decimalNumberFromDouble:coordinate.latitude]];
-                       [ds setLongitude:[PEUtils decimalNumberFromDouble:coordinate.longitude]];
-                       [coordinatesTableView reloadData];
-                       [hud hide:YES];
-                     } else if (error) {
-                       [hud hide:YES];
-                       [PEUIUtils showErrorAlertWithMsgs:nil
-                                                   title:@"Oops."
-                                        alertDescription:[[NSAttributedString alloc] initWithString:@"There was a problem trying to compute the\n\
-location from the given address above."]
-                                                topInset:70.0
-                                             buttonTitle:@"Okay."
-                                            buttonAction:nil
-                                          relativeToView:parentView];
-                     }
-                   }];
+      [parentViewController.view endEditing:YES];
+      if (([[fuelStationStreetTf text] length] == 0) &&
+          ([[fuelStationCityTf text] length] == 0) &&
+          ([[fuelStationStateTf text] length] == 0) &&
+          ([[fuelStationZipTf text] length] == 0)) {
+        [PEUIUtils showErrorAlertWithMsgs:nil
+                                    title:@"Oops."
+                         alertDescription:[[NSAttributedString alloc] initWithString:@"You need to enter at least part of the address above in order to compute the location coordinates."]
+                                 topInset:70.0
+                              buttonTitle:@"Okay."
+                             buttonAction:nil
+                           relativeToView:parentView];
+      } else {
+        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:parentView animated:YES];
+        hud.delegate = parentViewController;
+        hud.labelText = @"Computing Location Coordinates";
+        CLGeocoder *geocoder = [[CLGeocoder alloc] init];
+        [geocoder geocodeAddressString:[PEUtils addressStringFromStreet:[fuelStationStreetTf text]
+                                                                   city:[fuelStationCityTf text]
+                                                                  state:[fuelStationStateTf text]
+                                                                    zip:[fuelStationZipTf text]]
+                     completionHandler:^(NSArray *placemarks, NSError *error) {
+                       if (placemarks && ([placemarks count] > 0)) {
+                         CLPlacemark *placemark = placemarks[0];
+                         CLLocation *location = [placemark location];
+                         CLLocationCoordinate2D coordinate = [location coordinate];
+                         [ds setLatitude:[PEUtils decimalNumberFromDouble:coordinate.latitude]];
+                         [ds setLongitude:[PEUtils decimalNumberFromDouble:coordinate.longitude]];
+                         [coordinatesTableView reloadData];
+                         [hud hide:YES];
+                       } else if (error) {
+                         [hud hide:YES];
+                         [PEUIUtils showErrorAlertWithMsgs:nil
+                                                     title:@"Oops."
+                                          alertDescription:[[NSAttributedString alloc] initWithString:@"There was a problem trying to compute the \
+                                                            location from the given address above."]
+                                                  topInset:70.0
+                                               buttonTitle:@"Okay."
+                                              buttonAction:nil
+                                            relativeToView:parentView];
+                       }
+                     }];
+      }
     } forControlEvents:UIControlEventTouchUpInside];
-    [PEUIUtils setFrameWidthOfView:recomputeCoordsBtn ofWidth:1.0 relativeTo:fuelStationPanel];
     [PEUIUtils placeView:recomputeCoordsBtn
                    below:useCurrentLocationBtn
                     onto:fuelStationPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:10.0
-                hpadding:0];
+                vpadding:6.0
+                hpadding:0.0];
     if (includeLogButton) {
-      [self placeViewLogsButtonOntoFuelstationPanel:fuelStationPanel
+      // I can't remember why I thought it was a good idea to include the
+      // view-log buttons on the form/edit screen...oh well...
+      /*[self placeViewLogsButtonOntoFuelstationPanel:fuelStationPanel
                                           belowView:recomputeCoordsBtn
-                               parentViewController:parentViewController];
+                               parentViewController:parentViewController];*/
     }
     // wrap fuel station panel in scroll view (so everything can "fit")
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelStationPanel frame]];
+    /*UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelStationPanel frame]];
     [scrollView setContentSize:CGSizeMake(fuelStationPanel.frame.size.width, 1.3 * fuelStationPanel.frame.size.height)];
     [scrollView addSubview:fuelStationPanel];
     [scrollView setBounces:NO];
-    return scrollView;
+    return scrollView;*/
+    return fuelStationPanel;
   };
 }
 
@@ -1304,7 +1394,7 @@ location from the given address above."]
 #pragma mark - Fuel Purchase Log
 
 - (PEEntityViewPanelMakerBlk)fplogViewPanelMakerWithUser:(FPUser *)user {
-  return ^ UIView * (PEAddViewEditController *parentViewController, FPFuelPurchaseLog *fplog) {
+  return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPFuelPurchaseLog *fplog) {
     UIView *parentView = [parentViewController view];
     UIView *fplogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
     UIView *fplogDataPanel = [self dataPanelWithRowData:@[@[@"Octane", [PEUtils descriptionOrEmptyIfNil:[fplog octane]]],
@@ -1590,7 +1680,7 @@ location from the given address above."]
 #pragma mark - Environment Log
 
 - (PEEntityViewPanelMakerBlk)envlogViewPanelMakerWithUser:(FPUser *)user {
-  return ^ UIView * (PEAddViewEditController *parentViewController, FPEnvironmentLog *envlog) {
+  return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPEnvironmentLog *envlog) {
     UIView *parentView = [parentViewController view];
     UIView *envlogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
     UIView *envlogDataPanel = [self dataPanelWithRowData:@[@[@"Odometer", [PEUtils descriptionOrEmptyIfNil:[envlog odometer]]],

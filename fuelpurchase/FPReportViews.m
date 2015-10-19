@@ -595,7 +595,7 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 
 - (FPFunFact)temperatureLastYearFromLogFunFact {
   return ^JGActionSheetSection *(FPEnvironmentLog *odometerLog, FPUser *user, UIView *relativeToView) {
-    NSNumber *temperateLastYear = [_stats temperatureLastYearFromLog:odometerLog user:user];
+    NSNumber *temperateLastYear = [_stats temperatureLastYearForUser:user withinDaysVariance:20];
     if (temperateLastYear) {
       NSAttributedString *funFact = [PEUIUtils attributedTextWithTemplate:@"A year ago the temperature was %@ degrees."
                                                              textToAccent:[temperateLastYear description]
