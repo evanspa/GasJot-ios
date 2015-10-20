@@ -121,7 +121,7 @@ You currently have no unsynced items."
   UIColor *eipBadgeTextColor = [UIColor blackColor];
   _vehiclesButton = nil;
   if (numEipVehicles > 0) {
-    _vehiclesButton = [FPUIUtils buttonWithLabel:@"Vehicles"
+    _vehiclesButton = [PEUIUtils buttonWithLabel:@"Vehicles"
                                         badgeNum:numEipVehicles
                                       badgeColor:eipBadgeColor
                                   badgeTextColor:eipBadgeTextColor
@@ -135,7 +135,7 @@ You currently have no unsynced items."
   }
   _fuelStationsButton = nil;
   if (numEipFuelStations > 0) {
-    _fuelStationsButton = [FPUIUtils buttonWithLabel:@"Gas Stations"
+    _fuelStationsButton = [PEUIUtils buttonWithLabel:@"Gas Stations"
                                             badgeNum:numEipFuelStations
                                           badgeColor:eipBadgeColor
                                       badgeTextColor:eipBadgeTextColor
@@ -149,7 +149,7 @@ You currently have no unsynced items."
   }
   _fplogsButton = nil;
   if (numEipFpLogs > 0) {
-    _fplogsButton = [FPUIUtils buttonWithLabel:@"Gas Logs"
+    _fplogsButton = [PEUIUtils buttonWithLabel:@"Gas Logs"
                                       badgeNum:numEipFpLogs
                                     badgeColor:eipBadgeColor
                                 badgeTextColor:eipBadgeTextColor
@@ -163,7 +163,7 @@ You currently have no unsynced items."
   }
   _envlogsButton = nil;
   if (numEipEnvLogs > 0) {
-    _envlogsButton = [FPUIUtils buttonWithLabel:@"Odometer Logs"
+    _envlogsButton = [PEUIUtils buttonWithLabel:@"Odometer Logs"
                                        badgeNum:numEipEnvLogs
                                      badgeColor:eipBadgeColor
                                  badgeTextColor:eipBadgeTextColor
@@ -177,7 +177,7 @@ You currently have no unsynced items."
   }
   _syncAllButton = nil;
   if (totalNumSyncNeeded > 0) {
-    _syncAllButton = [FPUIUtils buttonWithLabel:@"Upload All"
+    _syncAllButton = [PEUIUtils buttonWithLabel:@"Upload All"
                                        badgeNum:totalNumSyncNeeded
                                      badgeColor:[UIColor fpAppBlue]
                                  badgeTextColor:[UIColor whiteColor]

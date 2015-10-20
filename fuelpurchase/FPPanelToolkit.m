@@ -59,10 +59,10 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
   return ^ UIView * (PEAddViewEditController *parentViewController, id nilParent, FPUser *user) {
     UIView *parentView = [parentViewController view];
     UIView *userAccountPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *userAccountDataPanel = [FPUIUtils dataPanelWithRowData:@[@[@"Name", [PEUtils emptyIfNil:[user name]]],
-                                                                     @[@"Email", [PEUtils emptyIfNil:[user email]]]]
-                                                         uitoolkit:_uitoolkit
-                                                        parentView:parentView];
+    UIView *userAccountDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Name", [PEUtils emptyIfNil:[user name]]],
+                                                                      @[@"Email", [PEUtils emptyIfNil:[user email]]]]
+                                                          uitoolkit:_uitoolkit
+                                                         parentView:parentView];
     UIView *accountStatusPanel = [FPPanelToolkit accountStatusPanelForUser:user
                                                                   panelTag:@(accountStatusLabelTag)
                                                       includeRefreshButton:NO
@@ -469,7 +469,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                    belowView:(UIView *)belowView
                         parentViewController:(PEAddViewEditController *)parentViewController {
   // View Fuel Purchase Logs button
-  UIButton *viewFpLogsBtn = [FPUIUtils buttonWithLabel:@"Gas logs"
+  UIButton *viewFpLogsBtn = [PEUIUtils buttonWithLabel:@"Gas logs"
                                           tagForButton:@(FPVehicleTagViewFplogsBtn)
                                            recordCount:[_coordDao numFuelPurchaseLogsForVehicle:(FPVehicle *)[parentViewController entity] error:[FPUtils localFetchErrorHandlerMaker]()]
                                 tagForRecordCountLabel:@(FPVehicleTagViewFplogsBtnRecordCount)
@@ -490,7 +490,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
               vpadding:30
               hpadding:0];
   // View Environment Logs button
-  UIButton *viewEnvLogsBtn = [FPUIUtils buttonWithLabel:@"Odometer logs"
+  UIButton *viewEnvLogsBtn = [PEUIUtils buttonWithLabel:@"Odometer logs"
                                            tagForButton:@(FPVehicleTagViewEnvlogsBtn)
                                             recordCount:[_coordDao numEnvironmentLogsForVehicle:(FPVehicle *)[parentViewController entity] error:[FPUtils localFetchErrorHandlerMaker]()]
                                  tagForRecordCountLabel:@(FPVehicleTagViewEnvlogsBtnRecordCount)
@@ -528,11 +528,11 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPVehicle *vehicle) {
     UIView *parentView = [parentViewController view];
     UIView *vehiclePanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *vehicleDataPanel = [FPUIUtils dataPanelWithRowData:@[@[@"Vehicle name", [PEUtils emptyIfNil:[vehicle name]]],
-                                                                 @[@"Default octane", [PEUtils descriptionOrEmptyIfNil:[vehicle defaultOctane]]],
-                                                                 @[@"Fuel capacity", [PEUtils descriptionOrEmptyIfNil:[vehicle fuelCapacity]]]]
-                                                     uitoolkit:_uitoolkit
-                                                    parentView:parentView];
+    UIView *vehicleDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Vehicle name", [PEUtils emptyIfNil:[vehicle name]]],
+                                                                  @[@"Default octane", [PEUtils descriptionOrEmptyIfNil:[vehicle defaultOctane]]],
+                                                                  @[@"Fuel capacity", [PEUtils descriptionOrEmptyIfNil:[vehicle fuelCapacity]]]]
+                                                      uitoolkit:_uitoolkit
+                                                     parentView:parentView];
     [PEUIUtils placeView:vehicleDataPanel
                  atTopOf:vehiclePanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -556,7 +556,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:30.0
                 hpadding:0.0];*/
-    UIButton *statsBtn = [_uitoolkit systemButtonMaker](@"Stats", nil, nil);
+    UIButton *statsBtn = [_uitoolkit systemButtonMaker](@"Stats & Trends", nil, nil);
     [[statsBtn layer] setCornerRadius:0.0];
     [PEUIUtils setFrameWidthOfView:statsBtn ofWidth:1.0 relativeTo:parentView];
     [PEUIUtils addDisclosureIndicatorToButton:statsBtn];
@@ -696,7 +696,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
 - (UIButton *)placeViewLogsButtonOntoFuelstationPanel:(UIView *)fuelstationPanel
                                             belowView:(UIView *)belowView
                                  parentViewController:(PEAddViewEditController *)parentViewController {
-  UIButton *viewFpLogsBtn = [FPUIUtils buttonWithLabel:@"Gas logs"
+  UIButton *viewFpLogsBtn = [PEUIUtils buttonWithLabel:@"Gas logs"
                                           tagForButton:@(FPFuelStationTagViewFplogsBtn)
                                            recordCount:[_coordDao numFuelPurchaseLogsForFuelStation:(FPFuelStation *)[parentViewController entity] error:[FPUtils localFetchErrorHandlerMaker]()]
                                 tagForRecordCountLabel:@(FPFuelStationTagViewFplogsBtnRecordCount)
@@ -761,13 +761,13 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPFuelStation *fuelstation) {
     UIView *parentView = [parentViewController view];
     UIView *fuelstationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.2 relativeToView:parentView];
-    UIView *fuelstationDataPanel = [FPUIUtils dataPanelWithRowData:@[@[@"Gas station name", [PEUtils emptyIfNil:[fuelstation name]]],
-                                                                     @[@"Street", [PEUtils emptyIfNil:[fuelstation street]]],
-                                                                     @[@"City", [PEUtils emptyIfNil:[fuelstation city]]],
-                                                                     @[@"State", [PEUtils emptyIfNil:[fuelstation state]]],
-                                                                     @[@"Zip", [PEUtils emptyIfNil:[fuelstation zip]]]]
-                                                         uitoolkit:_uitoolkit
-                                                        parentView:parentView];
+    UIView *fuelstationDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Gas station name", [PEUtils emptyIfNil:[fuelstation name]]],
+                                                                      @[@"Street", [PEUtils emptyIfNil:[fuelstation street]]],
+                                                                      @[@"City", [PEUtils emptyIfNil:[fuelstation city]]],
+                                                                      @[@"State", [PEUtils emptyIfNil:[fuelstation state]]],
+                                                                      @[@"Zip", [PEUtils emptyIfNil:[fuelstation zip]]]]
+                                                          uitoolkit:_uitoolkit
+                                                         parentView:parentView];
     [PEUIUtils placeView:fuelstationDataPanel
                  atTopOf:fuelstationPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -1357,13 +1357,13 @@ To compute your location, you need to enable location services for Gas Jot.  If 
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPFuelPurchaseLog *fplog) {
     UIView *parentView = [parentViewController view];
     UIView *fplogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *fplogDataPanel = [FPUIUtils dataPanelWithRowData:@[@[@"Octane", [PEUtils descriptionOrEmptyIfNil:[fplog octane]]],
-                                                               @[@"Price per gallon", [PEUtils descriptionOrEmptyIfNil:[fplog gallonPrice]]],
-                                                               @[@"Car wash per-gallon discount", [PEUtils descriptionOrEmptyIfNil:[fplog carWashPerGallonDiscount]]],
-                                                               @[@"Got car wash?", [PEUtils yesNoFromBool:[fplog gotCarWash]]],
-                                                               @[@"Num gallons", [PEUtils descriptionOrEmptyIfNil:[fplog numGallons]]]]
-                                                   uitoolkit:_uitoolkit
-                                                  parentView:parentView];
+    UIView *fplogDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Octane", [PEUtils descriptionOrEmptyIfNil:[fplog octane]]],
+                                                                @[@"Price per gallon", [PEUtils descriptionOrEmptyIfNil:[fplog gallonPrice]]],
+                                                                @[@"Car wash per-gallon discount", [PEUtils descriptionOrEmptyIfNil:[fplog carWashPerGallonDiscount]]],
+                                                                @[@"Got car wash?", [PEUtils yesNoFromBool:[fplog gotCarWash]]],
+                                                                @[@"Num gallons", [PEUtils descriptionOrEmptyIfNil:[fplog numGallons]]]]
+                                                    uitoolkit:_uitoolkit
+                                                   parentView:parentView];
     FPVehicle *vehicle = [_coordDao vehicleForFuelPurchaseLog:fplog error:[FPUtils localFetchErrorHandlerMaker]()];
     FPFuelStation *fuelstation = [_coordDao fuelStationForFuelPurchaseLog:fplog error:[FPUtils localFetchErrorHandlerMaker]()];
     NSDictionary *components = [self fplogFormComponentsWithUser:user
@@ -1644,13 +1644,13 @@ To compute your location, you need to enable location services for Gas Jot.  If 
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPEnvironmentLog *envlog) {
     UIView *parentView = [parentViewController view];
     UIView *envlogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *envlogDataPanel = [FPUIUtils dataPanelWithRowData:@[@[@"Odometer", [PEUtils descriptionOrEmptyIfNil:[envlog odometer]]],
-                                                                @[@"Reported DTE", [PEUtils descriptionOrEmptyIfNil:[envlog reportedDte]]],
-                                                                @[@"Reported avg mpg", [PEUtils descriptionOrEmptyIfNil:[envlog reportedAvgMpg]]],
-                                                                @[@"Reported avg mph", [PEUtils descriptionOrEmptyIfNil:[envlog reportedAvgMph]]],
-                                                                @[@"Reported outside temperature", [PEUtils descriptionOrEmptyIfNil:[envlog reportedOutsideTemp]]]]
-                                                    uitoolkit:_uitoolkit
-                                                   parentView:parentView];
+    UIView *envlogDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Odometer", [PEUtils descriptionOrEmptyIfNil:[envlog odometer]]],
+                                                                 @[@"Reported DTE", [PEUtils descriptionOrEmptyIfNil:[envlog reportedDte]]],
+                                                                 @[@"Reported avg mpg", [PEUtils descriptionOrEmptyIfNil:[envlog reportedAvgMpg]]],
+                                                                 @[@"Reported avg mph", [PEUtils descriptionOrEmptyIfNil:[envlog reportedAvgMph]]],
+                                                                 @[@"Reported outside temperature", [PEUtils descriptionOrEmptyIfNil:[envlog reportedOutsideTemp]]]]
+                                                     uitoolkit:_uitoolkit
+                                                    parentView:parentView];
     NSDictionary *components = [self envlogFormComponentsWithUser:user
                                       displayDisclosureIndicators:NO
                                            defaultSelectedVehicle:[_coordDao vehicleForEnvironmentLog:envlog error:[FPUtils localFetchErrorHandlerMaker]()]

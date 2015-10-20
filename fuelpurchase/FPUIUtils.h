@@ -12,48 +12,9 @@ typedef void (^FPEnableUserInteractionBlk)(BOOL);
 
 @interface FPUIUtils : NSObject
 
-+ (NSString *)textForDecimal:(NSDecimalNumber *)decimalValue
-                   formatter:(NSNumberFormatter *)formatter
-                   textIfNil:(NSString *)textIfNil;
+#pragma mark - Helpers
 
-+ (UIView *)dataPanelWithRowData:(NSArray *)rowData
-                       uitoolkit:(PEUIToolkit *)uitoolkit
-                      parentView:(UIView *)parentView;
-
-+ (UIView *)dataPanelWithRowData:(NSArray *)rowData
-            footerAttributedText:(NSAttributedString *)footerAttributedText
-  footerFontForHeightCalculation:(UIFont *)footerFontForHeightCalculation
-           footerVerticalPadding:(CGFloat)footerVerticalPadding
-                       uitoolkit:(PEUIToolkit *)uitoolkit
-                      parentView:(UIView *)parentView;
-
-+ (UIView *)badgeForNum:(NSInteger)num
-                  color:(UIColor *)color
-         badgeTextColor:(UIColor *)badgeTextColor;
-
-+ (NSString *)labelTextForRecordCount:(NSInteger)recordCount;
-
-+ (void)refreshRecordCountLabelOnButton:(UIButton *)button
-                    recordCountLabelTag:(NSInteger)recordCountLabelTag
-                            recordCount:(NSInteger)recordCount;
-
-+ (UIButton *)buttonWithLabel:(NSString *)labelText
-                 tagForButton:(NSNumber *)tagForButton
-                  recordCount:(NSInteger)recordCount
-       tagForRecordCountLabel:(NSNumber *)tagForRecordCountLabel
-            addDisclosureIcon:(BOOL)addDisclosureIcon
-                      handler:(void(^)(void))handler
-                    uitoolkit:(PEUIToolkit *)uitoolkit
-               relativeToView:(UIView *)relativeToView;
-
-+ (UIButton *)buttonWithLabel:(NSString *)labelText
-                     badgeNum:(NSInteger)badgeNum
-                   badgeColor:(UIColor *)badgeColor
-               badgeTextColor:(UIColor *)badgeTextColor
-            addDisclosureIcon:(BOOL)addDisclosureIcon
-                      handler:(void(^)(void))handler
-                    uitoolkit:(PEUIToolkit *)uitoolkit
-               relativeToView:(UIView *)relativeToView;
++ (UIView *)headerPanelWithText:(NSString *)headerText relativeToView:(UIView *)relativeToView;
 
 + (FPEnableUserInteractionBlk)makeUserEnabledBlockForController:(UIViewController *)controller;
 

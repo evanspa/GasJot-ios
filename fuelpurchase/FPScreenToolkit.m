@@ -794,11 +794,11 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
       UIButton *viewFplogsBtn = (UIButton *)[ctrl.view viewWithTag:FPVehicleTagViewFplogsBtn];
-      [FPUIUtils refreshRecordCountLabelOnButton:viewFplogsBtn
+      [PEUIUtils refreshRecordCountLabelOnButton:viewFplogsBtn
                              recordCountLabelTag:FPVehicleTagViewFplogsBtnRecordCount
                                      recordCount:[_coordDao numFuelPurchaseLogsForVehicle:vehicle error:[FPUtils localFetchErrorHandlerMaker]()]];
       UIButton *viewEnvlogsBtn = (UIButton *)[ctrl.view viewWithTag:FPVehicleTagViewEnvlogsBtn];
-      [FPUIUtils refreshRecordCountLabelOnButton:viewEnvlogsBtn
+      [PEUIUtils refreshRecordCountLabelOnButton:viewEnvlogsBtn
                              recordCountLabelTag:FPVehicleTagViewEnvlogsBtnRecordCount
                                      recordCount:[_coordDao numEnvironmentLogsForVehicle:vehicle error:[FPUtils localFetchErrorHandlerMaker]()]];
     };
@@ -1428,7 +1428,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
       UIButton *viewFplogsBtn = (UIButton *)[ctrl.view viewWithTag:FPFuelStationTagViewFplogsBtn];
-      [FPUIUtils refreshRecordCountLabelOnButton:viewFplogsBtn
+      [PEUIUtils refreshRecordCountLabelOnButton:viewFplogsBtn
                              recordCountLabelTag:FPFuelStationTagViewFplogsBtnRecordCount
                                      recordCount:[_coordDao numFuelPurchaseLogsForFuelStation:fuelStation error:[FPUtils localFetchErrorHandlerMaker]()]];
     };

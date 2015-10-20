@@ -28,48 +28,7 @@
 
 @implementation FPUtils
 
-#pragma mark - Things For PEObjc-Commons
-
-+ (NSNumberFormatter *)currencyFormatter {
-  NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-  [formatter setNumberStyle:NSNumberFormatterCurrencyStyle];
-  return formatter;
-}
-
-+ (NSInteger)daysFromDate:(NSDate *)fromDate toDate:(NSDate *)toDate {
-  NSCalendar *gregorianCalendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
-  NSDateComponents *components = [gregorianCalendar components:NSCalendarUnitDay
-                                                      fromDate:fromDate
-                                                        toDate:toDate
-                                                       options:NSCalendarWrapComponents];
-  return [components day];
-}
-
-+ (NSArray *)daysBetweenDates:(NSArray *)dates {
-  NSUInteger numDates = [dates count];
-  if (numDates <= 1) {
-    return nil;
-  } else {
-    NSMutableArray *intervals = [NSMutableArray arrayWithCapacity:numDates - 1];
-    NSInteger loopBoundary = numDates - 1;
-    for (NSUInteger i = 0; i < loopBoundary; i++) {
-      intervals[i] = @([FPUtils daysFromDate:dates[i] toDate:dates[i+1]]);
-    }
-    return intervals;
-  }
-}
-
-+ (NSInteger)currentYear {
-  return [[NSCalendar currentCalendar] component:NSCalendarUnitYear fromDate:[NSDate date]];
-}
-
 #pragma mark - User Helpers
-
-+ (BOOL)validateEmailWithString:(NSString*)email {
-  NSString *emailRegex = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
-  NSPredicate *emailTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", emailRegex];
-  return [emailTest evaluateWithObject:email];
-}
 
 + (NSArray *)computeSignInErrMsgs:(NSUInteger)signInErrMask {
   NSMutableArray *errMsgs = [NSMutableArray arrayWithCapacity:1];

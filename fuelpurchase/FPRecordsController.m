@@ -73,7 +73,7 @@ From here you can drill into all of your data records."
   [_fuelstationsBtn removeFromSuperview];
   [_fplogsBtn removeFromSuperview];
   [_envlogsBtn removeFromSuperview];
-  _vehiclesBtn = [FPUIUtils buttonWithLabel:@"Vehicles"
+  _vehiclesBtn = [PEUIUtils buttonWithLabel:@"Vehicles"
                                tagForButton:nil
                                 recordCount:[_coordDao numVehiclesForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
                      tagForRecordCountLabel:nil
@@ -85,7 +85,7 @@ From here you can drill into all of your data records."
                                     }
                                   uitoolkit:_uitoolkit
                              relativeToView:self.view];
-  _fuelstationsBtn = [FPUIUtils buttonWithLabel:@"Gas stations"
+  _fuelstationsBtn = [PEUIUtils buttonWithLabel:@"Gas stations"
                                    tagForButton:nil
                                     recordCount:[_coordDao numFuelStationsForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
                          tagForRecordCountLabel:nil
@@ -97,7 +97,7 @@ From here you can drill into all of your data records."
                                         }
                                       uitoolkit:_uitoolkit
                                  relativeToView:self.view];
-  _fplogsBtn = [FPUIUtils buttonWithLabel:@"Gas logs"
+  _fplogsBtn = [PEUIUtils buttonWithLabel:@"Gas logs"
                              tagForButton:nil
                               recordCount:[_coordDao numFuelPurchaseLogsForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
                    tagForRecordCountLabel:nil
@@ -109,7 +109,7 @@ From here you can drill into all of your data records."
                                   }
                                 uitoolkit:_uitoolkit
                            relativeToView:self.view];
-  _envlogsBtn = [FPUIUtils buttonWithLabel:@"Odometer logs"
+  _envlogsBtn = [PEUIUtils buttonWithLabel:@"Odometer logs"
                               tagForButton:nil
                                recordCount:[_coordDao numEnvironmentLogsForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
                     tagForRecordCountLabel:nil
@@ -163,7 +163,7 @@ From here you can drill into all of your data records."
 #pragma mark - Helpers
 
 - (UIButton *)unsyncedEditsButtonWithBadgeNum:(NSInteger)numUnsynced {
-  return [FPUIUtils buttonWithLabel:@"Unsynced Edits"
+  return [PEUIUtils buttonWithLabel:@"Unsynced Edits"
                            badgeNum:numUnsynced
                          badgeColor:[UIColor redColor]
                      badgeTextColor:[UIColor whiteColor]

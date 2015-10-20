@@ -43,6 +43,8 @@
 		CA920C121B21F48900A848EA /* fpapi-resource.localdev.json in Resources */ = {isa = PBXBuildFile; fileRef = 18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */; };
 		CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */; };
 		CABF516F1BD499150083B460 /* FPVehicleStatsController.m in Sources */ = {isa = PBXBuildFile; fileRef = CABF516E1BD499150083B460 /* FPVehicleStatsController.m */; settings = {ASSET_TAGS = (); }; };
+		CABF51861BD680F40083B460 /* FPVehicleGasCostPerMileController.m in Sources */ = {isa = PBXBuildFile; fileRef = CABF51851BD680F40083B460 /* FPVehicleGasCostPerMileController.m */; settings = {ASSET_TAGS = (); }; };
+		CABF51891BD689900083B460 /* FPVehicleSpentOnGasController.m in Sources */ = {isa = PBXBuildFile; fileRef = CABF51881BD689900083B460 /* FPVehicleSpentOnGasController.m */; settings = {ASSET_TAGS = (); }; };
 		CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = CAD8AE501B2B291000276F4F /* PELMUIUtils.m */; };
 		CAE873F71BBDA64900E5A81F /* FPForgotPasswordController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAE873F61BBDA64900E5A81F /* FPForgotPasswordController.m */; settings = {ASSET_TAGS = (); }; };
 		CAEE0C9A1BC9830E00FAB0BF /* FPReportViews.m in Sources */ = {isa = PBXBuildFile; fileRef = CAEE0C991BC9830E00FAB0BF /* FPReportViews.m */; settings = {ASSET_TAGS = (); }; };
@@ -137,6 +139,10 @@
 		CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPReauthenticateController.m; sourceTree = "<group>"; };
 		CABF516D1BD499150083B460 /* FPVehicleStatsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPVehicleStatsController.h; sourceTree = "<group>"; };
 		CABF516E1BD499150083B460 /* FPVehicleStatsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPVehicleStatsController.m; sourceTree = "<group>"; };
+		CABF51841BD680F40083B460 /* FPVehicleGasCostPerMileController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPVehicleGasCostPerMileController.h; sourceTree = "<group>"; };
+		CABF51851BD680F40083B460 /* FPVehicleGasCostPerMileController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPVehicleGasCostPerMileController.m; sourceTree = "<group>"; };
+		CABF51871BD689900083B460 /* FPVehicleSpentOnGasController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPVehicleSpentOnGasController.h; sourceTree = "<group>"; };
+		CABF51881BD689900083B460 /* FPVehicleSpentOnGasController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPVehicleSpentOnGasController.m; sourceTree = "<group>"; };
 		CAD8AE4F1B2B291000276F4F /* PELMUIUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PELMUIUtils.h; sourceTree = "<group>"; };
 		CAD8AE501B2B291000276F4F /* PELMUIUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PELMUIUtils.m; sourceTree = "<group>"; };
 		CAE873F51BBDA64900E5A81F /* FPForgotPasswordController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPForgotPasswordController.h; sourceTree = "<group>"; };
@@ -531,6 +537,8 @@
 		CABF516C1BD498FB0083B460 /* Vehicle Stats Screen */ = {
 			isa = PBXGroup;
 			children = (
+				CABF51831BD680C60083B460 /* Spent on gas Screen */,
+				CABF51821BD680B60083B460 /* Gas cost per mile Screen */,
 				CABF516D1BD499150083B460 /* FPVehicleStatsController.h */,
 				CABF516E1BD499150083B460 /* FPVehicleStatsController.m */,
 			);
@@ -543,6 +551,24 @@
 				CABF516C1BD498FB0083B460 /* Vehicle Stats Screen */,
 			);
 			name = "Stat Screens";
+			sourceTree = "<group>";
+		};
+		CABF51821BD680B60083B460 /* Gas cost per mile Screen */ = {
+			isa = PBXGroup;
+			children = (
+				CABF51841BD680F40083B460 /* FPVehicleGasCostPerMileController.h */,
+				CABF51851BD680F40083B460 /* FPVehicleGasCostPerMileController.m */,
+			);
+			name = "Gas cost per mile Screen";
+			sourceTree = "<group>";
+		};
+		CABF51831BD680C60083B460 /* Spent on gas Screen */ = {
+			isa = PBXGroup;
+			children = (
+				CABF51871BD689900083B460 /* FPVehicleSpentOnGasController.h */,
+				CABF51881BD689900083B460 /* FPVehicleSpentOnGasController.m */,
+			);
+			name = "Spent on gas Screen";
 			sourceTree = "<group>";
 		};
 		CAD8AE4E1B2B28E200276F4F /* Local Data UI Utils */ = {
@@ -801,6 +827,7 @@
 				CAFC84691BA363A600FAEB66 /* iCarousel.m in Sources */,
 				CAFC84871BA749FB00FAEB66 /* UIColor+FPAdditions.m in Sources */,
 				CAFC846E1BA64B5A00FAEB66 /* FPHomeScreenController.m in Sources */,
+				CABF51891BD689900083B460 /* FPVehicleSpentOnGasController.m in Sources */,
 				CA7D5A271B383F5A00433581 /* FPAppNotificationNames.m in Sources */,
 				CAFC847A1BA6ECCA00FAEB66 /* FPJotController.m in Sources */,
 				CAFC84651BA27EAB00FAEB66 /* FPSplashController.m in Sources */,
@@ -811,6 +838,7 @@
 				CA7D5A2E1B3851E200433581 /* FPAccountLoginController.m in Sources */,
 				CAE873F71BBDA64900E5A81F /* FPForgotPasswordController.m in Sources */,
 				186E0B7C19CD237B00CE4B3A /* PEListViewController.m in Sources */,
+				CABF51861BD680F40083B460 /* FPVehicleGasCostPerMileController.m in Sources */,
 				CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */,
 				189AC7561A78034500A6CFE3 /* FPLogEnvLogComposite.m in Sources */,
 				18010C5A180E4752005F5CEB /* FPQuickActionMenuController.m in Sources */,

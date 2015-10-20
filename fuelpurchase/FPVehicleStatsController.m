@@ -8,10 +8,13 @@
 
 #import "FPVehicleStatsController.h"
 #import <PEFuelPurchase-Model/FPStats.h>
+#import <PEObjc-Commons/PEUtils.h>
+#import <PEObjc-Commons/PEUIUtils.h>
 #import "FPUtils.h"
 #import "FPUIUtils.h"
-
-NSString * const FPVehicleStatsTextIfNilStat = @"---";
+#import <BlocksKit/UIControl+BlocksKit.h>
+#import "FPVehicleGasCostPerMileController.h"
+#import "FPVehicleSpentOnGasController.h"
 
 @implementation FPVehicleStatsController {
   FPCoordinatorDao *_coordDao;
@@ -19,11 +22,6 @@ NSString * const FPVehicleStatsTextIfNilStat = @"---";
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
   FPVehicle *_vehicle;
-  FPStats *_stats;
-  UIView *_gasCostPerMileTable;
-  UIView *_spentOnGasTable;
-  NSInteger _currentYear;
-  NSNumberFormatter *_currencyFormatter;
 }
 
 #pragma mark - Initializers
@@ -40,51 +38,8 @@ NSString * const FPVehicleStatsTextIfNilStat = @"---";
     _coordDao = coordDao;
     _uitoolkit = uitoolkit;
     _screenToolkit = screenToolkit;
-    _stats = [[FPStats alloc] initWithLocalDao:_coordDao.localDao errorBlk:[FPUtils localFetchErrorHandlerMaker]()];
-    _currentYear = [FPUtils currentYear];
-    _currencyFormatter = [FPUtils currencyFormatter];
   }
   return self;
-}
-
-#pragma mark - Helpers
-
-- (UIView *)headerPanelWithText:(NSString *)headerText {
-  return [PEUIUtils leftPadView:[PEUIUtils labelWithKey:headerText
-                                                   font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                        backgroundColor:[UIColor clearColor]
-                                              textColor:[UIColor darkGrayColor]
-                                    verticalTextPadding:3.0
-                                             fitToWidth:self.view.frame.size.width - 15.0]
-                        padding:8.0];
-}
-
-- (UIView *)gasCostPerMileTable {
-  return [FPUIUtils dataPanelWithRowData:@[@[[NSString stringWithFormat:@"%ld YTD", (long)_currentYear], [FPUIUtils textForDecimal:[_stats yearToDateGasCostPerMileForVehicle:_vehicle]
-                                                                                                                        formatter:_currencyFormatter
-                                                                                                                        textIfNil:FPVehicleStatsTextIfNilStat]],
-                                           @[[NSString stringWithFormat:@"%ld", (long)_currentYear-1], [FPUIUtils textForDecimal:[_stats lastYearGasCostPerMileForVehicle:_vehicle]
-                                                                                                                      formatter:_currencyFormatter
-                                                                                                                      textIfNil:FPVehicleStatsTextIfNilStat]],
-                                           @[@"All time", [FPUIUtils textForDecimal:[_stats overallGasCostPerMileForVehicle:_vehicle]
-                                                                          formatter:_currencyFormatter
-                                                                          textIfNil:FPVehicleStatsTextIfNilStat]]]
-                               uitoolkit:_uitoolkit
-                              parentView:self.view];
-}
-
-- (UIView *)spentOnGasTable {
-  return [FPUIUtils dataPanelWithRowData:@[@[[NSString stringWithFormat:@"%ld YTD", (long)_currentYear], [FPUIUtils textForDecimal:[_stats yearToDateSpentOnGasForVehicle:_vehicle]
-                                                                                                                         formatter:_currencyFormatter
-                                                                                                                         textIfNil:FPVehicleStatsTextIfNilStat]],
-                                           @[[NSString stringWithFormat:@"%ld", (long)_currentYear-1], [FPUIUtils textForDecimal:[_stats lastYearSpentOnGasForVehicle:_vehicle]
-                                                                                                                       formatter:_currencyFormatter
-                                                                                                                       textIfNil:FPVehicleStatsTextIfNilStat]],
-                                           @[@"All time", [FPUIUtils textForDecimal:[_stats totalSpentOnGasForVehicle:_vehicle]
-                                                                          formatter:_currencyFormatter
-                                                                          textIfNil:FPVehicleStatsTextIfNilStat]]]
-                               uitoolkit:_uitoolkit
-                              parentView:self.view];
 }
 
 #pragma mark - View controller lifecycle
@@ -92,38 +47,66 @@ NSString * const FPVehicleStatsTextIfNilStat = @"---";
 - (void)viewDidLoad {
   [super viewDidLoad];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
-  [self setTitle:@"Vehicle Stats"];
-  UIView *gasCostPerMileHeader = [self headerPanelWithText:@"GAS COST PER MILE"];
-  _gasCostPerMileTable = [self gasCostPerMileTable];
+  [self setTitle:@"Vehicle Stats & Trends"];  
+  NSAttributedString *vehicleHeaderText = [PEUIUtils attributedTextWithTemplate:@"(vehicle: %@)"
+                                                                   textToAccent:_vehicle.name
+                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+  UILabel *vehicleLabel = [PEUIUtils labelWithAttributeText:vehicleHeaderText
+                                                       font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                   fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                            backgroundColor:[UIColor clearColor]
+                                                  textColor:[UIColor darkGrayColor]
+                                        verticalTextPadding:3.0
+                                                 fitToWidth:self.view.frame.size.width - 15.0];
+  UIButton *gasCostPerMileBtn = [_uitoolkit systemButtonMaker](@"Gas cost per mile", nil, nil);
+  [PEUIUtils setFrameWidthOfView:gasCostPerMileBtn ofWidth:1.0 relativeTo:self.view];
+  [PEUIUtils addDisclosureIndicatorToButton:gasCostPerMileBtn];
+  [gasCostPerMileBtn bk_addEventHandler:^(id sender) {
+    FPVehicleGasCostPerMileController *gasCostPerMileScreen =
+      [[FPVehicleGasCostPerMileController alloc] initWithStoreCoordinator:_coordDao
+                                                                     user:_user
+                                                                  vehicle:_vehicle
+                                                                uitoolkit:_uitoolkit
+                                                            screenToolkit:_screenToolkit];
+    [self.navigationController pushViewController:gasCostPerMileScreen animated:YES];
+  } forControlEvents:UIControlEventTouchUpInside];
+  UILabel *gasCostPerMileMsg = [PEUIUtils labelWithKey:@"Stats and trend information on the average cost of a mile.  \
+The cost of a mile is calculated by dividing the total amount spent on gas by the total number of recorded miles driven (from odometer logs)."
+                                                  font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                       backgroundColor:[UIColor clearColor]
+                                             textColor:[UIColor darkGrayColor]
+                                   verticalTextPadding:3.0
+                                            fitToWidth:self.view.frame.size.width - 15.0];
   
-  UIView *spentOnHeader = [self headerPanelWithText:@"TOTAL SPENT ON GAS"];
-  _spentOnGasTable = [self spentOnGasTable];
+  UIButton *spentOnGasBtn = [_uitoolkit systemButtonMaker](@"Amount spent on gas", nil, nil);
+  [PEUIUtils setFrameWidthOfView:spentOnGasBtn ofWidth:1.0 relativeTo:self.view];
+  [PEUIUtils addDisclosureIndicatorToButton:spentOnGasBtn];
+  [spentOnGasBtn bk_addEventHandler:^(id sender) {
+    FPVehicleSpentOnGasController *spentOnGasScreen =
+    [[FPVehicleSpentOnGasController alloc] initWithStoreCoordinator:_coordDao
+                                                               user:_user
+                                                            vehicle:_vehicle
+                                                          uitoolkit:_uitoolkit
+                                                      screenToolkit:_screenToolkit];
+    [self.navigationController pushViewController:spentOnGasScreen animated:YES];
+  } forControlEvents:UIControlEventTouchUpInside];
+  NSAttributedString *spentOnGasMsgText = [PEUIUtils attributedTextWithTemplate:@"Stats and trend information on the total amount spent on gas:\n(per price gallon %@ number of gallons)."
+                                                                   textToAccent:@"x"
+                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+  UILabel *spentOnGasMsg = [PEUIUtils labelWithAttributeText:spentOnGasMsgText
+                                                        font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                    fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                             backgroundColor:[UIColor clearColor]
+                                                   textColor:[UIColor darkGrayColor]
+                                         verticalTextPadding:3.0
+                                                  fitToWidth:self.view.frame.size.width - 15.0];
   
   // place the views
-  [PEUIUtils placeView:gasCostPerMileHeader atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:90.0 hpadding:0.0];
-  [PEUIUtils placeView:_gasCostPerMileTable below:gasCostPerMileHeader onto:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
-  [PEUIUtils placeView:spentOnHeader below:_gasCostPerMileTable onto:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:20.0 hpadding:0.0];
-  [PEUIUtils placeView:_spentOnGasTable below:spentOnHeader onto:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-  NSLog(@"viewDidAppear called");
-  [super viewDidAppear:animated];
-  // remove the views
-  CGRect gasCostPerMileTableFrame = _gasCostPerMileTable.frame;
-  CGRect spentOnGasTableFrame = _spentOnGasTable.frame;
-  [_gasCostPerMileTable removeFromSuperview];
-  [_spentOnGasTable removeFromSuperview];
-  
-  // refresh their data
-  _gasCostPerMileTable = [self gasCostPerMileTable];
-  _spentOnGasTable = [self spentOnGasTable];
-  
-  // re-add them
-  _gasCostPerMileTable.frame = gasCostPerMileTableFrame;
-  _spentOnGasTable.frame = spentOnGasTableFrame;
-  [self.view addSubview:_gasCostPerMileTable];
-  [self.view addSubview:_spentOnGasTable];
+  [PEUIUtils placeView:vehicleLabel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:80.0 hpadding:8.0];
+  [PEUIUtils placeView:gasCostPerMileBtn below:vehicleLabel onto:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:self.view vpadding:20.0 hpadding:0.0];
+  [PEUIUtils placeView:gasCostPerMileMsg below:gasCostPerMileBtn onto:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:8.0];
+  [PEUIUtils placeView:spentOnGasBtn below:gasCostPerMileMsg onto:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:self.view vpadding:20.0 hpadding:0.0];
+  [PEUIUtils placeView:spentOnGasMsg below:spentOnGasBtn onto:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:8.0];
 }
 
 @end

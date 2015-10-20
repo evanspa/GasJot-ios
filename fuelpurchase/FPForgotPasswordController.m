@@ -138,7 +138,7 @@
                         if ([email length] == 0) {
                           emailErrMask = emailErrMask | FPSaveUsrEmailNotProvided
                           | FPSaveUsrAnyIssues;
-                        } else if (![FPUtils validateEmailWithString:email]) {
+                        } else if (![PEUtils validateEmailWithString:email]) {
                           emailErrMask = emailErrMask | FPSaveUsrInvalidEmail | FPSaveUsrAnyIssues;
                         }
                         return @(emailErrMask);

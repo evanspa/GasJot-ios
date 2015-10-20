@@ -168,7 +168,7 @@ enable your data records to be synced to Gas Jot's central server so you can acc
         if ([email length] == 0) {
           createUsrErrMask = createUsrErrMask | FPSaveUsrEmailNotProvided
               | FPSaveUsrAnyIssues;
-        } else if (![FPUtils validateEmailWithString:email]) {
+        } else if (![PEUtils validateEmailWithString:email]) {
           createUsrErrMask = createUsrErrMask | FPSaveUsrInvalidEmail | FPSaveUsrAnyIssues;
         }
         if ([password length] == 0) {

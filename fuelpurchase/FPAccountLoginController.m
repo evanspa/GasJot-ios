@@ -166,7 +166,7 @@ Gas Jot account, connecting this device to it.  Your Gas Jot data will be downlo
         NSUInteger signInErrMask = 0;
         if ([email length] == 0) {
           signInErrMask = FPSignInEmailNotProvided | FPSignInAnyIssues;
-        } else if (![FPUtils validateEmailWithString:email]) {
+        } else if (![PEUtils validateEmailWithString:email]) {
           signInErrMask = signInErrMask | FPSignInInvalidEmail | FPSignInAnyIssues;
         }
         if ([password length] == 0) {
