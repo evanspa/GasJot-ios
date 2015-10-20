@@ -49,6 +49,8 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
 
 + (NSArray *)daysBetweenDates:(NSArray *)dates;
 
++ (NSInteger)currentYear;
+
 #pragma mark - User Helpers
 
 + (BOOL)validateEmailWithString:(NSString*)email;

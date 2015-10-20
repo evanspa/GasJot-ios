@@ -9,10 +9,62 @@
 #import "FPUIUtils.h"
 #import <BlocksKit/UIControl+BlocksKit.h>
 #import <PEObjc-Commons/PEUIUtils.h>
+#import <PEObjc-Commons/PEUtils.h>
 #import <PEObjc-Commons/UIView+PERoundify.h>
 #import <FlatUIKit/UIColor+FlatUI.h>
 
 @implementation FPUIUtils
+
+#pragma mark - Helpers
+
++ (NSString *)textForDecimal:(NSDecimalNumber *)decimalValue
+                   formatter:(NSNumberFormatter *)formatter
+                   textIfNil:(NSString *)textIfNil {
+  if ([PEUtils isNil:decimalValue]) {
+    return textIfNil;
+  }
+  return [formatter stringFromNumber:decimalValue];
+}
+
++ (UIView *)dataPanelWithRowData:(NSArray *)rowData
+                       uitoolkit:(PEUIToolkit *)uitoolkit
+                      parentView:(UIView *)parentView {
+  return [self dataPanelWithRowData:rowData
+               footerAttributedText:nil
+     footerFontForHeightCalculation:nil
+              footerVerticalPadding:0.0
+                          uitoolkit:uitoolkit
+                         parentView:parentView];
+}
+
++ (UIView *)dataPanelWithRowData:(NSArray *)rowData
+            footerAttributedText:(NSAttributedString *)footerAttributedText
+  footerFontForHeightCalculation:(UIFont *)footerFontForHeightCalculation
+           footerVerticalPadding:(CGFloat)footerVerticalPadding
+                       uitoolkit:(PEUIToolkit *)uitoolkit
+                      parentView:(UIView *)parentView {
+  return [PEUIUtils tablePanelWithRowData:rowData
+                           withCellHeight:36.5
+                        labelLeftHPadding:10.0
+                       valueRightHPadding:12.5
+                                labelFont:[UIFont systemFontOfSize:16] //[_uitoolkit fontForTextfields]
+                                valueFont:[UIFont systemFontOfSize:16] //[_uitoolkit fontForTextfields]
+                           labelTextColor:[UIColor blackColor]
+                           valueTextColor:[UIColor grayColor]
+           minPaddingBetweenLabelAndValue:10.0
+                        includeTopDivider:NO
+                     includeBottomDivider:NO
+                     includeInnerDividers:NO
+                  innerDividerWidthFactor:0.95
+                           dividerPadding:3.5
+                  rowPanelBackgroundColor:[UIColor whiteColor]
+                     panelBackgroundColor:[uitoolkit colorForWindows]
+                             dividerColor:nil
+                     footerAttributedText:footerAttributedText
+           footerFontForHeightCalculation:footerFontForHeightCalculation
+                    footerVerticalPadding:footerVerticalPadding
+                           relativeToView:parentView];
+}
 
 + (UIView *)badgeForNum:(NSInteger)num
                   color:(UIColor *)color

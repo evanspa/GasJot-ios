@@ -12,6 +12,21 @@ typedef void (^FPEnableUserInteractionBlk)(BOOL);
 
 @interface FPUIUtils : NSObject
 
++ (NSString *)textForDecimal:(NSDecimalNumber *)decimalValue
+                   formatter:(NSNumberFormatter *)formatter
+                   textIfNil:(NSString *)textIfNil;
+
++ (UIView *)dataPanelWithRowData:(NSArray *)rowData
+                       uitoolkit:(PEUIToolkit *)uitoolkit
+                      parentView:(UIView *)parentView;
+
++ (UIView *)dataPanelWithRowData:(NSArray *)rowData
+            footerAttributedText:(NSAttributedString *)footerAttributedText
+  footerFontForHeightCalculation:(UIFont *)footerFontForHeightCalculation
+           footerVerticalPadding:(CGFloat)footerVerticalPadding
+                       uitoolkit:(PEUIToolkit *)uitoolkit
+                      parentView:(UIView *)parentView;
+
 + (UIView *)badgeForNum:(NSInteger)num
                   color:(UIColor *)color
          badgeTextColor:(UIColor *)badgeTextColor;

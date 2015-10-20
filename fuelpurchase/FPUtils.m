@@ -59,6 +59,10 @@
   }
 }
 
++ (NSInteger)currentYear {
+  return [[NSCalendar currentCalendar] component:NSCalendarUnitYear fromDate:[NSDate date]];
+}
+
 #pragma mark - User Helpers
 
 + (BOOL)validateEmailWithString:(NSString*)email {
