@@ -10,8 +10,11 @@
 #import <PEFuelPurchase-Model/FPStats.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEObjc-Commons/PEUIUtils.h>
+#import <BlocksKit/UIControl+BlocksKit.h>
 #import "FPUtils.h"
 #import "FPUIUtils.h"
+#import "FPVehicleGasCostPerMileComparisonController.h"
+#import "UIColor+FPAdditions.h"
 
 NSString * const FPVehicleGasCostPerMileTextIfNilStat = @"---";
 
@@ -72,7 +75,8 @@ NSString * const FPVehicleGasCostPerMileTextIfNilStat = @"---";
   [self setTitle:@"Gas Cost per Mile"];
   NSAttributedString *vehicleHeaderText = [PEUIUtils attributedTextWithTemplate:@"(vehicle: %@)"
                                                                    textToAccent:_vehicle.name
-                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                                accentTextColor:[UIColor fpAppBlue]];
   UILabel *vehicleLabel = [PEUIUtils labelWithAttributeText:vehicleHeaderText
                                                        font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                    fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
@@ -80,14 +84,38 @@ NSString * const FPVehicleGasCostPerMileTextIfNilStat = @"---";
                                                   textColor:[UIColor darkGrayColor]
                                         verticalTextPadding:3.0
                                                  fitToWidth:self.view.frame.size.width - 15.0];
-  UIView *vehicleLabelPanel = [PEUIUtils leftPadView:vehicleLabel padding:8.0];
-  [PEUIUtils setFrameWidthOfView:vehicleLabelPanel ofWidth:1.0 relativeTo:self.view];
   UIView *gasCostPerMileHeader = [FPUIUtils headerPanelWithText:@"GAS COST PER MILE" relativeToView:self.view];
   _gasCostPerMileTable = [self gasCostPerMileTable];
+  
   // place the views
-  [PEUIUtils placeView:vehicleLabelPanel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:75.0 hpadding:0.0];
-  [PEUIUtils placeView:gasCostPerMileHeader below:vehicleLabelPanel/*divider*/ onto:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:vehicleLabelPanel vpadding:12.0 hpadding:0.0];
-  [PEUIUtils placeView:_gasCostPerMileTable below:gasCostPerMileHeader onto:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
+  [PEUIUtils placeView:vehicleLabel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:75.0 hpadding:8.0];
+  [PEUIUtils placeView:gasCostPerMileHeader below:vehicleLabel onto:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:self.view vpadding:12.0 hpadding:0.0];
+  [PEUIUtils placeView:_gasCostPerMileTable
+                 below:gasCostPerMileHeader
+                  onto:self.view
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:4.0
+              hpadding:0.0];
+  if ([_coordDao vehiclesForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()].count > 1) {
+    UIButton *vehicleCompareBtn = [_uitoolkit systemButtonMaker](@"Compare vehicles", nil, nil);
+    [PEUIUtils setFrameWidthOfView:vehicleCompareBtn ofWidth:1.0 relativeTo:self.view];
+    [PEUIUtils addDisclosureIndicatorToButton:vehicleCompareBtn];
+    [vehicleCompareBtn bk_addEventHandler:^(id sender) {
+      FPVehicleGasCostPerMileComparisonController *comparisonScreen =
+      [[FPVehicleGasCostPerMileComparisonController alloc] initWithStoreCoordinator:_coordDao
+                                                                               user:_user
+                                                                            vehicle:_vehicle
+                                                                          uitoolkit:_uitoolkit
+                                                                      screenToolkit:_screenToolkit];
+      [[self navigationController] pushViewController:comparisonScreen animated:YES];
+    } forControlEvents:UIControlEventTouchUpInside];
+    [PEUIUtils placeView:vehicleCompareBtn
+                   below:_gasCostPerMileTable
+                    onto:self.view
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:20.0
+                hpadding:0.0];
+  }
 }
 
 - (void)viewDidAppear:(BOOL)animated {

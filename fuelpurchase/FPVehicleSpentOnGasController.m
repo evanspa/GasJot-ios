@@ -11,7 +11,10 @@
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEObjc-Commons/PEUIUtils.h>
 #import "FPUtils.h"
+#import <BlocksKit/UIControl+BlocksKit.h>
 #import "FPUIUtils.h"
+#import "UIColor+FPAdditions.h"
+#import "FPVehicleSpentOnGasComparisonController.h"
 
 NSString * const FPVehicleSpentOnGasTextIfNilStat = @"---";
 
@@ -72,7 +75,8 @@ NSString * const FPVehicleSpentOnGasTextIfNilStat = @"---";
   [self setTitle:@"Vehicle Stats & Trends"];  
   NSAttributedString *vehicleHeaderText = [PEUIUtils attributedTextWithTemplate:@"(vehicle: %@)"
                                                                    textToAccent:_vehicle.name
-                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                                accentTextColor:[UIColor fpAppBlue]];
   UILabel *vehicleLabel = [PEUIUtils labelWithAttributeText:vehicleHeaderText
                                                        font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                    fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
@@ -88,6 +92,26 @@ NSString * const FPVehicleSpentOnGasTextIfNilStat = @"---";
   [PEUIUtils placeView:vehicleLabelPanel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:75.0 hpadding:0.0];
   [PEUIUtils placeView:spentOnHeader below:vehicleLabelPanel onto:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:20.0 hpadding:0.0];
   [PEUIUtils placeView:_spentOnGasTable below:spentOnHeader onto:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
+  if ([_coordDao vehiclesForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()].count > 1) {
+    UIButton *vehicleCompareBtn = [_uitoolkit systemButtonMaker](@"Compare vehicles", nil, nil);
+    [PEUIUtils setFrameWidthOfView:vehicleCompareBtn ofWidth:1.0 relativeTo:self.view];
+    [PEUIUtils addDisclosureIndicatorToButton:vehicleCompareBtn];
+    [vehicleCompareBtn bk_addEventHandler:^(id sender) {
+      FPVehicleSpentOnGasComparisonController *comparisonScreen =
+      [[FPVehicleSpentOnGasComparisonController alloc] initWithStoreCoordinator:_coordDao
+                                                                           user:_user
+                                                                        vehicle:_vehicle
+                                                                      uitoolkit:_uitoolkit
+                                                                  screenToolkit:_screenToolkit];
+      [[self navigationController] pushViewController:comparisonScreen animated:YES];
+    } forControlEvents:UIControlEventTouchUpInside];
+    [PEUIUtils placeView:vehicleCompareBtn
+                   below:_spentOnGasTable
+                    onto:self.view
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:20.0
+                hpadding:0.0];
+  }
 }
 
 - (void)viewDidAppear:(BOOL)animated {

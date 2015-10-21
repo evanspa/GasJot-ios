@@ -15,6 +15,7 @@
 #import <BlocksKit/UIControl+BlocksKit.h>
 #import "FPVehicleGasCostPerMileController.h"
 #import "FPVehicleSpentOnGasController.h"
+#import "UIColor+FPAdditions.h"
 
 @implementation FPVehicleStatsController {
   FPCoordinatorDao *_coordDao;
@@ -50,7 +51,8 @@
   [self setTitle:@"Vehicle Stats & Trends"];  
   NSAttributedString *vehicleHeaderText = [PEUIUtils attributedTextWithTemplate:@"(vehicle: %@)"
                                                                    textToAccent:_vehicle.name
-                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                                accentTextColor:[UIColor fpAppBlue]];
   UILabel *vehicleLabel = [PEUIUtils labelWithAttributeText:vehicleHeaderText
                                                        font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                    fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
