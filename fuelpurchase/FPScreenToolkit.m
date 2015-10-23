@@ -2527,10 +2527,13 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       UITextField *odometerTf = (UITextField *)[entityPanel viewWithTag:FPEnvLogTagOdometer];
       [odometerTf becomeFirstResponder];
     };
-    PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, UIView *entityFormPanel, FPEnvironmentLog *fpEnvlog) {
+    PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, UIView *entityFormPanel, FPEnvironmentLog *envlog) {
+      FPEnvLogVehicleAndDateDataSourceDelegate *ds =
+        (FPEnvLogVehicleAndDateDataSourceDelegate *)[(UITableView *)[entityFormPanel viewWithTag:FPEnvLogTagVehicleAndDate] dataSource];
+      FPVehicle *selectedVehicle = [ds selectedVehicle];
       return [FPScreenToolkit funFactSectionWithNumFunFacts:[_reportViews numOdometerFunFacts]
                                              nextFunFactBlk:^{ return [_reportViews nextOdometerFunFact]; }
-                                                     record:fpEnvlog
+                                                     record:@[envlog, selectedVehicle]
                                                        user:user
                                              relativeToView:ctrl.view];
     };

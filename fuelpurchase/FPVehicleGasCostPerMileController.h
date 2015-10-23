@@ -11,8 +11,9 @@
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
+#import <JBChartView/JBLineChartView.h>
 
-@interface FPVehicleGasCostPerMileController : UIViewController
+@interface FPVehicleGasCostPerMileController : UIViewController <JBLineChartViewDelegate, JBLineChartViewDataSource>
 
 #pragma mark - Initializers
 

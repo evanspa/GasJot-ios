@@ -10,7 +10,6 @@
 #import "FPUtils.h"
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEObjc-Commons/PEUIUtils.h>
-#import "NSDate+PEAdditions.h"
 #import <FlatUIKit/UIColor+FlatUI.h>
 
 NSString * const FPOdometerLogFunFactIndexDefaultsKey = @"FPOdometerLogFunFactIndex";
@@ -568,8 +567,10 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 #pragma mark - Odometer Log Fun Facts
 
 - (FPFunFact)milesDrivenSinceLastOdometerLogAndLogFunFact {
-  return ^JGActionSheetSection *(FPEnvironmentLog *odometerLog, FPUser *user, UIView *relativeToView) {
-    NSDecimalNumber *milesDrivenSinceLastLog = [_stats milesDrivenSinceLastOdometerLogAndLog:odometerLog user:user];
+  return ^JGActionSheetSection *(NSArray *logVeh, FPUser *user, UIView *relativeToView) {
+    FPEnvironmentLog *odometerLog = logVeh[0];
+    FPVehicle *vehicle = logVeh[1];
+    NSDecimalNumber *milesDrivenSinceLastLog = [_stats milesDrivenSinceLastOdometerLogAndLog:odometerLog vehicle:vehicle];
     if (milesDrivenSinceLastLog) {
       NSAttributedString *funFact = [PEUIUtils attributedTextWithTemplate:@"You have driven %@ miles since your last odometer log was recorded."
                                                              textToAccent:[milesDrivenSinceLastLog description]
@@ -581,8 +582,10 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 }
 
 - (FPFunFact)daysSinceLastOdometerLogAndLogFunFact {
-  return ^JGActionSheetSection *(FPEnvironmentLog *odometerLog, FPUser *user, UIView *relativeToView) {
-    NSNumber *daysSinceLastLog = [_stats daysSinceLastOdometerLogAndLog:odometerLog user:user];
+  return ^JGActionSheetSection *(NSArray *logVeh, FPUser *user, UIView *relativeToView) {
+    FPEnvironmentLog *odometerLog = logVeh[0];
+    FPVehicle *vehicle = logVeh[1];
+    NSNumber *daysSinceLastLog = [_stats daysSinceLastOdometerLogAndLog:odometerLog vehicle:vehicle];
     if (daysSinceLastLog) {
       NSAttributedString *funFact = [PEUIUtils attributedTextWithTemplate:@"It has been %@ days since your last odometer log was recorded."
                                                              textToAccent:[daysSinceLastLog description]
@@ -594,7 +597,8 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 }
 
 - (FPFunFact)temperatureLastYearFromLogFunFact {
-  return ^JGActionSheetSection *(FPEnvironmentLog *odometerLog, FPUser *user, UIView *relativeToView) {
+  return ^JGActionSheetSection *(NSArray *logVeh, FPUser *user, UIView *relativeToView) {
+    FPEnvironmentLog *odometerLog = logVeh[0];
     NSNumber *temperateLastYear = [_stats temperatureLastYearForUser:user withinDaysVariance:20];
     if (temperateLastYear) {
       NSAttributedString *funFact = [PEUIUtils attributedTextWithTemplate:@"A year ago the temperature was %@ degrees."

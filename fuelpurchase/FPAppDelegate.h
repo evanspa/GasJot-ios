@@ -21,7 +21,8 @@
 #import <UIKit/UIKit.h>
 #import <MBProgressHUD/MBProgressHUD.h>
 #import <PEFuelPurchase-Common/FPAuthTokenDelegate.h>
-#import <PEFuelPurchase-Model/FPCoordinatorDao.h>
+//#import <PEFuelPurchase-Model/FPCoordinatorDao.h>
+#import "FPCoordinatorDao.h"
 #import <PEObjc-Commons/PEUIToolkit.h>
 
 #ifdef FP_DEV

@@ -18,6 +18,8 @@
 
 NSString * const FPVehicleGasCostPerMileTextIfNilStat = @"---";
 
+#define ARC4RANDOM_MAX 0x100000000
+
 @implementation FPVehicleGasCostPerMileController {
   FPCoordinatorDao *_coordDao;
   PEUIToolkit *_uitoolkit;
@@ -26,6 +28,7 @@ NSString * const FPVehicleGasCostPerMileTextIfNilStat = @"---";
   FPVehicle *_vehicle;
   FPStats *_stats;
   UIView *_gasCostPerMileTable;
+  JBLineChartView *_gasCostPerMileLineChart;
   NSInteger _currentYear;
   NSNumberFormatter *_currencyFormatter;
 }
@@ -51,6 +54,32 @@ NSString * const FPVehicleGasCostPerMileTextIfNilStat = @"---";
   return self;
 }
 
+#pragma mark - JBLineChartViewDelegate
+
+- (CGFloat)lineChartView:(JBLineChartView *)lineChartView verticalValueForHorizontalIndex:(NSUInteger)horizontalIndex atLineIndex:(NSUInteger)lineIndex {
+  int minRange = 1;
+  int maxRange = 5;
+  return ((double)arc4random() / ARC4RANDOM_MAX) * (maxRange - minRange) + minRange;
+}
+
+- (CGFloat)lineChartView:(JBLineChartView *)lineChartView widthForLineAtLineIndex:(NSUInteger)lineIndex {
+  return 2.0;
+}
+
+- (UIColor *)lineChartView:(JBLineChartView *)lineChartView colorForLineAtLineIndex:(NSUInteger)lineIndex {
+  return [UIColor fpAppBlue];
+}
+
+#pragma mark - JBLineChartViewDataSource
+
+- (NSUInteger)numberOfLinesInLineChartView:(JBLineChartView *)lineChartView {
+  return 1;
+}
+
+- (NSUInteger)lineChartView:(JBLineChartView *)lineChartView numberOfVerticalValuesAtLineIndex:(NSUInteger)lineIndex {
+  return 25;
+}
+
 #pragma mark - Helpers
 
 - (UIView *)gasCostPerMileTable {
@@ -65,6 +94,13 @@ NSString * const FPVehicleGasCostPerMileTextIfNilStat = @"---";
                                                                          textIfNil:FPVehicleGasCostPerMileTextIfNilStat]]]
                                 uitoolkit:_uitoolkit
                                parentView:self.view];
+}
+
+- (JBLineChartView *)gasCostPerMileLineChart {
+  JBLineChartView *lineChartView = [[JBLineChartView alloc] init];  
+  [lineChartView setDelegate:self];
+  [lineChartView setDataSource:self];
+  return lineChartView;
 }
 
 #pragma mark - View controller lifecycle
@@ -86,15 +122,31 @@ NSString * const FPVehicleGasCostPerMileTextIfNilStat = @"---";
                                                  fitToWidth:self.view.frame.size.width - 15.0];
   UIView *gasCostPerMileHeader = [FPUIUtils headerPanelWithText:@"GAS COST PER MILE" relativeToView:self.view];
   _gasCostPerMileTable = [self gasCostPerMileTable];
+  _gasCostPerMileLineChart = [self gasCostPerMileLineChart];
+  [PEUIUtils setFrameWidthOfView:_gasCostPerMileLineChart ofWidth:1.0 relativeTo:self.view];
+  [PEUIUtils setFrameHeightOfView:_gasCostPerMileLineChart ofHeight:0.25 relativeTo:self.view];
   
   // place the views
   [PEUIUtils placeView:vehicleLabel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:75.0 hpadding:8.0];
-  [PEUIUtils placeView:gasCostPerMileHeader below:vehicleLabel onto:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:self.view vpadding:12.0 hpadding:0.0];
+  [PEUIUtils placeView:gasCostPerMileHeader
+                 below:vehicleLabel
+                  onto:self.view
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+alignmentRelativeToView:self.view
+              vpadding:12.0
+              hpadding:0.0];
   [PEUIUtils placeView:_gasCostPerMileTable
                  below:gasCostPerMileHeader
                   onto:self.view
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
+              hpadding:0.0];
+  [PEUIUtils placeView:_gasCostPerMileLineChart
+                 below:_gasCostPerMileTable
+                  onto:self.view
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+alignmentRelativeToView:self.view
+              vpadding:20.0
               hpadding:0.0];
   if ([_coordDao vehiclesForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()].count > 1) {
     UIButton *vehicleCompareBtn = [_uitoolkit systemButtonMaker](@"Compare vehicles", nil, nil);
@@ -110,7 +162,7 @@ NSString * const FPVehicleGasCostPerMileTextIfNilStat = @"---";
       [[self navigationController] pushViewController:comparisonScreen animated:YES];
     } forControlEvents:UIControlEventTouchUpInside];
     [PEUIUtils placeView:vehicleCompareBtn
-                   below:_gasCostPerMileTable
+                   below:_gasCostPerMileLineChart
                     onto:self.view
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:20.0
@@ -122,14 +174,21 @@ NSString * const FPVehicleGasCostPerMileTextIfNilStat = @"---";
   [super viewDidAppear:animated];
   // remove the views
   CGRect gasCostPerMileTableFrame = _gasCostPerMileTable.frame;
+  CGRect gasCostPerMileLineChartFrame = _gasCostPerMileLineChart.frame;
+  
   [_gasCostPerMileTable removeFromSuperview];
+  [_gasCostPerMileLineChart removeFromSuperview];
   
   // refresh their data
   _gasCostPerMileTable = [self gasCostPerMileTable];
+  _gasCostPerMileLineChart = [self gasCostPerMileLineChart];
   
   // re-add them
   _gasCostPerMileTable.frame = gasCostPerMileTableFrame;
+  _gasCostPerMileLineChart.frame = gasCostPerMileLineChartFrame;
   [self.view addSubview:_gasCostPerMileTable];
+  [self.view addSubview:_gasCostPerMileLineChart];
+  [_gasCostPerMileLineChart reloadData];
 }
 
 @end
