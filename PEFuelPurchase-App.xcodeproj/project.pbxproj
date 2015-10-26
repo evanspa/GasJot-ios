@@ -44,6 +44,7 @@
 		CA8AC4B91BDE8923008603C0 /* JBChartTooltipTipView.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4B81BDE8923008603C0 /* JBChartTooltipTipView.m */; settings = {ASSET_TAGS = (); }; };
 		CA8AC4BC1BDE8930008603C0 /* JBChartInformationView.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4BB1BDE8930008603C0 /* JBChartInformationView.m */; settings = {ASSET_TAGS = (); }; };
 		CA8AC4C01BDE9287008603C0 /* JBChartHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4BF1BDE9287008603C0 /* JBChartHeaderView.m */; settings = {ASSET_TAGS = (); }; };
+		CA8AC4C41BDEB338008603C0 /* FPCommonStatController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4C31BDEB338008603C0 /* FPCommonStatController.m */; settings = {ASSET_TAGS = (); }; };
 		CA90F4241B45AB7F005FAB35 /* PEServerSyncActionSheet.m in Sources */ = {isa = PBXBuildFile; fileRef = CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */; };
 		CA920C121B21F48900A848EA /* fpapi-resource.localdev.json in Resources */ = {isa = PBXBuildFile; fileRef = 18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */; };
 		CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */; };
@@ -154,6 +155,8 @@
 		CA8AC4BB1BDE8930008603C0 /* JBChartInformationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JBChartInformationView.m; sourceTree = "<group>"; };
 		CA8AC4BE1BDE9287008603C0 /* JBChartHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JBChartHeaderView.h; sourceTree = "<group>"; };
 		CA8AC4BF1BDE9287008603C0 /* JBChartHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JBChartHeaderView.m; sourceTree = "<group>"; };
+		CA8AC4C21BDEB338008603C0 /* FPCommonStatController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPCommonStatController.h; sourceTree = "<group>"; };
+		CA8AC4C31BDEB338008603C0 /* FPCommonStatController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPCommonStatController.m; sourceTree = "<group>"; };
 		CA90F4221B45AB7F005FAB35 /* PEServerSyncActionSheet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PEServerSyncActionSheet.h; sourceTree = "<group>"; };
 		CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PEServerSyncActionSheet.m; sourceTree = "<group>"; };
 		CAB5E94E1B4B024B00144072 /* FPReauthenticateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPReauthenticateController.h; sourceTree = "<group>"; };
@@ -613,6 +616,15 @@
 			name = "Chart Header View";
 			sourceTree = "<group>";
 		};
+		CA8AC4C11BDEB284008603C0 /* Common Stat Screen */ = {
+			isa = PBXGroup;
+			children = (
+				CA8AC4C21BDEB338008603C0 /* FPCommonStatController.h */,
+				CA8AC4C31BDEB338008603C0 /* FPCommonStatController.m */,
+			);
+			name = "Common Stat Screen";
+			sourceTree = "<group>";
+		};
 		CA90F4211B45AB4C005FAB35 /* Server Sync Action Sheet */ = {
 			isa = PBXGroup;
 			children = (
@@ -645,6 +657,7 @@
 		CABF51701BD499370083B460 /* Stat Screens */ = {
 			isa = PBXGroup;
 			children = (
+				CA8AC4C11BDEB284008603C0 /* Common Stat Screen */,
 				CABF516C1BD498FB0083B460 /* Vehicle Stats Screen */,
 			);
 			name = "Stat Screens";
@@ -961,6 +974,7 @@
 				CABF518D1BD722290083B460 /* FPVehicleGasCostPerMileComparisonController.m in Sources */,
 				CAE873F71BBDA64900E5A81F /* FPForgotPasswordController.m in Sources */,
 				186E0B7C19CD237B00CE4B3A /* PEListViewController.m in Sources */,
+				CA8AC4C41BDEB338008603C0 /* FPCommonStatController.m in Sources */,
 				CA8AC4BC1BDE8930008603C0 /* JBChartInformationView.m in Sources */,
 				CABF51861BD680F40083B460 /* FPVehicleGasCostPerMileController.m in Sources */,
 				CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */,
