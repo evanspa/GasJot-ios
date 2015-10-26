@@ -159,9 +159,6 @@
   if (saveEnvLogErrMask & FPSaveEnvironmentLogOdometerNotProvided) {
     [errMsgs addObject:LS(@"savenvlog.odometer-notprovided")];
   }
-  if (saveEnvLogErrMask & FPSaveEnvironmentLogOutsideTempNotProvided) {
-    [errMsgs addObject:LS(@"savenvlog.outside-temp-notprovided")];
-  }
   if (saveEnvLogErrMask & FPSaveEnvironmentLogOdometerNegative) {
     [errMsgs addObject:LS(@"savenvlog.odometer-negative")];
   }

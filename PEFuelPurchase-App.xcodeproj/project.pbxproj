@@ -39,6 +39,11 @@
 		18F61A891A96133000BA631A /* UIScrollView+PEAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */; };
 		CA7D5A271B383F5A00433581 /* FPAppNotificationNames.m in Sources */ = {isa = PBXBuildFile; fileRef = CA7D5A261B383F5A00433581 /* FPAppNotificationNames.m */; };
 		CA7D5A2E1B3851E200433581 /* FPAccountLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA7D5A2D1B3851E200433581 /* FPAccountLoginController.m */; };
+		CA8AC4A81BDE7686008603C0 /* JBLineChartFooterView.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4A71BDE7686008603C0 /* JBLineChartFooterView.m */; settings = {ASSET_TAGS = (); }; };
+		CA8AC4B61BDE8918008603C0 /* JBChartTooltipView.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4B51BDE8918008603C0 /* JBChartTooltipView.m */; settings = {ASSET_TAGS = (); }; };
+		CA8AC4B91BDE8923008603C0 /* JBChartTooltipTipView.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4B81BDE8923008603C0 /* JBChartTooltipTipView.m */; settings = {ASSET_TAGS = (); }; };
+		CA8AC4BC1BDE8930008603C0 /* JBChartInformationView.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4BB1BDE8930008603C0 /* JBChartInformationView.m */; settings = {ASSET_TAGS = (); }; };
+		CA8AC4C01BDE9287008603C0 /* JBChartHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4BF1BDE9287008603C0 /* JBChartHeaderView.m */; settings = {ASSET_TAGS = (); }; };
 		CA90F4241B45AB7F005FAB35 /* PEServerSyncActionSheet.m in Sources */ = {isa = PBXBuildFile; fileRef = CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */; };
 		CA920C121B21F48900A848EA /* fpapi-resource.localdev.json in Resources */ = {isa = PBXBuildFile; fileRef = 18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */; };
 		CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */; };
@@ -134,6 +139,21 @@
 		CA7D5A261B383F5A00433581 /* FPAppNotificationNames.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPAppNotificationNames.m; sourceTree = "<group>"; };
 		CA7D5A2C1B3851E200433581 /* FPAccountLoginController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPAccountLoginController.h; sourceTree = "<group>"; };
 		CA7D5A2D1B3851E200433581 /* FPAccountLoginController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPAccountLoginController.m; sourceTree = "<group>"; };
+		CA8AC4A61BDE7686008603C0 /* JBLineChartFooterView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JBLineChartFooterView.h; sourceTree = "<group>"; };
+		CA8AC4A71BDE7686008603C0 /* JBLineChartFooterView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JBLineChartFooterView.m; sourceTree = "<group>"; };
+		CA8AC4AC1BDE7809008603C0 /* JBColorConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JBColorConstants.h; sourceTree = "<group>"; };
+		CA8AC4AD1BDE7809008603C0 /* JBConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JBConstants.h; sourceTree = "<group>"; };
+		CA8AC4AE1BDE7809008603C0 /* JBFontConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JBFontConstants.h; sourceTree = "<group>"; };
+		CA8AC4AF1BDE7809008603C0 /* JBStringConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JBStringConstants.h; sourceTree = "<group>"; };
+		CA8AC4B01BDE7809008603C0 /* JBUIConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JBUIConstants.h; sourceTree = "<group>"; };
+		CA8AC4B41BDE8918008603C0 /* JBChartTooltipView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JBChartTooltipView.h; sourceTree = "<group>"; };
+		CA8AC4B51BDE8918008603C0 /* JBChartTooltipView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JBChartTooltipView.m; sourceTree = "<group>"; };
+		CA8AC4B71BDE8923008603C0 /* JBChartTooltipTipView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JBChartTooltipTipView.h; sourceTree = "<group>"; };
+		CA8AC4B81BDE8923008603C0 /* JBChartTooltipTipView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JBChartTooltipTipView.m; sourceTree = "<group>"; };
+		CA8AC4BA1BDE8930008603C0 /* JBChartInformationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JBChartInformationView.h; sourceTree = "<group>"; };
+		CA8AC4BB1BDE8930008603C0 /* JBChartInformationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JBChartInformationView.m; sourceTree = "<group>"; };
+		CA8AC4BE1BDE9287008603C0 /* JBChartHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JBChartHeaderView.h; sourceTree = "<group>"; };
+		CA8AC4BF1BDE9287008603C0 /* JBChartHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JBChartHeaderView.m; sourceTree = "<group>"; };
 		CA90F4221B45AB7F005FAB35 /* PEServerSyncActionSheet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PEServerSyncActionSheet.h; sourceTree = "<group>"; };
 		CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PEServerSyncActionSheet.m; sourceTree = "<group>"; };
 		CAB5E94E1B4B024B00144072 /* FPReauthenticateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPReauthenticateController.h; sourceTree = "<group>"; };
@@ -492,6 +512,7 @@
 		CA7D5A281B384F4000433581 /* User Interface */ = {
 			isa = PBXGroup;
 			children = (
+				CA8AC4A91BDE77A9008603C0 /* JB Chart Support */,
 				CAEE0C961BC982D500FAB0BF /* Reporting Views */,
 				CAFC84831BA749DD00FAEB66 /* Categories */,
 				CAFC847F1BA7478B00FAEB66 /* GUI Utils */,
@@ -520,6 +541,76 @@
 				CA7D5A2D1B3851E200433581 /* FPAccountLoginController.m */,
 			);
 			name = "Account Login";
+			sourceTree = "<group>";
+		};
+		CA8AC4A91BDE77A9008603C0 /* JB Chart Support */ = {
+			isa = PBXGroup;
+			children = (
+				CA8AC4B31BDE890A008603C0 /* Tooltip view */,
+				CA8AC4B21BDE88F8008603C0 /* Tooltip tip-view */,
+				CA8AC4B11BDE88E4008603C0 /* Chart Information View */,
+				CA8AC4AB1BDE77CA008603C0 /* Constants */,
+				CA8AC4BD1BDE9260008603C0 /* Chart Header View */,
+				CA8AC4AA1BDE77B6008603C0 /* Line Chart Footer View */,
+			);
+			name = "JB Chart Support";
+			sourceTree = "<group>";
+		};
+		CA8AC4AA1BDE77B6008603C0 /* Line Chart Footer View */ = {
+			isa = PBXGroup;
+			children = (
+				CA8AC4A61BDE7686008603C0 /* JBLineChartFooterView.h */,
+				CA8AC4A71BDE7686008603C0 /* JBLineChartFooterView.m */,
+			);
+			name = "Line Chart Footer View";
+			sourceTree = "<group>";
+		};
+		CA8AC4AB1BDE77CA008603C0 /* Constants */ = {
+			isa = PBXGroup;
+			children = (
+				CA8AC4AC1BDE7809008603C0 /* JBColorConstants.h */,
+				CA8AC4AD1BDE7809008603C0 /* JBConstants.h */,
+				CA8AC4AE1BDE7809008603C0 /* JBFontConstants.h */,
+				CA8AC4AF1BDE7809008603C0 /* JBStringConstants.h */,
+				CA8AC4B01BDE7809008603C0 /* JBUIConstants.h */,
+			);
+			name = Constants;
+			sourceTree = "<group>";
+		};
+		CA8AC4B11BDE88E4008603C0 /* Chart Information View */ = {
+			isa = PBXGroup;
+			children = (
+				CA8AC4BA1BDE8930008603C0 /* JBChartInformationView.h */,
+				CA8AC4BB1BDE8930008603C0 /* JBChartInformationView.m */,
+			);
+			name = "Chart Information View";
+			sourceTree = "<group>";
+		};
+		CA8AC4B21BDE88F8008603C0 /* Tooltip tip-view */ = {
+			isa = PBXGroup;
+			children = (
+				CA8AC4B71BDE8923008603C0 /* JBChartTooltipTipView.h */,
+				CA8AC4B81BDE8923008603C0 /* JBChartTooltipTipView.m */,
+			);
+			name = "Tooltip tip-view";
+			sourceTree = "<group>";
+		};
+		CA8AC4B31BDE890A008603C0 /* Tooltip view */ = {
+			isa = PBXGroup;
+			children = (
+				CA8AC4B41BDE8918008603C0 /* JBChartTooltipView.h */,
+				CA8AC4B51BDE8918008603C0 /* JBChartTooltipView.m */,
+			);
+			name = "Tooltip view";
+			sourceTree = "<group>";
+		};
+		CA8AC4BD1BDE9260008603C0 /* Chart Header View */ = {
+			isa = PBXGroup;
+			children = (
+				CA8AC4BE1BDE9287008603C0 /* JBChartHeaderView.h */,
+				CA8AC4BF1BDE9287008603C0 /* JBChartHeaderView.m */,
+			);
+			name = "Chart Header View";
 			sourceTree = "<group>";
 		};
 		CA90F4211B45AB4C005FAB35 /* Server Sync Action Sheet */ = {
@@ -840,6 +931,7 @@
 				180EDA3019C7C2D200C782A6 /* FPSettingsController.m in Sources */,
 				186ADB3219E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.m in Sources */,
 				CAFC84721BA6691000FAEB66 /* FPRaisedCenterTabController.m in Sources */,
+				CA8AC4B91BDE8923008603C0 /* JBChartTooltipTipView.m in Sources */,
 				CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */,
 				CA90F4241B45AB7F005FAB35 /* PEServerSyncActionSheet.m in Sources */,
 				18B17D5719DAE696001D2BF6 /* PEAddViewEditController.m in Sources */,
@@ -847,6 +939,9 @@
 				CAEE0C9A1BC9830E00FAB0BF /* FPReportViews.m in Sources */,
 				18D6DFBC17F68005006B300D /* FPAppDelegate.m in Sources */,
 				18D6DFB817F68005006B300D /* main.m in Sources */,
+				CA8AC4B61BDE8918008603C0 /* JBChartTooltipView.m in Sources */,
+				CA8AC4C01BDE9287008603C0 /* JBChartHeaderView.m in Sources */,
+				CA8AC4A81BDE7686008603C0 /* JBLineChartFooterView.m in Sources */,
 				180EDA3519C7C89B00C782A6 /* FPEditsInProgressController.m in Sources */,
 				18CC2CF817F680AC009DF2CE /* FPNames.m in Sources */,
 				18EC863019EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m in Sources */,
@@ -866,6 +961,7 @@
 				CABF518D1BD722290083B460 /* FPVehicleGasCostPerMileComparisonController.m in Sources */,
 				CAE873F71BBDA64900E5A81F /* FPForgotPasswordController.m in Sources */,
 				186E0B7C19CD237B00CE4B3A /* PEListViewController.m in Sources */,
+				CA8AC4BC1BDE8930008603C0 /* JBChartInformationView.m in Sources */,
 				CABF51861BD680F40083B460 /* FPVehicleGasCostPerMileController.m in Sources */,
 				CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */,
 				189AC7561A78034500A6CFE3 /* FPLogEnvLogComposite.m in Sources */,

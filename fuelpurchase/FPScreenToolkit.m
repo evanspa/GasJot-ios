@@ -1580,14 +1580,22 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                             fuelStation:selectedFuelStation
                                   error:[FPUtils localSaveErrorHandlerMaker]()];
       if (shouldSavePreFillupEnvLog) {
-        [saveMessages addObject:@"Pre-fillup odometer log saved locally."];
+        if (shouldSavePostFillupEnvLog) {
+          [saveMessages addObject:@"Pre-fillup odometer log saved locally."];
+        } else {
+          [saveMessages addObject:@"Odometer log saved locally."];
+        }
         [_coordDao saveNewEnvironmentLog:[fpEnvLogComposite preFillupEnvLog]
                                  forUser:user
                                  vehicle:selectedVehicle
                                    error:[FPUtils localSaveErrorHandlerMaker]()];
       }
       if (shouldSavePostFillupEnvLog) {
-        [saveMessages addObject:@"Post-fillup odometer log saved locally."];
+        if (shouldSavePreFillupEnvLog) {
+          [saveMessages addObject:@"Post-fillup odometer log saved locally."];
+        } else {
+          [saveMessages addObject:@"Odometer log saved locally."];
+        }
         [_coordDao saveNewEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
                                  forUser:user
                                  vehicle:selectedVehicle
@@ -1642,7 +1650,11 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                        skippedDueToFuelStationNotSynced:^{depUnsyncedBlk(saveFpLogPercentComplete, mainMsgFragment, recordTitle, @"The gas station is not yet saved to the server."); [APP refreshTabs];}
                                                   error:[FPUtils localSaveErrorHandlerMaker]()];
       if (shouldSavePreFillupEnvLog) {
-        recordTitle = @"Pre-fillup odometer log";
+        if (shouldSavePostFillupEnvLog) {
+          recordTitle = @"Pre-fillup odometer log";
+        } else {
+          recordTitle = @"Odometer log";
+        }
         [_coordDao saveNewAndSyncImmediateEnvironmentLog:[fpEnvLogComposite preFillupEnvLog]
                                                  forUser:user
                                                  vehicle:selectedVehicle
@@ -1657,7 +1669,11 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                    error:[FPUtils localSaveErrorHandlerMaker]()];
       }
       if (shouldSavePostFillupEnvLog) {
-        recordTitle = @"Post-fillup odometer log";
+        if (shouldSavePreFillupEnvLog) {
+          recordTitle = @"Post-fillup odometer log";
+        } else {
+          recordTitle = @"Odometer log";
+        }
         [_coordDao saveNewAndSyncImmediateEnvironmentLog:[fpEnvLogComposite postFillupEnvLog]
                                                  forUser:user
                                                  vehicle:selectedVehicle
@@ -2460,7 +2476,6 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEMessageCollector cannotBeBlankCollector =
       [PEUIUtils newTfCannotBeEmptyBlkForMsgs:errMsgs entityPanel:envLogPanel];
     cannotBeBlankCollector(FPEnvLogTagOdometer, @"Odometer cannot be empty.");
-    cannotBeBlankCollector(FPEnvLogTagReportedOutsideTemp, @"Reported outside temperature cannot\nbe empty.");
     return errMsgs;
   };
 }
