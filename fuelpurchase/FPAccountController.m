@@ -130,9 +130,7 @@ NSInteger const kAccountStatusPanelTag = 12;
 
 - (UIView *)logoutPaddedMessage {
   NSString *logoutMsg = @"\
-Logging out will disconnect this device from \
-your remote account.  This will remove your \
-gas jot data from this device only.";
+Logging out will disconnect this device from your remote account and remove your Gas Jot data.";
   return [self leftPaddingMessageWithText:logoutMsg];
 }
 

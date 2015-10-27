@@ -16,6 +16,7 @@
 #import "UIColor+FPAdditions.h"
 
 NSString * const FPCommonStatComparisonTextIfNilStat = @"---";
+NSString * const FPStatComparisonCellIdentifier = @"FPStatComparisonCellIdentifier";
 
 @implementation FPCommonStatComparisonController {
   FPCoordinatorDao *_coordDao;
@@ -54,7 +55,6 @@ NSString * const FPCommonStatComparisonTextIfNilStat = @"---";
   return self;
 }
 
-
 #pragma mark - Helpers
 
 - (UIView *)makeComparisonTable {
@@ -66,26 +66,31 @@ NSString * const FPCommonStatComparisonTextIfNilStat = @"---";
     id entityName;
     if (_entity && [entity isEqual:_entity]) {
       entityName = [PEUIUtils attributedTextWithTemplate:@"%@"
-                                             textToAccent:_entityName(entity)
-                                           accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
-                                          accentTextColor:[UIColor fpAppBlue]];
+                                            textToAccent:_entityName(entity)
+                                          accentTextFont:[UIFont boldSystemFontOfSize:16]
+                                         accentTextColor:[UIColor fpAppBlue]];
     } else {
       entityName = _entityName(entity);
     }
     if (statValue) {
-      [rowData addObject:@[entityName, _valueFormatterBlk(statValue)]];
+      [rowData addObject:@[entityName, _valueFormatterBlk(statValue), statValue]];
     } else {
-      [nilRowData addObject:@[entityName, FPCommonStatComparisonTextIfNilStat]];
+      [nilRowData addObject:@[entityName, FPCommonStatComparisonTextIfNilStat, [NSDecimalNumber notANumber]]];
     }
   }
   [rowData sortUsingComparator:^NSComparisonResult(NSArray *o1, NSArray *o2) {
-    NSDecimalNumber *v1 = o1[1];
-    NSDecimalNumber *v2 = o2[1];
+    NSDecimalNumber *v1 = o1[2];
+    NSDecimalNumber *v2 = o2[2];
     return [v1 compare:v2];
   }];
-  return [PEUIUtils tablePanelWithRowData:[rowData arrayByAddingObjectsFromArray:nilRowData]
-                                uitoolkit:_uitoolkit
-                               parentView:self.view];
+  UIView *tablePanel = [PEUIUtils tablePanelWithRowData:[rowData arrayByAddingObjectsFromArray:nilRowData]
+                                              uitoolkit:_uitoolkit
+                                             parentView:self.view];
+  UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
+  [scrollView setContentSize:CGSizeMake(tablePanel.frame.size.width, 1.125 * (tablePanel.frame.origin.y + tablePanel.frame.size.height))];
+  [scrollView addSubview:tablePanel];
+  [scrollView setBounces:YES];
+  return scrollView;
 }
 
 #pragma mark - View controller lifecycle
@@ -98,6 +103,7 @@ NSString * const FPCommonStatComparisonTextIfNilStat = @"---";
                                               backgroundColor:[UIColor clearColor]
                                                     textColor:[UIColor blackColor]
                                           verticalTextPadding:0.0]];
+  
   UIView *header = [FPUIUtils headerPanelWithText:_headerText relativeToView:self.view];
   _comparisonTable = [self makeComparisonTable];
   
@@ -110,11 +116,11 @@ NSString * const FPCommonStatComparisonTextIfNilStat = @"---";
   alignmentRelativeToView:self.view
               vpadding:8.0
               hpadding:0.0];
-  
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
+  
   // remove the views
   CGRect comparisonTableFrame = _comparisonTable.frame;
   [_comparisonTable removeFromSuperview];

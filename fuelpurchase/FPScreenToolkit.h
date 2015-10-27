@@ -64,11 +64,19 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
                                              itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
                                          listViewController:(PEListViewController *)listViewController;
 
+- (FPAuthScreenMaker)newVehicleStatsLaunchScreenMakerWithVehicle:(FPVehicle *)vehicle;
+
 - (FPAuthScreenMaker)newVehicleGasCostPerMileStatsScreenMakerWithVehicle:(FPVehicle *)vehicle;
 
 - (FPAuthScreenMaker)newVehicleCompareGasCostPerMileStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle;
 
 - (FPAuthScreenMaker)newVehicleCompareGasCostPerMileStatsScreenMaker;
+
+- (FPAuthScreenMaker)newVehicleSpentOnGasStatsScreenMakerWithVehicle:(FPVehicle *)vehicle;
+
+- (FPAuthScreenMaker)newVehicleCompareSpentOnGasStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle;
+
+- (FPAuthScreenMaker)newVehicleCompareSpentOnGasStatsScreenMaker;
 
 #pragma mark - Fuel Station Screens
 
@@ -97,6 +105,14 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
                                                fuelStationIndexPath:(NSIndexPath *)fuelStationIndexPath
                                                      itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
                                                  listViewController:(PEListViewController *)listViewController;
+
+- (FPAuthScreenMaker)newFuelStationStatsLaunchScreenMakerWithFuelstation:(FPFuelStation *)fuelstation;
+
+- (FPAuthScreenMaker)newFuelStationSpentOnGasStatsScreenMakerWithFuelstation:(FPFuelStation *)fuelstation;
+
+- (FPAuthScreenMaker)newFuelStationCompareSpentOnGasStatsScreenMakerWithFuelstationInCtx:(FPFuelStation *)fuelstation;
+
+- (FPAuthScreenMaker)newFuelStationCompareSpentOnGasStatsScreenMaker;
 
 #pragma mark - Fuel Purchase Log Screens
 

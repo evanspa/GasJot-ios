@@ -20,7 +20,6 @@
 #import "FPUIUtils.h"
 #import "FPForgotPasswordController.h"
 #import <PEFuelPurchase-Model/FPStats.h>
-#import "FPVehicleStatsController.h"
 
 NSString * const FPFpLogEntityMakerFpLogEntry = @"FPFpLogEntityMakerFpLogEntry";
 NSString * const FPFpLogEntityMakerVehicleEntry = @"FPFpLogEntityMakerVehicleEntry";
@@ -538,35 +537,13 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:15.0
                 hpadding:0.0];
-    /*NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
-    NSAttributedString *footerText =
-    [PEUIUtils attributedTextWithTemplate:@"Aggregate spend (%@)."
-                             textToAccent:@"all octanes"
-                           accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
-    NSInteger currentYear = [self currentYear];
-    UIView *funFactsDataPanel = [self dataPanelWithRowData:@[@[[NSString stringWithFormat:@"%ld YTD spent on gas", (long)currentYear], [currencyFormatter stringFromNumber:[_stats yearToDateSpentOnGasForVehicle:vehicle]]],
-                                                             @[@"All-time spent on gas", [currencyFormatter stringFromNumber:[_stats totalSpentOnGasForVehicle:vehicle]]]]
-                                      footerAttributedText:footerText
-                            footerFontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
-                                     footerVerticalPadding:3.0
-                                                parentView:parentView];
-    [PEUIUtils placeView:funFactsDataPanel
-                   below:vehicleDataPanel
-                    onto:vehiclePanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:30.0
-                hpadding:0.0];*/
     UIButton *statsBtn = [_uitoolkit systemButtonMaker](@"Stats & Trends", nil, nil);
     [[statsBtn layer] setCornerRadius:0.0];
     [PEUIUtils setFrameWidthOfView:statsBtn ofWidth:1.0 relativeTo:parentView];
     [PEUIUtils addDisclosureIndicatorToButton:statsBtn];
     [statsBtn bk_addEventHandler:^(id sender) {
-      FPVehicleStatsController *vehicleStatsCtrl = [[FPVehicleStatsController alloc] initWithStoreCoordinator:_coordDao
-                                                                                                         user:user
-                                                                                                      vehicle:vehicle
-                                                                                                    uitoolkit:_uitoolkit
-                                                                                                screenToolkit:_screenToolkit];
-      [[parentViewController navigationController] pushViewController:vehicleStatsCtrl animated:YES];
+      [[parentViewController navigationController] pushViewController:[_screenToolkit newVehicleStatsLaunchScreenMakerWithVehicle:vehicle](user)
+                                                             animated:YES];
     } forControlEvents:UIControlEventTouchUpInside];
     UIView *statsMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into the stats and trends associated with this vehicle."
                                                                       font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
@@ -826,8 +803,38 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:30.0
                 hpadding:0.0];*/
+    
+    
+    UIButton *statsBtn = [_uitoolkit systemButtonMaker](@"Stats & Trends", nil, nil);
+    [[statsBtn layer] setCornerRadius:0.0];
+    [PEUIUtils setFrameWidthOfView:statsBtn ofWidth:1.0 relativeTo:parentView];
+    [PEUIUtils addDisclosureIndicatorToButton:statsBtn];
+    [statsBtn bk_addEventHandler:^(id sender) {
+      [[parentViewController navigationController] pushViewController:[_screenToolkit newFuelStationStatsLaunchScreenMakerWithFuelstation:fuelstation](user)
+                                                             animated:YES];
+    } forControlEvents:UIControlEventTouchUpInside];
+    UIView *statsMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into the stats and trends associated with this gas station."
+                                                                      font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                           backgroundColor:[UIColor clearColor]
+                                                                 textColor:[UIColor darkGrayColor]
+                                                       verticalTextPadding:3.0
+                                                                fitToWidth:parentView.frame.size.width - 15.0]
+                                           padding:8.0];
+    [PEUIUtils placeView:statsBtn
+                   below:coordinatesTableView
+                    onto:fuelstationPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:30.0
+                hpadding:0.0];
+    [PEUIUtils placeView:statsMsgPanel
+                   below:statsBtn
+                    onto:fuelstationPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:4.0
+                hpadding:0.0];
+    
     [self placeViewLogsButtonOntoFuelstationPanel:fuelstationPanel
-                                        belowView:coordinatesTableView //priceDataPanelsColumn
+                                        belowView:statsMsgPanel //priceDataPanelsColumn
                              parentViewController:parentViewController];
     /*if (priceDataPanels.count > 0) {
       // wrap fuel station panel in scroll view (so everything can "fit")
@@ -843,7 +850,12 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
       [scrollView setBounces:NO];
       return scrollView;
     } else {*/
-      return fuelstationPanel;
+    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelstationPanel frame]];
+    [scrollView setContentSize:CGSizeMake(fuelstationPanel.frame.size.width, 1.285 * fuelstationPanel.frame.size.height)];
+    [scrollView addSubview:fuelstationPanel];
+    [scrollView setBounces:NO];
+    return scrollView;
+      //return fuelstationPanel;
     //}
   };
 }

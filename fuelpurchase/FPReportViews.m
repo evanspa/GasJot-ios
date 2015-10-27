@@ -457,7 +457,7 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 - (FPFunFact)totalSpentOnGasForFuelStationFunFact {
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
     FPFuelStation *fuelstation = logVehFs[2];
-    NSDecimalNumber *spentOnGas = [_stats totalSpentOnGasForFuelstation:fuelstation];
+    NSDecimalNumber *spentOnGas = [_stats overallSpentOnGasForFuelstation:fuelstation];
     NSNumberFormatter *currencyFormatter = [PEUtils currencyFormatter];
     NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"Since recording, you've spent %@ on gas"
                                                                textToAccent:[currencyFormatter stringFromNumber:spentOnGas]
@@ -473,7 +473,7 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 - (FPFunFact)totalSpentOnGasForVehicleFunFact {
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
     FPVehicle *vehicle = logVehFs[1];
-    NSDecimalNumber *spentOnGas = [_stats totalSpentOnGasForVehicle:vehicle];
+    NSDecimalNumber *spentOnGas = [_stats overallSpentOnGasForVehicle:vehicle];
     NSNumberFormatter *currencyFormatter = [PEUtils currencyFormatter];
     NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"Since recording, you've spent %@ on gas"
                                                                textToAccent:[currencyFormatter stringFromNumber:spentOnGas]
@@ -488,7 +488,7 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 
 - (FPFunFact)totalSpentOnGasForUserFunFact {
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
-    NSDecimalNumber *spentOnGas = [_stats totalSpentOnGasForUser:user];
+    NSDecimalNumber *spentOnGas = [_stats overallSpentOnGasForUser:user];
     NSNumberFormatter *currencyFormatter = [PEUtils currencyFormatter];
     NSAttributedString *funFact = [PEUIUtils attributedTextWithTemplate:@"Since recording, you've spent %@ on gas across all your vehicles."
                                                            textToAccent:[currencyFormatter stringFromNumber:spentOnGas]

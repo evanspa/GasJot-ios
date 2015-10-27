@@ -40,6 +40,7 @@
 		CA7D5A271B383F5A00433581 /* FPAppNotificationNames.m in Sources */ = {isa = PBXBuildFile; fileRef = CA7D5A261B383F5A00433581 /* FPAppNotificationNames.m */; };
 		CA7D5A2E1B3851E200433581 /* FPAccountLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA7D5A2D1B3851E200433581 /* FPAccountLoginController.m */; };
 		CA813DB11BDF04A000B74A24 /* FPCommonStatComparisonController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA813DB01BDF04A000B74A24 /* FPCommonStatComparisonController.m */; settings = {ASSET_TAGS = (); }; };
+		CA813DCA1BDFE66B00B74A24 /* FPCommonStatsLaunchController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA813DC91BDFE66B00B74A24 /* FPCommonStatsLaunchController.m */; settings = {ASSET_TAGS = (); }; };
 		CA8AC4A81BDE7686008603C0 /* JBLineChartFooterView.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4A71BDE7686008603C0 /* JBLineChartFooterView.m */; settings = {ASSET_TAGS = (); }; };
 		CA8AC4B61BDE8918008603C0 /* JBChartTooltipView.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4B51BDE8918008603C0 /* JBChartTooltipView.m */; settings = {ASSET_TAGS = (); }; };
 		CA8AC4B91BDE8923008603C0 /* JBChartTooltipTipView.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4B81BDE8923008603C0 /* JBChartTooltipTipView.m */; settings = {ASSET_TAGS = (); }; };
@@ -49,7 +50,6 @@
 		CA90F4241B45AB7F005FAB35 /* PEServerSyncActionSheet.m in Sources */ = {isa = PBXBuildFile; fileRef = CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */; };
 		CA920C121B21F48900A848EA /* fpapi-resource.localdev.json in Resources */ = {isa = PBXBuildFile; fileRef = 18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */; };
 		CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */; };
-		CABF516F1BD499150083B460 /* FPVehicleStatsController.m in Sources */ = {isa = PBXBuildFile; fileRef = CABF516E1BD499150083B460 /* FPVehicleStatsController.m */; settings = {ASSET_TAGS = (); }; };
 		CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = CAD8AE501B2B291000276F4F /* PELMUIUtils.m */; };
 		CAE873F71BBDA64900E5A81F /* FPForgotPasswordController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAE873F61BBDA64900E5A81F /* FPForgotPasswordController.m */; settings = {ASSET_TAGS = (); }; };
 		CAEE0C9A1BC9830E00FAB0BF /* FPReportViews.m in Sources */ = {isa = PBXBuildFile; fileRef = CAEE0C991BC9830E00FAB0BF /* FPReportViews.m */; settings = {ASSET_TAGS = (); }; };
@@ -140,6 +140,8 @@
 		CA813DAF1BDF04A000B74A24 /* FPCommonStatComparisonController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPCommonStatComparisonController.h; sourceTree = "<group>"; };
 		CA813DB01BDF04A000B74A24 /* FPCommonStatComparisonController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPCommonStatComparisonController.m; sourceTree = "<group>"; };
 		CA813DB21BDF083000B74A24 /* FPCommonStatControllerConstants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FPCommonStatControllerConstants.h; sourceTree = "<group>"; };
+		CA813DC81BDFE66B00B74A24 /* FPCommonStatsLaunchController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPCommonStatsLaunchController.h; sourceTree = "<group>"; };
+		CA813DC91BDFE66B00B74A24 /* FPCommonStatsLaunchController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPCommonStatsLaunchController.m; sourceTree = "<group>"; };
 		CA8AC4A61BDE7686008603C0 /* JBLineChartFooterView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JBLineChartFooterView.h; sourceTree = "<group>"; };
 		CA8AC4A71BDE7686008603C0 /* JBLineChartFooterView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JBLineChartFooterView.m; sourceTree = "<group>"; };
 		CA8AC4AC1BDE7809008603C0 /* JBColorConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JBColorConstants.h; sourceTree = "<group>"; };
@@ -161,8 +163,6 @@
 		CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PEServerSyncActionSheet.m; sourceTree = "<group>"; };
 		CAB5E94E1B4B024B00144072 /* FPReauthenticateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPReauthenticateController.h; sourceTree = "<group>"; };
 		CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPReauthenticateController.m; sourceTree = "<group>"; };
-		CABF516D1BD499150083B460 /* FPVehicleStatsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPVehicleStatsController.h; sourceTree = "<group>"; };
-		CABF516E1BD499150083B460 /* FPVehicleStatsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPVehicleStatsController.m; sourceTree = "<group>"; };
 		CAD8AE4F1B2B291000276F4F /* PELMUIUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PELMUIUtils.h; sourceTree = "<group>"; };
 		CAD8AE501B2B291000276F4F /* PELMUIUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PELMUIUtils.m; sourceTree = "<group>"; };
 		CAE873F51BBDA64900E5A81F /* FPForgotPasswordController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPForgotPasswordController.h; sourceTree = "<group>"; };
@@ -547,6 +547,15 @@
 			name = "Common Stat Comparison Screen";
 			sourceTree = "<group>";
 		};
+		CA813DC71BDFE61400B74A24 /* Common Stat Launch Screen */ = {
+			isa = PBXGroup;
+			children = (
+				CA813DC81BDFE66B00B74A24 /* FPCommonStatsLaunchController.h */,
+				CA813DC91BDFE66B00B74A24 /* FPCommonStatsLaunchController.m */,
+			);
+			name = "Common Stat Launch Screen";
+			sourceTree = "<group>";
+		};
 		CA8AC4A91BDE77A9008603C0 /* JB Chart Support */ = {
 			isa = PBXGroup;
 			children = (
@@ -644,22 +653,13 @@
 			name = "Re-authenticate";
 			sourceTree = "<group>";
 		};
-		CABF516C1BD498FB0083B460 /* Vehicle Stats Screen */ = {
-			isa = PBXGroup;
-			children = (
-				CABF516D1BD499150083B460 /* FPVehicleStatsController.h */,
-				CABF516E1BD499150083B460 /* FPVehicleStatsController.m */,
-			);
-			name = "Vehicle Stats Screen";
-			sourceTree = "<group>";
-		};
 		CABF51701BD499370083B460 /* Stat Screens */ = {
 			isa = PBXGroup;
 			children = (
 				CA813DB21BDF083000B74A24 /* FPCommonStatControllerConstants.h */,
-				CA813DAE1BDF046400B74A24 /* Common Stat Comparison Screen */,
+				CA813DC71BDFE61400B74A24 /* Common Stat Launch Screen */,
 				CA8AC4C11BDEB284008603C0 /* Common Stat Screen */,
-				CABF516C1BD498FB0083B460 /* Vehicle Stats Screen */,
+				CA813DAE1BDF046400B74A24 /* Common Stat Comparison Screen */,
 			);
 			name = "Stat Screens";
 			sourceTree = "<group>";
@@ -914,6 +914,7 @@
 				18F61A891A96133000BA631A /* UIScrollView+PEAdditions.m in Sources */,
 				CAEE0C9A1BC9830E00FAB0BF /* FPReportViews.m in Sources */,
 				18D6DFBC17F68005006B300D /* FPAppDelegate.m in Sources */,
+				CA813DCA1BDFE66B00B74A24 /* FPCommonStatsLaunchController.m in Sources */,
 				18D6DFB817F68005006B300D /* main.m in Sources */,
 				CA8AC4B61BDE8918008603C0 /* JBChartTooltipView.m in Sources */,
 				CA8AC4C01BDE9287008603C0 /* JBChartHeaderView.m in Sources */,
@@ -941,7 +942,6 @@
 				189AC7561A78034500A6CFE3 /* FPLogEnvLogComposite.m in Sources */,
 				18010C5A180E4752005F5CEB /* FPQuickActionMenuController.m in Sources */,
 				183E1416180237A2009E9085 /* FPUtils.m in Sources */,
-				CABF516F1BD499150083B460 /* FPVehicleStatsController.m in Sources */,
 				18AC0722181ACC8C001FF24E /* FPLogging.m in Sources */,
 				1865B7D919FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m in Sources */,
 				18C3CD7419DC3B440092C002 /* FPPanelToolkit.m in Sources */,
