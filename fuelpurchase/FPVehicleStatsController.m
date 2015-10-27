@@ -13,7 +13,6 @@
 #import "FPUtils.h"
 #import "FPUIUtils.h"
 #import <BlocksKit/UIControl+BlocksKit.h>
-#import "FPVehicleGasCostPerMileController.h"
 #import "FPVehicleSpentOnGasController.h"
 #import "UIColor+FPAdditions.h"
 
@@ -64,12 +63,7 @@
   [PEUIUtils setFrameWidthOfView:gasCostPerMileBtn ofWidth:1.0 relativeTo:self.view];
   [PEUIUtils addDisclosureIndicatorToButton:gasCostPerMileBtn];
   [gasCostPerMileBtn bk_addEventHandler:^(id sender) {
-    FPVehicleGasCostPerMileController *gasCostPerMileScreen =
-      [[FPVehicleGasCostPerMileController alloc] initWithStoreCoordinator:_coordDao
-                                                                     user:_user
-                                                                  vehicle:_vehicle
-                                                                uitoolkit:_uitoolkit
-                                                            screenToolkit:_screenToolkit];
+    UIViewController *gasCostPerMileScreen = [_screenToolkit newVehicleGasCostPerMileStatsScreenMakerWithVehicle:_vehicle](_user);
     [self.navigationController pushViewController:gasCostPerMileScreen animated:YES];
   } forControlEvents:UIControlEventTouchUpInside];
   UILabel *gasCostPerMileMsg = [PEUIUtils labelWithKey:@"Stats and trend information on the average cost of a mile.  \

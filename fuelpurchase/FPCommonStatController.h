@@ -10,16 +10,9 @@
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
 #import <JBChartView/JBLineChartView.h>
+#import "FPCommonStatControllerConstants.h"
 
-typedef NSDecimalNumber *(^FPAlltimeAggregate)(id);
-typedef NSDecimalNumber *(^FPYearToDateAggregate)(id);
-typedef NSDecimalNumber *(^FPLastYearAggregate)(id);
-
-typedef NSArray *(^FPAlltimeDataset)(id);
-typedef NSArray *(^FPYearToDateDataset)(id);
-typedef NSArray *(^FPLastYearDataset)(id);
-
-typedef NSInteger(^FPSiblingEntityCount)(void);
+typedef NSUInteger(^FPSiblingEntityCount)(void);
 typedef UIViewController *(^FPComparisonScreenMaker)(void);
 
 @interface FPCommonStatController : UIViewController <JBLineChartViewDelegate, JBLineChartViewDataSource>
@@ -28,7 +21,7 @@ typedef UIViewController *(^FPComparisonScreenMaker)(void);
 
 - (id)initWithScreenTitle:(NSString *)screenTitle
       entityTypeLabelText:(NSString *)entityTypeLabelText
-               entityName:(NSString *)entityName
+            entityNameBlk:(FPEntityNameBlk)entityNameBlk
                    entity:(id)entity
      aggregatesHeaderText:(NSString *)aggregatesHeaderText
    compareButtonTitleText:(NSString *)compareButtonTitleText
@@ -40,6 +33,7 @@ typedef UIViewController *(^FPComparisonScreenMaker)(void);
        lastYearDatasetBlk:(FPLastYearDataset)lastYearDatasetBlk
           siblingCountBlk:(FPSiblingEntityCount)siblingCountBlk
  comparisonScreenMakerBlk:(FPComparisonScreenMaker)comparisonScreenMakerBlk
+        valueFormatterBlk:(FPValueFormatter)valueFormatterBlk
                 uitoolkit:(PEUIToolkit *)uitoolkit;
 
 @end

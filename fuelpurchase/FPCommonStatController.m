@@ -32,7 +32,6 @@ NSInteger const FPChartPreviousYearIndex = 2;
   UIView *_aggregatesTable;
   UIView *_lineChartPanel;
   NSInteger _currentYear;
-  NSNumberFormatter *_currencyFormatter;
   NSArray *_dataset;
   NSDateFormatter *_dateFormatter;
   JBChartTooltipView *_tooltipView;
@@ -40,7 +39,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
   BOOL _tooltipVisible;
   NSString *_screenTitle;
   NSString *_entityTypeLabelText;
-  NSString *_entityName;
+  FPEntityNameBlk _entityNameBlk;
   id _entity;
   NSString *_aggregatesHeaderText;
   NSString *_compareButtonTitleText;
@@ -52,13 +51,14 @@ NSInteger const FPChartPreviousYearIndex = 2;
   FPLastYearDataset _lastYearDatasetBlk;
   FPSiblingEntityCount _siblingCountBlk;
   FPComparisonScreenMaker _comparisonScreenMakerBlk;
+  FPValueFormatter _valueFormatter;
 }
 
 #pragma mark - Initializers
 
 - (id)initWithScreenTitle:(NSString *)screenTitle
       entityTypeLabelText:(NSString *)entityTypeLabelText
-               entityName:(NSString *)entityName
+            entityNameBlk:(FPEntityNameBlk)entityNameBlk
                    entity:(id)entity
      aggregatesHeaderText:(NSString *)aggregatesHeaderText
    compareButtonTitleText:(NSString *)compareButtonTitleText
@@ -70,12 +70,13 @@ NSInteger const FPChartPreviousYearIndex = 2;
        lastYearDatasetBlk:(FPLastYearDataset)lastYearDatasetBlk
           siblingCountBlk:(FPSiblingEntityCount)siblingCountBlk
  comparisonScreenMakerBlk:(FPComparisonScreenMaker)comparisonScreenMakerBlk
+        valueFormatterBlk:(FPValueFormatter)valueFormatterBlk
                 uitoolkit:(PEUIToolkit *)uitoolkit {
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
     _screenTitle = screenTitle;
     _entityTypeLabelText = entityTypeLabelText;
-    _entityName = entityName;
+    _entityNameBlk = entityNameBlk;
     _entity = entity;
     _aggregatesHeaderText = aggregatesHeaderText;
     _compareButtonTitleText = compareButtonTitleText;
@@ -87,9 +88,9 @@ NSInteger const FPChartPreviousYearIndex = 2;
     _lastYearDatasetBlk = lastYearDatasetBlk;
     _siblingCountBlk = siblingCountBlk;
     _comparisonScreenMakerBlk = comparisonScreenMakerBlk;
+    _valueFormatter = valueFormatterBlk;
     _uitoolkit = uitoolkit;
     _currentYear = [PEUtils currentYear];
-    _currencyFormatter = [PEUtils currencyFormatter];
     _dateFormatter = [[NSDateFormatter alloc] init];
     [_dateFormatter setDateFormat:@"MMM-yy"];
   }
@@ -145,7 +146,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
   NSDecimalNumber *value = dataPoint[1];
   [self setTooltipVisible:YES animated:YES atTouchPoint:touchPoint chartView:lineChartView];
   [_tooltipView setAttributedText:[PEUIUtils attributedTextWithTemplate:[[NSString stringWithFormat:@"%@: ", [_dateFormatter stringFromDate:dataPoint[0]]] stringByAppendingString:@"%@"]
-                                                           textToAccent:[_currencyFormatter stringFromNumber:value]
+                                                           textToAccent:_valueFormatter(value) //[_currencyFormatter stringFromNumber:value]
                                                          accentTextFont:nil
                                                         accentTextColor:[UIColor grayColor]]];
 }
@@ -165,6 +166,14 @@ NSInteger const FPChartPreviousYearIndex = 2;
 }
 
 #pragma mark - Helpers
+
+- (NSString *)formattedValueForValue:(id)value {
+  if (value) {
+    return _valueFormatter(value);
+  } else {
+    return FPTextIfNilStat;
+  }
+}
 
 - (void)setTooltipVisible:(BOOL)tooltipVisible animated:(BOOL)animated atTouchPoint:(CGPoint)touchPoint chartView:(JBChartView *)chartView {
   UIView *chartViewPanel = [chartView superview];
@@ -242,15 +251,9 @@ NSInteger const FPChartPreviousYearIndex = 2;
 }
 
 - (UIView *)aggregatesTable {
-  return [PEUIUtils tablePanelWithRowData:@[@[@"All time", [PEUtils textForDecimal:_alltimeAggregateBlk(_entity)
-                                                                         formatter:_currencyFormatter
-                                                                         textIfNil:FPTextIfNilStat]],
-                                            @[[NSString stringWithFormat:@"%ld YTD", (long)_currentYear], [PEUtils textForDecimal:_yearToDateAggregateBlk(_entity)
-                                                                                                                        formatter:_currencyFormatter
-                                                                                                                        textIfNil:FPTextIfNilStat]],
-                                            @[[NSString stringWithFormat:@"%ld", (long)_currentYear-1], [PEUtils textForDecimal:_lastYearAggregateBlk(_entity)
-                                                                                                                      formatter:_currencyFormatter
-                                                                                                                      textIfNil:FPTextIfNilStat]]]
+  return [PEUIUtils tablePanelWithRowData:@[@[@"All time", [self formattedValueForValue:_alltimeAggregateBlk(_entity)]],
+                                            @[[NSString stringWithFormat:@"%ld YTD", (long)_currentYear], [self formattedValueForValue:_yearToDateAggregateBlk(_entity)]],
+                                            @[[NSString stringWithFormat:@"%ld", (long)_currentYear-1], [self formattedValueForValue:_lastYearAggregateBlk(_entity)]]]
                                 uitoolkit:_uitoolkit
                                parentView:self.view];
 }
@@ -334,7 +337,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   [self setTitle:_screenTitle];
   NSAttributedString *entityHeaderText = [PEUIUtils attributedTextWithTemplate:[[NSString stringWithFormat:@"(%@: ", _entityTypeLabelText] stringByAppendingString:@"%@)"]
-                                                                  textToAccent:_entityName
+                                                                  textToAccent:_entityNameBlk(_entity)
                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
                                                                accentTextColor:[UIColor fpAppBlue]];
   UILabel *entityLabel = [PEUIUtils labelWithAttributeText:entityHeaderText

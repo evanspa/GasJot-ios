@@ -64,6 +64,12 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
                                              itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
                                          listViewController:(PEListViewController *)listViewController;
 
+- (FPAuthScreenMaker)newVehicleGasCostPerMileStatsScreenMakerWithVehicle:(FPVehicle *)vehicle;
+
+- (FPAuthScreenMaker)newVehicleCompareGasCostPerMileStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle;
+
+- (FPAuthScreenMaker)newVehicleCompareGasCostPerMileStatsScreenMaker;
+
 #pragma mark - Fuel Station Screens
 
 - (void)addDistanceInfoToTopOfCellContentView:(UIView *)contentView

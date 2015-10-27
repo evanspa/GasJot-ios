@@ -35,6 +35,9 @@
 #import "FPUIUtils.h"
 #import "FPAppNotificationNames.h"
 #import "FPReportViews.h"
+#import "FPCommonStatController.h"
+#import <PEFuelPurchase-Model/FPStats.h>
+#import "FPCommonStatComparisonController.h"
 
 NSInteger const PAGINATION_PAGE_SIZE = 30;
 NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
@@ -44,6 +47,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   FPPanelToolkit *_panelToolkit;
   PELMDaoErrorBlk _errorBlk;
   FPReportViews *_reportViews;
+  FPStats *_stats;
+  NSNumberFormatter *_currencyFormatter;
 }
 
 #pragma mark - Initializers
@@ -60,6 +65,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                          uitoolkit:uitoolkit
                                                              error:errorBlk];
     _reportViews = [[FPReportViews alloc] initWithStats:[[FPStats alloc] initWithLocalDao:_coordDao.localDao errorBlk:errorBlk]];
+    _stats = [[FPStats alloc] initWithLocalDao:_coordDao.localDao errorBlk:[FPUtils localFetchErrorHandlerMaker]()];
+    _currencyFormatter = [PEUtils currencyFormatter];
   }
   return self;
 }
@@ -844,6 +851,65 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                  modalOperationDone:[self commonModalOperationDoneBlock]
                                       entityUpdatedNotificationName:FPEntityUpdatedNotification
                                       entityRemovedNotificationName:FPEntityDeletedNotification];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleGasCostPerMileStatsScreenMakerWithVehicle:(FPVehicle *)vehicle {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Gas Cost per Mile"
+                                           entityTypeLabelText:@"vehicle"
+                                                 entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                        entity:vehicle
+                                          aggregatesHeaderText:@"GAS COST PER MILE AGGREGATES"
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallGasCostPerMileForVehicle:v];}
+                                        yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateGasCostPerMileForVehicle:v];}
+                                          lastYearAggregateBlk:^(FPVehicle *v) {return [_stats lastYearGasCostPerMileForVehicle:v];}
+                                             alltimeDatasetBlk:^(FPVehicle *v) {return [_stats overallGasCostPerMileDataSetForVehicle:v];}
+                                          yearToDateDatasetBlk:^(FPVehicle *v) {return [_stats yearToDateGasCostPerMileDataSetForVehicle:v];}
+                                            lastYearDatasetBlk:^(FPVehicle *v) {return [_stats lastYearGasCostPerMileDataSetForVehicle:v];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareGasCostPerMileStatsScreenMakerWithVehicleInCtx:vehicle](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleCompareGasCostPerMileStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatComparisonController alloc] initWithScreenTitle:@"Gas Cost per Mile Comparison"
+                                                              headerText:@"GAS COST PER MILE (All time)"
+                                                           entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                                  entity:vehicle
+                                                    entitiesToCompareBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                     alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallGasCostPerMileForVehicle:v];}
+                                                       valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                               uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleCompareGasCostPerMileStatsScreenMaker {
+  return [self newVehicleCompareGasCostPerMileStatsScreenMakerWithVehicleInCtx:nil];
+}
+
+- (FPAuthScreenMaker)newVehicleSpentOnGasStatsScreenMakerWithVehicle:(FPVehicle *)vehicle {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Spent on Gas"
+                                           entityTypeLabelText:@"vehicle"
+                                                 entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                        entity:vehicle
+                                          aggregatesHeaderText:@"SPENT ON GAS AGGREGATES"
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPVehicle *v) {return [_stats totalSpentOnGasForVehicle:v];}
+                                        yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateSpentOnGasForVehicle:v];}
+                                          lastYearAggregateBlk:^(FPVehicle *v) {return [_stats lastYearSpentOnGasForVehicle:v];}
+                                             alltimeDatasetBlk:^(FPVehicle *v) {return [_stats totalSpentOnGasDataSetForVehicle:v];}
+                                          yearToDateDatasetBlk:^(FPVehicle *v) {return [_stats yearToDateSpentOnGasDataSetForVehicle:v];}
+                                            lastYearDatasetBlk:^(FPVehicle *v) {return [_stats lastYearSpentOnGasDataSetForVehicle:v];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareSpentOnGasStatsScreenMakerWithVehicleInCtx:vehicle](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
   };
 }
 
