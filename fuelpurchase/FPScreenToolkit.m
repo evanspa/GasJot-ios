@@ -855,34 +855,72 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   };
 }
 
+#pragma mark - Vehicle Stat Screens
+
 - (FPAuthScreenMaker)newVehicleStatsLaunchScreenMakerWithVehicle:(FPVehicle *)vehicle {
   return ^ UIViewController * (FPUser *user) {
-    
-    NSMutableArray *statLaunchButtons = [NSMutableArray array];
-    [statLaunchButtons addObject:@[@"Gas cost per mile",
-                                   ^{ return [self newVehicleGasCostPerMileStatsScreenMakerWithVehicle:vehicle](user); },
-                                   [[NSAttributedString alloc] initWithString:@"Stats and trend information on the average cost of a mile.  \
-The cost of a mile is calculated by dividing the total amount spent on gas by the total number of recorded miles driven (from odometer logs)."]]];
-    
-    [statLaunchButtons addObject:@[@"Amount spent on gas",
-                                   ^{ return [self newVehicleSpentOnGasStatsScreenMakerWithVehicle:vehicle](user); },
-                                   [PEUIUtils attributedTextWithTemplate:@"Stats and trend information on the total amount spent on gas:\n(per \
-price gallon %@ number of gallons)."
-                                                            textToAccent:@"x"
-                                                          accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]]];
-  
-    NSArray *octanes = [_coordDao.localDao distinctOctanesForVehicle:vehicle error:_errorBlk];
-    for (NSNumber *octane in octanes) {
-      [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Price of gas (%@ octane)", octane],
-                                     ^{ return nil;}]];
-    }
-    
     return [[FPCommonStatsLaunchController alloc] initWithScreenTitle:@"Vehicle Stats & Trends"
                                                   entityTypeLabelText:@"vehicle"
                                                         entityNameBlk:^(FPVehicle *v) {return v.name;}
                                                                entity:vehicle
-                                                    statLaunchButtons:statLaunchButtons
+                                                 statLaunchButtonsBlk:^{
+                                                   NSMutableArray *statLaunchButtons = [NSMutableArray array];
+                                                   [statLaunchButtons addObject:@[@"Gas cost per mile",
+                                                                                  ^{ return [self newVehicleGasCostPerMileStatsScreenMakerWithVehicle:vehicle](user); },
+                                                                                  [PEUIUtils attributedTextWithTemplate:@"(total amount spent on gas %@ the number of recorded miles driven)"
+                                                                                                           textToAccent:@"DIVIDED BY"
+                                                                                                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]]];
+                                                   [statLaunchButtons addObject:@[@"Amount spent on gas",
+                                                                                  ^{ return [self newVehicleSpentOnGasStatsScreenMakerWithVehicle:vehicle](user); },
+                                                                                  [PEUIUtils attributedTextWithTemplate:@"(num gallons %@ price per gallon)"
+                                                                                                           textToAccent:@"MULTIPLIED BY"
+                                                                                                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]]];
+                                                   NSArray *octanes = [_coordDao.localDao distinctOctanesForVehicle:vehicle error:_errorBlk];
+                                                   for (NSNumber *octane in octanes) {
+                                                     [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Average price of gas (%@ octane)", octane],
+                                                                                    ^{ return [self newVehicleAvgPricePerGallonStatsScreenMakerWithVehicle:vehicle octane:octane](user); },
+                                                                                    [[NSAttributedString alloc] initWithString:@"(when buying gas for this vehicle)"]]];
+                                                   }
+                                                   return statLaunchButtons;
+                                                 }
                                                             uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleAvgPricePerGallonStatsScreenMakerWithVehicle:(FPVehicle *)vehicle
+                                                                     octane:(NSNumber *)octane {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Avg Price of Gas (%@)", octane]
+                                           entityTypeLabelText:@"vehicle"
+                                                 entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                        entity:vehicle
+                                          aggregatesHeaderText:[NSString stringWithFormat:@"AVG PRICE OF GAS (%@ octane) AGGREGATES", octane]
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallAvgPricePerGallonForVehicle:vehicle octane:octane];}
+                                        yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateAvgPricePerGallonForVehicle:v octane:octane];}
+                                          lastYearAggregateBlk:^(FPVehicle *v) {return [_stats lastYearAvgPricePerGallonForVehicle:v octane:octane];}
+                                             alltimeDatasetBlk:^(FPVehicle *v) {return [_stats overallAvgPricePerGallonDataSetForVehicle:v octane:octane];}
+                                          yearToDateDatasetBlk:^(FPVehicle *v) {return [_stats yearToDateAvgPricePerGallonDataSetForVehicle:v octane:octane];}
+                                            lastYearDatasetBlk:^(FPVehicle *v) {return [_stats lastYearAvgPricePerGallonDataSetForVehicle:v octane:octane];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareAvgPricePerGallonStatsScreenMakerWithVehicleInCtx:vehicle
+                                                                         octane:octane](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleCompareAvgPricePerGallonStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle
+                                                                                 octane:(NSNumber *)octane {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatComparisonController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Avg Price of Gas (%@) Comparison", octane]
+                                                              headerText:[NSString stringWithFormat:@"AVG PRICE OF GAS - %@ octane (All time)", octane]
+                                                           entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                                  entity:vehicle
+                                                    entitiesToCompareBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                     alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallAvgPricePerGallonForVehicle:v octane:octane];}
+                                                       valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                               uitoolkit:_uitoolkit];
   };
 }
 
@@ -1592,19 +1630,66 @@ price gallon %@ number of gallons)."
   };
 }
 
+#pragma mark - Fuel Station Stat Screens
+
 - (FPAuthScreenMaker)newFuelStationStatsLaunchScreenMakerWithFuelstation:(FPFuelStation *)fuelstation {
   return ^ UIViewController * (FPUser *user) {
     return [[FPCommonStatsLaunchController alloc] initWithScreenTitle:@"Gas Station Stats & Trends"
                                                   entityTypeLabelText:@"gas station"
                                                         entityNameBlk:^(FPFuelStation *fs) {return fs.name;}
                                                                entity:fuelstation
-                                                    statLaunchButtons:@[@[@"Amount spent on gas",
-                                                                          ^{ return [self newFuelStationSpentOnGasStatsScreenMakerWithFuelstation:fuelstation](user); },
-                                                                          [PEUIUtils attributedTextWithTemplate:@"Stats and trend information on the total amount spent on gas:\n(per \
-price gallon %@ number of gallons)."
-                                                                                                   textToAccent:@"x"
-                                                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]]]
+                                                 statLaunchButtonsBlk:^{
+                                                   NSMutableArray *statLaunchButtons = [NSMutableArray array];
+                                                   [statLaunchButtons addObject:@[@"Amount spent on gas",
+                                                                                  ^{ return [self newFuelStationSpentOnGasStatsScreenMakerWithFuelstation:fuelstation](user); },
+                                                                                  [PEUIUtils attributedTextWithTemplate:@"Stats and trend information on the total amount spent on gas:\n(per price gallon %@ number of gallons)."
+                                                                                                           textToAccent:@"x"
+                                                                                                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]]];
+                                                   NSArray *octanes = [_coordDao.localDao distinctOctanesForFuelstation:fuelstation error:_errorBlk];
+                                                   for (NSNumber *octane in octanes) {
+                                                     [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Average price of gas (%@ octane)", octane],
+                                                                                    ^{ return [self newFuelStationAvgPricePerGallonStatsScreenMakerWithFuelstation:fuelstation octane:octane](user); }]];
+                                                   }
+                                                   return statLaunchButtons;
+                                                 }
                                                             uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newFuelStationAvgPricePerGallonStatsScreenMakerWithFuelstation:(FPFuelStation *)fuelstation
+                                                                             octane:(NSNumber *)octane {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Avg Price of Gas (%@)", octane]
+                                           entityTypeLabelText:@"gas station"
+                                                 entityNameBlk:^(FPFuelStation *fs) {return fs.name;}
+                                                        entity:fuelstation
+                                          aggregatesHeaderText:[NSString stringWithFormat:@"AVG PRICE OF GAS (%@ octane) AGGREGATES", octane]
+                                        compareButtonTitleText:@"Compare gas stations"
+                                           alltimeAggregateBlk:^(FPFuelStation *fs) {return [_stats overallAvgPricePerGallonForFuelstation:fs octane:octane];}
+                                        yearToDateAggregateBlk:^(FPFuelStation *fs) {return [_stats yearToDateAvgPricePerGallonForFuelstation:fs octane:octane];}
+                                          lastYearAggregateBlk:^(FPFuelStation *fs) {return [_stats lastYearAvgPricePerGallonForFuelstation:fs octane:octane];}
+                                             alltimeDatasetBlk:^(FPFuelStation *fs) {return [_stats overallAvgPricePerGallonDataSetForFuelstation:fs octane:octane];}
+                                          yearToDateDatasetBlk:^(FPFuelStation *fs) {return [_stats yearToDateAvgPricePerGallonDataSetForFuelstation:fs octane:octane];}
+                                            lastYearDatasetBlk:^(FPFuelStation *fs) {return [_stats lastYearAvgPricePerGallonDataSetForFuelstation:fs octane:octane];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newFuelStationCompareAvgPricePerGallonStatsScreenMakerWithFuelstationInCtx:fuelstation
+                                                                                                                                                  octane:octane](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newFuelStationCompareAvgPricePerGallonStatsScreenMakerWithFuelstationInCtx:(FPFuelStation *)fuelstation
+                                                                                         octane:(NSNumber *)octane {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatComparisonController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Avg Price of Gas (%@) Comparison", octane]
+                                                              headerText:[NSString stringWithFormat:@"AVG PRICE OF GAS - %@ octane (All time)", octane]
+                                                           entityNameBlk:^(FPFuelStation *fs) {return fs.name;}
+                                                                  entity:fuelstation
+                                                    entitiesToCompareBlk:^{return [_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                     alltimeAggregateBlk:^(FPFuelStation *fs) {return [_stats overallAvgPricePerGallonForFuelstation:fs octane:octane];}
+                                                       valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                               uitoolkit:_uitoolkit];
   };
 }
 

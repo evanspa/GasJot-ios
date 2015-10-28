@@ -64,7 +64,15 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
                                              itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
                                          listViewController:(PEListViewController *)listViewController;
 
+#pragma mark - Vehicle Stat Screens
+
 - (FPAuthScreenMaker)newVehicleStatsLaunchScreenMakerWithVehicle:(FPVehicle *)vehicle;
+
+- (FPAuthScreenMaker)newVehicleAvgPricePerGallonStatsScreenMakerWithVehicle:(FPVehicle *)vehicle
+                                                                     octane:(NSNumber *)octane;
+
+- (FPAuthScreenMaker)newVehicleCompareAvgPricePerGallonStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle
+                                                                                 octane:(NSNumber *)octane;
 
 - (FPAuthScreenMaker)newVehicleGasCostPerMileStatsScreenMakerWithVehicle:(FPVehicle *)vehicle;
 
@@ -106,7 +114,15 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
                                                      itemChangedBlk:(PEItemChangedBlk)itemChangedBlk
                                                  listViewController:(PEListViewController *)listViewController;
 
+#pragma mark - Fuel Station Stat Screens
+
 - (FPAuthScreenMaker)newFuelStationStatsLaunchScreenMakerWithFuelstation:(FPFuelStation *)fuelstation;
+
+- (FPAuthScreenMaker)newFuelStationAvgPricePerGallonStatsScreenMakerWithFuelstation:(FPFuelStation *)fuelstation
+                                                                             octane:(NSNumber *)octane;
+
+- (FPAuthScreenMaker)newFuelStationCompareAvgPricePerGallonStatsScreenMakerWithFuelstationInCtx:(FPFuelStation *)fuelstation
+                                                                                         octane:(NSNumber *)octane;
 
 - (FPAuthScreenMaker)newFuelStationSpentOnGasStatsScreenMakerWithFuelstation:(FPFuelStation *)fuelstation;
 

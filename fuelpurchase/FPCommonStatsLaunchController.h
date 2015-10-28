@@ -19,7 +19,7 @@
       entityTypeLabelText:(NSString *)entityTypeLabelText
             entityNameBlk:(FPEntityNameBlk)entityNameBlk
                    entity:(id)entity
-        statLaunchButtons:(NSArray *)statLaunchButtons
+     statLaunchButtonsBlk:(NSArray *(^)(void))statLaunchButtonsBlk
                 uitoolkit:(PEUIToolkit *)uitoolkit;
 
 @end
