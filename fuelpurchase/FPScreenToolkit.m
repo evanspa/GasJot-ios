@@ -857,20 +857,31 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 
 - (FPAuthScreenMaker)newVehicleStatsLaunchScreenMakerWithVehicle:(FPVehicle *)vehicle {
   return ^ UIViewController * (FPUser *user) {
+    
+    NSMutableArray *statLaunchButtons = [NSMutableArray array];
+    [statLaunchButtons addObject:@[@"Gas cost per mile",
+                                   ^{ return [self newVehicleGasCostPerMileStatsScreenMakerWithVehicle:vehicle](user); },
+                                   [[NSAttributedString alloc] initWithString:@"Stats and trend information on the average cost of a mile.  \
+The cost of a mile is calculated by dividing the total amount spent on gas by the total number of recorded miles driven (from odometer logs)."]]];
+    
+    [statLaunchButtons addObject:@[@"Amount spent on gas",
+                                   ^{ return [self newVehicleSpentOnGasStatsScreenMakerWithVehicle:vehicle](user); },
+                                   [PEUIUtils attributedTextWithTemplate:@"Stats and trend information on the total amount spent on gas:\n(per \
+price gallon %@ number of gallons)."
+                                                            textToAccent:@"x"
+                                                          accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]]];
+  
+    NSArray *octanes = [_coordDao.localDao distinctOctanesForVehicle:vehicle error:_errorBlk];
+    for (NSNumber *octane in octanes) {
+      [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Price of gas (%@ octane)", octane],
+                                     ^{ return nil;}]];
+    }
+    
     return [[FPCommonStatsLaunchController alloc] initWithScreenTitle:@"Vehicle Stats & Trends"
                                                   entityTypeLabelText:@"vehicle"
                                                         entityNameBlk:^(FPVehicle *v) {return v.name;}
                                                                entity:vehicle
-                                                    statLaunchButtons:@[@[@"Gas cost per mile",
-                                                                          ^{ return [self newVehicleGasCostPerMileStatsScreenMakerWithVehicle:vehicle](user); },
-                                                                          [[NSAttributedString alloc] initWithString:@"Stats and trend information on the average cost of a mile.  \
-The cost of a mile is calculated by dividing the total amount spent on gas by the total number of recorded miles driven (from odometer logs)."]],
-                                                                        @[@"Amount spent on gas",
-                                                                          ^{ return [self newVehicleSpentOnGasStatsScreenMakerWithVehicle:vehicle](user); },
-                                                                          [PEUIUtils attributedTextWithTemplate:@"Stats and trend information on the total amount spent on gas:\n(per \
-price gallon %@ number of gallons)."
-                                                                                                   textToAccent:@"x"
-                                                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]]]
+                                                    statLaunchButtons:statLaunchButtons
                                                             uitoolkit:_uitoolkit];
   };
 }
