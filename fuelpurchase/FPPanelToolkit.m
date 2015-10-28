@@ -486,7 +486,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                  below:belowView
                   onto:vehiclePanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:30
+              vpadding:18.5
               hpadding:0];
   // View Environment Logs button
   UIButton *viewEnvLogsBtn = [PEUIUtils buttonWithLabel:@"Odometer logs"
@@ -691,7 +691,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                  below:belowView
                   onto:fuelstationPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:30
+              vpadding:18.5
               hpadding:0];
   UIView *msgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into the gas logs associated with this gas station."
                                                                font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
@@ -754,57 +754,6 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                                                             fuelstation:fuelstation
                                                                               belowView:fuelstationDataPanel
                                                                    parentViewController:parentViewController][0];
-    /*NSInteger currentYear = [FPUtils currentYear];
-    NSNumberFormatter *currencyFormatter = [FPUtils currencyFormatter];
-    NSArray *octanes = [_coordDao.localDao distinctOctanesForFuelstation:fuelstation error:[FPUtils localFetchErrorHandlerMaker]()];
-    NSMutableArray *priceDataPanels = [NSMutableArray array];
-    for (NSNumber *octane in octanes) {
-      NSAttributedString *footerText =
-        [PEUIUtils attributedTextWithTemplate:@"Aggregate price information for %@."
-                                 textToAccent:[NSString stringWithFormat:@"%@ octane", octane]
-                               accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
-      NSMutableArray *dataRows = [NSMutableArray array];
-      NSDecimalNumber *val = [_stats yearToDateAvgPricePerGallonForFuelstation:fuelstation octane:octane];
-      if (val) {
-        [dataRows addObject:@[[NSString stringWithFormat:@"%ld YTD avg price (%@ octane)", (long)currentYear, octane], [currencyFormatter stringFromNumber:val]]];
-      }
-      val = [_stats overallAvgPricePerGallonForFuelstation:fuelstation octane:octane];
-      if (val) {
-        [dataRows addObject:@[[NSString stringWithFormat:@"All time avg price (%@)", octane], [currencyFormatter stringFromNumber:val]]];
-      }
-      val = [_stats yearToDateMinPricePerGallonForFuelstation:fuelstation octane:octane];
-      if (val) {
-        [dataRows addObject:@[[NSString stringWithFormat:@"%ld YTD min price (%@)", (long)currentYear, octane], [currencyFormatter stringFromNumber:val]]];
-      }
-      val = [_stats overallMinPricePerGallonForFuelstation:fuelstation octane:octane];
-      if (val) {
-        [dataRows addObject:@[[NSString stringWithFormat:@"All time min price (%@)", octane], [currencyFormatter stringFromNumber:val]]];
-      }
-      val = [_stats yearToDateMaxPricePerGallonForFuelstation:fuelstation octane:octane];
-      if (val) {
-        [dataRows addObject:@[[NSString stringWithFormat:@"%ld YTD max price (%@)", (long)currentYear, octane], [currencyFormatter stringFromNumber:val]]];
-      }
-      val = [_stats overallMaxPricePerGallonForFuelstation:fuelstation octane:octane];
-      if (val) {
-        [dataRows addObject:@[[NSString stringWithFormat:@"All time max price (%@)", octane], [currencyFormatter stringFromNumber:val]]];
-      }
-      UIView *funFactsDataPanel = [self dataPanelWithRowData:dataRows
-                                        footerAttributedText:footerText
-                              footerFontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
-                                       footerVerticalPadding:3.0
-                                                  parentView:parentView];
-      [priceDataPanels addObject:funFactsDataPanel];
-    }
-    UIView *priceDataPanelsColumn = [PEUIUtils panelWithColumnOfViews:priceDataPanels verticalPaddingBetweenViews:15.0 viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
-    [PEUIUtils setFrameHeight:(fuelstationPanel.frame.size.height + priceDataPanelsColumn.frame.size.height) ofView:fuelstationPanel];
-    [PEUIUtils placeView:priceDataPanelsColumn
-                   below:coordinatesTableView
-                    onto:fuelstationPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:30.0
-                hpadding:0.0];*/
-    
-    
     UIButton *statsBtn = [_uitoolkit systemButtonMaker](@"Stats & Trends", nil, nil);
     [[statsBtn layer] setCornerRadius:0.0];
     [PEUIUtils setFrameWidthOfView:statsBtn ofWidth:1.0 relativeTo:parentView];
@@ -832,31 +781,14 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:4.0
                 hpadding:0.0];
-    
     [self placeViewLogsButtonOntoFuelstationPanel:fuelstationPanel
-                                        belowView:statsMsgPanel //priceDataPanelsColumn
+                                        belowView:statsMsgPanel
                              parentViewController:parentViewController];
-    /*if (priceDataPanels.count > 0) {
-      // wrap fuel station panel in scroll view (so everything can "fit")
-      CGFloat contentHeight;
-      if (priceDataPanels.count == 1) {
-        contentHeight = 1.35 * fuelstationPanel.frame.size.height;
-      } else {
-        contentHeight = (1.05 + (.18 * priceDataPanels.count)) * fuelstationPanel.frame.size.height;
-      }
-      UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelstationPanel frame]];
-      [scrollView setContentSize:CGSizeMake(fuelstationPanel.frame.size.width, contentHeight)];
-      [scrollView addSubview:fuelstationPanel];
-      [scrollView setBounces:NO];
-      return scrollView;
-    } else {*/
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelstationPanel frame]];
     [scrollView setContentSize:CGSizeMake(fuelstationPanel.frame.size.width, 1.285 * fuelstationPanel.frame.size.height)];
     [scrollView addSubview:fuelstationPanel];
     [scrollView setBounces:NO];
     return scrollView;
-      //return fuelstationPanel;
-    //}
   };
 }
 

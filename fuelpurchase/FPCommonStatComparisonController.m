@@ -29,6 +29,7 @@ NSString * const FPStatComparisonCellIdentifier = @"FPStatComparisonCellIdentifi
   FPEntitiesToCompareBlk _entitiesToCompareBlk;
   FPAlltimeAggregate _alltimeAggregateBlk;
   FPValueFormatter _valueFormatterBlk;
+  NSComparisonResult(^_comparator)(NSArray *, NSArray *);
 }
 
 #pragma mark - Initializers
@@ -40,6 +41,7 @@ NSString * const FPStatComparisonCellIdentifier = @"FPStatComparisonCellIdentifi
      entitiesToCompareBlk:(FPEntitiesToCompareBlk)entitiesToCompareBlk
       alltimeAggregateBlk:(FPAlltimeAggregate)alltimeAggregateBlk
         valueFormatterBlk:(FPValueFormatter)valueFormatterBlk
+               comparator:(NSComparisonResult(^)(NSArray *, NSArray *))comparator
                 uitoolkit:(PEUIToolkit *)uitoolkit {
   self = [super initWithNibName:nil bundle:nil];
   if (self) {
@@ -50,6 +52,7 @@ NSString * const FPStatComparisonCellIdentifier = @"FPStatComparisonCellIdentifi
     _entitiesToCompareBlk = entitiesToCompareBlk;
     _alltimeAggregateBlk = alltimeAggregateBlk;
     _valueFormatterBlk = valueFormatterBlk;
+    _comparator = comparator;
     _uitoolkit = uitoolkit;
   }
   return self;
@@ -78,11 +81,12 @@ NSString * const FPStatComparisonCellIdentifier = @"FPStatComparisonCellIdentifi
       [nilRowData addObject:@[entityName, FPCommonStatComparisonTextIfNilStat, [NSDecimalNumber notANumber]]];
     }
   }
-  [rowData sortUsingComparator:^NSComparisonResult(NSArray *o1, NSArray *o2) {
+  /*[rowData sortUsingComparator:^NSComparisonResult(NSArray *o1, NSArray *o2) {
     NSDecimalNumber *v1 = o1[2];
     NSDecimalNumber *v2 = o2[2];
     return [v1 compare:v2];
-  }];
+  }];*/
+  [rowData sortUsingComparator:_comparator];
   UIView *tablePanel = [PEUIUtils tablePanelWithRowData:[rowData arrayByAddingObjectsFromArray:nilRowData]
                                               uitoolkit:_uitoolkit
                                              parentView:self.view];

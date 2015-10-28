@@ -41,6 +41,10 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
  */
 @interface FPUtils : NSObject
 
+#pragma mark - General Helpers
+
++ (NSString *)truncatedText:(NSString *)text maxLength:(NSInteger)maxLength;
+
 #pragma mark - User Helpers
 
 + (NSArray *)computeSignInErrMsgs:(NSUInteger)signInErrMask;

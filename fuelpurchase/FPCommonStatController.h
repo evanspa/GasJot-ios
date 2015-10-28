@@ -28,6 +28,20 @@ typedef UIViewController *(^FPComparisonScreenMaker)(void);
       alltimeAggregateBlk:(FPAlltimeAggregate)alltimeAggregateBlk
    yearToDateAggregateBlk:(FPYearToDateAggregate)yearToDateAggregateBlk
      lastYearAggregateBlk:(FPLastYearAggregate)lastYearAggregateBlk
+          siblingCountBlk:(FPSiblingEntityCount)siblingCountBlk
+ comparisonScreenMakerBlk:(FPComparisonScreenMaker)comparisonScreenMakerBlk
+        valueFormatterBlk:(FPValueFormatter)valueFormatterBlk
+                uitoolkit:(PEUIToolkit *)uitoolkit;
+
+- (id)initWithScreenTitle:(NSString *)screenTitle
+      entityTypeLabelText:(NSString *)entityTypeLabelText
+            entityNameBlk:(FPEntityNameBlk)entityNameBlk
+                   entity:(id)entity
+     aggregatesHeaderText:(NSString *)aggregatesHeaderText
+   compareButtonTitleText:(NSString *)compareButtonTitleText
+      alltimeAggregateBlk:(FPAlltimeAggregate)alltimeAggregateBlk
+   yearToDateAggregateBlk:(FPYearToDateAggregate)yearToDateAggregateBlk
+     lastYearAggregateBlk:(FPLastYearAggregate)lastYearAggregateBlk
         alltimeDatasetBlk:(FPAlltimeDataset)alltimeDatasetBlk
      yearToDateDatasetBlk:(FPYearToDateDataset)yearToDateDatasetBlk
        lastYearDatasetBlk:(FPLastYearDataset)lastYearDatasetBlk

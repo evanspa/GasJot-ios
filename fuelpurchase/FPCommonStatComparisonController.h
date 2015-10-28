@@ -24,6 +24,7 @@ typedef NSArray *(^FPEntitiesToCompareBlk)(void);
      entitiesToCompareBlk:(FPEntitiesToCompareBlk)entitiesToCompareBlk
       alltimeAggregateBlk:(FPAlltimeAggregate)alltimeAggregateBlk
         valueFormatterBlk:(FPValueFormatter)valueFormatterBlk
+               comparator:(NSComparisonResult(^)(NSArray *, NSArray *))comparator
                 uitoolkit:(PEUIToolkit *)uitoolkit;
 
 @end

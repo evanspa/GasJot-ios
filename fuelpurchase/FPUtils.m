@@ -28,6 +28,15 @@
 
 @implementation FPUtils
 
+#pragma mark - General Helpers
+
++ (NSString *)truncatedText:(NSString *)text maxLength:(NSInteger)maxLength {
+  if ([text length] > maxLength) {
+    return [[text substringToIndex:maxLength] stringByAppendingString:@"..."];
+  }
+  return text;
+}
+
 #pragma mark - User Helpers
 
 + (NSArray *)computeSignInErrMsgs:(NSUInteger)signInErrMask {

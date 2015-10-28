@@ -52,10 +52,42 @@ NSInteger const FPChartPreviousYearIndex = 2;
   FPSiblingEntityCount _siblingCountBlk;
   FPComparisonScreenMaker _comparisonScreenMakerBlk;
   FPValueFormatter _valueFormatter;
-  UIScrollView *_scrollView;
+  //UIScrollView *_contentView;
+  UIView *_contentView;
 }
 
 #pragma mark - Initializers
+
+- (id)initWithScreenTitle:(NSString *)screenTitle
+      entityTypeLabelText:(NSString *)entityTypeLabelText
+            entityNameBlk:(FPEntityNameBlk)entityNameBlk
+                   entity:(id)entity
+     aggregatesHeaderText:(NSString *)aggregatesHeaderText
+   compareButtonTitleText:(NSString *)compareButtonTitleText
+      alltimeAggregateBlk:(FPAlltimeAggregate)alltimeAggregateBlk
+   yearToDateAggregateBlk:(FPYearToDateAggregate)yearToDateAggregateBlk
+     lastYearAggregateBlk:(FPLastYearAggregate)lastYearAggregateBlk
+          siblingCountBlk:(FPSiblingEntityCount)siblingCountBlk
+ comparisonScreenMakerBlk:(FPComparisonScreenMaker)comparisonScreenMakerBlk
+        valueFormatterBlk:(FPValueFormatter)valueFormatterBlk
+                uitoolkit:(PEUIToolkit *)uitoolkit {
+  return [self initWithScreenTitle:screenTitle
+               entityTypeLabelText:entityTypeLabelText
+                     entityNameBlk:entityNameBlk
+                            entity:entity
+              aggregatesHeaderText:aggregatesHeaderText
+            compareButtonTitleText:compareButtonTitleText
+               alltimeAggregateBlk:alltimeAggregateBlk
+            yearToDateAggregateBlk:yearToDateAggregateBlk
+              lastYearAggregateBlk:lastYearAggregateBlk
+                 alltimeDatasetBlk:nil
+              yearToDateDatasetBlk:nil
+                lastYearDatasetBlk:nil
+                   siblingCountBlk:siblingCountBlk
+          comparisonScreenMakerBlk:comparisonScreenMakerBlk
+                 valueFormatterBlk:valueFormatterBlk
+                         uitoolkit:uitoolkit];
+}
 
 - (id)initWithScreenTitle:(NSString *)screenTitle
       entityTypeLabelText:(NSString *)entityTypeLabelText
@@ -330,14 +362,18 @@ NSInteger const FPChartPreviousYearIndex = 2;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
-  [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.01 * self.view.frame.size.height)];
-  [_scrollView setBounces:NO];
-  _dataset = _alltimeDatasetBlk(_entity);
+  //_contentView = [[UIScrollView alloc] initWithFrame:self.view.frame];
+  //[_contentView setContentSize:CGSizeMake(self.view.frame.size.width, 1.01 * self.view.frame.size.height)];
+  //[_contentView setBounces:NO];
+  _contentView = [PEUIUtils panelWithFixedWidth:self.view.frame.size.width fixedHeight:self.view.frame.size.height];
+  if (_alltimeDatasetBlk) {
+    _dataset = _alltimeDatasetBlk(_entity);
+  }
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   [self setTitle:_screenTitle];
-  NSAttributedString *entityHeaderText = [PEUIUtils attributedTextWithTemplate:[[NSString stringWithFormat:@"(%@: ", _entityTypeLabelText] stringByAppendingString:@"%@)"]
-                                                                  textToAccent:_entityNameBlk(_entity)
+  NSString *entityName = [FPUtils truncatedText:_entityNameBlk(_entity) maxLength:27];
+  NSAttributedString *entityHeaderText = [PEUIUtils attributedTextWithTemplate:[[NSString stringWithFormat:@"%@: ", _entityTypeLabelText] stringByAppendingString:@"%@"]
+                                                                  textToAccent:entityName
                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
                                                                accentTextColor:[UIColor fpAppBlue]];
   UILabel *entityLabel = [PEUIUtils labelWithAttributeText:entityHeaderText
@@ -349,34 +385,39 @@ NSInteger const FPChartPreviousYearIndex = 2;
                                                 fitToWidth:self.view.frame.size.width - 15.0];
   UIView *aggregatesHeader = [FPUIUtils headerPanelWithText:_aggregatesHeaderText relativeToView:self.view];
   _aggregatesTable = [self aggregatesTable];
-  _lineChartPanel = [self makeLineChartPanel];
-  
+  if (_alltimeDatasetBlk) {
+    _lineChartPanel = [self makeLineChartPanel];
+  }
   // place the views
   [PEUIUtils placeView:entityLabel
-               atTopOf:_scrollView
+               atTopOf:_contentView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:13.0
+              vpadding:75.0 //13.0 (use '13.0' when _contentView is a scroll view)
               hpadding:8.0];
   [PEUIUtils placeView:aggregatesHeader
                  below:entityLabel
-                  onto:_scrollView
+                  onto:_contentView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
 alignmentRelativeToView:self.view
-              vpadding:12.0
+              vpadding:10.0
               hpadding:0.0];
   [PEUIUtils placeView:_aggregatesTable
                  below:aggregatesHeader
-                  onto:_scrollView
+                  onto:_contentView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
-  [PEUIUtils placeView:_lineChartPanel
-                 below:_aggregatesTable
-                  onto:_scrollView
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-alignmentRelativeToView:self.view
-              vpadding:20.0
-              hpadding:0.0];
+  UIView *aboveView = _aggregatesTable;
+  if (_lineChartPanel) {
+    aboveView = _lineChartPanel;
+    [PEUIUtils placeView:_lineChartPanel
+                   below:_aggregatesTable
+                    onto:_contentView
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+ alignmentRelativeToView:self.view
+                vpadding:15.0
+                hpadding:0.0];
+  }
   if (_siblingCountBlk() > 1) {
     UIButton *compareBtn = [_uitoolkit systemButtonMaker](_compareButtonTitleText, nil, nil);
     [PEUIUtils setFrameWidthOfView:compareBtn ofWidth:1.0 relativeTo:self.view];
@@ -386,33 +427,44 @@ alignmentRelativeToView:self.view
       [[self navigationController] pushViewController:comparisonScreen animated:YES];
     } forControlEvents:UIControlEventTouchUpInside];
     [PEUIUtils placeView:compareBtn
-                   below:_lineChartPanel
-                    onto:_scrollView
+                   below:aboveView
+                    onto:_contentView
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:20.0
+                vpadding:15.0
                 hpadding:0.0];
   }
-  [PEUIUtils placeView:_scrollView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+  [PEUIUtils placeView:_contentView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   // remove the views
   CGRect aggregatesTableFrame = _aggregatesTable.frame;
-  CGRect lineChartFrame = _lineChartPanel.frame;
+  CGRect lineChartFrame;
+  if (_lineChartPanel) {
+    lineChartFrame = _lineChartPanel.frame;
+  }
   
   [_aggregatesTable removeFromSuperview];
-  [_lineChartPanel removeFromSuperview];
+  if (_lineChartPanel) {
+    [_lineChartPanel removeFromSuperview];
+  }
   
   // refresh their data
   _aggregatesTable = [self aggregatesTable];
-  _lineChartPanel = [self makeLineChartPanel];
+  if (_lineChartPanel) {
+    _lineChartPanel = [self makeLineChartPanel];
+  }
   
   // re-add them
   _aggregatesTable.frame = aggregatesTableFrame;
-  _lineChartPanel.frame = lineChartFrame;
-  [_scrollView addSubview:_aggregatesTable];
-  [_scrollView addSubview:_lineChartPanel];
+  if (_lineChartPanel) {
+    _lineChartPanel.frame = lineChartFrame;
+  }
+  [_contentView addSubview:_aggregatesTable];
+  if (_lineChartPanel) {
+    [_contentView addSubview:_lineChartPanel];
+  }
 }
 
 @end
