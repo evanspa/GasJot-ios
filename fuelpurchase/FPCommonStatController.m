@@ -52,6 +52,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
   FPSiblingEntityCount _siblingCountBlk;
   FPComparisonScreenMaker _comparisonScreenMakerBlk;
   FPValueFormatter _valueFormatter;
+  UIScrollView *_scrollView;
 }
 
 #pragma mark - Initializers
@@ -319,13 +320,9 @@ NSInteger const FPChartPreviousYearIndex = 2;
     }
     configureFooter();
     [lineChartView reloadData];
-  }];
-  
+  }];  
   [PEUIUtils placeView:segmentedControl atTopOf:panel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
   [PEUIUtils placeView:lineChartView below:segmentedControl onto:panel withAlignment:PEUIHorizontalAlignmentTypeCenter vpadding:10.0 hpadding:0.0];
-  
-  //[PEUIUtils applyBorderToView:panel withColor:[UIColor redColor]];
-  //[PEUIUtils applyBorderToView:lineChartView withColor:[UIColor greenColor]];
   return panel;
 }
 
@@ -333,6 +330,9 @@ NSInteger const FPChartPreviousYearIndex = 2;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
+  [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.01 * self.view.frame.size.height)];
+  [_scrollView setBounces:NO];
   _dataset = _alltimeDatasetBlk(_entity);
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   [self setTitle:_screenTitle];
@@ -352,23 +352,27 @@ NSInteger const FPChartPreviousYearIndex = 2;
   _lineChartPanel = [self makeLineChartPanel];
   
   // place the views
-  [PEUIUtils placeView:entityLabel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:75.0 hpadding:8.0];
+  [PEUIUtils placeView:entityLabel
+               atTopOf:_scrollView
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:13.0
+              hpadding:8.0];
   [PEUIUtils placeView:aggregatesHeader
                  below:entityLabel
-                  onto:self.view
+                  onto:_scrollView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
 alignmentRelativeToView:self.view
               vpadding:12.0
               hpadding:0.0];
   [PEUIUtils placeView:_aggregatesTable
                  below:aggregatesHeader
-                  onto:self.view
+                  onto:_scrollView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
   [PEUIUtils placeView:_lineChartPanel
                  below:_aggregatesTable
-                  onto:self.view
+                  onto:_scrollView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
 alignmentRelativeToView:self.view
               vpadding:20.0
@@ -383,11 +387,12 @@ alignmentRelativeToView:self.view
     } forControlEvents:UIControlEventTouchUpInside];
     [PEUIUtils placeView:compareBtn
                    below:_lineChartPanel
-                    onto:self.view
+                    onto:_scrollView
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:20.0
                 hpadding:0.0];
   }
+  [PEUIUtils placeView:_scrollView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -406,8 +411,8 @@ alignmentRelativeToView:self.view
   // re-add them
   _aggregatesTable.frame = aggregatesTableFrame;
   _lineChartPanel.frame = lineChartFrame;
-  [self.view addSubview:_aggregatesTable];
-  [self.view addSubview:_lineChartPanel];
+  [_scrollView addSubview:_aggregatesTable];
+  [_scrollView addSubview:_lineChartPanel];
 }
 
 @end
