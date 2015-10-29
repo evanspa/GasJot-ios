@@ -106,7 +106,7 @@
     } else {
       NSString *groupHeadingText = statLaunchButtonElement;
       UIView *groupHeadingLabel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:groupHeadingText
-                                                                            font:[UIFont boldSystemFontOfSize:18.0]
+                                                                            font:[UIFont boldSystemFontOfSize:14.0]
                                                                  backgroundColor:[UIColor clearColor]
                                                                        textColor:[UIColor fpAppBlue]
                                                              verticalTextPadding:3.0]
@@ -115,7 +115,7 @@
     }
   }
   UIView *buttonsPanel = [PEUIUtils panelWithColumnOfViews:viewColumn
-                               verticalPaddingBetweenViews:15.0
+                               verticalPaddingBetweenViews:10.0
                                             viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
   return [PEUIUtils panelWithColumnOfViews:@[[PEUIUtils leftPadView:entityLabel padding:8.0], buttonsPanel]
                verticalPaddingBetweenViews:15.0

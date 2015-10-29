@@ -292,10 +292,10 @@ NSInteger const FPChartPreviousYearIndex = 2;
 }
 
 - (UIView *)makeLineChartPanel {
-  UIView *panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:0.30 relativeToView:self.view];
+  UIView *panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:self.view]; // will resize height later
   HMSegmentedControl *segmentedControl = [[HMSegmentedControl alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
   [PEUIUtils setFrameWidthOfView:segmentedControl ofWidth:1.0 relativeTo:panel];
-  [PEUIUtils setFrameHeightOfView:segmentedControl ofHeight:0.2 relativeTo:panel];
+  [PEUIUtils setFrameHeight:35.0 ofView:segmentedControl];
   segmentedControl.sectionTitles = @[@"All time",
                                      [NSString stringWithFormat:@"%ld YTD", (long)_currentYear],
                                      [NSString stringWithFormat:@"%ld", (long)_currentYear-1]];
@@ -314,10 +314,10 @@ NSInteger const FPChartPreviousYearIndex = 2;
   [lineChartView setDelegate:self];
   [lineChartView setDataSource:self];
   [PEUIUtils setFrameWidthOfView:lineChartView ofWidth:.975 relativeTo:panel];
-  [PEUIUtils setFrameHeightOfView:lineChartView ofHeight:0.720 relativeTo:panel];
+  [PEUIUtils setFrameHeight:150.0 ofView:lineChartView];
   JBLineChartFooterView *footerView = [[JBLineChartFooterView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
   [PEUIUtils setFrameWidthOfView:footerView ofWidth:1.0 relativeTo:panel];
-  [PEUIUtils setFrameHeightOfView:footerView ofHeight:0.1 relativeTo:panel];
+  [PEUIUtils setFrameHeight:25.0 ofView:footerView];
   
   void (^configureFooter)(void) = ^{
     [footerView setSectionCount:_dataset.count];
@@ -352,9 +352,16 @@ NSInteger const FPChartPreviousYearIndex = 2;
     }
     configureFooter();
     [lineChartView reloadData];
-  }];  
-  [PEUIUtils placeView:segmentedControl atTopOf:panel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
-  [PEUIUtils placeView:lineChartView below:segmentedControl onto:panel withAlignment:PEUIHorizontalAlignmentTypeCenter vpadding:10.0 hpadding:0.0];
+  }];
+  UILabel *trendLabel = [PEUIUtils labelWithKey:@"TREND"
+                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                backgroundColor:[UIColor clearColor]
+                                      textColor:[UIColor darkGrayColor]
+                            verticalTextPadding:3.0];
+  [PEUIUtils placeView:trendLabel atTopOf:panel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:8.0];
+  [PEUIUtils placeView:segmentedControl below:trendLabel onto:panel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:self.view vpadding:4.0 hpadding:0.0];
+  [PEUIUtils placeView:lineChartView below:segmentedControl onto:panel withAlignment:PEUIHorizontalAlignmentTypeCenter alignmentRelativeToView:self.view vpadding:10.0 hpadding:0.0];
+  [PEUIUtils setFrameHeight:(trendLabel.frame.size.height + segmentedControl.frame.size.height + lineChartView.frame.size.height + 4.0 + 10.0) ofView:panel];
   return panel;
 }
 
@@ -383,7 +390,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
                                                  textColor:[UIColor darkGrayColor]
                                        verticalTextPadding:3.0
                                                 fitToWidth:self.view.frame.size.width - 15.0];
-  UIView *aggregatesHeader = [FPUIUtils headerPanelWithText:_aggregatesHeaderText relativeToView:self.view];
+  //UIView *aggregatesHeader = [FPUIUtils headerPanelWithText:_aggregatesHeaderText relativeToView:self.view];
   _aggregatesTable = [self aggregatesTable];
   if (_alltimeDatasetBlk) {
     _lineChartPanel = [self makeLineChartPanel];
@@ -392,19 +399,20 @@ NSInteger const FPChartPreviousYearIndex = 2;
   [PEUIUtils placeView:entityLabel
                atTopOf:_contentView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:75.0 //13.0 (use '13.0' when _contentView is a scroll view)
+              vpadding:75.0 //13.0 (use '13.0' when _contentView is a scroll view); use 75.0 when not a scroll view
               hpadding:8.0];
-  [PEUIUtils placeView:aggregatesHeader
+  /*[PEUIUtils placeView:aggregatesHeader
                  below:entityLabel
                   onto:_contentView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
 alignmentRelativeToView:self.view
               vpadding:10.0
-              hpadding:0.0];
+              hpadding:0.0];*/
   [PEUIUtils placeView:_aggregatesTable
-                 below:aggregatesHeader
+                 below:entityLabel //aggregatesHeader
                   onto:_contentView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
+alignmentRelativeToView:_contentView
               vpadding:4.0
               hpadding:0.0];
   UIView *aboveView = _aggregatesTable;
@@ -415,7 +423,7 @@ alignmentRelativeToView:self.view
                     onto:_contentView
            withAlignment:PEUIHorizontalAlignmentTypeLeft
  alignmentRelativeToView:self.view
-                vpadding:15.0
+                vpadding:10.0
                 hpadding:0.0];
   }
   if (_siblingCountBlk() > 1) {
@@ -430,7 +438,7 @@ alignmentRelativeToView:self.view
                    below:aboveView
                     onto:_contentView
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:15.0
+                vpadding:8.0
                 hpadding:0.0];
   }
   [PEUIUtils placeView:_contentView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];

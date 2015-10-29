@@ -7,9 +7,9 @@
 //
 
 typedef NSString *(^FPEntityNameBlk)(id);
-typedef NSDecimalNumber *(^FPAlltimeAggregate)(id);
-typedef NSDecimalNumber *(^FPYearToDateAggregate)(id);
-typedef NSDecimalNumber *(^FPLastYearAggregate)(id);
+typedef NSNumber *(^FPAlltimeAggregate)(id);
+typedef NSNumber *(^FPYearToDateAggregate)(id);
+typedef NSNumber *(^FPLastYearAggregate)(id);
 
 typedef NSArray *(^FPAlltimeDataset)(id);
 typedef NSArray *(^FPYearToDateDataset)(id);

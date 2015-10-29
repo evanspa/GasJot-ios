@@ -50,6 +50,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   FPReportViews *_reportViews;
   FPStats *_stats;
   NSNumberFormatter *_currencyFormatter;
+  NSNumberFormatter *_generalFormatter;
 }
 
 #pragma mark - Initializers
@@ -68,6 +69,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     _reportViews = [[FPReportViews alloc] initWithStats:[[FPStats alloc] initWithLocalDao:_coordDao.localDao errorBlk:errorBlk]];
     _stats = [[FPStats alloc] initWithLocalDao:_coordDao.localDao errorBlk:[FPUtils localFetchErrorHandlerMaker]()];
     _currencyFormatter = [PEUtils currencyFormatter];
+    _generalFormatter = [[NSNumberFormatter alloc] init];
+    [_generalFormatter setNumberStyle:NSNumberFormatterDecimalStyle];
+    [_generalFormatter setMaximumFractionDigits:1];
   }
   return self;
 }
@@ -865,26 +869,188 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                entity:vehicle
                                                  statLaunchButtonsBlk:^{
                                                    NSMutableArray *statLaunchButtons = [NSMutableArray array];
+                                                   [statLaunchButtons addObject:@"DAYS BETWEEN FILL-UPS"];
+                                                   [statLaunchButtons addObject:@[@"Average days between fill-ups",
+                                                                                  ^{ return [self newVehicleAvgDaysBetweenFillupsStatsScreenMakerWithVehicle:vehicle](user); }]];
+                                                   [statLaunchButtons addObject:@[@"Max days between fill-ups",
+                                                                                  ^{ return [self newVehicleMaxDaysBetweenFillupsStatsScreenMakerWithVehicle:vehicle](user); }]];
+                                                   [statLaunchButtons addObject:@"COST & DOLLARS SPENT"];
                                                    [statLaunchButtons addObject:@[@"Gas cost per mile",
-                                                                                  ^{ return [self newVehicleGasCostPerMileStatsScreenMakerWithVehicle:vehicle](user); },
+                                                                                  ^{ return [self newVehicleGasCostPerMileStatsScreenMakerWithVehicle:vehicle](user); }/*,
                                                                                   [PEUIUtils attributedTextWithTemplate:@"(total amount spent on gas %@ the number of recorded miles driven)"
                                                                                                            textToAccent:@"DIVIDED BY"
-                                                                                                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]]];
+                                                                                                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]*/]];
                                                    [statLaunchButtons addObject:@[@"Amount spent on gas",
-                                                                                  ^{ return [self newVehicleSpentOnGasStatsScreenMakerWithVehicle:vehicle](user); },
+                                                                                  ^{ return [self newVehicleSpentOnGasStatsScreenMakerWithVehicle:vehicle](user); }/*,
                                                                                   [PEUIUtils attributedTextWithTemplate:@"(num gallons %@ price per gallon)"
                                                                                                            textToAccent:@"MULTIPLIED BY"
-                                                                                                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]]];
+                                                                                                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]*/]];
                                                    NSArray *octanes = [_coordDao.localDao distinctOctanesForVehicle:vehicle error:_errorBlk];
                                                    for (NSNumber *octane in octanes) {
-                                                     [statLaunchButtons addObject:[NSString stringWithFormat:@"%@ OCTANE STATS", octane]];
+                                                     [statLaunchButtons addObject:[NSString stringWithFormat:@"%@ OCTANE - PRICE STATS", octane]];
                                                      [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Average price of gas (%@ octane)", octane],
-                                                                                    ^{ return [self newVehicleAvgPricePerGallonStatsScreenMakerWithVehicle:vehicle octane:octane](user); },
-                                                                                    [[NSAttributedString alloc] initWithString:@"(when buying gas for this vehicle)"]]];
+                                                                                    ^{ return [self newVehicleAvgPricePerGallonStatsScreenMakerWithVehicle:vehicle octane:octane](user); }]];
+                                                     [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Min price of gas (%@ octane)", octane],
+                                                                                    ^{ return [self newVehicleMinPricePerGallonStatsScreenMakerWithVehicle:vehicle octane:octane](user); }]];
+                                                     [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Max price of gas (%@ octane)", octane],
+                                                                                    ^{ return [self newVehicleMaxPricePerGallonStatsScreenMakerWithVehicle:vehicle octane:octane](user); }]];
                                                    }
                                                    return statLaunchButtons;
                                                  }
                                                             uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleMaxDaysBetweenFillupsStatsScreenMakerWithVehicle:(FPVehicle *)vehicle {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Max Days Between Fill-ups"
+                                           entityTypeLabelText:@"VEHICLE"
+                                                 entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                        entity:vehicle
+                                          aggregatesHeaderText:@"MAX DAYS BETWEEN FILL-UPS"
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallMaxDaysBetweenFillupsForVehicle:v];}
+                                        yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateMaxDaysBetweenFillupsForVehicle:v];}
+                                          lastYearAggregateBlk:^(FPVehicle *v) {return [_stats lastYearMaxDaysBetweenFillupsForVehicle:v];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareMaxDaysBetweenFillupsStatsScreenMakerWithVehicleInCtx:vehicle](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_generalFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleCompareMaxDaysBetweenFillupsStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatComparisonController alloc] initWithScreenTitle:@"Max Days Between Fill-ups Comparison"
+                                                              headerText:@"MAX DAYS BETWEEN FILL-UPS (All time)"
+                                                           entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                                  entity:vehicle
+                                                    entitiesToCompareBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                     alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallMaxDaysBetweenFillupsForVehicle:v];}
+                                                       valueFormatterBlk:^(NSDecimalNumber *val) {return [_generalFormatter stringFromNumber:val];}
+                                                              comparator:^(NSArray *o1, NSArray *o2) {
+                                                                NSDecimalNumber *v1 = o1[2];
+                                                                NSDecimalNumber *v2 = o2[2];
+                                                                return [v2 compare:v1]; // descending
+                                                              }
+                                                               uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleAvgDaysBetweenFillupsStatsScreenMakerWithVehicle:(FPVehicle *)vehicle {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Avg Days Between Fill-ups"
+                                           entityTypeLabelText:@"VEHICLE"
+                                                 entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                        entity:vehicle
+                                          aggregatesHeaderText:@"AVG DAYS BETWEEN FILL-UPS"
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallAvgDaysBetweenFillupsForVehicle:v];}
+                                        yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateAvgDaysBetweenFillupsForVehicle:v];}
+                                          lastYearAggregateBlk:^(FPVehicle *v) {return [_stats lastYearAvgDaysBetweenFillupsForVehicle:v];}
+                                             alltimeDatasetBlk:^(FPVehicle *v) {return [_stats overallDaysBetweenFillupsDataSetForVehicle:v];}
+                                          yearToDateDatasetBlk:^(FPVehicle *v) {return [_stats yearToDateDaysBetweenFillupsDataSetForVehicle:v];}
+                                            lastYearDatasetBlk:^(FPVehicle *v) {return [_stats lastYearDaysBetweenFillupsDataSetForVehicle:v];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareAvgDaysBetweenFillupsStatsScreenMakerWithVehicleInCtx:vehicle](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_generalFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleCompareAvgDaysBetweenFillupsStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatComparisonController alloc] initWithScreenTitle:@"Avg Days Between Fill-ups Comparison"
+                                                              headerText:@"AVG DAYS BETWEEN FILL-UPS (All time)"
+                                                           entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                                  entity:vehicle
+                                                    entitiesToCompareBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                     alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallAvgDaysBetweenFillupsForVehicle:v];}
+                                                       valueFormatterBlk:^(NSDecimalNumber *val) {return [_generalFormatter stringFromNumber:val];}
+                                                              comparator:^(NSArray *o1, NSArray *o2) {
+                                                                NSDecimalNumber *v1 = o1[2];
+                                                                NSDecimalNumber *v2 = o2[2];
+                                                                return [v2 compare:v1]; // descending
+                                                              }
+                                                               uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleMinPricePerGallonStatsScreenMakerWithVehicle:(FPVehicle *)vehicle
+                                                                     octane:(NSNumber *)octane {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Min Price of Gas (%@)", octane]
+                                           entityTypeLabelText:@"VEHICLE"
+                                                 entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                        entity:vehicle
+                                          aggregatesHeaderText:[NSString stringWithFormat:@"MIN PRICE OF GAS (%@ octane)", octane]
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallMinPricePerGallonForVehicle:v octane:octane];}
+                                        yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateMinPricePerGallonForVehicle:v octane:octane];}
+                                          lastYearAggregateBlk:^(FPVehicle *v) {return [_stats lastYearMinPricePerGallonForVehicle:v octane:octane];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareMinPricePerGallonStatsScreenMakerWithVehicleInCtx:vehicle
+                                                                                                                                          octane:octane](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleCompareMinPricePerGallonStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle
+                                                                                 octane:(NSNumber *)octane {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatComparisonController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Min Price of Gas (%@) Comparison", octane]
+                                                              headerText:[NSString stringWithFormat:@"MIN PRICE OF GAS - %@ octane (All time)", octane]
+                                                           entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                                  entity:vehicle
+                                                    entitiesToCompareBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                     alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallMinPricePerGallonForVehicle:v octane:octane];}
+                                                       valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                              comparator:^(NSArray *o1, NSArray *o2) {
+                                                                NSDecimalNumber *v1 = o1[2];
+                                                                NSDecimalNumber *v2 = o2[2];
+                                                                return [v1 compare:v2]; // ascending
+                                                              }
+                                                               uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleMaxPricePerGallonStatsScreenMakerWithVehicle:(FPVehicle *)vehicle
+                                                                     octane:(NSNumber *)octane {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Max Price of Gas (%@)", octane]
+                                           entityTypeLabelText:@"VEHICLE"
+                                                 entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                        entity:vehicle
+                                          aggregatesHeaderText:[NSString stringWithFormat:@"MAX PRICE OF GAS (%@ octane)", octane]
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallMaxPricePerGallonForVehicle:v octane:octane];}
+                                        yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateMaxPricePerGallonForVehicle:v octane:octane];}
+                                          lastYearAggregateBlk:^(FPVehicle *v) {return [_stats lastYearMaxPricePerGallonForVehicle:v octane:octane];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareMaxPricePerGallonStatsScreenMakerWithVehicleInCtx:vehicle
+                                                                                                                                          octane:octane](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleCompareMaxPricePerGallonStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle
+                                                                                 octane:(NSNumber *)octane {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatComparisonController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Max Price of Gas (%@) Comparison", octane]
+                                                              headerText:[NSString stringWithFormat:@"MAX PRICE OF GAS - %@ octane (All time)", octane]
+                                                           entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                                  entity:vehicle
+                                                    entitiesToCompareBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                     alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallMaxPricePerGallonForVehicle:v octane:octane];}
+                                                       valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                              comparator:^(NSArray *o1, NSArray *o2) {
+                                                                NSDecimalNumber *v1 = o1[2];
+                                                                NSDecimalNumber *v2 = o2[2];
+                                                                return [v2 compare:v1]; // descending
+                                                              }
+                                                               uitoolkit:_uitoolkit];
   };
 }
 
@@ -895,9 +1061,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                            entityTypeLabelText:@"VEHICLE"
                                                  entityNameBlk:^(FPVehicle *v) {return v.name;}
                                                         entity:vehicle
-                                          aggregatesHeaderText:[NSString stringWithFormat:@"AVG PRICE OF GAS (%@ octane) AGGREGATES", octane]
+                                          aggregatesHeaderText:[NSString stringWithFormat:@"AVG PRICE OF GAS (%@ octane)", octane]
                                         compareButtonTitleText:@"Compare vehicles"
-                                           alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallAvgPricePerGallonForVehicle:vehicle octane:octane];}
+                                           alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallAvgPricePerGallonForVehicle:v octane:octane];}
                                         yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateAvgPricePerGallonForVehicle:v octane:octane];}
                                           lastYearAggregateBlk:^(FPVehicle *v) {return [_stats lastYearAvgPricePerGallonForVehicle:v octane:octane];}
                                              alltimeDatasetBlk:^(FPVehicle *v) {return [_stats overallAvgPricePerGallonDataSetForVehicle:v octane:octane];}
@@ -936,7 +1102,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                            entityTypeLabelText:@"VEHICLE"
                                                  entityNameBlk:^(FPVehicle *v) {return v.name;}
                                                         entity:vehicle
-                                          aggregatesHeaderText:@"GAS COST PER MILE AGGREGATES"
+                                          aggregatesHeaderText:@"GAS COST PER MILE"
                                         compareButtonTitleText:@"Compare vehicles"
                                            alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallGasCostPerMileForVehicle:v];}
                                         yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateGasCostPerMileForVehicle:v];}
@@ -979,7 +1145,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                            entityTypeLabelText:@"VEHICLE"
                                                  entityNameBlk:^(FPVehicle *v) {return v.name;}
                                                         entity:vehicle
-                                          aggregatesHeaderText:@"SPENT ON GAS AGGREGATES"
+                                          aggregatesHeaderText:@"SPENT ON GAS"
                                         compareButtonTitleText:@"Compare vehicles"
                                            alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallSpentOnGasForVehicle:v];}
                                         yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateSpentOnGasForVehicle:v];}
@@ -1656,14 +1822,15 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                entity:fuelstation
                                                  statLaunchButtonsBlk:^{
                                                    NSMutableArray *statLaunchButtons = [NSMutableArray array];
+                                                   [statLaunchButtons addObject:@"COST & DOLLARS SPENT"];
                                                    [statLaunchButtons addObject:@[@"Amount spent on gas",
-                                                                                  ^{ return [self newFuelStationSpentOnGasStatsScreenMakerWithFuelstation:fuelstation](user); },
+                                                                                  ^{ return [self newFuelStationSpentOnGasStatsScreenMakerWithFuelstation:fuelstation](user); }/*,
                                                                                   [PEUIUtils attributedTextWithTemplate:@"Stats and trend information on the total amount spent on gas:\n(per price gallon %@ number of gallons)."
                                                                                                            textToAccent:@"x"
-                                                                                                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]]];
+                                                                                                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]*/]];
                                                    NSArray *octanes = [_coordDao.localDao distinctOctanesForFuelstation:fuelstation error:_errorBlk];
                                                    for (NSNumber *octane in octanes) {
-                                                     [statLaunchButtons addObject:[NSString stringWithFormat:@"%@ OCTANE STATS", octane]];
+                                                     [statLaunchButtons addObject:[NSString stringWithFormat:@"%@ OCTANE - PRICE STATS", octane]];
                                                      [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Average price of gas (%@ octane)", octane],
                                                                                     ^{ return [self newFuelStationAvgPricePerGallonStatsScreenMakerWithFuelstation:fuelstation octane:octane](user); }]];
                                                      [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Min price of gas (%@ octane)", octane],
@@ -1684,7 +1851,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                            entityTypeLabelText:@"GAS STATION"
                                                  entityNameBlk:^(FPFuelStation *fs) {return fs.name;}
                                                         entity:fuelstation
-                                          aggregatesHeaderText:[NSString stringWithFormat:@"MIN PRICE OF GAS (%@ octane) AGGREGATES", octane]
+                                          aggregatesHeaderText:[NSString stringWithFormat:@"MIN PRICE OF GAS (%@ octane)", octane]
                                         compareButtonTitleText:@"Compare gas stations"
                                            alltimeAggregateBlk:^(FPFuelStation *fs) {return [_stats overallMinPricePerGallonForFuelstation:fs octane:octane];}
                                         yearToDateAggregateBlk:^(FPFuelStation *fs) {return [_stats yearToDateMinPricePerGallonForFuelstation:fs octane:octane];}
@@ -1723,7 +1890,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                            entityTypeLabelText:@"GAS STATION"
                                                  entityNameBlk:^(FPFuelStation *fs) {return fs.name;}
                                                         entity:fuelstation
-                                          aggregatesHeaderText:[NSString stringWithFormat:@"MAX PRICE OF GAS (%@ octane) AGGREGATES", octane]
+                                          aggregatesHeaderText:[NSString stringWithFormat:@"MAX PRICE OF GAS (%@ octane)", octane]
                                         compareButtonTitleText:@"Compare gas stations"
                                            alltimeAggregateBlk:^(FPFuelStation *fs) {return [_stats overallMaxPricePerGallonForFuelstation:fs octane:octane];}
                                         yearToDateAggregateBlk:^(FPFuelStation *fs) {return [_stats yearToDateMaxPricePerGallonForFuelstation:fs octane:octane];}
@@ -1762,7 +1929,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                            entityTypeLabelText:@"GAS STATION"
                                                  entityNameBlk:^(FPFuelStation *fs) {return fs.name;}
                                                         entity:fuelstation
-                                          aggregatesHeaderText:[NSString stringWithFormat:@"AVG PRICE OF GAS (%@ octane) AGGREGATES", octane]
+                                          aggregatesHeaderText:[NSString stringWithFormat:@"AVG PRICE OF GAS (%@ octane)", octane]
                                         compareButtonTitleText:@"Compare gas stations"
                                            alltimeAggregateBlk:^(FPFuelStation *fs) {return [_stats overallAvgPricePerGallonForFuelstation:fs octane:octane];}
                                         yearToDateAggregateBlk:^(FPFuelStation *fs) {return [_stats yearToDateAvgPricePerGallonForFuelstation:fs octane:octane];}
@@ -1803,7 +1970,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                            entityTypeLabelText:@"GAS STATION"
                                                  entityNameBlk:^(FPFuelStation *v) {return v.name;}
                                                         entity:fuelstation
-                                          aggregatesHeaderText:@"SPENT ON GAS AGGREGATES"
+                                          aggregatesHeaderText:@"SPENT ON GAS"
                                         compareButtonTitleText:@"Compare gas stations"
                                            alltimeAggregateBlk:^(FPFuelStation *fs) {return [_stats overallSpentOnGasForFuelstation:fs];}
                                         yearToDateAggregateBlk:^(FPFuelStation *fs) {return [_stats yearToDateSpentOnGasForFuelstation:fs];}

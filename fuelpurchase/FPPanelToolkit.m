@@ -556,7 +556,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                    below:vehicleDataPanel
                     onto:vehiclePanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:30.0
+                vpadding:20.0
                 hpadding:0.0];
     [PEUIUtils placeView:statsMsgPanel
                    below:statsBtn
@@ -773,7 +773,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                    below:coordinatesTableView
                     onto:fuelstationPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:30.0
+                vpadding:20.0
                 hpadding:0.0];
     [PEUIUtils placeView:statsMsgPanel
                    below:statsBtn

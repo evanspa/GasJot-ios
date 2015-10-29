@@ -65,7 +65,7 @@ NSString * const FPStatComparisonCellIdentifier = @"FPStatComparisonCellIdentifi
   NSMutableArray *nilRowData = [NSMutableArray array];
   NSArray *entities = _entitiesToCompareBlk();
   for (id entity in entities) {
-    NSDecimalNumber *statValue = _alltimeAggregateBlk(entity);
+    NSNumber *statValue = _alltimeAggregateBlk(entity);
     id entityName;
     if (_entity && [entity isEqual:_entity]) {
       entityName = [PEUIUtils attributedTextWithTemplate:@"%@"
