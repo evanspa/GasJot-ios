@@ -9,7 +9,7 @@
 #import "FPScreenToolkit.h"
 #import "FPEditsInProgressController.h"
 #import "FPSettingsController.h"
-#import "FPQuickActionMenuController.h"
+#import "FPHomeController.h"
 #import "FPRaisedCenterTabController.h"
 #import "FPRecordsController.h"
 #import <PEObjc-Commons/PEUtils.h>
@@ -2714,7 +2714,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     ^(PEListViewController *listViewCtrlr, PEItemAddedBlk itemAddedBlk) {
       UIViewController *addFpLogScreen =
       [self newAddFuelPurchaseLogScreenMakerWithBlk:itemAddedBlk
-                             defaultSelectedVehicle:[_coordDao defaultVehicleForNewFuelPurchaseLogForUser:user
+                             defaultSelectedVehicle:[_coordDao vehicleForMostRecentFuelPurchaseLogForUser:user
                                                                                                     error:[FPUtils localFetchErrorHandlerMaker]()]
                          defaultSelectedFuelStation:[_coordDao defaultFuelStationForNewFuelPurchaseLogForUser:user
                                                                                               currentLocation:[APP latestLocation]
@@ -2870,7 +2870,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     ^(PEListViewController *listViewCtrlr, PEItemAddedBlk itemAddedBlk) {
       UIViewController *addFpLogScreen =
       [self newAddFuelPurchaseLogScreenMakerWithBlk:itemAddedBlk
-                             defaultSelectedVehicle:[_coordDao defaultVehicleForNewFuelPurchaseLogForUser:user
+                             defaultSelectedVehicle:[_coordDao vehicleForMostRecentFuelPurchaseLogForUser:user
                                                                                                     error:[FPUtils localFetchErrorHandlerMaker]()]
                          defaultSelectedFuelStation:fuelStation
                                  listViewController:listViewCtrlr](user);
@@ -3451,7 +3451,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     ^(PEListViewController *listViewCtrlr, PEItemAddedBlk itemAddedBlk) {
       UIViewController *addEnvLogScreen =
       [self newAddEnvironmentLogScreenMakerWithBlk:itemAddedBlk
-                            defaultSelectedVehicle:[_coordDao defaultVehicleForNewFuelPurchaseLogForUser:user
+                            defaultSelectedVehicle:[_coordDao vehicleForMostRecentFuelPurchaseLogForUser:user
                                                                                                    error:[FPUtils localFetchErrorHandlerMaker]()]
                                 listViewController:listViewCtrlr](user);
       [listViewCtrlr presentViewController:[PEUIUtils navigationControllerWithController:addEnvLogScreen navigationBarHidden:NO]
@@ -3638,10 +3638,11 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 
 - (FPAuthScreenMaker)newHomeScreenMaker {
   return ^ UIViewController *(FPUser *user) {
-    return [[FPQuickActionMenuController alloc] initWithStoreCoordinator:_coordDao
-                                                                    user:user
-                                                               uitoolkit:_uitoolkit
-                                                           screenToolkit:self];
+    return [[FPHomeController alloc] initWithStoreCoordinator:_coordDao
+                                                         user:user
+                                                        stats:_stats
+                                                    uitoolkit:_uitoolkit
+                                                screenToolkit:self];
   };
 }
 
@@ -3822,7 +3823,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
         [addGasLogBtn bk_addEventHandler:^(id sender) {
           configJotButton(^UIViewController * (PEItemAddedBlk itemAddedBlk) {
             return [self newAddFuelPurchaseLogScreenMakerWithBlk:itemAddedBlk
-                                          defaultSelectedVehicle:[_coordDao defaultVehicleForNewFuelPurchaseLogForUser:user
+                                          defaultSelectedVehicle:[_coordDao vehicleForMostRecentFuelPurchaseLogForUser:user
                                                                                                                  error:[FPUtils localFetchErrorHandlerMaker]()]
                                       defaultSelectedFuelStation:[_coordDao defaultFuelStationForNewFuelPurchaseLogForUser:user
                                                                                                            currentLocation:[APP latestLocation]

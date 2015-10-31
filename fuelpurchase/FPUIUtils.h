@@ -7,10 +7,30 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <JBChartView/JBLineChartView.h>
+#import "JBChartTooltipTipView.h"
+#import "JBChartTooltipView.h"
 
 typedef void (^FPEnableUserInteractionBlk)(BOOL);
 
 @interface FPUIUtils : NSObject
+
+#pragma mark - Chart Helpers
+
++ (void)setTooltipVisible:(BOOL)tooltipVisible
+              tooltipView:(JBChartTooltipView *)tooltipView
+           tooltipTipView:(JBChartTooltipTipView *)tooltipTipView
+                 animated:(BOOL)animated
+             atTouchPoint:(CGPoint)touchPoint
+                chartView:(JBChartView *)chartView
+           controllerView:(UIView *)controllerView;
+
++ (void)setTooltipVisible:(BOOL)tooltipVisible
+              tooltipView:(JBChartTooltipView *)tooltipView
+           tooltipTipView:(JBChartTooltipTipView *)tooltipTipView
+                 animated:(BOOL)animated
+                chartView:(JBChartView *)chartView
+           controllerView:(UIView *)controllerView;
 
 #pragma mark - Helpers
 

@@ -18,34 +18,27 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#import "FPHomeScreenController.h"
+#import <UIKit/UIKit.h>
+#import <PEFuelPurchase-Model/FPUser.h>
+#import <PEFuelPurchase-Model/FPCoordinatorDao.h>
+#import <PEObjc-Commons/PEUIToolkit.h>
+#import "FPScreenToolkit.h"
+#import <PEFuelPurchase-Model/FPStats.h>
+#import <JBChartView/JBLineChartView.h>
 
-@implementation FPHomeScreenController {
-  FPCoordinatorDao *_coordDao;
-  PEUIToolkit *_uitoolkit;
-  FPUser *_user;
-  FPScreenToolkit *_screenToolkit;
-}
+/**
+ Presents a GUI representing the start-state of the application for an
+ authenticated user.  This can also be thought of as presenting the 'main
+ menu' state of the application.
+ */
+@interface FPHomeController : UIViewController <JBLineChartViewDelegate, JBLineChartViewDataSource>
 
 #pragma mark - Initializers
 
 - (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
                           user:(FPUser *)user
+                         stats:(FPStats *)stats
                      uitoolkit:(PEUIToolkit *)uitoolkit
-                 screenToolkit:(FPScreenToolkit *)screenToolkit {
-  self = [super initWithNibName:nil bundle:nil];
-  if (self) {
-    _user = user;
-    _coordDao = coordDao;
-    _uitoolkit = uitoolkit;
-    _screenToolkit = screenToolkit;
-  }
-  return self;
-}
-
-- (void)viewDidLoad {
-    [super viewDidLoad];
- 
-}
+                 screenToolkit:(FPScreenToolkit *)screenToolkit;
 
 @end

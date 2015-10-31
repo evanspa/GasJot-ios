@@ -30,7 +30,7 @@
 #import "FPUtils.h"
 #import "FPSettingsController.h"
 #import "FPEditsInProgressController.h"
-#import "FPQuickActionMenuController.h"
+#import "FPHomeController.h"
 #import "FPScreenToolkit.h"
 #import "FPLogging.h"
 #import "FPAppNotificationNames.h"
@@ -530,7 +530,7 @@ in an unauthenticated state.  Is main thread?  %@", [PEUtils yesNoFromBool:[NSTh
 
 - (NSDictionary *)screenNamesForViewControllers {
     return @{
-    NSStringFromClass([FPQuickActionMenuController class]) : @"authenticated-landing-screen"
+    NSStringFromClass([FPHomeController class]) : @"authenticated-landing-screen"
   };
 }
 

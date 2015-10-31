@@ -174,6 +174,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                               valueRightHPadding:15.0
                                                    valueLabelTag:nil
                                   minPaddingBetweenLabelAndValue:10.0
+                                                        rowWidth:(1.0 * relativeToView.frame.size.width)
                                                   relativeToView:relativeToView];
   [statusPanel setBackgroundColor:[UIColor whiteColor]];
   UIView *panel;

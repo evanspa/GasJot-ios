@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		18010C5A180E4752005F5CEB /* FPQuickActionMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18010C59180E4752005F5CEB /* FPQuickActionMenuController.m */; };
+		18010C5A180E4752005F5CEB /* FPHomeController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18010C59180E4752005F5CEB /* FPHomeController.m */; };
 		180EDA3019C7C2D200C782A6 /* FPSettingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 180EDA2F19C7C2D200C782A6 /* FPSettingsController.m */; };
 		180EDA3519C7C89B00C782A6 /* FPEditsInProgressController.m in Sources */ = {isa = PBXBuildFile; fileRef = 180EDA3419C7C89B00C782A6 /* FPEditsInProgressController.m */; };
 		183E13A518009F9F009E9085 /* fpapi-resource.json in Resources */ = {isa = PBXBuildFile; fileRef = 183E13A418009F9F009E9085 /* fpapi-resource.json */; };
@@ -55,7 +55,6 @@
 		CAEE0C9A1BC9830E00FAB0BF /* FPReportViews.m in Sources */ = {isa = PBXBuildFile; fileRef = CAEE0C991BC9830E00FAB0BF /* FPReportViews.m */; };
 		CAFC84651BA27EAB00FAEB66 /* FPSplashController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84641BA27EAB00FAEB66 /* FPSplashController.m */; };
 		CAFC84691BA363A600FAEB66 /* iCarousel.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84681BA363A600FAEB66 /* iCarousel.m */; };
-		CAFC846E1BA64B5A00FAEB66 /* FPHomeScreenController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC846D1BA64B5A00FAEB66 /* FPHomeScreenController.m */; };
 		CAFC84721BA6691000FAEB66 /* FPRaisedCenterTabController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84711BA6691000FAEB66 /* FPRaisedCenterTabController.m */; };
 		CAFC84761BA66D3900FAEB66 /* FPRecordsController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84751BA66D3900FAEB66 /* FPRecordsController.m */; };
 		CAFC847A1BA6ECCA00FAEB66 /* FPJotController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84791BA6ECCA00FAEB66 /* FPJotController.m */; };
@@ -66,8 +65,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		18010C58180E4752005F5CEB /* FPQuickActionMenuController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPQuickActionMenuController.h; sourceTree = "<group>"; };
-		18010C59180E4752005F5CEB /* FPQuickActionMenuController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPQuickActionMenuController.m; sourceTree = "<group>"; };
+		18010C58180E4752005F5CEB /* FPHomeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPHomeController.h; sourceTree = "<group>"; };
+		18010C59180E4752005F5CEB /* FPHomeController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPHomeController.m; sourceTree = "<group>"; };
 		180EDA2E19C7C2D200C782A6 /* FPSettingsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPSettingsController.h; sourceTree = "<group>"; };
 		180EDA2F19C7C2D200C782A6 /* FPSettingsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPSettingsController.m; sourceTree = "<group>"; };
 		180EDA3319C7C89B00C782A6 /* FPEditsInProgressController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPEditsInProgressController.h; sourceTree = "<group>"; };
@@ -173,8 +172,6 @@
 		CAFC84641BA27EAB00FAEB66 /* FPSplashController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPSplashController.m; sourceTree = "<group>"; };
 		CAFC84671BA363A600FAEB66 /* iCarousel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iCarousel.h; sourceTree = "<group>"; };
 		CAFC84681BA363A600FAEB66 /* iCarousel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iCarousel.m; sourceTree = "<group>"; };
-		CAFC846C1BA64B5A00FAEB66 /* FPHomeScreenController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPHomeScreenController.h; sourceTree = "<group>"; };
-		CAFC846D1BA64B5A00FAEB66 /* FPHomeScreenController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPHomeScreenController.m; sourceTree = "<group>"; };
 		CAFC84701BA6691000FAEB66 /* FPRaisedCenterTabController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPRaisedCenterTabController.h; sourceTree = "<group>"; };
 		CAFC84711BA6691000FAEB66 /* FPRaisedCenterTabController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPRaisedCenterTabController.m; sourceTree = "<group>"; };
 		CAFC84741BA66D3900FAEB66 /* FPRecordsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPRecordsController.h; sourceTree = "<group>"; };
@@ -219,13 +216,13 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
-		18010C57180E470C005F5CEB /* Quick Action Menu Screen */ = {
+		18010C57180E470C005F5CEB /* Home Screen */ = {
 			isa = PBXGroup;
 			children = (
-				18010C58180E4752005F5CEB /* FPQuickActionMenuController.h */,
-				18010C59180E4752005F5CEB /* FPQuickActionMenuController.m */,
+				18010C58180E4752005F5CEB /* FPHomeController.h */,
+				18010C59180E4752005F5CEB /* FPHomeController.m */,
 			);
-			name = "Quick Action Menu Screen";
+			name = "Home Screen";
 			sourceTree = "<group>";
 		};
 		180EDA2D19C7C2AB00C782A6 /* Settings Screen */ = {
@@ -339,14 +336,13 @@
 				CAFC847B1BA71FB700FAEB66 /* Account Screen */,
 				CAFC84771BA6ECB600FAEB66 /* Jot Screen */,
 				CAFC84731BA66D0600FAEB66 /* Records Screen */,
-				CAFC846B1BA6499A00FAEB66 /* Home Screen */,
 				CAFC84621BA27E8000FAEB66 /* Splash Screen */,
 				CAB5E94D1B4B007E00144072 /* Re-authenticate */,
 				CA7D5A2B1B384FEE00433581 /* Account Login */,
 				CA7D5A2A1B384FDE00433581 /* Account Creation */,
 				180EDA3219C7C87E00C782A6 /* Unsynced Edits Screen */,
 				180EDA2D19C7C2AB00C782A6 /* Settings Screen */,
-				18010C57180E470C005F5CEB /* Quick Action Menu Screen */,
+				18010C57180E470C005F5CEB /* Home Screen */,
 			);
 			name = "Custom Screens";
 			sourceTree = "<group>";
@@ -709,15 +705,6 @@
 			name = iCarousel;
 			sourceTree = "<group>";
 		};
-		CAFC846B1BA6499A00FAEB66 /* Home Screen */ = {
-			isa = PBXGroup;
-			children = (
-				CAFC846C1BA64B5A00FAEB66 /* FPHomeScreenController.h */,
-				CAFC846D1BA64B5A00FAEB66 /* FPHomeScreenController.m */,
-			);
-			name = "Home Screen";
-			sourceTree = "<group>";
-		};
 		CAFC846F1BA668B700FAEB66 /* Raised Center Tab Controller */ = {
 			isa = PBXGroup;
 			children = (
@@ -924,7 +911,6 @@
 				18EC863019EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m in Sources */,
 				CAFC84691BA363A600FAEB66 /* iCarousel.m in Sources */,
 				CAFC84871BA749FB00FAEB66 /* UIColor+FPAdditions.m in Sources */,
-				CAFC846E1BA64B5A00FAEB66 /* FPHomeScreenController.m in Sources */,
 				CA7D5A271B383F5A00433581 /* FPAppNotificationNames.m in Sources */,
 				CAFC847A1BA6ECCA00FAEB66 /* FPJotController.m in Sources */,
 				CA813DB11BDF04A000B74A24 /* FPCommonStatComparisonController.m in Sources */,
@@ -940,7 +926,7 @@
 				CA8AC4BC1BDE8930008603C0 /* JBChartInformationView.m in Sources */,
 				CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */,
 				189AC7561A78034500A6CFE3 /* FPLogEnvLogComposite.m in Sources */,
-				18010C5A180E4752005F5CEB /* FPQuickActionMenuController.m in Sources */,
+				18010C5A180E4752005F5CEB /* FPHomeController.m in Sources */,
 				183E1416180237A2009E9085 /* FPUtils.m in Sources */,
 				18AC0722181ACC8C001FF24E /* FPLogging.m in Sources */,
 				1865B7D919FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m in Sources */,

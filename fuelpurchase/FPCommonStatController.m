@@ -177,15 +177,30 @@ NSInteger const FPChartPreviousYearIndex = 2;
 - (void)lineChartView:(JBLineChartView *)lineChartView didSelectLineAtIndex:(NSUInteger)lineIndex horizontalIndex:(NSUInteger)horizontalIndex touchPoint:(CGPoint)touchPoint {
   NSArray *dataPoint = _dataset[horizontalIndex];
   NSDecimalNumber *value = dataPoint[1];
-  [self setTooltipVisible:YES animated:YES atTouchPoint:touchPoint chartView:lineChartView];
+  
+  //[self setTooltipVisible:YES animated:YES atTouchPoint:touchPoint chartView:lineChartView];
+  [FPUIUtils setTooltipVisible:YES
+                   tooltipView:_tooltipView
+                tooltipTipView:_tooltipTipView
+                      animated:YES
+                  atTouchPoint:touchPoint
+                     chartView:lineChartView
+                controllerView:self.view];
+  
   [_tooltipView setAttributedText:[PEUIUtils attributedTextWithTemplate:[[NSString stringWithFormat:@"%@: ", [_dateFormatter stringFromDate:dataPoint[0]]] stringByAppendingString:@"%@"]
-                                                           textToAccent:_valueFormatter(value) //[_currencyFormatter stringFromNumber:value]
+                                                           textToAccent:[NSString stringWithFormat:@" %@", _valueFormatter(value)]
                                                          accentTextFont:nil
                                                         accentTextColor:[UIColor grayColor]]];
 }
 
 - (void)didDeselectLineInLineChartView:(JBLineChartView *)lineChartView {
-  [self setTooltipVisible:NO animated:YES chartView:lineChartView];
+  //[self setTooltipVisible:NO animated:YES chartView:lineChartView];
+  [FPUIUtils setTooltipVisible:NO
+                   tooltipView:_tooltipView
+                tooltipTipView:_tooltipTipView
+                      animated:YES
+                     chartView:lineChartView
+                controllerView:self.view];
 }
 
 #pragma mark - JBLineChartViewDataSource
@@ -208,7 +223,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
   }
 }
 
-- (void)setTooltipVisible:(BOOL)tooltipVisible animated:(BOOL)animated atTouchPoint:(CGPoint)touchPoint chartView:(JBChartView *)chartView {
+/*- (void)setTooltipVisible:(BOOL)tooltipVisible animated:(BOOL)animated atTouchPoint:(CGPoint)touchPoint chartView:(JBChartView *)chartView {
   UIView *chartViewPanel = [chartView superview];
   _tooltipVisible = tooltipVisible;
   if (!_tooltipView) {
@@ -281,7 +296,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
 
 - (void)setTooltipVisible:(BOOL)tooltipVisible chartView:(JBChartView *)chartView {
   [self setTooltipVisible:tooltipVisible animated:NO chartView:chartView];
-}
+}*/
 
 - (UIView *)aggregatesTable {
   return [PEUIUtils tablePanelWithRowData:@[@[@"All time", [self formattedValueForValue:_alltimeAggregateBlk(_entity)]],
@@ -369,6 +384,10 @@ NSInteger const FPChartPreviousYearIndex = 2;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  
+  _tooltipView = [[JBChartTooltipView alloc] init];
+  _tooltipTipView = [[JBChartTooltipTipView alloc] init];
+  
   //_contentView = [[UIScrollView alloc] initWithFrame:self.view.frame];
   //[_contentView setContentSize:CGSizeMake(self.view.frame.size.width, 1.01 * self.view.frame.size.height)];
   //[_contentView setBounces:NO];
