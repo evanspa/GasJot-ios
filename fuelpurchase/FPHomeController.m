@@ -254,14 +254,14 @@ NSInteger const FPHomeSpentOnGasTableDataTag         = 6;
 }
 
 - (UIButton *)makeAllStatsButtonForVehicle:(FPVehicle *)vehicle {
-  UIButton *allStatsBtn = [PEUIUtils buttonWithKey:@"all stats"
+  UIButton *allStatsBtn = [PEUIUtils buttonWithKey:@"all vehicle stats"
                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                    backgroundColor:[UIColor grayColor]
                                          textColor:[UIColor whiteColor]
                       disabledStateBackgroundColor:nil
                             disabledStateTextColor:nil
                                    verticalPadding:7.0
-                                 horizontalPadding:55.0
+                                 horizontalPadding:50.0
                                       cornerRadius:3.0
                                             target:nil
                                             action:nil];
@@ -365,7 +365,7 @@ alignmentRelativeToView:chart
                              3.0 +
                              chart.frame.size.height +
                              0.0 +
-                             (addlLabelsView != nil ? addlLabelsView.frame.size.height : moreBtn.frame.size.height) +
+                             (addlLabelsView != nil ? addlLabelsView.frame.size.height : (moreBtn.frame.size.height + 3)) +
                              5.0 +
                              7.5)
                      ofView:panel];
@@ -418,6 +418,14 @@ alignmentRelativeToView:chart
                             rowWidth:125];
 }
 
+- (UIView *)makeSpentOnGasDataTable {
+  return [self makeDataTableWithRows:@[@[@"Avg spent:", [_currencyFormatter stringFromNumber:[_stats overallAvgSpentOnGasForUser:_user]]],
+                                       @[@"Min spent:", [_currencyFormatter stringFromNumber:[_stats overallMinSpentOnGasForUser:_user]]],
+                                       @[@"Max spent:", [_currencyFormatter stringFromNumber:[_stats overallMaxSpentOnGasForUser:_user]]]]
+                                 tag:FPHomePriceOfGasTableDataTag
+                            rowWidth:165];
+}
+
 - (void)refreshViewWithTag:(NSInteger)tag viewMaker:(UIView *(^)(void))viewMaker {
   UIView *view = [self.view viewWithTag:tag];
   UIView *superView = [view superview];
@@ -448,7 +456,7 @@ alignmentRelativeToView:chart
     _tooltipTipView = [[JBChartTooltipTipView alloc] init];
     [_tooltipView setBackgroundColor:[UIColor blackColor]];
     _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
-    [_scrollView setBounces:NO];
+    [_scrollView setBounces:YES];
     CGFloat totalHeightOfViews = 0.0;
     _vehicleLabel = [self makeLabelForVehicle:_vehicleInCtx];
     _vehicleAllStatsBtn = [self makeAllStatsButtonForVehicle:_vehicleInCtx];
@@ -466,7 +474,7 @@ alignmentRelativeToView:chart
                 vpadding:8.0
                 hpadding:8.0];
     
-    NSArray *daysBetweenFillupSection = [self makeLineChartSectionWithTitle:@"DAYS BETWEEN FILL-UPS (All Time)"
+    NSArray *daysBetweenFillupSection = [self makeLineChartSectionWithTitle:@"DAYS BETWEEN FILL-UPS (all time)"
                                                                    chartTag:FPHomeDaysBetweenFillupsChartTag
                                                           addlLabelsViewBlk:^UIView *{ return [self makeDaysBetweenFillupsDataTable];}
                                                     moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newVehicleAvgDaysBetweenFillupsStatsScreenMakerWithVehicle:_vehicleInCtx](_user);}];
@@ -484,7 +492,7 @@ alignmentRelativeToView:chart
       daysBetweenFillupPanel.frame.size.height + 10.0;
     
     NSNumber *octane = [self octaneOfLastVehicleInCtxGasLog];
-    NSArray *priceOfGasSection = [self makeLineChartSectionWithTitle:[NSString stringWithFormat:@"AVG PRICE OF %@ OCTANE (All Time)", octane]
+    NSArray *priceOfGasSection = [self makeLineChartSectionWithTitle:[NSString stringWithFormat:@"AVG PRICE OF %@ OCTANE (all time)", octane]
                                                             chartTag:FPHomePriceOfGasChartTag
                                                    addlLabelsViewBlk:^UIView *{ return [self makePricePerGallonDataTable];}                                             moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newAvgPricePerGallonStatsScreenMakerWithOctane:[self octaneOfLastVehicleInCtxGasLog]](_user);}];
     UIView *pricePerGallonPanel = priceOfGasSection[0];
@@ -498,9 +506,9 @@ alignmentRelativeToView:chart
                 hpadding:0.0];
     totalHeightOfViews += pricePerGallonPanel.frame.size.height + 10.0;
     
-    NSArray *spentOnGasSection = [self makeLineChartSectionWithTitle:@"SPENT ON GAS (All Time)"
+    NSArray *spentOnGasSection = [self makeLineChartSectionWithTitle:@"MONTHLY SPEND ON GAS\n     (all vehicles, all time)"
                                                             chartTag:FPHomeSpentOnGasChartTag
-                                                   addlLabelsViewBlk:nil
+                                                   addlLabelsViewBlk:^UIView *{ return [self makeSpentOnGasDataTable];}
                                              moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newSpentOnGasStatsScreenMaker](_user);}];
     UIView *spentOnGasPanel = spentOnGasSection[0];
     _spentOnGasChart = spentOnGasSection[1];
@@ -553,7 +561,7 @@ alignmentRelativeToView:chart
     
     //refresh the 'spent on gas' views
     _spentOnGasDataSet = [_stats overallSpentOnGasDataSetForUser:_user];
-    //[self refreshViewWithTag:FPHomeSpentOnGasTableDataTag viewMaker:^{ return [self makePricePerGallonDataTable]; }];
+    [self refreshViewWithTag:FPHomeSpentOnGasTableDataTag viewMaker:^{ return [self makeSpentOnGasDataTable]; }];
     [self refreshFooterForChart:_spentOnGasChart dataset:_spentOnGasDataSet];
     [_priceOfGasChart reloadData];
   }
