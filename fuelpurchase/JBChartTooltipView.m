@@ -16,7 +16,7 @@
 
 // Numerics
 CGFloat static const kJBChartTooltipViewCornerRadius = 5.0;
-CGFloat const kJBChartTooltipViewDefaultWidth = 95.0f;
+CGFloat const kJBChartTooltipViewDefaultWidth = 115.0f;
 CGFloat const kJBChartTooltipViewDefaultHeight = 28.0f;
 
 @interface JBChartTooltipView ()

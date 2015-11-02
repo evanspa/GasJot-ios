@@ -47,6 +47,12 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
 
 - (FPAuthScreenMaker)newUserAccountDetailScreenMaker;
 
+#pragma mark - User Stat Screens
+
+- (FPAuthScreenMaker)newAvgPricePerGallonStatsScreenMakerWithOctane:(NSNumber *)octane;
+
+- (FPAuthScreenMaker)newSpentOnGasStatsScreenMaker;
+
 #pragma mark - Vehicle Screens
 
 - (FPAuthScreenMaker)newViewVehiclesScreenMaker;
@@ -67,6 +73,8 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
 #pragma mark - Vehicle Stat Screens
 
 - (FPAuthScreenMaker)newVehicleStatsLaunchScreenMakerWithVehicle:(FPVehicle *)vehicle;
+
+- (FPAuthScreenMaker)newVehicleAvgDaysBetweenFillupsStatsScreenMakerWithVehicle:(FPVehicle *)vehicle;
 
 - (FPAuthScreenMaker)newVehicleAvgPricePerGallonStatsScreenMakerWithVehicle:(FPVehicle *)vehicle
                                                                      octane:(NSNumber *)octane;

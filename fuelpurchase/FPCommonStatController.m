@@ -125,7 +125,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
     _uitoolkit = uitoolkit;
     _currentYear = [PEUtils currentYear];
     _dateFormatter = [[NSDateFormatter alloc] init];
-    [_dateFormatter setDateFormat:@"MMM-yy"];
+    [_dateFormatter setDateFormat:@"MMM-yyyy"];
   }
   return self;
 }
@@ -167,7 +167,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
 }
 
 - (CGFloat)lineChartView:(JBLineChartView *)lineChartView dotRadiusForDotAtHorizontalIndex:(NSUInteger)horizontalIndex atLineIndex:(NSUInteger)lineIndex {
-  return 2.0;
+  return 1.5;
 }
 
 - (BOOL)lineChartView:(JBLineChartView *)lineChartView smoothLineAtLineIndex:(NSUInteger)lineIndex {
@@ -187,14 +187,13 @@ NSInteger const FPChartPreviousYearIndex = 2;
                      chartView:lineChartView
                 controllerView:self.view];
   
-  [_tooltipView setAttributedText:[PEUIUtils attributedTextWithTemplate:[[NSString stringWithFormat:@"%@: ", [_dateFormatter stringFromDate:dataPoint[0]]] stringByAppendingString:@"%@"]
-                                                           textToAccent:[NSString stringWithFormat:@" %@", _valueFormatter(value)]
+  [_tooltipView setAttributedText:[PEUIUtils attributedTextWithTemplate:@"%@"
+                                                           textToAccent:[NSString stringWithFormat:@"%@: %@", [_dateFormatter stringFromDate:dataPoint[0]], _valueFormatter(value)]
                                                          accentTextFont:nil
-                                                        accentTextColor:[UIColor grayColor]]];
+                                                        accentTextColor:[UIColor whiteColor]]];
 }
 
 - (void)didDeselectLineInLineChartView:(JBLineChartView *)lineChartView {
-  //[self setTooltipVisible:NO animated:YES chartView:lineChartView];
   [FPUIUtils setTooltipVisible:NO
                    tooltipView:_tooltipView
                 tooltipTipView:_tooltipTipView
@@ -223,81 +222,6 @@ NSInteger const FPChartPreviousYearIndex = 2;
   }
 }
 
-/*- (void)setTooltipVisible:(BOOL)tooltipVisible animated:(BOOL)animated atTouchPoint:(CGPoint)touchPoint chartView:(JBChartView *)chartView {
-  UIView *chartViewPanel = [chartView superview];
-  _tooltipVisible = tooltipVisible;
-  if (!_tooltipView) {
-    _tooltipView = [[JBChartTooltipView alloc] init];
-    _tooltipView.alpha = 0.0;
-    [chartViewPanel addSubview:_tooltipView];
-  }
-  
-  [chartViewPanel bringSubviewToFront:_tooltipView];
-  
-  if (!_tooltipTipView) {
-    _tooltipTipView = [[JBChartTooltipTipView alloc] init];
-    _tooltipTipView.alpha = 0.0;
-    [chartViewPanel addSubview:_tooltipTipView];
-  }
-  
-  [chartViewPanel bringSubviewToFront:_tooltipTipView];
-  
-  dispatch_block_t adjustTooltipPosition = ^{
-    CGPoint originalTouchPoint = [self.view convertPoint:touchPoint fromView:chartView];
-    CGPoint convertedTouchPoint = originalTouchPoint; // modified
-    CGFloat minChartX = (chartView.frame.origin.x + ceil(_tooltipView.frame.size.width * 0.5));
-    if (convertedTouchPoint.x < minChartX) {
-      convertedTouchPoint.x = minChartX;
-    }
-    CGFloat maxChartX = (chartView.frame.origin.x + chartView.frame.size.width - ceil(_tooltipView.frame.size.width * 0.5));
-    if (convertedTouchPoint.x > maxChartX) {
-      convertedTouchPoint.x = maxChartX;
-    }
-    _tooltipView.frame = CGRectMake(convertedTouchPoint.x - ceil(_tooltipView.frame.size.width * 0.5),
-                                    chartView.frame.origin.y - _tooltipView.frame.size.height, //CGRectGetMaxY(chartView.headerView.frame),
-                                    _tooltipView.frame.size.width,
-                                    _tooltipView.frame.size.height);
-    CGFloat minTipX = (chartView.frame.origin.x + _tooltipTipView.frame.size.width);
-    if (originalTouchPoint.x < minTipX) {
-      originalTouchPoint.x = minTipX;
-    }
-    CGFloat maxTipX = (chartView.frame.origin.x + chartView.frame.size.width - _tooltipTipView.frame.size.width);
-    if (originalTouchPoint.x > maxTipX) {
-      originalTouchPoint.x = maxTipX;
-    }
-    _tooltipTipView.frame = CGRectMake(originalTouchPoint.x - ceil(_tooltipTipView.frame.size.width * 0.5), CGRectGetMaxY(_tooltipView.frame), _tooltipTipView.frame.size.width, _tooltipTipView.frame.size.height);
-  };
-  
-  dispatch_block_t adjustTooltipVisibility = ^{
-    _tooltipView.alpha = _tooltipVisible ? 1.0 : 0.0;
-    _tooltipTipView.alpha = _tooltipVisible ? 1.0 : 0.0;
-  };
-  
-  if (tooltipVisible) {
-    adjustTooltipPosition();
-  }
-  
-  if (animated) {
-    [UIView animateWithDuration:0.25f animations:^{
-      adjustTooltipVisibility();
-    } completion:^(BOOL finished) {
-      if (!tooltipVisible) {
-        adjustTooltipPosition();
-      }
-    }];
-  } else {
-    adjustTooltipVisibility();
-  }
-}
-
-- (void)setTooltipVisible:(BOOL)tooltipVisible animated:(BOOL)animated chartView:(JBChartView *)chartView {
-  [self setTooltipVisible:tooltipVisible animated:animated atTouchPoint:CGPointZero chartView:chartView];
-}
-
-- (void)setTooltipVisible:(BOOL)tooltipVisible chartView:(JBChartView *)chartView {
-  [self setTooltipVisible:tooltipVisible animated:NO chartView:chartView];
-}*/
-
 - (UIView *)aggregatesTable {
   return [PEUIUtils tablePanelWithRowData:@[@[@"All time", [self formattedValueForValue:_alltimeAggregateBlk(_entity)]],
                                             @[[NSString stringWithFormat:@"%ld YTD", (long)_currentYear], [self formattedValueForValue:_yearToDateAggregateBlk(_entity)]],
@@ -308,6 +232,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
 
 - (UIView *)makeLineChartPanel {
   UIView *panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:self.view]; // will resize height later
+  [panel setBackgroundColor:[UIColor whiteColor]];
   HMSegmentedControl *segmentedControl = [[HMSegmentedControl alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
   [PEUIUtils setFrameWidthOfView:segmentedControl ofWidth:1.0 relativeTo:panel];
   [PEUIUtils setFrameHeight:35.0 ofView:segmentedControl];
@@ -329,8 +254,9 @@ NSInteger const FPChartPreviousYearIndex = 2;
   [lineChartView setDelegate:self];
   [lineChartView setDataSource:self];
   [PEUIUtils setFrameWidthOfView:lineChartView ofWidth:.975 relativeTo:panel];
-  [PEUIUtils setFrameHeight:150.0 ofView:lineChartView];
+  [PEUIUtils setFrameHeight:115.0 ofView:lineChartView];
   JBLineChartFooterView *footerView = [[JBLineChartFooterView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+  footerView.footerSeparatorColor = [UIColor darkGrayColor];
   [PEUIUtils setFrameWidthOfView:footerView ofWidth:1.0 relativeTo:panel];
   [PEUIUtils setFrameHeight:25.0 ofView:footerView];
   
@@ -387,6 +313,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
   
   _tooltipView = [[JBChartTooltipView alloc] init];
   _tooltipTipView = [[JBChartTooltipTipView alloc] init];
+  [_tooltipView setBackgroundColor:[UIColor blackColor]];
   
   //_contentView = [[UIScrollView alloc] initWithFrame:self.view.frame];
   //[_contentView setContentSize:CGSizeMake(self.view.frame.size.width, 1.01 * self.view.frame.size.height)];
@@ -397,43 +324,46 @@ NSInteger const FPChartPreviousYearIndex = 2;
   }
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   [self setTitle:_screenTitle];
-  NSString *entityName = [FPUtils truncatedText:_entityNameBlk(_entity) maxLength:27];
-  NSAttributedString *entityHeaderText = [PEUIUtils attributedTextWithTemplate:[[NSString stringWithFormat:@"%@: ", _entityTypeLabelText] stringByAppendingString:@"%@"]
-                                                                  textToAccent:entityName
-                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
-                                                               accentTextColor:[UIColor fpAppBlue]];
-  UILabel *entityLabel = [PEUIUtils labelWithAttributeText:entityHeaderText
-                                                      font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                  fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
-                                           backgroundColor:[UIColor clearColor]
-                                                 textColor:[UIColor darkGrayColor]
-                                       verticalTextPadding:3.0
-                                                fitToWidth:self.view.frame.size.width - 15.0];
-  //UIView *aggregatesHeader = [FPUIUtils headerPanelWithText:_aggregatesHeaderText relativeToView:self.view];
+  UILabel *entityLabel = nil;
+  if (_entityTypeLabelText) {
+    NSString *entityName = [FPUtils truncatedText:_entityNameBlk(_entity) maxLength:27];
+    NSAttributedString *entityHeaderText = [PEUIUtils attributedTextWithTemplate:[[NSString stringWithFormat:@"%@: ", _entityTypeLabelText] stringByAppendingString:@"%@"]
+                                                                    textToAccent:entityName
+                                                                  accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                                 accentTextColor:[UIColor fpAppBlue]];
+    entityLabel = [PEUIUtils labelWithAttributeText:entityHeaderText
+                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                           fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                    backgroundColor:[UIColor clearColor]
+                                          textColor:[UIColor darkGrayColor]
+                                verticalTextPadding:3.0
+                                         fitToWidth:self.view.frame.size.width - 15.0];
+  }
   _aggregatesTable = [self aggregatesTable];
   if (_alltimeDatasetBlk) {
     _lineChartPanel = [self makeLineChartPanel];
   }
   // place the views
-  [PEUIUtils placeView:entityLabel
-               atTopOf:_contentView
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:75.0 //13.0 (use '13.0' when _contentView is a scroll view); use 75.0 when not a scroll view
-              hpadding:8.0];
-  /*[PEUIUtils placeView:aggregatesHeader
-                 below:entityLabel
-                  onto:_contentView
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-alignmentRelativeToView:self.view
-              vpadding:10.0
-              hpadding:0.0];*/
-  [PEUIUtils placeView:_aggregatesTable
-                 below:entityLabel //aggregatesHeader
-                  onto:_contentView
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-alignmentRelativeToView:_contentView
-              vpadding:4.0
-              hpadding:0.0];
+  if (entityLabel) {
+    [PEUIUtils placeView:entityLabel
+                 atTopOf:_contentView
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:75.0 //13.0 (use '13.0' when _contentView is a scroll view); use 75.0 when not a scroll view
+                hpadding:8.0];
+    [PEUIUtils placeView:_aggregatesTable
+                   below:entityLabel
+                    onto:_contentView
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+ alignmentRelativeToView:_contentView
+                vpadding:4.0
+                hpadding:0.0];
+  } else {
+    [PEUIUtils placeView:_aggregatesTable
+                 atTopOf:_contentView
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:75.0 //13.0 (use '13.0' when _contentView is a scroll view); use 75.0 when not a scroll view
+                hpadding:0.0];
+  }
   UIView *aboveView = _aggregatesTable;
   if (_lineChartPanel) {
     aboveView = _lineChartPanel;
@@ -445,7 +375,7 @@ alignmentRelativeToView:_contentView
                 vpadding:10.0
                 hpadding:0.0];
   }
-  if (_siblingCountBlk() > 1) {
+  if (_siblingCountBlk && _siblingCountBlk() > 1) {
     UIButton *compareBtn = [_uitoolkit systemButtonMaker](_compareButtonTitleText, nil, nil);
     [PEUIUtils setFrameWidthOfView:compareBtn ofWidth:1.0 relativeTo:self.view];
     [PEUIUtils addDisclosureIndicatorToButton:compareBtn];

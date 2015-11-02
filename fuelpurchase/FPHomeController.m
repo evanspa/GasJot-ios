@@ -35,8 +35,16 @@
 #import "FPUtils.h"
 #import "FPUIUtils.h"
 #import <JBChartView/JBLineChartView.h>
+#import <BlocksKit/UIControl+BlocksKit.h>
 
-NSInteger const FPHomeDaysBetweenFillupsChartTag = 1;
+NSInteger const FPHomeDaysBetweenFillupsChartTag     = 1;
+NSInteger const FPHomeDaysBetweenFillupsTableDataTag = 2;
+
+NSInteger const FPHomePriceOfGasChartTag             = 3;
+NSInteger const FPHomePriceOfGasTableDataTag         = 4;
+
+NSInteger const FPHomeSpentOnGasChartTag             = 5;
+NSInteger const FPHomeSpentOnGasTableDataTag         = 6;
 
 @implementation FPHomeController {
   FPCoordinatorDao *_coordDao;
@@ -51,10 +59,17 @@ NSInteger const FPHomeDaysBetweenFillupsChartTag = 1;
   UIScrollView *_scrollView;
   JBChartTooltipView *_tooltipView;
   JBChartTooltipTipView *_tooltipTipView;
-  JBLineChartView *_daysBetweenFillupsChart;
-  NSArray *_daysBetweenFillupsDataSet;
   UILabel *_vehicleLabel;
   UIButton *_vehicleAllStatsBtn;
+  
+  JBLineChartView *_spentOnGasChart;
+  NSArray *_spentOnGasDataSet;
+  
+  JBLineChartView *_priceOfGasChart;
+  NSArray *_priceOfGasDataSet;
+  
+  JBLineChartView *_daysBetweenFillupsChart;
+  NSArray *_daysBetweenFillupsDataSet;
 }
 
 #pragma mark - Initializers
@@ -85,12 +100,17 @@ NSInteger const FPHomeDaysBetweenFillupsChartTag = 1;
 
 - (CGFloat)lineChartView:(JBLineChartView *)lineChartView verticalValueForHorizontalIndex:(NSUInteger)horizontalIndex atLineIndex:(NSUInteger)lineIndex {
   switch (lineChartView.tag) {
-    case FPHomeDaysBetweenFillupsChartTag:
-    {
+    case FPHomeDaysBetweenFillupsChartTag: {
       NSArray *dataPoint = _daysBetweenFillupsDataSet[horizontalIndex];
-      NSDecimalNumber *value = dataPoint[1];
-      return [value floatValue];
-      break;
+      return [dataPoint[1] floatValue];
+    }
+    case FPHomePriceOfGasChartTag: {
+      NSArray *dataPoint = _priceOfGasDataSet[horizontalIndex];
+      return [dataPoint[1] floatValue];
+    }
+    case FPHomeSpentOnGasChartTag: {
+      NSArray *dataPoint = _spentOnGasDataSet[horizontalIndex];
+      return [dataPoint[1] floatValue];
     }
   }
   return 0.0;
@@ -125,7 +145,7 @@ NSInteger const FPHomeDaysBetweenFillupsChartTag = 1;
 }
 
 - (CGFloat)lineChartView:(JBLineChartView *)lineChartView dotRadiusForDotAtHorizontalIndex:(NSUInteger)horizontalIndex atLineIndex:(NSUInteger)lineIndex {
-  return 2.0;
+  return 1.5;
 }
 
 - (BOOL)lineChartView:(JBLineChartView *)lineChartView smoothLineAtLineIndex:(NSUInteger)lineIndex {
@@ -144,12 +164,44 @@ NSInteger const FPHomeDaysBetweenFillupsChartTag = 1;
                       atTouchPoint:touchPoint
                          chartView:lineChartView
                     controllerView:self.view];
-      [_tooltipView setAttributedText:[PEUIUtils attributedTextWithTemplate:[[NSString stringWithFormat:@"%@: ", [_dateFormatter stringFromDate:dataPoint[0]]] stringByAppendingString:@"%@"]
-                                                               textToAccent:[NSString stringWithFormat:@" %@ days", [_generalFormatter stringFromNumber:value]]
+      [_tooltipView setAttributedText:[PEUIUtils attributedTextWithTemplate:@"%@"
+                                                               textToAccent:[NSString stringWithFormat:@"%@: %@ days", [_dateFormatter stringFromDate:dataPoint[0]], [_generalFormatter stringFromNumber:value]]
                                                              accentTextFont:nil
                                                             accentTextColor:[UIColor whiteColor]]];
-    }
       break;
+    }
+    case FPHomePriceOfGasChartTag: {
+      NSArray *dataPoint = _priceOfGasDataSet[horizontalIndex];
+      NSDecimalNumber *value = dataPoint[1];
+      [FPUIUtils setTooltipVisible:YES
+                       tooltipView:_tooltipView
+                    tooltipTipView:_tooltipTipView
+                          animated:YES
+                      atTouchPoint:touchPoint
+                         chartView:lineChartView
+                    controllerView:self.view];
+      [_tooltipView setAttributedText:[PEUIUtils attributedTextWithTemplate:@"%@"
+                                                               textToAccent:[NSString stringWithFormat:@"%@: %@", [_dateFormatter stringFromDate:dataPoint[0]], [_currencyFormatter stringFromNumber:value]]
+                                                             accentTextFont:nil
+                                                            accentTextColor:[UIColor whiteColor]]];
+      break;
+    }
+    case FPHomeSpentOnGasChartTag: {
+      NSArray *dataPoint = _spentOnGasDataSet[horizontalIndex];
+      NSDecimalNumber *value = dataPoint[1];
+      [FPUIUtils setTooltipVisible:YES
+                       tooltipView:_tooltipView
+                    tooltipTipView:_tooltipTipView
+                          animated:YES
+                      atTouchPoint:touchPoint
+                         chartView:lineChartView
+                    controllerView:self.view];
+      [_tooltipView setAttributedText:[PEUIUtils attributedTextWithTemplate:@"%@"
+                                                               textToAccent:[NSString stringWithFormat:@"%@: %@", [_dateFormatter stringFromDate:dataPoint[0]], [_currencyFormatter stringFromNumber:value]]
+                                                             accentTextFont:nil
+                                                            accentTextColor:[UIColor whiteColor]]];
+      break;
+    }
   }
 }
 
@@ -172,7 +224,10 @@ NSInteger const FPHomeDaysBetweenFillupsChartTag = 1;
   switch (lineChartView.tag) {
     case FPHomeDaysBetweenFillupsChartTag:
       return [_daysBetweenFillupsDataSet count];
-      break;
+    case FPHomePriceOfGasChartTag:
+      return [_priceOfGasDataSet count];
+    case FPHomeSpentOnGasChartTag:
+      return [_spentOnGasDataSet count];
   }
   return 0; //[_dataset count];
 }
@@ -211,6 +266,10 @@ NSInteger const FPHomeDaysBetweenFillupsChartTag = 1;
                                             target:nil
                                             action:nil];
   [PEUIUtils addDisclosureIndicatorToButton:allStatsBtn];
+  [allStatsBtn bk_addEventHandler:^(id sender) {
+    [[self navigationController] pushViewController:[_screenToolkit newVehicleStatsLaunchScreenMakerWithVehicle:_vehicleInCtx](_user)
+                                           animated:YES];
+  } forControlEvents:UIControlEventTouchUpInside];
   return allStatsBtn;
 }
 
@@ -246,7 +305,8 @@ NSInteger const FPHomeDaysBetweenFillupsChartTag = 1;
 
 - (NSArray *)makeLineChartSectionWithTitle:(NSString *)title
                                   chartTag:(NSInteger)chartTag
-                         addlLabelsViewBlk:(UIView *(^)(void))addlLabelsViewBlk {
+                         addlLabelsViewBlk:(UIView *(^)(void))addlLabelsViewBlk
+                   moreButtonControllerBlk:(UIViewController *(^)(void))moreButtonControllerBlk {
   UIView *panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:self.view];
   [panel setBackgroundColor:[UIColor whiteColor]];
   UILabel *chartHeader = [PEUIUtils labelWithKey:title
@@ -267,6 +327,10 @@ NSInteger const FPHomeDaysBetweenFillupsChartTag = 1;
                                         target:nil
                                         action:nil];
   [PEUIUtils addDisclosureIndicatorToButton:moreBtn];
+  [moreBtn bk_addEventHandler:^(id sender) {
+    [[self navigationController] pushViewController:moreButtonControllerBlk()
+                                           animated:YES];
+  } forControlEvents:UIControlEventTouchUpInside];
   [PEUIUtils placeView:chartHeader
                atTopOf:panel
          withAlignment:PEUIHorizontalAlignmentTypeCenter
@@ -279,14 +343,15 @@ NSInteger const FPHomeDaysBetweenFillupsChartTag = 1;
 alignmentRelativeToView:self.view
               vpadding:4.0
               hpadding:0.0];
+  UIView *addlLabelsView = nil;
   if (addlLabelsViewBlk) {
-    UIView *addlLabelsView = addlLabelsViewBlk();
+    addlLabelsView = addlLabelsViewBlk();
     [PEUIUtils placeView:addlLabelsView
                    below:chart
                     onto:panel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
  alignmentRelativeToView:chart
-                vpadding:3.5
+                vpadding:0.0
                 hpadding:5.0];
   }
   [PEUIUtils placeView:moreBtn
@@ -299,12 +364,76 @@ alignmentRelativeToView:chart
   [PEUIUtils setFrameHeight:(chartHeader.frame.size.height +
                              3.0 +
                              chart.frame.size.height +
-                             4.0 +
-                             moreBtn.frame.size.height +
+                             0.0 +
+                             (addlLabelsView != nil ? addlLabelsView.frame.size.height : moreBtn.frame.size.height) +
                              5.0 +
                              7.5)
                      ofView:panel];
   return @[panel, chart];
+}
+
+- (UIView *)makeDataTableWithRows:(NSArray *)rows
+                              tag:(NSInteger)tag
+                         rowWidth:(CGFloat)rowWidth {
+  UIView *tablePanel =
+  [PEUIUtils tablePanelWithRowData:rows
+                    withCellHeight:15.0
+                 labelLeftHPadding:10.0
+                valueRightHPadding:10.0
+                         labelFont:[UIFont systemFontOfSize:12]
+                         valueFont:[UIFont systemFontOfSize:12]
+                    labelTextColor:[UIColor blackColor]
+                    valueTextColor:[UIColor grayColor]
+    minPaddingBetweenLabelAndValue:0.0
+                 includeTopDivider:NO
+              includeBottomDivider:NO
+              includeInnerDividers:NO
+           innerDividerWidthFactor:0.0
+                    dividerPadding:0.0
+           rowPanelBackgroundColor:[UIColor whiteColor]
+              panelBackgroundColor:[_uitoolkit colorForWindows]
+                      dividerColor:nil
+              footerAttributedText:nil
+    footerFontForHeightCalculation:nil
+             footerVerticalPadding:0.0
+                          rowWidth:rowWidth
+                    relativeToView:_scrollView];
+  [tablePanel setTag:tag];
+  return tablePanel;
+}
+
+- (UIView *)makeDaysBetweenFillupsDataTable {
+  return [self makeDataTableWithRows:@[@[@"Avg days:", [_generalFormatter stringFromNumber:[_stats overallAvgDaysBetweenFillupsForVehicle:_vehicleInCtx]]],
+                                       @[@"Max days:", [_generalFormatter stringFromNumber:[_stats overallMaxDaysBetweenFillupsForVehicle:_vehicleInCtx]]]]
+                                 tag:FPHomeDaysBetweenFillupsTableDataTag
+                            rowWidth:110];
+}
+
+- (UIView *)makePricePerGallonDataTable {
+  NSNumber *octane = [self octaneOfLastVehicleInCtxGasLog];
+  return [self makeDataTableWithRows:@[@[@"Avg price:", [_currencyFormatter stringFromNumber:[_stats overallAvgPricePerGallonForUser:_user octane:octane]]],
+                                       @[@"Min price:", [_currencyFormatter stringFromNumber:[_stats overallMinPricePerGallonForUser:_user octane:octane]]],
+                                       @[@"Max price:", [_currencyFormatter stringFromNumber:[_stats overallMaxPricePerGallonForUser:_user octane:octane]]]]
+                                 tag:FPHomePriceOfGasTableDataTag
+                            rowWidth:125];
+}
+
+- (void)refreshViewWithTag:(NSInteger)tag viewMaker:(UIView *(^)(void))viewMaker {
+  UIView *view = [self.view viewWithTag:tag];
+  UIView *superView = [view superview];
+  CGRect frame = view.frame;
+  [view removeFromSuperview];
+  view = viewMaker();
+  view.frame = frame;
+  [superView addSubview:view];
+}
+
+- (NSNumber *)octaneOfLastVehicleInCtxGasLog {
+  FPFuelPurchaseLog *fplog = [_coordDao.localDao lastGasLogForVehicle:_vehicleInCtx error:[FPUtils localFetchErrorHandlerMaker]()];
+  if (fplog) {
+    return fplog.octane;
+  }
+  return nil;
 }
 
 #pragma mark - View Controller Lifecycle
@@ -313,48 +442,17 @@ alignmentRelativeToView:chart
   [super viewDidLoad];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   [self setTitle:@"Home"];
-  _tooltipView = [[JBChartTooltipView alloc] init];
-  [_tooltipView setBackgroundColor:[UIColor lightGrayColor]];
-  [_tooltipTipView setBackgroundColor:[UIColor lightGrayColor]];
-  _tooltipTipView = [[JBChartTooltipTipView alloc] init];
-  _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
-  [_scrollView setBounces:NO];
   _vehicleInCtx = [_coordDao vehicleForMostRecentFuelPurchaseLogForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()];
-  CGFloat totalHeightOfViews = 0.0;
   if (_vehicleInCtx) {
+    _tooltipView = [[JBChartTooltipView alloc] init];
+    _tooltipTipView = [[JBChartTooltipTipView alloc] init];
+    [_tooltipView setBackgroundColor:[UIColor blackColor]];
+    _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
+    [_scrollView setBounces:NO];
+    CGFloat totalHeightOfViews = 0.0;
     _vehicleLabel = [self makeLabelForVehicle:_vehicleInCtx];
     _vehicleAllStatsBtn = [self makeAllStatsButtonForVehicle:_vehicleInCtx];
-    NSArray *daysBetweenFillupSection = [self makeLineChartSectionWithTitle:@"DAYS BETWEEN FILL-UPS (All Time)"
-                                                                   chartTag:FPHomeDaysBetweenFillupsChartTag
-                                                          addlLabelsViewBlk:^UIView *{
-                                                            return [PEUIUtils tablePanelWithRowData:@[@[@"Avg days:", @"8000"],
-                                                                                                      @[@"Max days:", @"10"]]
-                                                                                     withCellHeight:15.0
-                                                                                  labelLeftHPadding:10.0
-                                                                                 valueRightHPadding:10.0
-                                                                                          labelFont:[UIFont systemFontOfSize:12]
-                                                                                          valueFont:[UIFont systemFontOfSize:12]
-                                                                                     labelTextColor:[UIColor blackColor]
-                                                                                     valueTextColor:[UIColor grayColor]
-                                                                     minPaddingBetweenLabelAndValue:0.0
-                                                                                  includeTopDivider:NO
-                                                                               includeBottomDivider:NO
-                                                                               includeInnerDividers:NO
-                                                                            innerDividerWidthFactor:0.0
-                                                                                     dividerPadding:0.0
-                                                                            rowPanelBackgroundColor:[UIColor whiteColor]
-                                                                               panelBackgroundColor:[_uitoolkit colorForWindows]
-                                                                                       dividerColor:nil
-                                                                               footerAttributedText:nil
-                                                                     footerFontForHeightCalculation:nil
-                                                                              footerVerticalPadding:0.0
-                                                                                           rowWidth:120
-                                                                                     relativeToView:_scrollView];
-                                                          }];
-    UIView *daysBetweenFillupPanel = daysBetweenFillupSection[0];
-    _daysBetweenFillupsChart = daysBetweenFillupSection[1];
     
-    // place the views onto the scroll view
     [PEUIUtils placeView:_vehicleLabel
                  atTopOf:_scrollView
            withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -367,6 +465,13 @@ alignmentRelativeToView:chart
  alignmentRelativeToView:self.view
                 vpadding:8.0
                 hpadding:8.0];
+    
+    NSArray *daysBetweenFillupSection = [self makeLineChartSectionWithTitle:@"DAYS BETWEEN FILL-UPS (All Time)"
+                                                                   chartTag:FPHomeDaysBetweenFillupsChartTag
+                                                          addlLabelsViewBlk:^UIView *{ return [self makeDaysBetweenFillupsDataTable];}
+                                                    moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newVehicleAvgDaysBetweenFillupsStatsScreenMakerWithVehicle:_vehicleInCtx](_user);}];
+    UIView *daysBetweenFillupPanel = daysBetweenFillupSection[0];
+    _daysBetweenFillupsChart = daysBetweenFillupSection[1];
     [PEUIUtils placeView:daysBetweenFillupPanel
                    below:_vehicleAllStatsBtn
                     onto:_scrollView
@@ -374,26 +479,57 @@ alignmentRelativeToView:chart
  alignmentRelativeToView:self.view
                 vpadding:10.0
                 hpadding:0.0];
-    totalHeightOfViews = _vehicleLabel.frame.size.height +
-    _vehicleAllStatsBtn.frame.size.height + 4.0 +
-    daysBetweenFillupPanel.frame.size.height + 10.0;
+    totalHeightOfViews += _vehicleLabel.frame.size.height +
+      _vehicleAllStatsBtn.frame.size.height + 4.0 +
+      daysBetweenFillupPanel.frame.size.height + 10.0;
+    
+    NSNumber *octane = [self octaneOfLastVehicleInCtxGasLog];
+    NSArray *priceOfGasSection = [self makeLineChartSectionWithTitle:[NSString stringWithFormat:@"AVG PRICE OF %@ OCTANE (All Time)", octane]
+                                                            chartTag:FPHomePriceOfGasChartTag
+                                                   addlLabelsViewBlk:^UIView *{ return [self makePricePerGallonDataTable];}                                             moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newAvgPricePerGallonStatsScreenMakerWithOctane:[self octaneOfLastVehicleInCtxGasLog]](_user);}];
+    UIView *pricePerGallonPanel = priceOfGasSection[0];
+    _priceOfGasChart = priceOfGasSection[1];
+    [PEUIUtils placeView:pricePerGallonPanel
+                   below:daysBetweenFillupPanel
+                    onto:_scrollView
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+ alignmentRelativeToView:self.view
+                vpadding:10.0
+                hpadding:0.0];
+    totalHeightOfViews += pricePerGallonPanel.frame.size.height + 10.0;
+    
+    NSArray *spentOnGasSection = [self makeLineChartSectionWithTitle:@"SPENT ON GAS (All Time)"
+                                                            chartTag:FPHomeSpentOnGasChartTag
+                                                   addlLabelsViewBlk:nil
+                                             moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newSpentOnGasStatsScreenMaker](_user);}];
+    UIView *spentOnGasPanel = spentOnGasSection[0];
+    _spentOnGasChart = spentOnGasSection[1];
+    [PEUIUtils placeView:spentOnGasPanel
+                   below:pricePerGallonPanel
+                    onto:_scrollView
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+ alignmentRelativeToView:self.view
+                vpadding:10.0
+                hpadding:0.0];
+    totalHeightOfViews += spentOnGasPanel.frame.size.height + 10.0;
+    
+    // place the scroll view
+    [PEUIUtils placeView:_scrollView
+                 atTopOf:self.view
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:0.0
+                hpadding:0.0];
+    
+    [_scrollView setContentSize:CGSizeMake(_scrollView.frame.size.width, 1.125 * totalHeightOfViews)];
+  } else {
+    // add some sort of message label with a big shiny 'create your first vehicle' buton
   }
-  
-  // place the scroll view
-  [PEUIUtils placeView:_scrollView
-               atTopOf:self.view
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:0.0
-              hpadding:0.0];
-  
-  [_scrollView setContentSize:CGSizeMake(_scrollView.frame.size.width, 1.125 * totalHeightOfViews)];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   _vehicleInCtx = [_coordDao vehicleForMostRecentFuelPurchaseLogForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()];
   if (_vehicleInCtx) {
-    _daysBetweenFillupsDataSet = [_stats overallDaysBetweenFillupsDataSetForVehicle:_vehicleInCtx];
     
     // refresh the vehicle label
     CGRect vehicleLabelFrame = _vehicleLabel.frame;
@@ -402,9 +538,24 @@ alignmentRelativeToView:chart
     _vehicleLabel.frame = vehicleLabelFrame;
     [_scrollView addSubview:_vehicleLabel];
     
-    // refresh the charts
+    //refresh the 'days between fillups' views
+    _daysBetweenFillupsDataSet = [_stats overallDaysBetweenFillupsDataSetForVehicle:_vehicleInCtx];
+    [self refreshViewWithTag:FPHomeDaysBetweenFillupsTableDataTag viewMaker:^{ return [self makeDaysBetweenFillupsDataTable]; }];
     [self refreshFooterForChart:_daysBetweenFillupsChart dataset:_daysBetweenFillupsDataSet];
     [_daysBetweenFillupsChart reloadData];
+    
+    //refresh the 'price per gallon' views
+    NSNumber *octane = [self octaneOfLastVehicleInCtxGasLog];
+    _priceOfGasDataSet = [_stats overallAvgPricePerGallonDataSetForUser:_user octane:octane];
+    [self refreshViewWithTag:FPHomePriceOfGasTableDataTag viewMaker:^{ return [self makePricePerGallonDataTable]; }];
+    [self refreshFooterForChart:_priceOfGasChart dataset:_priceOfGasDataSet];
+    [_priceOfGasChart reloadData];
+    
+    //refresh the 'spent on gas' views
+    _spentOnGasDataSet = [_stats overallSpentOnGasDataSetForUser:_user];
+    //[self refreshViewWithTag:FPHomeSpentOnGasTableDataTag viewMaker:^{ return [self makePricePerGallonDataTable]; }];
+    [self refreshFooterForChart:_spentOnGasChart dataset:_spentOnGasDataSet];
+    [_priceOfGasChart reloadData];
   }
 }
 

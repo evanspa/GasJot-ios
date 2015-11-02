@@ -348,6 +348,50 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   };
 }
 
+#pragma mark - User Stat Screens
+
+- (FPAuthScreenMaker)newAvgPricePerGallonStatsScreenMakerWithOctane:(NSNumber *)octane {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Avg Price of Gas (%@)", octane]
+                                           entityTypeLabelText:nil
+                                                 entityNameBlk:nil
+                                                        entity:user
+                                          aggregatesHeaderText:[NSString stringWithFormat:@"AVG PRICE OF GAS (%@ octane)", octane]
+                                        compareButtonTitleText:nil
+                                           alltimeAggregateBlk:^(FPUser *u) {return [_stats overallAvgPricePerGallonForUser:u octane:octane];}
+                                        yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateAvgPricePerGallonForUser:u octane:octane];}
+                                          lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearAvgPricePerGallonForUser:u octane:octane];}
+                                             alltimeDatasetBlk:^(FPUser *u) {return [_stats overallAvgPricePerGallonDataSetForUser:u octane:octane];}
+                                          yearToDateDatasetBlk:^(FPUser *u) {return [_stats yearToDateAvgPricePerGallonDataSetForUser:u octane:octane];}
+                                            lastYearDatasetBlk:^(FPUser *u) {return [_stats lastYearAvgPricePerGallonDataSetForUser:u octane:octane];}
+                                               siblingCountBlk:nil
+                                      comparisonScreenMakerBlk:nil
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newSpentOnGasStatsScreenMaker {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Spent on Gas"
+                                           entityTypeLabelText:nil
+                                                 entityNameBlk:nil
+                                                        entity:user
+                                          aggregatesHeaderText:@"SPENT ON GAS"
+                                        compareButtonTitleText:nil
+                                           alltimeAggregateBlk:^(FPUser *u) {return [_stats overallSpentOnGasForUser:u];}
+                                        yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateSpentOnGasForUser:u];}
+                                          lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearSpentOnGasForUser:u];}
+                                             alltimeDatasetBlk:^(FPUser *u) {return [_stats overallSpentOnGasDataSetForUser:u];}
+                                          yearToDateDatasetBlk:^(FPUser *u) {return [_stats yearToDateSpentOnGasDataSetForUser:u];}
+                                            lastYearDatasetBlk:^(FPUser *u) {return [_stats lastYearSpentOnGasDataSetForUser:u];}
+                                               siblingCountBlk:nil
+                                      comparisonScreenMakerBlk:nil
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
 #pragma mark - Vehicle Screens
 
 - (PEItemChildrenCounter)vehicleItemChildrenCounter {
@@ -953,7 +997,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                             lastYearDatasetBlk:^(FPVehicle *v) {return [_stats lastYearDaysBetweenFillupsDataSetForVehicle:v];}
                                                siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
                                       comparisonScreenMakerBlk:^{return [self newVehicleCompareAvgDaysBetweenFillupsStatsScreenMakerWithVehicleInCtx:vehicle](user);}
-                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_generalFormatter stringFromNumber:val];}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [NSString stringWithFormat:@"%@ days", [_generalFormatter stringFromNumber:val]];}
                                                      uitoolkit:_uitoolkit];
   };
 }
