@@ -163,6 +163,35 @@ Logging out will disconnect this device from your remote account and remove your
   return messagePanel;
 }
 
+- (UIView *)statsAndTrendsPanel {
+  UIView *panel = [PEUIUtils panelWithFixedWidth:self.view.frame.size.width fixedHeight:1.0];
+  UIButton *statsBtn = [_uitoolkit systemButtonMaker](@"Stats & Trends", nil, nil);
+  [[statsBtn layer] setCornerRadius:0.0];
+  [PEUIUtils setFrameWidthOfView:statsBtn ofWidth:1.0 relativeTo:panel];
+  [PEUIUtils addDisclosureIndicatorToButton:statsBtn];
+  [statsBtn bk_addEventHandler:^(id sender) {
+    [[self navigationController] pushViewController:[_screenToolkit newUserStatsLaunchScreenMaker](_user)
+                                           animated:YES];
+  } forControlEvents:UIControlEventTouchUpInside];
+  UIView *statsMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into various stats and trends associated with your data records."
+                                                                    font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                         backgroundColor:[UIColor clearColor]
+                                                               textColor:[UIColor darkGrayColor]
+                                                     verticalTextPadding:3.0
+                                                              fitToWidth:panel.frame.size.width - 15.0]
+                                         padding:8.0];
+  [PEUIUtils placeView:statsBtn atTopOf:panel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+  [PEUIUtils placeView:statsMsgPanel
+                 below:statsBtn
+                  onto:panel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:4.0
+              hpadding:0.0];
+  [PEUIUtils setFrameHeight:(statsBtn.frame.size.height + statsMsgPanel.frame.size.height + 4.0)
+                     ofView:panel];
+  return panel;
+}
+
 #pragma mark - Panel Makers
 
 - (void)makeDoesHaveAuthTokenPanel {
@@ -215,8 +244,15 @@ Logging out will disconnect this device from your remote account and remove your
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
-  [PEUIUtils placeView:accountStatusPanel
+  UIView *statsAndTrendsPanel = [self statsAndTrendsPanel];
+  [PEUIUtils placeView:statsAndTrendsPanel
                  below:accountSettingsMsgPanel
+                  onto:_doesHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:30.0
+              hpadding:0.0];
+  [PEUIUtils placeView:accountStatusPanel
+                 below:statsAndTrendsPanel
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:30.0

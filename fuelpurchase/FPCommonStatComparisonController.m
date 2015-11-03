@@ -64,16 +64,24 @@ NSString * const FPStatComparisonCellIdentifier = @"FPStatComparisonCellIdentifi
   NSMutableArray *rowData = [NSMutableArray array];
   NSMutableArray *nilRowData = [NSMutableArray array];
   NSArray *entities = _entitiesToCompareBlk();
+  NSString *(^truncatedEntityName)(id) = ^NSString *(id entity) { // kinda hacky
+    NSString *entityNameStr = _entityName(entity);
+    NSInteger maxLength = 25;
+    if (entityNameStr.length > maxLength) {
+      entityNameStr = [[entityNameStr substringToIndex:maxLength-3] stringByAppendingString:@"..."];
+    }
+    return entityNameStr;
+  };
   for (id entity in entities) {
     NSNumber *statValue = _alltimeAggregateBlk(entity);
     id entityName;
-    if (_entity && [entity isEqual:_entity]) {
+    if (_entity && entity && [entity isEqual:_entity]) {
       entityName = [PEUIUtils attributedTextWithTemplate:@"%@"
-                                            textToAccent:_entityName(entity)
+                                            textToAccent:truncatedEntityName(entity)
                                           accentTextFont:[UIFont boldSystemFontOfSize:16]
                                          accentTextColor:[UIColor fpAppBlue]];
     } else {
-      entityName = _entityName(entity);
+      entityName = truncatedEntityName(entity);
     }
     if (statValue) {
       [rowData addObject:@[entityName, _valueFormatterBlk(statValue), statValue]];
@@ -81,11 +89,6 @@ NSString * const FPStatComparisonCellIdentifier = @"FPStatComparisonCellIdentifi
       [nilRowData addObject:@[entityName, FPCommonStatComparisonTextIfNilStat, [NSDecimalNumber notANumber]]];
     }
   }
-  /*[rowData sortUsingComparator:^NSComparisonResult(NSArray *o1, NSArray *o2) {
-    NSDecimalNumber *v1 = o1[2];
-    NSDecimalNumber *v2 = o2[2];
-    return [v1 compare:v2];
-  }];*/
   [rowData sortUsingComparator:_comparator];
   UIView *tablePanel = [PEUIUtils tablePanelWithRowData:[rowData arrayByAddingObjectsFromArray:nilRowData]
                                               uitoolkit:_uitoolkit

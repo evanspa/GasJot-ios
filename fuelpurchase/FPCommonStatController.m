@@ -167,6 +167,9 @@ NSInteger const FPChartPreviousYearIndex = 2;
 }
 
 - (CGFloat)lineChartView:(JBLineChartView *)lineChartView dotRadiusForDotAtHorizontalIndex:(NSUInteger)horizontalIndex atLineIndex:(NSUInteger)lineIndex {
+  if (_dataset.count > 50) {
+    return 0.0;
+  }
   return 1.5;
 }
 
@@ -325,7 +328,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   [self setTitle:_screenTitle];
   UILabel *entityLabel = nil;
-  if (_entityTypeLabelText) {
+  if (_entityTypeLabelText && _entityNameBlk && _entity) {
     NSString *entityName = [FPUtils truncatedText:_entityNameBlk(_entity) maxLength:27];
     NSAttributedString *entityHeaderText = [PEUIUtils attributedTextWithTemplate:[[NSString stringWithFormat:@"%@: ", _entityTypeLabelText] stringByAppendingString:@"%@"]
                                                                     textToAccent:entityName

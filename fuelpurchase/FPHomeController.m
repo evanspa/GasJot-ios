@@ -37,6 +37,8 @@
 #import <JBChartView/JBLineChartView.h>
 #import <BlocksKit/UIControl+BlocksKit.h>
 
+NSString * const FPHomeTextIfNilStat = @"---";
+
 NSInteger const FPHomeDaysBetweenFillupsChartTag     = 1;
 NSInteger const FPHomeDaysBetweenFillupsTableDataTag = 2;
 
@@ -350,7 +352,7 @@ alignmentRelativeToView:self.view
                    below:chart
                     onto:panel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
- alignmentRelativeToView:chart
+ alignmentRelativeToView:panel
                 vpadding:0.0
                 hpadding:5.0];
   }
@@ -374,17 +376,17 @@ alignmentRelativeToView:chart
 
 - (UIView *)makeDataTableWithRows:(NSArray *)rows
                               tag:(NSInteger)tag
-                         rowWidth:(CGFloat)rowWidth {
+                         maxWidth:(CGFloat)maxWidth {
   UIView *tablePanel =
   [PEUIUtils tablePanelWithRowData:rows
                     withCellHeight:15.0
-                 labelLeftHPadding:10.0
+                 labelLeftHPadding:5.0
                 valueRightHPadding:10.0
                          labelFont:[UIFont systemFontOfSize:12]
                          valueFont:[UIFont systemFontOfSize:12]
                     labelTextColor:[UIColor blackColor]
                     valueTextColor:[UIColor grayColor]
-    minPaddingBetweenLabelAndValue:0.0
+    minPaddingBetweenLabelAndValue:1.0
                  includeTopDivider:NO
               includeBottomDivider:NO
               includeInnerDividers:NO
@@ -396,34 +398,35 @@ alignmentRelativeToView:chart
               footerAttributedText:nil
     footerFontForHeightCalculation:nil
              footerVerticalPadding:0.0
-                          rowWidth:rowWidth
+                          maxWidth:maxWidth
                     relativeToView:_scrollView];
   [tablePanel setTag:tag];
+  [PEUIUtils applyBorderToView:tablePanel withColor:[UIColor purpleColor]];
   return tablePanel;
 }
 
 - (UIView *)makeDaysBetweenFillupsDataTable {
-  return [self makeDataTableWithRows:@[@[@"Avg days:", [_generalFormatter stringFromNumber:[_stats overallAvgDaysBetweenFillupsForVehicle:_vehicleInCtx]]],
-                                       @[@"Max days:", [_generalFormatter stringFromNumber:[_stats overallMaxDaysBetweenFillupsForVehicle:_vehicleInCtx]]]]
+  return [self makeDataTableWithRows:@[@[@"Avg:", [self formattedValueForValue:[_stats overallAvgDaysBetweenFillupsForVehicle:_vehicleInCtx] formatter:^(NSNumber *val){return [_generalFormatter stringFromNumber:val];}]],
+                                       @[@"Max:", [self formattedValueForValue:[_stats overallMaxDaysBetweenFillupsForVehicle:_vehicleInCtx] formatter:^(NSNumber *val){return [_generalFormatter stringFromNumber:val];}]]]
                                  tag:FPHomeDaysBetweenFillupsTableDataTag
-                            rowWidth:110];
+                            maxWidth:205];
 }
 
 - (UIView *)makePricePerGallonDataTable {
   NSNumber *octane = [self octaneOfLastVehicleInCtxGasLog];
-  return [self makeDataTableWithRows:@[@[@"Avg price:", [_currencyFormatter stringFromNumber:[_stats overallAvgPricePerGallonForUser:_user octane:octane]]],
-                                       @[@"Min price:", [_currencyFormatter stringFromNumber:[_stats overallMinPricePerGallonForUser:_user octane:octane]]],
-                                       @[@"Max price:", [_currencyFormatter stringFromNumber:[_stats overallMaxPricePerGallonForUser:_user octane:octane]]]]
+  return [self makeDataTableWithRows:@[@[@"Avg:", [self formattedValueForValue:[_stats overallAvgPricePerGallonForUser:_user octane:octane] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]],
+                                       @[@"Min:", [self formattedValueForValue:[_stats overallMinPricePerGallonForUser:_user octane:octane] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]],
+                                       @[@"Max:", [self formattedValueForValue:[_stats overallMaxPricePerGallonForUser:_user octane:octane] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]]]
                                  tag:FPHomePriceOfGasTableDataTag
-                            rowWidth:125];
+                            maxWidth:205];
 }
 
 - (UIView *)makeSpentOnGasDataTable {
-  return [self makeDataTableWithRows:@[@[@"Avg spent:", [_currencyFormatter stringFromNumber:[_stats overallAvgSpentOnGasForUser:_user]]],
-                                       @[@"Min spent:", [_currencyFormatter stringFromNumber:[_stats overallMinSpentOnGasForUser:_user]]],
-                                       @[@"Max spent:", [_currencyFormatter stringFromNumber:[_stats overallMaxSpentOnGasForUser:_user]]]]
-                                 tag:FPHomePriceOfGasTableDataTag
-                            rowWidth:165];
+  return [self makeDataTableWithRows:@[@[@"Avg:", [self formattedValueForValue:[_stats overallAvgSpentOnGasForUser:_user] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]],
+                                       @[@"Min:", [self formattedValueForValue:[_stats overallMinSpentOnGasForUser:_user] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]],
+                                       @[@"Max:", [self formattedValueForValue:[_stats overallMaxSpentOnGasForUser:_user] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]]]
+                                 tag:FPHomeSpentOnGasTableDataTag
+                            maxWidth:205];
 }
 
 - (void)refreshViewWithTag:(NSInteger)tag viewMaker:(UIView *(^)(void))viewMaker {
@@ -432,7 +435,8 @@ alignmentRelativeToView:chart
   CGRect frame = view.frame;
   [view removeFromSuperview];
   view = viewMaker();
-  view.frame = frame;
+  [PEUIUtils setFrameX:frame.origin.x ofView:view];
+  [PEUIUtils setFrameY:frame.origin.y ofView:view];
   [superView addSubview:view];
 }
 
@@ -442,6 +446,14 @@ alignmentRelativeToView:chart
     return fplog.octane;
   }
   return nil;
+}
+
+- (NSString *)formattedValueForValue:(id)value formatter:(NSString *(^)(id))formatter {
+  if (value) {
+    return formatter(value);
+  } else {
+    return FPHomeTextIfNilStat;
+  }
 }
 
 #pragma mark - View Controller Lifecycle
@@ -563,7 +575,7 @@ alignmentRelativeToView:chart
     _spentOnGasDataSet = [_stats overallSpentOnGasDataSetForUser:_user];
     [self refreshViewWithTag:FPHomeSpentOnGasTableDataTag viewMaker:^{ return [self makeSpentOnGasDataTable]; }];
     [self refreshFooterForChart:_spentOnGasChart dataset:_spentOnGasDataSet];
-    [_priceOfGasChart reloadData];
+    [_spentOnGasChart reloadData];
   }
 }
 

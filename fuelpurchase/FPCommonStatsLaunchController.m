@@ -50,19 +50,21 @@
 #pragma mark - Helpers
 
 - (UIView *)makeContentPanel {
-  NSString *entityName = [FPUtils truncatedText:_entityNameBlk(_entity) maxLength:27];
-  NSAttributedString *entityHeaderText = [PEUIUtils attributedTextWithTemplate:[[NSString stringWithFormat:@"%@: ", _entityTypeLabelText] stringByAppendingString:@"%@"]
-                                                                  textToAccent:entityName
-                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
-                                                               accentTextColor:[UIColor fpAppBlue]];
-  UILabel *entityLabel = [PEUIUtils labelWithAttributeText:entityHeaderText
-                                                      font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                  fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
-                                           backgroundColor:[UIColor clearColor]
-                                                 textColor:[UIColor darkGrayColor]
-                                       verticalTextPadding:3.0
-                                                fitToWidth:self.view.frame.size.width - 15.0];
-  
+  UILabel *entityLabel = nil;
+  if (_entityNameBlk) {
+    NSString *entityName = [FPUtils truncatedText:_entityNameBlk(_entity) maxLength:27];
+    NSAttributedString *entityHeaderText = [PEUIUtils attributedTextWithTemplate:[[NSString stringWithFormat:@"%@: ", _entityTypeLabelText] stringByAppendingString:@"%@"]
+                                                                    textToAccent:entityName
+                                                                  accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                                 accentTextColor:[UIColor fpAppBlue]];
+    entityLabel = [PEUIUtils labelWithAttributeText:entityHeaderText
+                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                           fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                    backgroundColor:[UIColor clearColor]
+                                          textColor:[UIColor darkGrayColor]
+                                verticalTextPadding:3.0
+                                         fitToWidth:self.view.frame.size.width - 15.0];
+  }
   NSArray *statLaunchButtons = _statLaunchButtonsBlk();
   NSMutableArray *viewColumn = [NSMutableArray arrayWithCapacity:statLaunchButtons.count];
   for (id statLaunchButtonElement in statLaunchButtons) {
@@ -117,7 +119,12 @@
   UIView *buttonsPanel = [PEUIUtils panelWithColumnOfViews:viewColumn
                                verticalPaddingBetweenViews:10.0
                                             viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
-  return [PEUIUtils panelWithColumnOfViews:@[[PEUIUtils leftPadView:entityLabel padding:8.0], buttonsPanel]
+  NSMutableArray *views = [NSMutableArray array];
+  if (entityLabel) {
+    [views addObject:[PEUIUtils leftPadView:entityLabel padding:8.0]];
+  }
+  [views addObject:buttonsPanel];
+  return [PEUIUtils panelWithColumnOfViews:views
                verticalPaddingBetweenViews:15.0
                             viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
 }

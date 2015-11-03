@@ -163,7 +163,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                            controller:(UIViewController *)controller {
   FPEnableUserInteractionBlk enableUserInteraction = [FPUIUtils makeUserEnabledBlockForController:controller];
   NSArray *accountStatusText = [FPPanelToolkit accountStatusTextForUser:user];
-  UIView *statusPanel = [PEUIUtils labelValuePanelWithCellHeight:36.75
+  UIView *statusPanel = [PEUIUtils labelValuePanelWithCellHeight:41.5 //36.75
                                                      labelString:@"Account status"
                                                        labelFont:[uitoolkit fontForTextfields]
                                                   labelTextColor:[UIColor blackColor]
@@ -412,7 +412,20 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     [PEUIUtils placeView:buttonsView below:statusPanel onto:panel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:3.0 hpadding:0.0];
   } else {
     panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:statusPanel];
+    UILabel *statusVerifiedMsg = [PEUIUtils labelWithKey:@"Your account is verified.  Thank you."
+                                                    font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                         backgroundColor:[UIColor clearColor]
+                                               textColor:[UIColor darkGrayColor]
+                                     verticalTextPadding:3.0
+                                              fitToWidth:panel.frame.size.width - 15.0];
     [PEUIUtils placeView:statusPanel atTopOf:panel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+    [PEUIUtils placeView:statusVerifiedMsg
+                   below:statusPanel
+                    onto:panel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+ alignmentRelativeToView:panel
+                vpadding:4.0
+                hpadding:8.0];
   }
   [panel setTag:[panelTag integerValue]];
   return panel;

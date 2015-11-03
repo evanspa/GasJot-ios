@@ -49,6 +49,8 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
 
 #pragma mark - User Stat Screens
 
+- (FPAuthScreenMaker)newUserStatsLaunchScreenMaker;
+
 - (FPAuthScreenMaker)newAvgPricePerGallonStatsScreenMakerWithOctane:(NSNumber *)octane;
 
 - (FPAuthScreenMaker)newSpentOnGasStatsScreenMaker;
