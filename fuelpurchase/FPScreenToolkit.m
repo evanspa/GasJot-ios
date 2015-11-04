@@ -366,28 +366,120 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                    [statLaunchButtons addObject:@"COST PER MILE"];
                                                    [statLaunchButtons addObject:@[@"Gas cost per mile",
                                                                                   ^{ return [self newGasCostPerMileStatsScreenMaker](user); }]];
-                                                   /*[statLaunchButtons addObject:@"GAS SPEND"];
+                                                   [statLaunchButtons addObject:@"GAS SPEND"];
                                                    [statLaunchButtons addObject:@[@"Total amount spent on gas",
-                                                                                  ^{ return [self newVehicleSpentOnGasStatsScreenMakerWithVehicle:vehicle](user); }]];
+                                                                                  ^{ return [self newSpentOnGasStatsScreenMaker](user); }]];
                                                    [statLaunchButtons addObject:@[@"Avg monthly spend on gas",
-                                                                                  ^{ return [self newVehicleAvgSpentOnGasStatsScreenMakerWithVehicle:vehicle](user); }]];
+                                                                                  ^{ return [self newAvgSpentOnGasStatsScreenMaker](user); }]];
                                                    [statLaunchButtons addObject:@[@"Min monthly spend on gas",
-                                                                                  ^{ return [self newVehicleMinSpentOnGasStatsScreenMakerWithVehicle:vehicle](user); }]];
+                                                                                  ^{ return [self newMinSpentOnGasStatsScreenMaker](user); }]];
                                                    [statLaunchButtons addObject:@[@"Max monthly spend on gas",
-                                                                                  ^{ return [self newVehicleMaxSpentOnGasStatsScreenMakerWithVehicle:vehicle](user); }]];*/
+                                                                                  ^{ return [self newMaxSpentOnGasStatsScreenMaker](user); }]];
                                                    NSArray *octanes = [_coordDao.localDao distinctOctanesForUser:user error:_errorBlk];
                                                    for (NSNumber *octane in octanes) {
                                                      [statLaunchButtons addObject:[NSString stringWithFormat:@"%@ OCTANE - PRICE STATS", octane]];
                                                      [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Avg price of gas (%@ octane)", octane],
                                                                                     ^{ return [self newAvgPricePerGallonStatsScreenMakerWithOctane:octane](user); }]];
-                                                     /*[statLaunchButtons addObject:@[[NSString stringWithFormat:@"Min price of gas (%@ octane)", octane],
-                                                                                    ^{ return [self newVehicleMinPricePerGallonStatsScreenMakerWithVehicle:vehicle octane:octane](user); }]];
+                                                     [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Min price of gas (%@ octane)", octane],
+                                                                                    ^{ return [self newMinPricePerGallonStatsScreenMakerWithOctane:octane](user); }]];
                                                      [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Max price of gas (%@ octane)", octane],
-                                                                                    ^{ return [self newVehicleMaxPricePerGallonStatsScreenMakerWithVehicle:vehicle octane:octane](user); }]];*/
+                                                                                    ^{ return [self newMaxPricePerGallonStatsScreenMakerWithOctane:octane](user); }]];
                                                    }
                                                    return statLaunchButtons;
                                                  }
                                                             uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newMaxPricePerGallonStatsScreenMakerWithOctane:(NSNumber *)octane {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Max Price of Gas (%@)", octane]
+                                           entityTypeLabelText:nil
+                                                 entityNameBlk:nil
+                                                        entity:user
+                                          aggregatesHeaderText:[NSString stringWithFormat:@"MAX PRICE OF GAS (%@ octane)", octane]
+                                        compareButtonTitleText:@"Compare gas stations"
+                                           alltimeAggregateBlk:^(FPUser *u) {return [_stats overallMaxPricePerGallonForUser:u octane:octane];}
+                                        yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateMaxPricePerGallonForUser:u octane:octane];}
+                                          lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearMaxPricePerGallonForUser:u octane:octane];}
+                                               siblingCountBlk:^{return [_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newFuelStationCompareMaxPricePerGallonStatsScreenMakerWithFuelstationInCtx:nil
+                                                                                                                                                  octane:octane](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newMinPricePerGallonStatsScreenMakerWithOctane:(NSNumber *)octane {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Min Price of Gas (%@)", octane]
+                                           entityTypeLabelText:nil
+                                                 entityNameBlk:nil
+                                                        entity:user
+                                          aggregatesHeaderText:[NSString stringWithFormat:@"MIN PRICE OF GAS (%@ octane)", octane]
+                                        compareButtonTitleText:@"Compare gas stations"
+                                           alltimeAggregateBlk:^(FPUser *u) {return [_stats overallMinPricePerGallonForUser:u octane:octane];}
+                                        yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateMinPricePerGallonForUser:u octane:octane];}
+                                          lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearMinPricePerGallonForUser:u octane:octane];}
+                                               siblingCountBlk:^{return [_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newFuelStationCompareMinPricePerGallonStatsScreenMakerWithFuelstationInCtx:nil
+                                                                                                                                                  octane:octane](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newMaxSpentOnGasStatsScreenMaker {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Max Monthly Spend on Gas"
+                                           entityTypeLabelText:nil
+                                                 entityNameBlk:nil
+                                                        entity:user
+                                          aggregatesHeaderText:@"MAX MONTHLY SPEND ON GAS"
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPUser *u) {return [_stats overallMaxSpentOnGasForUser:u];}
+                                        yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateMaxSpentOnGasForUser:u];}
+                                          lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearMaxSpentOnGasForUser:u];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareMaxSpentOnGasStatsScreenMakerWithVehicleInCtx:nil](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newMinSpentOnGasStatsScreenMaker {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Min Monthly Spend on Gas"
+                                           entityTypeLabelText:nil
+                                                 entityNameBlk:nil
+                                                        entity:user
+                                          aggregatesHeaderText:@"MIN MONTHLY SPEND ON GAS"
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPUser *u) {return [_stats overallMinSpentOnGasForUser:u];}
+                                        yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateMinSpentOnGasForUser:u];}
+                                          lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearMinSpentOnGasForUser:u];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareMinSpentOnGasStatsScreenMakerWithVehicleInCtx:nil](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newAvgSpentOnGasStatsScreenMaker {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Avg Monthly Spend on Gas"
+                                           entityTypeLabelText:nil
+                                                 entityNameBlk:nil
+                                                        entity:user
+                                          aggregatesHeaderText:@"AVG MONTHLY SPEND ON GAS"
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPUser *u) {return [_stats overallAvgSpentOnGasForUser:u];}
+                                        yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateAvgSpentOnGasForUser:u];}
+                                          lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearAvgSpentOnGasForUser:u];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareAvgSpentOnGasStatsScreenMakerWithVehicleInCtx:nil](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
   };
 }
 
