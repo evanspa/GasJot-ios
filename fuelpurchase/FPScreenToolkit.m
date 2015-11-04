@@ -363,9 +363,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                                   ^{ return [self newAvgDaysBetweenFillupsStatsScreenMaker](user); }]];
                                                    [statLaunchButtons addObject:@[@"Max days between fill-ups",
                                                                                   ^{ return [self newMaxDaysBetweenFillupsStatsScreenMaker](user); }]];
-                                                   [statLaunchButtons addObject:@"COST PER MILE"];
-                                                   [statLaunchButtons addObject:@[@"Gas cost per mile",
-                                                                                  ^{ return [self newGasCostPerMileStatsScreenMaker](user); }]];
+                                                   [statLaunchButtons addObject:@"AVG COST PER MILE"];
+                                                   [statLaunchButtons addObject:@[@"Avg Gas cost per mile",
+                                                                                  ^{ return [self newAvgGasCostPerMileStatsScreenMaker](user); }]];
                                                    [statLaunchButtons addObject:@"GAS SPEND"];
                                                    [statLaunchButtons addObject:@[@"Total amount spent on gas",
                                                                                   ^{ return [self newSpentOnGasStatsScreenMaker](user); }]];
@@ -483,22 +483,22 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   };
 }
 
-- (FPAuthScreenMaker)newGasCostPerMileStatsScreenMaker {
+- (FPAuthScreenMaker)newAvgGasCostPerMileStatsScreenMaker {
   return ^ UIViewController * (FPUser *user) {
-    return [[FPCommonStatController alloc] initWithScreenTitle:@"Gas Cost per Mile"
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Avg Gas Cost per Mile"
                                            entityTypeLabelText:nil
                                                  entityNameBlk:nil
                                                         entity:user
-                                          aggregatesHeaderText:@"GAS COST PER MILE"
+                                          aggregatesHeaderText:@"AVG GAS COST PER MILE"
                                         compareButtonTitleText:@"Compare vehicles"
-                                           alltimeAggregateBlk:^(FPUser *u) {return [_stats overallGasCostPerMileForUser:u];}
-                                        yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateGasCostPerMileForUser:u];}
-                                          lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearGasCostPerMileForUser:u];}
-                                             alltimeDatasetBlk:^(FPUser *u) {return [_stats overallGasCostPerMileDataSetForUser:u];}
-                                          yearToDateDatasetBlk:^(FPUser *u) {return [_stats yearToDateGasCostPerMileDataSetForUser:u];}
-                                            lastYearDatasetBlk:^(FPUser *u) {return [_stats lastYearGasCostPerMileDataSetForUser:u];}
+                                           alltimeAggregateBlk:^(FPUser *u) {return [_stats overallAvgGasCostPerMileForUser:u];}
+                                        yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateAvgGasCostPerMileForUser:u];}
+                                          lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearAvgGasCostPerMileForUser:u];}
+                                             alltimeDatasetBlk:^(FPUser *u) {return [_stats overallAvgGasCostPerMileDataSetForUser:u];}
+                                          yearToDateDatasetBlk:^(FPUser *u) {return [_stats yearToDateAvgGasCostPerMileDataSetForUser:u];}
+                                            lastYearDatasetBlk:^(FPUser *u) {return [_stats lastYearAvgGasCostPerMileDataSetForUser:u];}
                                                siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
-                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareGasCostPerMileStatsScreenMakerWithVehicleInCtx:nil](user);}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareAvgGasCostPerMileStatsScreenMakerWithVehicleInCtx:nil](user);}
                                              valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
                                                      uitoolkit:_uitoolkit];
   };
@@ -1336,33 +1336,33 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 
 - (FPAuthScreenMaker)newVehicleGasCostPerMileStatsScreenMakerWithVehicle:(FPVehicle *)vehicle {
   return ^ UIViewController * (FPUser *user) {
-    return [[FPCommonStatController alloc] initWithScreenTitle:@"Gas Cost per Mile"
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Avg Gas Cost per Mile"
                                            entityTypeLabelText:@"VEHICLE"
                                                  entityNameBlk:^(FPVehicle *v) {return v.name;}
                                                         entity:vehicle
-                                          aggregatesHeaderText:@"GAS COST PER MILE"
+                                          aggregatesHeaderText:@"AVG GAS COST PER MILE"
                                         compareButtonTitleText:@"Compare vehicles"
-                                           alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallGasCostPerMileForVehicle:v];}
-                                        yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateGasCostPerMileForVehicle:v];}
-                                          lastYearAggregateBlk:^(FPVehicle *v) {return [_stats lastYearGasCostPerMileForVehicle:v];}
-                                             alltimeDatasetBlk:^(FPVehicle *v) {return [_stats overallGasCostPerMileDataSetForVehicle:v];}
-                                          yearToDateDatasetBlk:^(FPVehicle *v) {return [_stats yearToDateGasCostPerMileDataSetForVehicle:v];}
-                                            lastYearDatasetBlk:^(FPVehicle *v) {return [_stats lastYearGasCostPerMileDataSetForVehicle:v];}
+                                           alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallAvgGasCostPerMileForVehicle:v];}
+                                        yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateAvgGasCostPerMileForVehicle:v];}
+                                          lastYearAggregateBlk:^(FPVehicle *v) {return [_stats lastYearAvgGasCostPerMileForVehicle:v];}
+                                             alltimeDatasetBlk:^(FPVehicle *v) {return [_stats overallAvgGasCostPerMileDataSetForVehicle:v];}
+                                          yearToDateDatasetBlk:^(FPVehicle *v) {return [_stats yearToDateAvgGasCostPerMileDataSetForVehicle:v];}
+                                            lastYearDatasetBlk:^(FPVehicle *v) {return [_stats lastYearAvgGasCostPerMileDataSetForVehicle:v];}
                                                siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
-                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareGasCostPerMileStatsScreenMakerWithVehicleInCtx:vehicle](user);}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareAvgGasCostPerMileStatsScreenMakerWithVehicleInCtx:vehicle](user);}
                                              valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
                                                      uitoolkit:_uitoolkit];
   };
 }
 
-- (FPAuthScreenMaker)newVehicleCompareGasCostPerMileStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle {
+- (FPAuthScreenMaker)newVehicleCompareAvgGasCostPerMileStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle {
   return ^ UIViewController * (FPUser *user) {
-    return [[FPCommonStatComparisonController alloc] initWithScreenTitle:@"Gas Cost per Mile Comparison"
-                                                              headerText:@"GAS COST PER MILE (All time)"
+    return [[FPCommonStatComparisonController alloc] initWithScreenTitle:@"Avg Gas Cost per Mile Comparison"
+                                                              headerText:@"AVG GAS COST PER MILE (All time)"
                                                            entityNameBlk:^(FPVehicle *v) {return v.name;}
                                                                   entity:vehicle
                                                     entitiesToCompareBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];}
-                                                     alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallGasCostPerMileForVehicle:v];}
+                                                     alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallAvgGasCostPerMileForVehicle:v];}
                                                        valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
                                                               comparator:^(NSArray *o1, NSArray *o2) {
                                                                 NSDecimalNumber *v1 = o1[2];
@@ -1371,10 +1371,6 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                               }
                                                                uitoolkit:_uitoolkit];
   };
-}
-
-- (FPAuthScreenMaker)newVehicleCompareGasCostPerMileStatsScreenMaker {
-  return [self newVehicleCompareGasCostPerMileStatsScreenMakerWithVehicleInCtx:nil];
 }
 
 - (FPAuthScreenMaker)newVehicleMaxSpentOnGasStatsScreenMakerWithVehicle:(FPVehicle *)vehicle {
@@ -2345,7 +2341,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                  entityNameBlk:^(FPFuelStation *fs) {return fs.name;}
                                                         entity:fuelstation
                                           aggregatesHeaderText:@"MONTHLY SPEND ON GAS"
-                                        compareButtonTitleText:@"Compare fuelstations"
+                                        compareButtonTitleText:@"Compare gas stations"
                                            alltimeAggregateBlk:^(FPFuelStation *fs) {return [_stats overallMaxSpentOnGasForFuelstation:fs];}
                                         yearToDateAggregateBlk:^(FPFuelStation *fs) {return [_stats yearToDateMaxSpentOnGasForFuelstation:fs];}
                                           lastYearAggregateBlk:^(FPFuelStation *fs) {return [_stats lastYearMaxSpentOnGasForFuelstation:fs];}
@@ -2381,7 +2377,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                  entityNameBlk:^(FPFuelStation *fs) {return fs.name;}
                                                         entity:fuelstation
                                           aggregatesHeaderText:@"MONTHLY SPEND ON GAS"
-                                        compareButtonTitleText:@"Compare fuelstations"
+                                        compareButtonTitleText:@"Compare gas stations"
                                            alltimeAggregateBlk:^(FPFuelStation *fs) {return [_stats overallMinSpentOnGasForFuelstation:fs];}
                                         yearToDateAggregateBlk:^(FPFuelStation *fs) {return [_stats yearToDateMinSpentOnGasForFuelstation:fs];}
                                           lastYearAggregateBlk:^(FPFuelStation *fs) {return [_stats lastYearMinSpentOnGasForFuelstation:fs];}
@@ -2417,7 +2413,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                  entityNameBlk:^(FPFuelStation *fs) {return fs.name;}
                                                         entity:fuelstation
                                           aggregatesHeaderText:@"MONTHLY SPEND ON GAS"
-                                        compareButtonTitleText:@"Compare fuelstations"
+                                        compareButtonTitleText:@"Compare gas stations"
                                            alltimeAggregateBlk:^(FPFuelStation *fs) {return [_stats overallAvgSpentOnGasForFuelstation:fs];}
                                         yearToDateAggregateBlk:^(FPFuelStation *fs) {return [_stats yearToDateAvgSpentOnGasForFuelstation:fs];}
                                           lastYearAggregateBlk:^(FPFuelStation *fs) {return [_stats lastYearAvgSpentOnGasForFuelstation:fs];}

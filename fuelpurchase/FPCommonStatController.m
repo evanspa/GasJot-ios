@@ -167,10 +167,11 @@ NSInteger const FPChartPreviousYearIndex = 2;
 }
 
 - (CGFloat)lineChartView:(JBLineChartView *)lineChartView dotRadiusForDotAtHorizontalIndex:(NSUInteger)horizontalIndex atLineIndex:(NSUInteger)lineIndex {
-  if (_dataset.count > 50) {
+  /*if (_dataset.count > 50) {
     return 0.0;
   }
-  return 1.5;
+  return 1.0;*/
+  return 0.0;
 }
 
 - (BOOL)lineChartView:(JBLineChartView *)lineChartView smoothLineAtLineIndex:(NSUInteger)lineIndex {

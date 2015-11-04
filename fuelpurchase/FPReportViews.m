@@ -68,12 +68,12 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 
 #pragma mark - Gas Log Fun Facts
 
-- (FPFunFact)overallGasCostPerMileForVehicleFunFact {
+- (FPFunFact)overallAvgGasCostPerMileForVehicleFunFact {
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
     FPVehicle *vehicle = logVehFs[1];
-    NSDecimalNumber *gasCostPerMile = [_stats overallGasCostPerMileForVehicle:vehicle];
+    NSDecimalNumber *gasCostPerMile = [_stats overallAvgGasCostPerMileForVehicle:vehicle];
     NSNumberFormatter *currencyFormatter = [PEUtils currencyFormatter];
-    NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"Since recording, you're paying %@ per mile on gas"
+    NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"Since recording, you're paying about %@ per mile on gas"
                                                                textToAccent:[currencyFormatter stringFromNumber:gasCostPerMile]
                                                              accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
     NSMutableAttributedString *funFact = [[NSMutableAttributedString alloc] initWithAttributedString:funFactPart];
@@ -87,9 +87,9 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 - (FPFunFact)yearToDateGasCostPerMileForVehicleFunFact {
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
     FPVehicle *vehicle = logVehFs[1];
-    NSDecimalNumber *gasCostPerMile = [_stats yearToDateGasCostPerMileForVehicle:vehicle];
+    NSDecimalNumber *gasCostPerMile = [_stats yearToDateAvgGasCostPerMileForVehicle:vehicle];
     NSNumberFormatter *currencyFormatter = [PEUtils currencyFormatter];
-    NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"So far this year, you're paying %@ per mile on gas"
+    NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"So far this year, you're paying about %@ per mile on gas"
                                                                textToAccent:[currencyFormatter stringFromNumber:gasCostPerMile]
                                                              accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
     NSMutableAttributedString *funFact = [[NSMutableAttributedString alloc] initWithAttributedString:funFactPart];
@@ -612,7 +612,7 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
 }
 
 - (NSArray *)gasLogFunFacts {
-  FPFunFact f18 = [self overallGasCostPerMileForVehicleFunFact];
+  FPFunFact f18 = [self overallAvgGasCostPerMileForVehicleFunFact];
   FPFunFact f17 = [self yearToDateGasCostPerMileForVehicleFunFact];
   FPFunFact f16 = [self overallMinPricePerGallonForUserFunFact];
   FPFunFact f15 = [self overallMinPricePerGallonForFuelstationFunFact];

@@ -57,7 +57,7 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
 
 - (FPAuthScreenMaker)newSpentOnGasStatsScreenMaker;
 
-- (FPAuthScreenMaker)newGasCostPerMileStatsScreenMaker;
+- (FPAuthScreenMaker)newAvgGasCostPerMileStatsScreenMaker;
 
 #pragma mark - Vehicle Screens
 
@@ -90,9 +90,7 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
 
 - (FPAuthScreenMaker)newVehicleGasCostPerMileStatsScreenMakerWithVehicle:(FPVehicle *)vehicle;
 
-- (FPAuthScreenMaker)newVehicleCompareGasCostPerMileStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle;
-
-- (FPAuthScreenMaker)newVehicleCompareGasCostPerMileStatsScreenMaker;
+- (FPAuthScreenMaker)newVehicleCompareAvgGasCostPerMileStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle;
 
 - (FPAuthScreenMaker)newVehicleSpentOnGasStatsScreenMakerWithVehicle:(FPVehicle *)vehicle;
 

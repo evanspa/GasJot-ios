@@ -155,7 +155,7 @@ NSInteger const FPHomeGasCostPerMileTableDataTag     = 8;
 }
 
 - (CGFloat)lineChartView:(JBLineChartView *)lineChartView dotRadiusForDotAtHorizontalIndex:(NSUInteger)horizontalIndex atLineIndex:(NSUInteger)lineIndex {
-  return 1.5;
+  return 0.0;
 }
 
 - (BOOL)lineChartView:(JBLineChartView *)lineChartView smoothLineAtLineIndex:(NSUInteger)lineIndex {
@@ -448,8 +448,8 @@ alignmentRelativeToView:chart
                             maxWidth:205];
 }
 
-- (UIView *)makeGasCostPerMileDataTable {
-  return [self makeDataTableWithRows:@[@[@"Avg:", [self formattedValueForValue:[_stats overallGasCostPerMileForUser:_user] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]]]
+- (UIView *)makeAvgGasCostPerMileDataTable {
+  return [self makeDataTableWithRows:@[@[@"Avg:", [self formattedValueForValue:[_stats overallAvgGasCostPerMileForUser:_user] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]]]
                                  tag:FPHomeGasCostPerMileTableDataTag
                             maxWidth:205];
 }
@@ -536,10 +536,10 @@ alignmentRelativeToView:chart
                 hpadding:0.0];
     totalHeightOfViews += pricePerGallonPanel.frame.size.height + 10.0;
     
-    NSArray *gasCostPerMileSection = [self makeLineChartSectionWithTitle:@"GAS COST PER MILE\n(all vehicles, all time)"
+    NSArray *gasCostPerMileSection = [self makeLineChartSectionWithTitle:@"AVG GAS COST PER MILE\n    (all vehicles, all time)"
                                                                 chartTag:FPHomeGasCostPerMileChartTag
-                                                       addlLabelsViewBlk:^UIView *{ return [self makeGasCostPerMileDataTable];}
-                                                 moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newGasCostPerMileStatsScreenMaker](_user);}];
+                                                       addlLabelsViewBlk:^UIView *{ return [self makeAvgGasCostPerMileDataTable];}
+                                                 moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newAvgGasCostPerMileStatsScreenMaker](_user);}];
     UIView *gasCostPerMilePanel = gasCostPerMileSection[0];
     _gasCostPerMileChart = gasCostPerMileSection[1];
     [PEUIUtils placeView:gasCostPerMilePanel
@@ -604,8 +604,8 @@ alignmentRelativeToView:chart
     [_spentOnGasChart reloadData];
     
     //refresh the 'gas cost per mile' views
-    _gasCostPerMileDataSet = [_stats overallGasCostPerMileDataSetForUser:_user];
-    [self refreshViewWithTag:FPHomeGasCostPerMileTableDataTag viewMaker:^{ return [self makeGasCostPerMileDataTable]; }];
+    _gasCostPerMileDataSet = [_stats overallAvgGasCostPerMileDataSetForUser:_user];
+    [self refreshViewWithTag:FPHomeGasCostPerMileTableDataTag viewMaker:^{ return [self makeAvgGasCostPerMileDataTable]; }];
     [self refreshFooterForChart:_gasCostPerMileChart dataset:_gasCostPerMileDataSet];
     [_gasCostPerMileChart reloadData];
   }
