@@ -1316,6 +1316,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     UIView *parentView = [parentViewController view];
     UIView *fplogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
     UIView *fplogDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Octane", [PEUtils descriptionOrEmptyIfNil:[fplog octane]]],
+                                                                @[@"Odometer", [PEUtils descriptionOrEmptyIfNil:[fplog odometer]]],
                                                                 @[@"Price per gallon", [PEUtils descriptionOrEmptyIfNil:[fplog gallonPrice]]],
                                                                 @[@"Car wash per-gallon discount", [PEUtils descriptionOrEmptyIfNil:[fplog carWashPerGallonDiscount]]],
                                                                 @[@"Got car wash?", [PEUtils yesNoFromBool:[fplog gotCarWash]]],
@@ -1385,6 +1386,9 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     }
     [octaneTf setKeyboardType:UIKeyboardTypeNumberPad];
     components[@(FPFpLogTagOctane)] = octaneTf;
+    UITextField *odometerTf = tfMaker(@"Odometer", FPFplogTagOdometer);
+    [odometerTf setKeyboardType:UIKeyboardTypeNumberPad];
+    components[@(FPFplogTagOdometer)] = odometerTf;
     UITextField *carWashPerGallonDiscountTf =
     tfMaker(@"Car was per-gallon discount", FPFpLogTagCarWashPerGallonDiscount);
     [carWashPerGallonDiscountTf setKeyboardType:UIKeyboardTypeDecimalPad];
@@ -1475,6 +1479,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     UITextField *numGallonsTf = components[@(FPFpLogTagNumGallons)];
     UITextField *pricePerGallonTf = components[@(FPFpLogTagPricePerGallon)];
     UITextField *octaneTf = components[@(FPFpLogTagOctane)];
+    UITextField *odometerTf = components[@(FPFplogTagOdometer)];
     UITextField *carWashPerGallonDiscountTf = components[@(FPFpLogTagCarWashPerGallonDiscount)];
     UIView *gotCarWashPanel = components[@(FPFpLogTagCarWashPanel)];
     [PEUIUtils placeView:vehicleFuelStationDateTableView
@@ -1488,8 +1493,14 @@ To compute your location, you need to enable location services for Gas Jot.  If 
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    [PEUIUtils placeView:pricePerGallonTf
+    [PEUIUtils placeView:odometerTf
                    below:octaneTf
+                    onto:fpLogPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:pricePerGallonTf
+                   below:odometerTf
                     onto:fpLogPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
@@ -1539,6 +1550,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     binddec(FPFpLogTagNumGallons, @selector(setNumGallons:));
     binddec(FPFpLogTagPricePerGallon, @selector(setGallonPrice:));
     bindnum(FPFpLogTagOctane, @selector(setOctane:));
+    binddec(FPFplogTagOdometer, @selector(setOdometer:));
     binddec(FPFpLogTagCarWashPerGallonDiscount, @selector(setCarWashPerGallonDiscount:));
     UISwitch *gotCarWasSwitch = (UISwitch *)[panel viewWithTag:FPFpLogTagGotCarWash];
     [fpLog setGotCarWash:[gotCarWasSwitch isOn]];
@@ -1562,6 +1574,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       bindtt(FPFpLogTagNumGallons, @selector(numGallons));
       bindtt(FPFpLogTagPricePerGallon, @selector(gallonPrice));
       bindtt(FPFpLogTagOctane, @selector(octane));
+      bindtt(FPFplogTagOdometer, @selector(odometer));
       bindtt(FPFpLogTagCarWashPerGallonDiscount, @selector(carWashPerGallonDiscount));
       UISwitch *gotCarWasSwitch = (UISwitch *)[panel viewWithTag:FPFpLogTagGotCarWash];
       [gotCarWasSwitch setOn:[fpLog gotCarWash] animated:YES];
@@ -1588,6 +1601,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     enabDisab(FPFpLogTagNumGallons);
     enabDisab(FPFpLogTagPricePerGallon);
     enabDisab(FPFpLogTagOctane);
+    enabDisab(FPFplogTagOdometer);
     enabDisab(FPFpLogTagCarWashPerGallonDiscount);
     enabDisab(FPFpLogTagGotCarWash);
     UITableView *vehicleFuelStationDateTableView =

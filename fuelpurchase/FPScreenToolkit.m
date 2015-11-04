@@ -2989,6 +2989,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
           [fields addObject:@[@"Purchased date:", @(FPFpLogTagPurchasedDate), [PEUtils stringFromDate:[localFplog purchasedAt] withPattern:@"MM/dd/YYYY"], [PEUtils stringFromDate:[remoteFplog purchasedAt] withPattern:@"MM/dd/YYYY"]]];
         } else if ([fieldName isEqualToString:FPFplogOctaneField]) {
           [fields addObject:@[@"Octane:", @(FPFpLogTagOctane), [PEUtils descriptionOrEmptyIfNil:[localFplog octane]], [PEUtils descriptionOrEmptyIfNil:[remoteFplog octane]]]];
+        } else if ([fieldName isEqualToString:FPFplogOdometerField]) {
+          [fields addObject:@[@"Odometer:", @(FPFplogTagOdometer), [PEUtils descriptionOrEmptyIfNil:[localFplog odometer]], [PEUtils descriptionOrEmptyIfNil:[remoteFplog odometer]]]];
         } else if ([fieldName isEqualToString:FPFplogGallonPriceField]) {
           [fields addObject:@[@"Price per gallon:", @(FPFpLogTagPricePerGallon), [PEUtils descriptionOrEmptyIfNil:[localFplog gallonPrice]], [PEUtils descriptionOrEmptyIfNil:[remoteFplog gallonPrice]]]];
         } else if ([fieldName isEqualToString:FPFplogCarWashPerGallonDiscountField]) {
@@ -3014,6 +3016,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
           switch (remoteValue.tag) {
             case FPFpLogTagOctane:
               [resolvedFplog setOctane:[remoteFplog octane]];
+              break;
+            case FPFplogTagOdometer:
+              [resolvedFplog setOdometer:[remoteFplog odometer]];
               break;
             case FPFpLogTagPricePerGallon:
               [resolvedFplog setGallonPrice:[remoteFplog gallonPrice]];

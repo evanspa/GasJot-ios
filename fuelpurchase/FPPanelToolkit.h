@@ -52,6 +52,7 @@ typedef NS_ENUM (NSInteger, FPFpLogTag) {
   FPFpLogTagNumGallons,
   FPFpLogTagPricePerGallon,
   FPFpLogTagOctane,
+  FPFplogTagOdometer,
   FPFpLogTagCarWashPanel,
   FPFpLogTagCarWashPerGallonDiscount,
   FPFpLogTagGotCarWash,

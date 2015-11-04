@@ -27,6 +27,7 @@ carWashPerGallonDiscount:(NSDecimalNumber *)carWashPerGallonDiscount
   if (self) {
     _fpLog = [coordDao fuelPurchaseLogWithNumGallons:numGallons
                                               octane:octane
+                                            odometer:odometer
                                          gallonPrice:gallonPrice
                                           gotCarWash:gotCarWash
                             carWashPerGallonDiscount:carWashPerGallonDiscount
