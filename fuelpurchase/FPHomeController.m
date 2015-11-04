@@ -505,7 +505,7 @@ alignmentRelativeToView:chart
                 vpadding:12.5
                 hpadding:8.0];
     
-    NSArray *daysBetweenFillupSection = [self makeLineChartSectionWithTitle:@"DAYS BETWEEN FILL-UPS (all time)"
+    NSArray *daysBetweenFillupSection = [self makeLineChartSectionWithTitle:@"AVG DAYS BETWEEN FILL-UPS\n        (all vehicles, all time)"
                                                                    chartTag:FPHomeDaysBetweenFillupsChartTag
                                                           addlLabelsViewBlk:^UIView *{ return [self makeDaysBetweenFillupsDataTable];}
                                                     moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newAvgDaysBetweenFillupsStatsScreenMaker](_user);}];
@@ -522,7 +522,7 @@ alignmentRelativeToView:chart
       daysBetweenFillupPanel.frame.size.height + 10.0;
     
     NSNumber *octane = [self octaneOfLastVehicleInCtxGasLog];
-    NSArray *priceOfGasSection = [self makeLineChartSectionWithTitle:[NSString stringWithFormat:@"AVG PRICE OF %@ OCTANE (all time)", octane]
+    NSArray *priceOfGasSection = [self makeLineChartSectionWithTitle:[NSString stringWithFormat:@"AVG PRICE OF %@ OCTANE\n  (all gas stations, all time)", octane]
                                                             chartTag:FPHomePriceOfGasChartTag
                                                    addlLabelsViewBlk:^UIView *{ return [self makePricePerGallonDataTable];}                                             moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newAvgPricePerGallonStatsScreenMakerWithOctane:[self octaneOfLastVehicleInCtxGasLog]](_user);}];
     UIView *pricePerGallonPanel = priceOfGasSection[0];
@@ -585,7 +585,7 @@ alignmentRelativeToView:chart
   NSArray *vehicles = [_coordDao vehiclesForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()];
   if (vehicles.count > 0) {
     //refresh the 'days between fillups' views
-    _daysBetweenFillupsDataSet = [_stats overallDaysBetweenFillupsDataSetForUser:_user];
+    _daysBetweenFillupsDataSet = [_stats overallAvgDaysBetweenFillupsDataSetForUser:_user];
     [self refreshViewWithTag:FPHomeDaysBetweenFillupsTableDataTag viewMaker:^{ return [self makeDaysBetweenFillupsDataTable]; }];
     [self refreshFooterForChart:_daysBetweenFillupsChart dataset:_daysBetweenFillupsDataSet];
     [_daysBetweenFillupsChart reloadData];

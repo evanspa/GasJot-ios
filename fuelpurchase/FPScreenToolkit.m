@@ -533,9 +533,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                            alltimeAggregateBlk:^(FPUser *u) {return [_stats overallAvgDaysBetweenFillupsForUser:u];}
                                         yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateAvgDaysBetweenFillupsForUser:u];}
                                           lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearAvgDaysBetweenFillupsForUser:u];}
-                                             alltimeDatasetBlk:^(FPUser *u) {return [_stats overallDaysBetweenFillupsDataSetForUser:u];}
-                                          yearToDateDatasetBlk:^(FPUser *u) {return [_stats yearToDateDaysBetweenFillupsDataSetForUser:u];}
-                                            lastYearDatasetBlk:^(FPUser *u) {return [_stats lastYearDaysBetweenFillupsDataSetForUser:u];}
+                                             alltimeDatasetBlk:^(FPUser *u) {return [_stats overallAvgDaysBetweenFillupsDataSetForUser:u];}
+                                          yearToDateDatasetBlk:^(FPUser *u) {return [_stats yearToDateAvgDaysBetweenFillupsDataSetForUser:u];}
+                                            lastYearDatasetBlk:^(FPUser *u) {return [_stats lastYearAvgDaysBetweenFillupsDataSetForUser:u];}
                                                siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
                                       comparisonScreenMakerBlk:^{return [self newVehicleCompareAvgDaysBetweenFillupsStatsScreenMakerWithVehicleInCtx:nil](user);}
                                              valueFormatterBlk:^(NSDecimalNumber *val) {return [NSString stringWithFormat:@"%@ days", [_generalFormatter stringFromNumber:val]];}
@@ -1186,9 +1186,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                            alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallAvgDaysBetweenFillupsForVehicle:v];}
                                         yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateAvgDaysBetweenFillupsForVehicle:v];}
                                           lastYearAggregateBlk:^(FPVehicle *v) {return [_stats lastYearAvgDaysBetweenFillupsForVehicle:v];}
-                                             alltimeDatasetBlk:^(FPVehicle *v) {return [_stats overallDaysBetweenFillupsDataSetForVehicle:v];}
-                                          yearToDateDatasetBlk:^(FPVehicle *v) {return [_stats yearToDateDaysBetweenFillupsDataSetForVehicle:v];}
-                                            lastYearDatasetBlk:^(FPVehicle *v) {return [_stats lastYearDaysBetweenFillupsDataSetForVehicle:v];}
+                                             alltimeDatasetBlk:^(FPVehicle *v) {return [_stats overallAvgDaysBetweenFillupsDataSetForVehicle:v];}
+                                          yearToDateDatasetBlk:^(FPVehicle *v) {return [_stats yearToDateAvgDaysBetweenFillupsDataSetForVehicle:v];}
+                                            lastYearDatasetBlk:^(FPVehicle *v) {return [_stats lastYearAvgDaysBetweenFillupsDataSetForVehicle:v];}
                                                siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
                                       comparisonScreenMakerBlk:^{return [self newVehicleCompareAvgDaysBetweenFillupsStatsScreenMakerWithVehicleInCtx:vehicle](user);}
                                              valueFormatterBlk:^(NSDecimalNumber *val) {return [NSString stringWithFormat:@"%@ days", [_generalFormatter stringFromNumber:val]];}
