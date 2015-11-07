@@ -134,8 +134,14 @@ NSInteger const FPChartPreviousYearIndex = 2;
 
 - (CGFloat)lineChartView:(JBLineChartView *)lineChartView verticalValueForHorizontalIndex:(NSUInteger)horizontalIndex atLineIndex:(NSUInteger)lineIndex {
   NSArray *dataPoint = _dataset[horizontalIndex];
-  NSDecimalNumber *value = dataPoint[1];
-  return [value floatValue];
+  if (dataPoint) {
+    if ([dataPoint count] == 2) {
+      if ([dataPoint[1] floatValue] >= 0.0) {
+        return [dataPoint[1] floatValue];
+      }
+    }
+  }
+  return NAN;
 }
 
 - (CGFloat)lineChartView:(JBLineChartView *)lineChartView widthForLineAtLineIndex:(NSUInteger)lineIndex {

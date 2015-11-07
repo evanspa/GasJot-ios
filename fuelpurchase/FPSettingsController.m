@@ -161,6 +161,7 @@
   CGFloat labelLeftPadding = 8.0;
   //_doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
   _doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
+  [_doesHaveAuthTokenPanel setDelaysContentTouches:NO];
   [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.08 * self.view.frame.size.height)];
   [_doesHaveAuthTokenPanel setBounces:NO];
   UIView *changelogMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"\
