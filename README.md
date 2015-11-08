@@ -128,10 +128,14 @@ etc. --- immediately, without having to create an account or log in.
 
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/home-intro-1.png"
-height="418px" width="237px" style="border-width: 50px; border-style: solid;">
+height="418px" width="237px">
+Upon launching, the app invites you to create your first vehicle record.
+
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-vehicle.png"
 border="5" height="418px" width="237px">
+Create a vehicle is pretty simple; just 3 fields (*only the name is required*).
+
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/vehicle-saved-local.png"
 border="5" height="418px" width="237px">
