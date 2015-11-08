@@ -373,6 +373,13 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                                   ^{ return [self newMaxReportedMpgStatsScreenMaker](user); }]];
                                                    [statLaunchButtons addObject:@[@"Min reported mpg",
                                                                                   ^{ return [self newMinReportedMpgStatsScreenMaker](user); }]];
+                                                   [statLaunchButtons addObject:@"(REPORTED) MILES PER HOUR"];
+                                                   [statLaunchButtons addObject:@[@"Avg reported mph",
+                                                                                  ^{ return [self newAvgReportedMphStatsScreenMaker](user); }]];
+                                                   [statLaunchButtons addObject:@[@"Max reported mph",
+                                                                                  ^{ return [self newMaxReportedMphStatsScreenMaker](user); }]];
+                                                   [statLaunchButtons addObject:@[@"Min reported mph",
+                                                                                  ^{ return [self newMinReportedMphStatsScreenMaker](user); }]];
                                                    [statLaunchButtons addObject:@"GAS SPEND"];
                                                    [statLaunchButtons addObject:@[@"Total amount spent on gas",
                                                                                   ^{ return [self newSpentOnGasStatsScreenMaker](user); }]];
@@ -398,11 +405,68 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   };
 }
 
+- (FPAuthScreenMaker)newMinReportedMphStatsScreenMaker {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Min Reported Mph"
+                                           entityTypeLabelText:@"ALL VEHICLES"
+                                                 entityNameBlk:nil
+                                                        entity:user
+                                          aggregatesHeaderText:@"MIN REPORTED MPH"
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPUser *u) {return [_stats overallMinReportedMphForUser:u];}
+                                        yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateMinReportedMphForUser:u];}
+                                          lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearMinReportedMphForUser:u];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareMinReportedMphStatsScreenMakerWithVehicleInCtx:nil](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_generalFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newMaxReportedMphStatsScreenMaker {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Max Reported Mph"
+                                           entityTypeLabelText:@"ALL VEHICLES"
+                                                 entityNameBlk:nil
+                                                        entity:user
+                                          aggregatesHeaderText:@"MAX REPORTED MPH"
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPUser *u) {return [_stats overallMaxReportedMphForUser:u];}
+                                        yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateMaxReportedMphForUser:u];}
+                                          lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearMaxReportedMphForUser:u];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareMaxReportedMphStatsScreenMakerWithVehicleInCtx:nil](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_generalFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newAvgReportedMphStatsScreenMaker {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Avg Reported Mph"
+                                           entityTypeLabelText:@"ALL VEHICLES"
+                                                 entityNameBlk:nil
+                                                        entity:user
+                                          aggregatesHeaderText:@"AVG REPORTED MPH"
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPUser *u) {return [_stats overallAvgReportedMphForUser:u];}
+                                        yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateAvgReportedMphForUser:u];}
+                                          lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearAvgReportedMphForUser:u];}
+                                             alltimeDatasetBlk:^(FPUser *u) {return [_stats overallAvgReportedMphDataSetForUser:u];}
+                                          yearToDateDatasetBlk:^(FPUser *u) {return [_stats yearToDateAvgReportedMphDataSetForUser:u];}
+                                            lastYearDatasetBlk:^(FPUser *u) {return [_stats lastYearAvgReportedMphDataSetForUser:u];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareAvgReportedMphStatsScreenMakerWithVehicleInCtx:nil](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_generalFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
 - (FPAuthScreenMaker)newMinReportedMpgStatsScreenMaker {
   return ^ UIViewController * (FPUser *user) {
     return [[FPCommonStatController alloc] initWithScreenTitle:@"Min Reported Mpg"
-                                           entityTypeLabelText:@"VEHICLE"
-                                                 entityNameBlk:^(FPUser *u) {return u.name;}
+                                           entityTypeLabelText:@"ALL VEHICLES"
+                                                 entityNameBlk:nil
                                                         entity:user
                                           aggregatesHeaderText:@"MIN REPORTED MPG"
                                         compareButtonTitleText:@"Compare vehicles"
@@ -419,8 +483,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 - (FPAuthScreenMaker)newMaxReportedMpgStatsScreenMaker {
   return ^ UIViewController * (FPUser *user) {
     return [[FPCommonStatController alloc] initWithScreenTitle:@"Max Reported Mpg"
-                                           entityTypeLabelText:@"VEHICLE"
-                                                 entityNameBlk:^(FPUser *u) {return u.name;}
+                                           entityTypeLabelText:@"ALL VEHICLES"
+                                                 entityNameBlk:nil
                                                         entity:user
                                           aggregatesHeaderText:@"MAX REPORTED MPG"
                                         compareButtonTitleText:@"Compare vehicles"
@@ -437,8 +501,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 - (FPAuthScreenMaker)newAvgReportedMpgStatsScreenMaker {
   return ^ UIViewController * (FPUser *user) {
     return [[FPCommonStatController alloc] initWithScreenTitle:@"Avg Reported Mpg"
-                                           entityTypeLabelText:@"VEHICLE"
-                                                 entityNameBlk:^(FPUser *u) {return u.name;}
+                                           entityTypeLabelText:@"ALL VEHICLES"
+                                                 entityNameBlk:nil
                                                         entity:user
                                           aggregatesHeaderText:@"AVG REPORTED MPG"
                                         compareButtonTitleText:@"Compare vehicles"
@@ -458,7 +522,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 - (FPAuthScreenMaker)newMaxPricePerGallonStatsScreenMakerWithOctane:(NSNumber *)octane {
   return ^ UIViewController * (FPUser *user) {
     return [[FPCommonStatController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Max Price of Gas (%@)", octane]
-                                           entityTypeLabelText:nil
+                                           entityTypeLabelText:@"ALL GAS STATIONS"
                                                  entityNameBlk:nil
                                                         entity:user
                                           aggregatesHeaderText:[NSString stringWithFormat:@"MAX PRICE OF GAS (%@ octane)", octane]
@@ -477,7 +541,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 - (FPAuthScreenMaker)newMinPricePerGallonStatsScreenMakerWithOctane:(NSNumber *)octane {
   return ^ UIViewController * (FPUser *user) {
     return [[FPCommonStatController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Min Price of Gas (%@)", octane]
-                                           entityTypeLabelText:nil
+                                           entityTypeLabelText:@"ALL GAS STATIONS"
                                                  entityNameBlk:nil
                                                         entity:user
                                           aggregatesHeaderText:[NSString stringWithFormat:@"MIN PRICE OF GAS (%@ octane)", octane]
@@ -496,7 +560,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 - (FPAuthScreenMaker)newMaxSpentOnGasStatsScreenMaker {
   return ^ UIViewController * (FPUser *user) {
     return [[FPCommonStatController alloc] initWithScreenTitle:@"Max Monthly Spend on Gas"
-                                           entityTypeLabelText:nil
+                                           entityTypeLabelText:@"ALL VEHICLES"
                                                  entityNameBlk:nil
                                                         entity:user
                                           aggregatesHeaderText:@"MAX MONTHLY SPEND ON GAS"
@@ -514,7 +578,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 - (FPAuthScreenMaker)newMinSpentOnGasStatsScreenMaker {
   return ^ UIViewController * (FPUser *user) {
     return [[FPCommonStatController alloc] initWithScreenTitle:@"Min Monthly Spend on Gas"
-                                           entityTypeLabelText:nil
+                                           entityTypeLabelText:@"ALL VEHICLES"
                                                  entityNameBlk:nil
                                                         entity:user
                                           aggregatesHeaderText:@"MIN MONTHLY SPEND ON GAS"
@@ -532,7 +596,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 - (FPAuthScreenMaker)newAvgSpentOnGasStatsScreenMaker {
   return ^ UIViewController * (FPUser *user) {
     return [[FPCommonStatController alloc] initWithScreenTitle:@"Avg Monthly Spend on Gas"
-                                           entityTypeLabelText:nil
+                                           entityTypeLabelText:@"ALL VEHICLES"
                                                  entityNameBlk:nil
                                                         entity:user
                                           aggregatesHeaderText:@"AVG MONTHLY SPEND ON GAS"
@@ -550,7 +614,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 - (FPAuthScreenMaker)newAvgGasCostPerMileStatsScreenMaker {
   return ^ UIViewController * (FPUser *user) {
     return [[FPCommonStatController alloc] initWithScreenTitle:@"Avg Gas Cost per Mile"
-                                           entityTypeLabelText:nil
+                                           entityTypeLabelText:@"ALL VEHICLES"
                                                  entityNameBlk:nil
                                                         entity:user
                                           aggregatesHeaderText:@"AVG GAS COST PER MILE"
@@ -571,7 +635,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 - (FPAuthScreenMaker)newMaxDaysBetweenFillupsStatsScreenMaker {
   return ^ UIViewController * (FPUser *user) {
     return [[FPCommonStatController alloc] initWithScreenTitle:@"Max Days Between Fill-ups"
-                                           entityTypeLabelText:nil
+                                           entityTypeLabelText:@"ALL VEHICLES"
                                                  entityNameBlk:nil
                                                         entity:user
                                           aggregatesHeaderText:@"MAX DAYS BETWEEN FILL-UPS"
@@ -589,7 +653,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 - (FPAuthScreenMaker)newAvgDaysBetweenFillupsStatsScreenMaker {
   return ^ UIViewController * (FPUser *user) {
     return [[FPCommonStatController alloc] initWithScreenTitle:@"Avg Days Between Fill-ups"
-                                           entityTypeLabelText:nil
+                                           entityTypeLabelText:@"ALL VEHICLES"
                                                  entityNameBlk:nil
                                                         entity:user
                                           aggregatesHeaderText:@"AVG DAYS BETWEEN FILL-UPS"
@@ -610,7 +674,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 - (FPAuthScreenMaker)newAvgPricePerGallonStatsScreenMakerWithOctane:(NSNumber *)octane {
   return ^ UIViewController * (FPUser *user) {
     return [[FPCommonStatController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Avg Price of Gas (%@)", octane]
-                                           entityTypeLabelText:nil
+                                           entityTypeLabelText:@"ALL GAS STATIONS"
                                                  entityNameBlk:nil
                                                         entity:user
                                           aggregatesHeaderText:[NSString stringWithFormat:@"AVG PRICE OF GAS (%@ octane)", octane]
@@ -630,11 +694,11 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 
 - (FPAuthScreenMaker)newSpentOnGasStatsScreenMaker {
   return ^ UIViewController * (FPUser *user) {
-    return [[FPCommonStatController alloc] initWithScreenTitle:@"Spend on Gas (all vehicles)"
-                                           entityTypeLabelText:nil
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Spend on Gas"
+                                           entityTypeLabelText:@"ALL VEHICLES"
                                                  entityNameBlk:nil
                                                         entity:user
-                                          aggregatesHeaderText:@"SPEND ON GAS (all vehicles)"
+                                          aggregatesHeaderText:@"SPEND ON GAS"
                                         compareButtonTitleText:@"Compare vehicles"
                                            alltimeAggregateBlk:^(FPUser *u) {return [_stats overallSpentOnGasForUser:u];}
                                         yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateSpentOnGasForUser:u];}
@@ -1185,6 +1249,13 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                                   ^{ return [self newVehicleMaxReportedMpgStatsScreenMakerWithVehicle:vehicle](user); }]];
                                                    [statLaunchButtons addObject:@[@"Min reported mpg",
                                                                                   ^{ return [self newVehicleMinReportedMpgStatsScreenMakerWithVehicle:vehicle](user); }]];
+                                                   [statLaunchButtons addObject:@"(REPORTED) MILES PER HOUR"];
+                                                   [statLaunchButtons addObject:@[@"Avg reported mph",
+                                                                                  ^{ return [self newVehicleAvgReportedMphStatsScreenMakerWithVehicle:vehicle](user); }]];
+                                                   [statLaunchButtons addObject:@[@"Max reported mph",
+                                                                                  ^{ return [self newVehicleMaxReportedMphStatsScreenMakerWithVehicle:vehicle](user); }]];
+                                                   [statLaunchButtons addObject:@[@"Min reported mph",
+                                                                                  ^{ return [self newVehicleMinReportedMphStatsScreenMakerWithVehicle:vehicle](user); }]];
                                                    [statLaunchButtons addObject:@"GAS SPEND"];
                                                    [statLaunchButtons addObject:@[@"Total amount spent on gas",
                                                                                   ^{ return [self newVehicleSpentOnGasStatsScreenMakerWithVehicle:vehicle](user); }]];
@@ -1207,6 +1278,117 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                    return statLaunchButtons;
                                                  }
                                                             uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleMinReportedMphStatsScreenMakerWithVehicle:(FPVehicle *)vehicle {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Min Reported Mph"
+                                           entityTypeLabelText:@"VEHICLE"
+                                                 entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                        entity:vehicle
+                                          aggregatesHeaderText:@"MIN REPORTED MPH"
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallMinReportedMphForVehicle:v];}
+                                        yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateMinReportedMphForVehicle:v];}
+                                          lastYearAggregateBlk:^(FPVehicle *v) {return [_stats lastYearMinReportedMphForVehicle:v];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareMinReportedMphStatsScreenMakerWithVehicleInCtx:vehicle](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_generalFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleCompareMinReportedMphStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatComparisonController alloc] initWithScreenTitle:@"Min Reported Mph Comparison"
+                                                              headerText:@"MIN REPORTED MPH (all time)"
+                                                           entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                                  entity:vehicle
+                                                    entitiesToCompareBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                     alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallMinReportedMphForVehicle:v];}
+                                                       valueFormatterBlk:^(NSDecimalNumber *val) {return [_generalFormatter stringFromNumber:val];}
+                                                              comparator:^(NSArray *o1, NSArray *o2) {
+                                                                NSDecimalNumber *v1 = o1[2];
+                                                                NSDecimalNumber *v2 = o2[2];
+                                                                return [v1 compare:v2];
+                                                              }
+                                                               uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleMaxReportedMphStatsScreenMakerWithVehicle:(FPVehicle *)vehicle {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Max Reported Mph"
+                                           entityTypeLabelText:@"VEHICLE"
+                                                 entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                        entity:vehicle
+                                          aggregatesHeaderText:@"MAX REPORTED MPH"
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallMaxReportedMphForVehicle:v];}
+                                        yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateMaxReportedMphForVehicle:v];}
+                                          lastYearAggregateBlk:^(FPVehicle *v) {return [_stats lastYearMaxReportedMphForVehicle:v];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareMaxReportedMphStatsScreenMakerWithVehicleInCtx:vehicle](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_generalFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleCompareMaxReportedMphStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatComparisonController alloc] initWithScreenTitle:@"Max Reported Mph Comparison"
+                                                              headerText:@"MAX REPORTED MPH (all time)"
+                                                           entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                                  entity:vehicle
+                                                    entitiesToCompareBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                     alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallMaxReportedMphForVehicle:v];}
+                                                       valueFormatterBlk:^(NSDecimalNumber *val) {return [_generalFormatter stringFromNumber:val];}
+                                                              comparator:^(NSArray *o1, NSArray *o2) {
+                                                                NSDecimalNumber *v1 = o1[2];
+                                                                NSDecimalNumber *v2 = o2[2];
+                                                                return [v2 compare:v1]; // descending
+                                                              }
+                                                               uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleAvgReportedMphStatsScreenMakerWithVehicle:(FPVehicle *)vehicle {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:@"Avg Reported Mph"
+                                           entityTypeLabelText:@"VEHICLE"
+                                                 entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                        entity:vehicle
+                                          aggregatesHeaderText:@"AVG REPORTED MPH"
+                                        compareButtonTitleText:@"Compare vehicles"
+                                           alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallAvgReportedMphForVehicle:v];}
+                                        yearToDateAggregateBlk:^(FPVehicle *v) {return [_stats yearToDateAvgReportedMphForVehicle:v];}
+                                          lastYearAggregateBlk:^(FPVehicle *v) {return [_stats lastYearAvgReportedMphForVehicle:v];}
+                                             alltimeDatasetBlk:^(FPVehicle *v) {return [_stats overallAvgReportedMphDataSetForVehicle:v];}
+                                          yearToDateDatasetBlk:^(FPVehicle *v) {return [_stats yearToDateAvgReportedMphDataSetForVehicle:v];}
+                                            lastYearDatasetBlk:^(FPVehicle *v) {return [_stats lastYearAvgReportedMphDataSetForVehicle:v];}
+                                               siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareAvgReportedMphStatsScreenMakerWithVehicleInCtx:vehicle](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_generalFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleCompareAvgReportedMphStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatComparisonController alloc] initWithScreenTitle:@"Avg Reported Mph Comparison"
+                                                              headerText:@"AVG REPORTED MPH (All time)"
+                                                           entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                                  entity:vehicle
+                                                    entitiesToCompareBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                     alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallAvgReportedMphForVehicle:v];}
+                                                       valueFormatterBlk:^(NSDecimalNumber *val) {return [_generalFormatter stringFromNumber:val];}
+                                                              comparator:^(NSArray *o1, NSArray *o2) {
+                                                                NSDecimalNumber *v1 = o1[2];
+                                                                NSDecimalNumber *v2 = o2[2];
+                                                                return [v2 compare:v1]; // descending
+                                                              }
+                                                               uitoolkit:_uitoolkit];
   };
 }
 

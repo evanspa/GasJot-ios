@@ -348,6 +348,13 @@ NSInteger const FPChartPreviousYearIndex = 2;
                                           textColor:[UIColor darkGrayColor]
                                 verticalTextPadding:3.0
                                          fitToWidth:self.view.frame.size.width - 15.0];
+  } else if (_entityTypeLabelText) {
+    entityLabel = [PEUIUtils labelWithKey:_entityTypeLabelText
+                                     font:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                          backgroundColor:[UIColor clearColor]
+                                textColor:[UIColor fpAppBlue]
+                      verticalTextPadding:3.0
+                               fitToWidth:self.view.frame.size.width - 15.0];
   }
   _aggregatesTable = [self aggregatesTableWithValues:@[[NSNull null], [NSNull null], [NSNull null]]];
   UIView *lineChartPanel = nil;
