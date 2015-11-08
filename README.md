@@ -128,7 +128,7 @@ etc. --- immediately, without having to create an account or log in.
 
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/home-intro-1.png"
-border="5" height="418px" width="237px">
+height="418px" width="237px" style="border-width: 50px; border-style: solid;">
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-vehicle.png"
 border="5" height="418px" width="237px">
