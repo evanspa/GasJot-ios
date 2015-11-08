@@ -123,12 +123,12 @@ height="418px" width="237px">
 
 Gas Jot does NOT suffer from the
 [login barrier anti-pattern](http://blog.codinghorror.com/removing-the-login-barrier/).
-Users can start using the app --- adding vehicles, recording gas and odometer logs,
+Users can start using the app --- *adding vehicles*, *recording gas and odometer logs*,
 etc. --- immediately, without having to create an account or log in.
 
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/home-intro-1.png"
-height="418px" width="237px">
+border="1" height="418px" width="237px">
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-vehicle.png"
 height="418px" width="237px">
