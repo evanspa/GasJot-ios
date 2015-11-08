@@ -128,13 +128,13 @@ etc. --- immediately, without having to create an account or log in.
 
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/home-intro-1.png"
-border="1" height="418px" width="237px">
+border="5" height="418px" width="237px">
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-vehicle.png"
-height="418px" width="237px">
+border="5" height="418px" width="237px">
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/vehicle-saved-local.png"
-height="418px" width="237px">
+border="5" height="418px" width="237px">
 
 
 #### Account Creation / Login
