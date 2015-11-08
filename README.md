@@ -142,6 +142,9 @@ Create a vehicle is pretty simple; just 3 fields (*only the name is required*).
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/vehicle-saved-local.png"
 border="5" height="418px" width="237px">
 
+Success creation of vehicle.  At this point the vehicle record is saved locally
+in the app.
+
 #### Account Creation / Login
 
 Unfortunately the fuel purchase app suffers from the
