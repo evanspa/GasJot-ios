@@ -121,10 +121,10 @@ height="418px" width="237px">
 
 #### Home Screen
 
-Gas Jot does NOT suffer from the
+Gas Jot does not suffer from the
 [login barrier anti-pattern](http://blog.codinghorror.com/removing-the-login-barrier/).
-Users can start using the app --- *adding vehicles*, *recording gas and odometer logs*,
-etc. --- immediately, without having to create an account or log in.
+Instead, users can start using the app immediately (*adding vehicles*, *recording gas and odometer logs*,
+etc.), without having to sign up for an account or log in.
 
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/home-intro-1.png"
@@ -136,71 +136,37 @@ Upon launching, the app invites you to create your first vehicle record.
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-vehicle.png"
 border="5" height="418px" width="237px">
 
-Create a vehicle is pretty simple; just 3 fields (*only the name is required*).
+Creating a vehicle is pretty simple; just 3 fields: *name*, *default octane* and
+*fuel capacity*.  Only the *name* field is required.
 
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/vehicle-saved-local.png"
 border="5" height="418px" width="237px">
 
-Success creation of vehicle.  At this point the vehicle record is saved locally
-in the app.
-
-#### Account Creation / Login
-
-Unfortunately the fuel purchase app suffers from the
-[login barrier anti-pattern](http://blog.codinghorror.com/removing-the-login-barrier/).
-No worries though, as this app is meant to serve as a reference to using the PE*
-library suite, and is not meant for general user adoption.
+Successful creation of a vehicle record.  At this point the vehicle record is saved locally
+in the app and the user can now start recording gas and odometer logs.
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-acct-login.png"
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/home-intro-2.png"
 height="418px" width="237px">
 
-#### Quick Action Menu (home screen)
+The home screen now updates to reflect that you have at least 1 vehicle record.
 
-Main menu screen.  This is the screen that appears after logging in or creating
-account.  It's also the default authenticated screen when launching the app
-after a login has occured.
+#### Gas Jot Account Creation
 
-<img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/quick-action-menu.png"
-height="418px" width="237px">
+#### Adding a Gas Station
 
-#### Adding a Vehicle
+Adding a gas station (which is needed in order to log gas purchases).
 
-Adding a vehicle (which is needed in order to log fuel purchases).
+#### Adding a Gas Purchase Log
 
-<img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/add-vehicle.png"
-height="418px" width="237px">
+Adding a gas purchase log requires the user to pick the associated vehicle and
+gas station.
 
+#### Adding an Odometer Log
 
-#### Adding a Fuel Station
+Odometer logs are used for recording your vehicle's current odometer, the
+vehicle's reported average miles per gallon and miles per hour, the vehicle's
+reported distance-to-empty (DTE) and the outside temperature.
 
-Adding a fuel station (which is needed in order to log fuel purchases).
-
-<img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/add-fuelstation.png"
-height="418px" width="237px">
-
-#### Adding a Fuel Purchase Log
-
-Adding a fuel purchase log requires the user to pick the associated vehicle and
-fuel station.
-
-<img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/add-fplog.png"
-height="418px" width="237px">
-
-#### Adding an Environment Log
-
-We can also log things about the "environment" vis-a-vis one of our vehicles.
-
-<img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/add-envlog.png"
-height="418px" width="237px">
-
-#### Not Yet Implemented
-
-As of this writing, none of the reporting functionality has been implemented
-yet (but will be in the future).  Currently all you can do is log data.
+Odometer logs can be recorded at anytime.
