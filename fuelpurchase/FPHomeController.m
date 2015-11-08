@@ -736,7 +736,6 @@ alignmentRelativeToView:self.view
   [PEUIUtils placeView:loginMsgPanel atBottomOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:175.0 hpadding:10.0];
   UIImageView *loginArrowImgView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"arrow-1"]];
   [PEUIUtils placeView:loginArrowImgView below:loginMsgPanel onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:2.0 hpadding:15.0];
-  
   UILabel *jotBtnMsgLabel = [PEUIUtils labelWithKey:@"You can create any type of record from the Jot button at any time."
                                                font:[UIFont systemFontOfSize:16.0]
                                     backgroundColor:[UIColor clearColor]

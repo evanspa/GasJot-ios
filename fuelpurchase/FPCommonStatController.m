@@ -30,7 +30,6 @@ NSInteger const FPChartPreviousYearIndex = 2;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   UIView *_aggregatesTable;
-  UIView *_lineChartPanel;
   NSInteger _currentYear;
   NSArray *_dataset;
   NSDateFormatter *_dateFormatter;
@@ -52,7 +51,6 @@ NSInteger const FPChartPreviousYearIndex = 2;
   FPSiblingEntityCount _siblingCountBlk;
   FPComparisonScreenMaker _comparisonScreenMakerBlk;
   FPValueFormatter _valueFormatter;
-  //UIScrollView *_contentView;
   UIView *_contentView;
 }
 
@@ -225,22 +223,40 @@ NSInteger const FPChartPreviousYearIndex = 2;
 #pragma mark - Helpers
 
 - (NSString *)formattedValueForValue:(id)value {
-  if (value) {
+  if (![PEUtils isNil:value]) {
     return _valueFormatter(value);
   } else {
     return FPTextIfNilStat;
   }
 }
 
-- (UIView *)aggregatesTable {
-  return [PEUIUtils tablePanelWithRowData:@[@[@"All time", [self formattedValueForValue:_alltimeAggregateBlk(_entity)]],
-                                            @[[NSString stringWithFormat:@"%ld YTD", (long)_currentYear], [self formattedValueForValue:_yearToDateAggregateBlk(_entity)]],
-                                            @[[NSString stringWithFormat:@"%ld", (long)_currentYear-1], [self formattedValueForValue:_lastYearAggregateBlk(_entity)]]]
+- (UIView *)aggregatesTableWithValues:(NSArray *)values {
+  return [PEUIUtils tablePanelWithRowData:@[@[@"All time", [self formattedValueForValue:values[0]]],
+                                            @[[NSString stringWithFormat:@"%ld YTD", (long)_currentYear], [self formattedValueForValue:values[1]]],
+                                            @[[NSString stringWithFormat:@"%ld", (long)_currentYear-1], [self formattedValueForValue:values[2]]]]
                                 uitoolkit:_uitoolkit
                                parentView:self.view];
 }
 
-- (UIView *)makeLineChartPanel {
+- (void)refreshFooterOfChart:(JBLineChartView *)chart {
+  JBLineChartFooterView *footerView = (JBLineChartFooterView *)chart.footerView;
+  [footerView setSectionCount:_dataset.count];
+  if (_dataset.count > 0) {
+    NSArray *dp = _dataset[0];
+    footerView.leftLabel.text = [_dateFormatter stringFromDate:dp[0]];
+  } else {
+    footerView.leftLabel.text = @"NO (OR NOT ENOUGH) DATA.";
+    footerView.rightLabel.text = @"";
+  }
+  footerView.leftLabel.textColor = [UIColor fpAppBlue];
+  if (_dataset.count > 1) {
+    NSArray *dp = _dataset[_dataset.count - 1];
+    footerView.rightLabel.text = [_dateFormatter stringFromDate:dp[0]];
+    footerView.rightLabel.textColor = [UIColor fpAppBlue];
+  }
+}
+
+- (NSArray *)makeLineChartSection {
   UIView *panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:self.view]; // will resize height later
   [panel setBackgroundColor:[UIColor whiteColor]];
   HMSegmentedControl *segmentedControl = [[HMSegmentedControl alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
@@ -269,40 +285,26 @@ NSInteger const FPChartPreviousYearIndex = 2;
   footerView.footerSeparatorColor = [UIColor darkGrayColor];
   [PEUIUtils setFrameWidthOfView:footerView ofWidth:1.0 relativeTo:panel];
   [PEUIUtils setFrameHeight:25.0 ofView:footerView];
+  [lineChartView setFooterView:footerView];
   
-  void (^configureFooter)(void) = ^{
-    [footerView setSectionCount:_dataset.count];
-    [lineChartView setFooterView:footerView];
-    if (_dataset.count > 0) {
-      NSArray *dp = _dataset[0];
-      footerView.leftLabel.text = [_dateFormatter stringFromDate:dp[0]];
-    } else {
-      footerView.leftLabel.text = @"NO (OR NOT ENOUGH) DATA.";
-      footerView.rightLabel.text = @"";
-    }
-    footerView.leftLabel.textColor = [UIColor fpAppBlue];
-    if (_dataset.count > 1) {
-      NSArray *dp = _dataset[_dataset.count - 1];
-      footerView.rightLabel.text = [_dateFormatter stringFromDate:dp[0]];
-      footerView.rightLabel.textColor = [UIColor fpAppBlue];
-    }
-  };
-  configureFooter();
-  [lineChartView reloadData];
   [segmentedControl setIndexChangeBlock:^(NSInteger index) {
-    switch (index) {
-      case FPChartAllTimeIndex:
-        _dataset = _alltimeDatasetBlk(_entity);
-        break;
-      case FPChartYTDIndex:
-        _dataset = _yearToDateDatasetBlk(_entity);
-        break;
-      case FPChartPreviousYearIndex:
-        _dataset = _lastYearDatasetBlk(_entity);
-        break;
-    }
-    configureFooter();
-    [lineChartView reloadData];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+      switch (index) {
+        case FPChartAllTimeIndex:
+          _dataset = _alltimeDatasetBlk(_entity);
+          break;
+        case FPChartYTDIndex:
+          _dataset = _yearToDateDatasetBlk(_entity);
+          break;
+        case FPChartPreviousYearIndex:
+          _dataset = _lastYearDatasetBlk(_entity);
+          break;
+      }
+      dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self refreshFooterOfChart:lineChartView];
+        [lineChartView reloadData];
+      });
+    });
   }];
   UILabel *trendLabel = [PEUIUtils labelWithKey:@"TREND"
                                            font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
@@ -313,13 +315,15 @@ NSInteger const FPChartPreviousYearIndex = 2;
   [PEUIUtils placeView:segmentedControl below:trendLabel onto:panel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:self.view vpadding:4.0 hpadding:0.0];
   [PEUIUtils placeView:lineChartView below:segmentedControl onto:panel withAlignment:PEUIHorizontalAlignmentTypeCenter alignmentRelativeToView:self.view vpadding:10.0 hpadding:0.0];
   [PEUIUtils setFrameHeight:(trendLabel.frame.size.height + segmentedControl.frame.size.height + lineChartView.frame.size.height + 4.0 + 10.0) ofView:panel];
-  return panel;
+  return @[panel, lineChartView];
 }
 
 #pragma mark - View controller lifecycle
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
+  [self setTitle:_screenTitle];
   
   _tooltipView = [[JBChartTooltipView alloc] init];
   _tooltipTipView = [[JBChartTooltipTipView alloc] init];
@@ -329,11 +333,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
   //[_contentView setContentSize:CGSizeMake(self.view.frame.size.width, 1.01 * self.view.frame.size.height)];
   //[_contentView setBounces:NO];
   _contentView = [PEUIUtils panelWithFixedWidth:self.view.frame.size.width fixedHeight:self.view.frame.size.height];
-  if (_alltimeDatasetBlk) {
-    _dataset = _alltimeDatasetBlk(_entity);
-  }
-  [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
-  [self setTitle:_screenTitle];
+  
   UILabel *entityLabel = nil;
   if (_entityTypeLabelText && _entityNameBlk && _entity) {
     NSString *entityName = [FPUtils truncatedText:_entityNameBlk(_entity) maxLength:27];
@@ -349,9 +349,19 @@ NSInteger const FPChartPreviousYearIndex = 2;
                                 verticalTextPadding:3.0
                                          fitToWidth:self.view.frame.size.width - 15.0];
   }
-  _aggregatesTable = [self aggregatesTable];
+  _aggregatesTable = [self aggregatesTableWithValues:@[[NSNull null], [NSNull null], [NSNull null]]];
+  UIView *lineChartPanel = nil;
   if (_alltimeDatasetBlk) {
-    _lineChartPanel = [self makeLineChartPanel];
+    NSArray *section = [self makeLineChartSection];
+    lineChartPanel = section[0];
+    JBLineChartView *chart = section[1];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+      _dataset = _alltimeDatasetBlk(_entity);
+      dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self refreshFooterOfChart:chart];
+        [chart reloadData];
+      });
+    });
   }
   // place the views
   if (entityLabel) {
@@ -375,9 +385,9 @@ NSInteger const FPChartPreviousYearIndex = 2;
                 hpadding:0.0];
   }
   UIView *aboveView = _aggregatesTable;
-  if (_lineChartPanel) {
-    aboveView = _lineChartPanel;
-    [PEUIUtils placeView:_lineChartPanel
+  if (lineChartPanel) {
+    aboveView = lineChartPanel;
+    [PEUIUtils placeView:lineChartPanel
                    below:_aggregatesTable
                     onto:_contentView
            withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -405,33 +415,28 @@ NSInteger const FPChartPreviousYearIndex = 2;
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  // remove the views
-  CGRect aggregatesTableFrame = _aggregatesTable.frame;
-  CGRect lineChartFrame;
-  if (_lineChartPanel) {
-    lineChartFrame = _lineChartPanel.frame;
-  }
   
-  [_aggregatesTable removeFromSuperview];
-  if (_lineChartPanel) {
-    [_lineChartPanel removeFromSuperview];
-  }
+  void (^refreshRowValue)(NSInteger, id) = ^(NSInteger tag, id value) {
+    UILabel *valueLabel = (UILabel *)[_aggregatesTable viewWithTag:tag];
+    CGFloat currentWidth = valueLabel.frame.size.width;
+    NSString *valueText = [self formattedValueForValue:value];
+    [valueLabel setText:valueText];
+    CGSize newSize = [PEUIUtils sizeOfText:valueText withFont:valueLabel.font];
+    [PEUIUtils setFrameWidth:newSize.width ofView:valueLabel];
+    [PEUIUtils setFrameX:(valueLabel.frame.origin.x + (currentWidth - newSize.width)) ofView:valueLabel];
+  };
   
-  // refresh their data
-  _aggregatesTable = [self aggregatesTable];
-  if (_lineChartPanel) {
-    _lineChartPanel = [self makeLineChartPanel];
-  }
-  
-  // re-add them
-  _aggregatesTable.frame = aggregatesTableFrame;
-  if (_lineChartPanel) {
-    _lineChartPanel.frame = lineChartFrame;
-  }
-  [_contentView addSubview:_aggregatesTable];
-  if (_lineChartPanel) {
-    [_contentView addSubview:_lineChartPanel];
-  }
+  // refresh the table data
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+    id alltimeVal = _alltimeAggregateBlk(_entity);
+    id yearToDateVal = _yearToDateAggregateBlk(_entity);
+    id lastYearVal = _lastYearAggregateBlk(_entity);
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+      refreshRowValue(1, alltimeVal);
+      refreshRowValue(2, yearToDateVal);
+      refreshRowValue(3, lastYearVal);
+    });
+  });
 }
 
 @end
