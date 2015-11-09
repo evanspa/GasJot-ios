@@ -162,8 +162,8 @@
   //_doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
   _doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
   [_doesHaveAuthTokenPanel setDelaysContentTouches:NO];
-  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.08 * self.view.frame.size.height)];
-  [_doesHaveAuthTokenPanel setBounces:NO];
+  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.30 * self.view.frame.size.height)];
+  [_doesHaveAuthTokenPanel setBounces:YES];
   UIView *changelogMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"\
 Keeps your device synchronized with your remote account in case you've made edits \
 and deletions on other devices."

@@ -18,12 +18,22 @@ utilization history.
 - [PE* iOS Library Suite](#pe-ios-library-suite)
 - [Analytics](#analytics)
 - [Screenshots](#screenshots)
-    - [Account Creation / Login](#account-creation--login)
-    - [Quick Action Menu (home screen)](#quick-action-menu-home-screen)
-    - [Adding a Vehicle](#adding-a-vehicle)
-    - [Adding a Gas Station](#adding-a-gas-station)
-    - [Adding a Gas Purchase Log](#adding-a-gas-purchase-log)
+    - [Splash](#splash)
+    - [Home](#home-screen)
     - [Adding an Odometer Log](#adding-an-odometer-log)
+    - [Adding a Gas Purchase Log](#adding-a-gas-purchase-log)
+    - [Adding a Gas Station](#adding-a-gas-station)
+    - [Jot Button](#jot-button)
+    - [Records](#records-screen)
+    - [Home (with charts)](#home-screen-with-charts)
+    - [Gas Jot Account](#gas-jot-account)
+    - [Account Creation](#account-creation)
+    - [Account Log In](#account-log-in)
+    - [Account Screen](#account-screen)
+    - [Data Record Detail](#data-record-detail)
+    - [Data Record Stats](#data-record-stats)
+    - [Conflict Detection](#conflict-detection)
+    - [Settings](#settings)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -199,7 +209,7 @@ height="418px" width="237px">
 
 The records screen lets you explore and navigate all of your data records.
 
-#### Home Screen
+#### Home Screen with Charts
 
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/home.png"
@@ -217,7 +227,7 @@ Users can create an account or log into their existing Gas Jot account.
 Creating an account enables users' records to be saved to the Gas Jot server so
 they can be accessed from multiple devices.
 
-#### Gas Jot Account Creation
+#### Account Creation
 
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-account.png"
@@ -226,7 +236,7 @@ height="418px" width="237px">
 Creating an account is fairly simple affair.  Upon successfully creating an
 account, the user will receive a verification email.
 
-#### Gas Jot Account Log In
+#### Account Log In
 
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/login.png"

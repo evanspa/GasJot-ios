@@ -849,9 +849,9 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                         belowView:statsMsgPanel
                              parentViewController:parentViewController];
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelstationPanel frame]];
-    [scrollView setContentSize:CGSizeMake(fuelstationPanel.frame.size.width, 1.285 * fuelstationPanel.frame.size.height)];
+    [scrollView setContentSize:CGSizeMake(fuelstationPanel.frame.size.width, 1.4 * fuelstationPanel.frame.size.height)];
     [scrollView addSubview:fuelstationPanel];
-    [scrollView setBounces:NO];
+    [scrollView setBounces:YES];
     return scrollView;
   };
 }
@@ -1254,9 +1254,9 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     
     // wrap fuel station panel in scroll view (so everything can "fit")
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fpEnvCompPanel frame]];
-    [scrollView setContentSize:CGSizeMake(fpEnvCompPanel.frame.size.width, 1.25 * fpEnvCompPanel.frame.size.height)];
+    [scrollView setContentSize:CGSizeMake(fpEnvCompPanel.frame.size.width, 1.5 * fpEnvCompPanel.frame.size.height)];
     [scrollView addSubview:fpEnvCompPanel];
-    [scrollView setBounces:NO];
+    [scrollView setBounces:YES];
     return scrollView;
   };
 }

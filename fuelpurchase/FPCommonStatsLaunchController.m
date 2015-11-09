@@ -137,9 +137,9 @@
   [self setTitle:_screenTitle];
   _contentView = [self makeContentPanel];
   _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
-  [_scrollView setBounces:NO];
+  [_scrollView setBounces:YES];
   [_scrollView setDelaysContentTouches:YES];
-  [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.125 * (_contentView.frame.origin.y + _contentView.frame.size.height))];
+  [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.20 * (_contentView.frame.origin.y + _contentView.frame.size.height))];
   [PEUIUtils placeView:_contentView atTopOf:_scrollView withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
   [PEUIUtils placeView:_scrollView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:13.0 hpadding:0.0];
 }

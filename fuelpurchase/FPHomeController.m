@@ -598,7 +598,7 @@ alignmentRelativeToView:self.view
 alignmentRelativeToView:self.view
               vpadding:10.0
               hpadding:0.0];
-  [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, 1.125 * totalHeightOfViews)];
+  [scrollView setContentSize:CGSizeMake(scrollView.frame.size.width, 1.20 * totalHeightOfViews)];
   return scrollView;
 }
 
