@@ -23,6 +23,7 @@
 #import <ReactiveCocoa/RACSignal+Operations.h>
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
+#import <PEObjc-Commons/NSString+PEAdditions.h>
 #import <PEFuelPurchase-Model/FPErrorDomainsAndCodes.h>
 #import "FPCreateAccountController.h"
 #import "FPUtils.h"
@@ -41,9 +42,10 @@
 
 @implementation FPCreateAccountController {
   FPCoordinatorDao *_coordDao;
-  UITextField *_caFullNameTf;
-  UITextField *_caEmailTf;
-  UITextField *_caPasswordTf;
+  UITextField *_fullNameTf;
+  UITextField *_emailTf;
+  UITextField *_passwordTf;
+  UITextField *_confirmPasswordTf;
   CGFloat animatedDistance;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
@@ -72,7 +74,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  [_caFullNameTf becomeFirstResponder];
+  [_fullNameTf becomeFirstResponder];
 }
 
 - (void)viewDidLoad {
@@ -122,10 +124,12 @@ enable your data records to be synced to Gas Jot's central server so you can acc
   
   TextfieldMaker tfMaker =
     [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:createAcctPnl];
-  _caFullNameTf = tfMaker(@"unauth.start.ca.fullnametf.pht");
-  _caEmailTf = tfMaker(@"unauth.start.ca.emailtf.pht");
-  _caPasswordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
-  [_caPasswordTf setSecureTextEntry:YES];
+  _fullNameTf = tfMaker(@"unauth.start.ca.fullnametf.pht");
+  _emailTf = tfMaker(@"unauth.start.ca.emailtf.pht");
+  _passwordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
+  [_passwordTf setSecureTextEntry:YES];
+  _confirmPasswordTf = tfMaker(@"unauth.start.ca.pwdtf.cpht");
+  [_confirmPasswordTf setSecureTextEntry:YES];
   
   // place views
   [PEUIUtils placeView:createAccountMsgPanel
@@ -133,20 +137,26 @@ enable your data records to be synced to Gas Jot's central server so you can acc
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:0.0
               hpadding:0.0];
-  [PEUIUtils placeView:_caFullNameTf
+  [PEUIUtils placeView:_fullNameTf
                  below:createAccountMsgPanel
                   onto:createAcctPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:7.0
               hpadding:0];
-  [PEUIUtils placeView:_caEmailTf
-                 below:_caFullNameTf
+  [PEUIUtils placeView:_emailTf
+                 below:_fullNameTf
                   onto:createAcctPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5
               hpadding:0];
-  [PEUIUtils placeView:_caPasswordTf
-                 below:_caEmailTf
+  [PEUIUtils placeView:_passwordTf
+                 below:_emailTf
+                  onto:createAcctPnl
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:5
+              hpadding:0];
+  [PEUIUtils placeView:_confirmPasswordTf
+                 below:_passwordTf
                   onto:createAcctPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5
@@ -161,32 +171,43 @@ enable your data records to be synced to Gas Jot's central server so you can acc
   [PEUIUtils setFrameWidthOfView:instructionLabel ofWidth:1.05 relativeTo:instructionLabel];
   UIView *instructionPanel = [PEUIUtils leftPadView:instructionLabel padding:leftPadding];
   [PEUIUtils placeView:instructionPanel
-                 below:_caPasswordTf
+                 below:_confirmPasswordTf
                   onto:createAcctPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
   
   RAC(self, formStateMaskForAcctCreation) =
-    [RACSignal combineLatest:@[_caFullNameTf.rac_textSignal,
-                               _caEmailTf.rac_textSignal,
-                               _caPasswordTf.rac_textSignal]
+    [RACSignal combineLatest:@[_fullNameTf.rac_textSignal,
+                               _emailTf.rac_textSignal,
+                               _passwordTf.rac_textSignal,
+                               _confirmPasswordTf.rac_textSignal]
                       reduce:^(NSString *fullName,
                                NSString *email,
-                               NSString *password) {
-        NSUInteger createUsrErrMask = 0;
-        if ([email length] == 0) {
-          createUsrErrMask = createUsrErrMask | FPSaveUsrEmailNotProvided
-              | FPSaveUsrAnyIssues;
-        } else if (![PEUtils validateEmailWithString:email]) {
-          createUsrErrMask = createUsrErrMask | FPSaveUsrInvalidEmail | FPSaveUsrAnyIssues;
-        }
-        if ([password length] == 0) {
-          createUsrErrMask = createUsrErrMask | FPSaveUsrPasswordNotProvided |
-              FPSaveUsrAnyIssues;
-        }
-        return @(createUsrErrMask);
-      }];
+                               NSString *password,
+                               NSString *confirmPassword) {
+                        NSUInteger createUsrErrMask = 0;
+                        if ([email isBlank]) {
+                          createUsrErrMask = createUsrErrMask | FPSaveUsrEmailNotProvided | FPSaveUsrAnyIssues;
+                        } else if (![PEUtils validateEmailWithString:email]) {
+                          createUsrErrMask = createUsrErrMask | FPSaveUsrInvalidEmail | FPSaveUsrAnyIssues;
+                        }
+                        if ([password isBlank]) {
+                          createUsrErrMask = createUsrErrMask | FPSaveUsrPasswordNotProvided | FPSaveUsrAnyIssues;
+                          if (![confirmPassword isBlank]) {
+                            createUsrErrMask = createUsrErrMask | FPSaveUsrConfirmPasswordOnlyProvided | FPSaveUsrAnyIssues;
+                          }
+                        } else {
+                          if ([confirmPassword isBlank]) {
+                            createUsrErrMask = createUsrErrMask | FPSaveUsrConfirmPasswordNotProvided | FPSaveUsrAnyIssues;
+                          } else {
+                            if (![password isEqualToString:confirmPassword]) {
+                              createUsrErrMask = createUsrErrMask | FPSaveUsrPasswordConfirmPasswordDontMatch | FPSaveUsrAnyIssues;
+                            }
+                          }
+                        }
+                        return @(createUsrErrMask);
+                      }];
   return createAcctPnl;
 }
 
@@ -206,13 +227,12 @@ enable your data records to be synced to Gas Jot's central server so you can acc
 }
 
 - (void)handleAccountCreation {
-  NSLog(@"inside handleAccountCreation");
   FPEnableUserInteractionBlk enableUserInteraction = [self makeUserEnabledBlock];
   [[self view] endEditing:YES];
   if (!([self formStateMaskForAcctCreation] & FPSaveUsrAnyIssues)) {
-    [_localUser setName:[_caFullNameTf text]];
-    [_localUser setEmail:[_caEmailTf text]];
-    [_localUser setPassword:[_caPasswordTf text]];
+    [_localUser setName:[_fullNameTf text]];
+    [_localUser setEmail:[_emailTf text]];
+    [_localUser setPassword:[_passwordTf text]];
     __block MBProgressHUD *HUD;    
     void (^nonLocalSyncSuccessBlk)(FPUser *) = ^(FPUser *user){
       dispatch_async(dispatch_get_main_queue(), ^{
@@ -230,7 +250,6 @@ emailed to you."]
                                  [[NSNotificationCenter defaultCenter] postNotificationName:FPAppAccountCreationNotification
                                                                                      object:nil
                                                                                    userInfo:nil];
-                                 //[[self navigationController] popViewControllerAnimated:YES];
                                  [self dismissViewControllerAnimated:YES completion:nil];
                                }
                              relativeToView:[self parentViewForAlerts]];

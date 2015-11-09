@@ -4,11 +4,7 @@
 
 Gas Jot is an iOS application for collecting gas purchase and other data about
 your vehicle.  It's a fun application to use to track your gas purchase and
-utilization history.  It's serves as the unofficial reference application for
-leveraging the PE* suite of libraries.
-
-The PE* library suite is a set of iOS libraries to aid in the development of
-applications.
+utilization history.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -35,7 +31,7 @@ applications.
 
 The Gas Jot system serves as nice a reference implementation for a set of
 client-side and server-side libraries.  The Gas Jot system is a client/server
-one.  This repo, *PEFuelPurchase-App*, represents a client-side application of
+one.  This repo, *GasJot-ios*, represents a client-side application of
 the Gas Jot system.  The libraries it uses are generic, and thus are not coupled
 to Gas Jot.  These libraries are the
 [PE* iOS library suite](#pe-ios-library-suite).

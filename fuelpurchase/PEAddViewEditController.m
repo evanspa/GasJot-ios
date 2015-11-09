@@ -1593,6 +1593,7 @@ merge conflicts.";
                                                  target:self
                                                  action:@selector(cancelAddEdit)]];
     [_entityViewPanel removeFromSuperview];
+    [_entityFormPanel removeFromSuperview];
     _entityFormPanel = _entityFormPanelMaker(self);
     [PEUIUtils placeView:_entityFormPanel atTopOf:[self view] withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0 hpadding:0];
     _entityToPanelBinder(_entity, _entityFormPanel);

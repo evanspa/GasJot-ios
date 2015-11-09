@@ -59,7 +59,8 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     UIView *parentView = [parentViewController view];
     UIView *userAccountPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
     UIView *userAccountDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Name", [PEUtils emptyIfNil:[user name]]],
-                                                                      @[@"Email", [PEUtils emptyIfNil:[user email]]]]
+                                                                      @[@"Email", [PEUtils emptyIfNil:[user email]]],
+                                                                      @[@"Password", @"*****************"]]
                                                           uitoolkit:_uitoolkit
                                                          parentView:parentView];
     UIView *accountStatusPanel = [FPPanelToolkit accountStatusPanelForUser:user
@@ -90,10 +91,19 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
     UIView *userAccountPanel = [PEUIUtils panelWithWidthOf:1.0
                                                andHeightOf:1.0
                                             relativeToView:parentView];
-    TaggedTextfieldMaker tfMaker =
-    [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:userAccountPanel];
+    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:userAccountPanel];
     UITextField *nameTf = tfMaker(@"Name", FPUserTagName);
     UITextField *emailTf = tfMaker(@"E-mail", FPUserTagEmail);
+    UITextField *passwordTf = tfMaker(@"Password", FPUserTagPassword);
+    [passwordTf setSecureTextEntry:YES];
+    UITextField *confirmPasswordTf = tfMaker(@"Confirm password", FPUserTagConfirmPassword);
+    [confirmPasswordTf setSecureTextEntry:YES];
+    UILabel *passwordMsg = [PEUIUtils labelWithKey:@"If you don't want to change your password, leave the password field blank."
+                                              font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                   backgroundColor:[UIColor clearColor]
+                                         textColor:[UIColor darkGrayColor]
+                               verticalTextPadding:3.0
+                                        fitToWidth:parentView.frame.size.width - 23.0];
     [PEUIUtils placeView:nameTf
                  atTopOf:userAccountPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -105,6 +115,24 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
+    [PEUIUtils placeView:passwordTf
+                   below:emailTf
+                    onto:userAccountPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:confirmPasswordTf
+                   below:passwordTf
+                    onto:userAccountPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:passwordMsg
+                   below:confirmPasswordTf
+                    onto:userAccountPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:4.0
+                hpadding:8.0];
     return userAccountPanel;
   };
 }
@@ -119,6 +147,14 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
            withStringSetter:@selector(setEmail:)
        fromTextfieldWithTag:FPUserTagEmail
                    fromView:panel];
+    [PEUIUtils bindToEntity:userAccount
+           withStringSetter:@selector(setPassword:)
+       fromTextfieldWithTag:FPUserTagPassword
+                   fromView:panel];
+    [PEUIUtils bindToEntity:userAccount
+           withStringSetter:@selector(setConfirmPassword:)
+       fromTextfieldWithTag:FPUserTagConfirmPassword
+                   fromView:panel];
   };
 }
 
@@ -132,6 +168,14 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                fromView:panel
                              fromEntity:userAccount
                              withGetter:@selector(email)];
+    [PEUIUtils bindToTextControlWithTag:FPUserTagPassword
+                               fromView:panel
+                             fromEntity:userAccount
+                             withGetter:@selector(password)];
+    [PEUIUtils bindToTextControlWithTag:FPUserTagConfirmPassword
+                               fromView:panel
+                             fromEntity:userAccount
+                             withGetter:@selector(confirmPassword)];
   };
 }
 
@@ -141,6 +185,12 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                            fromView:panel
                              enable:enable];
     [PEUIUtils enableControlWithTag:FPUserTagEmail
+                           fromView:panel
+                             enable:enable];
+    [PEUIUtils enableControlWithTag:FPUserTagPassword
+                           fromView:panel
+                             enable:enable];
+    [PEUIUtils enableControlWithTag:FPUserTagConfirmPassword
                            fromView:panel
                              enable:enable];
   };

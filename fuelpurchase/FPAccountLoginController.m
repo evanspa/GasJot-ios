@@ -43,9 +43,9 @@
 
 @implementation FPAccountLoginController {
   FPCoordinatorDao *_coordDao;
-  UITextField *_siEmailTf;
-  UITextField *_siPasswordTf;
-  UIButton *_siDoSignInBtn;
+  UITextField *_emailTf;
+  UITextField *_passwordTf;
+  UIButton *_signInBtn;
   CGFloat animatedDistance;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
@@ -97,7 +97,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  [_siEmailTf becomeFirstResponder];
+  [_emailTf becomeFirstResponder];
 }
 
 #pragma mark - GUI helpers
@@ -124,9 +124,9 @@ Gas Jot account, connecting this device to it.  Your Gas Jot data will be downlo
                                          fitToWidth:(signInPnl.frame.size.width - leftPadding - 10.0)];
   UIView *signInMsgPanel = [PEUIUtils leftPadView:signInMsgLabel padding:leftPadding];
   TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:signInPnl];
-  _siEmailTf = tfMaker(@"unauth.start.signin.emailtf.pht");
-  _siPasswordTf = tfMaker(@"unauth.start.signin.pwdtf.pht");
-  [_siPasswordTf setSecureTextEntry:YES];
+  _emailTf = tfMaker(@"unauth.start.signin.emailtf.pht");
+  _passwordTf = tfMaker(@"unauth.start.signin.pwdtf.pht");
+  [_passwordTf setSecureTextEntry:YES];
   UILabel *instructionLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"Enter your credentials and tap %@."
                                                                                          textToAccent:@"Log In"
                                                                                        accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
@@ -143,20 +143,20 @@ Gas Jot account, connecting this device to it.  Your Gas Jot data will be downlo
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:0.0
               hpadding:0.0];
-  [PEUIUtils placeView:_siEmailTf
+  [PEUIUtils placeView:_emailTf
                  below:signInMsgPanel
                   onto:signInPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:7.0
               hpadding:0.0];
-  [PEUIUtils placeView:_siPasswordTf
-                 below:_siEmailTf
+  [PEUIUtils placeView:_passwordTf
+                 below:_emailTf
                   onto:signInPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5.0
               hpadding:0.0];
   [PEUIUtils placeView:instructionPanel
-                 below:_siPasswordTf
+                 below:_passwordTf
                   onto:signInPnl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
@@ -169,8 +169,8 @@ Gas Jot account, connecting this device to it.  Your Gas Jot data will be downlo
               hpadding:leftPadding];
   
   RAC(self, formStateMaskForSignIn) =
-    [RACSignal combineLatest:@[_siEmailTf.rac_textSignal,
-                               _siPasswordTf.rac_textSignal]
+    [RACSignal combineLatest:@[_emailTf.rac_textSignal,
+                               _passwordTf.rac_textSignal]
                        reduce:^(NSString *email,
                                 NSString *password) {
         NSString *trimmedEmail = [email stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
@@ -406,8 +406,8 @@ edits, the Gas Jot server is asking for you to authenticate again.  Sorry about 
       HUD.delegate = self;
       HUD.labelText = @"Logging in...";
       enableUserInteraction(NO);
-      [_coordDao loginWithEmail:[[_siEmailTf text] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
-                       password:[_siPasswordTf text]
+      [_coordDao loginWithEmail:[[_emailTf text] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
+                       password:[_passwordTf text]
    andLinkRemoteUserToLocalUser:_localUser
   preserveExistingLocalEntities:syncLocalEntities
                 remoteStoreBusy:^(NSDate *retryAfter) {

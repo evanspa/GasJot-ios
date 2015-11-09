@@ -150,11 +150,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 
 - (FPAuthScreenMaker)newViewUnsyncedEditsScreenMaker {
   return ^ UIViewController *(FPUser *user) {
-    return [[FPEditsInProgressController alloc]
-              initWithStoreCoordinator:_coordDao
-                                  user:user
-                             uitoolkit:_uitoolkit
-                         screenToolkit:self];
+    return [[FPEditsInProgressController alloc] initWithStoreCoordinator:_coordDao
+                                                                    user:user
+                                                               uitoolkit:_uitoolkit
+                                                           screenToolkit:self];
   };
 }
 
@@ -162,11 +161,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 
 - (FPAuthScreenMaker)newViewSettingsScreenMaker {
   return ^ UIViewController *(FPUser *user) {
-    return [[FPSettingsController alloc]
-              initWithStoreCoordinator:_coordDao
-                                  user:user
-                             uitoolkit:_uitoolkit
-                         screenToolkit:self];
+    return [[FPSettingsController alloc] initWithStoreCoordinator:_coordDao
+                                                             user:user
+                                                        uitoolkit:_uitoolkit
+                                                    screenToolkit:self];
   };
 }
 
@@ -180,6 +178,20 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     if ([email isBlank]) {
       [errMsgs addObject:@"E-mail cannot be blank."];
     }
+    NSString *password = [((UITextField *)[userAccountPanel viewWithTag:FPUserTagPassword]) text];
+    if (![password isBlank]) {
+      NSString *confirmPassword = [((UITextField *)[userAccountPanel viewWithTag:FPUserTagConfirmPassword]) text];
+      if ([confirmPassword isBlank]) {
+        [errMsgs addObject:@"To update your password, re-enter it in the 'Confirm Password' field."];
+      } else if (![password isEqualToString:confirmPassword]) {
+        [errMsgs addObject:@"Passwords do not match."];
+      }
+    } else {
+      NSString *confirmPassword = [((UITextField *)[userAccountPanel viewWithTag:FPUserTagConfirmPassword]) text];
+      if (![confirmPassword isBlank]) {
+        [errMsgs addObject:@"If you want to update your password, you have to enter it in both the 'Password' and 'Confirm Password' fields."];
+      }
+    }
     return errMsgs;
   };
 }
@@ -187,19 +199,17 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 - (FPAuthScreenMaker)newUserAccountDetailScreenMaker {
   return ^ UIViewController * (FPUser *user) {
     PEEntityEditPreparerBlk userEditPreparer = ^BOOL(PEAddViewEditController *ctrl, FPUser *user) {
-      BOOL prepareSuccess = [_coordDao prepareUserForEdit:user
-                                                    error:[FPUtils localSaveErrorHandlerMaker]()];
+      BOOL prepareSuccess = [_coordDao prepareUserForEdit:user error:[FPUtils localSaveErrorHandlerMaker]()];
+      [user setConfirmPassword:nil];
       [APP refreshTabs];
       return prepareSuccess;
     };
     PEEntityEditCancelerBlk userEditCanceler = ^(PEAddViewEditController *ctrl, FPUser *user) {
-      [_coordDao cancelEditOfUser:user
-                            error:[FPUtils localSaveErrorHandlerMaker]()];
+      [_coordDao cancelEditOfUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
       [APP refreshTabs];
     };
     PESaveEntityBlk userSaver = ^(PEAddViewEditController *ctrl, FPUser *user) {
-      [_coordDao saveUser:user
-                    error:[FPUtils localSaveErrorHandlerMaker]()];
+      [_coordDao saveUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEMarkAsDoneEditingImmediateSyncBlk doneEditingUserImmediateSync = ^(PEAddViewEditController *ctrl,
                                                                          FPUser *user,

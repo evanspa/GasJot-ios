@@ -70,6 +70,15 @@
   if (saveUsrErrMask & FPSaveUsrEmailAlreadyRegistered) {
     [errMsgs addObject:LS(@"saveusr.email-already-registered")];
   }
+  if (saveUsrErrMask & FPSaveUsrConfirmPasswordOnlyProvided) {
+    [errMsgs addObject:LS(@"saveusr.confirm-password-onlyprovided")];
+  }
+  if (saveUsrErrMask & FPSaveUsrConfirmPasswordNotProvided) {
+    [errMsgs addObject:LS(@"saveusr.confirm-password-notprovided")];
+  }
+  if (saveUsrErrMask & FPSaveUsrPasswordConfirmPasswordDontMatch) {
+    [errMsgs addObject:LS(@"saveusr.password-confirm-password-dont-match")];
+  }
   return errMsgs;
 }
 
