@@ -186,4 +186,12 @@ height="418px" width="237px">
 
 Adding a gas station (which is needed in order to log gas purchases).
 
+#### Jot Button
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/jot-button.png"
+height="418px" width="237px">
+
+The Jot button conveniently allows you to create any type of data record at any time.
+
 #### Gas Jot Account Creation
