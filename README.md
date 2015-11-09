@@ -14,7 +14,7 @@ utilization history.
   - [Server-side Application](#server-side-application)
 - [Component Layering](#component-layering)
 - [Dependency Graph](#dependency-graph)
-- [App-specific Libraries used by PEFuelPurchase-App](#app-specific-libraries)
+- [App-specific Libraries used by GasJot-ios](#app-specific-libraries)
 - [PE* iOS Library Suite](#pe-ios-library-suite)
 - [Analytics](#analytics)
 - [Screenshots](#screenshots)
@@ -120,7 +120,7 @@ actual screenshots.
 #### Splash
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/splash.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/splash.png"
 height="418px" width="237px">
 
 Gas Jot's splash screen.  The top portion of the screen is an image carousel
@@ -134,27 +134,27 @@ Instead, users can start using the app immediately (*adding vehicles*, *recordin
 etc.), without having to sign up for an account or log in.
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/home-intro-1.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/home-intro-1.png"
 height="418px" width="237px">
 
 Upon launching, the app invites you to create your first vehicle record.
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-vehicle.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/create-vehicle.png"
 border="5" height="418px" width="237px">
 
 Creating a vehicle is pretty simple; just 3 fields: *name*, *default octane* and
 *fuel capacity*.  Only the *name* field is required.
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/vehicle-saved-local.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/vehicle-saved-local.png"
 border="5" height="418px" width="237px">
 
 Successful creation of a vehicle record.  At this point the vehicle record is saved locally
 in the app and the user can now start recording gas and odometer logs.
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/home-intro-2.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/home-intro-2.png"
 height="418px" width="237px">
 
 The home screen now updates to reflect that you have at least 1 vehicle record.
@@ -162,7 +162,7 @@ The home screen now updates to reflect that you have at least 1 vehicle record.
 #### Adding an Odometer Log
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-odometer-log.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/create-odometer-log.png"
 height="418px" width="237px">
 
 Odometer logs are used for recording your vehicle's current odometer, the
@@ -174,7 +174,7 @@ Odometer logs can be recorded at anytime.
 #### Adding a Gas Purchase Log
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-gas-log.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/create-gas-log.png"
 height="528px" width="237px">
 
 Adding a gas purchase log requires the user to pick the associated vehicle and
@@ -187,7 +187,7 @@ to the gas log to record all the information.
 #### Adding a Gas Station
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-gas-station.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/create-gas-station.png"
 height="418px" width="237px">
 
 Adding a gas station (which is needed in order to log gas purchases).
@@ -195,7 +195,7 @@ Adding a gas station (which is needed in order to log gas purchases).
 #### Jot Button
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/jot-button.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/jot-button.png"
 height="418px" width="237px">
 
 The Jot button conveniently allows you to create any type of data record at any
@@ -204,7 +204,7 @@ time.
 #### Records Screen
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/records.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/records.png"
 height="418px" width="237px">
 
 The records screen lets you explore and navigate all of your data records.
@@ -212,7 +212,7 @@ The records screen lets you explore and navigate all of your data records.
 #### Home Screen with Charts
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/home.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/home.png"
 height="418px" width="237px">
 
 The home screen displays a series of charts and aggregate data points.
@@ -220,7 +220,7 @@ The home screen displays a series of charts and aggregate data points.
 #### Gas Jot Account
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/login-or-create-account.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/login-or-create-account.png"
 height="418px" width="237px">
 
 Users can create an account or log into their existing Gas Jot account.
@@ -230,7 +230,7 @@ they can be accessed from multiple devices.
 #### Account Creation
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-account.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/create-account.png"
 height="418px" width="237px">
 
 Creating an account is fairly simple affair.  Upon successfully creating an
@@ -239,7 +239,7 @@ account, the user will receive a verification email.
 #### Account Log In
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/login.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/login.png"
 height="418px" width="237px">
 
 Logging in is also a simple affair.  Password reset functionality is provided.
@@ -247,7 +247,7 @@ Logging in is also a simple affair.  Password reset functionality is provided.
 #### Account Screen
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/authenticated-account.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/authenticated-account.png"
 height="418px" width="237px">
 
 When logged in, the Account screen is where the user can log out, view and edit
@@ -256,7 +256,7 @@ their account details and drill into several stats and trends screens.
 #### Data Record Detail
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/view-vehicle.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/view-vehicle.png"
 height="418px" width="237px">
 
 From a data record's detail screen, the record can be edited or deleted.  In
@@ -269,7 +269,7 @@ logs for gas stations*).
 #### Data Record Stats
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/vehicle-stats.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/vehicle-stats.png"
 height="418px" width="237px">
 
 Stats and trend information can be drilled-into for vehicle and gas station
@@ -277,14 +277,14 @@ records (*and at the user-level too; giving stats trends across ALL vehicles or
 ALL gas stations*).
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/vehicle-stats-days-between.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/vehicle-stats-days-between.png"
 height="418px" width="237px">
 
 The above is an example showing the average number of days between fill-ups
 stats and trend information.
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/vehicle-stats-days-between-compare.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/vehicle-stats-days-between-compare.png"
 height="418px" width="237px">
 
 A *Compare* button is usually present to compare aggregate values.
@@ -299,7 +299,7 @@ will be detected by the server if the user attempts to edit the record on their
 device without having downloaded the latest from the server.
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/edit-vehicle-conflict.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/edit-vehicle-conflict.png"
 height="418px" width="237px">
 
 Gas Jot is smart enough to know if merging is possible.  If the fields of the
@@ -310,7 +310,7 @@ server, an automatic merge will not be possible, and the user will be presented
 with a manual merge screen.
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/edit-vehicle-manual-merge.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/edit-vehicle-manual-merge.png"
 height="418px" width="237px">
 
 In this example, the vehicle record on the server had been updated at some point
@@ -324,7 +324,7 @@ the local value, or the server copy's value.
 #### Settings
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/settings.png"
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/settings.png"
 height="418px" width="237px">
 
 From the Settings screen, the user can tap the *Download all changes* button to
