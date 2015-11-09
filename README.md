@@ -290,3 +290,19 @@ record on their device to change the name to *300ZX TT*.  In this case, an
 automatic merge cannot be done; so the user is presented with the conflict
 resolver screen.  For each field in conflict, the user chooses which they want:
 the local value, or the server copy's value.
+
+#### Settings
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/settings.png"
+height="418px" width="237px">
+
+From the Settings screen, the user can tap the *Download all changes* button to
+download records from the server that have been updated/added/deleted from other
+devices.  Doing this keeps the data records on users' devices up-to-date and
+consistent.
+
+**Offline mode** allows just that; it prevents communication with the Gas Jot
+  server when doing adds and edits, in order to keep those operations very
+  fast, since they'll be local-only.  Later, from the **Records** screen, all
+  unsynced edits can up uploaded to the Gas Jot server in 1 bulk operation.

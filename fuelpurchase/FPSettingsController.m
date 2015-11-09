@@ -173,7 +173,7 @@ and deletions on other devices."
                                                          verticalTextPadding:3.0
                                                                   fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0]
                                              padding:labelLeftPadding];
-  UIButton *changelogBtn = [_uitoolkit systemButtonMaker](@"Download All Changes", nil, nil);
+  UIButton *changelogBtn = [_uitoolkit systemButtonMaker](@"Download all changes", nil, nil);
   [PEUIUtils placeView:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"download-icon"]]
             inMiddleOf:changelogBtn
          withAlignment:PEUIHorizontalAlignmentTypeLeft
