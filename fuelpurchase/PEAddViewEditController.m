@@ -591,7 +591,7 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
                        cancelButtonTitle:@"No.  Cancel."
                       cancelButtonAction:^{}
                         cancelButtonSyle:JGActionSheetButtonStyleDefault
-                          relativeToView:self.tabBarController.view];
+                          relativeToView:[self parentViewForAlerts]];
   };
   if (_itemChildrenCounter) {
     NSInteger numChildren = _itemChildrenCounter(_entity);

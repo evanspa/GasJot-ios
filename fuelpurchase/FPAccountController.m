@@ -103,10 +103,14 @@ NSInteger const kAccountStatusPanelTag = 12;
     }
   } else {
     [navItem setTitle:@"Log In or Create Account"];
-    [PEUIUtils placeView:_notLoggedInPanel
+    /*[PEUIUtils placeView:_notLoggedInPanel
                  atTopOf:[self view]
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:0.0
+                hpadding:0.0];*/
+    [PEUIUtils placeView:_notLoggedInPanel
+              inMiddleOf:[self view]
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
                 hpadding:0.0];
   }
 }
@@ -369,14 +373,38 @@ account.";
 
 - (void)makeNotLoggedInPanel {
   _notLoggedInPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
-  UIButton *loginBtn = [_uitoolkit systemButtonMaker](@"Log In", nil, nil);
-  [[loginBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:loginBtn ofWidth:1.0 relativeTo:_notLoggedInPanel];
-  [PEUIUtils addDisclosureIndicatorToButton:loginBtn];
+  //UIButton *loginBtn = [_uitoolkit systemButtonMaker](@"Log In", nil, nil);
+  UIButton *loginBtn = [PEUIUtils buttonWithKey:@"Log In"
+                                           font:[UIFont boldSystemFontOfSize:22.0]
+                                backgroundColor:[UIColor turquoiseColor]
+                                      textColor:[UIColor whiteColor]
+                   disabledStateBackgroundColor:nil
+                         disabledStateTextColor:nil
+                                verticalPadding:22.5
+                              horizontalPadding:10.0
+                                   cornerRadius:5.0
+                                         target:nil
+                                         action:nil];
+  //[[loginBtn layer] setCornerRadius:0.0];
+  [PEUIUtils setFrameWidthOfView:loginBtn ofWidth:0.85 relativeTo:_notLoggedInPanel];
+  //[PEUIUtils addDisclosureIndicatorToButton:loginBtn];
+  
+  
   [loginBtn bk_addEventHandler:^(id sender) {
     [self presentLoginScreen];
   } forControlEvents:UIControlEventTouchUpInside];
-  UIView *loginMsgPanel = [self leftPaddingMessageWithAttributedText:[[NSAttributedString alloc] initWithString:@"Log into your Gas Jot account."]];
+//  UIView *loginMsgPanel = [self leftPaddingMessageWithAttributedText:[[NSAttributedString alloc] initWithString:@"Log into your Gas Jot account."]];
+  NSString *msgText = @"Already have a Gas Jot account?  Log in here.";
+  UILabel *loginMsgLbl = [PEUIUtils labelWithAttributeText:[[NSAttributedString alloc] initWithString:msgText]
+                                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                backgroundColor:[UIColor clearColor]
+                                                      textColor:[UIColor darkGrayColor]
+                                            verticalTextPadding:3.0
+                                                     fitToWidth:self.view.frame.size.width - (8.0 + 5.0)];
+  [loginMsgLbl setTextAlignment:NSTextAlignmentCenter];
+  
+  
+  
   UIButton *createAccountBtn = [PEUIUtils buttonWithKey:@"Create Account"
                                                    font:[UIFont boldSystemFontOfSize:22.0]
                                         backgroundColor:[UIColor peterRiverColor]
@@ -389,38 +417,49 @@ account.";
                                                  target:nil
                                                  action:nil];
   [PEUIUtils setFrameWidthOfView:createAccountBtn ofWidth:0.85 relativeTo:_notLoggedInPanel];
-  [PEUIUtils addDisclosureIndicatorToButton:createAccountBtn];
+  //[PEUIUtils addDisclosureIndicatorToButton:createAccountBtn];
   [createAccountBtn bk_addEventHandler:^(id sender) {
     [self presentSetupRemoteAccountScreen];
   } forControlEvents:UIControlEventTouchUpInside];
-  UIView *createAcctMsgPanel = [self leftPaddingMessageWithAttributedText:[[NSAttributedString alloc] initWithString:@"Create a Gas Jot account."]];  
+  msgText = @"Creating a Gas Jot account will enable your records to be saved to the Gas Jot server so you can access them from other devices.";
+  //UIView *createAcctMsgPanel = [self leftPaddingMessageWithAttributedText:[[NSAttributedString alloc] initWithString:msgText]];
+  UILabel *createAcctMsgLbl = [PEUIUtils labelWithAttributeText:[[NSAttributedString alloc] initWithString:msgText]
+                                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                backgroundColor:[UIColor clearColor]
+                                                      textColor:[UIColor darkGrayColor]
+                                            verticalTextPadding:3.0
+                                                     fitToWidth:self.view.frame.size.width - (8.0 + 5.0)];
+  [createAcctMsgLbl setTextAlignment:NSTextAlignmentCenter];
   
   // place views onto panel
   [PEUIUtils placeView:loginBtn
                atTopOf:_notLoggedInPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:90.0
-              hpadding:0];
-  [PEUIUtils placeView:loginMsgPanel
+         withAlignment:PEUIHorizontalAlignmentTypeCenter
+              vpadding:0.0 //90.0
+              hpadding:0.0];
+  [PEUIUtils placeView:loginMsgLbl
                  below:loginBtn
                   onto:_notLoggedInPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:4.0
+         withAlignment:PEUIHorizontalAlignmentTypeCenter
+              vpadding:8.0
               hpadding:0.0];
   [PEUIUtils placeView:createAccountBtn
-                 below:loginMsgPanel
+                 below:loginMsgLbl
                   onto:_notLoggedInPanel
          withAlignment:PEUIHorizontalAlignmentTypeCenter
 alignmentRelativeToView:_notLoggedInPanel
-              vpadding:30.0
+              vpadding:45.0
               hpadding:0.0];
-  [PEUIUtils placeView:createAcctMsgPanel
+  [PEUIUtils placeView:createAcctMsgLbl
                  below:createAccountBtn
                   onto:_notLoggedInPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-alignmentRelativeToView:createAccountBtn
-              vpadding:4.0
+         withAlignment:PEUIHorizontalAlignmentTypeCenter
+alignmentRelativeToView:_notLoggedInPanel
+              vpadding:8.0
               hpadding:0.0];
+  [PEUIUtils setFrameHeight:(loginBtn.frame.size.height + 8.0 + loginMsgLbl.frame.size.height + 45.0 +
+      createAccountBtn.frame.size.height + 8.0 + createAcctMsgLbl.frame.size.height)
+                     ofView:_notLoggedInPanel];
 }
 
 #pragma mark - Re-authenticate screen
@@ -443,8 +482,12 @@ alignmentRelativeToView:createAccountBtn
                                                    localUser:_user
                                                    uitoolkit:_uitoolkit
                                                screenToolkit:_screenToolkit];
-  [[self navigationController] pushViewController:loginController
-                                         animated:YES];
+  //[[self navigationController] pushViewController:loginController
+    //                                     animated:YES];
+  [[self navigationController] presentViewController:[PEUIUtils navigationControllerWithController:loginController
+                                                                               navigationBarHidden:NO]
+                                            animated:YES
+                                          completion:nil];
 }
 
 #pragma mark - Present Account Creation screen
@@ -455,8 +498,10 @@ alignmentRelativeToView:createAccountBtn
                                                     localUser:_user
                                                     uitoolkit:_uitoolkit
                                                 screenToolkit:_screenToolkit];
-  [[self navigationController] pushViewController:createAccountController
-                                         animated:YES];
+  [[self navigationController] presentViewController:[PEUIUtils navigationControllerWithController:createAccountController
+                                                                               navigationBarHidden:NO]
+                                            animated:YES
+                                          completion:nil];
 }
 
 #pragma mark - Logout

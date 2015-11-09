@@ -88,9 +88,19 @@
               hpadding:0.0];
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Create Account"];
+  [navItem setLeftBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
+                                                                              target:self
+                                                                              action:@selector(handleCancel)]];
   [navItem setRightBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                target:self
                                                                                action:@selector(handleAccountCreation)]];
+}
+
+- (UIView *)parentViewForAlerts {
+  if (self.tabBarController) {
+    return self.tabBarController.view;
+  }
+  return self.view;
 }
 
 #pragma mark - GUI construction (making panels)
@@ -180,10 +190,24 @@ enable your data records to be synced to Gas Jot's central server so you can acc
   return createAcctPnl;
 }
 
+- (FPEnableUserInteractionBlk)makeUserEnabledBlock {
+  return ^(BOOL enable) {
+    [APP enableJotButton:enable];
+    [[[self navigationItem] leftBarButtonItem] setEnabled:enable];
+    [[[self navigationItem] rightBarButtonItem] setEnabled:enable];
+    [[[self tabBarController] tabBar] setUserInteractionEnabled:enable];
+  };
+}
+
 #pragma mark - Event handling
 
+- (void)handleCancel {
+  [self dismissViewControllerAnimated:YES completion:nil];
+}
+
 - (void)handleAccountCreation {
-  FPEnableUserInteractionBlk enableUserInteraction = [FPUIUtils makeUserEnabledBlockForController:self];  
+  NSLog(@"inside handleAccountCreation");
+  FPEnableUserInteractionBlk enableUserInteraction = [self makeUserEnabledBlock];
   [[self view] endEditing:YES];
   if (!([self formStateMaskForAcctCreation] & FPSaveUsrAnyIssues)) {
     [_localUser setName:[_caFullNameTf text]];
@@ -206,9 +230,10 @@ emailed to you."]
                                  [[NSNotificationCenter defaultCenter] postNotificationName:FPAppAccountCreationNotification
                                                                                      object:nil
                                                                                    userInfo:nil];
-                                 [[self navigationController] popViewControllerAnimated:YES];
+                                 //[[self navigationController] popViewControllerAnimated:YES];
+                                 [self dismissViewControllerAnimated:YES completion:nil];
                                }
-                             relativeToView:self.tabBarController.view];
+                             relativeToView:[self parentViewForAlerts]];
       });
     };
     ErrMsgsMaker errMsgsMaker = ^ NSArray * (NSInteger errCode) {
@@ -296,10 +321,11 @@ remote account."]
                                                                                   [[NSNotificationCenter defaultCenter] postNotificationName:FPAppAccountCreationNotification
                                                                                                                                       object:nil
                                                                                                                                     userInfo:nil];
-                                                                                  [[self navigationController] popViewControllerAnimated:YES];
+                                                                                  //[[self navigationController] popViewControllerAnimated:YES];
+                                                                                  [self dismissViewControllerAnimated:YES completion:nil];
                                                                                   [APP refreshTabs];
                                                                                 }
-                                                                              relativeToView:self.tabBarController.view];
+                                                                              relativeToView:[self parentViewForAlerts]];
                                                       });
                                                     } else {
                                                       dispatch_async(dispatch_get_main_queue(), ^{
@@ -316,12 +342,12 @@ is asking for you to authenticate again.  Sorry about that. To authenticate, tap
                                                           becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
                                                                                                                  title:@"Authentication Failure."
                                                                                                       alertDescription:attrBecameUnauthMessage
-                                                                                                        relativeToView:self.tabBarController.view];
+                                                                                                        relativeToView:[self parentViewForAlerts]];
                                                         }
                                                         JGActionSheetSection *contentSection = [PEUIUtils warningAlertSectionWithMsgs:nil
                                                                                                                                 title:title
                                                                                                                      alertDescription:[[NSAttributedString alloc] initWithString:message]
-                                                                                                                       relativeToView:self.tabBarController.view];
+                                                                                                                       relativeToView:[self parentViewForAlerts]];
                                                         JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
                                                                                                                               message:nil
                                                                                                                          buttonTitles:@[@"Okay."]
@@ -335,16 +361,17 @@ is asking for you to authenticate again.  Sorry about that. To authenticate, tap
                                                         [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
                                                           enableUserInteraction(YES);
                                                           [sheet dismissAnimated:YES];
-                                                          [[self navigationController] popViewControllerAnimated:YES];
+                                                          //[[self navigationController] popViewControllerAnimated:YES];
+                                                          [self dismissViewControllerAnimated:YES completion:nil];
                                                         }];
-                                                        [alertSheet showInView:self.tabBarController.view animated:YES];
+                                                        [alertSheet showInView:[self parentViewForAlerts] animated:YES];
                                                         [APP refreshTabs];
                                                       });
                                                     }
                                                   }
                                                     error:^(NSError *err, int code, NSString *desc) {
                                                       dispatch_async(dispatch_get_main_queue(), ^{
-                                                        [FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)(err, code, desc);
+                                                        [FPUtils localDatabaseErrorHudHandlerMaker](HUD, [self parentViewForAlerts])(err, code, desc);
                                                       });
                                                     }];
         };
@@ -357,19 +384,19 @@ is asking for you to authenticate again.  Sorry about that. To authenticate, tap
       HUD.labelText = @"Creating account...";
       [_coordDao establishRemoteAccountForLocalUser:_localUser
                       preserveExistingLocalEntities:syncLocalEntities
-                                    remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.tabBarController.view)
+                                    remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, [self parentViewForAlerts])
                                   completionHandler:^(FPUser *user, NSError *err) {
                                     dispatch_async(dispatch_get_main_queue(), ^{
                                     [FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD,
                                                                                                        successBlk,
                                                                                                        ^{ enableUserInteraction(YES); },
-                                                                                                       self.tabBarController.view)(user, err);
+                                                                                                       [self parentViewForAlerts])(user, err);
                                     DDLogDebug(@"in FPCreateAccountController/handleAccountCreation, calling [APP setChangelogUpdatedAt:(%@)", [PEUtils millisecondsFromDate:user.updatedAt]);
                                     [APP setChangelogUpdatedAt:[user updatedAt]];
                                     });
                                   }
                                                    
-                              localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
+                              localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, [self parentViewForAlerts])];
     };
     if (_preserveExistingLocalEntities == nil) { // first time asked
       if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {
@@ -377,7 +404,7 @@ is asking for you to authenticate again.  Sorry about that. To authenticate, tap
 remote account upon account creation, or would you like them to be deleted?";
         JGActionSheetSection *contentSection = [PEUIUtils questionAlertSectionWithTitle:@"Locally created records."
                                                                        alertDescription:[[NSAttributedString alloc] initWithString:msg]
-                                                                         relativeToView:self.tabBarController.view];
+                                                                         relativeToView:[self parentViewForAlerts]];
         JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
                                                                               message:nil
                                                                          buttonTitles:@[@"Sync them to my remote account.",
@@ -399,7 +426,7 @@ remote account upon account creation, or would you like them to be deleted?";
           }
           [sheet dismissAnimated:YES];
         }];
-        [alertSheet showInView:self.tabBarController.view animated:YES];
+        [alertSheet showInView:[self parentViewForAlerts] animated:YES];
       } else {
         _preserveExistingLocalEntities = [NSNumber numberWithBool:NO];
         doAccountCreation(NO);
@@ -415,7 +442,7 @@ remote account upon account creation, or would you like them to be deleted?";
                                topInset:70.0
                             buttonTitle:@"Okay."
                            buttonAction:nil
-                         relativeToView:self.tabBarController.view];
+                         relativeToView:[self parentViewForAlerts]];
   }
 }
 

@@ -85,6 +85,9 @@
               hpadding:0.0];
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Account Log In"];
+  [navItem setLeftBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
+                                                                              target:self
+                                                                              action:@selector(handleCancel)]];
   [navItem setRightBarButtonItem:[[UIBarButtonItem alloc] initWithTitle:@"Log In"
                                                                   style:UIBarButtonItemStylePlain
                                                                  target:self
@@ -97,7 +100,14 @@
   [_siEmailTf becomeFirstResponder];
 }
 
-#pragma mark - GUI construction (making panels)
+#pragma mark - GUI helpers
+
+- (UIView *)parentViewForAlerts {
+  if (self.tabBarController) {
+    return self.tabBarController.view;
+  }
+  return self.view;
+}
 
 - (UIView *)panelForSignIn {
   UIView *signInPnl = [PEUIUtils panelWithWidthOf:1.0
@@ -163,10 +173,11 @@ Gas Jot account, connecting this device to it.  Your Gas Jot data will be downlo
                                _siPasswordTf.rac_textSignal]
                        reduce:^(NSString *email,
                                 NSString *password) {
+        NSString *trimmedEmail = [email stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
         NSUInteger signInErrMask = 0;
-        if ([email length] == 0) {
+        if ([trimmedEmail length] == 0) {
           signInErrMask = FPSignInEmailNotProvided | FPSignInAnyIssues;
-        } else if (![PEUtils validateEmailWithString:email]) {
+        } else if (![PEUtils validateEmailWithString:trimmedEmail]) {
           signInErrMask = signInErrMask | FPSignInInvalidEmail | FPSignInAnyIssues;
         }
         if ([password length] == 0) {
@@ -177,10 +188,23 @@ Gas Jot account, connecting this device to it.  Your Gas Jot data will be downlo
   return signInPnl;
 }
 
+- (FPEnableUserInteractionBlk)makeUserEnabledBlock {
+  return ^(BOOL enable) {
+    [APP enableJotButton:enable];
+    [[[self navigationItem] leftBarButtonItem] setEnabled:enable];
+    [[[self navigationItem] rightBarButtonItem] setEnabled:enable];
+    [[[self tabBarController] tabBar] setUserInteractionEnabled:enable];
+  };
+}
+
 #pragma mark - Login event handling
 
+- (void)handleCancel {
+  [self dismissViewControllerAnimated:YES completion:nil];
+}
+
 - (void)handleSignIn {
-  FPEnableUserInteractionBlk enableUserInteraction = [FPUIUtils makeUserEnabledBlockForController:self];
+  FPEnableUserInteractionBlk enableUserInteraction = [self makeUserEnabledBlock];
   [[self view] endEditing:YES];
   void (^enableLocationServices)(void(^)(void)) = ^(void(^postAction)(void)) {
     if (![APP locationServicesAuthorized] && ![APP locationServicesDenied]) {
@@ -201,7 +225,7 @@ If you would like to enable location services, tap 'Allow' in the next pop-up."]
                          cancelButtonTitle:@"No.  Not at this time."
                         cancelButtonAction:^{ postAction(); }
                           cancelButtonSyle:JGActionSheetButtonStyleDefault
-                            relativeToView:self.tabBarController.view];
+                            relativeToView:[self parentViewForAlerts]];
     } else {
       postAction();
     }
@@ -222,10 +246,11 @@ Any Gas Jot data that you create and save will be synced to your remote account.
                                    [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
                                                                                        object:nil
                                                                                      userInfo:nil];
-                                   [[self navigationController] popViewControllerAnimated:YES];
+                                   //[[self navigationController] popViewControllerAnimated:YES];
+                                   [self dismissViewControllerAnimated:YES completion:nil];
                                  });
                                }
-                            relativeToView:self.tabBarController.view];
+                            relativeToView:[self parentViewForAlerts]];
     };
     ErrMsgsMaker errMsgsMaker = ^ NSArray * (NSInteger errCode) {
       return [FPUtils computeSignInErrMsgs:errCode];
@@ -313,11 +338,12 @@ remote account."]
                                                                                     [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
                                                                                                                                         object:nil
                                                                                                                                       userInfo:nil];
-                                                                                    [[self navigationController] popViewControllerAnimated:YES];
+                                                                                    //[[self navigationController] popViewControllerAnimated:YES];
+                                                                                    [self dismissViewControllerAnimated:YES completion:nil];
                                                                                     [APP refreshTabs];
                                                                                   });
                                                                                 }
-                                                                              relativeToView:self.tabBarController.view];
+                                                                              relativeToView:[self parentViewForAlerts]];
                                                       });
                                                     } else {
                                                       dispatch_async(dispatch_get_main_queue(), ^{
@@ -334,12 +360,12 @@ edits, the Gas Jot server is asking for you to authenticate again.  Sorry about 
                                                           becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
                                                                                                                  title:@"Authentication Failure."
                                                                                                       alertDescription:attrBecameUnauthMessage
-                                                                                                        relativeToView:self.tabBarController.view];
+                                                                                                        relativeToView:[self parentViewForAlerts]];
                                                         }
                                                         JGActionSheetSection *contentSection = [PEUIUtils warningAlertSectionWithMsgs:nil
                                                                                                                                 title:title
                                                                                                                      alertDescription:[[NSAttributedString alloc] initWithString:message]
-                                                                                                                       relativeToView:self.tabBarController.view];
+                                                                                                                       relativeToView:[self parentViewForAlerts]];
                                                         JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
                                                                                                                               message:nil
                                                                                                                          buttonTitles:@[@"Okay."]
@@ -357,18 +383,19 @@ edits, the Gas Jot server is asking for you to authenticate again.  Sorry about 
                                                             [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification
                                                                                                                 object:nil
                                                                                                               userInfo:nil];
-                                                            [[self navigationController] popViewControllerAnimated:YES];
+                                                            //[[self navigationController] popViewControllerAnimated:YES];
+                                                            [self dismissViewControllerAnimated:YES completion:nil];
                                                           });
                                                         }];
                                                         [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
-                                                        [alertSheet showInView:self.tabBarController.view animated:YES];
+                                                        [alertSheet showInView:[self parentViewForAlerts] animated:YES];
                                                         [APP refreshTabs];
                                                       });
                                                     }
                                                   }
                                                     error:^(NSError *err, int code, NSString *desc) {
                                                       dispatch_async(dispatch_get_main_queue(), ^{
-                                                        [FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)(err, code, desc);
+                                                        [FPUtils localDatabaseErrorHudHandlerMaker](HUD, [self parentViewForAlerts])(err, code, desc);
                                                       });
                                                     }];
         };
@@ -379,7 +406,7 @@ edits, the Gas Jot server is asking for you to authenticate again.  Sorry about 
       HUD.delegate = self;
       HUD.labelText = @"Logging in...";
       enableUserInteraction(NO);
-      [_coordDao loginWithEmail:[_siEmailTf text]
+      [_coordDao loginWithEmail:[[_siEmailTf text] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
                        password:[_siPasswordTf text]
    andLinkRemoteUserToLocalUser:_localUser
   preserveExistingLocalEntities:syncLocalEntities
@@ -395,7 +422,7 @@ busy.  Please try logging in a little later."]
                                         buttonAction:^{
                                           enableUserInteraction(YES);
                                         }
-                                      relativeToView:self.tabBarController.view];
+                                      relativeToView:[self parentViewForAlerts]];
                   });
                 }
               completionHandler:^(FPUser *user, NSError *err) {
@@ -403,11 +430,11 @@ busy.  Please try logging in a little later."]
                   [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD,
                                                                       successBlk,
                                                                       ^{ enableUserInteraction(YES); },
-                                                                      self.tabBarController.view)(err);
+                                                                      [self parentViewForAlerts])(err);
                   if (user) {
                     NSDate *mostRecentUpdatedAt =
                     [[_coordDao localDao] mostRecentMasterUpdateForUser:user
-                                                                  error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
+                                                                  error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, [self parentViewForAlerts])];
                     DDLogDebug(@"in FPAccountLoginController/handleSignIn, login success, mostRecentUpdatedAt: [%@](%@)", mostRecentUpdatedAt, [PEUtils millisecondsFromDate:mostRecentUpdatedAt]);
                     if (mostRecentUpdatedAt) {
                       [APP setChangelogUpdatedAt:mostRecentUpdatedAt];
@@ -415,7 +442,7 @@ busy.  Please try logging in a little later."]
                   }
                 });
               }
-          localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
+          localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, [self parentViewForAlerts])];
     };
     if (_preserveExistingLocalEntities == nil) { // first time asked
       if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {
@@ -426,7 +453,7 @@ remote account upon logging in, or \
 would you like them to be deleted?";
         JGActionSheetSection *contentSection = [PEUIUtils questionAlertSectionWithTitle:@"Locally created records."
                                                                        alertDescription:[[NSAttributedString alloc] initWithString:msg]
-                                                                         relativeToView:self.tabBarController.view];
+                                                                         relativeToView:[self parentViewForAlerts]];
         JGActionSheetSection *buttonsSection = [JGActionSheetSection sectionWithTitle:nil
                                                                               message:nil
                                                                          buttonTitles:@[@"Sync them to my remote account.",
@@ -448,7 +475,7 @@ would you like them to be deleted?";
           }
           [sheet dismissAnimated:YES];
         }];
-        [alertSheet showInView:self.tabBarController.view animated:YES];              
+        [alertSheet showInView:[self parentViewForAlerts] animated:YES];              
       } else {
         _preserveExistingLocalEntities = [NSNumber numberWithBool:NO];
         doLogin(NO);
@@ -464,7 +491,7 @@ would you like them to be deleted?";
                                topInset:70.0
                             buttonTitle:@"Okay."
                            buttonAction:nil
-                         relativeToView:self.tabBarController.view];
+                         relativeToView:[self parentViewForAlerts]];
   }
 }
 

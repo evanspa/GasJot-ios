@@ -211,4 +211,20 @@ height="418px" width="237px">
 
 The home screen displays a series of charts and aggregate data points.
 
+#### Gas Jot Account
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/login-or-create-account.png"
+height="418px" width="237px">
+
+Users can create an account or log into their existing Gas Jot account.
+Creating an account enables users' records to be saved to the Gas Jot server so
+they can be accessed from multiple devices.
+
 #### Gas Jot Account Creation
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-account.png"
+height="418px" width="237px">
+
+Creating an account is fairly simple affair.
