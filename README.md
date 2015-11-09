@@ -172,10 +172,18 @@ src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create
 height="528px" width="237px">
 
 Adding a gas purchase log requires the user to pick the associated vehicle and
-gas station.
-
-#### Gas Jot Account Creation
+gas station.  The **Pre-fillup Reported DTE** field is the vehicle's distance-to-empty
+(DTE) indicator before you pump the gas; the **Post-fillup Reported DTE** field
+is the DTE indicated by the vehicle after you're done pumping the gas.  If both
+of these fields are provided, then 2 odometer logs will be created in addition
+to the gas log to record all the information.
 
 #### Adding a Gas Station
 
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-gas-station.png"
+height="418px" width="237px">
+
 Adding a gas station (which is needed in order to log gas purchases).
+
+#### Gas Jot Account Creation
