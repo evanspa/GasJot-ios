@@ -130,6 +130,46 @@
   return messagePanel;
 }
 
+- (UIButton *)makeExportButton {
+  UIButton *exportBtn = [_uitoolkit systemButtonMaker](@"Export your data", nil, nil);
+  [PEUIUtils setFrameWidthOfView:exportBtn ofWidth:1.0 relativeTo:self.view];
+  NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+  [dateFormatter setDateFormat:@"yyyy-MM-dd"];
+  NSDate *now = [NSDate date];
+  [exportBtn bk_addEventHandler:^(id sender) {
+    [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+      NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+      NSString *docsDir = [paths objectAtIndex:0];
+      NSString *vehiclesFileName = [NSString stringWithFormat:@"%@-vehicles.csv", [dateFormatter stringFromDate:now]];
+      NSString *gasStationsFileName = [NSString stringWithFormat:@"%@-gas-stations.csv", [dateFormatter stringFromDate:now]];
+       NSString *gasLogsFileName = [NSString stringWithFormat:@"%@-gas-logs.csv", [dateFormatter stringFromDate:now]];
+       NSString *odometerLogsFileName = [NSString stringWithFormat:@"%@-odometer-logs.csv", [dateFormatter stringFromDate:now]];
+      [_coordDao.localDao exportWithPathToVehiclesFile:[docsDir stringByAppendingPathComponent:vehiclesFileName]
+                                       gasStationsFile:[docsDir stringByAppendingPathComponent:gasStationsFileName]
+                                           gasLogsFile:[docsDir stringByAppendingPathComponent:gasLogsFileName]
+                                      odometerLogsFile:[docsDir stringByAppendingPathComponent:odometerLogsFileName]
+                                                  user:_user
+                                                 error:[FPUtils localFetchErrorHandlerMaker]()];
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
+        [PEUIUtils showSuccessAlertWithMsgs:@[vehiclesFileName, gasStationsFileName, gasLogsFileName, odometerLogsFileName]
+                                      title:@"Export Complete."
+                           alertDescription:[[NSAttributedString alloc] initWithString:@"Your Gas Jot data has been exported to the following CSV files."]
+                   additionalContentSection:[PEUIUtils infoAlertSectionWithTitle:@"Tip"
+                                                                alertDescription:[[NSAttributedString alloc] initWithString:@"To download these files to your computer, connect your device to iTunes, \
+click on your device, navigate to 'Apps' and scroll down to the 'File Sharing' section.  You'll see Gas Jot listed.  Click on Gas Jot, and you'll be able to see and download your data files."]
+                                                                  relativeToView:self.tabBarController.view]
+                                   topInset:70.0
+                                buttonTitle:@"Okay."
+                               buttonAction:^{}
+                             relativeToView:self.tabBarController.view];
+      });
+    });
+  } forControlEvents:UIControlEventTouchUpInside];
+  return exportBtn;
+}
+
 #pragma mark - Panel Makers
 
 - (UIView *)makeSplashScreenPanel {
@@ -162,7 +202,7 @@
   //_doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
   _doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
   [_doesHaveAuthTokenPanel setDelaysContentTouches:NO];
-  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.30 * self.view.frame.size.height)];
+  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.65 * self.view.frame.size.height)];
   [_doesHaveAuthTokenPanel setBounces:YES];
   UIView *changelogMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"\
 Keeps your device synchronized with your remote account in case you've made edits \
@@ -335,7 +375,20 @@ Enable offline mode if you are making many saves and you want them done instantl
   [PEUIUtils placeView:offlineModeDescPanelWithPad below:offlineModeSwitchPanel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
   [PEUIUtils placeView:changelogBtn below:offlineModeDescPanelWithPad onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
   [PEUIUtils placeView:changelogMsgPanel below:changelogBtn onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
-  [PEUIUtils placeView:[self makeSplashScreenPanel] below:changelogMsgPanel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
+  UIButton *exportBtn = [self makeExportButton];
+  [PEUIUtils placeView:exportBtn below:changelogMsgPanel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
+  UILabel *exportMsgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"From here you can export your Gas Jot data to files which you can then download from iTunes.\n\nTip: Before exporting, use the %@ button to \
+ensure this device has your latest Gas Jot data."
+                                                                                       textToAccent:@"Download all changes"
+                                                                                     accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
+                                                         font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                     fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                              backgroundColor:[UIColor clearColor]
+                                                    textColor:[UIColor darkGrayColor]
+                                          verticalTextPadding:3.0
+                                                   fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0];
+  [PEUIUtils placeView:exportMsgLabel below:exportBtn onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:_doesHaveAuthTokenPanel vpadding:4.0 hpadding:8.0];
+  [PEUIUtils placeView:[self makeSplashScreenPanel] below:exportMsgLabel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:_doesHaveAuthTokenPanel vpadding:35.0 hpadding:0.0];
 }
 
 - (void)makeNotLoggedInPanel {
@@ -360,6 +413,15 @@ Enable offline mode if you are making many saves and you want them done instantl
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
+  UIButton *exportBtn = [self makeExportButton];
+  [PEUIUtils placeView:exportBtn below:messagePanel onto:_notLoggedInPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
+  UILabel *exportMsgLabel = [PEUIUtils labelWithAttributeText:[[NSAttributedString alloc] initWithString:@"From here you can export your Gas Jot data to files which you can then download from iTunes."]
+                                                         font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                              backgroundColor:[UIColor clearColor]
+                                                    textColor:[UIColor darkGrayColor]
+                                          verticalTextPadding:3.0
+                                                   fitToWidth:_notLoggedInPanel.frame.size.width - 15.0];
+  [PEUIUtils placeView:exportMsgLabel below:exportBtn onto:_notLoggedInPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:_doesHaveAuthTokenPanel vpadding:4.0 hpadding:8.0];
 }
 
 #pragma mark - Clear All Data
