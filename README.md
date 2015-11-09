@@ -227,4 +227,22 @@ they can be accessed from multiple devices.
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-account.png"
 height="418px" width="237px">
 
-Creating an account is fairly simple affair.
+Creating an account is fairly simple affair.  Upon successfully creating an
+account, the user will receive a verification email.
+
+#### Gas Jot Account Log In
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/login.png"
+height="418px" width="237px">
+
+Logging in is also a simple affair.  Password reset functionality is provided.
+
+#### Account Screen
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/authenticated-account.png"
+height="418px" width="237px">
+
+When logged in, the Account screen is where the user can log out, view and edit
+their account details and drill into several stats and trends screens.
