@@ -246,3 +246,18 @@ height="418px" width="237px">
 
 When logged in, the Account screen is where the user can log out, view and edit
 their account details and drill into several stats and trends screens.
+
+#### Data Record Detail
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/view-vehicle.png"
+height="418px" width="237px">
+
+From a data record's detail screen, the record can be edited or deleted.  In
+addition, the **download** button on the navigation bar allow edits made to the
+record on other devices to be downloaded and merged.
+
+Child records can also be navigated to (*gas and odometer logs for vehicles; gas
+logs for gas stations*).
+
+#### Edits in Progress
