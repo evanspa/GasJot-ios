@@ -1,6 +1,6 @@
 # Gas Jot
 
-[![Build Status](https://travis-ci.org/evanspa/PEFuelPurchase-App.svg)](https://travis-ci.org/evanspa/PEFuelPurchase-App)
+[![Build Status](https://travis-ci.org/evanspa/GasJot-ios.svg)](https://travis-ci.org/evanspa/GasJot-ios)
 
 Gas Jot is an iOS application for collecting gas purchase and other data about
 your vehicle.  It's a fun application to use to track your gas purchase and
