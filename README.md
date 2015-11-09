@@ -260,4 +260,33 @@ record on other devices to be downloaded and merged.
 Child records can also be navigated to (*gas and odometer logs for vehicles; gas
 logs for gas stations*).
 
-#### Edits in Progress
+#### Conflict Detection
+
+With a distributed system like Gas Jot's, it's wholly possible for conflicts to
+arise vis-a-vis the editing of data records.  If a data record was changed on
+the server at some point after it was last downloaded to the device, a conflict
+will be detected by the server if the user attempts to edit the record on their
+device without having downloaded the latest from the server.
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/edit-vehicle-conflict.png"
+height="418px" width="237px">
+
+Gas Jot is smart enough to know if merging is possible.  If the fields of the
+data record edited by the user on the device differ than the fields of the
+record that were updated on the server, then automatic merging will be possible.  If the
+fields being edited locally are the same as the ones edited on the record on the
+server, an automatic merge will not be possible, and the user will be presented
+with a manual merge screen.
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/edit-vehicle-manual-merge.png"
+height="418px" width="237px">
+
+In this example, the vehicle record on the server had been updated at some point
+AFTER the record was last downloaded to the user's device.  Specifically it's
+**name** was updated to *Fairlady Z*.  The user was trying to update the vehicle
+record on their device to change the name to *300ZX TT*.  In this case, an
+automatic merge cannot be done; so the user is presented with the conflict
+resolver screen.  For each field in conflict, the user chooses which they want:
+the local value, or the server copy's value.
