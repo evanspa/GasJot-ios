@@ -169,7 +169,7 @@ Odometer logs can be recorded at anytime.
 
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-gas-log.png"
-height="418px" width="237px">
+height="528px" width="237px">
 
 Adding a gas purchase log requires the user to pick the associated vehicle and
 gas station.
