@@ -105,10 +105,10 @@
 		18D6DFAB17F68005006B300D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		18D6DFAD17F68005006B300D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		18D6DFAF17F68005006B300D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		18D6DFB317F68005006B300D /* PEFuelPurchase-App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "PEFuelPurchase-App-Info.plist"; sourceTree = "<group>"; };
+		18D6DFB317F68005006B300D /* Gas Jot-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Gas Jot-Info.plist"; sourceTree = "<group>"; };
 		18D6DFB517F68005006B300D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		18D6DFB717F68005006B300D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		18D6DFB917F68005006B300D /* PEFuelPurchase-App-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PEFuelPurchase-App-Prefix.pch"; sourceTree = "<group>"; };
+		18D6DFB917F68005006B300D /* Gas Jot-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Gas Jot-Prefix.pch"; sourceTree = "<group>"; };
 		18D6DFBA17F68005006B300D /* FPAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FPAppDelegate.h; sourceTree = "<group>"; };
 		18D6DFBB17F68005006B300D /* FPAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FPAppDelegate.m; sourceTree = "<group>"; };
 		18D6DFBD17F68005006B300D /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
@@ -377,7 +377,7 @@
 		18D6DF9F17F68005006B300D = {
 			isa = PBXGroup;
 			children = (
-				18D6DFB117F68005006B300D /* PEFuelPurchase-App */,
+				18D6DFB117F68005006B300D /* Gas Jot */,
 				18D6DFAA17F68005006B300D /* Frameworks */,
 				18D6DFA917F68005006B300D /* Products */,
 				08DB50AF6B2DED35218E1824 /* Pods */,
@@ -422,7 +422,7 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		18D6DFB117F68005006B300D /* PEFuelPurchase-App */ = {
+		18D6DFB117F68005006B300D /* Gas Jot */ = {
 			isa = PBXGroup;
 			children = (
 				186E0B7819CD1BDD00CE4B3A /* PE UI Commons */,
@@ -434,7 +434,7 @@
 				18AC071F181AC784001FF24E /* Logging */,
 				18D6DFB217F68005006B300D /* Supporting Files */,
 			);
-			name = "PEFuelPurchase-App";
+			name = "Gas Jot";
 			path = fuelpurchase;
 			sourceTree = "<group>";
 		};
@@ -446,12 +446,12 @@
 				18D6DFBD17F68005006B300D /* Images.xcassets */,
 				18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */,
 				183E13A418009F9F009E9085 /* fpapi-resource.json */,
-				18D6DFB317F68005006B300D /* PEFuelPurchase-App-Info.plist */,
+				18D6DFB317F68005006B300D /* Gas Jot-Info.plist */,
 				18D6DFB417F68005006B300D /* InfoPlist.strings */,
 				18D6DFB717F68005006B300D /* main.m */,
 				18CC2CF217F680AC009DF2CE /* FPNames.h */,
 				18CC2CF317F680AC009DF2CE /* FPNames.m */,
-				18D6DFB917F68005006B300D /* PEFuelPurchase-App-Prefix.pch */,
+				18D6DFB917F68005006B300D /* Gas Jot-Prefix.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -770,9 +770,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		18D6DFA717F68005006B300D /* PEFuelPurchase-App */ = {
+		18D6DFA717F68005006B300D /* Gas Jot */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 18D6DFD417F68005006B300D /* Build configuration list for PBXNativeTarget "PEFuelPurchase-App" */;
+			buildConfigurationList = 18D6DFD417F68005006B300D /* Build configuration list for PBXNativeTarget "Gas Jot" */;
 			buildPhases = (
 				7595B694D7984311A9A052AB /* Check Pods Manifest.lock */,
 				18D6DFA417F68005006B300D /* Sources */,
@@ -785,7 +785,7 @@
 			);
 			dependencies = (
 			);
-			name = "PEFuelPurchase-App";
+			name = "Gas Jot";
 			productName = fuelpurchase;
 			productReference = 18D6DFA817F68005006B300D /* Gas Jot.app */;
 			productType = "com.apple.product-type.application";
@@ -805,7 +805,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 18D6DFA317F68005006B300D /* Build configuration list for PBXProject "PEFuelPurchase-App" */;
+			buildConfigurationList = 18D6DFA317F68005006B300D /* Build configuration list for PBXProject "Gas Jot" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -817,7 +817,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				18D6DFA717F68005006B300D /* PEFuelPurchase-App */,
+				18D6DFA717F68005006B300D /* Gas Jot */,
 			);
 		};
 /* End PBXProject section */
@@ -995,13 +995,13 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "fuelpurchase/PEFuelPurchase-App-Prefix.pch";
+				GCC_PREFIX_HEADER = "fuelpurchase/Gas Jot-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"COCOAPODS=1",
 					"XCODE_VERSION=$(XCODE_VERSION_MAJOR)",
 				);
-				INFOPLIST_FILE = "fuelpurchase/PEFuelPurchase-App-Info.plist";
+				INFOPLIST_FILE = "fuelpurchase/Gas Jot-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
 				PRODUCT_BUNDLE_IDENTIFIER = "name.paulevans.fpapp.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "Gas Jot";
@@ -1058,14 +1058,14 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "fuelpurchase/PEFuelPurchase-App-Prefix.pch";
+				GCC_PREFIX_HEADER = "fuelpurchase/Gas Jot-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"COCOAPODS=1",
 					"XCODE_VERSION=$(XCODE_VERSION_MAJOR)",
 					"FP_DEV=1",
 				);
-				INFOPLIST_FILE = "fuelpurchase/PEFuelPurchase-App-Info.plist";
+				INFOPLIST_FILE = "fuelpurchase/Gas Jot-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
 				PRODUCT_BUNDLE_IDENTIFIER = "name.paulevans.fpapp.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "Gas Jot";
@@ -1078,7 +1078,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		18D6DFA317F68005006B300D /* Build configuration list for PBXProject "PEFuelPurchase-App" */ = {
+		18D6DFA317F68005006B300D /* Build configuration list for PBXProject "Gas Jot" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				18D6DFD317F68005006B300D /* Release */,
@@ -1087,7 +1087,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		18D6DFD417F68005006B300D /* Build configuration list for PBXNativeTarget "PEFuelPurchase-App" */ = {
+		18D6DFD417F68005006B300D /* Build configuration list for PBXNativeTarget "Gas Jot" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				18D6DFD617F68005006B300D /* Release */,

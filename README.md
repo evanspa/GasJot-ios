@@ -1,4 +1,4 @@
-# PEFuelPurchase-App
+# Gas Jot
 
 [![Build Status](https://travis-ci.org/evanspa/PEFuelPurchase-App.svg)](https://travis-ci.org/evanspa/PEFuelPurchase-App)
 

@@ -16,8 +16,8 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "18D6DFA717F68005006B300D"
                BuildableName = "Gas Jot.app"
-               BlueprintName = "PEFuelPurchase-App"
-               ReferencedContainer = "container:PEFuelPurchase-App.xcodeproj">
+               BlueprintName = "Gas Jot"
+               ReferencedContainer = "container:Gas Jot.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -35,7 +35,7 @@
                BlueprintIdentifier = "189925E418AF161500B61772"
                BuildableName = "fuelpurchaseTests.xctest"
                BlueprintName = "fuelpurchaseTests"
-               ReferencedContainer = "container:PEFuelPurchase-App.xcodeproj">
+               ReferencedContainer = "container:Gas Jot.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -44,8 +44,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "18D6DFA717F68005006B300D"
             BuildableName = "Gas Jot.app"
-            BlueprintName = "PEFuelPurchase-App"
-            ReferencedContainer = "container:PEFuelPurchase-App.xcodeproj">
+            BlueprintName = "Gas Jot"
+            ReferencedContainer = "container:Gas Jot.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -67,8 +67,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "18D6DFA717F68005006B300D"
             BuildableName = "Gas Jot.app"
-            BlueprintName = "PEFuelPurchase-App"
-            ReferencedContainer = "container:PEFuelPurchase-App.xcodeproj">
+            BlueprintName = "Gas Jot"
+            ReferencedContainer = "container:Gas Jot.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -86,8 +86,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "18D6DFA717F68005006B300D"
             BuildableName = "Gas Jot.app"
-            BlueprintName = "PEFuelPurchase-App"
-            ReferencedContainer = "container:PEFuelPurchase-App.xcodeproj">
+            BlueprintName = "Gas Jot"
+            ReferencedContainer = "container:Gas Jot.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
