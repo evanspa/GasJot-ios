@@ -192,6 +192,23 @@ Adding a gas station (which is needed in order to log gas purchases).
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/jot-button.png"
 height="418px" width="237px">
 
-The Jot button conveniently allows you to create any type of data record at any time.
+The Jot button conveniently allows you to create any type of data record at any
+time.
+
+#### Records Screen
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/records.png"
+height="418px" width="237px">
+
+The records screen lets you explore and navigate all of your data records.
+
+#### Home Screen
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/home.png"
+height="418px" width="237px">
+
+The home screen displays a series of charts and aggregate data points.
 
 #### Gas Jot Account Creation
