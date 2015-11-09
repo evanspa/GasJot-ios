@@ -60,7 +60,7 @@ appears largest because it encapsulates the bulk of the application; the core
 logic, model and data access functionality.
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPurchase-App-Component-Layers.png">
+src="https://github.com/evanspa/GasJot-ios/raw/master/drawings/PEFuelPurchase-App-Component-Layers.png">
 
 ## Dependency Graph
 
@@ -68,13 +68,13 @@ The following diagram attempts to illustrates the dependencies among the main
 components of the Gas Jot iOS client application.
 
 <img
-src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/drawings/PEFuelPurchase-App-Dependency-Graph.png">
+src="https://github.com/evanspa/GasJot-ios/raw/master/drawings/PEFuelPurchase-App-Dependency-Graph.png">
 
 ## App Specific Libraries
 *(The following libraries are specific to the Gas Jot application domain, but are not GUI-related.)*
-+ **[PEFuelPurchase-Common](https://github.com/evanspa/PEFuelPurchase-Common)**:
++ **[GasJot-ios-common](https://github.com/evanspa/GasJot-ios-common)**:
   contains *application agnostic* constant definitions.
-+ **[PEFuelPurchase-Model](https://github.com/evanspa/PEFuelPurchase-Model)**:
++ **[GasJot-ios-model](https://github.com/evanspa/GasJot-ios-model)**:
   encapsulates the object model, local data access, web service access and core
   logic of the application.  This library effectively implements the *core* of
   the Gas Jot application domain.  The Gas Jot iOS application (*this repo*) is
