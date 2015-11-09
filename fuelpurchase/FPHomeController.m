@@ -501,7 +501,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
         NSArray *dp = dataset[0];
         footerView.leftLabel.text = [_dateFormatter stringFromDate:dp[0]];
       } else {
-        footerView.leftLabel.text = @"NO (OR NOT ENOUGH) DATA.";
+        footerView.leftLabel.text = @"NOT ENOUGH DATA TO RENDER PLOT.";
         footerView.rightLabel.text = @"";
       }
       footerView.leftLabel.textColor = [UIColor fpAppBlue];
@@ -615,7 +615,7 @@ alignmentRelativeToView:self.view
                                          verticalTextPadding:3.0
                                                   fitToWidth:(0.90 * self.view.frame.size.width)];
   [msgLabel setTextAlignment:NSTextAlignmentCenter];
-  UILabel *msgLabel2 = [PEUIUtils labelWithKey:@"You have at least one vehicle saved.  You're now ready to start logging gas purchases and odometer info.\n\nOnce you have enough logs saved, this screen will display a set of charts."
+  UILabel *msgLabel2 = [PEUIUtils labelWithKey:@"You have at least one vehicle saved.  You're now ready to start logging gas purchases and odometer info.\n\nOnce you have enough logs saved, this screen (your Home screen) will display a set of charts."
                                                font:[UIFont systemFontOfSize:18.0]
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor fpAppBlue]
@@ -773,11 +773,12 @@ alignmentRelativeToView:self.view
 }
 
 - (void)reloadChartsAndTables {
+  PEOrNil orNil = [PEUtils orNilMaker];
   //refresh the 'days between fillups' views
   [self refreshViewWithTag:FPHomeDaysBetweenFillupsTableDataTag
             valuesMakerBlk:^{
-              return @[[_stats overallAvgDaysBetweenFillupsForUser:_user],
-                       [_stats overallMaxDaysBetweenFillupsForUser:_user]];
+              return @[orNil([_stats overallAvgDaysBetweenFillupsForUser:_user]),
+                       orNil([_stats overallMaxDaysBetweenFillupsForUser:_user])];
             }
               viewMakerBlk:^(NSArray *values) { return [self makeDaysBetweenFillupsDataTableWithValues:values]; }];
   
@@ -791,9 +792,9 @@ alignmentRelativeToView:self.view
   NSNumber *octane = [self octaneOfLastVehicleInCtxGasLog];
   [self refreshViewWithTag:FPHomePriceOfGasTableDataTag
             valuesMakerBlk:^{
-              return @[[_stats overallAvgPricePerGallonForUser:_user octane:octane],
-                       [_stats overallMinPricePerGallonForUser:_user octane:octane],
-                       [_stats overallMaxPricePerGallonForUser:_user octane:octane]];
+              return @[orNil([_stats overallAvgPricePerGallonForUser:_user octane:octane]),
+                       orNil([_stats overallMinPricePerGallonForUser:_user octane:octane]),
+                       orNil([_stats overallMaxPricePerGallonForUser:_user octane:octane])];
             }
               viewMakerBlk:^(NSArray *values) { return [self makePricePerGallonDataTableWithValues:values]; }];
   [self refreshChart:_priceOfGasChart
@@ -805,9 +806,9 @@ alignmentRelativeToView:self.view
   //refresh the 'spent on gas' views
   [self refreshViewWithTag:FPHomeSpentOnGasTableDataTag
             valuesMakerBlk:^{
-              return @[[_stats overallAvgSpentOnGasForUser:_user],
-                       [_stats overallMinSpentOnGasForUser:_user],
-                       [_stats overallMaxSpentOnGasForUser:_user]];
+              return @[orNil([_stats overallAvgSpentOnGasForUser:_user]),
+                       orNil([_stats overallMinSpentOnGasForUser:_user]),
+                       orNil([_stats overallMaxSpentOnGasForUser:_user])];
             }
               viewMakerBlk:^(NSArray *values){ return [self makeSpentOnGasDataTableWithValues:values]; }];
   [self refreshChart:_spentOnGasChart
@@ -819,7 +820,7 @@ alignmentRelativeToView:self.view
   //refresh the 'gas cost per mile' views
   [self refreshViewWithTag:FPHomeGasCostPerMileTableDataTag
             valuesMakerBlk:^{
-              return @[[_stats overallAvgGasCostPerMileForUser:_user]];
+              return @[orNil([_stats overallAvgGasCostPerMileForUser:_user])];
             }
               viewMakerBlk:^(NSArray *values){ return [self makeAvgGasCostPerMileDataTableWithValues:values]; }];
   [self refreshChart:_gasCostPerMileChart

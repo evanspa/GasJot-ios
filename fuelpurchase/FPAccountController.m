@@ -377,9 +377,18 @@ account.";
     [self presentLoginScreen];
   } forControlEvents:UIControlEventTouchUpInside];
   UIView *loginMsgPanel = [self leftPaddingMessageWithAttributedText:[[NSAttributedString alloc] initWithString:@"Log into your Gas Jot account."]];
-  UIButton *createAccountBtn = [_uitoolkit systemButtonMaker](@"Create Account", nil, nil);
-  [[createAccountBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:createAccountBtn ofWidth:1.0 relativeTo:_notLoggedInPanel];
+  UIButton *createAccountBtn = [PEUIUtils buttonWithKey:@"Create Account"
+                                                   font:[UIFont boldSystemFontOfSize:22.0]
+                                        backgroundColor:[UIColor peterRiverColor]
+                                              textColor:[UIColor whiteColor]
+                           disabledStateBackgroundColor:nil
+                                 disabledStateTextColor:nil
+                                        verticalPadding:22.5
+                                      horizontalPadding:10.0
+                                           cornerRadius:5.0
+                                                 target:nil
+                                                 action:nil];
+  [PEUIUtils setFrameWidthOfView:createAccountBtn ofWidth:0.85 relativeTo:_notLoggedInPanel];
   [PEUIUtils addDisclosureIndicatorToButton:createAccountBtn];
   [createAccountBtn bk_addEventHandler:^(id sender) {
     [self presentSetupRemoteAccountScreen];
@@ -401,13 +410,15 @@ account.";
   [PEUIUtils placeView:createAccountBtn
                  below:loginMsgPanel
                   onto:_notLoggedInPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
+         withAlignment:PEUIHorizontalAlignmentTypeCenter
+alignmentRelativeToView:_notLoggedInPanel
               vpadding:30.0
               hpadding:0.0];
   [PEUIUtils placeView:createAcctMsgPanel
                  below:createAccountBtn
                   onto:_notLoggedInPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
+alignmentRelativeToView:createAccountBtn
               vpadding:4.0
               hpadding:0.0];
 }

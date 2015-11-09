@@ -113,11 +113,12 @@ actual screenshots.
 
 #### Splash
 
-Splash screen:
-
 <img
 src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/splash.png"
 height="418px" width="237px">
+
+Gas Jot's splash screen.  The top portion of the screen is an image carousel
+showing a glimpse of functionality within the app.
 
 #### Home Screen
 
@@ -152,21 +153,25 @@ height="418px" width="237px">
 
 The home screen now updates to reflect that you have at least 1 vehicle record.
 
-#### Gas Jot Account Creation
-
-#### Adding a Gas Station
-
-Adding a gas station (which is needed in order to log gas purchases).
-
-#### Adding a Gas Purchase Log
-
-Adding a gas purchase log requires the user to pick the associated vehicle and
-gas station.
-
 #### Adding an Odometer Log
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/create-odometer-log.png"
+height="418px" width="237px">
 
 Odometer logs are used for recording your vehicle's current odometer, the
 vehicle's reported average miles per gallon and miles per hour, the vehicle's
 reported distance-to-empty (DTE) and the outside temperature.
 
 Odometer logs can be recorded at anytime.
+
+#### Adding a Gas Purchase Log
+
+Adding a gas purchase log requires the user to pick the associated vehicle and
+gas station.
+
+#### Gas Jot Account Creation
+
+#### Adding a Gas Station
+
+Adding a gas station (which is needed in order to log gas purchases).
