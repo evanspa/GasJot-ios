@@ -260,6 +260,30 @@ record on other devices to be downloaded and merged.
 Child records can also be navigated to (*gas and odometer logs for vehicles; gas
 logs for gas stations*).
 
+#### Data Record Stats
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/vehicle-stats.png"
+height="418px" width="237px">
+
+Stats and trend information can be drilled-into for vehicle and gas station
+records (*and at the user-level too; giving stats trends across ALL vehicles or
+ALL gas stations*).
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/vehicle-stats-days-between.png"
+height="418px" width="237px">
+
+The above is an example showing the average number of days between fill-ups
+stats and trend information.
+
+<img
+src="https://github.com/evanspa/PEFuelPurchase-App/raw/master/screenshots/vehicle-stats-days-between-compare.png"
+height="418px" width="237px">
+
+A *Compare* button is usually present to compare aggregate values.
+
+
 #### Conflict Detection
 
 With a distributed system like Gas Jot's, it's wholly possible for conflicts to
@@ -303,6 +327,6 @@ devices.  Doing this keeps the data records on users' devices up-to-date and
 consistent.
 
 **Offline mode** allows just that; it prevents communication with the Gas Jot
-  server when doing adds and edits, in order to keep those operations very
-  fast, since they'll be local-only.  Later, from the **Records** screen, all
-  unsynced edits can up uploaded to the Gas Jot server in 1 bulk operation.
+server when doing adds and edits, in order to keep those operations very fast,
+since they'll be local-only.  Later, from the **Records** screen, all unsynced
+edits can up uploaded to the Gas Jot server in 1 bulk operation.
