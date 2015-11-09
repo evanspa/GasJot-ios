@@ -50,7 +50,7 @@ to Gas Jot.  These libraries are the
 
 The server-side application of Gas Jot provides a REST API endpoint (*written in
 Clojure*) for the client applications to consume:
-[pe-fp-app](https://github.com/evanspa/pe-fp-app).
+[pe-gasjot-app](https://github.com/evanspa/pe-gasjot-app).
 
 ## Component Layering
 
