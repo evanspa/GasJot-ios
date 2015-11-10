@@ -34,6 +34,7 @@ utilization history.
     - [Data Record Stats](#data-record-stats)
     - [Conflict Detection](#conflict-detection)
     - [Settings](#settings)
+    - [Export](#export)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -336,3 +337,14 @@ consistent.
 server when doing adds and edits, in order to keep those operations very fast,
 since they'll be local-only.  Later, from the **Records** screen, all unsynced
 edits can up uploaded to the Gas Jot server in 1 bulk operation.
+
+**Export** allows the user to export their Gas Jot data to CSV files.
+
+#### Export
+
+<img
+src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/export.png"
+height="418px" width="237px">
+
+Users can export their Gas Jot to CSV files and download them to their device
+through the File Sharing feature of iTunes.

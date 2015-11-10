@@ -131,7 +131,7 @@
 }
 
 - (UIButton *)makeExportButton {
-  UIButton *exportBtn = [_uitoolkit systemButtonMaker](@"Export your data", nil, nil);
+  UIButton *exportBtn = [_uitoolkit systemButtonMaker](@"Export", nil, nil);
   [PEUIUtils setFrameWidthOfView:exportBtn ofWidth:1.0 relativeTo:self.view];
   NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
   [dateFormatter setDateFormat:@"yyyy-MM-dd"];
@@ -377,7 +377,7 @@ Enable offline mode if you are making many saves and you want them done instantl
   [PEUIUtils placeView:changelogMsgPanel below:changelogBtn onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
   UIButton *exportBtn = [self makeExportButton];
   [PEUIUtils placeView:exportBtn below:changelogMsgPanel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
-  UILabel *exportMsgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"From here you can export your Gas Jot data to files which you can then download from iTunes.\n\nTip: Before exporting, use the %@ button to \
+  UILabel *exportMsgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"From here you can export your Gas Jot data to files which you can then download from iTunes to your computer.\n\nTip: Before exporting, use the %@ button to \
 ensure this device has your latest Gas Jot data."
                                                                                        textToAccent:@"Download all changes"
                                                                                      accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
@@ -415,7 +415,7 @@ ensure this device has your latest Gas Jot data."
               hpadding:0.0];
   UIButton *exportBtn = [self makeExportButton];
   [PEUIUtils placeView:exportBtn below:messagePanel onto:_notLoggedInPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
-  UILabel *exportMsgLabel = [PEUIUtils labelWithAttributeText:[[NSAttributedString alloc] initWithString:@"From here you can export your Gas Jot data to files which you can then download from iTunes."]
+  UILabel *exportMsgLabel = [PEUIUtils labelWithAttributeText:[[NSAttributedString alloc] initWithString:@"From here you can export your Gas Jot data to files which you can then download from iTunes to your computer."]
                                                          font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
                                               backgroundColor:[UIColor clearColor]
                                                     textColor:[UIColor darkGrayColor]

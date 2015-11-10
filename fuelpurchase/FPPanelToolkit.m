@@ -606,7 +606,8 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     [PEUIUtils setFrameWidthOfView:statsBtn ofWidth:1.0 relativeTo:parentView];
     [PEUIUtils addDisclosureIndicatorToButton:statsBtn];
     [statsBtn bk_addEventHandler:^(id sender) {
-      [[parentViewController navigationController] pushViewController:[_screenToolkit newVehicleStatsLaunchScreenMakerWithVehicle:vehicle](user)
+      [[parentViewController navigationController] pushViewController:[_screenToolkit newVehicleStatsLaunchScreenMakerWithVehicle:vehicle
+                                                                                                                 parentController:parentViewController](user)
                                                              animated:YES];
     } forControlEvents:UIControlEventTouchUpInside];
     UIView *statsMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into the stats and trends associated with this vehicle."

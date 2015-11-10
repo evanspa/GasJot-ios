@@ -133,6 +133,14 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   return funFactSection;
 }
 
+- (NSString *)formattedValueForValue:(id)value formatter:(NSString *(^)(id))formatter {
+  if (![PEUtils isNil:value]) {
+    return formatter(value);
+  } else {
+    return @"---";
+  }
+}
+
 #pragma mark - Generic Screens
 
 - (FPAuthScreenMaker)newDatePickerScreenMakerWithTitle:(NSString *)title
@@ -360,7 +368,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 
 #pragma mark - User Stat Screens
 
-- (FPAuthScreenMaker)newUserStatsLaunchScreenMaker {
+- (FPAuthScreenMaker)newUserStatsLaunchScreenMakerWithParentController:(UIViewController *)parentController {
   return ^ UIViewController * (FPUser *user) {
     return [[FPCommonStatsLaunchController alloc] initWithScreenTitle:@"Stats & Trends"
                                                   entityTypeLabelText:nil
@@ -369,6 +377,13 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                  statLaunchButtonsBlk:^{
                                                    NSMutableArray *statLaunchButtons = [NSMutableArray array];
                                                    [statLaunchButtons addObject:@"DAYS BETWEEN FILL-UPS"];
+                                                   [statLaunchButtons addObject:@[^UIView *(void) {
+                                                     return [PEUIUtils tablePanelWithRowData:@[@[@"Days since last fill-up",
+                                                                                                 [self formattedValueForValue:[_stats daysSinceLastGasLogForUser:user]
+                                                                                                                    formatter:^NSString *(id val) { return [_generalFormatter stringFromNumber:val]; }]]]
+                                                                                   uitoolkit:_uitoolkit
+                                                                                  parentView:parentController.view];
+                                                   }]];
                                                    [statLaunchButtons addObject:@[@"Avg days between fill-ups",
                                                                                   ^{ return [self newAvgDaysBetweenFillupsStatsScreenMaker](user); }]];
                                                    [statLaunchButtons addObject:@[@"Max days between fill-ups",
@@ -1236,7 +1251,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 
 #pragma mark - Vehicle Stat Screens
 
-- (FPAuthScreenMaker)newVehicleStatsLaunchScreenMakerWithVehicle:(FPVehicle *)vehicle {
+- (FPAuthScreenMaker)newVehicleStatsLaunchScreenMakerWithVehicle:(FPVehicle *)vehicle
+                                                parentController:(UIViewController *)parentController {
   return ^ UIViewController * (FPUser *user) {
     return [[FPCommonStatsLaunchController alloc] initWithScreenTitle:@"Vehicle Stats & Trends"
                                                   entityTypeLabelText:@"VEHICLE"
@@ -1245,6 +1261,13 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                  statLaunchButtonsBlk:^{
                                                    NSMutableArray *statLaunchButtons = [NSMutableArray array];
                                                    [statLaunchButtons addObject:@"DAYS BETWEEN FILL-UPS"];
+                                                   [statLaunchButtons addObject:@[^UIView *(void) {
+                                                     return [PEUIUtils tablePanelWithRowData:@[@[@"Days since last fill-up",
+                                                                                                 [self formattedValueForValue:[_stats daysSinceLastGasLogForVehicle:vehicle]
+                                                                                                                    formatter:^NSString *(id val) { return [_generalFormatter stringFromNumber:val]; }]]]
+                                                                                   uitoolkit:_uitoolkit
+                                                                                  parentView:parentController.view];
+                                                   }]];
                                                    [statLaunchButtons addObject:@[@"Avg days between fill-ups",
                                                                                   ^{ return [self newVehicleAvgDaysBetweenFillupsStatsScreenMakerWithVehicle:vehicle](user); }]];
                                                    [statLaunchButtons addObject:@[@"Max days between fill-ups",
@@ -2774,7 +2797,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                               comparator:^(NSArray *o1, NSArray *o2) {
                                                                 NSDecimalNumber *v1 = o1[2];
                                                                 NSDecimalNumber *v2 = o2[2];
-                                                                return [v2 compare:v1]; // descending
+                                                                return [v1 compare:v2];
                                                               }
                                                                uitoolkit:_uitoolkit];
   };

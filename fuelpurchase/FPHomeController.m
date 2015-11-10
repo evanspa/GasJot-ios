@@ -296,7 +296,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
                                             action:nil];
   [PEUIUtils addDisclosureIndicatorToButton:allStatsBtn];
   [allStatsBtn bk_addEventHandler:^(id sender) {
-    [[self navigationController] pushViewController:[_screenToolkit newUserStatsLaunchScreenMaker](_user)
+    [[self navigationController] pushViewController:[_screenToolkit newUserStatsLaunchScreenMakerWithParentController:self](_user)
                                            animated:YES];
   } forControlEvents:UIControlEventTouchUpInside];
   return allStatsBtn;
@@ -424,10 +424,17 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
 }
 
 - (UIView *)makeDaysBetweenFillupsDataTableWithValues:(NSArray *)values {
-  return [self makeDataTableWithRows:@[@[@"Avg:", [self formattedValueForValue:values[0] formatter:^(NSNumber *val){return [_generalFormatter stringFromNumber:val];}]],
-                                       @[@"Max:", [self formattedValueForValue:values[1] formatter:^(NSNumber *val){return [_generalFormatter stringFromNumber:val];}]]]
-                                 tag:FPHomeDaysBetweenFillupsTableDataTag
-                            maxWidth:205];
+  UIView *panel = [PEUIUtils panelWithColumnOfViews:@[[self makeDataTableWithRows:@[@[@"Avg:", [self formattedValueForValue:values[0] formatter:^(NSNumber *val){return [_generalFormatter stringFromNumber:val];}]],
+                                                                                    @[@"Max:", [self formattedValueForValue:values[1] formatter:^(NSNumber *val){return [_generalFormatter stringFromNumber:val];}]]]
+                                                                              tag:0
+                                                                         maxWidth:205],
+                                                      [self makeDataTableWithRows:@[@[@"Days since last fill-up:", [self formattedValueForValue:values[2] formatter:^(NSNumber *val){return [_generalFormatter stringFromNumber:val];}]]]
+                                                                              tag:0
+                                                                         maxWidth:205]]
+                        verticalPaddingBetweenViews:0.0
+                                     viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
+  [panel setTag:FPHomeDaysBetweenFillupsTableDataTag];
+  return panel;
 }
 
 - (UIView *)makePricePerGallonDataTableWithValues:(NSArray *)values {
@@ -439,11 +446,19 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
 }
 
 - (UIView *)makeSpentOnGasDataTableWithValues:(NSArray *)values {
-  return [self makeDataTableWithRows:@[@[@"Avg:", [self formattedValueForValue:values[0] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]],
-                                       @[@"Min:", [self formattedValueForValue:values[1] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]],
-                                       @[@"Max:", [self formattedValueForValue:values[2] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]]]
-                                 tag:FPHomeSpentOnGasTableDataTag
-                            maxWidth:205];
+  UIView *panel = [PEUIUtils panelWithColumnOfViews:@[[self makeDataTableWithRows:@[@[@"Avg:", [self formattedValueForValue:values[0] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]],
+                                                                                    @[@"Min:", [self formattedValueForValue:values[1] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]],
+                                                                                    @[@"Max:", [self formattedValueForValue:values[2] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]]]
+                                                                              tag:0
+                                                                         maxWidth:205],
+                                                      [self makeDataTableWithRows:@[@[@"Spent this month:", [self formattedValueForValue:values[3] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]],
+                                                                                    @[@"Spent last month:", [self formattedValueForValue:values[4] formatter:^(NSNumber *val){return [_currencyFormatter stringFromNumber:val];}]]]
+                                                                              tag:0
+                                                                         maxWidth:205]]
+                        verticalPaddingBetweenViews:0.0
+                                     viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
+  [panel setTag:FPHomeSpentOnGasTableDataTag];
+  return panel;
 }
 
 - (UIView *)makeAvgGasCostPerMileDataTableWithValues:(NSArray *)values {
@@ -531,7 +546,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
   __block UIView *pricePerGallonPanel;
   __block UIView *gasCostPerMilePanel;
   __block UIView *spentOnGasPanel;
-  NSArray *dummyVals = @[[NSNull null], [NSNull null], [NSNull null]];
+  NSArray *dummyVals = @[[NSNull null], [NSNull null], [NSNull null], [NSNull null], [NSNull null]];
   [self makeLineChartSectionWithTitle:@"AVG DAYS BETWEEN FILL-UPS\n        (all vehicles, all time)"
                              chartTag:FPHomeDaysBetweenFillupsChartTag
                     addlLabelsViewBlk:^{ return [self makeDaysBetweenFillupsDataTableWithValues:dummyVals];}
@@ -778,7 +793,8 @@ alignmentRelativeToView:self.view
   [self refreshViewWithTag:FPHomeDaysBetweenFillupsTableDataTag
             valuesMakerBlk:^{
               return @[orNil([_stats overallAvgDaysBetweenFillupsForUser:_user]),
-                       orNil([_stats overallMaxDaysBetweenFillupsForUser:_user])];
+                       orNil([_stats overallMaxDaysBetweenFillupsForUser:_user]),
+                       orNil([_stats daysSinceLastGasLogForUser:_user])];
             }
               viewMakerBlk:^(NSArray *values) { return [self makeDaysBetweenFillupsDataTableWithValues:values]; }];
   
@@ -808,7 +824,9 @@ alignmentRelativeToView:self.view
             valuesMakerBlk:^{
               return @[orNil([_stats overallAvgSpentOnGasForUser:_user]),
                        orNil([_stats overallMinSpentOnGasForUser:_user]),
-                       orNil([_stats overallMaxSpentOnGasForUser:_user])];
+                       orNil([_stats overallMaxSpentOnGasForUser:_user]),
+                       orNil([_stats thisMonthSpentOnGasForUser:_user]),
+                       orNil([_stats lastMonthSpentOnGasForUser:_user])];
             }
               viewMakerBlk:^(NSArray *values){ return [self makeSpentOnGasDataTableWithValues:values]; }];
   [self refreshChart:_spentOnGasChart

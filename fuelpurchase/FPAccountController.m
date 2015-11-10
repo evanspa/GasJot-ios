@@ -174,7 +174,7 @@ Logging out will disconnect this device from your remote account and remove your
   [PEUIUtils setFrameWidthOfView:statsBtn ofWidth:1.0 relativeTo:panel];
   [PEUIUtils addDisclosureIndicatorToButton:statsBtn];
   [statsBtn bk_addEventHandler:^(id sender) {
-    [[self navigationController] pushViewController:[_screenToolkit newUserStatsLaunchScreenMaker](_user)
+    [[self navigationController] pushViewController:[_screenToolkit newUserStatsLaunchScreenMakerWithParentController:self](_user)
                                            animated:YES];
   } forControlEvents:UIControlEventTouchUpInside];
   UIView *statsMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into various stats and trends associated with your data records."

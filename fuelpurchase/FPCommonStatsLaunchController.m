@@ -70,42 +70,47 @@
   for (id statLaunchButtonElement in statLaunchButtons) {
     if ([statLaunchButtonElement isKindOfClass:[NSArray class]]) {
       NSArray *statLaunchButtonArray = statLaunchButtonElement;
-      NSString *buttonTitle = statLaunchButtonArray[0];
-      UIViewController *(^statScreenMaker)(void) = statLaunchButtonArray[1];
-      UIButton *btn = [_uitoolkit systemButtonMaker](buttonTitle, nil, nil);
-      [PEUIUtils setFrameWidthOfView:btn ofWidth:1.0 relativeTo:self.view];
-      [PEUIUtils addDisclosureIndicatorToButton:btn];
-      [btn bk_addEventHandler:^(id sender) {
-        [self.navigationController pushViewController:statScreenMaker()
-                                             animated:YES];
-      } forControlEvents:UIControlEventTouchUpInside];
-      
-      CGFloat btnPanelHeight = btn.frame.size.height;
-      UILabel *descriptionLabel = nil;
-      if (statLaunchButtonArray.count > 2) {
-        NSAttributedString *descriptionAttrText = statLaunchButtonArray[2];
-        descriptionLabel = [PEUIUtils labelWithAttributeText:descriptionAttrText
-                                                        font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                    fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
-                                             backgroundColor:[UIColor clearColor]
-                                                   textColor:[UIColor darkGrayColor]
-                                         verticalTextPadding:3.0
-                                                  fitToWidth:self.view.frame.size.width - 15.0];
-        btnPanelHeight += descriptionLabel.frame.size.height + 4.0;
+      if (statLaunchButtonArray.count == 1) {
+        UIView *(^viewMaker)(void) = statLaunchButtonArray[0];
+        [viewColumn addObject:viewMaker()];
+      } else {
+        NSString *buttonTitle = statLaunchButtonArray[0];
+        UIViewController *(^statScreenMaker)(void) = statLaunchButtonArray[1];
+        UIButton *btn = [_uitoolkit systemButtonMaker](buttonTitle, nil, nil);
+        [PEUIUtils setFrameWidthOfView:btn ofWidth:1.0 relativeTo:self.view];
+        [PEUIUtils addDisclosureIndicatorToButton:btn];
+        [btn bk_addEventHandler:^(id sender) {
+          [self.navigationController pushViewController:statScreenMaker()
+                                               animated:YES];
+        } forControlEvents:UIControlEventTouchUpInside];
+        
+        CGFloat btnPanelHeight = btn.frame.size.height;
+        UILabel *descriptionLabel = nil;
+        if (statLaunchButtonArray.count > 2) {
+          NSAttributedString *descriptionAttrText = statLaunchButtonArray[2];
+          descriptionLabel = [PEUIUtils labelWithAttributeText:descriptionAttrText
+                                                          font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                      fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                               backgroundColor:[UIColor clearColor]
+                                                     textColor:[UIColor darkGrayColor]
+                                           verticalTextPadding:3.0
+                                                    fitToWidth:self.view.frame.size.width - 15.0];
+          btnPanelHeight += descriptionLabel.frame.size.height + 4.0;
+        }
+        UIView *btnPanel = [PEUIUtils panelWithFixedWidth:self.view.frame.size.width fixedHeight:btnPanelHeight];
+        [PEUIUtils placeView:btn atTopOf:btnPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+        if (descriptionLabel) {
+          [PEUIUtils placeView:descriptionLabel
+                         below:btn
+                          onto:btnPanel
+                 withAlignment:PEUIHorizontalAlignmentTypeLeft
+       alignmentRelativeToView:self.view
+                      vpadding:4.0
+                      hpadding:8.0];
+        }
+        [viewColumn addObject:btnPanel];
       }
-      UIView *btnPanel = [PEUIUtils panelWithFixedWidth:self.view.frame.size.width fixedHeight:btnPanelHeight];
-      [PEUIUtils placeView:btn atTopOf:btnPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
-      if (descriptionLabel) {
-        [PEUIUtils placeView:descriptionLabel
-                       below:btn
-                        onto:btnPanel
-               withAlignment:PEUIHorizontalAlignmentTypeLeft
-     alignmentRelativeToView:self.view
-                    vpadding:4.0
-                    hpadding:8.0];
-      }
-      [viewColumn addObject:btnPanel];
-    } else {
+    } else if ([statLaunchButtonElement isKindOfClass:[NSString class]]) {
       NSString *groupHeadingText = statLaunchButtonElement;
       UIView *groupHeadingLabel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:groupHeadingText
                                                                             font:[UIFont boldSystemFontOfSize:14.0]
@@ -114,6 +119,8 @@
                                                              verticalTextPadding:3.0]
                                                  padding:8.0];
       [viewColumn addObject:groupHeadingLabel];
+    } else if ([statLaunchButtonElement isKindOfClass:[UIView class]]) {
+      [viewColumn addObject:statLaunchButtonElement];
     }
   }
   UIView *buttonsPanel = [PEUIUtils panelWithColumnOfViews:viewColumn
