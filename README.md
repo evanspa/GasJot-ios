@@ -326,7 +326,7 @@ the local value, or the server copy's value.
 
 <img
 src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/settings.png"
-height="620px" width="237px">
+height="625px" width="237px">
 
 From the Settings screen, the user can tap the *Download all changes* button to
 download records from the server that have been updated/added/deleted from other
@@ -346,5 +346,5 @@ edits can up uploaded to the Gas Jot server in 1 bulk operation.
 src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/export.png"
 height="418px" width="237px">
 
-Users can export their Gas Jot to CSV files and download them to their device
-through the File Sharing feature of iTunes.
+Users can export their Gas Jot data to CSV files and download them to their
+computer through the *File Sharing* feature of iTunes.
