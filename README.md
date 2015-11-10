@@ -326,7 +326,7 @@ the local value, or the server copy's value.
 
 <img
 src="https://github.com/evanspa/GasJot-ios/raw/master/screenshots/settings.png"
-height="530px" width="237px">
+height="580px" width="237px">
 
 From the Settings screen, the user can tap the *Download all changes* button to
 download records from the server that have been updated/added/deleted from other
