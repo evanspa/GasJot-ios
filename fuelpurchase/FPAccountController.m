@@ -36,8 +36,8 @@ NSInteger const kAccountStatusPanelTag = 12;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
-  //UIScrollView *_doesHaveAuthTokenPanel;
-  UIView *_doesHaveAuthTokenPanel;
+  UIScrollView *_doesHaveAuthTokenPanel;
+  //UIView *_doesHaveAuthTokenPanel;
   UIView *_doesNotHaveAuthTokenPanel;
   UIView *_notLoggedInPanel;
 }
@@ -69,7 +69,7 @@ NSInteger const kAccountStatusPanelTag = 12;
   [self makeNotLoggedInPanel];
   [self makeDoesHaveAuthTokenPanel];
   [self makeDoesNotHaveAuthTokenPanel];
-  //[self setAutomaticallyAdjustsScrollViewInsets:NO]; // http://stackoverflow.com/questions/6523205/uiscrollview-adjusts-contentoffset-when-contentsize-changes
+  [self setAutomaticallyAdjustsScrollViewInsets:NO]; // http://stackoverflow.com/questions/6523205/uiscrollview-adjusts-contentoffset-when-contentsize-changes
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -199,18 +199,11 @@ Logging out will disconnect this device from your remote account and remove your
 #pragma mark - Panel Makers
 
 - (void)makeDoesHaveAuthTokenPanel {
-  /*CGFloat dividerHeight = (1.0 / [UIScreen mainScreen].scale);
-  UIView *(^makeDivider)(CGFloat) = ^ UIView * (CGFloat widthOf) {
-    UIView *divider = [PEUIUtils panelWithWidthOf:widthOf relativeToView:_doesHaveAuthTokenPanel fixedHeight:dividerHeight];
-    [divider setBackgroundColor:[UIColor darkGrayColor]];
-    return divider;
-  };*/
   ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
-  _doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
-  //_doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
-  //[_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width,
-  //                                                   1.19 * self.view.frame.size.height)];
-  //[_doesHaveAuthTokenPanel setBounces:NO];
+  //_doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
+  _doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
+  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.19 * self.view.frame.size.height)];
+  [_doesHaveAuthTokenPanel setBounces:YES];
   NSAttributedString *attrMessage = [PEUIUtils attributedTextWithTemplate:@"%@.  From here you can view and edit your remote account details."
                                                              textToAccent:@"You are currently logged in"
                                                            accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
@@ -261,31 +254,6 @@ Logging out will disconnect this device from your remote account and remove your
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:30.0
               hpadding:0.0];
-  /*UIView *divider = makeDivider(1.0);
-  [PEUIUtils placeView:divider
-                 below:accountSettingsBtn
-                  onto:_doesHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:20.0
-              hpadding:0.0];*/
-  /*[PEUIUtils placeView:logoutMsgLabelWithPad
-                 below:divider
-                  onto:_doesHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:20.0
-              hpadding:0.0];*/
-  
-  /*[PEUIUtils placeView:logoutBtn
-            atBottomOf:_doesHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:_doesHaveAuthTokenPanel.frame.size.height * 0.275
-              hpadding:0.0];
-  [PEUIUtils placeView:logoutMsgLabelWithPad
-                 below:logoutBtn
-                  onto:_doesHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:4.0
-              hpadding:0.0];*/
   [PEUIUtils placeView:logoutMsgLabelWithPad
             atBottomOf:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft

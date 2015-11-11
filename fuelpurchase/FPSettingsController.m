@@ -71,6 +71,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
+  [[self.navigationController navigationBar] setHidden:NO];
   [_notLoggedInPanel removeFromSuperview];
   [_doesHaveAuthTokenPanel removeFromSuperview];
   if ([APP isUserLoggedIn]) {
@@ -422,6 +423,7 @@ ensure this device has your latest Gas Jot data."
                                           verticalTextPadding:3.0
                                                    fitToWidth:_notLoggedInPanel.frame.size.width - 15.0];
   [PEUIUtils placeView:exportMsgLabel below:exportBtn onto:_notLoggedInPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:_doesHaveAuthTokenPanel vpadding:4.0 hpadding:8.0];
+  [PEUIUtils placeView:[self makeSplashScreenPanel] below:exportMsgLabel onto:_notLoggedInPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:_notLoggedInPanel vpadding:35.0 hpadding:0.0];
 }
 
 #pragma mark - Clear All Data
