@@ -731,8 +731,9 @@ alignmentRelativeToView:self.view
                                                                                  navigationBarHidden:NO]
                                               animated:YES completion:nil];
   } forControlEvents:UIControlEventTouchUpInside];
-  UIView *panel = [PEUIUtils panelWithColumnOfViews:@[introMsgLabel, intro2MsgLabel, createVehicleBtn] verticalPaddingBetweenViews:20.0 viewsAlignment:PEUIHorizontalAlignmentTypeCenter];
-  [PEUIUtils placeView:panel atTopOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeCenter vpadding:95.0 hpadding:0.0];
+  UIView *panel = [PEUIUtils panelWithColumnOfViews:@[introMsgLabel, intro2MsgLabel, createVehicleBtn] verticalPaddingBetweenViews:17.5 viewsAlignment:PEUIHorizontalAlignmentTypeCenter];
+  CGFloat vpadding = self.view.frame.size.height * .075;
+  [PEUIUtils placeView:panel atTopOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeCenter vpadding:vpadding hpadding:0.0];
   UILabel *loginMsgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"If you already have a Gas Jot account and want to log in, tap the %@ tab."
                                                                                       textToAccent:@"Account"
                                                                                     accentTextFont:[UIFont boldSystemFontOfSize:16.0]
@@ -864,9 +865,11 @@ alignmentRelativeToView:self.view
   FPHomeState state = [self currentState];
   switch (state) {
     case FPHomeStateNoVehicles:
+      [[self.navigationController navigationBar] setHidden:YES];
       _currentContentPanel = [self noVehiclesYetPanel];
       break;
     case FPHomeStateNoLogs:
+      [[self.navigationController navigationBar] setHidden:YES];
       _currentContentPanel = [self noLogsYetPanel];
       break;
     case FPHomeStateHasLogs:
@@ -874,6 +877,7 @@ alignmentRelativeToView:self.view
       vpadding = 60.0;
       break;
   }
+  //[PEUIUtils applyBorderToView:_currentContentPanel withColor:[UIColor yellowColor]];
   [PEUIUtils placeView:_currentContentPanel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:vpadding hpadding:0.0];
   _currentlyRenderedState = state;
 }
@@ -889,16 +893,19 @@ alignmentRelativeToView:self.view
   };
   switch (state) {
     case FPHomeStateNoVehicles:
+      [[self.navigationController navigationBar] setHidden:YES];
       if (_currentlyRenderedState != FPHomeStateNoVehicles) {
         doRedraw(^{ return [self noVehiclesYetPanel]; }, 0.0);
       }
       break;
     case FPHomeStateNoLogs:
+      [[self.navigationController navigationBar] setHidden:YES];
       if (_currentlyRenderedState != FPHomeStateNoLogs) {
         doRedraw(^{ return [self noLogsYetPanel]; }, 0.0);
       }
       break;
     case FPHomeStateHasLogs:
+      [[self.navigationController navigationBar] setHidden:NO];
       if (_currentlyRenderedState != FPHomeStateHasLogs) {
         doRedraw(^{ return [self makeScrollView]; }, 60.0);
       }

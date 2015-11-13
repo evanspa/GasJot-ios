@@ -40,9 +40,11 @@ CGFloat const FPSPLASH_CONTENT_HEIGH_FACTOR = 0.65;
     _screenToolkit = screenToolkit;
     _letsGoButtonEnabled = letsGoButtonEnabled;
     _carouselViewMakers = @[^UIView *{ return [self rootCarouselView]; },
-                             ^UIView *{ return [self rootCarouselView2]; },
-                             ^UIView *{ return [self rootCarouselView3]; },
-                             ^UIView *{ return [self rootCarouselView4]; }
+                             ^UIView *{ return [self carouselViewWithImageNamed:@"carousel-record-data"]; },
+                             ^UIView *{ return [self carouselViewWithImageNamed:@"carousel-know-thyself"]; },
+                             ^UIView *{ return [self carouselViewWithImageNamed:@"carousel-any-device"]; },
+                             ^UIView *{ return [self carouselViewWithImageNamed:@"carousel-offline"]; },
+                             ^UIView *{ return [self carouselViewWithImageNamed:@"carousel-export"]; }
                              ];
     _numCarouselViewMakers = [_carouselViewMakers count];
   }
@@ -90,27 +92,11 @@ CGFloat const FPSPLASH_CONTENT_HEIGH_FACTOR = 0.65;
   return panel;
 }
 
-- (UIView *)rootCarouselView2 {
+- (UIView *)carouselViewWithImageNamed:(NSString *)imageName {
   UIView *panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:FPSPLASH_CONTENT_HEIGH_FACTOR relativeToView:self.view];
   [panel setBackgroundColor:[UIColor clearColor]];
-  UIImageView *imgView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"carousel-record-data"]];
-  [PEUIUtils placeView:imgView inMiddleOf:panel withAlignment:PEUIHorizontalAlignmentTypeCenter hpadding:0.0];
-  return panel;
-}
-
-- (UIView *)rootCarouselView3 {
-  UIView *panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:FPSPLASH_CONTENT_HEIGH_FACTOR relativeToView:self.view];
-  [panel setBackgroundColor:[UIColor clearColor]];
-  UIImageView *imgView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"carousel-know-thyself"]];
-  [PEUIUtils placeView:imgView inMiddleOf:panel withAlignment:PEUIHorizontalAlignmentTypeCenter hpadding:0.0];
-  return panel;
-}
-
-- (UIView *)rootCarouselView4 {
-  UIView *panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:FPSPLASH_CONTENT_HEIGH_FACTOR relativeToView:self.view];
-  [panel setBackgroundColor:[UIColor clearColor]];
-  UIImageView *imgView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"carousel-any-device"]];
-  [PEUIUtils placeView:imgView inMiddleOf:panel withAlignment:PEUIHorizontalAlignmentTypeCenter hpadding:0.0];
+  UIImageView *imgView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:imageName]];
+  [PEUIUtils placeView:imgView atBottomOf:panel withAlignment:PEUIHorizontalAlignmentTypeCenter vpadding:5.0 hpadding:0.0];
   return panel;
 }
 
@@ -146,7 +132,7 @@ CGFloat const FPSPLASH_CONTENT_HEIGH_FACTOR = 0.65;
                  below:carousel
                   onto:self.view
          withAlignment:PEUIHorizontalAlignmentTypeCenter
-              vpadding:15.0
+              vpadding:20.0
               hpadding:0.0];
 }
 
@@ -179,7 +165,8 @@ CGFloat const FPSPLASH_CONTENT_HEIGH_FACTOR = 0.65;
   [[self.navigationController navigationBar] setHidden:YES];
   _isCarouselRemoved = NO;
   //[PEUIUtils applyBorderToView:_carousel withColor:[UIColor yellowColor]];
-  [PEUIUtils placeView:_carousel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+  [PEUIUtils placeView:_carousel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:20.0 hpadding:0.0];
+  //[PEUIUtils applyBorderToView:_carousel withColor:[UIColor purpleColor]];
   [self refreshDotsPanelWithCarousel:_carousel];
   //UIView *southPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:0.5 relativeToView:self.view];
   UIButton *(^button)(NSString *, id, SEL) = ^UIButton *(NSString *title, id target, SEL sel) {
@@ -203,9 +190,7 @@ CGFloat const FPSPLASH_CONTENT_HEIGH_FACTOR = 0.65;
   UIButton *startUsing = button(@"Let's Go!", self, @selector(startUsing));
   [startUsing setUserInteractionEnabled:_letsGoButtonEnabled];
   [PEUIUtils addDisclosureIndicatorToButton:startUsing];
-  [PEUIUtils placeView:startUsing below:_dotsPanel onto:self.view withAlignment:PEUIHorizontalAlignmentTypeCenter alignmentRelativeToView:self.view vpadding:15.0 hpadding:0.0];
-  //[PEUIUtils placeView:startUsing atBottomOf:self.view withAlignment:PEUIHorizontalAlignmentTypeCenter vpadding:0.0 hpadding:0.0];
-  //[PEUIUtils placeView:southPanel atBottomOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+  [PEUIUtils placeView:startUsing below:_dotsPanel onto:self.view withAlignment:PEUIHorizontalAlignmentTypeCenter alignmentRelativeToView:self.view vpadding:25.0 hpadding:0.0];
 }
 
 - (void)startUsing {

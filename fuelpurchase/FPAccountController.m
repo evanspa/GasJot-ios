@@ -202,7 +202,7 @@ Logging out will disconnect this device from your remote account and remove your
   ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
   //_doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
   _doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
-  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.19 * self.view.frame.size.height)];
+  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.35 * self.view.frame.size.height)];
   [_doesHaveAuthTokenPanel setBounces:YES];
   NSAttributedString *attrMessage = [PEUIUtils attributedTextWithTemplate:@"%@.  From here you can view and edit your remote account details."
                                                              textToAccent:@"You are currently logged in"
@@ -254,13 +254,14 @@ Logging out will disconnect this device from your remote account and remove your
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:30.0
               hpadding:0.0];
-  [PEUIUtils placeView:logoutMsgLabelWithPad
-            atBottomOf:_doesHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:(10.0 + [APP jotButtonHeight])
-              hpadding:0.0];
   [PEUIUtils placeView:logoutBtn
-                 above:logoutMsgLabelWithPad
+                 below:accountStatusPanel
+                  onto:_doesHaveAuthTokenPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:30.0
+              hpadding:0.0];
+  [PEUIUtils placeView:logoutMsgLabelWithPad
+                 below:logoutBtn
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
@@ -315,21 +316,10 @@ account.";
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
-  /*[PEUIUtils placeView:logoutBtn
-            atBottomOf:_doesNotHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:_doesHaveAuthTokenPanel.frame.size.height * 0.275
-              hpadding:0.0];
-  [PEUIUtils placeView:logoutMsgLabelWithPad
-                 below:logoutBtn
-                  onto:_doesNotHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:4.0
-              hpadding:0.0];*/
   [PEUIUtils placeView:logoutMsgLabelWithPad
             atBottomOf:_doesNotHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:(10.0 + [APP jotButtonHeight])
+              vpadding:(25.0 + [APP jotButtonHeight])
               hpadding:0.0];
   [PEUIUtils placeView:logoutBtn
                  above:logoutMsgLabelWithPad

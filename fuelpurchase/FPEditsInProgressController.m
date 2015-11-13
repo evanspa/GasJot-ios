@@ -238,7 +238,7 @@ You currently have no unsynced items."
     topView = _envlogsButton;
   }
   if (totalNumSyncNeeded > 0 && [APP doesUserHaveValidAuthToken]) {
-    [PEUIUtils placeView:_syncAllButton atBottomOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:self.view.frame.size.height * 0.275 hpadding:0.0];
+    [PEUIUtils placeView:_syncAllButton atBottomOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:self.view.frame.size.height * 0.3 hpadding:0.0];
     [PEUIUtils placeView:_syncAllMessage
                    below:_syncAllButton
                     onto:self.view

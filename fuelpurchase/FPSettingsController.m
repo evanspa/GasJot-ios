@@ -35,7 +35,8 @@
   FPUser *_user;
   UIScrollView *_doesHaveAuthTokenPanel;
   //UIView *_doesHaveAuthTokenPanel;
-  UIView *_notLoggedInPanel;
+  //UIView *_notLoggedInPanel;
+  UIScrollView *_notLoggedInPanel;
 }
 
 #pragma mark - Initializers
@@ -203,7 +204,7 @@ click on your device, navigate to 'Apps' and scroll down to the 'File Sharing' s
   //_doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
   _doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
   [_doesHaveAuthTokenPanel setDelaysContentTouches:NO];
-  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.65 * self.view.frame.size.height)];
+  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.85 * self.view.frame.size.height)];
   [_doesHaveAuthTokenPanel setBounces:YES];
   UIView *changelogMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"\
 Keeps your device synchronized with your remote account in case you've made edits \
@@ -393,8 +394,14 @@ ensure this device has your latest Gas Jot data."
 }
 
 - (void)makeNotLoggedInPanel {
+      
+  //_notLoggedInPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
+  _notLoggedInPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
+  [_notLoggedInPanel setDelaysContentTouches:NO];
+  [_notLoggedInPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.35 * self.view.frame.size.height)];
+  [_notLoggedInPanel setBounces:YES];
+  
   ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
-  _notLoggedInPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
   NSString *message = @"This action will permanently delete your Gas Jot data from this device.";
   UIView *messagePanel = [self leftPaddingMessageWithText:message];
   UIButton *deleteAllDataBtn = buttonMaker(@"Delete All Data", self, @selector(clearAllData));

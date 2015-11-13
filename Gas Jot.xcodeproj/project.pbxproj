@@ -1003,7 +1003,7 @@
 				);
 				INFOPLIST_FILE = "fuelpurchase/Gas Jot-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
-				PRODUCT_BUNDLE_IDENTIFIER = "name.paulevans.fpapp.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_BUNDLE_IDENTIFIER = com.jotyourself.gasjot;
 				PRODUCT_NAME = "Gas Jot";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
@@ -1067,7 +1067,7 @@
 				);
 				INFOPLIST_FILE = "fuelpurchase/Gas Jot-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
-				PRODUCT_BUNDLE_IDENTIFIER = "name.paulevans.fpapp.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_BUNDLE_IDENTIFIER = com.jotyourself.gasjot;
 				PRODUCT_NAME = "Gas Jot";
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;

@@ -1490,8 +1490,14 @@ merge conflicts.";
                                 alertDescription:(NSAttributedString *)desc
                                     cancelAction:(void(^)(void))cancelAction {
   void (^reenableNavButtons)(void) = ^{
+    //[[[self navigationItem] leftBarButtonItem] setEnabled:YES];
+    //[[[self navigationItem] rightBarButtonItem] setEnabled:YES];
+    
     [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
     [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
+    [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
+    if (_modalOperationDone) { _modalOperationDone(); }
+    [self setUploadDownloadDeleteBarButtonStates];
   };
   void (^fetchDepsThenTakeAction)(void(^)(void)) = [self downloadDepsForEntity:latestEntity
                                                      dismissErrAlertPostAction:reenableNavButtons];

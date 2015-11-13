@@ -151,11 +151,7 @@ From here you can drill into all of your data records."
     NSInteger numUnsynced = [_coordDao totalNumUnsyncedEntitiesForUser:_user];
     if (numUnsynced > 0) {
       _unsyncedEditsBtn = [self unsyncedEditsButtonWithBadgeNum:numUnsynced];
-      [PEUIUtils placeView:_unsyncedEditsBtn
-                atBottomOf:self.view
-             withAlignment:PEUIHorizontalAlignmentTypeLeft
-                  vpadding:self.view.frame.size.height * 0.275
-                  hpadding:0.0];
+      [PEUIUtils placeView:_unsyncedEditsBtn below:_envlogsBtn onto:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:25.0 hpadding:0.0];
     }
   }
 }

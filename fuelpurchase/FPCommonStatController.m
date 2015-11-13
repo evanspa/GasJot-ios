@@ -51,7 +51,8 @@ NSInteger const FPChartPreviousYearIndex = 2;
   FPSiblingEntityCount _siblingCountBlk;
   FPComparisonScreenMaker _comparisonScreenMakerBlk;
   FPValueFormatter _valueFormatter;
-  UIView *_contentView;
+  //UIView *_contentView;
+  UIScrollView *_contentView;
 }
 
 #pragma mark - Initializers
@@ -324,15 +325,16 @@ NSInteger const FPChartPreviousYearIndex = 2;
   [super viewDidLoad];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   [self setTitle:_screenTitle];
+  [self setAutomaticallyAdjustsScrollViewInsets:NO];
   
   _tooltipView = [[JBChartTooltipView alloc] init];
   _tooltipTipView = [[JBChartTooltipTipView alloc] init];
   [_tooltipView setBackgroundColor:[UIColor blackColor]];
   
-  //_contentView = [[UIScrollView alloc] initWithFrame:self.view.frame];
-  //[_contentView setContentSize:CGSizeMake(self.view.frame.size.width, 1.01 * self.view.frame.size.height)];
-  //[_contentView setBounces:NO];
-  _contentView = [PEUIUtils panelWithFixedWidth:self.view.frame.size.width fixedHeight:self.view.frame.size.height];
+  _contentView = [[UIScrollView alloc] initWithFrame:self.view.frame];
+  [_contentView setContentSize:CGSizeMake(self.view.frame.size.width, 1.30 * self.view.frame.size.height)];
+  [_contentView setBounces:YES];
+  //_contentView = [PEUIUtils panelWithFixedWidth:self.view.frame.size.width fixedHeight:self.view.frame.size.height];
   
   UILabel *entityLabel = nil;
   if (_entityTypeLabelText && _entityNameBlk && _entity) {

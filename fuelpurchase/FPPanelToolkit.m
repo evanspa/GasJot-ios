@@ -227,6 +227,7 @@ NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelSt
                                                         rowWidth:(1.0 * relativeToView.frame.size.width)
                                                   relativeToView:relativeToView];
   [statusPanel setBackgroundColor:[UIColor whiteColor]];
+  CGFloat heightOfPanel = statusPanel.frame.size.height;
   UIView *panel;
   if ([PEUtils isNil:[user verifiedAt]]) {
     UIButton * (^makeSendEmailBtn)(void) = ^ UIButton * {
@@ -460,6 +461,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     }
     [PEUIUtils placeView:statusPanel atTopOf:panel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
     [PEUIUtils placeView:buttonsView below:statusPanel onto:panel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:3.0 hpadding:0.0];
+    heightOfPanel += buttonsView.frame.size.height + 3.0;
   } else {
     panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:statusPanel];
     UILabel *statusVerifiedMsg = [PEUIUtils labelWithKey:@"Your account is verified.  Thank you."
@@ -476,8 +478,10 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
  alignmentRelativeToView:panel
                 vpadding:4.0
                 hpadding:8.0];
+    heightOfPanel += statusVerifiedMsg.frame.size.height + 4.0;
   }
   [panel setTag:[panelTag integerValue]];
+  [PEUIUtils setFrameHeight:heightOfPanel ofView:panel];
   return panel;
 }
 
@@ -632,7 +636,11 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     [self placeViewLogsButtonsOntoVehiclePanel:vehiclePanel
                                      belowView:statsMsgPanel
                           parentViewController:parentViewController];
-    return vehiclePanel;
+    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[vehiclePanel frame]];
+    [scrollView setContentSize:CGSizeMake(vehiclePanel.frame.size.width, 1.4 * vehiclePanel.frame.size.height)];
+    [scrollView addSubview:vehiclePanel];
+    [scrollView setBounces:YES];
+    return scrollView;
   };
 }
 
@@ -1397,7 +1405,11 @@ To compute your location, you need to enable location services for Gas Jot.  If 
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    return fplogPanel;
+    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fplogPanel frame]];
+    [scrollView setContentSize:CGSizeMake(fplogPanel.frame.size.width, 1.4 * fplogPanel.frame.size.height)];
+    [scrollView addSubview:fplogPanel];
+    [scrollView setBounces:YES];
+    return scrollView;
   };
 }
 
@@ -1691,7 +1703,11 @@ To compute your location, you need to enable location services for Gas Jot.  If 
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    return envlogPanel;
+    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[envlogPanel frame]];
+    [scrollView setContentSize:CGSizeMake(envlogPanel.frame.size.width, 1.4 * envlogPanel.frame.size.height)];
+    [scrollView addSubview:envlogPanel];
+    [scrollView setBounces:YES];
+    return scrollView;
   };
 }
 

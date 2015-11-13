@@ -4631,7 +4631,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       UIView *jotPanel = [weakTabBarCtrl.view viewWithTag:jotPanelTag];
       weakTabBarCtrl.tabBar.userInteractionEnabled = !jotting;
       CGFloat (^onscreenYForJotButtons)(UIView *, UIButton *) = ^ CGFloat (UIView *theJotPanel, UIButton *addButton) {
-        return (420 + (theJotPanel.frame.size.height/2) - (addButton.frame.size.height/2));
+        return ((weakTabBarCtrl.view.frame.size.height * 0.705) + (theJotPanel.frame.size.height/2) - (addButton.frame.size.height/2));
       };
       __block UIButton *addVehicleBtn;
       __block UIButton *addFuelstationBtn;
@@ -4770,12 +4770,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     jotPanel.layer.cornerRadius = 5.0;
     [jotPanel setTag:jotPanelTag];
     [jotPanel setBackgroundColor:[UIColor whiteColor]];
-    jotPanel.layer.anchorPoint = CGPointMake(0.5, -0.4);
+    jotPanel.layer.anchorPoint = CGPointMake(0.5, -0.5);
     [PEUIUtils placeView:jotPanel
                    below:jotBtn
                     onto:weakTabBarCtrl.view
            withAlignment:PEUIHorizontalAlignmentTypeCenter
-                vpadding:7.0
+                vpadding:3.5
                 hpadding:0.0];
     [tabBarCtrl setViewControllers:controllers];
     [tabBarCtrl setSelectedIndex:0];
