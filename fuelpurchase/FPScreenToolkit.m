@@ -424,9 +424,35 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                      [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Max price of gas (%@ octane)", octane],
                                                                                     ^{ return [self newMaxPricePerGallonStatsScreenMakerWithOctane:octane](user); }]];
                                                    }
+                                                   if ([_coordDao.localDao hasDieselLogsForUser:user error:_errorBlk]) {
+                                                     [statLaunchButtons addObject:@"DIESEL - PRICE STATS"];
+                                                     [statLaunchButtons addObject:@[@"Avg price of diesel",
+                                                                                    ^{ return [self newAvgPricePerDieselGallonStatsScreenMaker](user); }]];
+                                                   }
                                                    return statLaunchButtons;
                                                  }
                                                             uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newAvgPricePerDieselGallonStatsScreenMaker {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Avg Price of Diesel"]
+                                           entityTypeLabelText:@"ALL GAS STATIONS"
+                                                 entityNameBlk:nil
+                                                        entity:user
+                                          aggregatesHeaderText:[NSString stringWithFormat:@"AVG PRICE OF DIESEL"]
+                                        compareButtonTitleText:@"Compare gas stations"
+                                           alltimeAggregateBlk:^(FPUser *u) {return [_stats overallAvgPricePerDieselGallonForUser:u];}
+                                        yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateAvgPricePerDieselGallonForUser:u];}
+                                          lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearAvgPricePerDieselGallonForUser:u];}
+                                             alltimeDatasetBlk:^(FPUser *u) {return [_stats overallAvgPricePerDieselGallonDataSetForUser:u];}
+                                          yearToDateDatasetBlk:^(FPUser *u) {return [_stats yearToDateAvgPricePerDieselGallonDataSetForUser:u];}
+                                            lastYearDatasetBlk:^(FPUser *u) {return [_stats lastYearAvgPricePerDieselGallonDataSetForUser:u];}
+                                               siblingCountBlk:^{return [_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newFuelStationCompareAvgPricePerDieselGallonStatsScreenMakerWithFuelstationInCtx:nil](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
   };
 }
 
@@ -711,7 +737,28 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                           yearToDateDatasetBlk:^(FPUser *u) {return [_stats yearToDateAvgPricePerGallonDataSetForUser:u octane:octane];}
                                             lastYearDatasetBlk:^(FPUser *u) {return [_stats lastYearAvgPricePerGallonDataSetForUser:u octane:octane];}
                                                siblingCountBlk:^{return [_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
-                                      comparisonScreenMakerBlk:^{return [self newFuelStationCompareAvgPricePerGallonStatsScreenMakerWithOctane:octane](user);}
+                                      comparisonScreenMakerBlk:^{return [self newFuelStationCompareAvgPricePerGallonStatsScreenMakerWithFuelstationInCtx:nil octane:octane](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newAvgPricePerGallonStatsScreenMaker {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Avg Price"]
+                                           entityTypeLabelText:@"ALL GAS STATIONS"
+                                                 entityNameBlk:nil
+                                                        entity:user
+                                          aggregatesHeaderText:[NSString stringWithFormat:@"AVG PRICE"]
+                                        compareButtonTitleText:@"Compare gas stations"
+                                           alltimeAggregateBlk:^(FPUser *u) {return [_stats overallAvgPricePerGallonForUser:u];}
+                                        yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateAvgPricePerGallonForUser:u];}
+                                          lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearAvgPricePerGallonForUser:u];}
+                                             alltimeDatasetBlk:^(FPUser *u) {return [_stats overallAvgPricePerGallonDataSetForUser:u];}
+                                          yearToDateDatasetBlk:^(FPUser *u) {return [_stats yearToDateAvgPricePerGallonDataSetForUser:u];}
+                                            lastYearDatasetBlk:^(FPUser *u) {return [_stats lastYearAvgPricePerGallonDataSetForUser:u];}
+                                               siblingCountBlk:^{return [_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newFuelStationCompareAvgPricePerGallonStatsScreenMakerWithFuelstationInCtx:nil](user);}
                                              valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
                                                      uitoolkit:_uitoolkit];
   };
@@ -2679,7 +2726,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                           yearToDateDatasetBlk:^(FPFuelStation *fs) {return [_stats yearToDateAvgPricePerGallonDataSetForFuelstation:fs octane:octane];}
                                             lastYearDatasetBlk:^(FPFuelStation *fs) {return [_stats lastYearAvgPricePerGallonDataSetForFuelstation:fs octane:octane];}
                                                siblingCountBlk:^{return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
-                                      comparisonScreenMakerBlk:^{return [self newFuelStationCompareAvgPricePerGallonStatsScreenMakerWithOctane:octane](user);}
+                                      comparisonScreenMakerBlk:^{return [self newFuelStationCompareAvgPricePerGallonStatsScreenMakerWithFuelstationInCtx:nil octane:octane](user);}
                                              valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
                                                      uitoolkit:_uitoolkit];
   };
@@ -2708,6 +2755,24 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   };
 }
 
+- (FPAuthScreenMaker)newFuelStationCompareAvgPricePerDieselGallonStatsScreenMakerWithFuelstationInCtx:(FPFuelStation *)fuelstation {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatComparisonController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Avg Price of Diesel Comparison"]
+                                                              headerText:[NSString stringWithFormat:@"AVG PRICE OF DIESEL (All time)"]
+                                                           entityNameBlk:^(FPFuelStation *fs) {return fs.name;}
+                                                                  entity:fuelstation
+                                                    entitiesToCompareBlk:^{return [_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                     alltimeAggregateBlk:^(FPFuelStation *fs) {return [_stats overallAvgPricePerDieselGallonForFuelstation:fs];}
+                                                       valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                              comparator:^(NSArray *o1, NSArray *o2) {
+                                                                NSDecimalNumber *v1 = o1[2];
+                                                                NSDecimalNumber *v2 = o2[2];
+                                                                return [v1 compare:v2]; // ascending
+                                                              }
+                                                               uitoolkit:_uitoolkit];
+  };
+}
+
 - (FPAuthScreenMaker)newFuelStationCompareAvgPricePerGallonStatsScreenMakerWithFuelstationInCtx:(FPFuelStation *)fuelstation
                                                                                          octane:(NSNumber *)octane {
   return ^ UIViewController * (FPUser *user) {
@@ -2727,8 +2792,22 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   };
 }
 
-- (FPAuthScreenMaker)newFuelStationCompareAvgPricePerGallonStatsScreenMakerWithOctane:(NSNumber *)octane {
-  return [self newFuelStationCompareAvgPricePerGallonStatsScreenMakerWithFuelstationInCtx:nil octane:octane];
+- (FPAuthScreenMaker)newFuelStationCompareAvgPricePerGallonStatsScreenMakerWithFuelstationInCtx:(FPFuelStation *)fuelstation {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatComparisonController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Avg Price Comparison"]
+                                                              headerText:[NSString stringWithFormat:@"AVG PRICE (All time)"]
+                                                           entityNameBlk:^(FPFuelStation *fs) {return fs.name;}
+                                                                  entity:fuelstation
+                                                    entitiesToCompareBlk:^{return [_coordDao fuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                     alltimeAggregateBlk:^(FPFuelStation *fs) {return [_stats overallAvgPricePerGallonForFuelstation:fs];}
+                                                       valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                              comparator:^(NSArray *o1, NSArray *o2) {
+                                                                NSDecimalNumber *v1 = o1[2];
+                                                                NSDecimalNumber *v2 = o2[2];
+                                                                return [v1 compare:v2]; // ascending
+                                                              }
+                                                               uitoolkit:_uitoolkit];
+  };
 }
 
 - (FPAuthScreenMaker)newFuelStationMaxSpentOnGasStatsScreenMakerWithFuelstation:(FPFuelStation *)fuelstation {
@@ -3097,12 +3176,19 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       [self deselectSelectedRowForTableOnView:ctrl.view tableViewTag:FPFpLogTagVehicleFuelStationAndDate];
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
+      UITextField *prefillupDteTf = (UITextField *)[entityPanel viewWithTag:FPFpEnvLogCompositeTagPreFillupReportedDte];
       UITextField *octaneTf = (UITextField *)[entityPanel viewWithTag:FPFpLogTagOctane];
-      if (octaneTf.text.length == 0) {
-        [octaneTf becomeFirstResponder];
+      UISwitch *dieselSwitch = (UISwitch *)[entityPanel viewWithTag:FPFpLogTagDieselSwitch];
+      if (dieselSwitch.on) {
+        if (prefillupDteTf.text.length == 0) {
+          [prefillupDteTf becomeFirstResponder];
+        }
       } else {
-        UITextField *prefillupDte = (UITextField *)[entityPanel viewWithTag:FPFpEnvLogCompositeTagPreFillupReportedDte];
-        [prefillupDte becomeFirstResponder];
+        if (octaneTf.text.length == 0) {
+          [octaneTf becomeFirstResponder];
+        } else {
+          [prefillupDteTf becomeFirstResponder];
+        }
       }
     };
     PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, BOOL dismissCtrlr, FPLogEnvLogComposite *fpEnvLogComposite) {

@@ -25,6 +25,14 @@ NSString * const FPFpLogEntityMakerFpLogEntry = @"FPFpLogEntityMakerFpLogEntry";
 NSString * const FPFpLogEntityMakerVehicleEntry = @"FPFpLogEntityMakerVehicleEntry";
 NSString * const FPFpLogEntityMakerFuelStationEntry = @"FPFpLogEntityMakerFuelStationEntry";
 
+NSString * const FPPanelToolkitNaText = @"---";
+
+NSString * const FPPanelToolkitVehicleDefaultOctanePlaceholerText = @"Default octane";
+NSString * const FPPanelToolkitVehicleDefaultOctaneNaPlaceholerText = @"Default octane (NOT APPLICABLE)";
+
+NSString * const FPPanelToolkitFplogOctanePlaceholerText = @"Octane";
+NSString * const FPPanelToolkitFplogOctaneNaPlaceholerText = @"Octane (NOT APPLICABLE)";
+
 @implementation FPPanelToolkit {
   FPCoordinatorDao *_coordDao;
   PEUIToolkit *_uitoolkit;
@@ -595,8 +603,15 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPVehicle *vehicle) {
     UIView *parentView = [parentViewController view];
     UIView *vehiclePanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
+    NSString *defaultOctaneText;
+    if ([vehicle isDiesel]) {
+      defaultOctaneText = FPPanelToolkitNaText;
+    } else {
+      defaultOctaneText = [PEUtils descriptionOrEmptyIfNil:[vehicle defaultOctane]];
+    }
     UIView *vehicleDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Vehicle name", [PEUtils emptyIfNil:[vehicle name]]],
-                                                                  @[@"Default octane", [PEUtils descriptionOrEmptyIfNil:[vehicle defaultOctane]]],
+                                                                  @[@"Takes diesel?", [PEUtils yesNoFromBool:[vehicle isDiesel]]],
+                                                                  @[@"Default octane", defaultOctaneText],
                                                                   @[@"Fuel capacity", [PEUtils descriptionOrEmptyIfNil:[vehicle fuelCapacity]]]]
                                                       uitoolkit:_uitoolkit
                                                      parentView:parentView];
@@ -648,20 +663,56 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
   return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
     UIView *vehiclePanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    TaggedTextfieldMaker tfMaker =
-      [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:vehiclePanel];
+    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:vehiclePanel];
     UITextField *vehicleNameTf = tfMaker(@"Vehicle name", FPVehicleTagName);
-    UITextField *vehicleDefaultOctaneTf = tfMaker(@"Default octane", FPVehicleTagDefaultOctane);
+    UIView *takesDieselPanel = [PEUIUtils panelWithWidthOf:1.0
+                                            relativeToView:parentView
+                                               fixedHeight:vehicleNameTf.frame.size.height];
+    [takesDieselPanel setTag:FPVehicleTagTakesDieselPanel];
+    [takesDieselPanel setBackgroundColor:[UIColor whiteColor]];
+    UILabel *takesDieselLabel = [PEUIUtils labelWithKey:@"Takes diesel?"
+                                                   font:[vehicleNameTf font]
+                                        backgroundColor:[UIColor clearColor]
+                                              textColor:[_uitoolkit colorForTableCellTitles]
+                                    verticalTextPadding:3.0];
+    UISwitch *takesDieselSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+    [takesDieselSwitch setTag:FPVehicleTagTakesDieselSwitch];
+    [PEUIUtils placeView:takesDieselLabel
+              inMiddleOf:takesDieselPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                hpadding:10.0];
+    [PEUIUtils placeView:takesDieselSwitch
+              inMiddleOf:takesDieselPanel
+           withAlignment:PEUIHorizontalAlignmentTypeRight
+                hpadding:15.0];
+    UITextField *vehicleDefaultOctaneTf = tfMaker(FPPanelToolkitVehicleDefaultOctanePlaceholerText, FPVehicleTagDefaultOctane);
     [vehicleDefaultOctaneTf setKeyboardType:UIKeyboardTypeNumberPad];
     UITextField *vehicleFuelCapacityTf = tfMaker(@"Fuel capacity", FPVehicleTagFuelCapacity);
     [vehicleFuelCapacityTf setKeyboardType:UIKeyboardTypeDecimalPad];
+    [takesDieselSwitch bk_addEventHandler:^(id sender) {
+      [vehicleDefaultOctaneTf setEnabled:!takesDieselSwitch.on];
+      if (takesDieselSwitch.on) {
+        [vehicleDefaultOctaneTf setText:@""];
+        [vehicleDefaultOctaneTf setPlaceholder:FPPanelToolkitVehicleDefaultOctaneNaPlaceholerText];
+        [vehicleDefaultOctaneTf setBackgroundColor:[UIColor lightGrayColor]];
+      } else {
+        [vehicleDefaultOctaneTf setPlaceholder:FPPanelToolkitVehicleDefaultOctanePlaceholerText];
+        [vehicleDefaultOctaneTf setBackgroundColor:[UIColor whiteColor]];
+      }
+    } forControlEvents:UIControlEventTouchUpInside];
     [PEUIUtils placeView:vehicleNameTf
                  atTopOf:vehiclePanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:15
                 hpadding:0];
-    [PEUIUtils placeView:vehicleDefaultOctaneTf
+    [PEUIUtils placeView:takesDieselPanel
                    below:vehicleNameTf
+                    onto:vehiclePanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:vehicleDefaultOctaneTf
+                   below:takesDieselPanel
                     onto:vehiclePanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
@@ -689,10 +740,16 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
            withStringSetter:@selector(setName:)
        fromTextfieldWithTag:FPVehicleTagName
                    fromView:panel];
-    [PEUIUtils bindToEntity:vehicle
-           withNumberSetter:@selector(setDefaultOctane:)
-       fromTextfieldWithTag:FPVehicleTagDefaultOctane
-                   fromView:panel];
+    UISwitch *takesDieselSwitch = (UISwitch *)[panel viewWithTag:FPVehicleTagTakesDieselSwitch];
+    [vehicle setIsDiesel:takesDieselSwitch.on];
+    if (takesDieselSwitch.on) {
+      [vehicle setDefaultOctane:nil];
+    } else {
+      [PEUIUtils bindToEntity:vehicle
+             withNumberSetter:@selector(setDefaultOctane:)
+         fromTextfieldWithTag:FPVehicleTagDefaultOctane
+                     fromView:panel];
+    }
     [PEUIUtils bindToEntity:vehicle
           withDecimalSetter:@selector(setFuelCapacity:)
        fromTextfieldWithTag:FPVehicleTagFuelCapacity
@@ -706,10 +763,20 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                fromView:panel
                              fromEntity:vehicle
                              withGetter:@selector(name)];
-    [PEUIUtils bindToTextControlWithTag:FPVehicleTagDefaultOctane
-                               fromView:panel
-                             fromEntity:vehicle
-                             withGetter:@selector(defaultOctane)];
+    UISwitch *takesDieselSwitch = (UISwitch *)[panel viewWithTag:FPVehicleTagTakesDieselSwitch];
+    [takesDieselSwitch setOn:[vehicle isDiesel] animated:YES];
+    UITextField *defaultOctaneTf = [panel viewWithTag:FPVehicleTagDefaultOctane];
+    if ([vehicle isDiesel]) {
+      [defaultOctaneTf setText:@""];
+      [defaultOctaneTf setPlaceholder:FPPanelToolkitVehicleDefaultOctaneNaPlaceholerText];
+      [defaultOctaneTf setBackgroundColor:[UIColor lightGrayColor]];
+    } else {
+      [defaultOctaneTf setBackgroundColor:[UIColor whiteColor]];
+      [PEUIUtils bindToTextControlWithTag:FPVehicleTagDefaultOctane
+                                 fromView:panel
+                               fromEntity:vehicle
+                               withGetter:@selector(defaultOctane)];
+    }
     [PEUIUtils bindToTextControlWithTag:FPVehicleTagFuelCapacity
                                fromView:panel
                              fromEntity:vehicle
@@ -720,6 +787,9 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
 - (PEEnableDisablePanelBlk)vehicleFormPanelEnablerDisabler {
   return ^ (UIView *panel, BOOL enable) {
     [PEUIUtils enableControlWithTag:FPVehicleTagName
+                           fromView:panel
+                             enable:enable];
+    [PEUIUtils enableControlWithTag:FPVehicleTagTakesDieselSwitch
                            fromView:panel
                              enable:enable];
     [PEUIUtils enableControlWithTag:FPVehicleTagDefaultOctane
@@ -736,7 +806,8 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     FPVehicle *newVehicle =
       [_coordDao vehicleWithName:[PEUIUtils stringFromTextFieldWithTag:FPVehicleTagName fromView:panel]
                    defaultOctane:[PEUIUtils numberFromTextFieldWithTag:FPVehicleTagDefaultOctane fromView:panel]
-                    fuelCapacity:[PEUIUtils decimalNumberFromTextFieldWithTag:FPVehicleTagFuelCapacity fromView:panel]];
+                    fuelCapacity:[PEUIUtils decimalNumberFromTextFieldWithTag:FPVehicleTagFuelCapacity fromView:panel]
+                        isDiesel:((UISwitch *)[panel viewWithTag:FPVehicleTagTakesDieselSwitch]).on];
     return newVehicle;
   };
 }
@@ -1181,6 +1252,8 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     //[PEUIUtils applyBorderToView:vehicleFuelStationDateTableView withColor:[UIColor yellowColor]];
     UITextField *numGallonsTf = fplogComponents[@(FPFpLogTagNumGallons)];
     UITextField *pricePerGallonTf = fplogComponents[@(FPFpLogTagPricePerGallon)];
+    UIView *dieselPanel = fplogComponents[@(FPFpLogTagDieselPanel)];
+    UISwitch *dieselSwitch = fplogComponents[@(FPFpLogTagDieselSwitch)];
     UITextField *octaneTf = fplogComponents[@(FPFpLogTagOctane)];
     UITextField *carWashPerGallonDiscountTf = fplogComponents[@(FPFpLogTagCarWashPerGallonDiscount)];
     UIView *gotCarWashPanel = fplogComponents[@(FPFpLogTagCarWashPanel)];
@@ -1189,8 +1262,14 @@ To compute your location, you need to enable location services for Gas Jot.  If 
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:0.0
                 hpadding:0.0];
-    [PEUIUtils placeView:octaneTf
+    [PEUIUtils placeView:dieselPanel
                    below:vehicleFuelStationDateTableView
+                    onto:fpEnvCompPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:octaneTf
+                   below:dieselPanel
                     onto:fpEnvCompPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
@@ -1260,6 +1339,13 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     if (![PEUtils isNil:defaultOctane]) {
       [octaneTf setText:[defaultOctane description]];
     }
+    BOOL isDiesel = [defaultSelectedVehicle isDiesel];
+    [dieselSwitch setOn:isDiesel];
+    [octaneTf setEnabled:!isDiesel];
+    if (isDiesel) {
+      [octaneTf setBackgroundColor:[UIColor lightGrayColor]];
+      [octaneTf setPlaceholder:FPPanelToolkitFplogOctaneNaPlaceholerText];
+    }
     
     // wrap fuel station panel in scroll view (so everything can "fit")
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fpEnvCompPanel frame]];
@@ -1271,8 +1357,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
 }
 
 - (PEPanelToEntityBinderBlk)fpEnvLogCompositeFormPanelToFpEnvLogCompositeBinder {
-  PEPanelToEntityBinderBlk fpLogPanelToEntityBinder =
-    [self fplogFormPanelToFplogBinder];
+  PEPanelToEntityBinderBlk fpLogPanelToEntityBinder = [self fplogFormPanelToFplogBinder];
   return ^ void (UIView *panel, FPLogEnvLogComposite *fpEnvLogComposite) {
     fpLogPanelToEntityBinder(panel, [fpEnvLogComposite fpLog]);
     void (^binddecToEnvLogs)(NSInteger, SEL) = ^(NSInteger tag, SEL sel) {
@@ -1313,8 +1398,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
 }
 
 - (PEEntityToPanelBinderBlk)fpEnvLogCompositeToFpEnvLogCompositePanelBinder {
-  PEEntityToPanelBinderBlk fpLogToPanelBinder =
-    [self fplogToFplogPanelBinder];
+  PEEntityToPanelBinderBlk fpLogToPanelBinder = [self fplogToFplogPanelBinder];
   return ^ void (FPLogEnvLogComposite *fpEnvLogComposite, UIView *panel) {
     fpLogToPanelBinder([fpEnvLogComposite fpLog], panel);
     void (^bindtt)(NSInteger, SEL) = ^ (NSInteger tag, SEL sel) {
@@ -1374,7 +1458,14 @@ To compute your location, you need to enable location services for Gas Jot.  If 
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPFuelPurchaseLog *fplog) {
     UIView *parentView = [parentViewController view];
     UIView *fplogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *fplogDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Octane", [PEUtils descriptionOrEmptyIfNil:[fplog octane]]],
+    NSString *octaneText;
+    if ([fplog isDiesel]) {
+      octaneText = FPPanelToolkitNaText;
+    } else {
+      octaneText = [PEUtils descriptionOrEmptyIfNil:[fplog octane]];
+    }
+    UIView *fplogDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Diesel?", [PEUtils yesNoFromBool:[fplog isDiesel]]],
+                                                                @[@"Octane", octaneText],
                                                                 @[@"Odometer", [PEUtils descriptionOrEmptyIfNil:[fplog odometer]]],
                                                                 @[@"Price per gallon", [PEUtils descriptionOrEmptyIfNil:[fplog gallonPrice]]],
                                                                 @[@"Car wash per-gallon discount", [PEUtils descriptionOrEmptyIfNil:[fplog carWashPerGallonDiscount]]],
@@ -1436,11 +1527,10 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     UITextField *numGallonsTf = tfMaker(@"Num gallons", FPFpLogTagNumGallons);
     components[@(FPFpLogTagNumGallons)] = numGallonsTf;
     [numGallonsTf setKeyboardType:UIKeyboardTypeDecimalPad];
-    UITextField *pricePerGallonTf =
-      tfMaker(@"Price per gallon", FPFpLogTagPricePerGallon);
+    UITextField *pricePerGallonTf = tfMaker(@"Price per gallon", FPFpLogTagPricePerGallon);
     components[@(FPFpLogTagPricePerGallon)] = pricePerGallonTf;
     [pricePerGallonTf setKeyboardType:UIKeyboardTypeDecimalPad];
-    UITextField *octaneTf = tfMaker(@"Octane", FPFpLogTagOctane);
+    UITextField *octaneTf = tfMaker(FPPanelToolkitFplogOctanePlaceholerText, FPFpLogTagOctane);
     if (defaultSelectedVehicle) {
       NSNumber *defaultOctane = [defaultSelectedVehicle defaultOctane];
       if (![PEUtils isNil:defaultOctane]) {
@@ -1449,28 +1539,58 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     }
     [octaneTf setKeyboardType:UIKeyboardTypeNumberPad];
     components[@(FPFpLogTagOctane)] = octaneTf;
+    UIView *dieselPanel = [PEUIUtils panelWithWidthOf:1.0
+                                       relativeToView:parentView
+                                          fixedHeight:pricePerGallonTf.frame.size.height];
+    [dieselPanel setTag:FPFpLogTagDieselPanel];
+    components[@(FPFpLogTagDieselPanel)] = dieselPanel;
+    [dieselPanel setBackgroundColor:[UIColor whiteColor]];
+    UILabel *dieselLabel = [PEUIUtils labelWithKey:@"Diesel?"
+                                              font:[pricePerGallonTf font]
+                                   backgroundColor:[UIColor clearColor]
+                                         textColor:[_uitoolkit colorForTableCellTitles]
+                               verticalTextPadding:3.0];
+    UISwitch *dieselSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+    [dieselSwitch setTag:FPFpLogTagDieselSwitch];
+    components[@(FPFpLogTagDieselSwitch)] = dieselSwitch;
+    [PEUIUtils placeView:dieselLabel
+              inMiddleOf:dieselPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                hpadding:10.0];
+    [PEUIUtils placeView:dieselSwitch
+              inMiddleOf:dieselPanel
+           withAlignment:PEUIHorizontalAlignmentTypeRight
+                hpadding:15.0];
+    [dieselSwitch bk_addEventHandler:^(id sender) {
+      [octaneTf setEnabled:!dieselSwitch.on];
+      if (dieselSwitch.on) {
+        [octaneTf setText:@""];
+        [octaneTf setPlaceholder:FPPanelToolkitFplogOctaneNaPlaceholerText];
+        [octaneTf setBackgroundColor:[UIColor lightGrayColor]];
+      } else {
+        [octaneTf setPlaceholder:FPPanelToolkitFplogOctanePlaceholerText];
+        [octaneTf setBackgroundColor:[UIColor whiteColor]];
+      }
+    } forControlEvents:UIControlEventTouchUpInside];
     UITextField *odometerTf = tfMaker(@"Odometer", FPFplogTagOdometer);
     [odometerTf setKeyboardType:UIKeyboardTypeNumberPad];
     components[@(FPFplogTagOdometer)] = odometerTf;
-    UITextField *carWashPerGallonDiscountTf =
-    tfMaker(@"Car was per-gallon discount", FPFpLogTagCarWashPerGallonDiscount);
+    UITextField *carWashPerGallonDiscountTf = tfMaker(@"Car was per-gallon discount", FPFpLogTagCarWashPerGallonDiscount);
     [carWashPerGallonDiscountTf setKeyboardType:UIKeyboardTypeDecimalPad];
     components[@(FPFpLogTagCarWashPerGallonDiscount)] = carWashPerGallonDiscountTf;
     UISwitch *gotCarWashSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
     [gotCarWashSwitch setTag:FPFpLogTagGotCarWash];
     components[@(FPFpLogTagGotCarWash)] = gotCarWashSwitch;
-    UIView *gotCarWashPanel =
-    [PEUIUtils panelWithWidthOf:1.0
-                 relativeToView:parentView
-                    fixedHeight:numGallonsTf.frame.size.height];
+    UIView *gotCarWashPanel = [PEUIUtils panelWithWidthOf:1.0
+                                           relativeToView:parentView
+                                              fixedHeight:numGallonsTf.frame.size.height];
     [gotCarWashPanel setTag:FPFpLogTagCarWashPanel];
     [gotCarWashPanel setBackgroundColor:[UIColor whiteColor]];
-    UILabel *gotCarWashLbl =
-    [PEUIUtils labelWithKey:@"Got car wash?"
-                       font:[numGallonsTf font]
-            backgroundColor:[UIColor clearColor]
-                  textColor:[_uitoolkit colorForTableCellTitles]
-        verticalTextPadding:3.0]; 
+    UILabel *gotCarWashLbl = [PEUIUtils labelWithKey:@"Got car wash?"
+                                                font:[numGallonsTf font]
+                                     backgroundColor:[UIColor clearColor]
+                                           textColor:[_uitoolkit colorForTableCellTitles]
+                                 verticalTextPadding:3.0];
     [PEUIUtils placeView:gotCarWashLbl
               inMiddleOf:gotCarWashPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -1545,13 +1665,20 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     UITextField *odometerTf = components[@(FPFplogTagOdometer)];
     UITextField *carWashPerGallonDiscountTf = components[@(FPFpLogTagCarWashPerGallonDiscount)];
     UIView *gotCarWashPanel = components[@(FPFpLogTagCarWashPanel)];
+    UIView *dieselPanel = components[@(FPFpLogTagDieselPanel)];
     [PEUIUtils placeView:vehicleFuelStationDateTableView
                  atTopOf:fpLogPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:0.0
                 hpadding:0.0];
-    [PEUIUtils placeView:octaneTf
+    [PEUIUtils placeView:dieselPanel
                    below:vehicleFuelStationDateTableView
+                    onto:fpLogPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:octaneTf
+                   below:dieselPanel
                     onto:fpLogPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
@@ -1612,7 +1739,6 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     };
     binddec(FPFpLogTagNumGallons, @selector(setNumGallons:));
     binddec(FPFpLogTagPricePerGallon, @selector(setGallonPrice:));
-    bindnum(FPFpLogTagOctane, @selector(setOctane:));
     binddec(FPFplogTagOdometer, @selector(setOdometer:));
     binddec(FPFpLogTagCarWashPerGallonDiscount, @selector(setCarWashPerGallonDiscount:));
     UISwitch *gotCarWasSwitch = (UISwitch *)[panel viewWithTag:FPFpLogTagGotCarWash];
@@ -1622,6 +1748,14 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
       (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehicleFuelStationDateTableView dataSource];
     [fpLog setPurchasedAt:[ds pickedLogDate]];
+    
+    UISwitch *dieselSwitch = (UISwitch *)[panel viewWithTag:FPFpLogTagDieselSwitch];
+    [fpLog setIsDiesel:dieselSwitch.on];
+    if (dieselSwitch.on) {
+      [fpLog setOctane:nil];
+    } else {
+      bindnum(FPFpLogTagOctane, @selector(setOctane:));
+    }
   };
 }
 
@@ -1636,7 +1770,6 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       };
       bindtt(FPFpLogTagNumGallons, @selector(numGallons));
       bindtt(FPFpLogTagPricePerGallon, @selector(gallonPrice));
-      bindtt(FPFpLogTagOctane, @selector(octane));
       bindtt(FPFplogTagOdometer, @selector(odometer));
       bindtt(FPFpLogTagCarWashPerGallonDiscount, @selector(carWashPerGallonDiscount));
       UISwitch *gotCarWasSwitch = (UISwitch *)[panel viewWithTag:FPFpLogTagGotCarWash];
@@ -1648,6 +1781,15 @@ To compute your location, you need to enable location services for Gas Jot.  If 
         (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehicleFuelStationDateTableView dataSource];
         [ds setPickedLogDate:[fpLog purchasedAt]];
         [vehicleFuelStationDateTableView reloadData];
+      }
+      UISwitch *dieselSwitch = (UISwitch *)[panel viewWithTag:FPFpLogTagDieselSwitch];
+      [dieselSwitch setOn:[fpLog isDiesel] animated:YES];
+      if ([fpLog isDiesel]) {
+        UITextField *octaneTf = [panel viewWithTag:FPFpLogTagOctane];
+        [octaneTf setText:@""];
+        [octaneTf setPlaceholder:FPPanelToolkitFplogOctaneNaPlaceholerText];
+      } else {
+        bindtt(FPFpLogTagOctane, @selector(octane));
       }
     }
   };
@@ -1663,6 +1805,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     enabDisab(FPFpLogTagVehicleFuelStationAndDate);
     enabDisab(FPFpLogTagNumGallons);
     enabDisab(FPFpLogTagPricePerGallon);
+    enabDisab(FPFpLogTagDieselSwitch);
     enabDisab(FPFpLogTagOctane);
     enabDisab(FPFplogTagOdometer);
     enabDisab(FPFpLogTagCarWashPerGallonDiscount);

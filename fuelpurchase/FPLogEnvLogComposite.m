@@ -31,7 +31,8 @@ carWashPerGallonDiscount:(NSDecimalNumber *)carWashPerGallonDiscount
                                          gallonPrice:gallonPrice
                                           gotCarWash:gotCarWash
                             carWashPerGallonDiscount:carWashPerGallonDiscount
-                                             logDate:logDate];
+                                             logDate:logDate
+                                            isDiesel:NO];
     _preFillupEnvLog = [coordDao environmentLogWithOdometer:odometer
                                              reportedAvgMpg:reportedAvgMpg
                                              reportedAvgMph:reportedAvgMph

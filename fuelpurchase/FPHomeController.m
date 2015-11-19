@@ -39,17 +39,21 @@
 
 NSString * const FPHomeTextIfNilStat = @"---";
 
-NSInteger const FPHomeDaysBetweenFillupsChartTag     = 1;
-NSInteger const FPHomeDaysBetweenFillupsTableDataTag = 2;
+NSInteger const FPHomeDaysBetweenFillupsChartTag      = 1;
+NSInteger const FPHomeDaysBetweenFillupsChartTitleTag = 2;
+NSInteger const FPHomeDaysBetweenFillupsTableDataTag  = 3;
 
-NSInteger const FPHomePriceOfGasChartTag             = 3;
-NSInteger const FPHomePriceOfGasTableDataTag         = 4;
+NSInteger const FPHomePriceOfGasChartTag              = 4;
+NSInteger const FPHomePriceOfGasChartTitleTag         = 5;
+NSInteger const FPHomePriceOfGasTableDataTag          = 6;
 
-NSInteger const FPHomeSpentOnGasChartTag             = 5;
-NSInteger const FPHomeSpentOnGasTableDataTag         = 6;
+NSInteger const FPHomeSpentOnGasChartTag              = 7;
+NSInteger const FPHomeSpentOnGasChartTitleTag         = 8;
+NSInteger const FPHomeSpentOnGasTableDataTag          = 9;
 
-NSInteger const FPHomeGasCostPerMileChartTag         = 7;
-NSInteger const FPHomeGasCostPerMileTableDataTag     = 8;
+NSInteger const FPHomeGasCostPerMileChartTag          = 10;
+NSInteger const FPHomeGasCostPerMileChartTitleTag     = 11;
+NSInteger const FPHomeGasCostPerMileTableDataTag      = 12;
 
 typedef NS_ENUM(NSInteger, FPHomeState) {
   FPHomeStateNoVehicles,
@@ -320,78 +324,81 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
 
 - (void)makeLineChartSectionWithTitle:(NSString *)title
                              chartTag:(NSInteger)chartTag
+                        chartTitleTag:(NSInteger)chartTitleTag
                     addlLabelsViewBlk:(UIView *(^)(void))addlLabelsViewBlk
               moreButtonControllerBlk:(UIViewController *(^)(void))moreButtonControllerBlk
                             resultBlk:(void(^)(NSArray *))resultBlk {
-      UIView *panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:self.view];
-      [panel setBackgroundColor:[UIColor whiteColor]];
-      UILabel *chartHeader = [PEUIUtils labelWithKey:title
-                                                font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                     backgroundColor:[UIColor clearColor]
-                                           textColor:[UIColor darkGrayColor]
-                                 verticalTextPadding:3.0];
-      JBLineChartView *chart = [self makeLineChartWithTag:chartTag];
-      UIButton *moreBtn = [PEUIUtils buttonWithKey:@"more"
-                                              font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                   backgroundColor:[UIColor grayColor]
-                                         textColor:[UIColor whiteColor]
-                      disabledStateBackgroundColor:nil
-                            disabledStateTextColor:nil
-                                   verticalPadding:10.0
-                                 horizontalPadding:55.0
-                                      cornerRadius:3.0
-                                            target:nil
-                                            action:nil];
-      [PEUIUtils addDisclosureIndicatorToButton:moreBtn];
-      [moreBtn bk_addEventHandler:^(id sender) {
-        [[self navigationController] pushViewController:moreButtonControllerBlk()
-                                               animated:YES];
-      } forControlEvents:UIControlEventTouchUpInside];
-      [PEUIUtils placeView:chartHeader
-                   atTopOf:panel
-             withAlignment:PEUIHorizontalAlignmentTypeCenter
-                  vpadding:3.0
-                  hpadding:0.0];
-      [PEUIUtils placeView:chart
-                     below:chartHeader
-                      onto:panel
-             withAlignment:PEUIHorizontalAlignmentTypeCenter
-   alignmentRelativeToView:self.view
-                  vpadding:4.0
-                  hpadding:0.0];
-      UIView *addlLabelsView = nil;
-      if (addlLabelsViewBlk) {
-        addlLabelsView = addlLabelsViewBlk();
-        [PEUIUtils placeView:addlLabelsView
-                       below:chart
-                        onto:panel
-               withAlignment:PEUIHorizontalAlignmentTypeLeft
-     alignmentRelativeToView:panel
-                    vpadding:0.0
-                    hpadding:5.0];
-      }
-      [PEUIUtils placeView:moreBtn
-                     below:chart
-                      onto:panel
-             withAlignment:PEUIHorizontalAlignmentTypeRight
-   alignmentRelativeToView:chart
-                  vpadding:5.0
-                  hpadding:5.0];
-      CGFloat moreBtnHeight = moreBtn.frame.size.height;
-      CGFloat addlLabelsPanelHeight = 0.0;
-      if (addlLabelsView != nil) {
-        addlLabelsPanelHeight = addlLabelsView.frame.size.height;
-      }
-      CGFloat addlHeight = moreBtnHeight > addlLabelsPanelHeight ? (moreBtnHeight + 3.0) : addlLabelsPanelHeight;
-      [PEUIUtils setFrameHeight:(chartHeader.frame.size.height +
-                                 3.0 +
-                                 chart.frame.size.height +
-                                 0.0 +
-                                 addlHeight +
-                                 5.0 +
-                                 7.5)
-                         ofView:panel];
-      resultBlk(@[panel, chart]);
+  UIView *panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:self.view];
+  [panel setBackgroundColor:[UIColor whiteColor]];
+  UILabel *chartHeader = [PEUIUtils labelWithKey:title
+                                            font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                 backgroundColor:[UIColor clearColor]
+                                       textColor:[UIColor darkGrayColor]
+                             verticalTextPadding:3.0];
+  [chartHeader setTextAlignment:NSTextAlignmentCenter];
+  [chartHeader setTag:chartTitleTag];
+  JBLineChartView *chart = [self makeLineChartWithTag:chartTag];
+  UIButton *moreBtn = [PEUIUtils buttonWithKey:@"more"
+                                          font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                               backgroundColor:[UIColor grayColor]
+                                     textColor:[UIColor whiteColor]
+                  disabledStateBackgroundColor:nil
+                        disabledStateTextColor:nil
+                               verticalPadding:10.0
+                             horizontalPadding:55.0
+                                  cornerRadius:3.0
+                                        target:nil
+                                        action:nil];
+  [PEUIUtils addDisclosureIndicatorToButton:moreBtn];
+  [moreBtn bk_addEventHandler:^(id sender) {
+    [[self navigationController] pushViewController:moreButtonControllerBlk()
+                                           animated:YES];
+  } forControlEvents:UIControlEventTouchUpInside];
+  [PEUIUtils placeView:chartHeader
+               atTopOf:panel
+         withAlignment:PEUIHorizontalAlignmentTypeCenter
+              vpadding:3.0
+              hpadding:0.0];
+  [PEUIUtils placeView:chart
+                 below:chartHeader
+                  onto:panel
+         withAlignment:PEUIHorizontalAlignmentTypeCenter
+alignmentRelativeToView:self.view
+              vpadding:4.0
+              hpadding:0.0];
+  UIView *addlLabelsView = nil;
+  if (addlLabelsViewBlk) {
+    addlLabelsView = addlLabelsViewBlk();
+    [PEUIUtils placeView:addlLabelsView
+                   below:chart
+                    onto:panel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+ alignmentRelativeToView:panel
+                vpadding:0.0
+                hpadding:5.0];
+  }
+  [PEUIUtils placeView:moreBtn
+                 below:chart
+                  onto:panel
+         withAlignment:PEUIHorizontalAlignmentTypeRight
+alignmentRelativeToView:chart
+              vpadding:5.0
+              hpadding:5.0];
+  CGFloat moreBtnHeight = moreBtn.frame.size.height;
+  CGFloat addlLabelsPanelHeight = 0.0;
+  if (addlLabelsView != nil) {
+    addlLabelsPanelHeight = addlLabelsView.frame.size.height;
+  }
+  CGFloat addlHeight = moreBtnHeight > addlLabelsPanelHeight ? (moreBtnHeight + 3.0) : addlLabelsPanelHeight;
+  [PEUIUtils setFrameHeight:(chartHeader.frame.size.height +
+                             3.0 +
+                             chart.frame.size.height +
+                             0.0 +
+                             addlHeight +
+                             5.0 +
+                             7.5)
+                     ofView:panel];
+  resultBlk(@[panel, chart]);
 }
 
 - (UIView *)makeDataTableWithRows:(NSArray *)rows
@@ -476,6 +483,11 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
   return nil;
 }
 
+- (FPFuelPurchaseLog *)lastFplogOfLastVehicleInCtxGasLog {
+  FPVehicle *vehicle = [_coordDao vehicleForMostRecentFuelPurchaseLogForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()];
+  return [_coordDao.localDao lastGasLogForVehicle:vehicle error:[FPUtils localFetchErrorHandlerMaker]()];
+}
+
 - (NSString *)formattedValueForValue:(id)value formatter:(NSString *(^)(id))formatter {
   if (![PEUtils isNil:value]) {
     return formatter(value);
@@ -503,6 +515,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
 }
 
 - (void)refreshChart:(JBLineChartView *)chart
+          chartTitle:(NSString *)chartTitle
              dataset:(NSMutableArray *)dataset
           datasetBlk:(NSArray *(^)(void))datasetBlk {
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
@@ -525,9 +538,25 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
         footerView.rightLabel.text = [_dateFormatter stringFromDate:dp[0]];
         footerView.rightLabel.textColor = [UIColor fpAppBlue];
       }
+      if (chartTitle) {
+        UILabel *chartHeader = [self.view viewWithTag:FPHomePriceOfGasChartTitleTag];
+        [PEUIUtils setTextAndResize:chartTitle forLabel:chartHeader];
+      }
       [chart reloadData];
     });
   });
+}
+
+- (NSString *)avgPriceChartTitleForFplog:(FPFuelPurchaseLog *)fplog {
+  NSString *chartTitle;
+  if (![PEUtils isNil:fplog.octane]) {
+    chartTitle = [NSString stringWithFormat:@"AVG PRICE OF %@ OCTANE\n(all gas stations, all time)", fplog.octane];
+  } else if (fplog.isDiesel) {
+    chartTitle = @"AVG PRICE OF DIESEL\n(all gas stations, all time)";
+  } else {
+    chartTitle = @"AVG PRICE\n(all gas stations, all time)";
+  }
+  return chartTitle;
 }
 
 - (UIScrollView *)makeScrollView {
@@ -547,8 +576,9 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
   __block UIView *gasCostPerMilePanel;
   __block UIView *spentOnGasPanel;
   NSArray *dummyVals = @[[NSNull null], [NSNull null], [NSNull null], [NSNull null], [NSNull null]];
-  [self makeLineChartSectionWithTitle:@"AVG DAYS BETWEEN FILL-UPS\n        (all vehicles, all time)"
+  [self makeLineChartSectionWithTitle:@"AVG DAYS BETWEEN FILL-UPS\n(all vehicles, all time)"
                              chartTag:FPHomeDaysBetweenFillupsChartTag
+                        chartTitleTag:FPHomeDaysBetweenFillupsChartTitleTag
                     addlLabelsViewBlk:^{ return [self makeDaysBetweenFillupsDataTableWithValues:dummyVals];}
               moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newAvgDaysBetweenFillupsStatsScreenMaker](_user);}
                             resultBlk:^(NSArray *section) {
@@ -557,18 +587,33 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
                               totalHeightOfViews += allStatsBtn.frame.size.height + 4.0 +
                               daysBetweenFillupPanel.frame.size.height + 10.0;
                             }];
-  NSNumber *octane = [self octaneOfLastVehicleInCtxGasLog];
-  [self makeLineChartSectionWithTitle:[NSString stringWithFormat:@"AVG PRICE OF %@ OCTANE\n  (all gas stations, all time)", octane]
+  //NSNumber *octane = [self octaneOfLastVehicleInCtxGasLog];
+  FPFuelPurchaseLog *fplog = [self lastFplogOfLastVehicleInCtxGasLog];
+  UIViewController *(^moreBtnCtrlBlk)(void);
+  NSString *chartTitle = [self avgPriceChartTitleForFplog:fplog];
+  if (![PEUtils isNil:fplog.octane]) {
+    //chartTitle = [NSString stringWithFormat:@"AVG PRICE OF %@ OCTANE\n  (all gas stations, all time)", fplog.octane];
+    moreBtnCtrlBlk = ^UIViewController *{ return [_screenToolkit newAvgPricePerGallonStatsScreenMakerWithOctane:fplog.octane](_user);};
+  } else if (fplog.isDiesel) {
+    //chartTitle = @"AVG PRICE OF DIESEL\n  (all gas stations, all time)";
+    moreBtnCtrlBlk = ^UIViewController *{ return [_screenToolkit newAvgPricePerDieselGallonStatsScreenMaker](_user);};
+  } else {
+    //chartTitle = @"AVG PRICE\n  (all gas stations, all time)";
+    moreBtnCtrlBlk = ^UIViewController *{ return [_screenToolkit newAvgPricePerGallonStatsScreenMaker](_user);};
+  }
+  [self makeLineChartSectionWithTitle:chartTitle
                              chartTag:FPHomePriceOfGasChartTag
+                        chartTitleTag:FPHomePriceOfGasChartTitleTag
                     addlLabelsViewBlk:^UIView *(void) { return [self makePricePerGallonDataTableWithValues:dummyVals];}
-              moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newAvgPricePerGallonStatsScreenMakerWithOctane:[self octaneOfLastVehicleInCtxGasLog]](_user);}
+              moreButtonControllerBlk:moreBtnCtrlBlk
                             resultBlk:^(NSArray *section) {
                               pricePerGallonPanel = section[0];
                               _priceOfGasChart = section[1];
                               totalHeightOfViews += pricePerGallonPanel.frame.size.height + 10.0;
                             }];
-  [self makeLineChartSectionWithTitle:@"AVG GAS COST PER MILE\n    (all vehicles, all time)"
+  [self makeLineChartSectionWithTitle:@"AVG GAS COST PER MILE\n(all vehicles, all time)"
                              chartTag:FPHomeGasCostPerMileChartTag
+                        chartTitleTag:FPHomeGasCostPerMileChartTitleTag
                     addlLabelsViewBlk:^UIView *(void) { return [self makeAvgGasCostPerMileDataTableWithValues:dummyVals];}
               moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newAvgGasCostPerMileStatsScreenMaker](_user); }
                             resultBlk:^(NSArray *section) {
@@ -576,8 +621,9 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
                               _gasCostPerMileChart = section[1];
                               totalHeightOfViews += gasCostPerMilePanel.frame.size.height + 10.0;
                             }];
-  [self makeLineChartSectionWithTitle:@"MONTHLY SPEND ON GAS\n     (all vehicles, all time)"
+  [self makeLineChartSectionWithTitle:@"MONTHLY SPEND\n(all vehicles, all time)"
                              chartTag:FPHomeSpentOnGasChartTag
+                        chartTitleTag:FPHomeSpentOnGasChartTitleTag
                     addlLabelsViewBlk:^UIView *(void) { return [self makeSpentOnGasDataTableWithValues:dummyVals];}
               moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newSpentOnGasStatsScreenMaker](_user); }
                             resultBlk:^(NSArray *section) {
@@ -800,25 +846,51 @@ alignmentRelativeToView:self.view
               viewMakerBlk:^(NSArray *values) { return [self makeDaysBetweenFillupsDataTableWithValues:values]; }];
   
   [self refreshChart:_daysBetweenFillupsChart
+          chartTitle:nil
              dataset:_daysBetweenFillupsDataSet
           datasetBlk:^NSArray *{
             return [_stats overallAvgDaysBetweenFillupsDataSetForUser:_user];
           }];
   
   //refresh the 'price per gallon' views
-  NSNumber *octane = [self octaneOfLastVehicleInCtxGasLog];
+  FPFuelPurchaseLog *fplog = [self lastFplogOfLastVehicleInCtxGasLog];
+  NSArray *(^valuesMakerBlk)(void);
+  NSArray *(^datasetBlk)(void);
+  if (![PEUtils isNil:fplog.octane]) {
+    valuesMakerBlk = ^ NSArray * {
+      return @[orNil([_stats overallAvgPricePerGallonForUser:_user octane:fplog.octane]),
+               orNil([_stats overallMinPricePerGallonForUser:_user octane:fplog.octane]),
+               orNil([_stats overallMaxPricePerGallonForUser:_user octane:fplog.octane])];
+    };
+    datasetBlk = ^NSArray *{
+      return [_stats overallAvgPricePerGallonDataSetForUser:_user octane:fplog.octane];
+    };
+  } else if (fplog.isDiesel) {
+    valuesMakerBlk = ^ NSArray * {
+      return @[orNil([_stats overallAvgPricePerDieselGallonForUser:_user]),
+               orNil([_stats overallMinPricePerDieselGallonForUser:_user]),
+               orNil([_stats overallMaxPricePerDieselGallonForUser:_user])];
+    };
+    datasetBlk = ^NSArray *{
+      return [_stats overallAvgPricePerDieselGallonDataSetForUser:_user];
+    };
+  } else {
+    valuesMakerBlk = ^ NSArray * {
+      return @[orNil([_stats overallAvgPricePerGallonForUser:_user]),
+               orNil([_stats overallMinPricePerGallonForUser:_user]),
+               orNil([_stats overallMaxPricePerGallonForUser:_user])];
+    };
+    datasetBlk = ^NSArray *{
+      return [_stats overallAvgPricePerGallonDataSetForUser:_user];
+    };
+  }
   [self refreshViewWithTag:FPHomePriceOfGasTableDataTag
-            valuesMakerBlk:^{
-              return @[orNil([_stats overallAvgPricePerGallonForUser:_user octane:octane]),
-                       orNil([_stats overallMinPricePerGallonForUser:_user octane:octane]),
-                       orNil([_stats overallMaxPricePerGallonForUser:_user octane:octane])];
-            }
+            valuesMakerBlk:valuesMakerBlk
               viewMakerBlk:^(NSArray *values) { return [self makePricePerGallonDataTableWithValues:values]; }];
   [self refreshChart:_priceOfGasChart
+          chartTitle:[self avgPriceChartTitleForFplog:fplog]
              dataset:_priceOfGasDataSet
-          datasetBlk:^NSArray *{
-            return [_stats overallAvgPricePerGallonDataSetForUser:_user octane:octane];;
-          }];
+          datasetBlk:datasetBlk];
   
   //refresh the 'spent on gas' views
   [self refreshViewWithTag:FPHomeSpentOnGasTableDataTag
@@ -831,6 +903,7 @@ alignmentRelativeToView:self.view
             }
               viewMakerBlk:^(NSArray *values){ return [self makeSpentOnGasDataTableWithValues:values]; }];
   [self refreshChart:_spentOnGasChart
+          chartTitle:nil
              dataset:_spentOnGasDataSet
           datasetBlk:^NSArray *{
             return [_stats overallSpentOnGasDataSetForUser:_user];
@@ -843,6 +916,7 @@ alignmentRelativeToView:self.view
             }
               viewMakerBlk:^(NSArray *values){ return [self makeAvgGasCostPerMileDataTableWithValues:values]; }];
   [self refreshChart:_gasCostPerMileChart
+          chartTitle:nil
              dataset:_gasCostPerMileDataSet
           datasetBlk:^NSArray *{
             return [_stats overallAvgGasCostPerMileDataSetForUser:_user];

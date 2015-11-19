@@ -13,7 +13,7 @@
 #import "FPScreenToolkit.h"
 
 typedef NS_ENUM (NSInteger, FPUserTag) {
-  FPUserTagName = 1,
+  FPUserTagName,
   FPUserTagEmail,
   FPUserTagPassword,
   FPUserTagConfirmPassword
@@ -21,6 +21,8 @@ typedef NS_ENUM (NSInteger, FPUserTag) {
 
 typedef NS_ENUM (NSInteger, FPVehicleTag) {
   FPVehicleTagName = 1,
+  FPVehicleTagTakesDieselSwitch,
+  FPVehicleTagTakesDieselPanel,
   FPVehicleTagDefaultOctane,
   FPVehicleTagFuelCapacity,
   FPVehicleTagViewFplogsBtn,
@@ -30,7 +32,7 @@ typedef NS_ENUM (NSInteger, FPVehicleTag) {
 };
 
 typedef NS_ENUM (NSInteger, FPFuelStationTag) {
-  FPFuelStationTagName = 6,
+  FPFuelStationTagName = 10,
   FPFuelStationTagStreet,
   FPFuelStationTagCity,
   FPFuelStationTagState,
@@ -43,14 +45,16 @@ typedef NS_ENUM (NSInteger, FPFuelStationTag) {
 };
 
 typedef NS_ENUM (NSInteger, FPFpEnvLogCompositeTag) {
-  FPFpEnvLogCompositeTagPreFillupReportedDte = 15,
+  FPFpEnvLogCompositeTagPreFillupReportedDte = 20,
   FPFpEnvLogCompositeTagPostFillupReportedDte
 };
 
 typedef NS_ENUM (NSInteger, FPFpLogTag) {
-  FPFpLogTagVehicleFuelStationAndDate = 17,
+  FPFpLogTagVehicleFuelStationAndDate = 22,
   FPFpLogTagNumGallons,
   FPFpLogTagPricePerGallon,
+  FPFpLogTagDieselSwitch,
+  FPFpLogTagDieselPanel,
   FPFpLogTagOctane,
   FPFplogTagOdometer,
   FPFpLogTagCarWashPanel,
@@ -62,7 +66,7 @@ typedef NS_ENUM (NSInteger, FPFpLogTag) {
 };
 
 typedef NS_ENUM (NSInteger, FPEnvLogTag) {
-  FPEnvLogTagVehicleAndDate = 30,
+  FPEnvLogTagVehicleAndDate = 35,
   FPEnvLogTagOdometer,
   FPEnvLogTagReportedAvgMpg,
   FPEnvLogTagReportedAvgMph,

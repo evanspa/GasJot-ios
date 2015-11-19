@@ -51,9 +51,13 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
 
 - (FPAuthScreenMaker)newUserStatsLaunchScreenMakerWithParentController:(UIViewController *)parentController;
 
+- (FPAuthScreenMaker)newAvgPricePerDieselGallonStatsScreenMaker;
+
 - (FPAuthScreenMaker)newAvgDaysBetweenFillupsStatsScreenMaker;
 
 - (FPAuthScreenMaker)newAvgPricePerGallonStatsScreenMakerWithOctane:(NSNumber *)octane;
+
+- (FPAuthScreenMaker)newAvgPricePerGallonStatsScreenMaker;
 
 - (FPAuthScreenMaker)newSpentOnGasStatsScreenMaker;
 
