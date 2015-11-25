@@ -49,7 +49,7 @@ PODS:
     - FMDB/common
   - HMSegmentedControl (1.5.2)
   - IQKeyboardManager (3.2.1.2)
-  - JBChartView (2.8.16)
+  - JBChartView (2.8.19)
   - KissXML (5.0)
   - MBProgressHUD (0.9.1)
   - OHHTTPStubs (3.1.12):
@@ -59,31 +59,31 @@ PODS:
     - PEObjc-Commons (~> 1.0.20)
     - PESimu-Select (~> 1.0.3)
   - PEFuelPurchase-Common (1.0.12)
-  - PEFuelPurchase-Model (1.0.179):
+  - PEFuelPurchase-Model (1.0.181):
     - CHCSVParser (~> 2.1.0)
     - CocoaLumberjack (~> 1.9)
     - FMDB (~> 2.5)
     - PEFuelPurchase-Common (~> 1.0.12)
     - PEHateoas-Client (~> 1.0.8)
-    - PEObjc-Commons (~> 1.0.85)
+    - PEObjc-Commons (~> 1.0.86)
     - UICKeyChainStore (~> 2.0.4)
   - PEHateoas-Client (1.0.8):
     - AFNetworking (~> 2.5.4)
     - CocoaLumberjack (~> 1.9)
     - PEObjc-Commons (~> 1.0.73)
-  - PEObjc-Commons (1.0.85):
+  - PEObjc-Commons (1.0.86):
     - BlocksKit (~> 2.2.5)
-  - PESimu-Select (1.0.3):
-    - PEObjc-Commons (~> 1.0.20)
-    - PEWire-Control (~> 1.0.2)
-  - PEWire-Control (1.0.4):
+  - PESimu-Select (1.0.4):
+    - PEObjc-Commons (~> 1.0.86)
+    - PEWire-Control (~> 1.0.5)
+  - PEWire-Control (1.0.5):
     - KissXML (~> 5.0)
     - OHHTTPStubs (~> 3.1.10)
-    - PEObjc-Commons (~> 1.0.73)
-    - PEXML-Utils (~> 1.0.3)
-  - PEXML-Utils (1.0.3):
+    - PEObjc-Commons (~> 1.0.86)
+    - PEXML-Utils (~> 1.0.4)
+  - PEXML-Utils (1.0.4):
     - KissXML (~> 5.0)
-    - PEObjc-Commons (~> 1.0.73)
+    - PEObjc-Commons (~> 1.0.86)
   - ReactiveCocoa (2.4.7):
     - ReactiveCocoa/UI (= 2.4.7)
   - ReactiveCocoa/Core (2.4.7):
@@ -107,8 +107,8 @@ DEPENDENCIES:
   - OHHTTPStubs (~> 3.1.12)
   - PEDev-Console (~> 1.0.4)
   - PEFuelPurchase-Common (~> 1.0.12)
-  - PEFuelPurchase-Model (~> 1.0.179)
-  - PEObjc-Commons (~> 1.0.85)
+  - PEFuelPurchase-Model (~> 1.0.181)
+  - PEObjc-Commons (~> 1.0.86)
   - ReactiveCocoa (~> 2.4.7)
   - UICKeyChainStore (~> 2.0.5)
 
@@ -121,18 +121,18 @@ SPEC CHECKSUMS:
   FMDB: 96e8f1bcc1329e269330f99770ad4285d9003e52
   HMSegmentedControl: 83b9686022d2176fb6457d2bdb61e5d6393fed7d
   IQKeyboardManager: 4adcd7cc9c17440a7cb74755f6f6c8389919c6bf
-  JBChartView: 8e65b7fbb4e7f1f2c0197575734fce4af1c19e17
+  JBChartView: 196146fea321396bafc4b2116fd03acd7d725a64
   KissXML: ce643413d618ad69886d0d43c3792b7dedfe476e
   MBProgressHUD: c47f2c166c126cf2ce36498d80f33e754d4e93ad
   OHHTTPStubs: 8cf0cfe6f34f13fc88fdf5b2a1b2c2536e8c0261
   PEDev-Console: e950c909066280c4cd17e717c30f2977eb3a0ebe
   PEFuelPurchase-Common: 8b4ed986a89d064914a44d8a922078c9d622f445
-  PEFuelPurchase-Model: e2433f03179fc48ed55339c04ead8370ec237362
+  PEFuelPurchase-Model: 33dff52b7c83c852d594ad081bad47be002330a0
   PEHateoas-Client: 4eb23cd4a1c106ecab147abd87cd3cacac93d52f
-  PEObjc-Commons: 1d3fae42b762c64ee9125aaeeffd8911a578ac66
-  PESimu-Select: 9ad38adb78e42e79c9f9365f71c9b05215b6ac10
-  PEWire-Control: 68a8b1a8ea4b167c2dfc2299b9183bf38600c034
-  PEXML-Utils: 47a95ccdbf02bc2a1d69b6d8e99017df9da49f88
+  PEObjc-Commons: 590bf3988d90666d307a618384ebc72181dc3bb2
+  PESimu-Select: 88e3ab14e1b9e0f75e9b626103581bd488128674
+  PEWire-Control: c2d18d4261d025182513466da9c6ed80e596f526
+  PEXML-Utils: d36d0ab7337b92c120ec49b84f99e7b923bf8a24
   ReactiveCocoa: eb38dee0a0e698f73a9b25e5c1faea2bb4c79240
   UICKeyChainStore: 696cd35083f7c8fb5e201d909b7e6aea6b478575
 

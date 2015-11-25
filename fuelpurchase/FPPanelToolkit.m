@@ -612,7 +612,9 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     UIView *vehicleDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Vehicle name", [PEUtils emptyIfNil:[vehicle name]]],
                                                                   @[@"Takes diesel?", [PEUtils yesNoFromBool:[vehicle isDiesel]]],
                                                                   @[@"Default octane", defaultOctaneText],
-                                                                  @[@"Fuel capacity", [PEUtils descriptionOrEmptyIfNil:[vehicle fuelCapacity]]]]
+                                                                  @[@"Fuel capacity", [PEUtils descriptionOrEmptyIfNil:[vehicle fuelCapacity]]],
+                                                                  @[@"VIN", [PEUtils emptyIfNil:[vehicle vin]]],
+                                                                  @[@"Plate #", [PEUtils emptyIfNil:[vehicle plate]]]]
                                                       uitoolkit:_uitoolkit
                                                      parentView:parentView];
     [PEUIUtils placeView:vehicleDataPanel
@@ -652,7 +654,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                      belowView:statsMsgPanel
                           parentViewController:parentViewController];
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[vehiclePanel frame]];
-    [scrollView setContentSize:CGSizeMake(vehiclePanel.frame.size.width, 1.4 * vehiclePanel.frame.size.height)];
+    [scrollView setContentSize:CGSizeMake(vehiclePanel.frame.size.width, 1.45 * vehiclePanel.frame.size.height)];
     [scrollView addSubview:vehiclePanel];
     [scrollView setBounces:YES];
     return scrollView;
@@ -700,6 +702,8 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
         [vehicleDefaultOctaneTf setBackgroundColor:[UIColor whiteColor]];
       }
     } forControlEvents:UIControlEventTouchUpInside];
+    UITextField *vinTf = tfMaker(@"VIN", FPVehicleTagVin);
+    UITextField *plateTf = tfMaker(@"Plate #", FPVehicleTagPlate);
     [PEUIUtils placeView:vehicleNameTf
                  atTopOf:vehiclePanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -719,6 +723,18 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                 hpadding:0.0];
     [PEUIUtils placeView:vehicleFuelCapacityTf
                    below:vehicleDefaultOctaneTf
+                    onto:vehiclePanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:vinTf
+                   below:vehicleFuelCapacityTf
+                    onto:vehiclePanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:plateTf
+                   below:vinTf
                     onto:vehiclePanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
@@ -754,6 +770,14 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
           withDecimalSetter:@selector(setFuelCapacity:)
        fromTextfieldWithTag:FPVehicleTagFuelCapacity
                    fromView:panel];
+    [PEUIUtils bindToEntity:vehicle
+           withStringSetter:@selector(setVin:)
+       fromTextfieldWithTag:FPVehicleTagVin
+                   fromView:panel];
+    [PEUIUtils bindToEntity:vehicle
+           withStringSetter:@selector(setPlate:)
+       fromTextfieldWithTag:FPVehicleTagPlate
+                   fromView:panel];
   };
 }
 
@@ -781,6 +805,14 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                fromView:panel
                              fromEntity:vehicle
                              withGetter:@selector(fuelCapacity)];
+    [PEUIUtils bindToTextControlWithTag:FPVehicleTagVin
+                               fromView:panel
+                             fromEntity:vehicle
+                             withGetter:@selector(vin)];
+    [PEUIUtils bindToTextControlWithTag:FPVehicleTagPlate
+                               fromView:panel
+                             fromEntity:vehicle
+                             withGetter:@selector(plate)];
   };
 }
 
@@ -798,6 +830,12 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     [PEUIUtils enableControlWithTag:FPVehicleTagFuelCapacity
                            fromView:panel
                              enable:enable];
+    [PEUIUtils enableControlWithTag:FPVehicleTagVin
+                           fromView:panel
+                             enable:enable];
+    [PEUIUtils enableControlWithTag:FPVehicleTagPlate
+                           fromView:panel
+                             enable:enable];
   };
 }
 
@@ -807,7 +845,10 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
       [_coordDao vehicleWithName:[PEUIUtils stringFromTextFieldWithTag:FPVehicleTagName fromView:panel]
                    defaultOctane:[PEUIUtils numberFromTextFieldWithTag:FPVehicleTagDefaultOctane fromView:panel]
                     fuelCapacity:[PEUIUtils decimalNumberFromTextFieldWithTag:FPVehicleTagFuelCapacity fromView:panel]
-                        isDiesel:((UISwitch *)[panel viewWithTag:FPVehicleTagTakesDieselSwitch]).on];
+                        isDiesel:((UISwitch *)[panel viewWithTag:FPVehicleTagTakesDieselSwitch]).on
+                    fieldsetMask:nil
+                             vin:[PEUIUtils stringFromTextFieldWithTag:FPVehicleTagVin fromView:panel]
+                           plate:[PEUIUtils stringFromTextFieldWithTag:FPVehicleTagPlate fromView:panel]];
     return newVehicle;
   };
 }

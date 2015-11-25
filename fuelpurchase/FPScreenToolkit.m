@@ -2968,6 +2968,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     NSMutableArray *errMsgs = [NSMutableArray array];
     PEEntityValidatorBlk fpLogValidator = [self newFuelPurchaseLogValidator];
     [errMsgs addObjectsFromArray:fpLogValidator(fpEnvLogCompositePanel)];
+    PEMessageCollector cannotBeBlankCollector = [PEUIUtils newTfCannotBeEmptyBlkForMsgs:errMsgs
+                                                                            entityPanel:fpEnvLogCompositePanel];
+    cannotBeBlankCollector(FPEnvLogTagOdometer, @"Odometer cannot be empty.");
     return errMsgs;
   };
 }
@@ -2986,6 +2989,11 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     if (!selectedFuelStation) {
       [errMsgs addObject:@"Must select a gas station."];
     }
+    PEMessageCollector cannotBeBlankCollector = [PEUIUtils newTfCannotBeEmptyBlkForMsgs:errMsgs
+                                                                            entityPanel:fpLogPanel];
+    cannotBeBlankCollector(FPFpLogTagPricePerGallon, @"Gallon price cannot be empty.");
+    cannotBeBlankCollector(FPFpLogTagNumGallons, @"Num gallons cannot be empty.");
+    cannotBeBlankCollector(FPFplogTagOdometer, @"Odometer cannot be empty.");
     return errMsgs;
   };
 }
@@ -3969,8 +3977,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     if (!selectedVehicle) {
       [errMsgs addObject:@"Must select a vehicle."];
     }
-    PEMessageCollector cannotBeBlankCollector =
-      [PEUIUtils newTfCannotBeEmptyBlkForMsgs:errMsgs entityPanel:envLogPanel];
+    PEMessageCollector cannotBeBlankCollector = [PEUIUtils newTfCannotBeEmptyBlkForMsgs:errMsgs entityPanel:envLogPanel];
     cannotBeBlankCollector(FPEnvLogTagOdometer, @"Odometer cannot be empty.");
     return errMsgs;
   };

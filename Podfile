@@ -2,9 +2,9 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 platform :ios, '8.4'
 
-pod 'PEFuelPurchase-Model', '~> 1.0.179'
+pod 'PEFuelPurchase-Model', '~> 1.0.181'
 pod 'PEFuelPurchase-Common', '~> 1.0.12'
-pod 'PEObjc-Commons', '~> 1.0.85'
+pod 'PEObjc-Commons', '~> 1.0.86'
 pod 'ReactiveCocoa', '~> 2.4.7', :inhibit_warnings => true
 pod 'AFNetworking', '~> 2.5.4', :inhibit_warnings => true
 pod 'CocoaLumberjack', '~> 1.9'

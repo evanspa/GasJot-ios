@@ -28,11 +28,13 @@ typedef NS_ENUM (NSInteger, FPVehicleTag) {
   FPVehicleTagViewFplogsBtn,
   FPVehicleTagViewFplogsBtnRecordCount,
   FPVehicleTagViewEnvlogsBtn,
-  FPVehicleTagViewEnvlogsBtnRecordCount
+  FPVehicleTagViewEnvlogsBtnRecordCount,
+  FPVehicleTagVin,
+  FPVehicleTagPlate
 };
 
 typedef NS_ENUM (NSInteger, FPFuelStationTag) {
-  FPFuelStationTagName = 10,
+  FPFuelStationTagName = 12,
   FPFuelStationTagStreet,
   FPFuelStationTagCity,
   FPFuelStationTagState,
@@ -45,12 +47,12 @@ typedef NS_ENUM (NSInteger, FPFuelStationTag) {
 };
 
 typedef NS_ENUM (NSInteger, FPFpEnvLogCompositeTag) {
-  FPFpEnvLogCompositeTagPreFillupReportedDte = 20,
+  FPFpEnvLogCompositeTagPreFillupReportedDte = 22,
   FPFpEnvLogCompositeTagPostFillupReportedDte
 };
 
 typedef NS_ENUM (NSInteger, FPFpLogTag) {
-  FPFpLogTagVehicleFuelStationAndDate = 22,
+  FPFpLogTagVehicleFuelStationAndDate = 24,
   FPFpLogTagNumGallons,
   FPFpLogTagPricePerGallon,
   FPFpLogTagDieselSwitch,
@@ -66,7 +68,7 @@ typedef NS_ENUM (NSInteger, FPFpLogTag) {
 };
 
 typedef NS_ENUM (NSInteger, FPEnvLogTag) {
-  FPEnvLogTagVehicleAndDate = 35,
+  FPEnvLogTagVehicleAndDate = 37,
   FPEnvLogTagOdometer,
   FPEnvLogTagReportedAvgMpg,
   FPEnvLogTagReportedAvgMph,
