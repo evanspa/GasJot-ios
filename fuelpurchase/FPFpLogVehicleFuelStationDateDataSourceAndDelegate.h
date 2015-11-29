@@ -16,9 +16,9 @@
 #pragma mark - Initializers
 
 - (id)initWithControllerCtx:(UIViewController *)controllerCtx
-     defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
- defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
-             defaultLogDate:(NSDate *)defaultLogDate
+                    vehicle:(FPVehicle *)vehicle
+                fuelstation:(FPFuelStation *)fuelstation
+                    logDate:(NSDate *)logDate
       vehicleSelectedAction:(PEItemSelectedAction)vehicleSelectedAction
   fuelStationSelectedAction:(PEItemSelectedAction)fuelStationSelectedAction
         logDatePickedAction:(void(^)(NSDate *))logDatePickedAction

@@ -967,8 +967,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                 completion:nil];
     };
     PEPageLoaderBlk pageLoader = ^ NSArray * (FPVehicle *lastVehicle) {
-      return [_coordDao vehiclesForUser:user
-                                  error:[FPUtils localFetchErrorHandlerMaker]()];
+      return [_coordDao vehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPVehicle *v1, FPVehicle *v2){return [v1 isEqualToVehicle:v2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
@@ -1187,6 +1186,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
           [fields addObject:@[@"Default octane:", @(FPVehicleTagDefaultOctane), [PEUtils descriptionOrEmptyIfNil:[localVehicle defaultOctane]], [PEUtils descriptionOrEmptyIfNil:[remoteVehicle defaultOctane]]]];
         } else if ([fieldName isEqualToString:FPVehicleFuelCapacityField]) {
           [fields addObject:@[@"Fuel capacity:", @(FPVehicleTagFuelCapacity), [PEUtils descriptionOrEmptyIfNil:[localVehicle fuelCapacity]], [PEUtils descriptionOrEmptyIfNil:[remoteVehicle fuelCapacity]]]];
+        } else if ([fieldName isEqualToString:FPVehicleIsDieselField]) {
+          [fields addObject:@[@"Takes diesel?:", @(FPVehicleTagTakesDieselSwitch), [PEUtils yesNoFromBool:[localVehicle isDiesel]], [PEUtils yesNoFromBool:[remoteVehicle isDiesel]]]];
+        } else if ([fieldName isEqualToString:FPVehicleVinField]) {
+          [fields addObject:@[@"VIN:", @(FPVehicleTagVin), [PEUtils descriptionOrEmptyIfNil:[localVehicle vin]], [PEUtils descriptionOrEmptyIfNil:[remoteVehicle vin]]]];
+        } else if ([fieldName isEqualToString:FPVehiclePlateField]) {
+          [fields addObject:@[@"Plate #:", @(FPVehicleTagPlate), [PEUtils descriptionOrEmptyIfNil:[localVehicle plate]], [PEUtils descriptionOrEmptyIfNil:[remoteVehicle plate]]]];
         }
       }];
       return fields;
@@ -1211,6 +1216,15 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
               break;
             case FPVehicleTagFuelCapacity:
               [resolvedVehicle setFuelCapacity:[remoteVehicle fuelCapacity]];
+              break;
+            case FPVehicleTagTakesDieselSwitch:
+              [resolvedVehicle setIsDiesel:[remoteVehicle isDiesel]];
+              break;
+            case FPVehicleTagVin:
+              [resolvedVehicle setVin:[remoteVehicle vin]];
+              break;
+            case FPVehicleTagPlate:
+              [resolvedVehicle setPlate:[remoteVehicle plate]];
               break;
           }
         }
@@ -1355,9 +1369,53 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                      [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Max price of gas (%@ octane)", octane],
                                                                                     ^{ return [self newVehicleMaxPricePerGallonStatsScreenMakerWithVehicle:vehicle octane:octane](user); }]];
                                                    }
+                                                   if ([_coordDao.localDao hasDieselLogsForVehicle:vehicle error:_errorBlk]) {
+                                                     [statLaunchButtons addObject:@"DIESEL - PRICE STATS"];
+                                                     [statLaunchButtons addObject:@[@"Avg price of diesel",
+                                                                                    ^{ return [self newAvgPricePerDieselGallonStatsScreenMakerWithVehicle:vehicle](user); }]];
+                                                   }
                                                    return statLaunchButtons;
                                                  }
                                                             uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newAvgPricePerDieselGallonStatsScreenMakerWithVehicle:(FPVehicle *)vehicle {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Avg Price of Diesel"]
+                                           entityTypeLabelText:@"ALL DIESEL VEHICLES"
+                                                 entityNameBlk:nil
+                                                        entity:user
+                                          aggregatesHeaderText:[NSString stringWithFormat:@"AVG PRICE OF DIESEL"]
+                                        compareButtonTitleText:@"Compare diesel vehicles"
+                                           alltimeAggregateBlk:^(FPUser *u) {return [_stats overallAvgPricePerDieselGallonForVehicle:vehicle];}
+                                        yearToDateAggregateBlk:^(FPUser *u) {return [_stats yearToDateAvgPricePerDieselGallonForVehicle:vehicle];}
+                                          lastYearAggregateBlk:^(FPUser *u) {return [_stats lastYearAvgPricePerDieselGallonForVehicle:vehicle];}
+                                             alltimeDatasetBlk:^(FPUser *u) {return [_stats overallAvgPricePerDieselGallonDataSetForVehicle:vehicle];}
+                                          yearToDateDatasetBlk:^(FPUser *u) {return [_stats yearToDateAvgPricePerDieselGallonDataSetForVehicle:vehicle];}
+                                            lastYearDatasetBlk:^(FPUser *u) {return [_stats lastYearAvgPricePerDieselGallonDataSetForVehicle:vehicle];}
+                                               siblingCountBlk:^{return [_coordDao dieselVehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()].count;}
+                                      comparisonScreenMakerBlk:^{return [self newVehicleCompareAvgPricePerDieselGallonStatsScreenMakerWithVehicleInCtx:vehicle](user);}
+                                             valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                     uitoolkit:_uitoolkit];
+  };
+}
+
+- (FPAuthScreenMaker)newVehicleCompareAvgPricePerDieselGallonStatsScreenMakerWithVehicleInCtx:(FPVehicle *)vehicle {
+  return ^ UIViewController * (FPUser *user) {
+    return [[FPCommonStatComparisonController alloc] initWithScreenTitle:[NSString stringWithFormat:@"Avg Price of Diesel Comparison"]
+                                                              headerText:[NSString stringWithFormat:@"AVG PRICE OF DIESEL (All time)"]
+                                                           entityNameBlk:^(FPVehicle *v) {return v.name;}
+                                                                  entity:vehicle
+                                                    entitiesToCompareBlk:^{return [_coordDao dieselVehiclesForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                     alltimeAggregateBlk:^(FPVehicle *v) {return [_stats overallAvgPricePerDieselGallonForVehicle:v];}
+                                                       valueFormatterBlk:^(NSDecimalNumber *val) {return [_currencyFormatter stringFromNumber:val];}
+                                                              comparator:^(NSArray *o1, NSArray *o2) {
+                                                                NSDecimalNumber *v1 = o1[2];
+                                                                NSDecimalNumber *v2 = o2[2];
+                                                                return [v1 compare:v2]; // ascending
+                                                              }
+                                                               uitoolkit:_uitoolkit];
   };
 }
 
@@ -3183,20 +3241,21 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
       [self deselectSelectedRowForTableOnView:ctrl.view tableViewTag:FPFpLogTagVehicleFuelStationAndDate];
     };
-    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
-      UITextField *prefillupDteTf = (UITextField *)[entityPanel viewWithTag:FPFpEnvLogCompositeTagPreFillupReportedDte];
-      UITextField *octaneTf = (UITextField *)[entityPanel viewWithTag:FPFpLogTagOctane];
-      UISwitch *dieselSwitch = (UISwitch *)[entityPanel viewWithTag:FPFpLogTagDieselSwitch];
-      if (dieselSwitch.on) {
-        if (prefillupDteTf.text.length == 0) {
-          [prefillupDteTf becomeFirstResponder];
-        }
-      } else {
+    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityFormPanel) {
+      FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
+        (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[(UITableView *)[entityFormPanel viewWithTag:FPFpLogTagVehicleFuelStationAndDate] dataSource];
+      FPVehicle *selectedVehicle = [ds selectedVehicle];
+      if (!selectedVehicle.isDiesel) {
+        UITextField *octaneTf = (UITextField *)[entityFormPanel viewWithTag:FPFpLogTagOctane];
         if (octaneTf.text.length == 0) {
           [octaneTf becomeFirstResponder];
         } else {
+          UITextField *prefillupDteTf = (UITextField *)[entityFormPanel viewWithTag:FPFpEnvLogCompositeTagPreFillupReportedDte];
           [prefillupDteTf becomeFirstResponder];
         }
+      } else {
+        UITextField *prefillupDteTf = (UITextField *)[entityFormPanel viewWithTag:FPFpEnvLogCompositeTagPreFillupReportedDte];
+        [prefillupDteTf becomeFirstResponder];
       }
     };
     PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, BOOL dismissCtrlr, FPLogEnvLogComposite *fpEnvLogComposite) {
@@ -3257,9 +3316,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                              listViewController:listViewController
                                                    itemAddedBlk:itemAddedBlk
                                            entityFormPanelMaker:[_panelToolkit fpEnvLogCompositeFormPanelMakerWithUser:user
-                                                                                                defaultSelectedVehicle:defaultSelectedVehicle
-                                                                                            defaultSelectedFuelStation:defaultSelectedFuelStation
-                                                                                                  defaultPickedLogDate:[NSDate date]]
+                                                                                                        defaultVehicle:defaultSelectedVehicle
+                                                                                                    defaultFuelstation:defaultSelectedFuelStation
+                                                                                                               logDate:[NSDate date]]
                                             entityToPanelBinder:[_panelToolkit fpEnvLogCompositeToFpEnvLogCompositePanelBinder]
                                             panelToEntityBinder:[_panelToolkit fpEnvLogCompositeFormPanelToFpEnvLogCompositeBinder]
                                                     entityTitle:@"Gas (and odo.) Logs"
@@ -3607,9 +3666,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                           uitoolkit:_uitoolkit
                                                      itemChangedBlk:itemChangedBlk
                                                entityFormPanelMaker:[_panelToolkit fplogFormPanelMakerWithUser:user
-                                                                                        defaultSelectedVehicle:^{return [_coordDao vehicleForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()];}
-                                                                                    defaultSelectedFuelStation:^{return [_coordDao fuelStationForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()];}
-                                                                                          defaultPickedLogDate:[fpLog purchasedAt]]
+                                                                                             defaultVehicleBlk:^{return [_coordDao vehicleForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                                                         defaultFuelstationBlk:^{return [_coordDao fuelStationForFuelPurchaseLog:fpLog error:[FPUtils localFetchErrorHandlerMaker]()];}
+                                                                                                       logDate:[fpLog purchasedAt]]
                                                entityViewPanelMaker:[_panelToolkit fplogViewPanelMakerWithUser:user]
                                                 entityToPanelBinder:[_panelToolkit fplogToFplogPanelBinder]
                                                 panelToEntityBinder:[_panelToolkit fplogFormPanelToFplogBinder]
@@ -4059,8 +4118,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                              listViewController:listViewController
                                                    itemAddedBlk:itemAddedBlk
                                            entityFormPanelMaker:[_panelToolkit envlogFormPanelMakerWithUser:user
-                                                                                     defaultSelectedVehicle:^{ return defaultSelectedVehicle; }
-                                                                                       defaultPickedLogDate:[NSDate date]]
+                                                                                     vehicle:^{ return defaultSelectedVehicle; }
+                                                                                       logDate:[NSDate date]]
                                             entityToPanelBinder:[_panelToolkit envlogToEnvlogPanelBinder]
                                             panelToEntityBinder:[_panelToolkit envlogFormPanelToEnvlogBinder]
                                                     entityTitle:@"Odometer Log"
@@ -4343,9 +4402,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                           uitoolkit:_uitoolkit
                                                      itemChangedBlk:itemChangedBlk
                                                entityFormPanelMaker:[_panelToolkit envlogFormPanelMakerWithUser:user
-                                                                                         defaultSelectedVehicle:^{ return [_coordDao vehicleForEnvironmentLog:envLog
+                                                                                         vehicle:^{ return [_coordDao vehicleForEnvironmentLog:envLog
                                                                                                                                                         error:[FPUtils localFetchErrorHandlerMaker]()]; }
-                                                                                           defaultPickedLogDate:[envLog logDate]]
+                                                                                           logDate:[envLog logDate]]
                                                entityViewPanelMaker:[_panelToolkit envlogViewPanelMakerWithUser:user]
                                                 entityToPanelBinder:[_panelToolkit envlogToEnvlogPanelBinder]
                                                 panelToEntityBinder:[_panelToolkit envlogFormPanelToEnvlogBinder]

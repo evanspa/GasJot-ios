@@ -72,15 +72,18 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
     FPVehicle *vehicle = logVehFs[1];
     NSDecimalNumber *gasCostPerMile = [_stats overallAvgGasCostPerMileForVehicle:vehicle];
-    NSNumberFormatter *currencyFormatter = [PEUtils currencyFormatter];
-    NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"Since recording, you're paying about %@ per mile on gas"
-                                                               textToAccent:[currencyFormatter stringFromNumber:gasCostPerMile]
-                                                             accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
-    NSMutableAttributedString *funFact = [[NSMutableAttributedString alloc] initWithAttributedString:funFactPart];
-    [funFact appendAttributedString:[PEUIUtils attributedTextWithTemplate:@" for your vehicle: %@."
-                                                             textToAccent:[vehicle name]
-                                                           accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]];
-    return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact" alertDescription:funFact relativeToView:relativeToView];
+    if (gasCostPerMile) {
+      NSNumberFormatter *currencyFormatter = [PEUtils currencyFormatter];
+      NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"Since recording, you're paying about %@ per mile on gas"
+                                                                 textToAccent:[currencyFormatter stringFromNumber:gasCostPerMile]
+                                                               accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSMutableAttributedString *funFact = [[NSMutableAttributedString alloc] initWithAttributedString:funFactPart];
+      [funFact appendAttributedString:[PEUIUtils attributedTextWithTemplate:@" for your vehicle: %@."
+                                                               textToAccent:[vehicle name]
+                                                             accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]];
+      return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact" alertDescription:funFact relativeToView:relativeToView];
+    }
+    return nil;
   };
 }
 
@@ -88,15 +91,18 @@ NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";
   return ^JGActionSheetSection *(NSArray *logVehFs, FPUser *user, UIView *relativeToView) {
     FPVehicle *vehicle = logVehFs[1];
     NSDecimalNumber *gasCostPerMile = [_stats yearToDateAvgGasCostPerMileForVehicle:vehicle];
-    NSNumberFormatter *currencyFormatter = [PEUtils currencyFormatter];
-    NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"So far this year, you're paying about %@ per mile on gas"
-                                                               textToAccent:[currencyFormatter stringFromNumber:gasCostPerMile]
-                                                             accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
-    NSMutableAttributedString *funFact = [[NSMutableAttributedString alloc] initWithAttributedString:funFactPart];
-    [funFact appendAttributedString:[PEUIUtils attributedTextWithTemplate:@" for your vehicle: %@."
-                                                             textToAccent:[vehicle name]
-                                                           accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]];
-    return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact" alertDescription:funFact relativeToView:relativeToView];
+    if (gasCostPerMile) {
+      NSNumberFormatter *currencyFormatter = [PEUtils currencyFormatter];
+      NSAttributedString *funFactPart = [PEUIUtils attributedTextWithTemplate:@"So far this year, you're paying about %@ per mile on gas"
+                                                                 textToAccent:[currencyFormatter stringFromNumber:gasCostPerMile]
+                                                               accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+      NSMutableAttributedString *funFact = [[NSMutableAttributedString alloc] initWithAttributedString:funFactPart];
+      [funFact appendAttributedString:[PEUIUtils attributedTextWithTemplate:@" for your vehicle: %@."
+                                                               textToAccent:[vehicle name]
+                                                             accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]];
+      return [PEUIUtils infoAlertSectionWithTitle:@"Fun Fact" alertDescription:funFact relativeToView:relativeToView];
+    }
+    return nil;
   };
 }
 

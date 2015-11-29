@@ -16,8 +16,8 @@
 #pragma mark - Initializers
 
 - (id)initWithControllerCtx:(UIViewController *)controllerCtx
-     defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
-             defaultLogDate:(NSDate *)defaultLogDate
+                    vehicle:(FPVehicle *)vehicle
+                    logDate:(NSDate *)logDate
       vehicleSelectedAction:(PEItemSelectedAction)vehicleSelectedAction
         logDatePickedAction:(void(^)(NSDate *))logDatePickedAction
 displayDisclosureIndicators:(BOOL)displayDisclosureIndicators

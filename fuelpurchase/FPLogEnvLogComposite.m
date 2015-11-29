@@ -11,6 +11,7 @@
 @implementation FPLogEnvLogComposite
 
 - (id)initWithNumGallons:(NSDecimalNumber *)numGallons
+                isDiesel:(BOOL)isDiesel
                   octane:(NSNumber *)octane
              gallonPrice:(NSDecimalNumber *)gallonPrice
               gotCarWash:(BOOL)gotCarWash
@@ -32,7 +33,7 @@ carWashPerGallonDiscount:(NSDecimalNumber *)carWashPerGallonDiscount
                                           gotCarWash:gotCarWash
                             carWashPerGallonDiscount:carWashPerGallonDiscount
                                              logDate:logDate
-                                            isDiesel:NO];
+                                            isDiesel:isDiesel];
     _preFillupEnvLog = [coordDao environmentLogWithOdometer:odometer
                                              reportedAvgMpg:reportedAvgMpg
                                              reportedAvgMph:reportedAvgMph

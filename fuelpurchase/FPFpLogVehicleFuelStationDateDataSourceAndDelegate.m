@@ -27,24 +27,24 @@
 #pragma mark - Initializers
 
 - (id)initWithControllerCtx:(UIViewController *)controllerCtx
-     defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
- defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
-             defaultLogDate:(NSDate *)defaultLogDate
+                    vehicle:(FPVehicle *)vehicle
+                fuelstation:(FPFuelStation *)fuelstation
+                    logDate:(NSDate *)logDate
       vehicleSelectedAction:(PEItemSelectedAction)vehicleSelectedAction
   fuelStationSelectedAction:(PEItemSelectedAction)fuelStationSelectedAction
         logDatePickedAction:(void(^)(NSDate *))logDatePickedAction
 displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
              coordinatorDao:(FPCoordinatorDao *)coordDao
                        user:(FPUser *)user
-               screenToolkit:(FPScreenToolkit *)screenToolkit
+              screenToolkit:(FPScreenToolkit *)screenToolkit
                       error:(PELMDaoErrorBlk)errorBlk {
   self = [super init];
   if (self) {
     _controllerCtx = controllerCtx;
     _coordDao = coordDao;
-    _selectedVehicle = defaultSelectedVehicle;
-    _selectedFuelStation = defaultSelectedFuelStation;
-    _pickedLogDate = defaultLogDate;
+    _selectedVehicle = vehicle;
+    _selectedFuelStation = fuelstation;
+    _pickedLogDate = logDate;
     _displayDisclosureIndicators = displayDisclosureIndicators;
     _user = user;
     _screenToolkit = screenToolkit;

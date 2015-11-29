@@ -30,8 +30,8 @@ NSString * const FPPanelToolkitNaText = @"---";
 NSString * const FPPanelToolkitVehicleDefaultOctanePlaceholerText = @"Default octane";
 NSString * const FPPanelToolkitVehicleDefaultOctaneNaPlaceholerText = @"Default octane (NOT APPLICABLE)";
 
-NSString * const FPPanelToolkitFplogOctanePlaceholerText = @"Octane";
-NSString * const FPPanelToolkitFplogOctaneNaPlaceholerText = @"Octane (NOT APPLICABLE)";
+//NSString * const FPPanelToolkitFplogOctanePlaceholerText = @"Octane";
+//NSString * const FPPanelToolkitFplogOctaneNaPlaceholerText = @"Octane (NOT APPLICABLE)";
 
 @implementation FPPanelToolkit {
   FPCoordinatorDao *_coordDao;
@@ -603,18 +603,15 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPVehicle *vehicle) {
     UIView *parentView = [parentViewController view];
     UIView *vehiclePanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    NSString *defaultOctaneText;
-    if ([vehicle isDiesel]) {
-      defaultOctaneText = FPPanelToolkitNaText;
-    } else {
-      defaultOctaneText = [PEUtils descriptionOrEmptyIfNil:[vehicle defaultOctane]];
+    NSMutableArray *rowData = [NSMutableArray arrayWithArray:@[@[@"Vehicle name", [PEUtils emptyIfNil:[vehicle name]]],
+                                                               @[@"Takes diesel?", [PEUtils yesNoFromBool:[vehicle isDiesel]]]]];
+    if (!vehicle.isDiesel) {
+      [rowData addObject:@[@"Default octane", [PEUtils descriptionOrEmptyIfNil:[vehicle defaultOctane]]]];
     }
-    UIView *vehicleDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Vehicle name", [PEUtils emptyIfNil:[vehicle name]]],
-                                                                  @[@"Takes diesel?", [PEUtils yesNoFromBool:[vehicle isDiesel]]],
-                                                                  @[@"Default octane", defaultOctaneText],
-                                                                  @[@"Fuel capacity", [PEUtils descriptionOrEmptyIfNil:[vehicle fuelCapacity]]],
-                                                                  @[@"VIN", [PEUtils emptyIfNil:[vehicle vin]]],
-                                                                  @[@"Plate #", [PEUtils emptyIfNil:[vehicle plate]]]]
+    [rowData addObjectsFromArray:@[@[@"Fuel capacity", [PEUtils descriptionOrEmptyIfNil:[vehicle fuelCapacity]]],
+                                   @[@"VIN", [PEUtils emptyIfNil:[vehicle vin]]],
+                                   @[@"Plate #", [PEUtils emptyIfNil:[vehicle plate]]]]];
+    UIView *vehicleDataPanel = [PEUIUtils tablePanelWithRowData:rowData
                                                       uitoolkit:_uitoolkit
                                                      parentView:parentView];
     [PEUIUtils placeView:vehicleDataPanel
@@ -664,8 +661,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
 - (PEEntityPanelMakerBlk)vehicleFormPanelMakerIncludeLogButtons:(BOOL)includeLogButtons {
   return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
-    UIView *vehiclePanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:vehiclePanel];
+    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:parentView];
     UITextField *vehicleNameTf = tfMaker(@"Vehicle name", FPVehicleTagName);
     UIView *takesDieselPanel = [PEUIUtils panelWithWidthOf:1.0
                                             relativeToView:parentView
@@ -691,61 +687,81 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     [vehicleDefaultOctaneTf setKeyboardType:UIKeyboardTypeNumberPad];
     UITextField *vehicleFuelCapacityTf = tfMaker(@"Fuel capacity", FPVehicleTagFuelCapacity);
     [vehicleFuelCapacityTf setKeyboardType:UIKeyboardTypeDecimalPad];
-    [takesDieselSwitch bk_addEventHandler:^(id sender) {
-      [vehicleDefaultOctaneTf setEnabled:!takesDieselSwitch.on];
-      if (takesDieselSwitch.on) {
-        [vehicleDefaultOctaneTf setText:@""];
-        [vehicleDefaultOctaneTf setPlaceholder:FPPanelToolkitVehicleDefaultOctaneNaPlaceholerText];
-        [vehicleDefaultOctaneTf setBackgroundColor:[UIColor lightGrayColor]];
-      } else {
-        [vehicleDefaultOctaneTf setPlaceholder:FPPanelToolkitVehicleDefaultOctanePlaceholerText];
-        [vehicleDefaultOctaneTf setBackgroundColor:[UIColor whiteColor]];
-      }
-    } forControlEvents:UIControlEventTouchUpInside];
     UITextField *vinTf = tfMaker(@"VIN", FPVehicleTagVin);
     UITextField *plateTf = tfMaker(@"Plate #", FPVehicleTagPlate);
+    UIView *topPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:parentView fixedHeight:0.0];
+    [topPanel setTag:FPVehicleTagTopPanel];
     [PEUIUtils placeView:vehicleNameTf
-                 atTopOf:vehiclePanel
+                 atTopOf:topPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:15
+                vpadding:15.0
                 hpadding:0];
     [PEUIUtils placeView:takesDieselPanel
                    below:vehicleNameTf
-                    onto:vehiclePanel
+                    onto:topPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
+    [PEUIUtils setFrameHeight:(vehicleNameTf.frame.size.height + 15.0 +
+                               takesDieselPanel.frame.size.height + 5.0)
+                       ofView:topPanel];    
+    UIView *bottomPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:parentView fixedHeight:0.0];
+    [bottomPanel setTag:FPVehicleTagBottomPanel];
     [PEUIUtils placeView:vehicleDefaultOctaneTf
-                   below:takesDieselPanel
-                    onto:vehiclePanel
+                 atTopOf:bottomPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
     [PEUIUtils placeView:vehicleFuelCapacityTf
                    below:vehicleDefaultOctaneTf
-                    onto:vehiclePanel
+                    onto:bottomPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
     [PEUIUtils placeView:vinTf
                    below:vehicleFuelCapacityTf
-                    onto:vehiclePanel
+                    onto:bottomPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
     [PEUIUtils placeView:plateTf
                    below:vinTf
-                    onto:vehiclePanel
+                    onto:bottomPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    if (includeLogButtons) {
-      // I can't remember why I thought it was a good idea to include the
-      // view-log buttons on the form/edit screen...oh well...
-      /*[self placeViewLogsButtonsOntoVehiclePanel:vehiclePanel
-                                       belowView:vehicleFuelCapacityTf
-                            parentViewController:parentViewController];*/
-    }
+    [PEUIUtils setFrameHeight:(vehicleDefaultOctaneTf.frame.size.height + 5.0 +
+                               vehicleFuelCapacityTf.frame.size.height + 5.0 +
+                               vinTf.frame.size.height + 5.0 +
+                               plateTf.frame.size.height + 5.0)
+                       ofView:bottomPanel];
+    UIView *vehiclePanel = [PEUIUtils panelWithColumnOfViews:@[topPanel, bottomPanel]
+                                 verticalPaddingBetweenViews:0.0
+                                              viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
+    [vehiclePanel bringSubviewToFront:topPanel];
+    [takesDieselSwitch bk_addEventHandler:^(id sender) {
+      [vehicleDefaultOctaneTf setEnabled:!takesDieselSwitch.on];
+      if (takesDieselSwitch.on) {
+        [UIView animateWithDuration:0.65
+                              delay:0
+                            options:UIViewAnimationOptionCurveEaseInOut
+                         animations:^{
+                           [PEUIUtils adjustYOfView:bottomPanel withValue:((takesDieselPanel.frame.size.height + 5.0) * -1.0)];
+                         }
+                         completion:^(BOOL finished) {
+                           [vehicleDefaultOctaneTf setText:@""];
+                         }];
+      } else {
+        [UIView animateWithDuration:0.65
+                              delay:0
+                            options:UIViewAnimationOptionCurveEaseInOut
+                         animations:^{
+                           [PEUIUtils adjustYOfView:bottomPanel withValue:((takesDieselPanel.frame.size.height + 5.0) * 1.0)];
+                         }
+                         completion:^(BOOL finished) {
+                         }];
+      }
+    } forControlEvents:UIControlEventTouchUpInside];
     return vehiclePanel;
   };
 }
@@ -792,8 +808,9 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     UITextField *defaultOctaneTf = [panel viewWithTag:FPVehicleTagDefaultOctane];
     if ([vehicle isDiesel]) {
       [defaultOctaneTf setText:@""];
-      [defaultOctaneTf setPlaceholder:FPPanelToolkitVehicleDefaultOctaneNaPlaceholerText];
-      [defaultOctaneTf setBackgroundColor:[UIColor lightGrayColor]];
+      UIView *bottomPanel = [panel viewWithTag:FPVehicleTagBottomPanel];
+      UIView *takesDieselPanel = [panel viewWithTag:FPVehicleTagTakesDieselPanel];
+      [PEUIUtils adjustYOfView:bottomPanel withValue:((takesDieselPanel.frame.size.height + 5.0) * -1.0)];
     } else {
       [defaultOctaneTf setBackgroundColor:[UIColor whiteColor]];
       [PEUIUtils bindToTextControlWithTag:FPVehicleTagDefaultOctane
@@ -1159,20 +1176,11 @@ To compute your location, you need to enable location services for Gas Jot.  If 
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:6.0
                 hpadding:0.0];
-    if (includeLogButton) {
-      // I can't remember why I thought it was a good idea to include the
-      // view-log buttons on the form/edit screen...oh well...
-      /*[self placeViewLogsButtonOntoFuelstationPanel:fuelStationPanel
-                                          belowView:recomputeCoordsBtn
-                               parentViewController:parentViewController];*/
-    }
-    // wrap fuel station panel in scroll view (so everything can "fit")
-    /*UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelStationPanel frame]];
-    [scrollView setContentSize:CGSizeMake(fuelStationPanel.frame.size.width, 1.3 * fuelStationPanel.frame.size.height)];
+    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelStationPanel frame]];
+    [scrollView setContentSize:CGSizeMake(fuelStationPanel.frame.size.width, 1.1 * fuelStationPanel.frame.size.height)];
     [scrollView addSubview:fuelStationPanel];
-    [scrollView setBounces:NO];
-    return scrollView;*/
-    return fuelStationPanel;
+    [scrollView setBounces:YES];
+    return scrollView;
   };
 }
 
@@ -1262,40 +1270,44 @@ To compute your location, you need to enable location services for Gas Jot.  If 
 #pragma mark - Fuel Purchase / Environment Log Composite Panel (Add only)
 
 - (PEEntityPanelMakerBlk)fpEnvLogCompositeFormPanelMakerWithUser:(FPUser *)user
-                                          defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
-                                      defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
-                                            defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
+                                                  defaultVehicle:(FPVehicle *)defaultVehicle
+                                              defaultFuelstation:(FPFuelStation *)defaultFuelstation
+                                                         logDate:(NSDate *)logDate {
   return ^ UIView * (UIViewController *parentViewController) {
     UIView *parentView = [parentViewController view];
+    
+    FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
+    (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[(UITableView *)[parentView viewWithTag:FPFpLogTagVehicleFuelStationAndDate] dataSource];
+    FPVehicle *vehicle = defaultVehicle;
+    FPFuelStation *fuelstation = defaultFuelstation;
+    if (ds) {
+      vehicle = [ds selectedVehicle];
+      fuelstation = [ds selectedFuelStation];
+    }
     UIView *fpEnvCompPanel = [PEUIUtils panelWithWidthOf:1.0
                                              andHeightOf:1.12
                                           relativeToView:parentView];
     NSDictionary *envlogComponents = [self envlogFormComponentsWithUser:user
                                             displayDisclosureIndicators:YES
-                                                 defaultSelectedVehicle:defaultSelectedVehicle
-                                                   defaultPickedLogDate:defaultPickedLogDate](parentViewController);
+                                                                vehicle:vehicle
+                                                                logDate:logDate](parentViewController);
     UITextField *odometerTf = envlogComponents[@(FPEnvLogTagOdometer)];
     UITextField *reportedAvgMpgTf = envlogComponents[@(FPEnvLogTagReportedAvgMpg)];
     UITextField *reportedAvgMphTf = envlogComponents[@(FPEnvLogTagReportedAvgMph)];
     UITextField *reportedOutsideTempTf = envlogComponents[@(FPEnvLogTagReportedOutsideTemp)];
-    TaggedTextfieldMaker tfMaker =
-      [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:fpEnvCompPanel];
+    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:fpEnvCompPanel];
     UITextField *preFillupReportedDteTf = tfMaker(@"Pre-fillup Reported DTE", FPFpEnvLogCompositeTagPreFillupReportedDte);
     [preFillupReportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
     UITextField *postFillupReportedDteTf = tfMaker(@"Post-fillup Reported DTE", FPFpEnvLogCompositeTagPostFillupReportedDte);
     [postFillupReportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
     NSDictionary *fplogComponents = [self fplogFormComponentsWithUser:user
                                            displayDisclosureIndicator:YES
-                                               defaultSelectedVehicle:defaultSelectedVehicle
-                                           defaultSelectedFuelStation:defaultSelectedFuelStation
-                                                 defaultPickedLogDate:defaultPickedLogDate](parentViewController);
+                                                              vehicle:vehicle
+                                                          fuelstation:fuelstation
+                                                              logDate:logDate](parentViewController);
     UITableView *vehicleFuelStationDateTableView = fplogComponents[@(FPFpLogTagVehicleFuelStationAndDate)];
-    //[PEUIUtils applyBorderToView:vehicleFuelStationDateTableView withColor:[UIColor yellowColor]];
     UITextField *numGallonsTf = fplogComponents[@(FPFpLogTagNumGallons)];
     UITextField *pricePerGallonTf = fplogComponents[@(FPFpLogTagPricePerGallon)];
-    UIView *dieselPanel = fplogComponents[@(FPFpLogTagDieselPanel)];
-    UISwitch *dieselSwitch = fplogComponents[@(FPFpLogTagDieselSwitch)];
-    UITextField *octaneTf = fplogComponents[@(FPFpLogTagOctane)];
     UITextField *carWashPerGallonDiscountTf = fplogComponents[@(FPFpLogTagCarWashPerGallonDiscount)];
     UIView *gotCarWashPanel = fplogComponents[@(FPFpLogTagCarWashPanel)];
     [PEUIUtils placeView:vehicleFuelStationDateTableView
@@ -1303,20 +1315,26 @@ To compute your location, you need to enable location services for Gas Jot.  If 
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:0.0
                 hpadding:0.0];
-    [PEUIUtils placeView:dieselPanel
-                   below:vehicleFuelStationDateTableView
-                    onto:fpEnvCompPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
-    [PEUIUtils placeView:octaneTf
-                   below:dieselPanel
-                    onto:fpEnvCompPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
+    UIView *aboveView;
+    if (vehicle.isDiesel) {
+      aboveView = vehicleFuelStationDateTableView;
+    } else {
+      UITextField *octaneTf = fplogComponents[@(FPFpLogTagOctane)];
+      [PEUIUtils placeView:octaneTf
+                     below:vehicleFuelStationDateTableView
+                      onto:fpEnvCompPanel
+             withAlignment:PEUIHorizontalAlignmentTypeLeft
+                  vpadding:5.0
+                  hpadding:0.0];
+      
+      NSNumber *defaultOctane = [vehicle defaultOctane];
+      if (![PEUtils isNil:defaultOctane]) {
+        [octaneTf setText:[defaultOctane description]];
+      }
+      aboveView = octaneTf;
+    }
     [PEUIUtils placeView:preFillupReportedDteTf
-                   below:octaneTf
+                   below:aboveView
                     onto:fpEnvCompPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
@@ -1375,20 +1393,6 @@ To compute your location, you need to enable location services for Gas Jot.  If 
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    
-    NSNumber *defaultOctane = [defaultSelectedVehicle defaultOctane];
-    if (![PEUtils isNil:defaultOctane]) {
-      [octaneTf setText:[defaultOctane description]];
-    }
-    BOOL isDiesel = [defaultSelectedVehicle isDiesel];
-    [dieselSwitch setOn:isDiesel];
-    [octaneTf setEnabled:!isDiesel];
-    if (isDiesel) {
-      [octaneTf setBackgroundColor:[UIColor lightGrayColor]];
-      [octaneTf setPlaceholder:FPPanelToolkitFplogOctaneNaPlaceholerText];
-    }
-    
-    // wrap fuel station panel in scroll view (so everything can "fit")
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fpEnvCompPanel frame]];
     [scrollView setContentSize:CGSizeMake(fpEnvCompPanel.frame.size.width, 1.5 * fpEnvCompPanel.frame.size.height)];
     [scrollView addSubview:fpEnvCompPanel];
@@ -1476,8 +1480,14 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       (UITableView *)[panel viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
     FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
       (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehicleFuelStationDateTableView dataSource];
+    FPVehicle *vehicle = [ds selectedVehicle];
+    NSNumber *octane = nil;
+    if (![vehicle isDiesel]) {
+      octane = tfnum(FPFpLogTagOctane);
+    }
     FPLogEnvLogComposite *composite = [[FPLogEnvLogComposite alloc] initWithNumGallons:tfdec(FPFpLogTagNumGallons)
-                                                                                octane:tfnum(FPFpLogTagOctane)
+                                                                              isDiesel:[vehicle isDiesel]
+                                                                                octane:octane
                                                                            gallonPrice:tfdec(FPFpLogTagPricePerGallon)
                                                                             gotCarWash:[gotCarWashSwitch isOn]
                                                               carWashPerGallonDiscount:tfdec(FPFpLogTagCarWashPerGallonDiscount)
@@ -1499,28 +1509,26 @@ To compute your location, you need to enable location services for Gas Jot.  If 
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPFuelPurchaseLog *fplog) {
     UIView *parentView = [parentViewController view];
     UIView *fplogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    NSString *octaneText;
-    if ([fplog isDiesel]) {
-      octaneText = FPPanelToolkitNaText;
-    } else {
-      octaneText = [PEUtils descriptionOrEmptyIfNil:[fplog octane]];
+
+    NSMutableArray *rowData = [NSMutableArray array];
+    if (![fplog isDiesel]) {
+      [rowData addObject:@[@"Octane", [PEUtils descriptionOrEmptyIfNil:[fplog octane]]]];
     }
-    UIView *fplogDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Diesel?", [PEUtils yesNoFromBool:[fplog isDiesel]]],
-                                                                @[@"Octane", octaneText],
-                                                                @[@"Odometer", [PEUtils descriptionOrEmptyIfNil:[fplog odometer]]],
-                                                                @[@"Price per gallon", [PEUtils descriptionOrEmptyIfNil:[fplog gallonPrice]]],
-                                                                @[@"Car wash per-gallon discount", [PEUtils descriptionOrEmptyIfNil:[fplog carWashPerGallonDiscount]]],
-                                                                @[@"Got car wash?", [PEUtils yesNoFromBool:[fplog gotCarWash]]],
-                                                                @[@"Num gallons", [PEUtils descriptionOrEmptyIfNil:[fplog numGallons]]]]
+    [rowData addObjectsFromArray:@[@[@"Odometer", [PEUtils descriptionOrEmptyIfNil:[fplog odometer]]],
+                                   @[@"Price per gallon", [PEUtils descriptionOrEmptyIfNil:[fplog gallonPrice]]],
+                                   @[@"Car wash per-gallon discount", [PEUtils descriptionOrEmptyIfNil:[fplog carWashPerGallonDiscount]]],
+                                   @[@"Got car wash?", [PEUtils yesNoFromBool:[fplog gotCarWash]]],
+                                   @[@"Num gallons", [PEUtils descriptionOrEmptyIfNil:[fplog numGallons]]]]];
+    UIView *fplogDataPanel = [PEUIUtils tablePanelWithRowData:rowData
                                                     uitoolkit:_uitoolkit
                                                    parentView:parentView];
     FPVehicle *vehicle = [_coordDao vehicleForFuelPurchaseLog:fplog error:[FPUtils localFetchErrorHandlerMaker]()];
     FPFuelStation *fuelstation = [_coordDao fuelStationForFuelPurchaseLog:fplog error:[FPUtils localFetchErrorHandlerMaker]()];
     NSDictionary *components = [self fplogFormComponentsWithUser:user
                                       displayDisclosureIndicator:NO
-                                          defaultSelectedVehicle:vehicle
-                                      defaultSelectedFuelStation:fuelstation
-                                            defaultPickedLogDate:[fplog purchasedAt]](parentViewController);
+                                          vehicle:vehicle
+                                      fuelstation:fuelstation
+                                            logDate:[fplog purchasedAt]](parentViewController);
     UITableView *vehicleFuelStationDateTableView = components[@(FPFpLogTagVehicleFuelStationAndDate)];
     FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds = (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)vehicleFuelStationDateTableView.dataSource;
     [ds setSelectedFuelStation:fuelstation];
@@ -1547,185 +1555,183 @@ To compute your location, you need to enable location services for Gas Jot.  If 
 
 - (PEComponentsMakerBlk)fplogFormComponentsWithUser:(FPUser *)user
                          displayDisclosureIndicator:(BOOL)displayDisclosureIndicator
-                             defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
-                         defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
-                               defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
+                                            vehicle:(FPVehicle *)vehicle
+                                        fuelstation:(FPFuelStation *)fuelstation
+                                            logDate:(NSDate *)logDate {
   return ^ NSDictionary * (UIViewController *parentViewController) {
     NSMutableDictionary *components = [NSMutableDictionary dictionary];
     UIView *parentView = [parentViewController view];
-    UITableView *vehicleFuelStationDateTableView =
-    [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)
-                                 style:UITableViewStyleGrouped];
-    [vehicleFuelStationDateTableView setScrollEnabled:NO];
-    [vehicleFuelStationDateTableView setTag:FPFpLogTagVehicleFuelStationAndDate];
-    [PEUIUtils setFrameWidthOfView:vehicleFuelStationDateTableView ofWidth:1.0 relativeTo:parentView];
-    [PEUIUtils setFrameHeight:180.0 ofView:vehicleFuelStationDateTableView];
-    vehicleFuelStationDateTableView.sectionHeaderHeight = 2.0;
-    vehicleFuelStationDateTableView.sectionFooterHeight = 2.0;
-    components[@(FPFpLogTagVehicleFuelStationAndDate)] = vehicleFuelStationDateTableView;
-    TaggedTextfieldMaker tfMaker =
-    [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:parentView];
-    UITextField *numGallonsTf = tfMaker(@"Num gallons", FPFpLogTagNumGallons);
-    components[@(FPFpLogTagNumGallons)] = numGallonsTf;
-    [numGallonsTf setKeyboardType:UIKeyboardTypeDecimalPad];
-    UITextField *pricePerGallonTf = tfMaker(@"Price per gallon", FPFpLogTagPricePerGallon);
-    components[@(FPFpLogTagPricePerGallon)] = pricePerGallonTf;
-    [pricePerGallonTf setKeyboardType:UIKeyboardTypeDecimalPad];
-    UITextField *octaneTf = tfMaker(FPPanelToolkitFplogOctanePlaceholerText, FPFpLogTagOctane);
-    if (defaultSelectedVehicle) {
-      NSNumber *defaultOctane = [defaultSelectedVehicle defaultOctane];
-      if (![PEUtils isNil:defaultOctane]) {
-        [octaneTf setText:[defaultOctane description]];
-      }
+    UITableView *vehicleFuelStationDateTableView = (UITableView *)[parentView viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
+    if (!vehicleFuelStationDateTableView) {
+      vehicleFuelStationDateTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 0, 0) style:UITableViewStyleGrouped];
+      [vehicleFuelStationDateTableView setScrollEnabled:NO];
+      [vehicleFuelStationDateTableView setTag:FPFpLogTagVehicleFuelStationAndDate];
+      [PEUIUtils setFrameWidthOfView:vehicleFuelStationDateTableView ofWidth:1.0 relativeTo:parentView];
+      [PEUIUtils setFrameHeight:180.0 ofView:vehicleFuelStationDateTableView];
+      vehicleFuelStationDateTableView.sectionHeaderHeight = 2.0;
+      vehicleFuelStationDateTableView.sectionFooterHeight = 2.0;
+      PEItemSelectedAction vehicleSelectedAction = ^(FPVehicle *vehicle, NSIndexPath *indexPath, UIViewController *vehicleSelectionController) {
+        [[vehicleSelectionController navigationController] popViewControllerAnimated:YES];
+        [vehicleFuelStationDateTableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]] // 'Vehicle' is col-index 0
+                                               withRowAnimation:UITableViewRowAnimationAutomatic];
+      };
+      PEItemSelectedAction fuelStationSelectedAction = ^(FPFuelStation *fuelStation, NSIndexPath *indexPath, UIViewController *fuelStationSelectionController) {
+        [[fuelStationSelectionController navigationController] popViewControllerAnimated:YES];
+        [vehicleFuelStationDateTableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:1]] // 'Fuel Station' is col-index 1
+                                               withRowAnimation:UITableViewRowAnimationAutomatic];
+      };
+      void (^logDatePickedAction)(NSDate *) = ^(NSDate *logDate) {
+        [vehicleFuelStationDateTableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:2]] // 'Log Date' is col-index 2
+                                               withRowAnimation:UITableViewRowAnimationAutomatic];
+      };
+      FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
+      [[FPFpLogVehicleFuelStationDateDataSourceAndDelegate alloc] initWithControllerCtx:parentViewController
+                                                                                vehicle:vehicle
+                                                                            fuelstation:fuelstation
+                                                                                logDate:logDate
+                                                                  vehicleSelectedAction:vehicleSelectedAction
+                                                              fuelStationSelectedAction:fuelStationSelectedAction
+                                                                    logDatePickedAction:logDatePickedAction
+                                                            displayDisclosureIndicators:displayDisclosureIndicator
+                                                                         coordinatorDao:_coordDao
+                                                                                   user:user
+                                                                          screenToolkit:_screenToolkit
+                                                                                  error:_errorBlk];
+      [_tableViewDataSources addObject:ds];
+      [vehicleFuelStationDateTableView setDataSource:ds];
+      [vehicleFuelStationDateTableView setDelegate:ds];
     }
-    [octaneTf setKeyboardType:UIKeyboardTypeNumberPad];
-    components[@(FPFpLogTagOctane)] = octaneTf;
-    UIView *dieselPanel = [PEUIUtils panelWithWidthOf:1.0
-                                       relativeToView:parentView
-                                          fixedHeight:pricePerGallonTf.frame.size.height];
-    [dieselPanel setTag:FPFpLogTagDieselPanel];
-    components[@(FPFpLogTagDieselPanel)] = dieselPanel;
-    [dieselPanel setBackgroundColor:[UIColor whiteColor]];
-    UILabel *dieselLabel = [PEUIUtils labelWithKey:@"Diesel?"
-                                              font:[pricePerGallonTf font]
-                                   backgroundColor:[UIColor clearColor]
-                                         textColor:[_uitoolkit colorForTableCellTitles]
-                               verticalTextPadding:3.0];
-    UISwitch *dieselSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
-    [dieselSwitch setTag:FPFpLogTagDieselSwitch];
-    components[@(FPFpLogTagDieselSwitch)] = dieselSwitch;
-    [PEUIUtils placeView:dieselLabel
-              inMiddleOf:dieselPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                hpadding:10.0];
-    [PEUIUtils placeView:dieselSwitch
-              inMiddleOf:dieselPanel
-           withAlignment:PEUIHorizontalAlignmentTypeRight
-                hpadding:15.0];
-    [dieselSwitch bk_addEventHandler:^(id sender) {
-      [octaneTf setEnabled:!dieselSwitch.on];
-      if (dieselSwitch.on) {
-        [octaneTf setText:@""];
-        [octaneTf setPlaceholder:FPPanelToolkitFplogOctaneNaPlaceholerText];
-        [octaneTf setBackgroundColor:[UIColor lightGrayColor]];
-      } else {
-        [octaneTf setPlaceholder:FPPanelToolkitFplogOctanePlaceholerText];
-        [octaneTf setBackgroundColor:[UIColor whiteColor]];
+    components[@(FPFpLogTagVehicleFuelStationAndDate)] = vehicleFuelStationDateTableView;
+    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:parentView];
+    UITextField *numGallonsTf = (UITextField *)[parentView viewWithTag:FPFpLogTagNumGallons];
+    if (!numGallonsTf) {
+      numGallonsTf = tfMaker(@"Num gallons", FPFpLogTagNumGallons);
+      [numGallonsTf setKeyboardType:UIKeyboardTypeDecimalPad];
+    }
+    components[@(FPFpLogTagNumGallons)] = numGallonsTf;
+    UITextField *pricePerGallonTf = (UITextField *)[parentView viewWithTag:FPFpLogTagPricePerGallon];
+    if (!pricePerGallonTf) {
+      pricePerGallonTf = tfMaker(@"Price per gallon", FPFpLogTagPricePerGallon);
+      [pricePerGallonTf setKeyboardType:UIKeyboardTypeDecimalPad];
+    }
+    components[@(FPFpLogTagPricePerGallon)] = pricePerGallonTf;
+    if (vehicle) {
+      if (!vehicle.isDiesel) {
+        UITextField *octaneTf = (UITextField *)[parentView viewWithTag:FPFpLogTagOctane];
+        if (!octaneTf) {
+          [octaneTf setKeyboardType:UIKeyboardTypeNumberPad];
+          octaneTf = tfMaker(@"Octane", FPFpLogTagOctane);
+        }
+        NSNumber *defaultOctane = [vehicle defaultOctane];
+        if (![PEUtils isNil:defaultOctane]) {
+          [octaneTf setText:[defaultOctane description]];
+        } else {
+          [octaneTf setText:@""];
+        }
+        components[@(FPFpLogTagOctane)] = octaneTf;
       }
-    } forControlEvents:UIControlEventTouchUpInside];
-    UITextField *odometerTf = tfMaker(@"Odometer", FPFplogTagOdometer);
-    [odometerTf setKeyboardType:UIKeyboardTypeNumberPad];
+    } else {
+      UITextField *octaneTf = (UITextField *)[parentView viewWithTag:FPFpLogTagOctane];
+      if (!octaneTf) {
+        [octaneTf setKeyboardType:UIKeyboardTypeNumberPad];
+        octaneTf = tfMaker(@"Octane", FPFpLogTagOctane);
+      }
+      components[@(FPFpLogTagOctane)] = octaneTf;
+    }
+    UITextField *odometerTf = (UITextField *)[parentView viewWithTag:FPFplogTagOdometer];
+    if (!odometerTf) {
+      odometerTf = tfMaker(@"Odometer", FPFplogTagOdometer);
+      [odometerTf setKeyboardType:UIKeyboardTypeNumberPad];
+    }
     components[@(FPFplogTagOdometer)] = odometerTf;
-    UITextField *carWashPerGallonDiscountTf = tfMaker(@"Car was per-gallon discount", FPFpLogTagCarWashPerGallonDiscount);
-    [carWashPerGallonDiscountTf setKeyboardType:UIKeyboardTypeDecimalPad];
+    UITextField *carWashPerGallonDiscountTf = (UITextField *)[parentView viewWithTag:FPFpLogTagCarWashPerGallonDiscount];
+    if (!carWashPerGallonDiscountTf) {
+      carWashPerGallonDiscountTf = tfMaker(@"Car was per-gallon discount", FPFpLogTagCarWashPerGallonDiscount);
+      [carWashPerGallonDiscountTf setKeyboardType:UIKeyboardTypeDecimalPad];
+    }
     components[@(FPFpLogTagCarWashPerGallonDiscount)] = carWashPerGallonDiscountTf;
-    UISwitch *gotCarWashSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
-    [gotCarWashSwitch setTag:FPFpLogTagGotCarWash];
+    UISwitch *gotCarWashSwitch = (UISwitch *)[parentView viewWithTag:FPFpLogTagGotCarWash];
+    UIView *gotCarWashPanel = (UIView *)[parentView viewWithTag:FPFpLogTagCarWashPanel];
+    if (!gotCarWashSwitch) {
+      gotCarWashSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+      [gotCarWashSwitch setTag:FPFpLogTagGotCarWash];
+      gotCarWashPanel = [PEUIUtils panelWithWidthOf:1.0
+                                     relativeToView:parentView
+                                        fixedHeight:numGallonsTf.frame.size.height];
+      [gotCarWashPanel setTag:FPFpLogTagCarWashPanel];
+      [gotCarWashPanel setBackgroundColor:[UIColor whiteColor]];
+      UILabel *gotCarWashLbl = [PEUIUtils labelWithKey:@"Got car wash?"
+                                                  font:[numGallonsTf font]
+                                       backgroundColor:[UIColor clearColor]
+                                             textColor:[_uitoolkit colorForTableCellTitles]
+                                   verticalTextPadding:3.0];
+      [PEUIUtils placeView:gotCarWashLbl
+                inMiddleOf:gotCarWashPanel
+             withAlignment:PEUIHorizontalAlignmentTypeLeft
+                  hpadding:10.0];
+      [PEUIUtils placeView:gotCarWashSwitch
+              toTheRightOf:gotCarWashLbl
+                      onto:gotCarWashPanel
+             withAlignment:PEUIVerticalAlignmentTypeMiddle
+                  hpadding:15.0];
+    }
     components[@(FPFpLogTagGotCarWash)] = gotCarWashSwitch;
-    UIView *gotCarWashPanel = [PEUIUtils panelWithWidthOf:1.0
-                                           relativeToView:parentView
-                                              fixedHeight:numGallonsTf.frame.size.height];
-    [gotCarWashPanel setTag:FPFpLogTagCarWashPanel];
-    [gotCarWashPanel setBackgroundColor:[UIColor whiteColor]];
-    UILabel *gotCarWashLbl = [PEUIUtils labelWithKey:@"Got car wash?"
-                                                font:[numGallonsTf font]
-                                     backgroundColor:[UIColor clearColor]
-                                           textColor:[_uitoolkit colorForTableCellTitles]
-                                 verticalTextPadding:3.0];
-    [PEUIUtils placeView:gotCarWashLbl
-              inMiddleOf:gotCarWashPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                hpadding:10.0];
-    [PEUIUtils placeView:gotCarWashSwitch
-            toTheRightOf:gotCarWashLbl
-                    onto:gotCarWashPanel
-           withAlignment:PEUIVerticalAlignmentTypeMiddle
-                hpadding:15.0];
     components[@(FPFpLogTagCarWashPanel)] = gotCarWashPanel;
-    PEItemSelectedAction vehicleSelectedAction = ^(FPVehicle *vehicle, NSIndexPath *indexPath, UIViewController *vehicleSelectionController) {
-      [[vehicleSelectionController navigationController] popViewControllerAnimated:YES];
-      [vehicleFuelStationDateTableView
-       reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]] // 'Vehicle' is col-index 0
-       withRowAnimation:UITableViewRowAnimationAutomatic];
-      NSNumber *defaultOctane = [vehicle defaultOctane];
-      if (![PEUtils isNil:defaultOctane]) {
-        [octaneTf setText:[defaultOctane description]];
-      } else {
-        [octaneTf setText:@""];
-      }
-    };
-    PEItemSelectedAction fuelStationSelectedAction = ^(FPFuelStation *fuelStation, NSIndexPath *indexPath, UIViewController *fuelStationSelectionController) {
-      [[fuelStationSelectionController navigationController] popViewControllerAnimated:YES];
-      [vehicleFuelStationDateTableView
-       reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:1]] // 'Fuel Station' is col-index 1
-       withRowAnimation:UITableViewRowAnimationAutomatic];
-    };
-    void (^logDatePickedAction)(NSDate *) = ^(NSDate *logDate) {
-      [vehicleFuelStationDateTableView
-       reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:2]] // 'Log Date' is col-index 2
-       withRowAnimation:UITableViewRowAnimationAutomatic];
-    };
-    FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
-    [[FPFpLogVehicleFuelStationDateDataSourceAndDelegate alloc] initWithControllerCtx:parentViewController
-                                                               defaultSelectedVehicle:defaultSelectedVehicle
-                                                           defaultSelectedFuelStation:defaultSelectedFuelStation
-                                                                       defaultLogDate:defaultPickedLogDate
-                                                                vehicleSelectedAction:vehicleSelectedAction
-                                                            fuelStationSelectedAction:fuelStationSelectedAction
-                                                                  logDatePickedAction:logDatePickedAction
-                                                           displayDisclosureIndicators:displayDisclosureIndicator
-                                                                       coordinatorDao:_coordDao
-                                                                                 user:user
-                                                                        screenToolkit:_screenToolkit
-                                                                                error:_errorBlk];
-    [_tableViewDataSources addObject:ds];
-    [vehicleFuelStationDateTableView setDataSource:ds];
-    [vehicleFuelStationDateTableView setDelegate:ds];
     return components;
   };
 }
 
 - (PEEntityPanelMakerBlk)fplogFormPanelMakerWithUser:(FPUser *)user
-                              defaultSelectedVehicle:(FPVehicle *(^)(void))defaultSelectedVehicle
-                          defaultSelectedFuelStation:(FPFuelStation *(^)(void))defaultSelectedFuelStation
-                                defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
+                                   defaultVehicleBlk:(FPVehicle *(^)(void))defaultVehicleBlk
+                               defaultFuelstationBlk:(FPFuelStation *(^)(void))defaultFuelstationBlk
+                                             logDate:(NSDate *)logDate {
   return ^ UIView * (UIViewController *parentViewController) {
     UIView *parentView = [parentViewController view];
+    FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
+    (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[(UITableView *)[parentView viewWithTag:FPFpLogTagVehicleFuelStationAndDate] dataSource];
+    FPVehicle *vehicle;
+    FPFuelStation *fuelstation;
+    if (ds) {
+      vehicle = [ds selectedVehicle];
+      fuelstation = [ds selectedFuelStation];
+    } else {
+      vehicle = defaultVehicleBlk();
+      fuelstation = defaultFuelstationBlk();
+    }
     UIView *fpLogPanel = [PEUIUtils panelWithWidthOf:1.0
                                          andHeightOf:1.0
                                       relativeToView:parentView];
     NSDictionary *components = [self fplogFormComponentsWithUser:user
                                       displayDisclosureIndicator:YES
-                                          defaultSelectedVehicle:defaultSelectedVehicle()
-                                      defaultSelectedFuelStation:defaultSelectedFuelStation()
-                                            defaultPickedLogDate:defaultPickedLogDate](parentViewController);
+                                                         vehicle:vehicle
+                                                     fuelstation:fuelstation
+                                                         logDate:logDate](parentViewController);
     UITableView *vehicleFuelStationDateTableView = components[@(FPFpLogTagVehicleFuelStationAndDate)];
     UITextField *numGallonsTf = components[@(FPFpLogTagNumGallons)];
     UITextField *pricePerGallonTf = components[@(FPFpLogTagPricePerGallon)];
-    UITextField *octaneTf = components[@(FPFpLogTagOctane)];
     UITextField *odometerTf = components[@(FPFplogTagOdometer)];
     UITextField *carWashPerGallonDiscountTf = components[@(FPFpLogTagCarWashPerGallonDiscount)];
     UIView *gotCarWashPanel = components[@(FPFpLogTagCarWashPanel)];
-    UIView *dieselPanel = components[@(FPFpLogTagDieselPanel)];
     [PEUIUtils placeView:vehicleFuelStationDateTableView
                  atTopOf:fpLogPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:0.0
                 hpadding:0.0];
-    [PEUIUtils placeView:dieselPanel
-                   below:vehicleFuelStationDateTableView
-                    onto:fpLogPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
-    [PEUIUtils placeView:octaneTf
-                   below:dieselPanel
-                    onto:fpLogPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
+    UIView *aboveView;
+    if (vehicle.isDiesel) {
+      aboveView = vehicleFuelStationDateTableView;
+    } else {
+      UITextField *octaneTf = components[@(FPFpLogTagOctane)];
+      [PEUIUtils placeView:octaneTf
+                     below:vehicleFuelStationDateTableView
+                      onto:fpLogPanel
+             withAlignment:PEUIHorizontalAlignmentTypeLeft
+                  vpadding:5.0
+                  hpadding:0.0];
+      aboveView = octaneTf;
+    }
     [PEUIUtils placeView:odometerTf
-                   below:octaneTf
+                   below:aboveView
                     onto:fpLogPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
@@ -1754,13 +1760,11 @@ To compute your location, you need to enable location services for Gas Jot.  If 
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    
-//    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fpLogPanel frame]];
-//    [scrollView setContentSize:CGSizeMake(fpLogPanel.frame.size.width, 1.3 * fpLogPanel.frame.size.height)];
-//    [scrollView addSubview:fpLogPanel];
-//    [scrollView setBounces:NO];
-//    return scrollView;
-    return fpLogPanel;
+    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fpLogPanel frame]];
+    [scrollView setContentSize:CGSizeMake(fpLogPanel.frame.size.width, 1.3 * fpLogPanel.frame.size.height)];
+    [scrollView addSubview:fpLogPanel];
+    [scrollView setBounces:YES];
+    return scrollView;
   };
 }
 
@@ -1789,10 +1793,9 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
       (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehicleFuelStationDateTableView dataSource];
     [fpLog setPurchasedAt:[ds pickedLogDate]];
-    
-    UISwitch *dieselSwitch = (UISwitch *)[panel viewWithTag:FPFpLogTagDieselSwitch];
-    [fpLog setIsDiesel:dieselSwitch.on];
-    if (dieselSwitch.on) {
+    FPVehicle *vehicle = [ds selectedVehicle];
+    [fpLog setIsDiesel:[vehicle isDiesel]];
+    if ([fpLog isDiesel]) {
       [fpLog setOctane:nil];
     } else {
       bindnum(FPFpLogTagOctane, @selector(setOctane:));
@@ -1813,8 +1816,8 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       bindtt(FPFpLogTagPricePerGallon, @selector(gallonPrice));
       bindtt(FPFplogTagOdometer, @selector(odometer));
       bindtt(FPFpLogTagCarWashPerGallonDiscount, @selector(carWashPerGallonDiscount));
-      UISwitch *gotCarWasSwitch = (UISwitch *)[panel viewWithTag:FPFpLogTagGotCarWash];
-      [gotCarWasSwitch setOn:[fpLog gotCarWash] animated:YES];
+      UISwitch *gotCarWashSwitch = (UISwitch *)[panel viewWithTag:FPFpLogTagGotCarWash];
+      [gotCarWashSwitch setOn:[fpLog gotCarWash] animated:YES];
       if ([fpLog purchasedAt]) {
         UITableView *vehicleFuelStationDateTableView =
         (UITableView *)[panel viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
@@ -1826,9 +1829,9 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       UISwitch *dieselSwitch = (UISwitch *)[panel viewWithTag:FPFpLogTagDieselSwitch];
       [dieselSwitch setOn:[fpLog isDiesel] animated:YES];
       if ([fpLog isDiesel]) {
-        UITextField *octaneTf = [panel viewWithTag:FPFpLogTagOctane];
-        [octaneTf setText:@""];
-        [octaneTf setPlaceholder:FPPanelToolkitFplogOctaneNaPlaceholerText];
+        //UITextField *octaneTf = [panel viewWithTag:FPFpLogTagOctane];
+        //[octaneTf setText:@""];
+        //[octaneTf setPlaceholder:FPPanelToolkitFplogOctaneNaPlaceholerText];
       } else {
         bindtt(FPFpLogTagOctane, @selector(octane));
       }
@@ -1872,8 +1875,8 @@ To compute your location, you need to enable location services for Gas Jot.  If 
                                                     parentView:parentView];
     NSDictionary *components = [self envlogFormComponentsWithUser:user
                                       displayDisclosureIndicators:NO
-                                           defaultSelectedVehicle:[_coordDao vehicleForEnvironmentLog:envlog error:[FPUtils localFetchErrorHandlerMaker]()]
-                                             defaultPickedLogDate:[envlog logDate]](parentViewController);
+                                           vehicle:[_coordDao vehicleForEnvironmentLog:envlog error:[FPUtils localFetchErrorHandlerMaker]()]
+                                             logDate:[envlog logDate]](parentViewController);
     UITableView *vehicleAndLogDateTableView = components[@(FPEnvLogTagVehicleAndDate)];
     [vehicleAndLogDateTableView setUserInteractionEnabled:NO];
     [PEUIUtils placeView:vehicleAndLogDateTableView
@@ -1897,72 +1900,86 @@ To compute your location, you need to enable location services for Gas Jot.  If 
 
 - (PEComponentsMakerBlk)envlogFormComponentsWithUser:(FPUser *)user
                          displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
-                              defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
-                                defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
+                                             vehicle:(FPVehicle *)vehicle
+                                             logDate:(NSDate *)logDate {
   return ^ NSDictionary * (UIViewController *parentViewController) {
     NSMutableDictionary *components = [NSMutableDictionary dictionary];
     UIView *parentView = [parentViewController view];
-    UITableView *vehicleAndLogDateTableView =
-    [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)
-                                 style:UITableViewStyleGrouped];
-    [vehicleAndLogDateTableView setScrollEnabled:NO];
-    [vehicleAndLogDateTableView setTag:FPEnvLogTagVehicleAndDate];
-    [PEUIUtils setFrameWidthOfView:vehicleAndLogDateTableView ofWidth:1.0 relativeTo:parentView];
-    [PEUIUtils setFrameHeight:124.96 ofView:vehicleAndLogDateTableView];
-    PEItemSelectedAction vehicleSelectedAction = ^(FPVehicle *vehicle, NSIndexPath *indexPath, UIViewController *vehicleSelectionController) {
-      [[vehicleSelectionController navigationController] popViewControllerAnimated:YES];
-      [vehicleAndLogDateTableView
-       reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]] // 'Vehicle' is col-index 0
-       withRowAnimation:UITableViewRowAnimationAutomatic];
-    };
-    void (^logDatePickedAction)(NSDate *) = ^(NSDate *logDate) {
-      [vehicleAndLogDateTableView
-       reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:1]] // 'Log Date' is col-index 1
-       withRowAnimation:UITableViewRowAnimationAutomatic];
-    };
-    FPEnvLogVehicleAndDateDataSourceDelegate *ds =
-    [[FPEnvLogVehicleAndDateDataSourceDelegate alloc] initWithControllerCtx:parentViewController
-                                                     defaultSelectedVehicle:defaultSelectedVehicle
-                                                             defaultLogDate:defaultPickedLogDate
-                                                      vehicleSelectedAction:vehicleSelectedAction
-                                                        logDatePickedAction:logDatePickedAction
-                                                displayDisclosureIndicators:displayDisclosureIndicators
-                                                             coordinatorDao:_coordDao
-                                                                       user:user
-                                                              screenToolkit:_screenToolkit
-                                                                      error:_errorBlk];
-    [_tableViewDataSources addObject:ds];
-    vehicleAndLogDateTableView.sectionHeaderHeight = 2.0;
-    vehicleAndLogDateTableView.sectionFooterHeight = 2.0;
-    [vehicleAndLogDateTableView setDataSource:ds];
-    [vehicleAndLogDateTableView setDelegate:ds];
+    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:parentView];
+    UITableView *vehicleAndLogDateTableView = (UITableView *)[parentView viewWithTag:FPEnvLogTagVehicleAndDate];
+    if (!vehicleAndLogDateTableView) {
+      vehicleAndLogDateTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)
+                                                                style:UITableViewStyleGrouped];
+      [vehicleAndLogDateTableView setScrollEnabled:NO];
+      [vehicleAndLogDateTableView setTag:FPEnvLogTagVehicleAndDate];
+      [PEUIUtils setFrameWidthOfView:vehicleAndLogDateTableView ofWidth:1.0 relativeTo:parentView];
+      [PEUIUtils setFrameHeight:124.96 ofView:vehicleAndLogDateTableView];
+      PEItemSelectedAction vehicleSelectedAction = ^(FPVehicle *vehicle, NSIndexPath *indexPath, UIViewController *vehicleSelectionController) {
+        [[vehicleSelectionController navigationController] popViewControllerAnimated:YES];
+        [vehicleAndLogDateTableView
+         reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]] // 'Vehicle' is col-index 0
+         withRowAnimation:UITableViewRowAnimationAutomatic];
+      };
+      void (^logDatePickedAction)(NSDate *) = ^(NSDate *logDate) {
+        [vehicleAndLogDateTableView
+         reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:1]] // 'Log Date' is col-index 1
+         withRowAnimation:UITableViewRowAnimationAutomatic];
+      };
+      FPEnvLogVehicleAndDateDataSourceDelegate *ds =
+      [[FPEnvLogVehicleAndDateDataSourceDelegate alloc] initWithControllerCtx:parentViewController
+                                                                      vehicle:vehicle
+                                                                      logDate:logDate
+                                                        vehicleSelectedAction:vehicleSelectedAction
+                                                          logDatePickedAction:logDatePickedAction
+                                                  displayDisclosureIndicators:displayDisclosureIndicators
+                                                               coordinatorDao:_coordDao
+                                                                         user:user
+                                                                screenToolkit:_screenToolkit
+                                                                        error:_errorBlk];
+      [_tableViewDataSources addObject:ds];
+      vehicleAndLogDateTableView.sectionHeaderHeight = 2.0;
+      vehicleAndLogDateTableView.sectionFooterHeight = 2.0;
+      [vehicleAndLogDateTableView setDataSource:ds];
+      [vehicleAndLogDateTableView setDelegate:ds];
+    }
     components[@(FPEnvLogTagVehicleAndDate)] = vehicleAndLogDateTableView;
-    TaggedTextfieldMaker tfMaker =
-      [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:parentView];
-    UITextField *odometerTf = tfMaker(@"Odometer", FPEnvLogTagOdometer);
-    [odometerTf setKeyboardType:UIKeyboardTypeDecimalPad];
+    UITextField *odometerTf = (UITextField *)[parentView viewWithTag:FPEnvLogTagOdometer];
+    if (!odometerTf) {
+      odometerTf = tfMaker(@"Odometer", FPEnvLogTagOdometer);
+      [odometerTf setKeyboardType:UIKeyboardTypeDecimalPad];
+    }
     components[@(FPEnvLogTagOdometer)] = odometerTf;
-    UITextField *reportedDteTf = tfMaker(@"Reported DTE", FPEnvLogTagReportedDte);
-    [reportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
+    UITextField *reportedDteTf = (UITextField *)[parentView viewWithTag:FPEnvLogTagReportedDte];
+    if (!reportedDteTf) {
+      reportedDteTf = tfMaker(@"Reported DTE", FPEnvLogTagReportedDte);
+      [reportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
+    }
     components[@(FPEnvLogTagReportedDte)] = reportedDteTf;
-    UITextField *reportedAvgMpgTf =
-    tfMaker(@"Reported avg mpg", FPEnvLogTagReportedAvgMpg);
-    [reportedAvgMpgTf setKeyboardType:UIKeyboardTypeDecimalPad];
+    UITextField *reportedAvgMpgTf = (UITextField *)[parentView viewWithTag:FPEnvLogTagReportedAvgMpg];
+    if (!reportedAvgMpgTf) {
+      reportedAvgMpgTf = tfMaker(@"Reported avg mpg", FPEnvLogTagReportedAvgMpg);
+      [reportedAvgMpgTf setKeyboardType:UIKeyboardTypeDecimalPad];
+    }
     components[@(FPEnvLogTagReportedAvgMpg)] = reportedAvgMpgTf;
-    UITextField *reportedAvgMphTf = tfMaker(@"Reported avg mph", FPEnvLogTagReportedAvgMph);
-    [reportedAvgMphTf setKeyboardType:UIKeyboardTypeDecimalPad];
+    UITextField *reportedAvgMphTf = (UITextField *)[parentView viewWithTag:FPEnvLogTagReportedAvgMph];
+    if (!reportedAvgMphTf) {
+      reportedAvgMphTf = tfMaker(@"Reported avg mph", FPEnvLogTagReportedAvgMph);
+      [reportedAvgMphTf setKeyboardType:UIKeyboardTypeDecimalPad];
+    }
     components[@(FPEnvLogTagReportedAvgMph)] = reportedAvgMphTf;
-    UITextField *reportedOutsideTempTf =
-    tfMaker(@"Reported outside temperature", FPEnvLogTagReportedOutsideTemp);
-    [reportedOutsideTempTf setKeyboardType:UIKeyboardTypeNumberPad];
+    UITextField *reportedOutsideTempTf = (UITextField *)[parentView viewWithTag:FPEnvLogTagReportedOutsideTemp];
+    if (!reportedOutsideTempTf) {
+      reportedOutsideTempTf = tfMaker(@"Reported outside temperature", FPEnvLogTagReportedOutsideTemp);
+      [reportedOutsideTempTf setKeyboardType:UIKeyboardTypeNumberPad];
+    }
     components[@(FPEnvLogTagReportedOutsideTemp)] = reportedOutsideTempTf;
     return components;
   };
 }
 
 - (PEEntityPanelMakerBlk)envlogFormPanelMakerWithUser:(FPUser *)user
-                               defaultSelectedVehicle:(FPVehicle *(^)(void))defaultSelectedVehicle
-                                 defaultPickedLogDate:(NSDate *)defaultPickedLogDate {
+                                              vehicle:(FPVehicle *(^)(void))vehicle
+                                              logDate:(NSDate *)logDate {
   return ^ UIView * (UIViewController *parentViewController) {
     UIView *parentView = [parentViewController view];
     UIView *envLogPanel = [PEUIUtils panelWithWidthOf:1.0
@@ -1970,8 +1987,8 @@ To compute your location, you need to enable location services for Gas Jot.  If 
                                        relativeToView:parentView];
     NSDictionary *components = [self envlogFormComponentsWithUser:user
                                       displayDisclosureIndicators:YES
-                                           defaultSelectedVehicle:defaultSelectedVehicle()
-                                             defaultPickedLogDate:defaultPickedLogDate](parentViewController);
+                                                          vehicle:vehicle()
+                                                          logDate:logDate](parentViewController);
     UITableView *vehicleAndLogDateTableView = components[@(FPEnvLogTagVehicleAndDate)];
     UITextField *odometerTf = components[@(FPEnvLogTagOdometer)];
     UITextField *reportedDteTf = components[@(FPEnvLogTagReportedDte)];

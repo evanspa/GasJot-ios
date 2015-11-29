@@ -30,11 +30,13 @@ typedef NS_ENUM (NSInteger, FPVehicleTag) {
   FPVehicleTagViewEnvlogsBtn,
   FPVehicleTagViewEnvlogsBtnRecordCount,
   FPVehicleTagVin,
-  FPVehicleTagPlate
+  FPVehicleTagPlate,
+  FPVehicleTagTopPanel,
+  FPVehicleTagBottomPanel
 };
 
 typedef NS_ENUM (NSInteger, FPFuelStationTag) {
-  FPFuelStationTagName = 12,
+  FPFuelStationTagName = 14,
   FPFuelStationTagStreet,
   FPFuelStationTagCity,
   FPFuelStationTagState,
@@ -47,12 +49,12 @@ typedef NS_ENUM (NSInteger, FPFuelStationTag) {
 };
 
 typedef NS_ENUM (NSInteger, FPFpEnvLogCompositeTag) {
-  FPFpEnvLogCompositeTagPreFillupReportedDte = 22,
+  FPFpEnvLogCompositeTagPreFillupReportedDte = 24,
   FPFpEnvLogCompositeTagPostFillupReportedDte
 };
 
 typedef NS_ENUM (NSInteger, FPFpLogTag) {
-  FPFpLogTagVehicleFuelStationAndDate = 24,
+  FPFpLogTagVehicleFuelStationAndDate = 26,
   FPFpLogTagNumGallons,
   FPFpLogTagPricePerGallon,
   FPFpLogTagDieselSwitch,
@@ -68,7 +70,7 @@ typedef NS_ENUM (NSInteger, FPFpLogTag) {
 };
 
 typedef NS_ENUM (NSInteger, FPEnvLogTag) {
-  FPEnvLogTagVehicleAndDate = 37,
+  FPEnvLogTagVehicleAndDate = 39,
   FPEnvLogTagOdometer,
   FPEnvLogTagReportedAvgMpg,
   FPEnvLogTagReportedAvgMph,
@@ -155,9 +157,9 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 #pragma mark - Fuel Purchase / Environment Log Composite Panel (Add only)
 
 - (PEEntityPanelMakerBlk)fpEnvLogCompositeFormPanelMakerWithUser:(FPUser *)user
-                                      defaultSelectedVehicle:(FPVehicle *)defaultSelectedVehicle
-                                  defaultSelectedFuelStation:(FPFuelStation *)defaultSelectedFuelStation
-                                        defaultPickedLogDate:(NSDate *)defaultPickedLogDate;
+                                                  defaultVehicle:(FPVehicle *)defaultVehicle
+                                              defaultFuelstation:(FPFuelStation *)defaultFuelstation
+                                                         logDate:(NSDate *)logDate;
 
 - (PEPanelToEntityBinderBlk)fpEnvLogCompositeFormPanelToFpEnvLogCompositeBinder;
 
@@ -169,10 +171,10 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 
 - (PEEntityViewPanelMakerBlk)fplogViewPanelMakerWithUser:(FPUser *)user;
 
-- (PEEntityPanelMakerBlk)fplogFormPanelMakerWithUser:(FPUser *)user                          
-                              defaultSelectedVehicle:(FPVehicle *(^)(void))defaultSelectedVehicle
-                          defaultSelectedFuelStation:(FPFuelStation *(^)(void))defaultSelectedFuelStation
-                                defaultPickedLogDate:(NSDate *)defaultPickedLogDate;
+- (PEEntityPanelMakerBlk)fplogFormPanelMakerWithUser:(FPUser *)user
+                                   defaultVehicleBlk:(FPVehicle *(^)(void))defaultVehicleBlk
+                               defaultFuelstationBlk:(FPFuelStation *(^)(void))defaultFuelstationBlk
+                                             logDate:(NSDate *)logDate;
 
 - (PEPanelToEntityBinderBlk)fplogFormPanelToFplogBinder;
 
@@ -185,8 +187,8 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 - (PEEntityViewPanelMakerBlk)envlogViewPanelMakerWithUser:(FPUser *)user;
 
 - (PEEntityPanelMakerBlk)envlogFormPanelMakerWithUser:(FPUser *)user
-                               defaultSelectedVehicle:(FPVehicle *(^)(void))defaultSelectedVehicle
-                                 defaultPickedLogDate:(NSDate *)defaultPickedLogDate;
+                                              vehicle:(FPVehicle *(^)(void))vehicle
+                                              logDate:(NSDate *)logDate;
 
 - (PEPanelToEntityBinderBlk)envlogFormPanelToEnvlogBinder;
 

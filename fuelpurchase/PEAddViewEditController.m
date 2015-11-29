@@ -421,6 +421,12 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   if (_isAdd || _isEdit) {
+    UIView *tmpNewFormPanel = _entityFormPanelMaker(self);
+    [_entityFormPanel removeFromSuperview];
+    _entityFormPanel = tmpNewFormPanel;
+    [[self view] addSubview:_entityFormPanel];
+    _entityToPanelBinder(_entity, _entityFormPanel);    
+    
     if (_prepareUIForUserInteractionBlk) {
       _prepareUIForUserInteractionBlk(_entityFormPanel);
     }
@@ -1442,6 +1448,7 @@ entity's dependency.";
     NSDictionary *mergeConflicts = _merge(self, _entity, latestEntity);
     if ([mergeConflicts count] > 0) {
       [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // ensures 'Cancel' button stays grayed-out
+      [_deleteBarButtonItem setEnabled:NO];
       [self.view endEditing:YES]; // dismiss the keyboard
       NSString *desc = @"\
 Use the form below to resolve the \
@@ -1490,11 +1497,9 @@ merge conflicts.";
                                 alertDescription:(NSAttributedString *)desc
                                     cancelAction:(void(^)(void))cancelAction {
   void (^reenableNavButtons)(void) = ^{
-    //[[[self navigationItem] leftBarButtonItem] setEnabled:YES];
-    //[[[self navigationItem] rightBarButtonItem] setEnabled:YES];
-    
     [[[self navigationItem] leftBarButtonItem] setEnabled:YES];
     [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
+    [_deleteBarButtonItem setEnabled:YES];
     [[[self tabBarController] tabBar] setUserInteractionEnabled:YES];
     if (_modalOperationDone) { _modalOperationDone(); }
     [self setUploadDownloadDeleteBarButtonStates];
@@ -1545,6 +1550,7 @@ merge conflicts.";
   if (flag) {
     if ([self prepareForEditing]) {
       _entityCopyBeforeEdit = [_entity copy];
+      _isEdit = YES;
       [super setEditing:flag animated:animated];
       if (_prepareUIForUserInteractionBlk) {
         _prepareUIForUserInteractionBlk(_entityFormPanel);
@@ -1614,6 +1620,7 @@ merge conflicts.";
     if (_itemChangedBlk) {
       _itemChangedBlk(_entity, _entityIndexPath);
     }
+    _isEdit = NO;
     [self enableUi];
     [[self navigationItem] setLeftBarButtonItem:_backButton];
     [[self navigationItem] setRightBarButtonItem:[self editButtonItem]];
@@ -1637,6 +1644,7 @@ merge conflicts.";
     _entityToPanelBinder(_entity, _entityFormPanel);
     postEditActivities();
     _isEditCanceled = NO;
+    _isEdit = NO;
   } else {
     NSArray *errMsgs = _entityValidator(_entityFormPanel);
     BOOL isValidEntity = YES;
@@ -2523,6 +2531,7 @@ The ones that did not %@ and will need to be fixed individually."
     _newEntity = nil;
   } else {
     _isEditCanceled = YES;
+    _isEdit = NO;
     [self setEditing:NO animated:YES]; // to get 'Done' button to turn to 'Edit'
   }
 }

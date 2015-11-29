@@ -14,6 +14,7 @@
 @interface FPLogEnvLogComposite : NSObject
 
 - (id)initWithNumGallons:(NSDecimalNumber *)numGallons
+                isDiesel:(BOOL)isDiesel
                   octane:(NSNumber *)octane
              gallonPrice:(NSDecimalNumber *)gallonPrice
               gotCarWash:(BOOL)gotCarWash
