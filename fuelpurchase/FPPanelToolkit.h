@@ -32,11 +32,19 @@ typedef NS_ENUM (NSInteger, FPVehicleTag) {
   FPVehicleTagVin,
   FPVehicleTagPlate,
   FPVehicleTagTopPanel,
-  FPVehicleTagBottomPanel
+  FPVehicleTagBottomPanel,
+  FPVehicleTagHasDteReadoutSwitch,
+  FPVehicleTagHasDteReadoutPanel,
+  FPVehicleTagHasMpgReadoutSwitch,
+  FPVehicleTagHasMpgReadoutPanel,
+  FPVehicleTagHasMphReadoutSwitch,
+  FPVehicleTagHasMphReadoutPanel,
+  FPVehicleTagHasOutsideTempReadoutSwitch,
+  FPVehicleTagHasOutsideTempReadoutPanel
 };
 
 typedef NS_ENUM (NSInteger, FPFuelStationTag) {
-  FPFuelStationTagName = 14,
+  FPFuelStationTagName = 22,
   FPFuelStationTagStreet,
   FPFuelStationTagCity,
   FPFuelStationTagState,
@@ -49,12 +57,12 @@ typedef NS_ENUM (NSInteger, FPFuelStationTag) {
 };
 
 typedef NS_ENUM (NSInteger, FPFpEnvLogCompositeTag) {
-  FPFpEnvLogCompositeTagPreFillupReportedDte = 24,
+  FPFpEnvLogCompositeTagPreFillupReportedDte = 32,
   FPFpEnvLogCompositeTagPostFillupReportedDte
 };
 
 typedef NS_ENUM (NSInteger, FPFpLogTag) {
-  FPFpLogTagVehicleFuelStationAndDate = 26,
+  FPFpLogTagVehicleFuelStationAndDate = 34,
   FPFpLogTagNumGallons,
   FPFpLogTagPricePerGallon,
   FPFpLogTagDieselSwitch,
@@ -70,7 +78,7 @@ typedef NS_ENUM (NSInteger, FPFpLogTag) {
 };
 
 typedef NS_ENUM (NSInteger, FPEnvLogTag) {
-  FPEnvLogTagVehicleAndDate = 39,
+  FPEnvLogTagVehicleAndDate = 47,
   FPEnvLogTagOdometer,
   FPEnvLogTagReportedAvgMpg,
   FPEnvLogTagReportedAvgMph,
@@ -187,7 +195,7 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 - (PEEntityViewPanelMakerBlk)envlogViewPanelMakerWithUser:(FPUser *)user;
 
 - (PEEntityPanelMakerBlk)envlogFormPanelMakerWithUser:(FPUser *)user
-                                              vehicle:(FPVehicle *(^)(void))vehicle
+                                    defaultVehicleBlk:(FPVehicle *(^)(void))defaultVehicleBlk
                                               logDate:(NSDate *)logDate;
 
 - (PEPanelToEntityBinderBlk)envlogFormPanelToEnvlogBinder;

@@ -609,6 +609,10 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
       [rowData addObject:@[@"Default octane", [PEUtils descriptionOrEmptyIfNil:[vehicle defaultOctane]]]];
     }
     [rowData addObjectsFromArray:@[@[@"Fuel capacity", [PEUtils descriptionOrEmptyIfNil:[vehicle fuelCapacity]]],
+                                   @[@"Has range readout?", [PEUtils yesNoFromBool:[vehicle hasDteReadout]]],
+                                   @[@"Has average MPG readout?", [PEUtils yesNoFromBool:[vehicle hasMpgReadout]]],
+                                   @[@"Has average MPH readout?", [PEUtils yesNoFromBool:[vehicle hasMphReadout]]],
+                                   @[@"Has outside temperature readout?", [PEUtils yesNoFromBool:[vehicle hasOutsideTempReadout]]],
                                    @[@"VIN", [PEUtils emptyIfNil:[vehicle vin]]],
                                    @[@"Plate #", [PEUtils emptyIfNil:[vehicle plate]]]]];
     UIView *vehicleDataPanel = [PEUIUtils tablePanelWithRowData:rowData
@@ -651,7 +655,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                      belowView:statsMsgPanel
                           parentViewController:parentViewController];
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[vehiclePanel frame]];
-    [scrollView setContentSize:CGSizeMake(vehiclePanel.frame.size.width, 1.45 * vehiclePanel.frame.size.height)];
+    [scrollView setContentSize:CGSizeMake(vehiclePanel.frame.size.width, 1.575 * vehiclePanel.frame.size.height)];
     [scrollView addSubview:vehiclePanel];
     [scrollView setBounces:YES];
     return scrollView;
@@ -663,30 +667,44 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     UIView *parentView = [parentViewController view];
     TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:parentView];
     UITextField *vehicleNameTf = tfMaker(@"Vehicle name", FPVehicleTagName);
-    UIView *takesDieselPanel = [PEUIUtils panelWithWidthOf:1.0
-                                            relativeToView:parentView
-                                               fixedHeight:vehicleNameTf.frame.size.height];
-    [takesDieselPanel setTag:FPVehicleTagTakesDieselPanel];
-    [takesDieselPanel setBackgroundColor:[UIColor whiteColor]];
-    UILabel *takesDieselLabel = [PEUIUtils labelWithKey:@"Takes diesel?"
-                                                   font:[vehicleNameTf font]
-                                        backgroundColor:[UIColor clearColor]
-                                              textColor:[_uitoolkit colorForTableCellTitles]
-                                    verticalTextPadding:3.0];
-    UISwitch *takesDieselSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
-    [takesDieselSwitch setTag:FPVehicleTagTakesDieselSwitch];
-    [PEUIUtils placeView:takesDieselLabel
-              inMiddleOf:takesDieselPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                hpadding:10.0];
-    [PEUIUtils placeView:takesDieselSwitch
-              inMiddleOf:takesDieselPanel
-           withAlignment:PEUIHorizontalAlignmentTypeRight
-                hpadding:15.0];
+    NSArray *(^switchPanelBlk)(NSInteger, NSString *, NSInteger) = ^NSArray *(NSInteger panelTag, NSString *labelText, NSInteger switchTag) {
+      UIView *panel = [PEUIUtils panelWithWidthOf:1.0
+                                   relativeToView:parentView
+                                      fixedHeight:vehicleNameTf.frame.size.height];
+      [panel setTag:panelTag];
+      [panel setBackgroundColor:[UIColor whiteColor]];
+      UILabel *label = [PEUIUtils labelWithKey:labelText
+                                          font:[vehicleNameTf font]
+                               backgroundColor:[UIColor clearColor]
+                                     textColor:[_uitoolkit colorForTableCellTitles]
+                           verticalTextPadding:3.0];
+      UISwitch *uiswitch = [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+      [uiswitch setTag:switchTag];
+      [PEUIUtils placeView:label
+                inMiddleOf:panel
+             withAlignment:PEUIHorizontalAlignmentTypeLeft
+                  hpadding:10.0];
+      [PEUIUtils placeView:uiswitch
+                inMiddleOf:panel
+             withAlignment:PEUIHorizontalAlignmentTypeRight
+                  hpadding:15.0];
+      return @[panel, uiswitch];
+    };
+    NSArray *takesDieselArray = switchPanelBlk(FPVehicleTagTakesDieselPanel, @"Takes Diesel?", FPVehicleTagTakesDieselSwitch);
+    UIView *takesDieselPanel = takesDieselArray[0];
+    UISwitch *takesDieselSwitch = takesDieselArray[1];
     UITextField *vehicleDefaultOctaneTf = tfMaker(FPPanelToolkitVehicleDefaultOctanePlaceholerText, FPVehicleTagDefaultOctane);
     [vehicleDefaultOctaneTf setKeyboardType:UIKeyboardTypeNumberPad];
     UITextField *vehicleFuelCapacityTf = tfMaker(@"Fuel capacity", FPVehicleTagFuelCapacity);
     [vehicleFuelCapacityTf setKeyboardType:UIKeyboardTypeDecimalPad];
+    NSArray *hasDteReadoutArray = switchPanelBlk(FPVehicleTagHasDteReadoutPanel, @"Has range readout?", FPVehicleTagHasDteReadoutSwitch);
+    UIView *hasDteReadoutPanel = hasDteReadoutArray[0];
+    NSArray *hasMpgReadoutArray = switchPanelBlk(FPVehicleTagHasMpgReadoutPanel, @"Has average MPG readout?", FPVehicleTagHasMpgReadoutSwitch);
+    UIView *hasMpgReadoutPanel = hasMpgReadoutArray[0];
+    NSArray *hasMphReadoutArray = switchPanelBlk(FPVehicleTagHasMphReadoutPanel, @"Has average MPH readout?", FPVehicleTagHasMphReadoutSwitch);
+    UIView *hasMphReadoutPanel = hasMphReadoutArray[0];
+    NSArray *hasOutsideTempReadoutArray = switchPanelBlk(FPVehicleTagHasOutsideTempReadoutPanel, @"Has outside temp. readout?", FPVehicleTagHasOutsideTempReadoutSwitch);
+    UIView *hasOutsideTempReadoutPanel = hasOutsideTempReadoutArray[0];
     UITextField *vinTf = tfMaker(@"VIN", FPVehicleTagVin);
     UITextField *plateTf = tfMaker(@"Plate #", FPVehicleTagPlate);
     UIView *topPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:parentView fixedHeight:0.0];
@@ -718,8 +736,38 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    [PEUIUtils placeView:vinTf
+    [PEUIUtils placeView:hasDteReadoutPanel
                    below:vehicleFuelCapacityTf
+                    onto:bottomPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:hasMpgReadoutPanel
+                   below:hasDteReadoutPanel
+                    onto:bottomPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:hasMphReadoutPanel
+                   below:hasMpgReadoutPanel
+                    onto:bottomPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:hasOutsideTempReadoutPanel
+                   below:hasMphReadoutPanel
+                    onto:bottomPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:vinTf
+                   below:hasOutsideTempReadoutPanel
+                    onto:bottomPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:plateTf
+                   below:vinTf
                     onto:bottomPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
@@ -732,6 +780,10 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                 hpadding:0.0];
     [PEUIUtils setFrameHeight:(vehicleDefaultOctaneTf.frame.size.height + 5.0 +
                                vehicleFuelCapacityTf.frame.size.height + 5.0 +
+                               hasDteReadoutPanel.frame.size.height + 5.0 +
+                               hasMpgReadoutPanel.frame.size.height + 5.0 +
+                               hasMphReadoutPanel.frame.size.height + 5.0 +
+                               hasOutsideTempReadoutPanel.frame.size.height + 5.0 +
                                vinTf.frame.size.height + 5.0 +
                                plateTf.frame.size.height + 5.0)
                        ofView:bottomPanel];
@@ -762,7 +814,11 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                          }];
       }
     } forControlEvents:UIControlEventTouchUpInside];
-    return vehiclePanel;
+    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[vehiclePanel frame]];
+    [scrollView setContentSize:CGSizeMake(vehiclePanel.frame.size.width, 1.575 * vehiclePanel.frame.size.height)];
+    [scrollView addSubview:vehiclePanel];
+    [scrollView setBounces:YES];
+    return scrollView;
   };
 }
 
@@ -786,6 +842,10 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
           withDecimalSetter:@selector(setFuelCapacity:)
        fromTextfieldWithTag:FPVehicleTagFuelCapacity
                    fromView:panel];
+    [vehicle setHasDteReadout:((UISwitch *)[panel viewWithTag:FPVehicleTagHasDteReadoutSwitch]).on];
+    [vehicle setHasMpgReadout:((UISwitch *)[panel viewWithTag:FPVehicleTagHasMpgReadoutSwitch]).on];
+    [vehicle setHasMphReadout:((UISwitch *)[panel viewWithTag:FPVehicleTagHasMphReadoutSwitch]).on];
+    [vehicle setHasOutsideTempReadout:((UISwitch *)[panel viewWithTag:FPVehicleTagHasOutsideTempReadoutSwitch]).on];
     [PEUIUtils bindToEntity:vehicle
            withStringSetter:@selector(setVin:)
        fromTextfieldWithTag:FPVehicleTagVin
@@ -822,6 +882,10 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                fromView:panel
                              fromEntity:vehicle
                              withGetter:@selector(fuelCapacity)];
+    [((UISwitch *)[panel viewWithTag:FPVehicleTagHasDteReadoutSwitch]) setOn:vehicle.hasDteReadout animated:YES];
+    [((UISwitch *)[panel viewWithTag:FPVehicleTagHasMpgReadoutSwitch]) setOn:vehicle.hasMpgReadout animated:YES];
+    [((UISwitch *)[panel viewWithTag:FPVehicleTagHasMphReadoutSwitch]) setOn:vehicle.hasMphReadout animated:YES];
+    [((UISwitch *)[panel viewWithTag:FPVehicleTagHasOutsideTempReadoutSwitch]) setOn:vehicle.hasOutsideTempReadout animated:YES];
     [PEUIUtils bindToTextControlWithTag:FPVehicleTagVin
                                fromView:panel
                              fromEntity:vehicle
@@ -847,6 +911,18 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     [PEUIUtils enableControlWithTag:FPVehicleTagFuelCapacity
                            fromView:panel
                              enable:enable];
+    [PEUIUtils enableControlWithTag:FPVehicleTagHasDteReadoutSwitch
+                           fromView:panel
+                             enable:enable];
+    [PEUIUtils enableControlWithTag:FPVehicleTagHasMpgReadoutSwitch
+                           fromView:panel
+                             enable:enable];
+    [PEUIUtils enableControlWithTag:FPVehicleTagHasMphReadoutSwitch
+                           fromView:panel
+                             enable:enable];
+    [PEUIUtils enableControlWithTag:FPVehicleTagHasOutsideTempReadoutSwitch
+                           fromView:panel
+                             enable:enable];
     [PEUIUtils enableControlWithTag:FPVehicleTagVin
                            fromView:panel
                              enable:enable];
@@ -863,7 +939,10 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                    defaultOctane:[PEUIUtils numberFromTextFieldWithTag:FPVehicleTagDefaultOctane fromView:panel]
                     fuelCapacity:[PEUIUtils decimalNumberFromTextFieldWithTag:FPVehicleTagFuelCapacity fromView:panel]
                         isDiesel:((UISwitch *)[panel viewWithTag:FPVehicleTagTakesDieselSwitch]).on
-                    fieldsetMask:nil
+                   hasDteReadout:((UISwitch *)[panel viewWithTag:FPVehicleTagHasDteReadoutSwitch]).on
+                   hasMpgReadout:((UISwitch *)[panel viewWithTag:FPVehicleTagHasMpgReadoutSwitch]).on
+                   hasMphReadout:((UISwitch *)[panel viewWithTag:FPVehicleTagHasMphReadoutSwitch]).on
+           hasOutsideTempReadout:((UISwitch *)[panel viewWithTag:FPVehicleTagHasOutsideTempReadoutSwitch]).on
                              vin:[PEUIUtils stringFromTextFieldWithTag:FPVehicleTagVin fromView:panel]
                            plate:[PEUIUtils stringFromTextFieldWithTag:FPVehicleTagPlate fromView:panel]];
     return newVehicle;
@@ -1287,19 +1366,12 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     UIView *fpEnvCompPanel = [PEUIUtils panelWithWidthOf:1.0
                                              andHeightOf:1.12
                                           relativeToView:parentView];
+    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:fpEnvCompPanel];
     NSDictionary *envlogComponents = [self envlogFormComponentsWithUser:user
                                             displayDisclosureIndicators:YES
                                                                 vehicle:vehicle
                                                                 logDate:logDate](parentViewController);
     UITextField *odometerTf = envlogComponents[@(FPEnvLogTagOdometer)];
-    UITextField *reportedAvgMpgTf = envlogComponents[@(FPEnvLogTagReportedAvgMpg)];
-    UITextField *reportedAvgMphTf = envlogComponents[@(FPEnvLogTagReportedAvgMph)];
-    UITextField *reportedOutsideTempTf = envlogComponents[@(FPEnvLogTagReportedOutsideTemp)];
-    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:fpEnvCompPanel];
-    UITextField *preFillupReportedDteTf = tfMaker(@"Pre-fillup Reported DTE", FPFpEnvLogCompositeTagPreFillupReportedDte);
-    [preFillupReportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
-    UITextField *postFillupReportedDteTf = tfMaker(@"Post-fillup Reported DTE", FPFpEnvLogCompositeTagPostFillupReportedDte);
-    [postFillupReportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
     NSDictionary *fplogComponents = [self fplogFormComponentsWithUser:user
                                            displayDisclosureIndicator:YES
                                                               vehicle:vehicle
@@ -1333,38 +1405,56 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       }
       aboveView = octaneTf;
     }
-    [PEUIUtils placeView:preFillupReportedDteTf
+    if (vehicle.hasDteReadout) {
+      UITextField *preFillupReportedDteTf = tfMaker(@"Pre-fillup range readout", FPFpEnvLogCompositeTagPreFillupReportedDte);
+      [preFillupReportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
+      [PEUIUtils placeView:preFillupReportedDteTf
+                     below:aboveView
+                      onto:fpEnvCompPanel
+             withAlignment:PEUIHorizontalAlignmentTypeLeft
+                  vpadding:5.0
+                  hpadding:0.0];
+      aboveView = preFillupReportedDteTf;
+    }
+    if (vehicle.hasMpgReadout) {
+      UITextField *reportedAvgMpgTf = envlogComponents[@(FPEnvLogTagReportedAvgMpg)];
+      [PEUIUtils placeView:reportedAvgMpgTf
+                     below:aboveView
+                      onto:fpEnvCompPanel
+             withAlignment:PEUIHorizontalAlignmentTypeLeft
+                  vpadding:5.0
+                  hpadding:0.0];
+      aboveView = reportedAvgMpgTf;
+    }
+    if (vehicle.hasMphReadout) {
+      UITextField *reportedAvgMphTf = envlogComponents[@(FPEnvLogTagReportedAvgMph)];
+      [PEUIUtils placeView:reportedAvgMphTf
+                     below:aboveView
+                      onto:fpEnvCompPanel
+             withAlignment:PEUIHorizontalAlignmentTypeLeft
+                  vpadding:5.0
+                  hpadding:0.0];
+      aboveView = reportedAvgMphTf;
+    }
+    [PEUIUtils placeView:odometerTf
                    below:aboveView
                     onto:fpEnvCompPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    [PEUIUtils placeView:reportedAvgMpgTf
-                   below:preFillupReportedDteTf
-                    onto:fpEnvCompPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
-    [PEUIUtils placeView:reportedAvgMphTf
-                   below:reportedAvgMpgTf
-                    onto:fpEnvCompPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
-    [PEUIUtils placeView:odometerTf
-                   below:reportedAvgMphTf
-                    onto:fpEnvCompPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
-    [PEUIUtils placeView:reportedOutsideTempTf
-                   below:odometerTf
-                    onto:fpEnvCompPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
+    aboveView = odometerTf;
+    if (vehicle.hasOutsideTempReadout) {
+      UITextField *reportedOutsideTempTf = envlogComponents[@(FPEnvLogTagReportedOutsideTemp)];
+      [PEUIUtils placeView:reportedOutsideTempTf
+                     below:odometerTf
+                      onto:fpEnvCompPanel
+             withAlignment:PEUIHorizontalAlignmentTypeLeft
+                  vpadding:5.0
+                  hpadding:0.0];
+      aboveView = reportedOutsideTempTf;
+    }
     [PEUIUtils placeView:pricePerGallonTf
-                   below:reportedOutsideTempTf
+                   below:aboveView
                     onto:fpEnvCompPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
@@ -1387,12 +1477,16 @@ To compute your location, you need to enable location services for Gas Jot.  If 
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    [PEUIUtils placeView:postFillupReportedDteTf
-                   below:numGallonsTf
-                    onto:fpEnvCompPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
+    if (vehicle.hasDteReadout) {
+      UITextField *postFillupReportedDteTf = tfMaker(@"Post-fillup range readout", FPFpEnvLogCompositeTagPostFillupReportedDte);
+      [postFillupReportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
+      [PEUIUtils placeView:postFillupReportedDteTf
+                     below:numGallonsTf
+                      onto:fpEnvCompPanel
+             withAlignment:PEUIHorizontalAlignmentTypeLeft
+                  vpadding:5.0
+                  hpadding:0.0];
+    }
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fpEnvCompPanel frame]];
     [scrollView setContentSize:CGSizeMake(fpEnvCompPanel.frame.size.width, 1.5 * fpEnvCompPanel.frame.size.height)];
     [scrollView addSubview:fpEnvCompPanel];
@@ -1509,7 +1603,6 @@ To compute your location, you need to enable location services for Gas Jot.  If 
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPFuelPurchaseLog *fplog) {
     UIView *parentView = [parentViewController view];
     UIView *fplogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-
     NSMutableArray *rowData = [NSMutableArray array];
     if (![fplog isDiesel]) {
       [rowData addObject:@[@"Octane", [PEUtils descriptionOrEmptyIfNil:[fplog octane]]]];
@@ -1526,9 +1619,9 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     FPFuelStation *fuelstation = [_coordDao fuelStationForFuelPurchaseLog:fplog error:[FPUtils localFetchErrorHandlerMaker]()];
     NSDictionary *components = [self fplogFormComponentsWithUser:user
                                       displayDisclosureIndicator:NO
-                                          vehicle:vehicle
-                                      fuelstation:fuelstation
-                                            logDate:[fplog purchasedAt]](parentViewController);
+                                                         vehicle:vehicle
+                                                     fuelstation:fuelstation
+                                                         logDate:[fplog purchasedAt]](parentViewController);
     UITableView *vehicleFuelStationDateTableView = components[@(FPFpLogTagVehicleFuelStationAndDate)];
     FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds = (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)vehicleFuelStationDateTableView.dataSource;
     [ds setSelectedFuelStation:fuelstation];
@@ -1670,9 +1763,8 @@ To compute your location, you need to enable location services for Gas Jot.  If 
              withAlignment:PEUIHorizontalAlignmentTypeLeft
                   hpadding:10.0];
       [PEUIUtils placeView:gotCarWashSwitch
-              toTheRightOf:gotCarWashLbl
-                      onto:gotCarWashPanel
-             withAlignment:PEUIVerticalAlignmentTypeMiddle
+                inMiddleOf:gotCarWashPanel
+             withAlignment:PEUIHorizontalAlignmentTypeRight
                   hpadding:15.0];
     }
     components[@(FPFpLogTagGotCarWash)] = gotCarWashSwitch;
@@ -1865,18 +1957,29 @@ To compute your location, you need to enable location services for Gas Jot.  If 
 - (PEEntityViewPanelMakerBlk)envlogViewPanelMakerWithUser:(FPUser *)user {
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPEnvironmentLog *envlog) {
     UIView *parentView = [parentViewController view];
+    FPVehicle *vehicle = [_coordDao vehicleForEnvironmentLog:envlog error:[FPUtils localFetchErrorHandlerMaker]()];
     UIView *envlogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *envlogDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Odometer", [PEUtils descriptionOrEmptyIfNil:[envlog odometer]]],
-                                                                 @[@"Reported DTE", [PEUtils descriptionOrEmptyIfNil:[envlog reportedDte]]],
-                                                                 @[@"Reported avg mpg", [PEUtils descriptionOrEmptyIfNil:[envlog reportedAvgMpg]]],
-                                                                 @[@"Reported avg mph", [PEUtils descriptionOrEmptyIfNil:[envlog reportedAvgMph]]],
-                                                                 @[@"Reported outside temperature", [PEUtils descriptionOrEmptyIfNil:[envlog reportedOutsideTemp]]]]
+    NSMutableArray *rowData = [NSMutableArray array];
+    [rowData addObject:@[@"Odometer", [PEUtils descriptionOrEmptyIfNil:[envlog odometer]]]];
+    if (vehicle.hasDteReadout) {
+      [rowData addObject:@[@"Range readout", [PEUtils descriptionOrEmptyIfNil:[envlog reportedDte]]]];
+    }
+    if (vehicle.hasMpgReadout) {
+      [rowData addObject:@[@"Average MPG readout", [PEUtils descriptionOrEmptyIfNil:[envlog reportedAvgMpg]]]];
+    }
+    if (vehicle.hasMphReadout) {
+      [rowData addObject:@[@"Average MPH readout", [PEUtils descriptionOrEmptyIfNil:[envlog reportedAvgMph]]]];
+    }
+    if (vehicle.hasOutsideTempReadout) {
+      [rowData addObject:@[@"Outside temperature readout", [PEUtils descriptionOrEmptyIfNil:[envlog reportedOutsideTemp]]]];
+    }
+    UIView *envlogDataPanel = [PEUIUtils tablePanelWithRowData:rowData
                                                      uitoolkit:_uitoolkit
                                                     parentView:parentView];
     NSDictionary *components = [self envlogFormComponentsWithUser:user
                                       displayDisclosureIndicators:NO
-                                           vehicle:[_coordDao vehicleForEnvironmentLog:envlog error:[FPUtils localFetchErrorHandlerMaker]()]
-                                             logDate:[envlog logDate]](parentViewController);
+                                                          vehicle:vehicle
+                                                          logDate:[envlog logDate]](parentViewController);
     UITableView *vehicleAndLogDateTableView = components[@(FPEnvLogTagVehicleAndDate)];
     [vehicleAndLogDateTableView setUserInteractionEnabled:NO];
     [PEUIUtils placeView:vehicleAndLogDateTableView
@@ -1949,52 +2052,64 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       [odometerTf setKeyboardType:UIKeyboardTypeDecimalPad];
     }
     components[@(FPEnvLogTagOdometer)] = odometerTf;
-    UITextField *reportedDteTf = (UITextField *)[parentView viewWithTag:FPEnvLogTagReportedDte];
-    if (!reportedDteTf) {
-      reportedDteTf = tfMaker(@"Reported DTE", FPEnvLogTagReportedDte);
-      [reportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
+    if (vehicle.hasDteReadout) {
+      UITextField *reportedDteTf = (UITextField *)[parentView viewWithTag:FPEnvLogTagReportedDte];
+      if (!reportedDteTf) {
+        reportedDteTf = tfMaker(@"Range readout", FPEnvLogTagReportedDte);
+        [reportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
+      }
+      components[@(FPEnvLogTagReportedDte)] = reportedDteTf;
     }
-    components[@(FPEnvLogTagReportedDte)] = reportedDteTf;
-    UITextField *reportedAvgMpgTf = (UITextField *)[parentView viewWithTag:FPEnvLogTagReportedAvgMpg];
-    if (!reportedAvgMpgTf) {
-      reportedAvgMpgTf = tfMaker(@"Reported avg mpg", FPEnvLogTagReportedAvgMpg);
-      [reportedAvgMpgTf setKeyboardType:UIKeyboardTypeDecimalPad];
+    if (vehicle.hasMpgReadout) {
+      UITextField *reportedAvgMpgTf = (UITextField *)[parentView viewWithTag:FPEnvLogTagReportedAvgMpg];
+      if (!reportedAvgMpgTf) {
+        reportedAvgMpgTf = tfMaker(@"Average MPG readout", FPEnvLogTagReportedAvgMpg);
+        [reportedAvgMpgTf setKeyboardType:UIKeyboardTypeDecimalPad];
+      }
+      components[@(FPEnvLogTagReportedAvgMpg)] = reportedAvgMpgTf;
     }
-    components[@(FPEnvLogTagReportedAvgMpg)] = reportedAvgMpgTf;
-    UITextField *reportedAvgMphTf = (UITextField *)[parentView viewWithTag:FPEnvLogTagReportedAvgMph];
-    if (!reportedAvgMphTf) {
-      reportedAvgMphTf = tfMaker(@"Reported avg mph", FPEnvLogTagReportedAvgMph);
-      [reportedAvgMphTf setKeyboardType:UIKeyboardTypeDecimalPad];
+    if (vehicle.hasMphReadout) {
+      UITextField *reportedAvgMphTf = (UITextField *)[parentView viewWithTag:FPEnvLogTagReportedAvgMph];
+      if (!reportedAvgMphTf) {
+        reportedAvgMphTf = tfMaker(@"Average MPH readout", FPEnvLogTagReportedAvgMph);
+        [reportedAvgMphTf setKeyboardType:UIKeyboardTypeDecimalPad];
+      }
+      components[@(FPEnvLogTagReportedAvgMph)] = reportedAvgMphTf;
     }
-    components[@(FPEnvLogTagReportedAvgMph)] = reportedAvgMphTf;
-    UITextField *reportedOutsideTempTf = (UITextField *)[parentView viewWithTag:FPEnvLogTagReportedOutsideTemp];
-    if (!reportedOutsideTempTf) {
-      reportedOutsideTempTf = tfMaker(@"Reported outside temperature", FPEnvLogTagReportedOutsideTemp);
-      [reportedOutsideTempTf setKeyboardType:UIKeyboardTypeNumberPad];
+    if (vehicle.hasOutsideTempReadout) {
+      UITextField *reportedOutsideTempTf = (UITextField *)[parentView viewWithTag:FPEnvLogTagReportedOutsideTemp];
+      if (!reportedOutsideTempTf) {
+        reportedOutsideTempTf = tfMaker(@"Outside temperature readout", FPEnvLogTagReportedOutsideTemp);
+        [reportedOutsideTempTf setKeyboardType:UIKeyboardTypeNumberPad];
+      }
+      components[@(FPEnvLogTagReportedOutsideTemp)] = reportedOutsideTempTf;
     }
-    components[@(FPEnvLogTagReportedOutsideTemp)] = reportedOutsideTempTf;
     return components;
   };
 }
 
 - (PEEntityPanelMakerBlk)envlogFormPanelMakerWithUser:(FPUser *)user
-                                              vehicle:(FPVehicle *(^)(void))vehicle
+                                    defaultVehicleBlk:(FPVehicle *(^)(void))defaultVehicleBlk
                                               logDate:(NSDate *)logDate {
   return ^ UIView * (UIViewController *parentViewController) {
     UIView *parentView = [parentViewController view];
+    FPEnvLogVehicleAndDateDataSourceDelegate *ds =
+      (FPEnvLogVehicleAndDateDataSourceDelegate *)[(UITableView *)[parentView viewWithTag:FPEnvLogTagVehicleAndDate] dataSource];
+    FPVehicle *vehicle;
+    if (ds) {
+      vehicle = [ds selectedVehicle];
+    } else {
+      vehicle = defaultVehicleBlk();
+    }
     UIView *envLogPanel = [PEUIUtils panelWithWidthOf:1.0
                                           andHeightOf:1.0
                                        relativeToView:parentView];
     NSDictionary *components = [self envlogFormComponentsWithUser:user
                                       displayDisclosureIndicators:YES
-                                                          vehicle:vehicle()
+                                                          vehicle:vehicle
                                                           logDate:logDate](parentViewController);
     UITableView *vehicleAndLogDateTableView = components[@(FPEnvLogTagVehicleAndDate)];
     UITextField *odometerTf = components[@(FPEnvLogTagOdometer)];
-    UITextField *reportedDteTf = components[@(FPEnvLogTagReportedDte)];
-    UITextField *reportedAvgMpgTf = components[@(FPEnvLogTagReportedAvgMpg)];
-    UITextField *reportedAvgMphTf = components[@(FPEnvLogTagReportedAvgMph)];
-    UITextField *reportedOutsideTempTf = components[@(FPEnvLogTagReportedOutsideTemp)];
     [PEUIUtils placeView:vehicleAndLogDateTableView
                  atTopOf:envLogPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -2006,31 +2121,52 @@ To compute your location, you need to enable location services for Gas Jot.  If 
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    [PEUIUtils placeView:reportedAvgMpgTf
-                   below:odometerTf
-                    onto:envLogPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
-    [PEUIUtils placeView:reportedDteTf
-                   below:reportedAvgMpgTf
-                    onto:envLogPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
-    [PEUIUtils placeView:reportedAvgMphTf
-                   below:reportedDteTf
-                    onto:envLogPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
-    [PEUIUtils placeView:reportedOutsideTempTf
-                   below:reportedAvgMphTf
-                    onto:envLogPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
-    return envLogPanel;
+    UIView *aboveView = odometerTf;
+    if (vehicle.hasMpgReadout) {
+      UITextField *reportedAvgMpgTf = components[@(FPEnvLogTagReportedAvgMpg)];
+      [PEUIUtils placeView:reportedAvgMpgTf
+                     below:aboveView
+                      onto:envLogPanel
+             withAlignment:PEUIHorizontalAlignmentTypeLeft
+                  vpadding:5.0
+                  hpadding:0.0];
+      aboveView = reportedAvgMpgTf;
+    }
+    if (vehicle.hasDteReadout) {
+      UITextField *reportedDteTf = components[@(FPEnvLogTagReportedDte)];
+      [PEUIUtils placeView:reportedDteTf
+                     below:aboveView
+                      onto:envLogPanel
+             withAlignment:PEUIHorizontalAlignmentTypeLeft
+                  vpadding:5.0
+                  hpadding:0.0];
+      aboveView = reportedDteTf;
+    }
+    if (vehicle.hasMphReadout) {
+      UITextField *reportedAvgMphTf = components[@(FPEnvLogTagReportedAvgMph)];
+      [PEUIUtils placeView:reportedAvgMphTf
+                     below:aboveView
+                      onto:envLogPanel
+             withAlignment:PEUIHorizontalAlignmentTypeLeft
+                  vpadding:5.0
+                  hpadding:0.0];
+      aboveView = reportedAvgMphTf;
+    }
+    if (vehicle.hasOutsideTempReadout) {
+      UITextField *reportedOutsideTempTf = components[@(FPEnvLogTagReportedOutsideTemp)];
+      [PEUIUtils placeView:reportedOutsideTempTf
+                     below:aboveView
+                      onto:envLogPanel
+             withAlignment:PEUIHorizontalAlignmentTypeLeft
+                  vpadding:5.0
+                  hpadding:0.0];
+      aboveView = reportedOutsideTempTf;
+    }
+    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[envLogPanel frame]];
+    [scrollView setContentSize:CGSizeMake(envLogPanel.frame.size.width, 1.4 * envLogPanel.frame.size.height)];
+    [scrollView addSubview:envLogPanel];
+    [scrollView setBounces:YES];
+    return scrollView;
   };
 }
 

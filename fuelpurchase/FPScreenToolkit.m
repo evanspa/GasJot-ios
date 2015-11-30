@@ -4118,8 +4118,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                              listViewController:listViewController
                                                    itemAddedBlk:itemAddedBlk
                                            entityFormPanelMaker:[_panelToolkit envlogFormPanelMakerWithUser:user
-                                                                                     vehicle:^{ return defaultSelectedVehicle; }
-                                                                                       logDate:[NSDate date]]
+                                                                                          defaultVehicleBlk:^{ return defaultSelectedVehicle; }
+                                                                                                    logDate:[NSDate date]]
                                             entityToPanelBinder:[_panelToolkit envlogToEnvlogPanelBinder]
                                             panelToEntityBinder:[_panelToolkit envlogFormPanelToEnvlogBinder]
                                                     entityTitle:@"Odometer Log"
@@ -4402,9 +4402,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                           uitoolkit:_uitoolkit
                                                      itemChangedBlk:itemChangedBlk
                                                entityFormPanelMaker:[_panelToolkit envlogFormPanelMakerWithUser:user
-                                                                                         vehicle:^{ return [_coordDao vehicleForEnvironmentLog:envLog
+                                                                                              defaultVehicleBlk:^{ return [_coordDao vehicleForEnvironmentLog:envLog
                                                                                                                                                         error:[FPUtils localFetchErrorHandlerMaker]()]; }
-                                                                                           logDate:[envLog logDate]]
+                                                                                                        logDate:[envLog logDate]]
                                                entityViewPanelMaker:[_panelToolkit envlogViewPanelMakerWithUser:user]
                                                 entityToPanelBinder:[_panelToolkit envlogToEnvlogPanelBinder]
                                                 panelToEntityBinder:[_panelToolkit envlogFormPanelToEnvlogBinder]
