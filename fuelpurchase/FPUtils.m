@@ -164,6 +164,9 @@
   if (saveFpLogErrMask & FPSaveFuelPurchaseLogGallonPriceNegative) {
     [errMsgs addObject:LS(@"savefplog.gallonprice-negative")];
   }
+  if (saveFpLogErrMask & FPSaveFuelPurchaseLogOdometerNegative) {
+    [errMsgs addObject:LS(@"savefplog.odometer-negative")];
+  }
   return errMsgs;
 }
 

@@ -2257,7 +2257,7 @@ The ones that did not %@ and will need to be fixed individually."
                 fixLaterActionTitle = @"I'll fix them later.";
                 cancelActionTitle = @"Forget it.  Just cancel them.";
                 dealWithLaterActionTitle = @"I'll try uploading them later.";
-                title = [NSString stringWithFormat:@"Problems %@.", mainMsgTitle];
+                title = [NSString stringWithFormat:@"Problems saving %@.", [mainMsgTitle lowercaseString]];
                 if (!areAllBusyErrors()) {
                   [sections addObject:[PEUIUtils multiErrorAlertSectionWithFailures:stripOutBusyErrors()
                                                                               title:title

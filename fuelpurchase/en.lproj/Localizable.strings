@@ -104,6 +104,7 @@
 "savefplog.numgallons-negative" = "Number of gallons cannot be negative.";
 "savefplog.octane-negative" = "Octane cannot be negative.";
 "savefplog.gallonprice-negative" = "Gallon price cannot be negative.";
+"savefplog.odometer-negative" = "Odometer cannot be negative.";
 
 /***************************************************************
  * 'Save Environment Log' error messages
