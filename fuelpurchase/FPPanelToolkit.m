@@ -814,6 +814,8 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                          }];
       }
     } forControlEvents:UIControlEventTouchUpInside];
+    [PEUIUtils setFrameHeightOfView:vehiclePanel ofHeight:1.0 relativeTo:parentView];
+    //[PEUIUtils applyBorderToView:vehiclePanel withColor:[UIColor greenColor]];
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[vehiclePanel frame]];
     [scrollView setContentSize:CGSizeMake(vehiclePanel.frame.size.width, 1.575 * vehiclePanel.frame.size.height)];
     [scrollView addSubview:vehiclePanel];
@@ -1076,7 +1078,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
 - (PEEntityPanelMakerBlk)fuelstationFormPanelMakerIncludeLogButton:(BOOL)includeLogButton {
   return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
-    UIView *fuelStationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.4 relativeToView:parentView];
+    UIView *fuelStationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
     TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:fuelStationPanel];
     UITextField *fuelStationNameTf = tfMaker(@"Gas station name", FPFuelStationTagName);
     UITextField *fuelStationStreetTf = tfMaker(@"Street", FPFuelStationTagStreet);
@@ -1256,6 +1258,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
                 vpadding:6.0
                 hpadding:0.0];
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelStationPanel frame]];
+    //[PEUIUtils applyBorderToView:fuelStationPanel withColor:[UIColor redColor]];
     [scrollView setContentSize:CGSizeMake(fuelStationPanel.frame.size.width, 1.1 * fuelStationPanel.frame.size.height)];
     [scrollView addSubview:fuelStationPanel];
     [scrollView setBounces:YES];

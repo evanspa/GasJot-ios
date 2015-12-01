@@ -1182,12 +1182,20 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
         NSString *fieldName = key;
         if ([fieldName isEqualToString:FPVehicleNameField]) {
           [fields addObject:@[@"Name:", @(FPVehicleTagName), [PEUtils emptyIfNil:[localVehicle name]], [PEUtils emptyIfNil:[remoteVehicle name]]]];
+        } else if ([fieldName isEqualToString:FPVehicleIsDieselField]) {
+          [fields addObject:@[@"Takes diesel?:", @(FPVehicleTagTakesDieselSwitch), [PEUtils yesNoFromBool:[localVehicle isDiesel]], [PEUtils yesNoFromBool:[remoteVehicle isDiesel]]]];
         } else if ([fieldName isEqualToString:FPVehicleDefaultOctaneField]) {
           [fields addObject:@[@"Default octane:", @(FPVehicleTagDefaultOctane), [PEUtils descriptionOrEmptyIfNil:[localVehicle defaultOctane]], [PEUtils descriptionOrEmptyIfNil:[remoteVehicle defaultOctane]]]];
         } else if ([fieldName isEqualToString:FPVehicleFuelCapacityField]) {
           [fields addObject:@[@"Fuel capacity:", @(FPVehicleTagFuelCapacity), [PEUtils descriptionOrEmptyIfNil:[localVehicle fuelCapacity]], [PEUtils descriptionOrEmptyIfNil:[remoteVehicle fuelCapacity]]]];
-        } else if ([fieldName isEqualToString:FPVehicleIsDieselField]) {
-          [fields addObject:@[@"Takes diesel?:", @(FPVehicleTagTakesDieselSwitch), [PEUtils yesNoFromBool:[localVehicle isDiesel]], [PEUtils yesNoFromBool:[remoteVehicle isDiesel]]]];
+        } else if ([fieldName isEqualToString:FPVehicleHasDteReadoutField]) {
+          [fields addObject:@[@"Has range readout?:", @(FPVehicleTagHasDteReadoutSwitch), [PEUtils yesNoFromBool:[localVehicle hasDteReadout]], [PEUtils yesNoFromBool:[remoteVehicle hasDteReadout]]]];
+        } else if ([fieldName isEqualToString:FPVehicleHasMpgReadoutField]) {
+          [fields addObject:@[@"Has avg MPG readout?:", @(FPVehicleTagHasMpgReadoutSwitch), [PEUtils yesNoFromBool:[localVehicle hasMpgReadout]], [PEUtils yesNoFromBool:[remoteVehicle hasMpgReadout]]]];
+        } else if ([fieldName isEqualToString:FPVehicleHasMphReadoutField]) {
+          [fields addObject:@[@"Has avg MPH readout?:", @(FPVehicleTagHasMphReadoutSwitch), [PEUtils yesNoFromBool:[localVehicle hasMphReadout]], [PEUtils yesNoFromBool:[remoteVehicle hasMphReadout]]]];
+        } else if ([fieldName isEqualToString:FPVehicleHasOutsideTempReadoutField]) {
+          [fields addObject:@[@"Has outside temp. readout?:", @(FPVehicleTagHasOutsideTempReadoutSwitch), [PEUtils yesNoFromBool:[localVehicle hasOutsideTempReadout]], [PEUtils yesNoFromBool:[remoteVehicle hasOutsideTempReadout]]]];
         } else if ([fieldName isEqualToString:FPVehicleVinField]) {
           [fields addObject:@[@"VIN:", @(FPVehicleTagVin), [PEUtils descriptionOrEmptyIfNil:[localVehicle vin]], [PEUtils descriptionOrEmptyIfNil:[remoteVehicle vin]]]];
         } else if ([fieldName isEqualToString:FPVehiclePlateField]) {
@@ -1225,6 +1233,18 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
               break;
             case FPVehicleTagPlate:
               [resolvedVehicle setPlate:[remoteVehicle plate]];
+              break;
+            case FPVehicleTagHasDteReadoutSwitch:
+              [resolvedVehicle setHasDteReadout:[remoteVehicle hasDteReadout]];
+              break;
+            case FPVehicleTagHasMpgReadoutSwitch:
+              [resolvedVehicle setHasMpgReadout:[remoteVehicle hasMpgReadout]];
+              break;
+            case FPVehicleTagHasMphReadoutSwitch:
+              [resolvedVehicle setHasMphReadout:[remoteVehicle hasMphReadout]];
+              break;
+            case FPVehicleTagHasOutsideTempReadoutSwitch:
+              [resolvedVehicle setHasOutsideTempReadout:[remoteVehicle hasOutsideTempReadout]];
               break;
           }
         }
@@ -4298,13 +4318,13 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
         } else if ([fieldName isEqualToString:FPEnvlogOdometerField]) {
           [fields addObject:@[@"Odometer:", @(FPEnvLogTagOdometer), [PEUtils descriptionOrEmptyIfNil:[localEnvlog odometer]], [PEUtils descriptionOrEmptyIfNil:[remoteEnvlog odometer]]]];
         } else if ([fieldName isEqualToString:FPEnvlogReportedDteField]) {
-          [fields addObject:@[@"DTE:", @(FPEnvLogTagReportedDte), [PEUtils descriptionOrEmptyIfNil:[localEnvlog reportedDte]], [PEUtils descriptionOrEmptyIfNil:[remoteEnvlog reportedDte]]]];
+          [fields addObject:@[@"Range readout:", @(FPEnvLogTagReportedDte), [PEUtils descriptionOrEmptyIfNil:[localEnvlog reportedDte]], [PEUtils descriptionOrEmptyIfNil:[remoteEnvlog reportedDte]]]];
         } else if ([fieldName isEqualToString:FPEnvlogReportedAvgMpgField]) {
-          [fields addObject:@[@"Reported avg mpg:", @(FPEnvLogTagReportedAvgMpg), [PEUtils descriptionOrEmptyIfNil:[localEnvlog reportedAvgMpg]], [PEUtils descriptionOrEmptyIfNil:[remoteEnvlog reportedAvgMpg]]]];
+          [fields addObject:@[@"Average MPG readout:", @(FPEnvLogTagReportedAvgMpg), [PEUtils descriptionOrEmptyIfNil:[localEnvlog reportedAvgMpg]], [PEUtils descriptionOrEmptyIfNil:[remoteEnvlog reportedAvgMpg]]]];
         } else if ([fieldName isEqualToString:FPEnvlogReportedAvgMphField]) {
-          [fields addObject:@[@"Reported avg mph:", @(FPEnvLogTagReportedAvgMph), [PEUtils descriptionOrEmptyIfNil:[localEnvlog reportedAvgMph]], [PEUtils descriptionOrEmptyIfNil:[remoteEnvlog reportedAvgMph]]]];
+          [fields addObject:@[@"Average MPG readout:", @(FPEnvLogTagReportedAvgMph), [PEUtils descriptionOrEmptyIfNil:[localEnvlog reportedAvgMph]], [PEUtils descriptionOrEmptyIfNil:[remoteEnvlog reportedAvgMph]]]];
         } else if ([fieldName isEqualToString:FPEnvlogReportedOutsideTempField]) {
-          [fields addObject:@[@"Reported outside temperature:", @(FPEnvLogTagReportedOutsideTemp), [PEUtils descriptionOrEmptyIfNil:[localEnvlog reportedOutsideTemp]], [PEUtils descriptionOrEmptyIfNil:[remoteEnvlog reportedOutsideTemp]]]];
+          [fields addObject:@[@"Outside temp. readout:", @(FPEnvLogTagReportedOutsideTemp), [PEUtils descriptionOrEmptyIfNil:[localEnvlog reportedOutsideTemp]], [PEUtils descriptionOrEmptyIfNil:[remoteEnvlog reportedOutsideTemp]]]];
         }
       }];
       return fields;
