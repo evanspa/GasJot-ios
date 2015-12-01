@@ -2,7 +2,7 @@
 
 readonly projectName="GasJot-ios"
 readonly version="$1"
-readonly tagLabel="${projectName}-v${version}"
+readonly tagLabel="${version}"
 
 agvtool new-version -all ${version}
 git add .
