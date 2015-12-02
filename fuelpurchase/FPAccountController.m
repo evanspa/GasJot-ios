@@ -363,7 +363,7 @@ account.";
   
   
   
-  UIButton *createAccountBtn = [PEUIUtils buttonWithKey:@"Create Account"
+  UIButton *createAccountBtn = [PEUIUtils buttonWithKey:@"Sign Up"
                                                    font:[UIFont boldSystemFontOfSize:22.0]
                                         backgroundColor:[UIColor peterRiverColor]
                                               textColor:[UIColor whiteColor]

@@ -17,13 +17,13 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.4.2</string>
+	<string>1.4.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.4.2</string>
+	<string>1.4.0</string>
 	<key>FP Authentication Strength for Login Token</key>
-	<real>0.3</real>
+	<real>0.29999999999999999</real>
 	<key>FP Authentication scheme</key>
 	<string>fp-auth</string>
 	<key>FP Authentication token param name</key>

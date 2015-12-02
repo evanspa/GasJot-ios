@@ -89,7 +89,7 @@
               vpadding:75.0
               hpadding:0.0];
   UINavigationItem *navItem = [self navigationItem];
-  [navItem setTitle:@"Create Account"];
+  [navItem setTitle:@"Sign Up"];
   [navItem setLeftBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
                                                                               target:self
                                                                               action:@selector(handleCancel)]];

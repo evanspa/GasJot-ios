@@ -76,6 +76,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
   //UIButton *_allStatsBtn;
   FPHomeState _currentlyRenderedState;
   UIView *_currentContentPanel;
+  dispatch_queue_t _serialQueue;
   
   JBLineChartView *_spentOnGasChart;
   NSMutableArray *_spentOnGasDataSet;
@@ -114,6 +115,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
     _priceOfGasDataSet = [NSMutableArray array];
     _daysBetweenFillupsDataSet = [NSMutableArray array];
     _gasCostPerMileDataSet = [NSMutableArray array];
+    _serialQueue = dispatch_queue_create("com.jotyourself.gasjot.home.queue", DISPATCH_QUEUE_SERIAL);
   }
   return self;
 }
@@ -408,8 +410,8 @@ alignmentRelativeToView:chart
                                          withCellHeight:15.0
                                       labelLeftHPadding:5.0
                                      valueRightHPadding:10.0
-                                              labelFont:[UIFont systemFontOfSize:12]
-                                              valueFont:[UIFont systemFontOfSize:12]
+                                         labelTextStyle:UIFontTextStyleCaption1
+                                         valueTextStyle:UIFontTextStyleCaption1
                                          labelTextColor:[UIColor blackColor]
                                          valueTextColor:[UIColor grayColor]
                          minPaddingBetweenLabelAndValue:1.0
@@ -499,7 +501,7 @@ alignmentRelativeToView:chart
 - (void)refreshViewWithTag:(NSInteger)tag
             valuesMakerBlk:(NSArray *(^)(void))valuesMakeBlk
               viewMakerBlk:(UIView *(^)(NSArray *))viewMakerBlk {
-  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+  dispatch_async(_serialQueue, ^(void) {
     NSArray *values = valuesMakeBlk();
     dispatch_async(dispatch_get_main_queue(), ^(void) {
       UIView *view = [self.view viewWithTag:tag];
@@ -518,7 +520,7 @@ alignmentRelativeToView:chart
           chartTitle:(NSString *)chartTitle
              dataset:(NSMutableArray *)dataset
           datasetBlk:(NSArray *(^)(void))datasetBlk {
-  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+  dispatch_async(_serialQueue, ^(void) {
     [dataset removeAllObjects];
     [dataset addObjectsFromArray:datasetBlk()];
     dispatch_async(dispatch_get_main_queue(), ^(void) {

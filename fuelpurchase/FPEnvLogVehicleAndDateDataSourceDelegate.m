@@ -55,40 +55,6 @@ displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
   return self;
 }
 
-#pragma mark - Notification Observing
-
-- (void)handleNotification:(NSNotification *)notification
-   potentialMatchingEntity:(PELMMainSupport *)entity
-          tempNotification:(NSString *)tempNotification {
-  if (entity) {
-    NSNumber *indexOfNotifEntity =
-      [PELMNotificationUtils indexOfEntityRef:entity notification:notification];
-    if (indexOfNotifEntity) {
-      [PEUIUtils displayTempNotification:tempNotification
-                           forController:_controllerCtx
-                               uitoolkit:[_screenToolkit uitoolkit]];
-    }
-  }
-}
-
-- (void)vehicleObjectSyncInitiated:(NSNotification *)notification {
-  [self handleNotification:notification
-   potentialMatchingEntity:_selectedVehicle
-          tempNotification:@"Sync initiated for selected vehicle."];
-}
-
-- (void)vehicleObjectSyncCompleted:(NSNotification *)notification {
-  [self handleNotification:notification
-   potentialMatchingEntity:_selectedVehicle
-          tempNotification:@"Sync completed for selected vehicle."];
-}
-
-- (void)vehicleObjectSyncFailed:(NSNotification *)notification {
-  [self handleNotification:notification
-   potentialMatchingEntity:_selectedVehicle
-          tempNotification:@"Sync failed for selected vehicle."];
-}
-
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView *)tableView

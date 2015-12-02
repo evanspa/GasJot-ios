@@ -223,11 +223,11 @@ NSString * const FPPanelToolkitVehicleDefaultOctaneNaPlaceholerText = @"Default 
   NSArray *accountStatusText = [FPPanelToolkit accountStatusTextForUser:user];
   UIView *statusPanel = [PEUIUtils labelValuePanelWithCellHeight:41.5 //36.75
                                                      labelString:@"Account status"
-                                                       labelFont:[uitoolkit fontForTextfields]
+                                                  labelTextStyle:UIFontTextStyleBody
                                                   labelTextColor:[UIColor blackColor]
                                                labelLeftHPadding:10.0
                                                      valueString:accountStatusText[0]
-                                                       valueFont:[uitoolkit fontForTextfields]
+                                                  valueTextStyle:UIFontTextStyleBody
                                                   valueTextColor:accountStatusText[1]
                                               valueRightHPadding:15.0
                                                    valueLabelTag:nil

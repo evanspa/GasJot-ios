@@ -43,10 +43,20 @@
   return self;
 }
 
+#pragma mark - Dynamic Type Support
+
+- (void)changeTextSize:(NSNotification *)notification {
+  [self viewDidAppear:YES];
+}
+
 #pragma mark - View Controller Lifecycle
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(changeTextSize:)
+                                               name:UIContentSizeCategoryDidChangeNotification
+                                             object:nil];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Data Records"];

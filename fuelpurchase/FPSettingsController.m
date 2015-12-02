@@ -55,6 +55,12 @@
   return self;
 }
 
+#pragma mark - Dynamic Type Support
+
+- (void)changeTextSize:(NSNotification *)notification {
+  [self viewDidAppear:YES];
+}
+
 #pragma mark - View Controller Lifecyle
 
 - (void)viewDidLoad {
@@ -62,11 +68,13 @@
 #ifdef FP_DEV
   [self pdvDevEnable];
 #endif
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(changeTextSize:)
+                                               name:UIContentSizeCategoryDidChangeNotification
+                                             object:nil];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Settings"];
-  [self makeNotLoggedInPanel];
-  [self makeDoesHaveAuthTokenPanel];
   [self setAutomaticallyAdjustsScrollViewInsets:NO]; // http://stackoverflow.com/questions/6523205/uiscrollview-adjusts-contentoffset-when-contentsize-changes
 }
 
@@ -76,12 +84,14 @@
   [_notLoggedInPanel removeFromSuperview];
   [_doesHaveAuthTokenPanel removeFromSuperview];
   if ([APP isUserLoggedIn]) {
+    [self makeDoesHaveAuthTokenPanel];
     [PEUIUtils placeView:_doesHaveAuthTokenPanel
                  atTopOf:[self view]
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:0.0
                 hpadding:0.0];
   } else {
+    [self makeNotLoggedInPanel];
     [PEUIUtils placeView:_notLoggedInPanel
                  atTopOf:[self view]
            withAlignment:PEUIHorizontalAlignmentTypeLeft
@@ -95,7 +105,7 @@
 - (UIView *)leftPaddingMessageWithText:(NSString *)text {
   CGFloat leftPadding = 8.0;
   UILabel *label = [PEUIUtils labelWithKey:text
-                                      font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                      font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                            backgroundColor:[UIColor clearColor]
                                  textColor:[UIColor darkGrayColor]
                        verticalTextPadding:3.0
@@ -111,7 +121,7 @@
   CGFloat labelLeftPadding = 8.0;
   UIImageView *iconImageView = [[UIImageView alloc] initWithImage:iconImage];
   UILabel *messageLabel = [PEUIUtils labelWithKey:message
-                                             font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                             font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                   backgroundColor:[UIColor clearColor]
                                         textColor:[UIColor darkGrayColor]
                               verticalTextPadding:3.0
@@ -174,17 +184,17 @@ click on your device, navigate to 'Apps' and scroll down to the 'File Sharing' s
 
 #pragma mark - Panel Makers
 
-- (UIView *)makeSplashScreenPanel {
+- (UIView *)makeSplashScreenPanelFitSubtitleToWidth:(CGFloat)fitSubtitleToWidth {
   CGFloat labelLeftPadding = 8.0;
   UIButton *viewSplashScreenBtn = [_uitoolkit systemButtonMaker](@"View splash screen", nil, nil);
   [PEUIUtils setFrameWidthOfView:viewSplashScreenBtn ofWidth:1.0 relativeTo:self.view];
   [PEUIUtils addDisclosureIndicatorToButton:viewSplashScreenBtn];
   UIView *viewSplashScreenMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"Care to see Gas Jot's splash screen again?"
-                                                                        font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                                             backgroundColor:[UIColor clearColor]
-                                                                   textColor:[UIColor darkGrayColor]
-                                                         verticalTextPadding:3.0
-                                                                  fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0]
+                                                                               font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
+                                                                    backgroundColor:[UIColor clearColor]
+                                                                          textColor:[UIColor darkGrayColor]
+                                                                verticalTextPadding:3.0
+                                                                         fitToWidth:fitSubtitleToWidth]
                                              padding:labelLeftPadding];
   [viewSplashScreenBtn bk_addEventHandler:^(id sender) {
     FPSplashController *splashController =
@@ -201,15 +211,11 @@ click on your device, navigate to 'Apps' and scroll down to the 'File Sharing' s
 
 - (void)makeDoesHaveAuthTokenPanel {
   CGFloat labelLeftPadding = 8.0;
-  //_doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
   _doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
-  [_doesHaveAuthTokenPanel setDelaysContentTouches:NO];
-  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.85 * self.view.frame.size.height)];
-  [_doesHaveAuthTokenPanel setBounces:YES];
   UIView *changelogMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"\
 Keeps your device synchronized with your remote account in case you've made edits \
 and deletions on other devices."
-                                                                        font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                                        font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                              backgroundColor:[UIColor clearColor]
                                                                    textColor:[UIColor darkGrayColor]
                                                          verticalTextPadding:3.0
@@ -222,6 +228,7 @@ and deletions on other devices."
               hpadding:15.0];
   [[changelogBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:changelogBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
+  UIFont* boldDescFont = [PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline];
   [changelogBtn bk_addEventHandler:^(id sender) {
     MBProgressHUD *changelogHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     changelogHud.delegate = self;
@@ -320,7 +327,7 @@ The server is currently busy at the moment. Please try this again later."]
                      [PEUIUtils attributedTextWithTemplate:@"Re-authenticate"
                                               textToAccent:@"Well this is awkward.  While syncing your account, the server is asking for you \
 to re-authenticate.\n\nTo authenticate, tap the %@ button."
-                                            accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+                                            accentTextFont:boldDescFont];
                      [PEUIUtils showWarningAlertWithMsgs:nil
                                                    title:@"Authentication Failure."
                                         alertDescription:attrBecameUnauthMessage
@@ -350,57 +357,64 @@ Offline mode prevents upload attempts to the server, keeping all saves local-onl
 Enable offline mode if you are making many saves and you want them done instantly and you have a poor internet connection.  "];
   NSAttributedString *offlineDescPart2 = [PEUIUtils attributedTextWithTemplate:@"Later, you can bulk-upload your edits from the %@ screen.\n\n"
                                                                   textToAccent:@"Records"
-                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+                                                                accentTextFont:boldDescFont];
   NSAttributedString *offlineDescPart3 = [PEUIUtils attributedTextWithTemplate:@"When offline mode is enabled, an %@ will appear to remind you it's enabled."
                                                                   textToAccent:@"orange border"
-                                                                accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                                accentTextFont:boldDescFont
                                                                accentTextColor:[UIColor carrotColor]];
   [offlineDesc appendAttributedString:offlineDescPart2];
   [offlineDesc appendAttributedString:offlineDescPart3];
   UILabel *offlineModeDescLabel = [PEUIUtils labelWithAttributeText:offlineDesc
-                                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                               font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                     backgroundColor:[UIColor clearColor]
                                                           textColor:[UIColor darkGrayColor]
                                                 verticalTextPadding:3.0
                                                          fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0];
   UIView *offlineModeDescPanelWithPad = [PEUIUtils leftPadView:offlineModeDescLabel padding:labelLeftPadding];
-  UIView *offlineModeSwitchPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:_doesHaveAuthTokenPanel fixedHeight:40.0];
-  [offlineModeSwitchPanel setBackgroundColor:[UIColor whiteColor]];
   UILabel *offlineModeLabel = [PEUIUtils labelWithKey:@"Offline mode"
-                                                 font:[UIFont systemFontOfSize:18.0]
+                                                 font:[_uitoolkit fontForButtonsBlk]()
                                       backgroundColor:[UIColor clearColor]
                                             textColor:[UIColor blackColor]
                                   verticalTextPadding:3.0];
+  UIView *offlineModeSwitchPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:_doesHaveAuthTokenPanel fixedHeight:(offlineModeLabel.frame.size.height + [_uitoolkit verticalPaddingForButtons])];
+  [offlineModeSwitchPanel setBackgroundColor:[UIColor whiteColor]];
   [PEUIUtils placeView:offlineModeLabel inMiddleOf:offlineModeSwitchPanel withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:15.0];
   [PEUIUtils placeView:offlineModeSwitch inMiddleOf:offlineModeSwitchPanel withAlignment:PEUIHorizontalAlignmentTypeRight hpadding:15.0];
+  
   [PEUIUtils placeView:offlineModeSwitchPanel atTopOf:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:90.0 hpadding:0.0];
+  CGFloat totalHeight = offlineModeSwitchPanel.frame.size.height + 90;
   [PEUIUtils placeView:offlineModeDescPanelWithPad below:offlineModeSwitchPanel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
+  totalHeight += offlineModeDescPanelWithPad.frame.size.height + 4.0;
   [PEUIUtils placeView:changelogBtn below:offlineModeDescPanelWithPad onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
+  totalHeight += changelogBtn.frame.size.height + 30.0;
   [PEUIUtils placeView:changelogMsgPanel below:changelogBtn onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
+  totalHeight += changelogMsgPanel.frame.size.height + 4.0;
   UIButton *exportBtn = [self makeExportButton];
   [PEUIUtils placeView:exportBtn below:changelogMsgPanel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
+  totalHeight += exportBtn.frame.size.height + 30.0;
   UILabel *exportMsgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"From here you can export your Gas Jot data to files which you can then download from iTunes to your computer.\n\nTip: Before exporting, use the %@ button to \
 ensure this device has your latest Gas Jot data."
                                                                                        textToAccent:@"Download all changes"
-                                                                                     accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
-                                                         font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                     fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                                                     accentTextFont:boldDescFont]
+                                                         font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
+                                     fontForHeightCalculation:boldDescFont
                                               backgroundColor:[UIColor clearColor]
                                                     textColor:[UIColor darkGrayColor]
                                           verticalTextPadding:3.0
                                                    fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0];
   [PEUIUtils placeView:exportMsgLabel below:exportBtn onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:_doesHaveAuthTokenPanel vpadding:4.0 hpadding:8.0];
-  [PEUIUtils placeView:[self makeSplashScreenPanel] below:exportMsgLabel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:_doesHaveAuthTokenPanel vpadding:35.0 hpadding:0.0];
+  totalHeight += exportMsgLabel.frame.size.height + 4.0;
+  UIView *splashScreenPanel = [self makeSplashScreenPanelFitSubtitleToWidth:(_doesHaveAuthTokenPanel.frame.size.width - 15.0)];
+  [PEUIUtils placeView:splashScreenPanel below:exportMsgLabel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:_doesHaveAuthTokenPanel vpadding:35.0 hpadding:0.0];
+  totalHeight += splashScreenPanel.frame.size.height + 35.0;
+  [PEUIUtils setFrameHeight:totalHeight ofView:_doesHaveAuthTokenPanel];
+  [_doesHaveAuthTokenPanel setDelaysContentTouches:NO];
+  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.7 * _doesHaveAuthTokenPanel.frame.size.height)];
+  [_doesHaveAuthTokenPanel setBounces:YES];
 }
 
 - (void)makeNotLoggedInPanel {
-      
-  //_notLoggedInPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
   _notLoggedInPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
-  [_notLoggedInPanel setDelaysContentTouches:NO];
-  [_notLoggedInPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.35 * self.view.frame.size.height)];
-  [_notLoggedInPanel setBounces:YES];
-  
   ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
   NSString *message = @"This action will permanently delete your Gas Jot data from this device.";
   UIView *messagePanel = [self leftPaddingMessageWithText:message];
@@ -415,22 +429,32 @@ ensure this device has your latest Gas Jot data."
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:90.0
               hpadding:0];
+  CGFloat totalHeight = deleteAllDataBtn.frame.size.height + 90.0;
   [PEUIUtils placeView:messagePanel
                  below:deleteAllDataBtn
                   onto:_notLoggedInPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
+  totalHeight += messagePanel.frame.size.height + 4.0;
   UIButton *exportBtn = [self makeExportButton];
   [PEUIUtils placeView:exportBtn below:messagePanel onto:_notLoggedInPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
+  totalHeight += exportBtn.frame.size.height + 30.0;
   UILabel *exportMsgLabel = [PEUIUtils labelWithAttributeText:[[NSAttributedString alloc] initWithString:@"From here you can export your Gas Jot data to files which you can then download from iTunes to your computer."]
-                                                         font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                         font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                               backgroundColor:[UIColor clearColor]
                                                     textColor:[UIColor darkGrayColor]
                                           verticalTextPadding:3.0
                                                    fitToWidth:_notLoggedInPanel.frame.size.width - 15.0];
   [PEUIUtils placeView:exportMsgLabel below:exportBtn onto:_notLoggedInPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:_doesHaveAuthTokenPanel vpadding:4.0 hpadding:8.0];
-  [PEUIUtils placeView:[self makeSplashScreenPanel] below:exportMsgLabel onto:_notLoggedInPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:_notLoggedInPanel vpadding:35.0 hpadding:0.0];
+  totalHeight += exportMsgLabel.frame.size.height + 4.0;
+  UIView *splashScreenPanel = [self makeSplashScreenPanelFitSubtitleToWidth:(_notLoggedInPanel.frame.size.width - 15.0)];
+  [PEUIUtils placeView:splashScreenPanel below:exportMsgLabel onto:_notLoggedInPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:_notLoggedInPanel vpadding:35.0 hpadding:0.0];
+  totalHeight += splashScreenPanel.frame.size.height + 35.0;
+  [PEUIUtils setFrameHeight:totalHeight ofView:_notLoggedInPanel];
+  [_notLoggedInPanel setDelaysContentTouches:NO];
+  [_notLoggedInPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.4 * _notLoggedInPanel.frame.size.height)];
+  [_notLoggedInPanel setBounces:YES];
 }
 
 #pragma mark - Clear All Data

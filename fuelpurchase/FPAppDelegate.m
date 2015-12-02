@@ -362,35 +362,20 @@ shouldSelectViewController:(UIViewController *)viewController {
   [[UITabBarItem appearance] setTitleTextAttributes:@{ NSForegroundColorAttributeName : fpBlue }
                                            forState:UIControlStateSelected];
   return [[PEUIToolkit alloc] initWithColorForContentPanels:fpBlue
-                                 colorForNotificationPanels:[UIColor orangeColor]
                                             colorForWindows:[UIColor cloudsColor]
                            topBottomPaddingForContentPanels:15
                                                 accentColor:[UIColor colorFromHexCode:@"FFBF40"]
-                                             fontForButtons:[UIFont systemFontOfSize:[UIFont buttonFontSize]]
-                                     cornerRadiusForButtons:3
+                                          fontForButtonsBlk:^{ return [UIFont preferredFontForTextStyle:UIFontTextStyleTitle3]; }
                                   verticalPaddingForButtons:20
                                 horizontalPaddingForButtons:25
-                                   bgColorForWarningButtons:[UIColor carrotColor]
-                                 textColorForWarningButtons:[UIColor whiteColor]
-                                   bgColorForPrimaryButtons:[UIColor colorFromHexCode:@"05326D"]
-                                 textColorForPrimaryButtons:[UIColor whiteColor]
-                                    bgColorForDangerButtons:[UIColor alizarinColor]
-                                  textColorForDangerButtons:[UIColor whiteColor]
-                                       fontForHeader1Labels:[UIFont boldSystemFontOfSize:24]
-                                      colorForHeader1Labels:[UIColor whiteColor]
-                                      fontForHeaders2Labels:[UIFont boldSystemFontOfSize:18]
-                                      colorForHeader2Labels:[UIColor whiteColor]
-                                          fontForTextfields:[UIFont systemFontOfSize:18]
+                                       fontForTextfieldsBlk:^{ return [UIFont systemFontOfSize:18]; }
                                          colorForTextfields:[UIColor whiteColor]
                                   heightFactorForTextfields:1.7
                                leftViewPaddingForTextfields:10
-                                     fontForTableCellTitles:[UIFont systemFontOfSize:16]
+                                  fontForTableCellTitlesBlk:^{ return [UIFont systemFontOfSize:16]; }
                                     colorForTableCellTitles:[UIColor blackColor]
-                                  fontForTableCellSubtitles:[UIFont systemFontOfSize:10]
-                                 colorForTableCellSubtitles:[UIColor grayColor]
-                                  durationForFrameAnimation:0.5
-                                durationForFadeOutAnimation:2.0
-                                 downToYForFromTopAnimation:40];
+                               fontForTableCellSubtitlesBlk:^{ return [UIFont systemFontOfSize:10]; }
+                                 colorForTableCellSubtitles:[UIColor grayColor]];
 }
 
 - (void)initializeNotificationObserving {
@@ -543,7 +528,7 @@ in an unauthenticated state.  Is main thread?  %@", [PEUtils yesNoFromBool:[NSTh
 - (NSArray *)screenGroups {
   PDVScreenGroup *createAcctScreenGroup =
     [[PDVScreenGroup alloc]
-      initWithName:@"Create Account"
+      initWithName:@"Sign Up"
            screens:@[
       // Authenticated landing screen
       [[PDVScreen alloc] initWithDisplayName:@"Authenticated Landing"
