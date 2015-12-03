@@ -489,7 +489,7 @@
 Deleting this record will result in the \
 following child-records being deleted.\n\n\
 Are you sure you want to continue?"]
-                                          topInset:70.0
+                                          topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                    okayButtonTitle:@"Yes, delete."
                                   okayButtonAction:^{deleter();}
                                  cancelButtonTitle:@"No, cancel."
@@ -549,7 +549,7 @@ Are you sure you want to continue?"]
                                          alertDescription:[[NSAttributedString alloc] initWithString:@"\
 The remote copy of this entity has been \
 updated since you last downloaded it."]
-                                                 topInset:70.0
+                                                 topInset:[PEUIUtils topInsetForAlertsWithController:self]
                               forceDeleteLocalButtonTitle:@"I don't care.  Delete it anyway."
                                   forceDeleteButtonAction:^{
                                     [item setUpdatedAt:[latestEntity updatedAt]];
@@ -570,7 +570,7 @@ The server is currently busy at the moment \
 undergoing maintenance.\n\n\
 We apologize for the inconvenience.  Please \
 try this operation again later."]
-                                      topInset:70.0
+                                      topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                    buttonTitle:@"Okay."
                                   buttonAction:^{
                                     postDeleteAttemptActivities();
@@ -583,7 +583,7 @@ try this operation again later."]
                                alertDescription:[[NSAttributedString alloc] initWithString:@"\
 It looks like this record was already deleted from a different device. \
 It has now been removed from this device."]
-                                       topInset:70.0
+                                       topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                     buttonTitle:@"Okay."
                                    buttonAction:^{
                                      doLocalDelete();
@@ -748,7 +748,7 @@ as follows:";
                          alertDescription:[[NSAttributedString alloc] initWithString:@"\
                                            You cannot delete anything because \
                                            you're currently not authenticated."]
-                                 topInset:70.0
+                                 topInset:[PEUIUtils topInsetForAlertsWithController:self]
                               buttonTitle:@"Okay."
                              buttonAction:^{
                                [_tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];

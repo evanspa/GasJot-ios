@@ -47,6 +47,7 @@
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
+  UIView *_contentPanel;
 }
 
 #pragma mark - Initializers
@@ -65,10 +66,18 @@
   return self;
 }
 
+#pragma mark - Dynamic Type Support
+
+- (void)changeTextSize:(NSNotification *)notification {
+  [self viewDidAppear:YES];
+}
+
 #pragma mark - View Controller Lifecyle
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
+  [_contentPanel removeFromSuperview];
+  [self makeContentPanel];
   [_passwordTf becomeFirstResponder];
 }
 
@@ -77,59 +86,67 @@
   #ifdef FP_DEV
     [self pdvDevEnable];
   #endif
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(changeTextSize:)
+                                               name:UIContentSizeCategoryDidChangeNotification
+                                             object:nil];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
-  [PEUIUtils placeView:[self panelForReauthentication]
-               atTopOf:[self view]
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:90.0
-              hpadding:0.0];
+  
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Re-authenticate"];
   [navItem setRightBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                target:self
                                                                                action:@selector(handleLightLogin)]];
+  [self makeContentPanel];
+  RAC(self, formStateMaskForLightLogin) =
+  [RACSignal combineLatest:@[_passwordTf.rac_textSignal]
+                    reduce:^(NSString *password) {
+                      NSUInteger reauthErrMask = 0;
+                      if ([password length] == 0) {
+                        reauthErrMask = reauthErrMask | FPSignInPasswordNotProvided | FPSignInAnyIssues;
+                      }
+                      return @(reauthErrMask);
+                    }];
 }
 
 #pragma mark - GUI construction (making panels)
 
-- (UIView *)panelForReauthentication {
-  UIView *reauthPnl = [PEUIUtils panelWithWidthOf:1.0
-                                      andHeightOf:1.0
-                                   relativeToView:[self view]];
+- (void)makeContentPanel {
+  _contentPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
   CGFloat leftPadding = 8.0;
-  [PEUIUtils setFrameHeightOfView:reauthPnl ofHeight:0.5 relativeTo:[self view]];
+  [PEUIUtils setFrameHeightOfView:_contentPanel ofHeight:0.5 relativeTo:[self view]];
   UILabel *messageLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"Enter your password and hit %@ to re-authenticate."
                                                                                      textToAccent:@"Done"
-                                                                                   accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
-                                                       font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                                                   accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]]
+                                                       font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                             backgroundColor:[UIColor clearColor]
                                                   textColor:[UIColor darkGrayColor]
                                         verticalTextPadding:3.0
-                                                 fitToWidth:(reauthPnl.frame.size.width - leftPadding)];
+                                                 fitToWidth:(_contentPanel.frame.size.width - leftPadding)];
   UIView *messageLabelWithPad = [PEUIUtils leftPadView:messageLabel padding:leftPadding];
-  TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:reauthPnl];
+  TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:_contentPanel];
   _passwordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
   [_passwordTf setSecureTextEntry:YES];
   
   // place views
   [PEUIUtils placeView:_passwordTf
-               atTopOf:reauthPnl
+               atTopOf:_contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:0.0
               hpadding:0.0];
   [PEUIUtils placeView:messageLabelWithPad
                  below:_passwordTf
-                  onto:reauthPnl
+                  onto:_contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
   [PEUIUtils placeView:[FPPanelToolkit forgotPasswordButtonForUser:_user coordinatorDao:_coordDao uitoolkit:_uitoolkit controller:self]
                  below:messageLabelWithPad
-                  onto:reauthPnl
+                  onto:_contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:20.0
               hpadding:leftPadding];
-  RAC(self, formStateMaskForLightLogin) =
+/*  RAC(self, formStateMaskForLightLogin) =
     [RACSignal combineLatest:@[_passwordTf.rac_textSignal]
                       reduce:^(NSString *password) {
         NSUInteger reauthErrMask = 0;
@@ -137,8 +154,12 @@
           reauthErrMask = reauthErrMask | FPSignInPasswordNotProvided | FPSignInAnyIssues;
         }
         return @(reauthErrMask);
-      }];
-  return reauthPnl;
+      }];*/
+  [PEUIUtils placeView:_contentPanel
+               atTopOf:[self view]
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:90.0
+              hpadding:0.0];
 }
 
 #pragma mark - Login event handling
@@ -155,7 +176,7 @@
         [PEUIUtils showSuccessAlertWithMsgs:nil
                                       title:@"Success."
                            alertDescription:[[NSAttributedString alloc] initWithString:msg]
-                                   topInset:70.0
+                                   topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                 buttonTitle:@"Okay."
                                buttonAction:^{
                                  enableUserInteraction(YES);
@@ -238,7 +259,7 @@
                                                           [PEUIUtils showSuccessAlertWithMsgs:nil
                                                                                         title:@"Authentication Success."
                                                                              alertDescription:[[NSAttributedString alloc] initWithString:@"You have become authenticated again and your records have been synced up to the Gas Jot server."]
-                                                                                     topInset:70.0
+                                                                                     topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                                                                   buttonTitle:@"Okay."
                                                                                  buttonAction:^{
                                                                                    enableUserInteraction(YES);
@@ -256,7 +277,7 @@
                                                             [PEUIUtils attributedTextWithTemplate:@"This is awkward.  While syncing your local edits, the  Gas Jot server is asking for you to \
 authenticate again.  Sorry about that.  To authenticate, tap the %@ button."
                                                                                      textToAccent:@"Re-authenticate"
-                                                                                   accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+                                                                                   accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]];
                                                             becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
                                                                                                                    title:@"Authentication Failure."
                                                                                                         alertDescription:attrBecameUnauthMessage
@@ -297,7 +318,7 @@ authenticate again.  Sorry about that.  To authenticate, tap the %@ button."
                                                         }
                                                       });
                                                     }
-                                                      error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
+                                                      error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, self.tabBarController.view)];
           });
         };
       } else {
@@ -309,9 +330,8 @@ authenticate again.  Sorry about that.  To authenticate, tap the %@ button."
       HUD.labelText = @"Re-authenticating...";
       [_coordDao lightLoginForUser:_user
                           password:[_passwordTf text]
-                   remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self.tabBarController.view)
+                   remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self, self.tabBarController.view)
                  completionHandler:^(NSError *err) {
-                   //[FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD, successBlk, self.tabBarController.view)(err);
                    dispatch_async(dispatch_get_main_queue(), ^{
                      if (err) {
                        enableUserInteraction(YES);
@@ -319,10 +339,11 @@ authenticate again.  Sorry about that.  To authenticate, tap the %@ button."
                      [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD,
                                                                          successBlk,
                                                                          ^{ enableUserInteraction(YES); },
+                                                                         self,
                                                                          self.tabBarController.view)(err);
                    });
                  }
-             localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
+             localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, self.tabBarController.view)];
     };
     doLightLogin([_coordDao doesUserHaveAnyUnsyncedEntities:_user]);
   } else {
@@ -330,7 +351,7 @@ authenticate again.  Sorry about that.  To authenticate, tap the %@ button."
     [PEUIUtils showWarningAlertWithMsgs:errMsgs
                                   title:@"Oops"
                        alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
-                               topInset:70.0
+                               topInset:[PEUIUtils topInsetForAlertsWithController:self]
                             buttonTitle:@"Okay."
                            buttonAction:nil
                          relativeToView:self.tabBarController.view];

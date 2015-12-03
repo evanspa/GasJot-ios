@@ -368,7 +368,7 @@ shouldSelectViewController:(UIViewController *)viewController {
                                           fontForButtonsBlk:^{ return [UIFont preferredFontForTextStyle:UIFontTextStyleTitle3]; }
                                   verticalPaddingForButtons:20
                                 horizontalPaddingForButtons:25
-                                       fontForTextfieldsBlk:^{ return [UIFont systemFontOfSize:18]; }
+                                       fontForTextfieldsBlk:^{ return [UIFont preferredFontForTextStyle:UIFontTextStyleBody]; }
                                          colorForTextfields:[UIColor whiteColor]
                                   heightFactorForTextfields:1.7
                                leftViewPaddingForTextfields:10

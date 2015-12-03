@@ -290,7 +290,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
 
 - (UIButton *)makeAllStatsButton {
   UIButton *allStatsBtn = [PEUIUtils buttonWithKey:@"all stats"
-                                              font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                              font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                    backgroundColor:[UIColor grayColor]
                                          textColor:[UIColor whiteColor]
                       disabledStateBackgroundColor:nil
@@ -333,7 +333,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
   UIView *panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:self.view];
   [panel setBackgroundColor:[UIColor whiteColor]];
   UILabel *chartHeader = [PEUIUtils labelWithKey:title
-                                            font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                            font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                  backgroundColor:[UIColor clearColor]
                                        textColor:[UIColor darkGrayColor]
                              verticalTextPadding:3.0];
@@ -341,7 +341,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
   [chartHeader setTag:chartTitleTag];
   JBLineChartView *chart = [self makeLineChartWithTag:chartTag];
   UIButton *moreBtn = [PEUIUtils buttonWithKey:@"more"
-                                          font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                          font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                backgroundColor:[UIColor grayColor]
                                      textColor:[UIColor whiteColor]
                   disabledStateBackgroundColor:nil
@@ -667,35 +667,35 @@ alignmentRelativeToView:self.view
 
 - (UIView *)noLogsYetPanel {
   UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:self.view];
-  UILabel *msgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"%@: Create Logs"
-                                                                                 textToAccent:@"Next"
-                                                                               accentTextFont:[UIFont boldSystemFontOfSize:22.0]
+  UILabel *msgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"%@ Create Logs"
+                                                                                 textToAccent:@"Next:"
+                                                                               accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle3] //[UIFont boldSystemFontOfSize:22.0]
                                                                               accentTextColor:[UIColor blackColor]]
-                                                        font:[UIFont systemFontOfSize:22.0]
-                                    fontForHeightCalculation:[UIFont boldSystemFontOfSize:22.0]
+                                                        font:[UIFont preferredFontForTextStyle:UIFontTextStyleTitle3] //[UIFont systemFontOfSize:22.0]
+                                    fontForHeightCalculation:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle3] //[UIFont boldSystemFontOfSize:22.0]
                                              backgroundColor:[UIColor clearColor]
                                                    textColor:[UIColor fpAppBlue]
                                          verticalTextPadding:3.0
                                                   fitToWidth:(0.90 * self.view.frame.size.width)];
   [msgLabel setTextAlignment:NSTextAlignmentCenter];
   UILabel *msgLabel2 = [PEUIUtils labelWithKey:@"You have at least one vehicle saved.  You're now ready to start logging gas purchases and odometer info.\n\nOnce you have enough logs saved, this screen (your Home screen) will display a set of charts."
-                                               font:[UIFont systemFontOfSize:18.0]
+                                               font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline] //[UIFont systemFontOfSize:18.0]
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor fpAppBlue]
                                 verticalTextPadding:3.0
                                          fitToWidth:(0.90 * self.view.frame.size.width)];
   [msgLabel2 setTextAlignment:NSTextAlignmentCenter];
   UIButton *gasLogBtn = [PEUIUtils buttonWithKey:@"Create Gas Log"
-                                                          font:[UIFont boldSystemFontOfSize:20.0]
-                                               backgroundColor:[UIColor peterRiverColor]
-                                                     textColor:[UIColor whiteColor]
-                                  disabledStateBackgroundColor:nil
-                                        disabledStateTextColor:nil
-                                               verticalPadding:18.0
-                                             horizontalPadding:10.0
-                                                  cornerRadius:5.0
-                                                        target:nil
-                                                        action:nil];
+                                            font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle3] //[UIFont boldSystemFontOfSize:20.0]
+                                 backgroundColor:[UIColor peterRiverColor]
+                                       textColor:[UIColor whiteColor]
+                    disabledStateBackgroundColor:nil
+                          disabledStateTextColor:nil
+                                 verticalPadding:12.0
+                               horizontalPadding:12.0
+                                    cornerRadius:5.0
+                                          target:nil
+                                          action:nil];
   [PEUIUtils setFrameWidthOfView:gasLogBtn ofWidth:0.85 relativeTo:self.view];
   PEItemAddedBlk itemAddedBlk = ^(PEAddViewEditController *addViewEditCtrl, id record) {
     [[addViewEditCtrl navigationController] dismissViewControllerAnimated:YES completion:nil];
@@ -714,16 +714,16 @@ alignmentRelativeToView:self.view
                                             completion:nil];
   } forControlEvents:UIControlEventTouchUpInside];
   UIButton *odometerLogBtn = [PEUIUtils buttonWithKey:@"Create Odometer Log"
-                                                          font:[UIFont boldSystemFontOfSize:20.0]
-                                               backgroundColor:[UIColor peterRiverColor]
-                                                     textColor:[UIColor whiteColor]
-                                  disabledStateBackgroundColor:nil
-                                        disabledStateTextColor:nil
-                                               verticalPadding:18.0
-                                             horizontalPadding:10.0
-                                                  cornerRadius:5.0
-                                                        target:nil
-                                                        action:nil];
+                                                 font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle3] //[UIFont boldSystemFontOfSize:20.0]
+                                      backgroundColor:[UIColor peterRiverColor]
+                                            textColor:[UIColor whiteColor]
+                         disabledStateBackgroundColor:nil
+                               disabledStateTextColor:nil
+                                      verticalPadding:12.0 //18.0
+                                    horizontalPadding:12.0
+                                         cornerRadius:5.0
+                                               target:nil
+                                               action:nil];
   [PEUIUtils setFrameWidthOfView:odometerLogBtn ofWidth:0.85 relativeTo:self.view];
   [odometerLogBtn bk_addEventHandler:^(id sender) {
     UIViewController *addEnvlogController = [_screenToolkit newAddEnvironmentLogScreenMakerWithBlk:itemAddedBlk
@@ -734,33 +734,39 @@ alignmentRelativeToView:self.view
                                               animated:YES
                                             completion:nil];
   } forControlEvents:UIControlEventTouchUpInside];
-  UIView *panel = [PEUIUtils panelWithColumnOfViews:@[msgLabel, msgLabel2, gasLogBtn, odometerLogBtn] verticalPaddingBetweenViews:12.5 viewsAlignment:PEUIHorizontalAlignmentTypeCenter];
-  [PEUIUtils placeView:panel atTopOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeCenter vpadding:95.0 hpadding:0.0];
+  UIView *panel = [PEUIUtils panelWithColumnOfViews:@[msgLabel, msgLabel2, gasLogBtn, odometerLogBtn]
+                        verticalPaddingBetweenViews:12.5
+                                     viewsAlignment:PEUIHorizontalAlignmentTypeCenter];
+  [PEUIUtils placeView:panel
+            inMiddleOf:contentPanel
+         withAlignment:PEUIHorizontalAlignmentTypeCenter
+              hpadding:0.0];
+  [PEUIUtils adjustYOfView:panel withValue:(self.tabBarController.tabBar.frame.size.height / 2) * -1];
   return contentPanel;
 }
 
 - (UIView *)noVehiclesYetPanel {
   UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:self.view];
-  UILabel *introMsgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"%@: Create a Vehicle"
-                                                                                      textToAccent:@"Step 1"
-                                                                                    accentTextFont:[UIFont boldSystemFontOfSize:22.0]
+  UILabel *introMsgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"%@ Create a Vehicle"
+                                                                                      textToAccent:@"Step 1:"
+                                                                                    accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle3] //[UIFont boldSystemFontOfSize:22.0]
                                                                                    accentTextColor:[UIColor blackColor]]
-                                                        font:[UIFont systemFontOfSize:22.0]
-                                    fontForHeightCalculation:[UIFont boldSystemFontOfSize:22.0]
+                                                        font:[UIFont preferredFontForTextStyle:UIFontTextStyleTitle3] //[UIFont systemFontOfSize:22.0]
+                                    fontForHeightCalculation:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle3] //[UIFont boldSystemFontOfSize:22.0]
                                              backgroundColor:[UIColor clearColor]
                                                    textColor:[UIColor fpAppBlue]
                                          verticalTextPadding:3.0
                                                   fitToWidth:(0.90 * self.view.frame.size.width)];
   [introMsgLabel setTextAlignment:NSTextAlignmentCenter];
   UILabel *intro2MsgLabel = [PEUIUtils labelWithKey:@"Create a vehicle and you'll be able to create gas and odometer logs against it."
-                                               font:[UIFont systemFontOfSize:18.0]
+                                               font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline] //[UIFont systemFontOfSize:18.0]
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor fpAppBlue]
                                 verticalTextPadding:3.0
                                          fitToWidth:(0.90 * self.view.frame.size.width)];
   [intro2MsgLabel setTextAlignment:NSTextAlignmentCenter];
   UIButton *createVehicleBtn = [PEUIUtils buttonWithKey:@"Create Vehicle"
-                                                   font:[UIFont boldSystemFontOfSize:22.0]
+                                                   font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle3] //[UIFont boldSystemFontOfSize:22.0]
                                         backgroundColor:[UIColor peterRiverColor]
                                               textColor:[UIColor whiteColor]
                            disabledStateBackgroundColor:nil
@@ -779,29 +785,40 @@ alignmentRelativeToView:self.view
                                                                                  navigationBarHidden:NO]
                                               animated:YES completion:nil];
   } forControlEvents:UIControlEventTouchUpInside];
-  UIView *panel = [PEUIUtils panelWithColumnOfViews:@[introMsgLabel, intro2MsgLabel, createVehicleBtn] verticalPaddingBetweenViews:17.5 viewsAlignment:PEUIHorizontalAlignmentTypeCenter];
+  UIView *panel = [PEUIUtils panelWithColumnOfViews:@[introMsgLabel, intro2MsgLabel, createVehicleBtn]
+                        verticalPaddingBetweenViews:15.0 //17.5
+                                     viewsAlignment:PEUIHorizontalAlignmentTypeCenter];
   CGFloat vpadding = self.view.frame.size.height * .075;
+  
   [PEUIUtils placeView:panel atTopOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeCenter vpadding:vpadding hpadding:0.0];
-  UILabel *loginMsgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"If you already have a Gas Jot account and want to log in, tap the %@ tab."
-                                                                                      textToAccent:@"Account"
-                                                                                    accentTextFont:[UIFont boldSystemFontOfSize:16.0]
-                                                                                   accentTextColor:[UIColor darkTextColor]]
-                                                        font:[UIFont systemFontOfSize:16.0]
-                                    fontForHeightCalculation:[UIFont boldSystemFontOfSize:16.0]
-                                             backgroundColor:[UIColor clearColor]
-                                                   textColor:[UIColor fpAppBlue]
-                                         verticalTextPadding:3.0
-                                                  fitToWidth:(0.70 * self.view.frame.size.width)];
-  UIView *loginMsgPanel = [PEUIUtils panelWithWidthOf:0.75 andHeightOf:0.0 relativeToView:self.view];
-  [PEUIUtils setFrameHeight:loginMsgLabel.frame.size.height + 10 ofView:loginMsgPanel];
-  [loginMsgPanel setBackgroundColor:[UIColor cloudsColor]];
-  [[loginMsgPanel layer] setCornerRadius:5.0];
-  [PEUIUtils placeView:loginMsgLabel inMiddleOf:loginMsgPanel withAlignment:PEUIHorizontalAlignmentTypeCenter hpadding:0.0];
-  [PEUIUtils placeView:loginMsgPanel atBottomOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:175.0 hpadding:10.0];
+  UIView * (^createAndPlaceLoginMsgPanel)(CGFloat) = ^ UIView * (CGFloat fitToWidthFactor) {
+    UILabel *loginMsgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"Tap the %@ tab to access your Gas Jot account." //@"If you already have a Gas Jot account and want to log in, tap the %@ tab."
+                                                                                        textToAccent:@"Account"
+                                                                                      accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleCaption1] //[UIFont boldSystemFontOfSize:16.0]
+                                                                                     accentTextColor:[UIColor darkTextColor]]
+                                                          font:[UIFont preferredFontForTextStyle:UIFontTextStyleCaption1] //[UIFont systemFontOfSize:16.0]
+                                      fontForHeightCalculation:[PEUIUtils boldFontForTextStyle:UIFontTextStyleCaption1] //[UIFont boldSystemFontOfSize:16.0]
+                                               backgroundColor:[UIColor clearColor]
+                                                     textColor:[UIColor fpAppBlue]
+                                           verticalTextPadding:3.0
+                                                    fitToWidth:(fitToWidthFactor * self.view.frame.size.width)];
+    UIView *loginMsgPanel = [PEUIUtils panelWithWidthOf:fitToWidthFactor andHeightOf:0.0 relativeToView:self.view];
+    [PEUIUtils setFrameHeight:loginMsgLabel.frame.size.height + 10 ofView:loginMsgPanel];
+    [loginMsgPanel setBackgroundColor:[UIColor cloudsColor]];
+    [[loginMsgPanel layer] setCornerRadius:5.0];
+    [PEUIUtils placeView:loginMsgLabel inMiddleOf:loginMsgPanel withAlignment:PEUIHorizontalAlignmentTypeCenter hpadding:0.0];
+    [PEUIUtils placeView:loginMsgPanel atBottomOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:175.0 hpadding:12.0];
+    return loginMsgPanel;
+  };
+  UIView *loginMsgPanel = createAndPlaceLoginMsgPanel(0.70);
+  if (loginMsgPanel.frame.origin.y <= (panel.frame.origin.y + panel.frame.size.height)) {
+    [loginMsgPanel removeFromSuperview];
+    loginMsgPanel = createAndPlaceLoginMsgPanel(0.85);
+  }
   UIImageView *loginArrowImgView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"arrow-1"]];
   [PEUIUtils placeView:loginArrowImgView below:loginMsgPanel onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:2.0 hpadding:15.0];
   UILabel *jotBtnMsgLabel = [PEUIUtils labelWithKey:@"You can create any type of record from the Jot button at any time."
-                                               font:[UIFont systemFontOfSize:16.0]
+                                               font:[UIFont preferredFontForTextStyle:UIFontTextStyleCaption1] //[UIFont systemFontOfSize:16.0]
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor fpAppBlue]
                                 verticalTextPadding:3.0
@@ -925,10 +942,20 @@ alignmentRelativeToView:self.view
           }];
 }
 
+#pragma mark - Dynamic Type Support
+
+- (void)changeTextSize:(NSNotification *)notification {
+  [self viewDidAppear:YES];
+}
+
 #pragma mark - View Controller Lifecycle
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(changeTextSize:)
+                                               name:UIContentSizeCategoryDidChangeNotification
+                                             object:nil];
   [[self view] setBackgroundColor:[UIColor whiteColor]];
   [[self navigationItem] setTitle:@"Gas Jot Home"];
   [self setAutomaticallyAdjustsScrollViewInsets:NO];
@@ -953,7 +980,6 @@ alignmentRelativeToView:self.view
       vpadding = 60.0;
       break;
   }
-  //[PEUIUtils applyBorderToView:_currentContentPanel withColor:[UIColor yellowColor]];
   [PEUIUtils placeView:_currentContentPanel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:vpadding hpadding:0.0];
   _currentlyRenderedState = state;
 }
@@ -968,25 +994,28 @@ alignmentRelativeToView:self.view
     _currentlyRenderedState = state;
   };
   switch (state) {
-    case FPHomeStateNoVehicles:
+    case FPHomeStateNoVehicles: {
       [[self.navigationController navigationBar] setHidden:YES];
-      if (_currentlyRenderedState != FPHomeStateNoVehicles) {
+      //if (_currentlyRenderedState != FPHomeStateNoVehicles) {
         doRedraw(^{ return [self noVehiclesYetPanel]; }, 0.0);
-      }
+      //}
       break;
-    case FPHomeStateNoLogs:
+    }
+    case FPHomeStateNoLogs: {
       [[self.navigationController navigationBar] setHidden:YES];
-      if (_currentlyRenderedState != FPHomeStateNoLogs) {
+      //if (_currentlyRenderedState != FPHomeStateNoLogs) {
         doRedraw(^{ return [self noLogsYetPanel]; }, 0.0);
-      }
+      //}
       break;
-    case FPHomeStateHasLogs:
+    }
+    case FPHomeStateHasLogs: {
       [[self.navigationController navigationBar] setHidden:NO];
-      if (_currentlyRenderedState != FPHomeStateHasLogs) {
+      //if (_currentlyRenderedState != FPHomeStateHasLogs) {
         doRedraw(^{ return [self makeScrollView]; }, 60.0);
-      }
+      //}
       [self reloadChartsAndTables];
       break;
+    }
   }
 }
 

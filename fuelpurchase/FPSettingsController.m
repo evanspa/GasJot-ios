@@ -172,7 +172,7 @@
                                                                 alertDescription:[[NSAttributedString alloc] initWithString:@"To download these files to your computer, connect your device to iTunes, \
 click on your device, navigate to 'Apps' and scroll down to the 'File Sharing' section.  You'll see Gas Jot listed.  Click on Gas Jot, and you'll be able to see and download your data files."]
                                                                   relativeToView:self.tabBarController.view]
-                                   topInset:70.0
+                                   topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                 buttonTitle:@"Okay."
                                buttonAction:^{}
                              relativeToView:self.tabBarController.view];
@@ -238,7 +238,7 @@ and deletions on other devices."
       [PEUIUtils showErrorAlertWithMsgs:nil
                                   title:@"Error."
                        alertDescription:[[NSAttributedString alloc] initWithString:@"We're sorry, but an unexpected error has occurred.  Please try this again later."]
-                               topInset:70.0
+                               topInset:[PEUIUtils topInsetForAlertsWithController:self]
                             buttonTitle:@"Okay."
                            buttonAction:^{}
                          relativeToView:self.tabBarController.view];
@@ -257,7 +257,7 @@ and deletions on other devices."
                               void (^displayAlreadySynchronizedAlert)(void) = ^{
                                 [PEUIUtils showInfoAlertWithTitle:@"Already up-to-date."
                                                  alertDescription:[[NSAttributedString alloc] initWithString:@"Your device is already fully synchronized with your account."]
-                                                         topInset:70.0
+                                                         topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                                       buttonTitle:@"Okay."
                                                      buttonAction:^{ }
                                                    relativeToView:self.tabBarController.view];
@@ -285,7 +285,7 @@ and deletions on other devices."
                                                                 title:@"Synchronized."
                                                      alertDescription:[[NSAttributedString alloc] initWithString:@"\
 You have successfully synchronized your account to this device, incorporating the following changes:"]
-                                                             topInset:70.0
+                                                             topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                                           buttonTitle:@"Okay."
                                                          buttonAction:^{
                                                             [APP refreshTabs];
@@ -307,7 +307,7 @@ You have successfully synchronized your account to this device, incorporating th
                                                  title:@"Server is busy."
                                       alertDescription:[[NSAttributedString alloc] initWithString:@"\
 The server is currently busy at the moment. Please try this again later."]
-                                              topInset:70.0
+                                              topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                            buttonTitle:@"Okay."
                                           buttonAction:^{}
                                         relativeToView:self.tabBarController.view];
@@ -331,7 +331,7 @@ to re-authenticate.\n\nTo authenticate, tap the %@ button."
                      [PEUIUtils showWarningAlertWithMsgs:nil
                                                    title:@"Authentication Failure."
                                         alertDescription:attrBecameUnauthMessage
-                                                topInset:70.0
+                                                topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                              buttonTitle:@"Okay."
                                             buttonAction:^{
                                               [APP refreshTabs];
@@ -552,7 +552,7 @@ simply be saved locally.";
       [PEUIUtils showSuccessAlertWithMsgs:nil
                                     title:@"Logout successful."
                          alertDescription:[[NSAttributedString alloc] initWithString:msg]
-                                 topInset:70.0
+                                 topInset:[PEUIUtils topInsetForAlertsWithController:self]
                               buttonTitle:@"Okay."
                              buttonAction:^{
                                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
@@ -582,7 +582,7 @@ simply be saved locally.";
 You have unsynced edits.  If you log out, \
 they will be permanently deleted.\n\n\
 Are you sure you want to do continue?"]
-                                       topInset:70.0
+                                       topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                 okayButtonTitle:@"Yes.  Log me out."
                                okayButtonAction:^{ doLogout(); }
                               cancelButtonTitle:@"Cancel."

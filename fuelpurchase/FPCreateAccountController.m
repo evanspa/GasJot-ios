@@ -115,7 +115,7 @@
   CGFloat leftPadding = 8.0;
   UILabel *createAccountMsgLabel = [PEUIUtils labelWithKey:@"From here you can create a remote Gas Jot account. This will \
 enable your data records to be synced to Gas Jot's central server so you can access them from your other devices."
-                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                               font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor darkGrayColor]
                                 verticalTextPadding:3.0
@@ -164,7 +164,7 @@ enable your data records to be synced to Gas Jot's central server so you can acc
   UILabel *instructionLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"Fill out the form and tap %@."
                                                                                          textToAccent:@"Done"
                                                                                        accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
-                                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                           font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                 backgroundColor:[UIColor clearColor]
                                                       textColor:[UIColor darkGrayColor]
                                             verticalTextPadding:3.0];
@@ -243,7 +243,7 @@ enable your data records to be synced to Gas Jot's central server so you can acc
 Your account has been created successfully.\n\nFrom this point on, any new records that you create \
 will be saved on your device AND the Gas Jot central server.\n\nAn account verification link has been \
 emailed to you."]
-                                   topInset:70.0
+                                   topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                 buttonTitle:@"Okay."
                                buttonAction:^{
                                  enableUserInteraction(YES);
@@ -333,7 +333,7 @@ Your account is now connected to this \
 device.  Any Gas Jot data that \
 you create and save will be synced to your \
 remote account."]
-                                                                                    topInset:70.0
+                                                                                    topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                                                                  buttonTitle:@"Okay."
                                                                                 buttonAction:^{
                                                                                   enableUserInteraction(YES);
@@ -390,7 +390,7 @@ is asking for you to authenticate again.  Sorry about that. To authenticate, tap
                                                   }
                                                     error:^(NSError *err, int code, NSString *desc) {
                                                       dispatch_async(dispatch_get_main_queue(), ^{
-                                                        [FPUtils localDatabaseErrorHudHandlerMaker](HUD, [self parentViewForAlerts])(err, code, desc);
+                                                        [FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, [self parentViewForAlerts])(err, code, desc);
                                                       });
                                                     }];
         };
@@ -403,19 +403,20 @@ is asking for you to authenticate again.  Sorry about that. To authenticate, tap
       HUD.labelText = @"Creating account...";
       [_coordDao establishRemoteAccountForLocalUser:_localUser
                       preserveExistingLocalEntities:syncLocalEntities
-                                    remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, [self parentViewForAlerts])
+                                    remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self, [self parentViewForAlerts])
                                   completionHandler:^(FPUser *user, NSError *err) {
                                     dispatch_async(dispatch_get_main_queue(), ^{
                                     [FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD,
                                                                                                        successBlk,
                                                                                                        ^{ enableUserInteraction(YES); },
+                                                                                                       self,
                                                                                                        [self parentViewForAlerts])(user, err);
                                     DDLogDebug(@"in FPCreateAccountController/handleAccountCreation, calling [APP setChangelogUpdatedAt:(%@)", [PEUtils millisecondsFromDate:user.updatedAt]);
                                     [APP setChangelogUpdatedAt:[user updatedAt]];
                                     });
                                   }
                                                    
-                              localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, [self parentViewForAlerts])];
+                              localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, [self parentViewForAlerts])];
     };
     if (_preserveExistingLocalEntities == nil) { // first time asked
       if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {
@@ -458,7 +459,7 @@ remote account upon account creation, or would you like them to be deleted?";
     [PEUIUtils showWarningAlertWithMsgs:errMsgs
                                   title:@"Oops"
                        alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
-                               topInset:70.0
+                               topInset:[PEUIUtils topInsetForAlertsWithController:self]
                             buttonTitle:@"Okay."
                            buttonAction:nil
                          relativeToView:[self parentViewForAlerts]];

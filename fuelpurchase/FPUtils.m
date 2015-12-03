@@ -189,7 +189,7 @@
 #pragma mark - Various Error Handler Helpers
 
 + (ServerBusyHandlerMaker)serverBusyHandlerMakerForUI {
-  return ^(MBProgressHUD *HUD, UIView *relativeToView) {
+  return ^(MBProgressHUD *HUD, UIViewController *controller, UIView *relativeToView) {
     return (^(NSDate *retryAfter) {
       dispatch_async(dispatch_get_main_queue(), ^{
         [HUD hide:YES];
@@ -198,7 +198,7 @@
                         alertDescription:[[NSAttributedString alloc] initWithString:@"\
 We apologize, but the server is currently \
 busy.  Please retry your request shortly."]
-                                topInset:70.0
+                                topInset:[PEUIUtils topInsetForAlertsWithController:controller]
                              buttonTitle:@"Okay."
                             buttonAction:nil
                           relativeToView:relativeToView];
@@ -208,7 +208,7 @@ busy.  Please retry your request shortly."]
 }
 
 + (SynchUnitOfWorkHandlerMakerZeroArg)loginHandlerWithErrMsgsMaker:(ErrMsgsMaker)errMsgsMaker {
-  return ^(MBProgressHUD *hud, void(^successBlock)(void), void(^notAuthedAlertAction)(void), UIView *relativeToView) {
+  return ^(MBProgressHUD *hud, void(^successBlock)(void), void(^notAuthedAlertAction)(void), UIViewController *controller, UIView *relativeToView) {
     return (^(NSError *error) {
       if (error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -234,7 +234,7 @@ busy.  Please retry your request shortly."]
           [PEUIUtils showErrorAlertWithMsgs:errMsgs
                                       title:@"Authentication failure."
                            alertDescription:[[NSAttributedString alloc] initWithString:message]
-                                   topInset:70.0
+                                   topInset:[PEUIUtils topInsetForAlertsWithController:controller]
                                 buttonTitle:@"Okay."
                                buttonAction:notAuthedAlertAction
                              relativeToView:relativeToView];
@@ -247,7 +247,7 @@ busy.  Please retry your request shortly."]
 }
 
 + (SynchUnitOfWorkHandlerMaker)synchUnitOfWorkHandlerMakerWithErrMsgsMaker:(ErrMsgsMaker)errMsgsMaker {
-  return ^(MBProgressHUD *hud, void (^successBlock)(FPUser *), void(^errAlertAction)(void), UIView *relativeToView) {
+  return ^(MBProgressHUD *hud, void (^successBlock)(FPUser *), void(^errAlertAction)(void), UIViewController *controller, UIView *relativeToView) {
     return (^(FPUser *newUser, NSError *error) {
       if (error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -268,7 +268,7 @@ busy.  Please retry your request shortly."]
                                       title:@"Oops."
                            alertDescription:[[NSAttributedString alloc] initWithString:@"An error has occurred.  The details are as\n\
 follows:"]
-                                   topInset:70.0
+                                   topInset:[PEUIUtils topInsetForAlertsWithController:controller]
                                 buttonTitle:@"Okay."
                                buttonAction:errAlertAction
                              relativeToView:relativeToView];
@@ -281,7 +281,7 @@ follows:"]
 }
 
 + (SynchUnitOfWorkHandlerMakerZeroArg)synchUnitOfWorkZeroArgHandlerMakerWithErrMsgsMaker:(ErrMsgsMaker)errMsgsMaker {
-  return ^(MBProgressHUD *hud, void(^successBlock)(void), void(^errAlertAction)(void), UIView *relativeToView) {
+  return ^(MBProgressHUD *hud, void(^successBlock)(void), void(^errAlertAction)(void), UIViewController *controller, UIView *relativeToView) {
     return (^(NSError *error) {
       if (error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -301,7 +301,7 @@ follows:"]
           [PEUIUtils showErrorAlertWithMsgs:errMsgs
                                       title:@"Oops."
                            alertDescription:[[NSAttributedString alloc] initWithString:@"An error has occurred.  The details are as follows:"]
-                                   topInset:70.0
+                                   topInset:[PEUIUtils topInsetForAlertsWithController:controller]
                                 buttonTitle:@"Okay."
                                buttonAction:errAlertAction
                              relativeToView:relativeToView];
@@ -314,14 +314,14 @@ follows:"]
 }
 
 + (LocalDatabaseErrorHandlerMakerWithHUD)localDatabaseErrorHudHandlerMaker {
-  return ^(MBProgressHUD *hud, UIView *relativeToView) {
+  return ^(MBProgressHUD *hud, UIViewController *controller, UIView *relativeToView) {
     return (^(NSError *error, int code, NSString *msg) {
       [hud hide:YES];
       [PEUIUtils showErrorAlertWithMsgs:@[[error localizedDescription]]
                                   title:@"This is awkward."
                        alertDescription:[[NSAttributedString alloc] initWithString:@"An error has occurred attempting to talk\n\
 to the local database.  The details are:"]
-                               topInset:70.0
+                               topInset:[PEUIUtils topInsetForAlertsWithController:controller]
                             buttonTitle:@"Okay."
                            buttonAction:nil
                          relativeToView:relativeToView];

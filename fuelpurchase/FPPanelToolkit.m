@@ -107,7 +107,7 @@ NSString * const FPPanelToolkitVehicleDefaultOctaneNaPlaceholerText = @"Default 
     UITextField *confirmPasswordTf = tfMaker(@"Confirm password", FPUserTagConfirmPassword);
     [confirmPasswordTf setSecureTextEntry:YES];
     UILabel *passwordMsg = [PEUIUtils labelWithKey:@"If you don't want to change your password, leave the password field blank."
-                                              font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                              font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                    backgroundColor:[UIColor clearColor]
                                          textColor:[UIColor darkGrayColor]
                                verticalTextPadding:3.0
@@ -221,13 +221,13 @@ NSString * const FPPanelToolkitVehicleDefaultOctaneNaPlaceholerText = @"Default 
                            controller:(UIViewController *)controller {
   FPEnableUserInteractionBlk enableUserInteraction = [FPUIUtils makeUserEnabledBlockForController:controller];
   NSArray *accountStatusText = [FPPanelToolkit accountStatusTextForUser:user];
-  UIView *statusPanel = [PEUIUtils labelValuePanelWithCellHeight:41.5 //36.75
+  UIView *statusPanel = [PEUIUtils labelValuePanelWithCellHeight:([PEUIUtils sizeOfText:@"" withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle3]].height + uitoolkit.verticalPaddingForButtons)
                                                      labelString:@"Account status"
-                                                  labelTextStyle:UIFontTextStyleBody
+                                                  labelTextStyle:UIFontTextStyleTitle3
                                                   labelTextColor:[UIColor blackColor]
                                                labelLeftHPadding:10.0
                                                      valueString:accountStatusText[0]
-                                                  valueTextStyle:UIFontTextStyleBody
+                                                  valueTextStyle:UIFontTextStyleTitle3
                                                   valueTextColor:accountStatusText[1]
                                               valueRightHPadding:15.0
                                                    valueLabelTag:nil
@@ -240,7 +240,7 @@ NSString * const FPPanelToolkitVehicleDefaultOctaneNaPlaceholerText = @"Default 
   if ([PEUtils isNil:[user verifiedAt]]) {
     UIButton * (^makeSendEmailBtn)(void) = ^ UIButton * {
       UIButton *sendEmailBtn = [PEUIUtils buttonWithKey:@"re-send verification email"
-                                                   font:[UIFont systemFontOfSize:14]
+                                                   font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                         backgroundColor:[UIColor concreteColor]
                                               textColor:[UIColor whiteColor]
                            disabledStateBackgroundColor:nil
@@ -263,7 +263,7 @@ NSString * const FPPanelToolkitVehicleDefaultOctaneNaPlaceholerText = @"Default 
                                                   alertDescription:[[NSAttributedString alloc] initWithString:@"\
 The server is currently busy at the moment undergoing maintenance.\n\n\
 We apologize for the inconvenience.  Please try re-sending the verification email later."]
-                                                          topInset:70.0
+                                                          topInset:[PEUIUtils topInsetForAlertsWithController:controller]
                                                        buttonTitle:@"Okay."
                                                       buttonAction:^{ enableUserInteraction(YES); }
                                                     relativeToView:controller.tabBarController.view];
@@ -275,10 +275,10 @@ We apologize for the inconvenience.  Please try re-sending the verification emai
                                    NSAttributedString *attrMessage =
                                    [PEUIUtils attributedTextWithTemplate:@"The verification email was sent to at: %@."
                                                             textToAccent:[user email]
-                                                          accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+                                                          accentTextFont:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]];
                                    [PEUIUtils showSuccessAlertWithTitle:@"Verification e-mail sent."
                                                        alertDescription:attrMessage
-                                                               topInset:70.0
+                                                               topInset:[PEUIUtils topInsetForAlertsWithController:controller]
                                                             buttonTitle:@"Okay."
                                                            buttonAction:^{ enableUserInteraction(YES); }
                                                          relativeToView:controller.tabBarController.view];
@@ -291,7 +291,7 @@ We apologize for the inconvenience.  Please try re-sending the verification emai
                                                                         title:@"Something went wrong."
                                                              alertDescription:[[NSAttributedString alloc] initWithString:@"\
 Oops.  Something went wrong in attempting to send you a verification email.  Please try this again a little later."]
-                                                                     topInset:70.0
+                                                                     topInset:[PEUIUtils topInsetForAlertsWithController:controller]
                                                                   buttonTitle:@"Okay."
                                                                  buttonAction:^{ enableUserInteraction(YES); }
                                                                relativeToView:controller.tabBarController.view];
@@ -306,7 +306,7 @@ Oops.  Something went wrong in attempting to send you a verification email.  Ple
     [buttonsView setBackgroundColor:[UIColor clearColor]];
     if (includeRefreshButton) {
       UIButton *refreshBtn = [PEUIUtils buttonWithKey:@"refresh"
-                                                 font:[UIFont systemFontOfSize:14]
+                                                 font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                       backgroundColor:[UIColor concreteColor]
                                             textColor:[UIColor whiteColor]
                          disabledStateBackgroundColor:nil
@@ -341,8 +341,8 @@ Oops.  Something went wrong in attempting to send you a verification email.  Ple
                                  alertDescription:[PEUIUtils attributedTextWithTemplate:@"Your account is still not verified.  \
 Use the %@ button to have a new account verification link emailed to you."
                                                                            textToAccent:@"re-send verification email"
-                                                                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
-                                         topInset:70.0
+                                                                         accentTextFont:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]]
+                                         topInset:[PEUIUtils topInsetForAlertsWithController:controller]
                                       buttonTitle:@"Okay."
                                      buttonAction:^{ enableUserInteraction(YES); }
                                    relativeToView:controller.tabBarController.view];
@@ -358,7 +358,7 @@ Use the %@ button to have a new account verification link emailed to you."
                 } else {  // user account verified
                   [PEUIUtils showSuccessAlertWithTitle:@"Account verified."
                                       alertDescription:[[NSAttributedString alloc] initWithString:@"Thank you.  Your account is now verified."]
-                                              topInset:70.0
+                                              topInset:[PEUIUtils topInsetForAlertsWithController:controller]
                                            buttonTitle:@"Okay."
                                           buttonAction:^{
                                             enableUserInteraction(YES);
@@ -382,7 +382,7 @@ Use the %@ button to have a new account verification link emailed to you."
                                            title:@"Busy with maintenance."
                                 alertDescription:[[NSAttributedString alloc] initWithString:@"The server is currently busy at the moment \
 undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refreshing later."]
-                                        topInset:70.0
+                                        topInset:[PEUIUtils topInsetForAlertsWithController:controller]
                                      buttonTitle:@"Okay."
                                     buttonAction:^{ enableUserInteraction(YES); }
                                   relativeToView:controller.tabBarController.view];
@@ -391,7 +391,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                 [PEUIUtils showErrorAlertWithMsgs:nil
                                             title:@"Something went wrong."
                                  alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
-                                         topInset:70.0
+                                         topInset:[PEUIUtils topInsetForAlertsWithController:controller]
                                       buttonTitle:@"Okay."
                                      buttonAction:^{ enableUserInteraction(YES); }
                                    relativeToView:controller.tabBarController.view];
@@ -401,7 +401,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                 [PEUIUtils showErrorAlertWithMsgs:errsForRefresh[0][2]
                                             title:@"Something went wrong."
                                  alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
-                                         topInset:70.0
+                                         topInset:[PEUIUtils topInsetForAlertsWithController:controller]
                                       buttonTitle:@"Okay."
                                      buttonAction:^{ enableUserInteraction(YES); }
                                    relativeToView:controller.tabBarController.view];
@@ -462,18 +462,25 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
       } forControlEvents:UIControlEventTouchUpInside];
       [PEUIUtils placeView:refreshBtn inMiddleOf:buttonsView withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:8.0];
       UIButton *resendEmailBtn = makeSendEmailBtn();
-      [PEUIUtils placeView:resendEmailBtn toTheRightOf:refreshBtn onto:buttonsView withAlignment:PEUIVerticalAlignmentTypeMiddle hpadding:10.0];
+      if ((refreshBtn.frame.size.width + 10.0 + resendEmailBtn.frame.size.width) > panel.frame.size.width) {
+        [PEUIUtils placeView:resendEmailBtn below:refreshBtn onto:buttonsView withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:3.0 hpadding:0.0];
+        [PEUIUtils setFrameHeight:((refreshBtn.frame.size.height * 2) + 3.0) ofView:buttonsView];
+      } else {
+        [PEUIUtils placeView:resendEmailBtn toTheRightOf:refreshBtn onto:buttonsView withAlignment:PEUIVerticalAlignmentTypeMiddle hpadding:10.0];
+        [PEUIUtils setFrameHeight:refreshBtn.frame.size.height ofView:buttonsView];
+      }
     } else {
       UIButton *resendEmailBtn = makeSendEmailBtn();
       [PEUIUtils placeView:resendEmailBtn inMiddleOf:buttonsView withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:10.0];
+      [PEUIUtils setFrameHeight:resendEmailBtn.frame.size.height ofView:buttonsView];
     }
     [PEUIUtils placeView:statusPanel atTopOf:panel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
-    [PEUIUtils placeView:buttonsView below:statusPanel onto:panel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:3.0 hpadding:0.0];
-    heightOfPanel += buttonsView.frame.size.height + 3.0;
+    [PEUIUtils placeView:buttonsView below:statusPanel onto:panel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:5.0 hpadding:0.0];
+    heightOfPanel += buttonsView.frame.size.height + 5.0;
   } else {
     panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:statusPanel];
     UILabel *statusVerifiedMsg = [PEUIUtils labelWithKey:@"Your account is verified.  Thank you."
-                                                    font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                    font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                          backgroundColor:[UIColor clearColor]
                                                textColor:[UIColor darkGrayColor]
                                      verticalTextPadding:3.0
@@ -519,7 +526,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                 uitoolkit:(PEUIToolkit *)uitoolkit
                                controller:(UIViewController *)controller {
   UIButton *forgotPasswordBtn = [PEUIUtils buttonWithKey:@"Forgot password?"
-                                                    font:[UIFont systemFontOfSize:14]
+                                                    font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                          backgroundColor:[UIColor concreteColor]
                                                textColor:[UIColor whiteColor]
                             disabledStateBackgroundColor:nil
@@ -585,7 +592,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
               vpadding:8.0
               hpadding:0];
   UIView *msgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into the gas and odometer logs associated with this vehicle."
-                                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                               font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                     backgroundColor:[UIColor clearColor]
                                                           textColor:[UIColor darkGrayColor]
                                                 verticalTextPadding:3.0
@@ -610,9 +617,9 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     }
     [rowData addObjectsFromArray:@[@[@"Fuel capacity", [PEUtils descriptionOrEmptyIfNil:[vehicle fuelCapacity]]],
                                    @[@"Has range readout?", [PEUtils yesNoFromBool:[vehicle hasDteReadout]]],
-                                   @[@"Has average MPG readout?", [PEUtils yesNoFromBool:[vehicle hasMpgReadout]]],
-                                   @[@"Has average MPH readout?", [PEUtils yesNoFromBool:[vehicle hasMphReadout]]],
-                                   @[@"Has outside temperature readout?", [PEUtils yesNoFromBool:[vehicle hasOutsideTempReadout]]],
+                                   @[@"Has avg MPG readout?", [PEUtils yesNoFromBool:[vehicle hasMpgReadout]]],
+                                   @[@"Has avg MPH readout?", [PEUtils yesNoFromBool:[vehicle hasMphReadout]]],
+                                   @[@"Has outside temp. readout?", [PEUtils yesNoFromBool:[vehicle hasOutsideTempReadout]]],
                                    @[@"VIN", [PEUtils emptyIfNil:[vehicle vin]]],
                                    @[@"Plate #", [PEUtils emptyIfNil:[vehicle plate]]]]];
     UIView *vehicleDataPanel = [PEUIUtils tablePanelWithRowData:rowData
@@ -633,7 +640,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                                              animated:YES];
     } forControlEvents:UIControlEventTouchUpInside];
     UIView *statsMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into the stats and trends associated with this vehicle."
-                                                                      font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                                      font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                            backgroundColor:[UIColor clearColor]
                                                                  textColor:[UIColor darkGrayColor]
                                                        verticalTextPadding:3.0
@@ -699,9 +706,9 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     [vehicleFuelCapacityTf setKeyboardType:UIKeyboardTypeDecimalPad];
     NSArray *hasDteReadoutArray = switchPanelBlk(FPVehicleTagHasDteReadoutPanel, @"Has range readout?", FPVehicleTagHasDteReadoutSwitch);
     UIView *hasDteReadoutPanel = hasDteReadoutArray[0];
-    NSArray *hasMpgReadoutArray = switchPanelBlk(FPVehicleTagHasMpgReadoutPanel, @"Has average MPG readout?", FPVehicleTagHasMpgReadoutSwitch);
+    NSArray *hasMpgReadoutArray = switchPanelBlk(FPVehicleTagHasMpgReadoutPanel, @"Has avg MPG readout?", FPVehicleTagHasMpgReadoutSwitch);
     UIView *hasMpgReadoutPanel = hasMpgReadoutArray[0];
-    NSArray *hasMphReadoutArray = switchPanelBlk(FPVehicleTagHasMphReadoutPanel, @"Has average MPH readout?", FPVehicleTagHasMphReadoutSwitch);
+    NSArray *hasMphReadoutArray = switchPanelBlk(FPVehicleTagHasMphReadoutPanel, @"Has avg MPH readout?", FPVehicleTagHasMphReadoutSwitch);
     UIView *hasMphReadoutPanel = hasMphReadoutArray[0];
     NSArray *hasOutsideTempReadoutArray = switchPanelBlk(FPVehicleTagHasOutsideTempReadoutPanel, @"Has outside temp. readout?", FPVehicleTagHasOutsideTempReadoutSwitch);
     UIView *hasOutsideTempReadoutPanel = hasOutsideTempReadoutArray[0];
@@ -814,8 +821,6 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                          }];
       }
     } forControlEvents:UIControlEventTouchUpInside];
-    [PEUIUtils setFrameHeightOfView:vehiclePanel ofHeight:1.0 relativeTo:parentView];
-    //[PEUIUtils applyBorderToView:vehiclePanel withColor:[UIColor greenColor]];
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[vehiclePanel frame]];
     [scrollView setContentSize:CGSizeMake(vehiclePanel.frame.size.width, 1.575 * vehiclePanel.frame.size.height)];
     [scrollView addSubview:vehiclePanel];
@@ -977,7 +982,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
               vpadding:18.5
               hpadding:0];
   UIView *msgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into the gas logs associated with this gas station."
-                                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                               font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                     backgroundColor:[UIColor clearColor]
                                                           textColor:[UIColor darkGrayColor]
                                                 verticalTextPadding:3.0
@@ -1046,7 +1051,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                                              animated:YES];
     } forControlEvents:UIControlEventTouchUpInside];
     UIView *statsMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into the stats and trends associated with this gas station."
-                                                                      font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                                      font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                            backgroundColor:[UIColor clearColor]
                                                                  textColor:[UIColor darkGrayColor]
                                                        verticalTextPadding:3.0
@@ -1122,7 +1127,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     UITableView *coordinatesTableView = tableAndDs[0];
     FPFuelStationCoordinatesTableDataSource *ds = tableAndDs[1];
     UIButton *useCurrentLocationBtn = [PEUIUtils buttonWithKey:@"Use current location"
-                                                          font:[UIFont systemFontOfSize:14]
+                                                          font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                backgroundColor:[UIColor concreteColor]
                                                      textColor:[UIColor whiteColor]
                                   disabledStateBackgroundColor:nil
@@ -1149,11 +1154,11 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
           [PEUIUtils attributedTextWithTemplate:@"Your current location cannot be determined.  \
 Make sure you have location services enabled for Gas Jot.  You can check this by going to:\n\n%@"
                                    textToAccent:@"Settings app \u2794 Privacy \u2794 Location Services \u2794 Gas Jot"
-                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+                                 accentTextFont:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]];
           [PEUIUtils showWarningAlertWithMsgs:nil
                                         title:@"Hmm."
                              alertDescription:attrDescTextWithInstructionalText
-                                     topInset:70.0
+                                     topInset:[PEUIUtils topInsetForAlertsWithController:parentViewController]
                                   buttonTitle:@"Okay."
                                  buttonAction:^{}
                                relativeToView:parentView];
@@ -1162,7 +1167,7 @@ Make sure you have location services enabled for Gas Jot.  You can check this by
             [PEUIUtils showInstructionalAlertWithTitle:@"Enable location services."
                                   alertDescriptionText:@"To compute your current location, you need to enable location services for Gas Jot.  To do this, go to:\n\n"
                                        instructionText:@"Settings app \u2794 Privacy \u2794 Location Services \u2794 Gas Jot"
-                                              topInset:70.0
+                                              topInset:[PEUIUtils topInsetForAlertsWithController:parentViewController]
                                            buttonTitle:@"Okay."
                                           buttonAction:^{}
                                         relativeToView:parentView];
@@ -1171,7 +1176,7 @@ Make sure you have location services enabled for Gas Jot.  You can check this by
                                       titleImage:[PEUIUtils bundleImageWithName:@"question"]
                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
 To compute your location, you need to enable location services for Gas Jot.  If you would like to do this, tap 'Allow' in the next pop-up."]
-                                        topInset:70.0
+                                        topInset:[PEUIUtils topInsetForAlertsWithController:parentViewController]
                                  okayButtonTitle:@"Okay."
                                 okayButtonAction:^{
                                   [[APP locationManager] requestWhenInUseAuthorization];
@@ -1195,7 +1200,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
                 vpadding:8.0
                 hpadding:8.0];
     UIButton *recomputeCoordsBtn = [PEUIUtils buttonWithKey:@"Compute coordinates from address above"
-                                                       font:[UIFont systemFontOfSize:14]
+                                                       font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                             backgroundColor:[UIColor concreteColor]
                                                   textColor:[UIColor whiteColor]
                                disabledStateBackgroundColor:nil
@@ -1215,7 +1220,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
         [PEUIUtils showErrorAlertWithMsgs:nil
                                     title:@"Oops."
                          alertDescription:[[NSAttributedString alloc] initWithString:@"You need to enter at least part of the address above in order to compute the location coordinates."]
-                                 topInset:70.0
+                                 topInset:[PEUIUtils topInsetForAlertsWithController:parentViewController]
                               buttonTitle:@"Okay."
                              buttonAction:nil
                            relativeToView:parentView];
@@ -1243,7 +1248,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
                                                      title:@"Oops."
                                           alertDescription:[[NSAttributedString alloc] initWithString:@"There was a problem trying to compute the \
                                                             location from the given address above."]
-                                                  topInset:70.0
+                                                  topInset:[PEUIUtils topInsetForAlertsWithController:parentViewController]
                                                buttonTitle:@"Okay."
                                               buttonAction:nil
                                             relativeToView:parentView];

@@ -25,6 +25,7 @@
   UIButton *_fplogsBtn;
   UIButton *_envlogsBtn;
   UIButton *_unsyncedEditsBtn;
+  UIScrollView *_scrollView;
 }
 
 #pragma mark - Initializers
@@ -60,21 +61,6 @@
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Data Records"];
-  
-  CGFloat leftPadding = 8.0;
-  _msgPanel =  [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"\
-From here you can drill into all of your data records."
-                                                         font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                              backgroundColor:[UIColor clearColor]
-                                                    textColor:[UIColor darkGrayColor]
-                                          verticalTextPadding:3.0
-                                                   fitToWidth:self.view.frame.size.width - (leftPadding + 3.0)]
-                              padding:leftPadding];
-  [PEUIUtils placeView:_msgPanel
-               atTopOf:self.view
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:75.0
-              hpadding:0.0];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -83,6 +69,16 @@ From here you can drill into all of your data records."
   [_fuelstationsBtn removeFromSuperview];
   [_fplogsBtn removeFromSuperview];
   [_envlogsBtn removeFromSuperview];
+  [_scrollView removeFromSuperview];
+  
+  CGFloat leftPadding = 8.0;
+  _msgPanel =  [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into all of your data records."
+                                                         font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
+                                              backgroundColor:[UIColor clearColor]
+                                                    textColor:[UIColor darkGrayColor]
+                                          verticalTextPadding:3.0
+                                                   fitToWidth:self.view.frame.size.width - (leftPadding + 3.0)]
+                              padding:leftPadding];
   _vehiclesBtn = [PEUIUtils buttonWithLabel:@"Vehicles"
                                tagForButton:nil
                                 recordCount:[_coordDao numVehiclesForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
@@ -131,39 +127,56 @@ From here you can drill into all of your data records."
                                   }
                                  uitoolkit:_uitoolkit
                             relativeToView:self.view];
+  _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
+  [PEUIUtils placeView:_msgPanel
+               atTopOf:_scrollView
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:75.0
+              hpadding:0.0];
+  CGFloat totalHeight = _msgPanel.frame.size.height + 75.0;
   [PEUIUtils placeView:_vehiclesBtn
                  below:_msgPanel
-                  onto:self.view
+                  onto:_scrollView //self.view
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:10.0
               hpadding:0.0];
+  totalHeight += _vehiclesBtn.frame.size.height + 10.0;
   [PEUIUtils placeView:_fuelstationsBtn
                  below:_vehiclesBtn
-                  onto:self.view
+                  onto:_scrollView //self.view
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:10.0
               hpadding:0.0];
+  totalHeight += _fuelstationsBtn.frame.size.height + 10.0;
   [PEUIUtils placeView:_fplogsBtn
                  below:_fuelstationsBtn
-                  onto:self.view
+                  onto:_scrollView //self.view
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:10.0
               hpadding:0.0];
+  totalHeight += _fplogsBtn.frame.size.height + 10.0;
   [PEUIUtils placeView:_envlogsBtn
                  below:_fplogsBtn
-                  onto:self.view
+                  onto:_scrollView //self.view
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:10.0
               hpadding:0.0];
+  totalHeight += _envlogsBtn.frame.size.height + 10.0;
   
   [_unsyncedEditsBtn removeFromSuperview];
   if ([APP isUserLoggedIn]) {
     NSInteger numUnsynced = [_coordDao totalNumUnsyncedEntitiesForUser:_user];
     if (numUnsynced > 0) {
       _unsyncedEditsBtn = [self unsyncedEditsButtonWithBadgeNum:numUnsynced];
-      [PEUIUtils placeView:_unsyncedEditsBtn below:_envlogsBtn onto:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:25.0 hpadding:0.0];
+      [PEUIUtils placeView:_unsyncedEditsBtn below:_envlogsBtn onto:_scrollView withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:25.0 hpadding:0.0];
+      totalHeight += _unsyncedEditsBtn.frame.size.height + 25.0;
     }
   }
+  [PEUIUtils setFrameHeight:totalHeight ofView:_scrollView];
+  [_scrollView setDelaysContentTouches:NO];
+  [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.6 * _scrollView.frame.size.height)];
+  [_scrollView setBounces:YES];
+  [PEUIUtils placeView:_scrollView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
 }
 
 #pragma mark - Helpers

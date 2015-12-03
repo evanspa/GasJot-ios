@@ -522,7 +522,7 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
   NSAttributedString *attrBecameUnauthMessage =
   [PEUIUtils attributedTextWithTemplate:@"It appears you're no longer authenticated.  To re-authenticate, go to:\n\n%@."
                            textToAccent:@"Account \u2794 Re-authenticate"
-                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+                         accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]];
   return [PEUIUtils warningAlertSectionWithMsgs:nil
                                           title:@"Authentication failure."
                                alertDescription:attrBecameUnauthMessage
@@ -590,7 +590,7 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
     [PEUIUtils showConfirmAlertWithTitle:@"Are you sure?"
                               titleImage:nil //[PEUIUtils bundleImageWithName:@"question"]
                         alertDescription:[[NSAttributedString alloc] initWithString:@"Are you sure you want to delete this record?"]
-                                topInset:70.0
+                                topInset:[PEUIUtils topInsetForAlertsWithController:self]
                          okayButtonTitle:@"Yes.  Delete it."
                         okayButtonAction:^{ [self doDelete]; }
                          okayButtonStyle:JGActionSheetButtonStyleRed
@@ -608,7 +608,7 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
 Deleting this record will result in the \
 following child-records being deleted.\n\n\
 Are you sure you want to continue?"]
-                                        topInset:70.0
+                                        topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                  okayButtonTitle:@"Yes, delete."
                                 okayButtonAction:^{ [self doDelete]; }
                                cancelButtonTitle:@"No, cancel."
@@ -664,7 +664,7 @@ Are you sure you want to continue?"]
             [PEUIUtils showDeleteConflictAlertWithTitle:@"Conflict"
                                        alertDescription:[[NSAttributedString alloc] initWithString:@"\
 The remote copy of this record has been updated since you last downloaded it."]
-                                               topInset:70.0
+                                               topInset:[PEUIUtils topInsetForAlertsWithController:self]
                             forceDeleteLocalButtonTitle:@"I don't care.  Delete it anyway."
                                 forceDeleteButtonAction:^{
                                   [_entity setUpdatedAt:[latestEntity updatedAt]];
@@ -680,7 +680,7 @@ The remote copy of this record has been updated since you last downloaded it."]
                              alertDescription:[[NSAttributedString alloc] initWithString:@"\
 It looks like this record was already deleted from a different device. \
 It has now been removed from this device."]
-                                     topInset:70.0
+                                     topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                   buttonTitle:@"Okay."
                                  buttonAction:^{
                                    _itemLocalDeleter(self, _entity, _entityIndexPath);
@@ -895,7 +895,7 @@ It has now been removed from this device."]
           [PEUIUtils showInfoAlertWithTitle:@"You already have the latest."
                            alertDescription:[[NSAttributedString alloc] initWithString:@"\
 You already have the latest version of this record on your device."]
-                                   topInset:70.0
+                                   topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                 buttonTitle:@"Okay."
                                buttonAction:^{ [self enableUi]; }
                              relativeToView:[self parentViewForAlerts]];
@@ -909,7 +909,7 @@ You already have the latest version of this record on your device."]
             [PEUIUtils showSuccessAlertWithTitle:[NSString stringWithFormat:@"%@ downloaded.", _entityTitle]
                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
 The latest version of this record has been successfully downloaded to your device."]
-                                        topInset:70.0
+                                        topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                      buttonTitle:@"Okay."
                                     buttonAction:^{
                                       [_entity setUpdatedAt:[downloadedEntity updatedAt]];
@@ -933,7 +933,7 @@ The latest version of this record has been successfully downloaded to your devic
           [PEUIUtils showErrorAlertWithMsgs:errsForEntityDownload[0][2]
                                       title:@"Download error."
                            alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
-                                   topInset:70.0
+                                   topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                 buttonTitle:@"Okay."
                                buttonAction:^{ [self enableUi]; }
                              relativeToView:[self parentViewForAlerts]];
@@ -1277,7 +1277,7 @@ The server is currently busy at the moment \
 undergoing maintenance.\n\n\
 We apologize for the inconvenience.  Please \
 try this operation again later."]
-                          topInset:70.0
+                          topInset:[PEUIUtils topInsetForAlertsWithController:self]
                        buttonTitle:@"Okay."
                       buttonAction:action
                     relativeToView:[self parentViewForAlerts]];
@@ -1293,7 +1293,7 @@ with your remote account, it will be removed now.";
   [PEUIUtils showErrorAlertWithMsgs:nil
                               title:@"Record not found."
                    alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
-                           topInset:70.0
+                           topInset:[PEUIUtils topInsetForAlertsWithController:self]
                         buttonTitle:@"Okay."
                        buttonAction:^{
                          _itemLocalDeleter(self, _entity, _entityIndexPath);
@@ -1352,7 +1352,7 @@ entity's dependencies.";
                 [PEUIUtils showMultiErrorAlertWithFailures:errsForDepsFetch
                                                      title:@"Fetch errors."
                                           alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
-                                                  topInset:70.0
+                                                  topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                                buttonTitle:@"Okay."
                                               buttonAction:^{
                                                 dismissErrAlertAction();
@@ -1365,7 +1365,7 @@ entity's dependency.";
                 [PEUIUtils showErrorAlertWithMsgs:errsForDepsFetch[0][2]
                                             title:@"Fetch error."
                                  alertDescription:[[NSAttributedString alloc] initWithString:fetchErrMsg]
-                                         topInset:70.0
+                                         topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                       buttonTitle:@"Okay."
                                      buttonAction:^{
                                        dismissErrAlertAction();
@@ -1456,11 +1456,11 @@ merge conflicts.";
       [PEUIUtils showConflictResolverWithTitle:@"Conflict resolver."
                               alertDescription:[[NSAttributedString alloc] initWithString:desc]
                          conflictResolveFields:_conflictResolveFields(self, mergeConflicts, _entity, latestEntity)
-                                withCellHeight:36.75
+                                withCellHeight:([PEUIUtils sizeOfText:@"" withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]].height + _uitoolkit.verticalPaddingForButtons)
                              labelLeftHPadding:5.0
                             valueRightHPadding:8.0
-                                     labelFont:[UIFont systemFontOfSize:14]
-                                     valueFont:[UIFont systemFontOfSize:14]
+                                     labelFont:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
+                                     valueFont:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                 labelTextColor:[UIColor darkGrayColor]
                                 valueTextColor:[UIColor darkGrayColor]
                 minPaddingBetweenLabelAndValue:10.0
@@ -1508,7 +1508,7 @@ merge conflicts.";
                                                      dismissErrAlertPostAction:reenableNavButtons];
   [PEUIUtils showEditConflictAlertWithTitle:@"Conflict."
                            alertDescription:desc
-                                   topInset:70.0
+                                   topInset:[PEUIUtils topInsetForAlertsWithController:self]
                            mergeButtonTitle:@"Merge remote and local, then review."
                           mergeButtonAction:^(UIView *alertSection) {
                             void (^doMerge)(void) = [self mergerWithLatestEntity:latestEntity
@@ -1588,7 +1588,7 @@ merge conflicts.";
 
 - (UILabel *)titleWithText:(NSString *)titleText {
   return [PEUIUtils labelWithKey:titleText
-                            font:[UIFont systemFontOfSize:14.0]
+                            font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                  backgroundColor:[UIColor clearColor]
                        textColor:[UIColor blackColor]
              verticalTextPadding:0.0];
@@ -1685,7 +1685,7 @@ merge conflicts.";
               [HUD hide:YES];
               [PEUIUtils showSuccessAlertWithTitle:[NSString stringWithFormat:@"%@ saved.", _entityTitle]
                                   alertDescription:[[NSAttributedString alloc] initWithString:successMessageTitlesForUpload[0]]
-                                          topInset:70.0
+                                          topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                        buttonTitle:@"Okay."
                                       buttonAction:^{ postEditActivities(); }
                                     relativeToView:[self parentViewForAlerts]];
@@ -1703,7 +1703,7 @@ The server is currently busy at the moment \
 undergoing maintenance.\n\n\
 Your edits have been saved locally.  You \
 can try to upload them later."]
-                                        topInset:70.0
+                                        topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                      buttonTitle:@"Okay."
                                     buttonAction:^{
                                       postEditActivities();
@@ -1748,7 +1748,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                 }
                 attrMessage = [PEUIUtils attributedTextWithTemplate:messageTemplate
                                                        textToAccent:textToAccent
-                                                     accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+                                                     accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]];
                 JGActionSheetSection *becameUnauthSection = nil;
                 if (receivedAuthReqdErrorOnSaveAttempt) {
                   becameUnauthSection = [self becameUnauthenticatedSection];
@@ -2001,7 +2001,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
       [PEUIUtils showWarningAlertWithMsgs:errMsgs
                                     title:@"Oops"
                          alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
-                                 topInset:70.0
+                                 topInset:[PEUIUtils topInsetForAlertsWithController:self]
                               buttonTitle:@"Okay."
                              buttonAction:nil
                            relativeToView:[self view]];
@@ -2042,7 +2042,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
   UIView *errorPanel = [PEUIUtils panelWithWidthOf:0.9 relativeToView:contentView fixedHeight:height];
   UIImageView *errImgView = [[UIImageView alloc] initWithImage:leftImgIcon];
   UILabel *errorMsgLbl = [PEUIUtils labelWithKey:title
-                                            font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                            font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                  backgroundColor:[UIColor clearColor]
                                        textColor:[UIColor blackColor]
                              verticalTextPadding:0.0];
@@ -2140,7 +2140,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
               [PEUIUtils showSuccessAlertWithTitle:[NSString stringWithFormat:@"%@ saved.", _entityTitle]
                                   alertDescription:[[NSAttributedString alloc] initWithString:successMessageTitlesForUpload[0]]
                           additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _entityFormPanel, _newEntity) : nil
-                                          topInset:70.0
+                                          topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                        buttonTitle:@"Okay."
                                       buttonAction:^{
                                         _itemAddedBlk(self, _newEntity);  // this is what causes this controller to be dismissed
@@ -2213,7 +2213,7 @@ locally.  Try uploading it later.";
                 NSAttributedString *attrMessage = [PEUIUtils attributedTextWithTemplate:@"Some of the edits were saved to the Gas Jot server and some were not. \
 The ones that did not %@ and will need to be fixed individually."
                                                        textToAccent:@"have been saved locally"
-                                                     accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+                                                     accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]];
                 [sections addObject:[PEUIUtils mixedResultsAlertSectionWithSuccessMsgs:successMessageTitlesForUpload
                                                                                  title:title
                                                                       alertDescription:attrMessage
@@ -2263,7 +2263,7 @@ The ones that did not %@ and will need to be fixed individually."
                                                                               title:title
                                                                    alertDescription:[PEUIUtils attributedTextWithTemplate:messageTemplate
                                                                                                              textToAccent:textToAccent
-                                                                                                           accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
+                                                                                                           accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]]
                                                                      relativeToView:[self parentViewForAlerts]]];
                 }
               } else {
@@ -2288,7 +2288,7 @@ The ones that did not %@ and will need to be fixed individually."
                                                                      title:title
                                                           alertDescription:[PEUIUtils attributedTextWithTemplate:messageTemplate
                                                                                                     textToAccent:textToAccent
-                                                                                                  accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
+                                                                                                  accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]]
                                                             relativeToView:[self parentViewForAlerts]]];
                 }
               }
@@ -2471,12 +2471,12 @@ The ones that did not %@ and will need to be fixed individually."
       if (_isOfflineMode() && _isAuthenticatedBlk()) {
         [descSubtext appendAttributedString:[PEUIUtils attributedTextWithTemplate:@"\n\n(%@)"
                                                                      textToAccent:@"offline mode enabled"
-                                                                   accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                                   accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]
                                                                   accentTextColor:[UIColor blackColor]]];
       } else if (_isUserLoggedIn() && !_isAuthenticatedBlk()) {
         [descSubtext appendAttributedString:[PEUIUtils attributedTextWithTemplate:@"\n\n(%@)"
                                                                      textToAccent:@"not saved to the server"
-                                                                   accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                                   accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]
                                                                   accentTextColor:[UIColor blackColor]]];
       }
       if ([saveMessages count] > 1) {
@@ -2487,7 +2487,7 @@ The ones that did not %@ and will need to be fixed individually."
                                       title:saveTitle
                            alertDescription:desc
                    additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _entityFormPanel, _newEntity) : nil
-                                   topInset:70.0
+                                   topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                 buttonTitle:@"Okay."
                                buttonAction:^{
                                  if (_modalOperationDone) { _modalOperationDone(); }
@@ -2502,7 +2502,7 @@ The ones that did not %@ and will need to be fixed individually."
         [PEUIUtils showSuccessAlertWithTitle:saveTitle
                             alertDescription:desc
                     additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _entityFormPanel, _newEntity) : nil
-                                    topInset:70.0
+                                    topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                  buttonTitle:@"Okay."
                                 buttonAction:^{
                                   if (_modalOperationDone) { _modalOperationDone(); }
@@ -2516,7 +2516,7 @@ The ones that did not %@ and will need to be fixed individually."
     [PEUIUtils showWarningAlertWithMsgs:errMsgs
                                   title:@"Oops"
                        alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
-                               topInset:70.0
+                               topInset:[PEUIUtils topInsetForAlertsWithController:self]
                             buttonTitle:@"Okay."
                            buttonAction:^{  }
                          relativeToView:[self view]];

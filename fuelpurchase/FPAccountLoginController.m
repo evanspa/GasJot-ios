@@ -214,7 +214,7 @@ Gas Jot account, connecting this device to it.  Your Gas Jot data will be downlo
 By enabling location services, selecting a gas station becomes easier when logging \
 gas purchases because the nearest gas station can be pre-selected.\n\n\
 If you would like to enable location services, tap 'Allow' in the next pop-up."]
-                                  topInset:70.0
+                                  topInset:[PEUIUtils topInsetForAlertsWithController:self]
                            okayButtonTitle:@"Okay."
                           okayButtonAction:^{
                             [[APP locationManager] requestWhenInUseAuthorization];
@@ -238,7 +238,7 @@ If you would like to enable location services, tap 'Allow' in the next pop-up."]
                           alertDescription:[[NSAttributedString alloc] initWithString:@"\
 You have been successfully logged in.\n\nYour remote account is now connected to this device.  \
 Any Gas Jot data that you create and save will be synced to your remote account."]
-                                   topInset:70.0
+                                   topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                 buttonTitle:@"Okay."
                                buttonAction:^{
                                  enableLocationServices(^{
@@ -330,7 +330,7 @@ Your remote account is now connected to \
 this device.  Any gas jot data that \
 you create and save will be synced to your \
 remote account."]
-                                                                                    topInset:70.0
+                                                                                    topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                                                                  buttonTitle:@"Okay."
                                                                                 buttonAction:^{
                                                                                   enableLocationServices(^{
@@ -395,7 +395,7 @@ edits, the Gas Jot server is asking for you to authenticate again.  Sorry about 
                                                   }
                                                     error:^(NSError *err, int code, NSString *desc) {
                                                       dispatch_async(dispatch_get_main_queue(), ^{
-                                                        [FPUtils localDatabaseErrorHudHandlerMaker](HUD, [self parentViewForAlerts])(err, code, desc);
+                                                        [FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, [self parentViewForAlerts])(err, code, desc);
                                                       });
                                                     }];
         };
@@ -417,7 +417,7 @@ edits, the Gas Jot server is asking for you to authenticate again.  Sorry about 
                                                title:@"Server Busy."
                                     alertDescription:[[NSAttributedString alloc] initWithString:@"We apologize, but the Gas Jot server is currently \
 busy.  Please try logging in a little later."]
-                                            topInset:70.0
+                                            topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                          buttonTitle:@"Okay."
                                         buttonAction:^{
                                           enableUserInteraction(YES);
@@ -430,11 +430,12 @@ busy.  Please try logging in a little later."]
                   [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD,
                                                                       successBlk,
                                                                       ^{ enableUserInteraction(YES); },
+                                                                      self,
                                                                       [self parentViewForAlerts])(err);
                   if (user) {
                     NSDate *mostRecentUpdatedAt =
                     [[_coordDao localDao] mostRecentMasterUpdateForUser:user
-                                                                  error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, [self parentViewForAlerts])];
+                                                                  error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, [self parentViewForAlerts])];
                     DDLogDebug(@"in FPAccountLoginController/handleSignIn, login success, mostRecentUpdatedAt: [%@](%@)", mostRecentUpdatedAt, [PEUtils millisecondsFromDate:mostRecentUpdatedAt]);
                     if (mostRecentUpdatedAt) {
                       [APP setChangelogUpdatedAt:mostRecentUpdatedAt];
@@ -442,7 +443,7 @@ busy.  Please try logging in a little later."]
                   }
                 });
               }
-          localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, [self parentViewForAlerts])];
+          localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, [self parentViewForAlerts])];
     };
     if (_preserveExistingLocalEntities == nil) { // first time asked
       if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {
@@ -488,7 +489,7 @@ would you like them to be deleted?";
     [PEUIUtils showWarningAlertWithMsgs:errMsgs
                                   title:@"Oops"
                        alertDescription:[[NSAttributedString alloc] initWithString:@"There are some validation errors:"]
-                               topInset:70.0
+                               topInset:[PEUIUtils topInsetForAlertsWithController:self]
                             buttonTitle:@"Okay."
                            buttonAction:nil
                          relativeToView:[self parentViewForAlerts]];

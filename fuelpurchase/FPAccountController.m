@@ -58,6 +58,12 @@ NSInteger const kAccountStatusPanelTag = 12;
   return self;
 }
 
+#pragma mark - Dynamic Type Support
+
+- (void)changeTextSize:(NSNotification *)notification {
+  [self viewDidAppear:YES];
+}
+
 #pragma mark - View Controller Lifecyle
 
 - (void)viewDidLoad {
@@ -65,10 +71,11 @@ NSInteger const kAccountStatusPanelTag = 12;
 #ifdef FP_DEV
   [self pdvDevEnable];
 #endif
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(changeTextSize:)
+                                               name:UIContentSizeCategoryDidChangeNotification
+                                             object:nil];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
-  [self makeNotLoggedInPanel];
-  [self makeDoesHaveAuthTokenPanel];
-  [self makeDoesNotHaveAuthTokenPanel];
   [self setAutomaticallyAdjustsScrollViewInsets:NO]; // http://stackoverflow.com/questions/6523205/uiscrollview-adjusts-contentoffset-when-contentsize-changes
 }
 
@@ -80,6 +87,7 @@ NSInteger const kAccountStatusPanelTag = 12;
   [_doesNotHaveAuthTokenPanel removeFromSuperview];
   if ([APP isUserLoggedIn]) {
     if ([APP doesUserHaveValidAuthToken]) {
+      [self makeDoesHaveAuthTokenPanel];
       [navItem setTitle:@"Your Gas Jot Account"];
       [PEUIUtils placeView:_doesHaveAuthTokenPanel
                    atTopOf:[self view]
@@ -94,6 +102,7 @@ NSInteger const kAccountStatusPanelTag = 12;
                                         relativeToView:_doesHaveAuthTokenPanel
                                             controller:self];
     } else {
+      [self makeDoesNotHaveAuthTokenPanel];
       [navItem setTitle:@"Your Gas Jot Account"];
       [PEUIUtils placeView:_doesNotHaveAuthTokenPanel
                    atTopOf:[self view]
@@ -102,16 +111,13 @@ NSInteger const kAccountStatusPanelTag = 12;
                   hpadding:0.0];
     }
   } else {
+    [self makeNotLoggedInPanel];
     [navItem setTitle:@"Log In or Create Account"];
-    /*[PEUIUtils placeView:_notLoggedInPanel
-                 atTopOf:[self view]
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:0.0
-                hpadding:0.0];*/
     [PEUIUtils placeView:_notLoggedInPanel
               inMiddleOf:[self view]
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 hpadding:0.0];
+    [PEUIUtils adjustYOfView:_notLoggedInPanel withValue:15.0];
   }
 }
 
@@ -124,7 +130,7 @@ NSInteger const kAccountStatusPanelTag = 12;
 - (UIView *)leftPaddingMessageWithAttributedText:(NSAttributedString *)attrText {
   CGFloat leftPadding = 8.0;
   UILabel *label = [PEUIUtils labelWithAttributeText:attrText
-                                                font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                      backgroundColor:[UIColor clearColor]
                                            textColor:[UIColor darkGrayColor]
                                  verticalTextPadding:3.0
@@ -146,7 +152,7 @@ Logging out will disconnect this device from your remote account and remove your
   CGFloat labelLeftPadding = 8.0;
   UIImageView *iconImageView = [[UIImageView alloc] initWithImage:iconImage];
   UILabel *messageLabel = [PEUIUtils labelWithKey:message
-                                             font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                             font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                   backgroundColor:[UIColor clearColor]
                                         textColor:[UIColor darkGrayColor]
                               verticalTextPadding:3.0
@@ -178,7 +184,7 @@ Logging out will disconnect this device from your remote account and remove your
                                            animated:YES];
   } forControlEvents:UIControlEventTouchUpInside];
   UIView *statsMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into various stats and trends associated with your data records."
-                                                                    font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                                    font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                          backgroundColor:[UIColor clearColor]
                                                                textColor:[UIColor darkGrayColor]
                                                      verticalTextPadding:3.0
@@ -200,13 +206,10 @@ Logging out will disconnect this device from your remote account and remove your
 
 - (void)makeDoesHaveAuthTokenPanel {
   ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
-  //_doesHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
   _doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
-  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.35 * self.view.frame.size.height)];
-  [_doesHaveAuthTokenPanel setBounces:YES];
   NSAttributedString *attrMessage = [PEUIUtils attributedTextWithTemplate:@"%@.  From here you can view and edit your remote account details."
                                                              textToAccent:@"You are currently logged in"
-                                                           accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                           accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]
                                                           accentTextColor:[UIColor greenSeaColor]];
   UIView *accountSettingsMsgPanel = [self leftPaddingMessageWithAttributedText:attrMessage];
   UIButton *accountSettingsBtn = [_uitoolkit systemButtonMaker](@"Remote account details", nil, nil);
@@ -229,18 +232,21 @@ Logging out will disconnect this device from your remote account and remove your
   [logoutBtn setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
   [[logoutBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
+  
   // place views onto panel
   [PEUIUtils placeView:accountSettingsBtn
                atTopOf:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:90
+              vpadding:90.0
               hpadding:0.0];
+  CGFloat totalHeight = accountSettingsBtn.frame.size.height + 90.0;
   [PEUIUtils placeView:accountSettingsMsgPanel
                  below:accountSettingsBtn
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
+  totalHeight += accountSettingsMsgPanel.frame.size.height + 4.0;
   UIView *statsAndTrendsPanel = [self statsAndTrendsPanel];
   [PEUIUtils placeView:statsAndTrendsPanel
                  below:accountSettingsMsgPanel
@@ -248,33 +254,37 @@ Logging out will disconnect this device from your remote account and remove your
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:30.0
               hpadding:0.0];
+  totalHeight += statsAndTrendsPanel.frame.size.height + 30.0;
   [PEUIUtils placeView:accountStatusPanel
                  below:statsAndTrendsPanel
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:30.0
               hpadding:0.0];
+  totalHeight += accountStatusPanel.frame.size.height + 30.0;
   [PEUIUtils placeView:logoutBtn
                  below:accountStatusPanel
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:30.0
               hpadding:0.0];
+  totalHeight += logoutBtn.frame.size.height + 30.0;
   [PEUIUtils placeView:logoutMsgLabelWithPad
                  below:logoutBtn
                   onto:_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
+  totalHeight += logoutBtn.frame.size.height + 4.0;
+  [PEUIUtils setFrameHeight:totalHeight ofView:_doesHaveAuthTokenPanel];
+  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.6 * _doesHaveAuthTokenPanel.frame.size.height)];
+  [_doesHaveAuthTokenPanel setBounces:YES];
 }
 
 - (void)makeDoesNotHaveAuthTokenPanel {
   ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
   _doesNotHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
-  NSString *message = @"\
-For security reasons, we need you to \
-re-authenticate against your remote \
-account.";
+  NSString *message = @"For security reasons, we need you to re-authenticate against your remote account.";
   UIView *messagePanel = [self leftPaddingMessageWithText:message];
   UIButton *reauthenticateBtn = [_uitoolkit systemButtonMaker](@"Re-authenticate", nil, nil);
   [[reauthenticateBtn layer] setCornerRadius:0.0];
@@ -292,7 +302,7 @@ account.";
   exclamationView.layer.cornerRadius = 10;
   exclamationView.backgroundColor = [UIColor redColor];
   [PEUIUtils placeView:[PEUIUtils labelWithKey:@"!"
-                                          font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                          font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                backgroundColor:[UIColor clearColor]
                                      textColor:[UIColor whiteColor]
                            verticalTextPadding:0.0]
@@ -331,9 +341,8 @@ account.";
 
 - (void)makeNotLoggedInPanel {
   _notLoggedInPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
-  //UIButton *loginBtn = [_uitoolkit systemButtonMaker](@"Log In", nil, nil);
   UIButton *loginBtn = [PEUIUtils buttonWithKey:@"Log In"
-                                           font:[UIFont boldSystemFontOfSize:22.0]
+                                           font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle2]
                                 backgroundColor:[UIColor turquoiseColor]
                                       textColor:[UIColor whiteColor]
                    disabledStateBackgroundColor:nil
@@ -343,18 +352,13 @@ account.";
                                    cornerRadius:5.0
                                          target:nil
                                          action:nil];
-  //[[loginBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:loginBtn ofWidth:0.85 relativeTo:_notLoggedInPanel];
-  //[PEUIUtils addDisclosureIndicatorToButton:loginBtn];
-  
-  
+  [PEUIUtils setFrameWidthOfView:loginBtn ofWidth:0.85 relativeTo:_notLoggedInPanel];  
   [loginBtn bk_addEventHandler:^(id sender) {
     [self presentLoginScreen];
   } forControlEvents:UIControlEventTouchUpInside];
-//  UIView *loginMsgPanel = [self leftPaddingMessageWithAttributedText:[[NSAttributedString alloc] initWithString:@"Log into your Gas Jot account."]];
   NSString *msgText = @"Already have a Gas Jot account?  Log in here.";
   UILabel *loginMsgLbl = [PEUIUtils labelWithAttributeText:[[NSAttributedString alloc] initWithString:msgText]
-                                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                           font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                 backgroundColor:[UIColor clearColor]
                                                       textColor:[UIColor darkGrayColor]
                                             verticalTextPadding:3.0
@@ -364,7 +368,7 @@ account.";
   
   
   UIButton *createAccountBtn = [PEUIUtils buttonWithKey:@"Sign Up"
-                                                   font:[UIFont boldSystemFontOfSize:22.0]
+                                                   font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle2]
                                         backgroundColor:[UIColor peterRiverColor]
                                               textColor:[UIColor whiteColor]
                            disabledStateBackgroundColor:nil
@@ -375,14 +379,12 @@ account.";
                                                  target:nil
                                                  action:nil];
   [PEUIUtils setFrameWidthOfView:createAccountBtn ofWidth:0.85 relativeTo:_notLoggedInPanel];
-  //[PEUIUtils addDisclosureIndicatorToButton:createAccountBtn];
   [createAccountBtn bk_addEventHandler:^(id sender) {
     [self presentSetupRemoteAccountScreen];
   } forControlEvents:UIControlEventTouchUpInside];
   msgText = @"Creating a Gas Jot account will enable your records to be saved to the Gas Jot server so you can access them from other devices.";
-  //UIView *createAcctMsgPanel = [self leftPaddingMessageWithAttributedText:[[NSAttributedString alloc] initWithString:msgText]];
   UILabel *createAcctMsgLbl = [PEUIUtils labelWithAttributeText:[[NSAttributedString alloc] initWithString:msgText]
-                                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                           font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                 backgroundColor:[UIColor clearColor]
                                                       textColor:[UIColor darkGrayColor]
                                             verticalTextPadding:3.0
@@ -406,7 +408,7 @@ account.";
                   onto:_notLoggedInPanel
          withAlignment:PEUIHorizontalAlignmentTypeCenter
 alignmentRelativeToView:_notLoggedInPanel
-              vpadding:45.0
+              vpadding:35.0
               hpadding:0.0];
   [PEUIUtils placeView:createAcctMsgLbl
                  below:createAccountBtn
@@ -485,7 +487,7 @@ simply be saved locally.";
       [PEUIUtils showSuccessAlertWithMsgs:nil
                                     title:@"Logout successful."
                          alertDescription:[[NSAttributedString alloc] initWithString:msg]
-                                 topInset:70.0
+                                 topInset:[PEUIUtils topInsetForAlertsWithController:self]
                               buttonTitle:@"Okay."
                              buttonAction:^{
                                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
@@ -517,7 +519,7 @@ simply be saved locally.";
 You have unsynced edits.  If you log out, \
 they will be permanently deleted.\n\n\
 Are you sure you want to do continue?"]
-                                       topInset:70.0
+                                       topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                 okayButtonTitle:@"Yes.  Log me out."
                                okayButtonAction:^{ doLogout(); }
                               cancelButtonTitle:@"Cancel."

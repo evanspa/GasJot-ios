@@ -58,7 +58,7 @@
 From here you can drill into all of your items \
 that have unsynced edits, are edit-in-progress \
 or have known problems."
-                                             font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                             font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                   backgroundColor:[UIColor clearColor]
                                         textColor:[UIColor darkGrayColor]
                               verticalTextPadding:3.0
@@ -73,7 +73,7 @@ This action will attempt to upload all 'sync-able' \
 edits.  This include items that don't have \
 known problems or are not in edit-in-progress \
 mode."
-                                             font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                             font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                   backgroundColor:[UIColor clearColor]
                                         textColor:[UIColor darkGrayColor]
                               verticalTextPadding:3.0
@@ -83,9 +83,8 @@ mode."
 
 - (UIView *)paddedNoEipsInfoMessage {
   CGFloat leftPadding = 8.0;
-  UILabel *infoMsgLabel = [PEUIUtils labelWithKey:@"\
-You currently have no unsynced items."
-                                             font:[UIFont boldSystemFontOfSize:16.0]
+  UILabel *infoMsgLabel = [PEUIUtils labelWithKey:@"You currently have no unsynced items."
+                                             font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle1] //[UIFont boldSystemFontOfSize:16.0]
                                   backgroundColor:[UIColor clearColor]
                                         textColor:[UIColor darkGrayColor]
                               verticalTextPadding:3.0
@@ -93,22 +92,10 @@ You currently have no unsynced items."
   return [PEUIUtils leftPadView:infoMsgLabel padding:leftPadding];
 }
 
-#pragma mark - View Controller Lifecyle
-
-- (void)viewWillAppear:(BOOL)animated {
-  [super viewWillAppear:YES];
-  
-  // remove stale message panels
-  [_eipsMessagePanel removeFromSuperview];
-  [_noEipsMessagePanel removeFromSuperview];
-  
-  // remove stale buttons
-  [_vehiclesButton removeFromSuperview];
-  [_fuelStationsButton removeFromSuperview];
-  [_fplogsButton removeFromSuperview];
-  [_envlogsButton removeFromSuperview];
-  [_syncAllMessage removeFromSuperview];
-  [_syncAllButton removeFromSuperview];
+- (void)makeContentPanel {
+  _eipsMessagePanel = [self paddedEipsInfoMessage];
+  _noEipsMessagePanel = [self paddedNoEipsInfoMessage];
+  _syncAllMessage = [self syncAllInfoMessage];
   
   // get the EIP numbers
   NSInteger numEipVehicles = [_coordDao numUnsyncedVehiclesForUser:_user];
@@ -249,20 +236,40 @@ You currently have no unsynced items."
   }
 }
 
+#pragma mark - Dynamic Type Support
+
+- (void)changeTextSize:(NSNotification *)notification {
+  [self viewDidAppear:YES];
+}
+
+#pragma mark - View Controller Lifecyle
+
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:YES];
+  [_eipsMessagePanel removeFromSuperview];
+  [_noEipsMessagePanel removeFromSuperview];
+  [_vehiclesButton removeFromSuperview];
+  [_fuelStationsButton removeFromSuperview];
+  [_fplogsButton removeFromSuperview];
+  [_envlogsButton removeFromSuperview];
+  [_syncAllMessage removeFromSuperview];
+  [_syncAllButton removeFromSuperview];
+  [self makeContentPanel];
+}
+
 - (void)viewDidLoad {
   [super viewDidLoad];
 #ifdef FP_DEV
   [self pdvDevEnable];
 #endif
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(changeTextSize:)
+                                               name:UIContentSizeCategoryDidChangeNotification
+                                             object:nil];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   UINavigationItem *navItem = [self navigationItem];
-  [navItem setTitle:@"Unsynced Edits"];
-  
-  // make the button (and message panel) views
-  _eipsMessagePanel = [self paddedEipsInfoMessage];
-  _noEipsMessagePanel = [self paddedNoEipsInfoMessage];
-  
-  _syncAllMessage = [self syncAllInfoMessage];
+  [navItem setTitle:@"Unsynced Edits"];  
+  [self makeContentPanel];
 }
 
 - (void)syncAll {
@@ -350,7 +357,7 @@ You currently have no unsynced items."
                                                 [PEUIUtils showSuccessAlertWithMsgs:nil
                                                                               title:@"Upload complete."
                                                                    alertDescription:[[NSAttributedString alloc] initWithString:msg]
-                                                                           topInset:70.0
+                                                                           topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                                                         buttonTitle:@"Okay."
                                                                        buttonAction:^{
                                                                          enableUserInteraction(YES);
@@ -527,7 +534,7 @@ one of your records.  Try syncing it later.";
                                               }
                                             });
                                           }
-                                            error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self.tabBarController.view)];
+                                            error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, self.tabBarController.view)];
 }
 
 @end
