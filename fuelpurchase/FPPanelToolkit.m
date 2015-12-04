@@ -871,7 +871,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                              fromEntity:vehicle
                              withGetter:@selector(name)];
     UISwitch *takesDieselSwitch = (UISwitch *)[panel viewWithTag:FPVehicleTagTakesDieselSwitch];
-    [takesDieselSwitch setOn:[vehicle isDiesel] animated:YES];
+    [takesDieselSwitch setOn:[vehicle isDiesel] animated:NO];
     UITextField *defaultOctaneTf = [panel viewWithTag:FPVehicleTagDefaultOctane];
     if ([vehicle isDiesel]) {
       [defaultOctaneTf setText:@""];
@@ -889,10 +889,10 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                fromView:panel
                              fromEntity:vehicle
                              withGetter:@selector(fuelCapacity)];
-    [((UISwitch *)[panel viewWithTag:FPVehicleTagHasDteReadoutSwitch]) setOn:vehicle.hasDteReadout animated:YES];
-    [((UISwitch *)[panel viewWithTag:FPVehicleTagHasMpgReadoutSwitch]) setOn:vehicle.hasMpgReadout animated:YES];
-    [((UISwitch *)[panel viewWithTag:FPVehicleTagHasMphReadoutSwitch]) setOn:vehicle.hasMphReadout animated:YES];
-    [((UISwitch *)[panel viewWithTag:FPVehicleTagHasOutsideTempReadoutSwitch]) setOn:vehicle.hasOutsideTempReadout animated:YES];
+    [((UISwitch *)[panel viewWithTag:FPVehicleTagHasDteReadoutSwitch]) setOn:vehicle.hasDteReadout animated:NO];
+    [((UISwitch *)[panel viewWithTag:FPVehicleTagHasMpgReadoutSwitch]) setOn:vehicle.hasMpgReadout animated:NO];
+    [((UISwitch *)[panel viewWithTag:FPVehicleTagHasMphReadoutSwitch]) setOn:vehicle.hasMphReadout animated:NO];
+    [((UISwitch *)[panel viewWithTag:FPVehicleTagHasOutsideTempReadoutSwitch]) setOn:vehicle.hasOutsideTempReadout animated:NO];
     [PEUIUtils bindToTextControlWithTag:FPVehicleTagVin
                                fromView:panel
                              fromEntity:vehicle

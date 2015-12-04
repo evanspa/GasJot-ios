@@ -21,6 +21,7 @@
 #import <ReactiveCocoa/UITextField+RACSignalSupport.h>
 #import <ReactiveCocoa/RACSubscriptingAssignmentTrampoline.h>
 #import <ReactiveCocoa/RACSignal+Operations.h>
+#import <ReactiveCocoa/RACDisposable.h>
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEFuelPurchase-Model/FPErrorDomainsAndCodes.h>
@@ -48,6 +49,7 @@
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
   UIView *_contentPanel;
+  RACDisposable *_disposable;
 }
 
 #pragma mark - Initializers
@@ -98,15 +100,6 @@
                                                                                target:self
                                                                                action:@selector(handleLightLogin)]];
   [self makeContentPanel];
-  RAC(self, formStateMaskForLightLogin) =
-  [RACSignal combineLatest:@[_passwordTf.rac_textSignal]
-                    reduce:^(NSString *password) {
-                      NSUInteger reauthErrMask = 0;
-                      if ([password length] == 0) {
-                        reauthErrMask = reauthErrMask | FPSignInPasswordNotProvided | FPSignInAnyIssues;
-                      }
-                      return @(reauthErrMask);
-                    }];
 }
 
 #pragma mark - GUI construction (making panels)
@@ -127,6 +120,16 @@
   TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:_contentPanel];
   _passwordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
   [_passwordTf setSecureTextEntry:YES];
+  [_disposable dispose];
+  RACSignal *signal = [RACSignal combineLatest:@[_passwordTf.rac_textSignal]
+                                        reduce:^(NSString *password) {
+                                          NSUInteger reauthErrMask = 0;
+                                          if ([password length] == 0) {
+                                            reauthErrMask = reauthErrMask | FPSignInPasswordNotProvided | FPSignInAnyIssues;
+                                          }
+                                          return @(reauthErrMask);
+                                        }];
+  _disposable = [signal setKeyPath:@"formStateMaskForLightLogin" onObject:self nilValue:nil];
   
   // place views
   [PEUIUtils placeView:_passwordTf
@@ -146,15 +149,6 @@
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:20.0
               hpadding:leftPadding];
-/*  RAC(self, formStateMaskForLightLogin) =
-    [RACSignal combineLatest:@[_passwordTf.rac_textSignal]
-                      reduce:^(NSString *password) {
-        NSUInteger reauthErrMask = 0;
-        if ([password length] == 0) {
-          reauthErrMask = reauthErrMask | FPSignInPasswordNotProvided | FPSignInAnyIssues;
-        }
-        return @(reauthErrMask);
-      }];*/
   [PEUIUtils placeView:_contentPanel
                atTopOf:[self view]
          withAlignment:PEUIHorizontalAlignmentTypeLeft

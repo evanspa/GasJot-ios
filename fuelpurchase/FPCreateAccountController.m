@@ -21,6 +21,7 @@
 #import <ReactiveCocoa/UITextField+RACSignalSupport.h>
 #import <ReactiveCocoa/RACSubscriptingAssignmentTrampoline.h>
 #import <ReactiveCocoa/RACSignal+Operations.h>
+#import <ReactiveCocoa/RACDisposable.h>
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEObjc-Commons/NSString+PEAdditions.h>
@@ -52,6 +53,8 @@
   FPUser *_localUser;
   NSNumber *_preserveExistingLocalEntities;
   BOOL _receivedAuthReqdErrorOnSyncAttempt;
+  RACDisposable *_disposable;
+  UIScrollView *_scrollView;
 }
 
 #pragma mark - Initializers
@@ -70,10 +73,18 @@
   return self;
 }
 
+#pragma mark - Dynamic Type Support
+
+- (void)changeTextSize:(NSNotification *)notification {
+  [self viewDidAppear:YES];
+}
+
 #pragma mark - View Controller Lifecyle
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
+  [_scrollView removeFromSuperview];
+  [self makeContentPanel];
   [_fullNameTf becomeFirstResponder];
 }
 
@@ -82,12 +93,11 @@
   #ifdef FP_DEV
     [self pdvDevEnable];
   #endif
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(changeTextSize:)
+                                               name:UIContentSizeCategoryDidChangeNotification
+                                             object:nil];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
-  [PEUIUtils placeView:[self panelForAccountCreation]
-               atTopOf:[self view]
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:75.0
-              hpadding:0.0];
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Sign Up"];
   [navItem setLeftBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
@@ -96,6 +106,9 @@
   [navItem setRightBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                target:self
                                                                                action:@selector(handleAccountCreation)]];
+  [self setAutomaticallyAdjustsScrollViewInsets:NO];
+  [self makeContentPanel];
+  [PEUIUtils placeView:_scrollView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
 }
 
 - (UIView *)parentViewForAlerts {
@@ -107,11 +120,8 @@
 
 #pragma mark - GUI construction (making panels)
 
-- (UIView *)panelForAccountCreation {
-  UIView *createAcctPnl = [PEUIUtils panelWithWidthOf:1.0
-                                          andHeightOf:1.0
-                                       relativeToView:[self view]];
-  [PEUIUtils setFrameHeightOfView:createAcctPnl ofHeight:0.5 relativeTo:[self view]];
+- (void)makeContentPanel {
+  _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
   CGFloat leftPadding = 8.0;
   UILabel *createAccountMsgLabel = [PEUIUtils labelWithKey:@"From here you can create a remote Gas Jot account. This will \
 enable your data records to be synced to Gas Jot's central server so you can access them from your other devices."
@@ -119,11 +129,11 @@ enable your data records to be synced to Gas Jot's central server so you can acc
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor darkGrayColor]
                                 verticalTextPadding:3.0
-                                         fitToWidth:(createAcctPnl.frame.size.width - leftPadding - 10.0)];
+                                         fitToWidth:(_scrollView.frame.size.width - leftPadding - 10.0)];
   UIView *createAccountMsgPanel = [PEUIUtils leftPadView:createAccountMsgLabel padding:leftPadding];
   
   TextfieldMaker tfMaker =
-    [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:createAcctPnl];
+    [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:_scrollView];
   _fullNameTf = tfMaker(@"unauth.start.ca.fullnametf.pht");
   _emailTf = tfMaker(@"unauth.start.ca.emailtf.pht");
   _passwordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
@@ -133,37 +143,42 @@ enable your data records to be synced to Gas Jot's central server so you can acc
   
   // place views
   [PEUIUtils placeView:createAccountMsgPanel
-               atTopOf:createAcctPnl
+               atTopOf:_scrollView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:0.0
+              vpadding:75.0
               hpadding:0.0];
+  CGFloat totalHeight = createAccountMsgPanel.frame.size.height + 75.0;
   [PEUIUtils placeView:_fullNameTf
                  below:createAccountMsgPanel
-                  onto:createAcctPnl
+                  onto:_scrollView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:7.0
               hpadding:0];
+  totalHeight += _fullNameTf.frame.size.height + 7.0;
   [PEUIUtils placeView:_emailTf
                  below:_fullNameTf
-                  onto:createAcctPnl
+                  onto:_scrollView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:5
+              vpadding:5.0
               hpadding:0];
+  totalHeight += _emailTf.frame.size.height + 5.0;
   [PEUIUtils placeView:_passwordTf
                  below:_emailTf
-                  onto:createAcctPnl
+                  onto:_scrollView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:5
+              vpadding:5.0
               hpadding:0];
+  totalHeight += _passwordTf.frame.size.height + 5.0;
   [PEUIUtils placeView:_confirmPasswordTf
                  below:_passwordTf
-                  onto:createAcctPnl
+                  onto:_scrollView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:5
+              vpadding:5.0
               hpadding:0];
+  totalHeight += _confirmPasswordTf.frame.size.height + 5.0;
   UILabel *instructionLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"Fill out the form and tap %@."
                                                                                          textToAccent:@"Done"
-                                                                                       accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
+                                                                                       accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]]
                                                            font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                 backgroundColor:[UIColor clearColor]
                                                       textColor:[UIColor darkGrayColor]
@@ -172,12 +187,27 @@ enable your data records to be synced to Gas Jot's central server so you can acc
   UIView *instructionPanel = [PEUIUtils leftPadView:instructionLabel padding:leftPadding];
   [PEUIUtils placeView:instructionPanel
                  below:_confirmPasswordTf
-                  onto:createAcctPnl
+                  onto:_scrollView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
+  if (totalHeight <= self.view.frame.size.height) {
+    [PEUIUtils setFrameHeight:self.view.frame.size.height ofView:_scrollView];
+    [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.3 * _scrollView.frame.size.height)];
+  } else {
+    [PEUIUtils setFrameHeight:totalHeight ofView:_scrollView];
+    [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.6 * _scrollView.frame.size.height)];
+  }
+  [_scrollView setDelaysContentTouches:NO];
+  [_scrollView setBounces:YES];
+  [PEUIUtils placeView:_scrollView
+               atTopOf:self.view
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:0.0
+              hpadding:0.0];
   
-  RAC(self, formStateMaskForAcctCreation) =
+  [_disposable dispose];
+  RACSignal *signal =
     [RACSignal combineLatest:@[_fullNameTf.rac_textSignal,
                                _emailTf.rac_textSignal,
                                _passwordTf.rac_textSignal,
@@ -208,7 +238,7 @@ enable your data records to be synced to Gas Jot's central server so you can acc
                         }
                         return @(createUsrErrMask);
                       }];
-  return createAcctPnl;
+  _disposable = [signal setKeyPath:@"formStateMaskForAcctCreation" onObject:self nilValue:nil];
 }
 
 - (FPEnableUserInteractionBlk)makeUserEnabledBlock {
@@ -357,7 +387,7 @@ remote account."]
                                                           [PEUIUtils attributedTextWithTemplate:@"This is awkward.  While syncing your local edits, the Gas Jot server \
 is asking for you to authenticate again.  Sorry about that. To authenticate, tap the %@ button."
                                                                                    textToAccent:@"Re-authenticate"
-                                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+                                                                                 accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]];
                                                           becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
                                                                                                                  title:@"Authentication Failure."
                                                                                                       alertDescription:attrBecameUnauthMessage

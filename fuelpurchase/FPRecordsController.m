@@ -26,6 +26,7 @@
   UIButton *_envlogsBtn;
   UIButton *_unsyncedEditsBtn;
   UIScrollView *_scrollView;
+  CGPoint _scrollContentOffset;
 }
 
 #pragma mark - Initializers
@@ -61,6 +62,7 @@
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Data Records"];
+  [self setAutomaticallyAdjustsScrollViewInsets:NO];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -85,6 +87,7 @@
                      tagForRecordCountLabel:nil
                           addDisclosureIcon:YES
                                     handler:^{
+                                      _scrollContentOffset = _scrollView.contentOffset;
                                       [PEUIUtils displayController:[_screenToolkit newViewVehiclesScreenMaker](_user)
                                                     fromController:self
                                                           animated:YES];
@@ -97,6 +100,7 @@
                          tagForRecordCountLabel:nil
                               addDisclosureIcon:YES
                                         handler:^{
+                                          _scrollContentOffset = _scrollView.contentOffset;
                                           [PEUIUtils displayController:[_screenToolkit newViewFuelStationsScreenMaker](_user)
                                                         fromController:self
                                                               animated:YES];
@@ -109,6 +113,7 @@
                    tagForRecordCountLabel:nil
                         addDisclosureIcon:YES
                                   handler:^{
+                                    _scrollContentOffset = _scrollView.contentOffset;
                                     [PEUIUtils displayController:[_screenToolkit newViewFuelPurchaseLogsScreenMaker](_user)
                                                   fromController:self
                                                         animated:YES];
@@ -121,6 +126,7 @@
                     tagForRecordCountLabel:nil
                          addDisclosureIcon:YES
                                    handler:^{
+                                     _scrollContentOffset = _scrollView.contentOffset;
                                     [PEUIUtils displayController:[_screenToolkit newViewEnvironmentLogsScreenMaker](_user)
                                                   fromController:self
                                                         animated:YES];
@@ -172,11 +178,18 @@
       totalHeight += _unsyncedEditsBtn.frame.size.height + 25.0;
     }
   }
-  [PEUIUtils setFrameHeight:totalHeight ofView:_scrollView];
+  
+  if (totalHeight <= self.view.frame.size.height) {
+    [PEUIUtils setFrameHeight:self.view.frame.size.height ofView:_scrollView];
+    [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.3 * _scrollView.frame.size.height)];
+  } else {
+    [PEUIUtils setFrameHeight:totalHeight ofView:_scrollView];
+    [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.6 * _scrollView.frame.size.height)];
+  }
   [_scrollView setDelaysContentTouches:NO];
-  [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.6 * _scrollView.frame.size.height)];
   [_scrollView setBounces:YES];
   [PEUIUtils placeView:_scrollView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+  [_scrollView setContentOffset:_scrollContentOffset animated:NO];
 }
 
 #pragma mark - Helpers
@@ -188,6 +201,7 @@
                      badgeTextColor:[UIColor whiteColor]
                   addDisclosureIcon:YES
                             handler:^{
+                               _scrollContentOffset = _scrollView.contentOffset;
                               [PEUIUtils displayController:[_screenToolkit newViewUnsyncedEditsScreenMaker](_user)
                                             fromController:self
                                                   animated:YES];

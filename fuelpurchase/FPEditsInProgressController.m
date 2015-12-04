@@ -23,6 +23,7 @@
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
+  UIScrollView *_scrollView;
   UIView *_eipsMessagePanel;
   UIView *_noEipsMessagePanel;
   UIView *_syncAllMessage;
@@ -32,6 +33,7 @@
   UIButton *_envlogsButton;
   UIButton *_fplogsButton;
   UIButton *_syncAllButton;
+  CGPoint _scrollContentOffset;
 }
 
 #pragma mark - Initializers
@@ -114,6 +116,7 @@ mode."
                                   badgeTextColor:eipBadgeTextColor
                                addDisclosureIcon:YES
                                          handler:^{
+                                           _scrollContentOffset = _scrollView.contentOffset;
                                            [PEUIUtils displayController:[_screenToolkit newViewUnsyncedVehiclesScreenMaker](_user)
                                                          fromController:self
                                                                animated:YES]; }
@@ -128,6 +131,7 @@ mode."
                                       badgeTextColor:eipBadgeTextColor
                                    addDisclosureIcon:YES
                                              handler:^{
+                                               _scrollContentOffset = _scrollView.contentOffset;
                                                [PEUIUtils displayController:[_screenToolkit newViewUnsyncedFuelStationsScreenMaker](_user)
                                                              fromController:self
                                                                    animated:YES]; }
@@ -142,6 +146,7 @@ mode."
                                 badgeTextColor:eipBadgeTextColor
                              addDisclosureIcon:YES
                                        handler:^{
+                                         _scrollContentOffset = _scrollView.contentOffset;
                                          [PEUIUtils displayController:[_screenToolkit newViewUnsyncedFuelPurchaseLogsScreenMaker](_user)
                                                        fromController:self
                                                              animated:YES]; }
@@ -156,6 +161,7 @@ mode."
                                  badgeTextColor:eipBadgeTextColor
                               addDisclosureIcon:YES
                                         handler:^{
+                                          _scrollContentOffset = _scrollView.contentOffset;
                                           [PEUIUtils displayController:[_screenToolkit newViewUnsyncedEnvironmentLogsScreenMaker](_user)
                                                         fromController:self
                                                               animated:YES]; }
@@ -182,58 +188,81 @@ mode."
   } else {
     messagePanel = _noEipsMessagePanel;
   }
+  _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
   [PEUIUtils placeView:messagePanel
-               atTopOf:self.view
+               atTopOf:_scrollView //self.view
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:75.0
               hpadding:0.0];
+  CGFloat totalHeight = messagePanel.frame.size.height + 75.0;
   UIView *topView = messagePanel;
   if (_vehiclesButton) {
     [PEUIUtils placeView:_vehiclesButton
                    below:topView
-                    onto:self.view
+                    onto:_scrollView //self.view
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:7.0
                 hpadding:0.0];
     topView = _vehiclesButton;
+    totalHeight += _vehiclesButton.frame.size.height + 7.0;
   }
   if (_fuelStationsButton) {
     [PEUIUtils placeView:_fuelStationsButton
                    below:topView
-                    onto:self.view
+                    onto:_scrollView //self.view
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:7.0
                 hpadding:0.0];
     topView = _fuelStationsButton;
+    totalHeight += _fuelStationsButton.frame.size.height + 7.0;
   }
   if (_fplogsButton) {
     [PEUIUtils placeView:_fplogsButton
                    below:topView
-                    onto:self.view
+                    onto:_scrollView //self.view
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:7.0
                 hpadding:0.0];
     topView = _fplogsButton;
+    totalHeight += _fplogsButton.frame.size.height + 7.0;
   }
   if (_envlogsButton) {
     [PEUIUtils placeView:_envlogsButton
                    below:topView
-                    onto:self.view
+                    onto:_scrollView //self.view
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:7.0
                 hpadding:0.0];
     topView = _envlogsButton;
+    totalHeight += _envlogsButton.frame.size.height + 7.0;
   }
   if (totalNumSyncNeeded > 0 && [APP doesUserHaveValidAuthToken]) {
-    [PEUIUtils placeView:_syncAllButton atBottomOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:self.view.frame.size.height * 0.3 hpadding:0.0];
+    CGFloat vpadding = self.view.frame.size.height * 0.3;
+    [PEUIUtils placeView:_syncAllButton
+              atBottomOf:_scrollView //self.view
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:vpadding
+                hpadding:0.0];
+    totalHeight += _syncAllButton.frame.size.height + vpadding;
     [PEUIUtils placeView:_syncAllMessage
                    below:_syncAllButton
-                    onto:self.view
+                    onto:_scrollView //self.view
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
     topView = _syncAllButton;
+    totalHeight += _syncAllMessage.frame.size.height + 5.0;
   }
+  if (totalHeight <= self.view.frame.size.height) {
+    [PEUIUtils setFrameHeight:self.view.frame.size.height ofView:_scrollView];
+     [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.3 * _scrollView.frame.size.height)];
+  } else {
+    [PEUIUtils setFrameHeight:totalHeight ofView:_scrollView];
+     [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.6 * _scrollView.frame.size.height)];
+  }
+  [_scrollView setDelaysContentTouches:NO];
+  [_scrollView setBounces:YES];
+  [PEUIUtils placeView:_scrollView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];  
 }
 
 #pragma mark - Dynamic Type Support
@@ -254,7 +283,9 @@ mode."
   [_envlogsButton removeFromSuperview];
   [_syncAllMessage removeFromSuperview];
   [_syncAllButton removeFromSuperview];
+  [_scrollView removeFromSuperview];
   [self makeContentPanel];
+  [_scrollView setContentOffset:_scrollContentOffset animated:NO];
 }
 
 - (void)viewDidLoad {
@@ -268,8 +299,11 @@ mode."
                                              object:nil];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   UINavigationItem *navItem = [self navigationItem];
-  [navItem setTitle:@"Unsynced Edits"];  
+  [navItem setTitle:@"Unsynced Edits"];
+  [self setAutomaticallyAdjustsScrollViewInsets:NO];
   [self makeContentPanel];
+  [PEUIUtils placeView:_scrollView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+  _scrollContentOffset = _scrollView.contentOffset;
 }
 
 - (void)syncAll {

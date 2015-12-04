@@ -22,6 +22,7 @@
 #import <ReactiveCocoa/UITextField+RACSignalSupport.h>
 #import <ReactiveCocoa/RACSubscriptingAssignmentTrampoline.h>
 #import <ReactiveCocoa/RACSignal+Operations.h>
+#import <ReactiveCocoa/RACDisposable.h>
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEFuelPurchase-Model/FPErrorDomainsAndCodes.h>
@@ -52,6 +53,8 @@
   FPUser *_localUser;
   NSNumber *_preserveExistingLocalEntities;
   BOOL _receivedAuthReqdErrorOnSyncAttempt;
+  RACDisposable *_disposable;
+  UIScrollView *_scrollView;
 }
 
 #pragma mark - Initializers
@@ -70,6 +73,12 @@
   return self;
 }
 
+#pragma mark - Dynamic Type Support
+
+- (void)changeTextSize:(NSNotification *)notification {
+  [self viewDidAppear:YES];
+}
+
 #pragma mark - View Controller Lifecyle
 
 - (void)viewDidLoad {
@@ -77,12 +86,11 @@
   #ifdef FP_DEV
     [self pdvDevEnable];
   #endif
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(changeTextSize:)
+                                               name:UIContentSizeCategoryDidChangeNotification
+                                             object:nil];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
-  [PEUIUtils placeView:[self panelForSignIn]
-               atTopOf:[self view]
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:75.0
-              hpadding:0.0];
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Account Log In"];
   [navItem setLeftBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
@@ -92,11 +100,20 @@
                                                                   style:UIBarButtonItemStylePlain
                                                                  target:self
                                                                  action:@selector(handleSignIn)]];
+  [self setAutomaticallyAdjustsScrollViewInsets:NO];
+  [self makeContentPanel];
+  [PEUIUtils placeView:_scrollView
+               atTopOf:self.view
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:0.0
+              hpadding:0.0];
   _preserveExistingLocalEntities = nil;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
+  [_scrollView removeFromSuperview];
+  [self makeContentPanel];
   [_emailTf becomeFirstResponder];
 }
 
@@ -109,83 +126,101 @@
   return self.view;
 }
 
-- (UIView *)panelForSignIn {
-  UIView *signInPnl = [PEUIUtils panelWithWidthOf:1.0
-                                          andHeightOf:1.0
-                                       relativeToView:[self view]];
-  [PEUIUtils setFrameHeightOfView:signInPnl ofHeight:1.0 relativeTo:[self view]];
+- (void)makeContentPanel {
+  _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
   CGFloat leftPadding = 8.0;
   UILabel *signInMsgLabel = [PEUIUtils labelWithKey:@"From here you can log into your remote \
 Gas Jot account, connecting this device to it.  Your Gas Jot data will be downloaded to this device."
-                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                               font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor darkGrayColor]
                                 verticalTextPadding:3.0
-                                         fitToWidth:(signInPnl.frame.size.width - leftPadding - 10.0)];
+                                         fitToWidth:(_scrollView.frame.size.width - leftPadding - 10.0)];
   UIView *signInMsgPanel = [PEUIUtils leftPadView:signInMsgLabel padding:leftPadding];
-  TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:signInPnl];
+  TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:_scrollView];
   _emailTf = tfMaker(@"unauth.start.signin.emailtf.pht");
   _passwordTf = tfMaker(@"unauth.start.signin.pwdtf.pht");
   [_passwordTf setSecureTextEntry:YES];
   UILabel *instructionLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"Enter your credentials and tap %@."
                                                                                          textToAccent:@"Log In"
-                                                                                       accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]]
-                                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                                                       accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]]
+                                                           font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                 backgroundColor:[UIColor clearColor]
                                                       textColor:[UIColor darkGrayColor]
-                                            verticalTextPadding:3.0];
+                                            verticalTextPadding:3.0
+                                                     fitToWidth:(_scrollView.frame.size.width - leftPadding - 10.0)];
   [PEUIUtils setFrameWidthOfView:instructionLabel ofWidth:1.05 relativeTo:instructionLabel];
   UIView *instructionPanel = [PEUIUtils leftPadView:instructionLabel padding:leftPadding];
   
   // place views
   [PEUIUtils placeView:signInMsgPanel
-               atTopOf:signInPnl
+               atTopOf:_scrollView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:0.0
+              vpadding:75.0
               hpadding:0.0];
+  CGFloat totalHeight = signInMsgPanel.frame.size.height + 75.0;
   [PEUIUtils placeView:_emailTf
                  below:signInMsgPanel
-                  onto:signInPnl
+                  onto:_scrollView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:7.0
               hpadding:0.0];
+  totalHeight += _emailTf.frame.size.height + 7.0;
   [PEUIUtils placeView:_passwordTf
                  below:_emailTf
-                  onto:signInPnl
+                  onto:_scrollView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5.0
               hpadding:0.0];
+  totalHeight += _passwordTf.frame.size.height + 5.0;
   [PEUIUtils placeView:instructionPanel
                  below:_passwordTf
-                  onto:signInPnl
+                  onto:_scrollView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
-  [PEUIUtils placeView:[FPPanelToolkit forgotPasswordButtonForUser:nil coordinatorDao:_coordDao uitoolkit:_uitoolkit controller:self]
+  totalHeight += instructionPanel.frame.size.height + 4.0;
+  UIView *forgotPwdBtn = [FPPanelToolkit forgotPasswordButtonForUser:nil coordinatorDao:_coordDao uitoolkit:_uitoolkit controller:self];
+  [PEUIUtils placeView:forgotPwdBtn
                  below:instructionPanel
-                  onto:signInPnl
+                  onto:_scrollView
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:20.0
               hpadding:leftPadding];
+  totalHeight += forgotPwdBtn.frame.size.height + 20.0;
+  if (totalHeight <= self.view.frame.size.height) {
+    [PEUIUtils setFrameHeight:self.view.frame.size.height ofView:_scrollView];
+    [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.3 * _scrollView.frame.size.height)];
+  } else {
+    [PEUIUtils setFrameHeight:totalHeight ofView:_scrollView];
+    [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.6 * _scrollView.frame.size.height)];
+  }
+  [_scrollView setDelaysContentTouches:NO];
+  [_scrollView setBounces:YES];
+  [PEUIUtils placeView:_scrollView
+               atTopOf:self.view
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:0.0
+              hpadding:0.0];
   
-  RAC(self, formStateMaskForSignIn) =
-    [RACSignal combineLatest:@[_emailTf.rac_textSignal,
-                               _passwordTf.rac_textSignal]
-                       reduce:^(NSString *email,
-                                NSString *password) {
-        NSString *trimmedEmail = [email stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-        NSUInteger signInErrMask = 0;
-        if ([trimmedEmail length] == 0) {
-          signInErrMask = FPSignInEmailNotProvided | FPSignInAnyIssues;
-        } else if (![PEUtils validateEmailWithString:trimmedEmail]) {
-          signInErrMask = signInErrMask | FPSignInInvalidEmail | FPSignInAnyIssues;
-        }
-        if ([password length] == 0) {
-          signInErrMask = signInErrMask | FPSignInPasswordNotProvided | FPSignInAnyIssues;
-        }
-        return @(signInErrMask);
-      }];
-  return signInPnl;
+  [_disposable dispose];
+  RACSignal *signal = [RACSignal combineLatest:@[_emailTf.rac_textSignal,
+                                                 _passwordTf.rac_textSignal]
+                                        reduce:^(NSString *email,
+                                                 NSString *password) {
+                                          NSString *trimmedEmail = [email stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+                                          NSUInteger signInErrMask = 0;
+                                          if ([trimmedEmail length] == 0) {
+                                            signInErrMask = FPSignInEmailNotProvided | FPSignInAnyIssues;
+                                          } else if (![PEUtils validateEmailWithString:trimmedEmail]) {
+                                            signInErrMask = signInErrMask | FPSignInInvalidEmail | FPSignInAnyIssues;
+                                          }
+                                          if ([password length] == 0) {
+                                            signInErrMask = signInErrMask | FPSignInPasswordNotProvided | FPSignInAnyIssues;
+                                          }
+                                          return @(signInErrMask);
+                                        }];
+  _disposable = [signal setKeyPath:@"formStateMaskForSignIn" onObject:self nilValue:nil];
 }
 
 - (FPEnableUserInteractionBlk)makeUserEnabledBlock {
@@ -356,7 +391,7 @@ remote account."]
                                                           [PEUIUtils attributedTextWithTemplate:@"This is awkward.  While syncing your local \
 edits, the Gas Jot server is asking for you to authenticate again.  Sorry about that. To authenticate, tap the %@ button."
                                                                                    textToAccent:@"Re-authenticate"
-                                                                                 accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+                                                                                 accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]];
                                                           becameUnauthSection = [PEUIUtils warningAlertSectionWithMsgs:nil
                                                                                                                  title:@"Authentication Failure."
                                                                                                       alertDescription:attrBecameUnauthMessage

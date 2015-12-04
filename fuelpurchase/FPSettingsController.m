@@ -324,9 +324,9 @@ The server is currently busy at the moment. Please try this again later."]
                      [changelogHud hide:YES];
                      [APP refreshTabs];
                      NSAttributedString *attrBecameUnauthMessage =
-                     [PEUIUtils attributedTextWithTemplate:@"Re-authenticate"
-                                              textToAccent:@"Well this is awkward.  While syncing your account, the server is asking for you \
-to re-authenticate.\n\nTo authenticate, tap the %@ button."
+                     [PEUIUtils attributedTextWithTemplate:@"Well this is awkward.  While syncing your account, the server is asking for you \
+to re-authenticate.\n\nTo re-authenticate, go to:\n\n%@."
+                                              textToAccent:@"Account \u2794 Re-authenticate"
                                             accentTextFont:boldDescFont];
                      [PEUIUtils showWarningAlertWithMsgs:nil
                                                    title:@"Authentication Failure."
