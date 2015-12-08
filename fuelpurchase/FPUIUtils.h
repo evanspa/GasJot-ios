@@ -13,6 +13,8 @@
 
 typedef void (^FPEnableUserInteractionBlk)(BOOL);
 
+FOUNDATION_EXPORT NSInteger const FPContentPanelTopPadding;
+
 @interface FPUIUtils : NSObject
 
 #pragma mark - Chart Helpers

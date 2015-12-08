@@ -547,15 +547,20 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
 
 #pragma mark - Vehicle Panel
 
-- (void)placeViewLogsButtonsOntoVehiclePanel:(UIView *)vehiclePanel
-                                   belowView:(UIView *)belowView
-                        parentViewController:(PEAddViewEditController *)parentViewController {
+- (UIView *)placeViewLogsButtonsOntoVehiclePanel:(UIView *)vehiclePanel
+                                       belowView:(UIView *)belowView
+                                        vpadding:(CGFloat)vpadding
+                            parentViewController:(PEAddViewEditController *)parentViewController {
+  UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:vehiclePanel fixedHeight:0.0];
   // View Fuel Purchase Logs button
   UIButton *viewFpLogsBtn = [PEUIUtils buttonWithLabel:@"Gas logs"
                                           tagForButton:@(FPVehicleTagViewFplogsBtn)
                                            recordCount:[_coordDao numFuelPurchaseLogsForVehicle:(FPVehicle *)[parentViewController entity] error:[FPUtils localFetchErrorHandlerMaker]()]
                                 tagForRecordCountLabel:@(FPVehicleTagViewFplogsBtnRecordCount)
                                      addDisclosureIcon:YES
+                             addlVerticalButtonPadding:10.0
+                          recordCountFromBottomPadding:2.0
+                                recordCountLeftPadding:6.0
                                                handler:^{
                                                  FPAuthScreenMaker fpLogsScreenMaker =
                                                  [_screenToolkit newViewFuelPurchaseLogsScreenMakerForVehicleInCtx];
@@ -565,18 +570,17 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                                }
                                              uitoolkit:_uitoolkit
                                         relativeToView:parentViewController.view];
-  [PEUIUtils placeView:viewFpLogsBtn
-                 below:belowView
-                  onto:vehiclePanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:18.5
-              hpadding:0];
+  [PEUIUtils placeView:viewFpLogsBtn atTopOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+  CGFloat totalHeight = viewFpLogsBtn.frame.size.height;
   // View Environment Logs button
   UIButton *viewEnvLogsBtn = [PEUIUtils buttonWithLabel:@"Odometer logs"
                                            tagForButton:@(FPVehicleTagViewEnvlogsBtn)
                                             recordCount:[_coordDao numEnvironmentLogsForVehicle:(FPVehicle *)[parentViewController entity] error:[FPUtils localFetchErrorHandlerMaker]()]
                                  tagForRecordCountLabel:@(FPVehicleTagViewEnvlogsBtnRecordCount)
                                       addDisclosureIcon:YES
+                              addlVerticalButtonPadding:10.0
+                           recordCountFromBottomPadding:2.0
+                                 recordCountLeftPadding:6.0
                                                 handler:^{
                                                   FPVehicle *vehicle = (FPVehicle *)[parentViewController entity];
                                                   FPAuthScreenMaker envLogsScreenMaker =
@@ -587,10 +591,11 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                          relativeToView:parentViewController.view];  
   [PEUIUtils placeView:viewEnvLogsBtn
                  below:viewFpLogsBtn
-                  onto:vehiclePanel
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:8.0
               hpadding:0];
+  totalHeight += viewEnvLogsBtn.frame.size.height + 8.0;
   UIView *msgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into the gas and odometer logs associated with this vehicle."
                                                                font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                     backgroundColor:[UIColor clearColor]
@@ -600,36 +605,74 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                     padding:8.0];
   [PEUIUtils placeView:msgPanel
                  below:viewEnvLogsBtn
-                  onto:vehiclePanel
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0];
+  totalHeight += msgPanel.frame.size.height + 4.0;
+  [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+  [PEUIUtils placeView:contentPanel
+                 below:belowView
+                  onto:vehiclePanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:vpadding
+              hpadding:0];
+  return contentPanel;
 }
 
 - (PEEntityViewPanelMakerBlk)vehicleViewPanelMaker {
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPVehicle *vehicle) {
     UIView *parentView = [parentViewController view];
-    UIView *vehiclePanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
+    UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:parentView fixedHeight:0.0];
     NSMutableArray *rowData = [NSMutableArray arrayWithArray:@[@[@"Vehicle name", [PEUtils emptyIfNil:[vehicle name]]],
                                                                @[@"Takes diesel?", [PEUtils yesNoFromBool:[vehicle isDiesel]]]]];
     if (!vehicle.isDiesel) {
       [rowData addObject:@[@"Default octane", [PEUtils descriptionOrEmptyIfNil:[vehicle defaultOctane]]]];
     }
     [rowData addObjectsFromArray:@[@[@"Fuel capacity", [PEUtils descriptionOrEmptyIfNil:[vehicle fuelCapacity]]],
-                                   @[@"Has range readout?", [PEUtils yesNoFromBool:[vehicle hasDteReadout]]],
+                                   /*@[@"Has range readout?", [PEUtils yesNoFromBool:[vehicle hasDteReadout]]],
                                    @[@"Has avg MPG readout?", [PEUtils yesNoFromBool:[vehicle hasMpgReadout]]],
                                    @[@"Has avg MPH readout?", [PEUtils yesNoFromBool:[vehicle hasMphReadout]]],
-                                   @[@"Has outside temp. readout?", [PEUtils yesNoFromBool:[vehicle hasOutsideTempReadout]]],
+                                   @[@"Has outside temp. readout?", [PEUtils yesNoFromBool:[vehicle hasOutsideTempReadout]]],*/
                                    @[@"VIN", [PEUtils emptyIfNil:[vehicle vin]]],
                                    @[@"Plate #", [PEUtils emptyIfNil:[vehicle plate]]]]];
     UIView *vehicleDataPanel = [PEUIUtils tablePanelWithRowData:rowData
                                                       uitoolkit:_uitoolkit
-                                                     parentView:parentView];
+                                                     parentView:contentPanel];
     [PEUIUtils placeView:vehicleDataPanel
-                 atTopOf:vehiclePanel
+                 atTopOf:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:15.0
+                vpadding:FPContentPanelTopPadding
                 hpadding:0.0];
+    CGFloat totalHeight = vehicleDataPanel.frame.size.height + FPContentPanelTopPadding;
+    UIView *readoutsDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Range readout?", [PEUtils yesNoFromBool:[vehicle hasDteReadout]]],
+                                                                   @[@"Avg MPG readout?", [PEUtils yesNoFromBool:[vehicle hasMpgReadout]]],
+                                                                   @[@"Avg MPH readout?", [PEUtils yesNoFromBool:[vehicle hasMphReadout]]],
+                                                                   @[@"Outside temp. readout?", [PEUtils yesNoFromBool:[vehicle hasOutsideTempReadout]]]]
+                                                       uitoolkit:_uitoolkit
+                                                      parentView:contentPanel];
+    UILabel *hasReadoutsLabel = [PEUIUtils labelWithKey:@"Dashboard readout capabilities."
+                                                   font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
+                                        backgroundColor:[UIColor clearColor]
+                                              textColor:[UIColor darkGrayColor]
+                                    verticalTextPadding:3.0
+                                             fitToWidth:parentView.frame.size.width - 15.0];
+    [PEUIUtils placeView:readoutsDataPanel
+                   below:vehicleDataPanel
+                    onto:contentPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+ alignmentRelativeToView:contentPanel
+                vpadding:20.0
+                hpadding:0.0];
+    totalHeight += readoutsDataPanel.frame.size.height + 20.0;
+    [PEUIUtils placeView:hasReadoutsLabel
+                   below:readoutsDataPanel
+                    onto:contentPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+ alignmentRelativeToView:vehicleDataPanel
+                vpadding:4.0
+                hpadding:8.0];
+    totalHeight += hasReadoutsLabel.frame.size.height + 4.0;
     UIButton *statsBtn = [_uitoolkit systemButtonMaker](@"Stats & Trends", nil, nil);
     [[statsBtn layer] setCornerRadius:0.0];
     [PEUIUtils setFrameWidthOfView:statsBtn ofWidth:1.0 relativeTo:parentView];
@@ -647,25 +690,33 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                                                 fitToWidth:parentView.frame.size.width - 15.0]
                                            padding:8.0];
     [PEUIUtils placeView:statsBtn
-                   below:vehicleDataPanel
-                    onto:vehiclePanel
+                   below:hasReadoutsLabel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
+ alignmentRelativeToView:contentPanel
                 vpadding:20.0
                 hpadding:0.0];
+    totalHeight += statsBtn.frame.size.height + 20.0;
     [PEUIUtils placeView:statsMsgPanel
                    below:statsBtn
-                    onto:vehiclePanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:4.0
                 hpadding:0.0];
-    [self placeViewLogsButtonsOntoVehiclePanel:vehiclePanel
-                                     belowView:statsMsgPanel
-                          parentViewController:parentViewController];
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[vehiclePanel frame]];
-    [scrollView setContentSize:CGSizeMake(vehiclePanel.frame.size.width, 1.575 * vehiclePanel.frame.size.height)];
-    [scrollView addSubview:vehiclePanel];
-    [scrollView setBounces:YES];
-    return scrollView;
+    totalHeight += statsMsgPanel.frame.size.height + 4.0;
+    UIView *logsBtnsPanel = [self placeViewLogsButtonsOntoVehiclePanel:contentPanel
+                                                             belowView:statsMsgPanel
+                                                              vpadding:18.5
+                                                  parentViewController:parentViewController];
+    totalHeight += logsBtnsPanel.frame.size.height + 18.5;
+    [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+    return [PEUIUtils displayPanelFromContentPanel:contentPanel
+                                         scrolling:YES
+                               scrollContentOffset:[parentViewController scrollContentOffset]
+                                    scrollDelegate:parentViewController
+                                  notScrollViewBlk:^{ [parentViewController resetScrollOffset]; }
+                                          centered:NO
+                                        controller:parentViewController];    
   };
 }
 
@@ -704,13 +755,25 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     [vehicleDefaultOctaneTf setKeyboardType:UIKeyboardTypeNumberPad];
     UITextField *vehicleFuelCapacityTf = tfMaker(@"Fuel capacity", FPVehicleTagFuelCapacity);
     [vehicleFuelCapacityTf setKeyboardType:UIKeyboardTypeDecimalPad];
-    NSArray *hasDteReadoutArray = switchPanelBlk(FPVehicleTagHasDteReadoutPanel, @"Has range readout?", FPVehicleTagHasDteReadoutSwitch);
+    UILabel *readoutsLabel = [PEUIUtils labelWithKey:@"Select the dashboard readout capabilities of this vehicle."
+                                                font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
+                                     backgroundColor:[UIColor clearColor]
+                                           textColor:[UIColor darkGrayColor]
+                                 verticalTextPadding:3.0
+                                          fitToWidth:parentView.frame.size.width - 15.0];
+    UILabel *hasLabel = [PEUIUtils labelWithKey:@"This vehicle has..."
+                                           font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
+                                backgroundColor:[UIColor clearColor]
+                                      textColor:[UIColor darkGrayColor]
+                            verticalTextPadding:3.0
+                                     fitToWidth:parentView.frame.size.width - 15.0];
+    NSArray *hasDteReadoutArray = switchPanelBlk(FPVehicleTagHasDteReadoutPanel, @"Range readout?", FPVehicleTagHasDteReadoutSwitch);
     UIView *hasDteReadoutPanel = hasDteReadoutArray[0];
-    NSArray *hasMpgReadoutArray = switchPanelBlk(FPVehicleTagHasMpgReadoutPanel, @"Has avg MPG readout?", FPVehicleTagHasMpgReadoutSwitch);
+    NSArray *hasMpgReadoutArray = switchPanelBlk(FPVehicleTagHasMpgReadoutPanel, @"Avg MPG readout?", FPVehicleTagHasMpgReadoutSwitch);
     UIView *hasMpgReadoutPanel = hasMpgReadoutArray[0];
-    NSArray *hasMphReadoutArray = switchPanelBlk(FPVehicleTagHasMphReadoutPanel, @"Has avg MPH readout?", FPVehicleTagHasMphReadoutSwitch);
+    NSArray *hasMphReadoutArray = switchPanelBlk(FPVehicleTagHasMphReadoutPanel, @"Avg MPH readout?", FPVehicleTagHasMphReadoutSwitch);
     UIView *hasMphReadoutPanel = hasMphReadoutArray[0];
-    NSArray *hasOutsideTempReadoutArray = switchPanelBlk(FPVehicleTagHasOutsideTempReadoutPanel, @"Has outside temp. readout?", FPVehicleTagHasOutsideTempReadoutSwitch);
+    NSArray *hasOutsideTempReadoutArray = switchPanelBlk(FPVehicleTagHasOutsideTempReadoutPanel, @"Outside temp. readout?", FPVehicleTagHasOutsideTempReadoutSwitch);
     UIView *hasOutsideTempReadoutPanel = hasOutsideTempReadoutArray[0];
     UITextField *vinTf = tfMaker(@"VIN", FPVehicleTagVin);
     UITextField *plateTf = tfMaker(@"Plate #", FPVehicleTagPlate);
@@ -719,7 +782,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     [PEUIUtils placeView:vehicleNameTf
                  atTopOf:topPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:15.0
+                vpadding:FPContentPanelTopPadding
                 hpadding:0];
     [PEUIUtils placeView:takesDieselPanel
                    below:vehicleNameTf
@@ -727,7 +790,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    [PEUIUtils setFrameHeight:(vehicleNameTf.frame.size.height + 15.0 +
+    [PEUIUtils setFrameHeight:(vehicleNameTf.frame.size.height + FPContentPanelTopPadding +
                                takesDieselPanel.frame.size.height + 5.0)
                        ofView:topPanel];    
     UIView *bottomPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:parentView fixedHeight:0.0];
@@ -743,11 +806,36 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    [PEUIUtils placeView:hasDteReadoutPanel
+    [PEUIUtils placeView:vinTf
                    below:vehicleFuelCapacityTf
                     onto:bottomPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:plateTf
+                   below:vinTf
+                    onto:bottomPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:plateTf
+                   below:vinTf
+                    onto:bottomPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    [PEUIUtils placeView:hasLabel
+                   below:plateTf
+                    onto:bottomPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:20.0
+                hpadding:8.0];
+    [PEUIUtils placeView:hasDteReadoutPanel
+                   below:hasLabel
+                    onto:bottomPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+ alignmentRelativeToView:bottomPanel
+                vpadding:4.0
                 hpadding:0.0];
     [PEUIUtils placeView:hasMpgReadoutPanel
                    below:hasDteReadoutPanel
@@ -767,37 +855,27 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    [PEUIUtils placeView:vinTf
+    [PEUIUtils placeView:readoutsLabel
                    below:hasOutsideTempReadoutPanel
                     onto:bottomPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
-    [PEUIUtils placeView:plateTf
-                   below:vinTf
-                    onto:bottomPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
-    [PEUIUtils placeView:plateTf
-                   below:vinTf
-                    onto:bottomPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
+                vpadding:4.0
+                hpadding:8.0];
     [PEUIUtils setFrameHeight:(vehicleDefaultOctaneTf.frame.size.height + 5.0 +
                                vehicleFuelCapacityTf.frame.size.height + 5.0 +
-                               hasDteReadoutPanel.frame.size.height + 5.0 +
+                               vinTf.frame.size.height + 5.0 +
+                               plateTf.frame.size.height + 5.0 +
+                               hasLabel.frame.size.height + 20.0 +
+                               hasDteReadoutPanel.frame.size.height + 4.0 +
                                hasMpgReadoutPanel.frame.size.height + 5.0 +
                                hasMphReadoutPanel.frame.size.height + 5.0 +
                                hasOutsideTempReadoutPanel.frame.size.height + 5.0 +
-                               vinTf.frame.size.height + 5.0 +
-                               plateTf.frame.size.height + 5.0)
+                               readoutsLabel.frame.size.height + 4.0)
                        ofView:bottomPanel];
-    UIView *vehiclePanel = [PEUIUtils panelWithColumnOfViews:@[topPanel, bottomPanel]
+    UIView *contentPanel = [PEUIUtils panelWithColumnOfViews:@[topPanel, bottomPanel]
                                  verticalPaddingBetweenViews:0.0
                                               viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
-    [vehiclePanel bringSubviewToFront:topPanel];
+    [contentPanel bringSubviewToFront:topPanel];
     [takesDieselSwitch bk_addEventHandler:^(id sender) {
       [vehicleDefaultOctaneTf setEnabled:!takesDieselSwitch.on];
       if (takesDieselSwitch.on) {
@@ -821,11 +899,13 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                          }];
       }
     } forControlEvents:UIControlEventTouchUpInside];
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[vehiclePanel frame]];
-    [scrollView setContentSize:CGSizeMake(vehiclePanel.frame.size.width, 1.575 * vehiclePanel.frame.size.height)];
-    [scrollView addSubview:vehiclePanel];
-    [scrollView setBounces:YES];
-    return scrollView;
+    return [PEUIUtils displayPanelFromContentPanel:contentPanel
+                                         scrolling:YES
+                               scrollContentOffset:[parentViewController scrollContentOffset]
+                                    scrollDelegate:parentViewController
+                                  notScrollViewBlk:^{ [parentViewController resetScrollOffset]; }
+                                          centered:NO
+                                        controller:parentViewController];
   };
 }
 
@@ -958,14 +1038,17 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
 
 #pragma mark - Fuel Station Panel
 
-- (UIButton *)placeViewLogsButtonOntoFuelstationPanel:(UIView *)fuelstationPanel
-                                            belowView:(UIView *)belowView
-                                 parentViewController:(PEAddViewEditController *)parentViewController {
+- (NSArray *)placeViewLogsButtonOntoFuelstationPanel:(UIView *)fuelstationPanel
+                                           belowView:(UIView *)belowView
+                                parentViewController:(PEAddViewEditController *)parentViewController {
   UIButton *viewFpLogsBtn = [PEUIUtils buttonWithLabel:@"Gas logs"
                                           tagForButton:@(FPFuelStationTagViewFplogsBtn)
                                            recordCount:[_coordDao numFuelPurchaseLogsForFuelStation:(FPFuelStation *)[parentViewController entity] error:[FPUtils localFetchErrorHandlerMaker]()]
                                 tagForRecordCountLabel:@(FPFuelStationTagViewFplogsBtnRecordCount)
                                      addDisclosureIcon:YES
+                             addlVerticalButtonPadding:10.0
+                          recordCountFromBottomPadding:2.0
+                                recordCountLeftPadding:6.0
                                                handler:^{
                                                  FPAuthScreenMaker fpLogsScreenMaker =
                                                  [_screenToolkit newViewFuelPurchaseLogsScreenMakerForFuelStationInCtx];
@@ -981,6 +1064,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:18.5
               hpadding:0];
+  CGFloat totalHeight = viewFpLogsBtn.frame.size.height + 18.5;
   UIView *msgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into the gas logs associated with this gas station."
                                                                font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                     backgroundColor:[UIColor clearColor]
@@ -994,7 +1078,8 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0];
-  return viewFpLogsBtn;
+  totalHeight += msgPanel.frame.size.height + 4.0;
+  return @[viewFpLogsBtn, @(totalHeight)];
 }
 
 - (NSArray *)placeCoordinatesTableOntoFuelstationPanel:(UIView *)fuelstationPanel
@@ -1012,7 +1097,8 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
   [coordinatesTableView setScrollEnabled:NO];
   [coordinatesTableView setTag:FPFuelStationTagLocationCoordinates];
   [PEUIUtils setFrameWidthOfView:coordinatesTableView ofWidth:1.0 relativeTo:parentView];
-  [PEUIUtils setFrameHeight:142.0 ofView:coordinatesTableView];
+  [PEUIUtils setFrameHeight:((2 * [PEUIUtils sizeOfText:@"" withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height) + 120)
+                     ofView:coordinatesTableView];
   [PEUIUtils placeView:coordinatesTableView
                  below:belowView
                   onto:fuelstationPanel
@@ -1025,7 +1111,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
 - (PEEntityViewPanelMakerBlk)fuelstationViewPanelMaker {
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPFuelStation *fuelstation) {
     UIView *parentView = [parentViewController view];
-    UIView *fuelstationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.2 relativeToView:parentView];
+    UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:parentView fixedHeight:0.0];
     UIView *fuelstationDataPanel = [PEUIUtils tablePanelWithRowData:@[@[@"Gas station name", [PEUtils emptyIfNil:[fuelstation name]]],
                                                                       @[@"Street", [PEUtils emptyIfNil:[fuelstation street]]],
                                                                       @[@"City", [PEUtils emptyIfNil:[fuelstation city]]],
@@ -1034,14 +1120,16 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                                           uitoolkit:_uitoolkit
                                                          parentView:parentView];
     [PEUIUtils placeView:fuelstationDataPanel
-                 atTopOf:fuelstationPanel
+                 atTopOf:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:15.0
+                vpadding:FPContentPanelTopPadding
                 hpadding:0.0];
-    UITableView *coordinatesTableView = [self placeCoordinatesTableOntoFuelstationPanel:fuelstationPanel
+    CGFloat totalHeight = fuelstationDataPanel.frame.size.height + FPContentPanelTopPadding;
+    UITableView *coordinatesTableView = [self placeCoordinatesTableOntoFuelstationPanel:contentPanel
                                                                             fuelstation:fuelstation
                                                                               belowView:fuelstationDataPanel
                                                                    parentViewController:parentViewController][0];
+    totalHeight += coordinatesTableView.frame.size.height;
     UIButton *statsBtn = [_uitoolkit systemButtonMaker](@"Stats & Trends", nil, nil);
     [[statsBtn layer] setCornerRadius:0.0];
     [PEUIUtils setFrameWidthOfView:statsBtn ofWidth:1.0 relativeTo:parentView];
@@ -1059,32 +1147,39 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                            padding:8.0];
     [PEUIUtils placeView:statsBtn
                    below:coordinatesTableView
-                    onto:fuelstationPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:20.0
                 hpadding:0.0];
+    totalHeight += statsBtn.frame.size.height + 20.0;
     [PEUIUtils placeView:statsMsgPanel
                    below:statsBtn
-                    onto:fuelstationPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:4.0
                 hpadding:0.0];
-    [self placeViewLogsButtonOntoFuelstationPanel:fuelstationPanel
-                                        belowView:statsMsgPanel
-                             parentViewController:parentViewController];
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelstationPanel frame]];
-    [scrollView setContentSize:CGSizeMake(fuelstationPanel.frame.size.width, 1.4 * fuelstationPanel.frame.size.height)];
-    [scrollView addSubview:fuelstationPanel];
-    [scrollView setBounces:YES];
-    return scrollView;
+    totalHeight += statsMsgPanel.frame.size.height + 4.0;
+    NSArray *viewLogsContent = [self placeViewLogsButtonOntoFuelstationPanel:contentPanel
+                                                                   belowView:statsMsgPanel
+                                                        parentViewController:parentViewController];
+    totalHeight += ((NSDecimalNumber *)viewLogsContent[1]).floatValue;
+    [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+    return [PEUIUtils displayPanelFromContentPanel:contentPanel
+                                         scrolling:YES
+                               scrollContentOffset:[parentViewController scrollContentOffset]
+                                    scrollDelegate:parentViewController
+                                  notScrollViewBlk:^{ [parentViewController resetScrollOffset]; }
+                                          centered:NO
+                                        controller:parentViewController];
   };
 }
 
 - (PEEntityPanelMakerBlk)fuelstationFormPanelMakerIncludeLogButton:(BOOL)includeLogButton {
   return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
-    UIView *fuelStationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:fuelStationPanel];
+    //UIView *fuelStationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
+    UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:parentView fixedHeight:0.0];
+    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:contentPanel];
     UITextField *fuelStationNameTf = tfMaker(@"Gas station name", FPFuelStationTagName);
     UITextField *fuelStationStreetTf = tfMaker(@"Street", FPFuelStationTagStreet);
     UITextField *fuelStationCityTf = tfMaker(@"City", FPFuelStationTagCity);
@@ -1092,39 +1187,45 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     UITextField *fuelStationZipTf = tfMaker(@"Zip", FPFuelStationTagZip);
     [fuelStationZipTf setKeyboardType:UIKeyboardTypeNumberPad];
     [PEUIUtils placeView:fuelStationNameTf
-                 atTopOf:fuelStationPanel
+                 atTopOf:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:15
+                vpadding:FPContentPanelTopPadding
                 hpadding:0];
+    CGFloat totalHeight = fuelStationNameTf.frame.size.height + FPContentPanelTopPadding;
     [PEUIUtils placeView:fuelStationStreetTf
                    below:fuelStationNameTf
-                    onto:fuelStationPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
+    totalHeight += fuelStationStreetTf.frame.size.height + 5.0;
     [PEUIUtils placeView:fuelStationCityTf
                    below:fuelStationStreetTf
-                    onto:fuelStationPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
+    totalHeight += fuelStationCityTf.frame.size.height + 5.0;
     [PEUIUtils placeView:fuelStationStateTf
                    below:fuelStationCityTf
-                    onto:fuelStationPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
+    totalHeight += fuelStationStateTf.frame.size.height + 5.0;
     [PEUIUtils placeView:fuelStationZipTf
                    below:fuelStationStateTf
-                    onto:fuelStationPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    NSArray *tableAndDs = [self placeCoordinatesTableOntoFuelstationPanel:fuelStationPanel
+    totalHeight += fuelStationZipTf.frame.size.height + 5.0;
+    NSArray *tableAndDs = [self placeCoordinatesTableOntoFuelstationPanel:contentPanel
                                                               fuelstation:nil
                                                                 belowView:fuelStationZipTf
                                                      parentViewController:parentViewController];
     UITableView *coordinatesTableView = tableAndDs[0];
+    totalHeight += coordinatesTableView.frame.size.height;
     FPFuelStationCoordinatesTableDataSource *ds = tableAndDs[1];
     UIButton *useCurrentLocationBtn = [PEUIUtils buttonWithKey:@"Use current location"
                                                           font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
@@ -1195,10 +1296,11 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     } forControlEvents:UIControlEventTouchUpInside];
     [PEUIUtils placeView:useCurrentLocationBtn
                    below:coordinatesTableView
-                    onto:fuelStationPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:8.0
                 hpadding:8.0];
+    totalHeight += useCurrentLocationBtn.frame.size.height + 8.0;
     UIButton *recomputeCoordsBtn = [PEUIUtils buttonWithKey:@"Compute coordinates from address above"
                                                        font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                             backgroundColor:[UIColor concreteColor]
@@ -1258,16 +1360,19 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     } forControlEvents:UIControlEventTouchUpInside];
     [PEUIUtils placeView:recomputeCoordsBtn
                    below:useCurrentLocationBtn
-                    onto:fuelStationPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:6.0
                 hpadding:0.0];
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fuelStationPanel frame]];
-    //[PEUIUtils applyBorderToView:fuelStationPanel withColor:[UIColor redColor]];
-    [scrollView setContentSize:CGSizeMake(fuelStationPanel.frame.size.width, 1.1 * fuelStationPanel.frame.size.height)];
-    [scrollView addSubview:fuelStationPanel];
-    [scrollView setBounces:YES];
-    return scrollView;
+    totalHeight += recomputeCoordsBtn.frame.size.height + 6.0;
+    [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+    return [PEUIUtils displayPanelFromContentPanel:contentPanel
+                                         scrolling:YES
+                               scrollContentOffset:[parentViewController scrollContentOffset]
+                                    scrollDelegate:parentViewController
+                                  notScrollViewBlk:^{ [parentViewController resetScrollOffset]; }
+                                          centered:NO
+                                        controller:parentViewController];
   };
 }
 
@@ -1360,9 +1465,8 @@ To compute your location, you need to enable location services for Gas Jot.  If 
                                                   defaultVehicle:(FPVehicle *)defaultVehicle
                                               defaultFuelstation:(FPFuelStation *)defaultFuelstation
                                                          logDate:(NSDate *)logDate {
-  return ^ UIView * (UIViewController *parentViewController) {
+  return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
-    
     FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
     (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[(UITableView *)[parentView viewWithTag:FPFpLogTagVehicleFuelStationAndDate] dataSource];
     FPVehicle *vehicle = defaultVehicle;
@@ -1371,10 +1475,8 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       vehicle = [ds selectedVehicle];
       fuelstation = [ds selectedFuelStation];
     }
-    UIView *fpEnvCompPanel = [PEUIUtils panelWithWidthOf:1.0
-                                             andHeightOf:1.12
-                                          relativeToView:parentView];
-    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:fpEnvCompPanel];
+    UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:parentView fixedHeight:0.0];
+    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:contentPanel];
     NSDictionary *envlogComponents = [self envlogFormComponentsWithUser:user
                                             displayDisclosureIndicators:YES
                                                                 vehicle:vehicle
@@ -1391,10 +1493,11 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     UITextField *carWashPerGallonDiscountTf = fplogComponents[@(FPFpLogTagCarWashPerGallonDiscount)];
     UIView *gotCarWashPanel = fplogComponents[@(FPFpLogTagCarWashPanel)];
     [PEUIUtils placeView:vehicleFuelStationDateTableView
-                 atTopOf:fpEnvCompPanel
+                 atTopOf:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:0.0
                 hpadding:0.0];
+    CGFloat totalHeight = vehicleFuelStationDateTableView.frame.size.height;
     UIView *aboveView;
     if (vehicle.isDiesel) {
       aboveView = vehicleFuelStationDateTableView;
@@ -1402,11 +1505,11 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       UITextField *octaneTf = fplogComponents[@(FPFpLogTagOctane)];
       [PEUIUtils placeView:octaneTf
                      below:vehicleFuelStationDateTableView
-                      onto:fpEnvCompPanel
+                      onto:contentPanel
              withAlignment:PEUIHorizontalAlignmentTypeLeft
                   vpadding:5.0
                   hpadding:0.0];
-      
+      totalHeight += octaneTf.frame.size.height + 5.0;
       NSNumber *defaultOctane = [vehicle defaultOctane];
       if (![PEUtils isNil:defaultOctane]) {
         [octaneTf setText:[defaultOctane description]];
@@ -1418,88 +1521,101 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       [preFillupReportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
       [PEUIUtils placeView:preFillupReportedDteTf
                      below:aboveView
-                      onto:fpEnvCompPanel
+                      onto:contentPanel
              withAlignment:PEUIHorizontalAlignmentTypeLeft
                   vpadding:5.0
                   hpadding:0.0];
+      totalHeight += preFillupReportedDteTf.frame.size.height + 5.0;
       aboveView = preFillupReportedDteTf;
     }
     if (vehicle.hasMpgReadout) {
       UITextField *reportedAvgMpgTf = envlogComponents[@(FPEnvLogTagReportedAvgMpg)];
       [PEUIUtils placeView:reportedAvgMpgTf
                      below:aboveView
-                      onto:fpEnvCompPanel
+                      onto:contentPanel
              withAlignment:PEUIHorizontalAlignmentTypeLeft
                   vpadding:5.0
                   hpadding:0.0];
+      totalHeight += reportedAvgMpgTf.frame.size.height + 5.0;
       aboveView = reportedAvgMpgTf;
     }
     if (vehicle.hasMphReadout) {
       UITextField *reportedAvgMphTf = envlogComponents[@(FPEnvLogTagReportedAvgMph)];
       [PEUIUtils placeView:reportedAvgMphTf
                      below:aboveView
-                      onto:fpEnvCompPanel
+                      onto:contentPanel
              withAlignment:PEUIHorizontalAlignmentTypeLeft
                   vpadding:5.0
                   hpadding:0.0];
+      totalHeight += reportedAvgMphTf.frame.size.height + 5.0;
       aboveView = reportedAvgMphTf;
     }
     [PEUIUtils placeView:odometerTf
                    below:aboveView
-                    onto:fpEnvCompPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
+    totalHeight += odometerTf.frame.size.height + 5.0;
     aboveView = odometerTf;
     if (vehicle.hasOutsideTempReadout) {
       UITextField *reportedOutsideTempTf = envlogComponents[@(FPEnvLogTagReportedOutsideTemp)];
       [PEUIUtils placeView:reportedOutsideTempTf
                      below:odometerTf
-                      onto:fpEnvCompPanel
+                      onto:contentPanel
              withAlignment:PEUIHorizontalAlignmentTypeLeft
                   vpadding:5.0
                   hpadding:0.0];
+      totalHeight += reportedOutsideTempTf.frame.size.height + 5.0;
       aboveView = reportedOutsideTempTf;
     }
     [PEUIUtils placeView:pricePerGallonTf
                    below:aboveView
-                    onto:fpEnvCompPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
+    totalHeight += pricePerGallonTf.frame.size.height + 5.0;
     [PEUIUtils placeView:carWashPerGallonDiscountTf
                    below:pricePerGallonTf
-                    onto:fpEnvCompPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
+    totalHeight += carWashPerGallonDiscountTf.frame.size.height + 5.0;
     [PEUIUtils placeView:gotCarWashPanel
                    below:carWashPerGallonDiscountTf
-                    onto:fpEnvCompPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
+    totalHeight += gotCarWashPanel.frame.size.height + 5.0;
     [PEUIUtils placeView:numGallonsTf
                    below:gotCarWashPanel
-                    onto:fpEnvCompPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
+    totalHeight += numGallonsTf.frame.size.height + 5.0;
     if (vehicle.hasDteReadout) {
       UITextField *postFillupReportedDteTf = tfMaker(@"Post-fillup range readout", FPFpEnvLogCompositeTagPostFillupReportedDte);
       [postFillupReportedDteTf setKeyboardType:UIKeyboardTypeNumberPad];
       [PEUIUtils placeView:postFillupReportedDteTf
                      below:numGallonsTf
-                      onto:fpEnvCompPanel
+                      onto:contentPanel
              withAlignment:PEUIHorizontalAlignmentTypeLeft
                   vpadding:5.0
                   hpadding:0.0];
+      totalHeight += postFillupReportedDteTf.frame.size.height + 5.0;
     }
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fpEnvCompPanel frame]];
-    [scrollView setContentSize:CGSizeMake(fpEnvCompPanel.frame.size.width, 1.5 * fpEnvCompPanel.frame.size.height)];
-    [scrollView addSubview:fpEnvCompPanel];
-    [scrollView setBounces:YES];
-    return scrollView;
+    [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+    return [PEUIUtils displayPanelFromContentPanel:contentPanel
+                                         scrolling:YES
+                               scrollContentOffset:[parentViewController scrollContentOffset]
+                                    scrollDelegate:parentViewController
+                                  notScrollViewBlk:^{ [parentViewController resetScrollOffset]; }
+                                          centered:NO
+                                        controller:parentViewController];
   };
 }
 
@@ -1610,16 +1726,18 @@ To compute your location, you need to enable location services for Gas Jot.  If 
 - (PEEntityViewPanelMakerBlk)fplogViewPanelMakerWithUser:(FPUser *)user {
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPFuelPurchaseLog *fplog) {
     UIView *parentView = [parentViewController view];
-    UIView *fplogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
+    UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:parentView fixedHeight:0.0];
     NSMutableArray *rowData = [NSMutableArray array];
     if (![fplog isDiesel]) {
       [rowData addObject:@[@"Octane", [PEUtils descriptionOrEmptyIfNil:[fplog octane]]]];
     }
     [rowData addObjectsFromArray:@[@[@"Odometer", [PEUtils descriptionOrEmptyIfNil:[fplog odometer]]],
                                    @[@"Price per gallon", [PEUtils descriptionOrEmptyIfNil:[fplog gallonPrice]]],
-                                   @[@"Car wash per-gallon discount", [PEUtils descriptionOrEmptyIfNil:[fplog carWashPerGallonDiscount]]],
-                                   @[@"Got car wash?", [PEUtils yesNoFromBool:[fplog gotCarWash]]],
-                                   @[@"Num gallons", [PEUtils descriptionOrEmptyIfNil:[fplog numGallons]]]]];
+                                   @[@"Got car wash?", [PEUtils yesNoFromBool:[fplog gotCarWash]]]]];
+    if (![PEUtils isNil:[fplog carWashPerGallonDiscount]]) {
+      [rowData addObject:@[@"Car wash gal. discount", [PEUtils descriptionOrEmptyIfNil:[fplog carWashPerGallonDiscount]]]];
+    }
+    [rowData addObject:@[@"Num gallons", [PEUtils descriptionOrEmptyIfNil:[fplog numGallons]]]];
     UIView *fplogDataPanel = [PEUIUtils tablePanelWithRowData:rowData
                                                     uitoolkit:_uitoolkit
                                                    parentView:parentView];
@@ -1636,21 +1754,26 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     [ds setSelectedVehicle:vehicle];
     [vehicleFuelStationDateTableView setUserInteractionEnabled:NO];
     [PEUIUtils placeView:vehicleFuelStationDateTableView
-                 atTopOf:fplogPanel
+                 atTopOf:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:0.0
                 hpadding:0.0];
+    CGFloat totalHeight = vehicleFuelStationDateTableView.frame.size.height;
     [PEUIUtils placeView:fplogDataPanel
                    below:vehicleFuelStationDateTableView
-                    onto:fplogPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fplogPanel frame]];
-    [scrollView setContentSize:CGSizeMake(fplogPanel.frame.size.width, 1.4 * fplogPanel.frame.size.height)];
-    [scrollView addSubview:fplogPanel];
-    [scrollView setBounces:YES];
-    return scrollView;
+    totalHeight += fplogDataPanel.frame.size.height + 5.0;
+    [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+    return [PEUIUtils displayPanelFromContentPanel:contentPanel
+                                         scrolling:YES
+                               scrollContentOffset:[parentViewController scrollContentOffset]
+                                    scrollDelegate:parentViewController
+                                  notScrollViewBlk:^{ [parentViewController resetScrollOffset]; }
+                                          centered:NO
+                                        controller:parentViewController];
   };
 }
 
@@ -1668,7 +1791,8 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       [vehicleFuelStationDateTableView setScrollEnabled:NO];
       [vehicleFuelStationDateTableView setTag:FPFpLogTagVehicleFuelStationAndDate];
       [PEUIUtils setFrameWidthOfView:vehicleFuelStationDateTableView ofWidth:1.0 relativeTo:parentView];
-      [PEUIUtils setFrameHeight:180.0 ofView:vehicleFuelStationDateTableView];
+      [PEUIUtils setFrameHeight:((3 * [PEUIUtils sizeOfText:@"" withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height) + 150) //180.0
+                         ofView:vehicleFuelStationDateTableView];
       vehicleFuelStationDateTableView.sectionHeaderHeight = 2.0;
       vehicleFuelStationDateTableView.sectionFooterHeight = 2.0;
       PEItemSelectedAction vehicleSelectedAction = ^(FPVehicle *vehicle, NSIndexPath *indexPath, UIViewController *vehicleSelectionController) {
@@ -1785,7 +1909,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
                                    defaultVehicleBlk:(FPVehicle *(^)(void))defaultVehicleBlk
                                defaultFuelstationBlk:(FPFuelStation *(^)(void))defaultFuelstationBlk
                                              logDate:(NSDate *)logDate {
-  return ^ UIView * (UIViewController *parentViewController) {
+  return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
     FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
     (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[(UITableView *)[parentView viewWithTag:FPFpLogTagVehicleFuelStationAndDate] dataSource];
@@ -1798,9 +1922,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       vehicle = defaultVehicleBlk();
       fuelstation = defaultFuelstationBlk();
     }
-    UIView *fpLogPanel = [PEUIUtils panelWithWidthOf:1.0
-                                         andHeightOf:1.0
-                                      relativeToView:parentView];
+    UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:parentView fixedHeight:0.0];
     NSDictionary *components = [self fplogFormComponentsWithUser:user
                                       displayDisclosureIndicator:YES
                                                          vehicle:vehicle
@@ -1813,10 +1935,11 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     UITextField *carWashPerGallonDiscountTf = components[@(FPFpLogTagCarWashPerGallonDiscount)];
     UIView *gotCarWashPanel = components[@(FPFpLogTagCarWashPanel)];
     [PEUIUtils placeView:vehicleFuelStationDateTableView
-                 atTopOf:fpLogPanel
+                 atTopOf:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:0.0
                 hpadding:0.0];
+    CGFloat totalHeight = vehicleFuelStationDateTableView.frame.size.height;
     UIView *aboveView;
     if (vehicle.isDiesel) {
       aboveView = vehicleFuelStationDateTableView;
@@ -1824,47 +1947,56 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       UITextField *octaneTf = components[@(FPFpLogTagOctane)];
       [PEUIUtils placeView:octaneTf
                      below:vehicleFuelStationDateTableView
-                      onto:fpLogPanel
+                      onto:contentPanel
              withAlignment:PEUIHorizontalAlignmentTypeLeft
                   vpadding:5.0
                   hpadding:0.0];
+      totalHeight += octaneTf.frame.size.height + 5.0;
       aboveView = octaneTf;
     }
     [PEUIUtils placeView:odometerTf
                    below:aboveView
-                    onto:fpLogPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
+    totalHeight += odometerTf.frame.size.height + 5.0;
     [PEUIUtils placeView:pricePerGallonTf
                    below:odometerTf
-                    onto:fpLogPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    [PEUIUtils placeView:carWashPerGallonDiscountTf
-                   below:pricePerGallonTf
-                    onto:fpLogPanel
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:5.0
-                hpadding:0.0];
+    totalHeight += pricePerGallonTf.frame.size.height + 5.0;
     [PEUIUtils placeView:gotCarWashPanel
-                   below:carWashPerGallonDiscountTf
-                    onto:fpLogPanel
+                   below:pricePerGallonTf
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    [PEUIUtils placeView:numGallonsTf
+    totalHeight += gotCarWashPanel.frame.size.height + 5.0;
+    [PEUIUtils placeView:carWashPerGallonDiscountTf
                    below:gotCarWashPanel
-                    onto:fpLogPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[fpLogPanel frame]];
-    [scrollView setContentSize:CGSizeMake(fpLogPanel.frame.size.width, 1.3 * fpLogPanel.frame.size.height)];
-    [scrollView addSubview:fpLogPanel];
-    [scrollView setBounces:YES];
-    return scrollView;
+    totalHeight += carWashPerGallonDiscountTf.frame.size.height + 5.0;
+    [PEUIUtils placeView:numGallonsTf
+                   below:carWashPerGallonDiscountTf
+                    onto:contentPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:5.0
+                hpadding:0.0];
+    totalHeight += numGallonsTf.frame.size.height + 5.0;
+    [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+    return [PEUIUtils displayPanelFromContentPanel:contentPanel
+                                         scrolling:YES
+                               scrollContentOffset:[parentViewController scrollContentOffset]
+                                    scrollDelegate:parentViewController
+                                  notScrollViewBlk:^{ [parentViewController resetScrollOffset]; }
+                                          centered:NO
+                                        controller:parentViewController];
   };
 }
 
@@ -1966,7 +2098,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPEnvironmentLog *envlog) {
     UIView *parentView = [parentViewController view];
     FPVehicle *vehicle = [_coordDao vehicleForEnvironmentLog:envlog error:[FPUtils localFetchErrorHandlerMaker]()];
-    UIView *envlogPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
+    UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:parentView fixedHeight:0.0];
     NSMutableArray *rowData = [NSMutableArray array];
     [rowData addObject:@[@"Odometer", [PEUtils descriptionOrEmptyIfNil:[envlog odometer]]]];
     if (vehicle.hasDteReadout) {
@@ -1979,7 +2111,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       [rowData addObject:@[@"Average MPH readout", [PEUtils descriptionOrEmptyIfNil:[envlog reportedAvgMph]]]];
     }
     if (vehicle.hasOutsideTempReadout) {
-      [rowData addObject:@[@"Outside temperature readout", [PEUtils descriptionOrEmptyIfNil:[envlog reportedOutsideTemp]]]];
+      [rowData addObject:@[@"Outside temp. readout", [PEUtils descriptionOrEmptyIfNil:[envlog reportedOutsideTemp]]]];
     }
     UIView *envlogDataPanel = [PEUIUtils tablePanelWithRowData:rowData
                                                      uitoolkit:_uitoolkit
@@ -1991,21 +2123,26 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     UITableView *vehicleAndLogDateTableView = components[@(FPEnvLogTagVehicleAndDate)];
     [vehicleAndLogDateTableView setUserInteractionEnabled:NO];
     [PEUIUtils placeView:vehicleAndLogDateTableView
-                 atTopOf:envlogPanel
+                 atTopOf:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:0.0
                 hpadding:0.0];
+    CGFloat totalHeight = vehicleAndLogDateTableView.frame.size.height;
     [PEUIUtils placeView:envlogDataPanel
                    below:vehicleAndLogDateTableView
-                    onto:envlogPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[envlogPanel frame]];
-    [scrollView setContentSize:CGSizeMake(envlogPanel.frame.size.width, 1.4 * envlogPanel.frame.size.height)];
-    [scrollView addSubview:envlogPanel];
-    [scrollView setBounces:YES];
-    return scrollView;
+    totalHeight += envlogDataPanel.frame.size.height + 5.0;
+    [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+    return [PEUIUtils displayPanelFromContentPanel:contentPanel
+                                         scrolling:YES
+                               scrollContentOffset:[parentViewController scrollContentOffset]
+                                    scrollDelegate:parentViewController
+                                  notScrollViewBlk:^{ [parentViewController resetScrollOffset]; }
+                                          centered:NO
+                                        controller:parentViewController];
   };
 }
 
@@ -2099,7 +2236,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
 - (PEEntityPanelMakerBlk)envlogFormPanelMakerWithUser:(FPUser *)user
                                     defaultVehicleBlk:(FPVehicle *(^)(void))defaultVehicleBlk
                                               logDate:(NSDate *)logDate {
-  return ^ UIView * (UIViewController *parentViewController) {
+  return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
     FPEnvLogVehicleAndDateDataSourceDelegate *ds =
       (FPEnvLogVehicleAndDateDataSourceDelegate *)[(UITableView *)[parentView viewWithTag:FPEnvLogTagVehicleAndDate] dataSource];
@@ -2109,9 +2246,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     } else {
       vehicle = defaultVehicleBlk();
     }
-    UIView *envLogPanel = [PEUIUtils panelWithWidthOf:1.0
-                                          andHeightOf:1.0
-                                       relativeToView:parentView];
+    UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:parentView fixedHeight:0.0];
     NSDictionary *components = [self envlogFormComponentsWithUser:user
                                       displayDisclosureIndicators:YES
                                                           vehicle:vehicle
@@ -2119,62 +2254,71 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     UITableView *vehicleAndLogDateTableView = components[@(FPEnvLogTagVehicleAndDate)];
     UITextField *odometerTf = components[@(FPEnvLogTagOdometer)];
     [PEUIUtils placeView:vehicleAndLogDateTableView
-                 atTopOf:envLogPanel
+                 atTopOf:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:0.0
                 hpadding:0.0];
+    CGFloat totalHeight = vehicleAndLogDateTableView.frame.size.height;
     [PEUIUtils placeView:odometerTf
                    below:vehicleAndLogDateTableView
-                    onto:envLogPanel
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
+    totalHeight += odometerTf.frame.size.height + 5.0;
     UIView *aboveView = odometerTf;
     if (vehicle.hasMpgReadout) {
       UITextField *reportedAvgMpgTf = components[@(FPEnvLogTagReportedAvgMpg)];
       [PEUIUtils placeView:reportedAvgMpgTf
                      below:aboveView
-                      onto:envLogPanel
+                      onto:contentPanel
              withAlignment:PEUIHorizontalAlignmentTypeLeft
                   vpadding:5.0
                   hpadding:0.0];
+      totalHeight += reportedAvgMpgTf.frame.size.height + 5.0;
       aboveView = reportedAvgMpgTf;
     }
     if (vehicle.hasDteReadout) {
       UITextField *reportedDteTf = components[@(FPEnvLogTagReportedDte)];
       [PEUIUtils placeView:reportedDteTf
                      below:aboveView
-                      onto:envLogPanel
+                      onto:contentPanel
              withAlignment:PEUIHorizontalAlignmentTypeLeft
                   vpadding:5.0
                   hpadding:0.0];
+      totalHeight += reportedDteTf.frame.size.height + 5.0;
       aboveView = reportedDteTf;
     }
     if (vehicle.hasMphReadout) {
       UITextField *reportedAvgMphTf = components[@(FPEnvLogTagReportedAvgMph)];
       [PEUIUtils placeView:reportedAvgMphTf
                      below:aboveView
-                      onto:envLogPanel
+                      onto:contentPanel
              withAlignment:PEUIHorizontalAlignmentTypeLeft
                   vpadding:5.0
                   hpadding:0.0];
+      totalHeight += reportedAvgMphTf.frame.size.height + 5.0;
       aboveView = reportedAvgMphTf;
     }
     if (vehicle.hasOutsideTempReadout) {
       UITextField *reportedOutsideTempTf = components[@(FPEnvLogTagReportedOutsideTemp)];
       [PEUIUtils placeView:reportedOutsideTempTf
                      below:aboveView
-                      onto:envLogPanel
+                      onto:contentPanel
              withAlignment:PEUIHorizontalAlignmentTypeLeft
                   vpadding:5.0
                   hpadding:0.0];
+      totalHeight += reportedOutsideTempTf.frame.size.height + 5.0;
       aboveView = reportedOutsideTempTf;
     }
-    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:[envLogPanel frame]];
-    [scrollView setContentSize:CGSizeMake(envLogPanel.frame.size.width, 1.4 * envLogPanel.frame.size.height)];
-    [scrollView addSubview:envLogPanel];
-    [scrollView setBounces:YES];
-    return scrollView;
+    [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+    return [PEUIUtils displayPanelFromContentPanel:contentPanel
+                                         scrolling:YES
+                               scrollContentOffset:[parentViewController scrollContentOffset]
+                                    scrollDelegate:parentViewController
+                                  notScrollViewBlk:^{ [parentViewController resetScrollOffset]; }
+                                          centered:NO
+                                        controller:parentViewController];
   };
 }
 

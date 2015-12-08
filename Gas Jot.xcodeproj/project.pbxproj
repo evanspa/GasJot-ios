@@ -50,6 +50,7 @@
 		CA90F4241B45AB7F005FAB35 /* PEServerSyncActionSheet.m in Sources */ = {isa = PBXBuildFile; fileRef = CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */; };
 		CA920C121B21F48900A848EA /* fpapi-resource.localdev.json in Resources */ = {isa = PBXBuildFile; fileRef = 18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */; };
 		CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */; };
+		CAB61BFD1C11D6F60008F12B /* PECustomController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAB61BFC1C11D6F60008F12B /* PECustomController.m */; };
 		CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = CAD8AE501B2B291000276F4F /* PELMUIUtils.m */; };
 		CAE873F71BBDA64900E5A81F /* FPForgotPasswordController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAE873F61BBDA64900E5A81F /* FPForgotPasswordController.m */; };
 		CAEE0C9A1BC9830E00FAB0BF /* FPReportViews.m in Sources */ = {isa = PBXBuildFile; fileRef = CAEE0C991BC9830E00FAB0BF /* FPReportViews.m */; };
@@ -162,6 +163,8 @@
 		CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PEServerSyncActionSheet.m; sourceTree = "<group>"; };
 		CAB5E94E1B4B024B00144072 /* FPReauthenticateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPReauthenticateController.h; sourceTree = "<group>"; };
 		CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPReauthenticateController.m; sourceTree = "<group>"; };
+		CAB61BFB1C11D6F60008F12B /* PECustomController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PECustomController.h; sourceTree = "<group>"; };
+		CAB61BFC1C11D6F60008F12B /* PECustomController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PECustomController.m; sourceTree = "<group>"; };
 		CAD8AE4F1B2B291000276F4F /* PELMUIUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PELMUIUtils.h; sourceTree = "<group>"; };
 		CAD8AE501B2B291000276F4F /* PELMUIUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PELMUIUtils.m; sourceTree = "<group>"; };
 		CAE873F51BBDA64900E5A81F /* FPForgotPasswordController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPForgotPasswordController.h; sourceTree = "<group>"; };
@@ -288,6 +291,7 @@
 				CAD8AE4E1B2B28E200276F4F /* Local Data UI Utils */,
 				18F61A821A96129E00BA631A /* Categories */,
 				186E0B7919CD1BEA00CE4B3A /* Pull-to-Refresh List View Controller */,
+				CAB61BFA1C11D6D40008F12B /* Custom Screen */,
 			);
 			name = "PE UI Commons";
 			sourceTree = "<group>";
@@ -333,13 +337,13 @@
 			children = (
 				CABF51701BD499370083B460 /* Stat Screens */,
 				CAE873F41BBDA55800E5A81F /* Forgot Password Screen */,
-				CAFC847B1BA71FB700FAEB66 /* Account Screen */,
 				CAFC84771BA6ECB600FAEB66 /* Jot Screen */,
 				CAFC84731BA66D0600FAEB66 /* Records Screen */,
 				CAFC84621BA27E8000FAEB66 /* Splash Screen */,
 				CAB5E94D1B4B007E00144072 /* Re-authenticate */,
 				CA7D5A2B1B384FEE00433581 /* Account Login */,
 				CA7D5A2A1B384FDE00433581 /* Account Creation */,
+				CAFC847B1BA71FB700FAEB66 /* Account Screen */,
 				180EDA3219C7C87E00C782A6 /* Unsynced Edits Screen */,
 				180EDA2D19C7C2AB00C782A6 /* Settings Screen */,
 				18010C57180E470C005F5CEB /* Home Screen */,
@@ -649,6 +653,15 @@
 			name = "Re-authenticate";
 			sourceTree = "<group>";
 		};
+		CAB61BFA1C11D6D40008F12B /* Custom Screen */ = {
+			isa = PBXGroup;
+			children = (
+				CAB61BFB1C11D6F60008F12B /* PECustomController.h */,
+				CAB61BFC1C11D6F60008F12B /* PECustomController.m */,
+			);
+			name = "Custom Screen";
+			sourceTree = "<group>";
+		};
 		CABF51701BD499370083B460 /* Stat Screens */ = {
 			isa = PBXGroup;
 			children = (
@@ -912,6 +925,7 @@
 				CAFC84691BA363A600FAEB66 /* iCarousel.m in Sources */,
 				CAFC84871BA749FB00FAEB66 /* UIColor+FPAdditions.m in Sources */,
 				CA7D5A271B383F5A00433581 /* FPAppNotificationNames.m in Sources */,
+				CAB61BFD1C11D6F60008F12B /* PECustomController.m in Sources */,
 				CAFC847A1BA6ECCA00FAEB66 /* FPJotController.m in Sources */,
 				CA813DB11BDF04A000B74A24 /* FPCommonStatComparisonController.m in Sources */,
 				CAFC84651BA27EAB00FAEB66 /* FPSplashController.m in Sources */,

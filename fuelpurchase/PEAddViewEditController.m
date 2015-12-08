@@ -185,6 +185,8 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
     _entityUpdatedNotificationName = entityUpdatedNotificationName;
     _entityRemovedNotificationName = entityRemovedNotificationName;
     _addlContentSection = addlContentSection;
+    _scrollContentOffset = CGPointMake(0.0, 0.0);
+    _hasPoppedKeyboard = NO;
   }
   return self;
 }
@@ -407,6 +409,24 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
                                             addlContentSection:nil];
 }
 
+#pragma mark - Scroll View Delegate
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+  _scrollContentOffset = [scrollView contentOffset];
+}
+
+#pragma mark - Reset Scroll Offset
+
+- (void)resetScrollOffset {
+  _scrollContentOffset = CGPointMake(0.0, 0.0);
+}
+
+#pragma mark - Dynamic Type notification
+
+- (void)changeTextSize:(NSNotification *)notification {
+  [self viewDidAppear:YES];
+}
+
 #pragma mark - View Controller Lifecyle
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -424,12 +444,15 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
     UIView *tmpNewFormPanel = _entityFormPanelMaker(self);
     [_entityFormPanel removeFromSuperview];
     _entityFormPanel = tmpNewFormPanel;
-    [[self view] addSubview:_entityFormPanel];
-    _entityToPanelBinder(_entity, _entityFormPanel);    
-    
+    [PEUIUtils placeView:_entityFormPanel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+    _entityToPanelBinder(_entity, _entityFormPanel);
     if (_prepareUIForUserInteractionBlk) {
-      _prepareUIForUserInteractionBlk(_entityFormPanel);
+      _prepareUIForUserInteractionBlk(self, _entityFormPanel);
     }
+  } else {
+    [_entityViewPanel removeFromSuperview];
+    _entityViewPanel = _entityViewPanel = _entityViewPanelMaker(self, _parentEntity, _entity);
+    [PEUIUtils placeView:_entityViewPanel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
   }
   if (_viewDidAppearBlk) {
     _viewDidAppearBlk(self);
@@ -438,6 +461,10 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(changeTextSize:)
+                                               name:UIContentSizeCategoryDidChangeNotification
+                                             object:nil];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   UINavigationItem *navItem = [self navigationItem];
   _backButton = [navItem leftBarButtonItem];
@@ -586,6 +613,7 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
 }
 
 - (void)promptDoDelete {
+  [self.view endEditing:YES];
   void (^deleter)(void) = ^{
     [PEUIUtils showConfirmAlertWithTitle:@"Are you sure?"
                               titleImage:nil //[PEUIUtils bundleImageWithName:@"question"]
@@ -1062,7 +1090,7 @@ The latest version of this record has been successfully downloaded to your devic
           [PEUIUtils attributedTextWithTemplate:@"The remote copy of this record has been \
 updated since you started to edit it.  You have a few options:\n\nIf you cancel, %@."
                                    textToAccent:@"your local edits will be retained"
-                                 accentTextFont:[UIFont italicSystemFontOfSize:[UIFont systemFontSize]]];
+                                 accentTextFont:[PEUIUtils italicFontForTextStyle:UIFontTextStyleSubheadline]];
           [self presentSaveConflictAlertWithLatestEntity:latestEntity
                                         alertDescription:desc
                                             cancelAction:postUploadActivities];
@@ -1553,7 +1581,7 @@ merge conflicts.";
       _isEdit = YES;
       [super setEditing:flag animated:animated];
       if (_prepareUIForUserInteractionBlk) {
-        _prepareUIForUserInteractionBlk(_entityFormPanel);
+        _prepareUIForUserInteractionBlk(self, _entityFormPanel);
       }
       [self setUploadDownloadDeleteBarButtonStates];
     }
@@ -1715,7 +1743,7 @@ can try to upload them later."]
                 [PEUIUtils attributedTextWithTemplate:@"The remote copy of this record has been \
 updated since you started to edit it.  You have a few options:\n\nIf you cancel, %@."
                                          textToAccent:@"your local edits will be retained"
-                                       accentTextFont:[UIFont italicSystemFontOfSize:[UIFont systemFontSize]]];
+                                       accentTextFont:[PEUIUtils italicFontForTextStyle:UIFontTextStyleSubheadline]];
                 [self presentSaveConflictAlertWithLatestEntity:latestEntity
                                               alertDescription:desc
                                                   cancelAction:postEditActivities];
@@ -2533,6 +2561,7 @@ The ones that did not %@ and will need to be fixed individually."
     _isEditCanceled = YES;
     _isEdit = NO;
     [self setEditing:NO animated:YES]; // to get 'Done' button to turn to 'Edit'
+    [self setHasPoppedKeyboard:NO];
   }
 }
 

@@ -36,10 +36,6 @@ NSInteger const kAccountStatusPanelTag = 12;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
-  UIScrollView *_doesHaveAuthTokenPanel;
-  //UIView *_doesHaveAuthTokenPanel;
-  UIView *_doesNotHaveAuthTokenPanel;
-  UIView *_notLoggedInPanel;
 }
 
 #pragma mark - Initializers
@@ -58,10 +54,27 @@ NSInteger const kAccountStatusPanelTag = 12;
   return self;
 }
 
-#pragma mark - Dynamic Type Support
+#pragma mark - Make Content
 
-- (void)changeTextSize:(NSNotification *)notification {
-  [self viewDidAppear:YES];
+- (NSArray *)makeContent {
+  if ([APP isUserLoggedIn]) {
+    if ([APP doesUserHaveValidAuthToken]) {
+      NSArray *content = [self makeDoesHaveAuthTokenContent];
+      UIView *contentPanel = content[0];
+      [FPPanelToolkit refreshAccountStatusPanelForUser:_user
+                                              panelTag:@(kAccountStatusPanelTag)
+                                  includeRefreshButton:YES
+                                        coordinatorDao:_coordDao
+                                             uitoolkit:_uitoolkit
+                                        relativeToView:contentPanel
+                                            controller:self];
+      return content;
+    } else {
+      return [self makeDoesNotHaveAuthTokenContent];
+    }
+  } else {
+    return [self makeNotLoggedInContent];
+  }
 }
 
 #pragma mark - View Controller Lifecyle
@@ -71,53 +84,20 @@ NSInteger const kAccountStatusPanelTag = 12;
 #ifdef FP_DEV
   [self pdvDevEnable];
 #endif
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(changeTextSize:)
-                                               name:UIContentSizeCategoryDidChangeNotification
-                                             object:nil];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
-  [self setAutomaticallyAdjustsScrollViewInsets:NO]; // http://stackoverflow.com/questions/6523205/uiscrollview-adjusts-contentoffset-when-contentsize-changes
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   UINavigationItem *navItem = [self navigationItem];
-  [_notLoggedInPanel removeFromSuperview];
-  [_doesHaveAuthTokenPanel removeFromSuperview];
-  [_doesNotHaveAuthTokenPanel removeFromSuperview];
   if ([APP isUserLoggedIn]) {
     if ([APP doesUserHaveValidAuthToken]) {
-      [self makeDoesHaveAuthTokenPanel];
       [navItem setTitle:@"Your Gas Jot Account"];
-      [PEUIUtils placeView:_doesHaveAuthTokenPanel
-                   atTopOf:[self view]
-             withAlignment:PEUIHorizontalAlignmentTypeLeft
-                  vpadding:0.0
-                  hpadding:0.0];
-      [FPPanelToolkit refreshAccountStatusPanelForUser:_user
-                                              panelTag:@(kAccountStatusPanelTag)
-                                  includeRefreshButton:YES
-                                        coordinatorDao:_coordDao
-                                             uitoolkit:_uitoolkit
-                                        relativeToView:_doesHaveAuthTokenPanel
-                                            controller:self];
     } else {
-      [self makeDoesNotHaveAuthTokenPanel];
       [navItem setTitle:@"Your Gas Jot Account"];
-      [PEUIUtils placeView:_doesNotHaveAuthTokenPanel
-                   atTopOf:[self view]
-             withAlignment:PEUIHorizontalAlignmentTypeLeft
-                  vpadding:0.0
-                  hpadding:0.0];
     }
   } else {
-    [self makeNotLoggedInPanel];
     [navItem setTitle:@"Log In or Create Account"];
-    [PEUIUtils placeView:_notLoggedInPanel
-              inMiddleOf:[self view]
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                hpadding:0.0];
-    [PEUIUtils adjustYOfView:_notLoggedInPanel withValue:15.0];
   }
 }
 
@@ -202,11 +182,11 @@ Logging out will disconnect this device from your remote account and remove your
   return panel;
 }
 
-#pragma mark - Panel Makers
+#pragma mark - Content Makers
 
-- (void)makeDoesHaveAuthTokenPanel {
+- (NSArray *)makeDoesHaveAuthTokenContent {
+  UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0];
   ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
-  _doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
   NSAttributedString *attrMessage = [PEUIUtils attributedTextWithTemplate:@"%@.  From here you can view and edit your remote account details."
                                                              textToAccent:@"You are currently logged in"
                                                            accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]
@@ -214,7 +194,7 @@ Logging out will disconnect this device from your remote account and remove your
   UIView *accountSettingsMsgPanel = [self leftPaddingMessageWithAttributedText:attrMessage];
   UIButton *accountSettingsBtn = [_uitoolkit systemButtonMaker](@"Remote account details", nil, nil);
   [[accountSettingsBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:accountSettingsBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
+  [PEUIUtils setFrameWidthOfView:accountSettingsBtn ofWidth:1.0 relativeTo:contentPanel];
   [PEUIUtils addDisclosureIndicatorToButton:accountSettingsBtn];
   [accountSettingsBtn bk_addEventHandler:^(id sender) {
     [PEUIUtils displayController:[_screenToolkit newUserAccountDetailScreenMaker](_user) fromController:self animated:YES];
@@ -224,25 +204,25 @@ Logging out will disconnect this device from your remote account and remove your
                                                     includeRefreshButton:YES
                                                           coordinatorDao:_coordDao
                                                                uitoolkit:_uitoolkit
-                                                          relativeToView:_doesHaveAuthTokenPanel
+                                                          relativeToView:contentPanel
                                                               controller:self];
   [accountStatusPanel setBackgroundColor:[UIColor whiteColor]];
   UIView *logoutMsgLabelWithPad = [self logoutPaddedMessage];
   UIButton *logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
   [logoutBtn setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
   [[logoutBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
+  [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:contentPanel];
   
   // place views onto panel
   [PEUIUtils placeView:accountSettingsBtn
-               atTopOf:_doesHaveAuthTokenPanel
+               atTopOf:contentPanel //_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:90.0
+              vpadding:FPContentPanelTopPadding
               hpadding:0.0];
-  CGFloat totalHeight = accountSettingsBtn.frame.size.height + 90.0;
+  CGFloat totalHeight = accountSettingsBtn.frame.size.height + FPContentPanelTopPadding;
   [PEUIUtils placeView:accountSettingsMsgPanel
                  below:accountSettingsBtn
-                  onto:_doesHaveAuthTokenPanel
+                  onto:contentPanel //_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
@@ -250,45 +230,44 @@ Logging out will disconnect this device from your remote account and remove your
   UIView *statsAndTrendsPanel = [self statsAndTrendsPanel];
   [PEUIUtils placeView:statsAndTrendsPanel
                  below:accountSettingsMsgPanel
-                  onto:_doesHaveAuthTokenPanel
+                  onto:contentPanel //_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:30.0
               hpadding:0.0];
   totalHeight += statsAndTrendsPanel.frame.size.height + 30.0;
   [PEUIUtils placeView:accountStatusPanel
                  below:statsAndTrendsPanel
-                  onto:_doesHaveAuthTokenPanel
+                  onto:contentPanel //_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:30.0
               hpadding:0.0];
   totalHeight += accountStatusPanel.frame.size.height + 30.0;
   [PEUIUtils placeView:logoutBtn
                  below:accountStatusPanel
-                  onto:_doesHaveAuthTokenPanel
+                  onto:contentPanel //_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:30.0
               hpadding:0.0];
   totalHeight += logoutBtn.frame.size.height + 30.0;
   [PEUIUtils placeView:logoutMsgLabelWithPad
                  below:logoutBtn
-                  onto:_doesHaveAuthTokenPanel
+                  onto:contentPanel //_doesHaveAuthTokenPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
   totalHeight += logoutBtn.frame.size.height + 4.0;
-  [PEUIUtils setFrameHeight:totalHeight ofView:_doesHaveAuthTokenPanel];
-  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.6 * _doesHaveAuthTokenPanel.frame.size.height)];
-  [_doesHaveAuthTokenPanel setBounces:YES];
+  [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+  return @[contentPanel, @(YES), @(NO)];
 }
 
-- (void)makeDoesNotHaveAuthTokenPanel {
+- (NSArray *)makeDoesNotHaveAuthTokenContent {
+  UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0];
   ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
-  _doesNotHaveAuthTokenPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
   NSString *message = @"For security reasons, we need you to re-authenticate against your remote account.";
   UIView *messagePanel = [self leftPaddingMessageWithText:message];
   UIButton *reauthenticateBtn = [_uitoolkit systemButtonMaker](@"Re-authenticate", nil, nil);
   [[reauthenticateBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:reauthenticateBtn ofWidth:1.0 relativeTo:_doesNotHaveAuthTokenPanel];
+  [PEUIUtils setFrameWidthOfView:reauthenticateBtn ofWidth:1.0 relativeTo:contentPanel];
   [PEUIUtils addDisclosureIndicatorToButton:reauthenticateBtn];
   [reauthenticateBtn bk_addEventHandler:^(id sender) {
     [self presentReauthenticateScreen];
@@ -297,7 +276,7 @@ Logging out will disconnect this device from your remote account and remove your
   UIButton *logoutBtn = buttonMaker(@"Log Out", self, @selector(logout));
   [logoutBtn setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
   [[logoutBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:_doesNotHaveAuthTokenPanel];
+  [PEUIUtils setFrameWidthOfView:logoutBtn ofWidth:1.0 relativeTo:contentPanel];
   UIView *exclamationView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
   exclamationView.layer.cornerRadius = 10;
   exclamationView.backgroundColor = [UIColor redColor];
@@ -316,31 +295,38 @@ Logging out will disconnect this device from your remote account and remove your
   
   // place views onto panel
   [PEUIUtils placeView:reauthenticateBtn
-               atTopOf:_doesNotHaveAuthTokenPanel
+               atTopOf:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:90.0
+              vpadding:FPContentPanelTopPadding
               hpadding:0];
+  CGFloat totalHeight = reauthenticateBtn.frame.size.height + FPContentPanelTopPadding;
   [PEUIUtils placeView:messagePanel
                  below:reauthenticateBtn
-                  onto:_doesNotHaveAuthTokenPanel
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
-  [PEUIUtils placeView:logoutMsgLabelWithPad
-            atBottomOf:_doesNotHaveAuthTokenPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:(25.0 + [APP jotButtonHeight])
-              hpadding:0.0];
+  totalHeight += messagePanel.frame.size.height + 4.0;
   [PEUIUtils placeView:logoutBtn
-                 above:logoutMsgLabelWithPad
-                  onto:_doesNotHaveAuthTokenPanel
+                 below:messagePanel
+                  onto:contentPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:35.0
+              hpadding:0.0];
+  totalHeight += logoutBtn.frame.size.height + 35.0;
+  [PEUIUtils placeView:logoutMsgLabelWithPad
+                 below:logoutBtn
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
+  totalHeight += logoutMsgLabelWithPad.frame.size.height + 4.0;
+  [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+  return @[contentPanel, @(YES), @(NO)];
 }
 
-- (void)makeNotLoggedInPanel {
-  _notLoggedInPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
+- (NSArray *)makeNotLoggedInContent {
+  UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0];
   UIButton *loginBtn = [PEUIUtils buttonWithKey:@"Log In"
                                            font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle2]
                                 backgroundColor:[UIColor turquoiseColor]
@@ -352,7 +338,7 @@ Logging out will disconnect this device from your remote account and remove your
                                    cornerRadius:5.0
                                          target:nil
                                          action:nil];
-  [PEUIUtils setFrameWidthOfView:loginBtn ofWidth:0.85 relativeTo:_notLoggedInPanel];  
+  [PEUIUtils setFrameWidthOfView:loginBtn ofWidth:0.85 relativeTo:contentPanel];
   [loginBtn bk_addEventHandler:^(id sender) {
     [self presentLoginScreen];
   } forControlEvents:UIControlEventTouchUpInside];
@@ -364,9 +350,6 @@ Logging out will disconnect this device from your remote account and remove your
                                             verticalTextPadding:3.0
                                                      fitToWidth:self.view.frame.size.width - (8.0 + 5.0)];
   [loginMsgLbl setTextAlignment:NSTextAlignmentCenter];
-  
-  
-  
   UIButton *createAccountBtn = [PEUIUtils buttonWithKey:@"Sign Up"
                                                    font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle2]
                                         backgroundColor:[UIColor peterRiverColor]
@@ -378,7 +361,7 @@ Logging out will disconnect this device from your remote account and remove your
                                            cornerRadius:5.0
                                                  target:nil
                                                  action:nil];
-  [PEUIUtils setFrameWidthOfView:createAccountBtn ofWidth:0.85 relativeTo:_notLoggedInPanel];
+  [PEUIUtils setFrameWidthOfView:createAccountBtn ofWidth:0.85 relativeTo:contentPanel];
   [createAccountBtn bk_addEventHandler:^(id sender) {
     [self presentSetupRemoteAccountScreen];
   } forControlEvents:UIControlEventTouchUpInside];
@@ -393,33 +376,36 @@ Logging out will disconnect this device from your remote account and remove your
   
   // place views onto panel
   [PEUIUtils placeView:loginBtn
-               atTopOf:_notLoggedInPanel
+               atTopOf:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeCenter
-              vpadding:0.0 //90.0
+              vpadding:FPContentPanelTopPadding
               hpadding:0.0];
+  CGFloat totalHeight = loginBtn.frame.size.height + FPContentPanelTopPadding;
   [PEUIUtils placeView:loginMsgLbl
                  below:loginBtn
-                  onto:_notLoggedInPanel
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeCenter
               vpadding:8.0
               hpadding:0.0];
+  totalHeight += loginMsgLbl.frame.size.height + 8.0;
   [PEUIUtils placeView:createAccountBtn
                  below:loginMsgLbl
-                  onto:_notLoggedInPanel
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeCenter
-alignmentRelativeToView:_notLoggedInPanel
+alignmentRelativeToView:contentPanel
               vpadding:35.0
               hpadding:0.0];
+  totalHeight += createAccountBtn.frame.size.height + 35.0;
   [PEUIUtils placeView:createAcctMsgLbl
                  below:createAccountBtn
-                  onto:_notLoggedInPanel
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeCenter
-alignmentRelativeToView:_notLoggedInPanel
+alignmentRelativeToView:contentPanel
               vpadding:8.0
               hpadding:0.0];
-  [PEUIUtils setFrameHeight:(loginBtn.frame.size.height + 8.0 + loginMsgLbl.frame.size.height + 45.0 +
-      createAccountBtn.frame.size.height + 8.0 + createAcctMsgLbl.frame.size.height)
-                     ofView:_notLoggedInPanel];
+  totalHeight += createAcctMsgLbl.frame.size.height + 8.0;
+  [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+  return @[contentPanel, @(NO), @(NO)];
 }
 
 #pragma mark - Re-authenticate screen

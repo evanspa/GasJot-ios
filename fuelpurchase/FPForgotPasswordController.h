@@ -23,8 +23,9 @@
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
+#import "PECustomController.h"
 
-@interface FPForgotPasswordController : UIViewController <MBProgressHUDDelegate>
+@interface FPForgotPasswordController : PECustomController <MBProgressHUDDelegate>
 
 #pragma mark - Initializers
 

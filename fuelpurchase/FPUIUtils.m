@@ -13,6 +13,8 @@
 #import <PEObjc-Commons/UIView+PERoundify.h>
 #import <FlatUIKit/UIColor+FlatUI.h>
 
+NSInteger const FPContentPanelTopPadding = 20.0;
+
 @implementation FPUIUtils
 
 #pragma mark - Chart Helpers
@@ -100,7 +102,7 @@
 
 + (UIView *)headerPanelWithText:(NSString *)headerText relativeToView:(UIView *)relativeToView {
   return [PEUIUtils leftPadView:[PEUIUtils labelWithKey:headerText
-                                                   font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                                   font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                         backgroundColor:[UIColor clearColor]
                                               textColor:[UIColor darkGrayColor]
                                     verticalTextPadding:3.0

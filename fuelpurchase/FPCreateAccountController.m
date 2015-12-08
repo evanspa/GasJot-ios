@@ -47,14 +47,12 @@
   UITextField *_emailTf;
   UITextField *_passwordTf;
   UITextField *_confirmPasswordTf;
-  CGFloat animatedDistance;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_localUser;
   NSNumber *_preserveExistingLocalEntities;
   BOOL _receivedAuthReqdErrorOnSyncAttempt;
   RACDisposable *_disposable;
-  UIScrollView *_scrollView;
 }
 
 #pragma mark - Initializers
@@ -73,30 +71,11 @@
   return self;
 }
 
-#pragma mark - Dynamic Type Support
-
-- (void)changeTextSize:(NSNotification *)notification {
-  [self viewDidAppear:YES];
-}
-
-#pragma mark - View Controller Lifecyle
-
-- (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
-  [_scrollView removeFromSuperview];
-  [self makeContentPanel];
-  [_fullNameTf becomeFirstResponder];
-}
-
 - (void)viewDidLoad {
   [super viewDidLoad];
   #ifdef FP_DEV
     [self pdvDevEnable];
   #endif
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(changeTextSize:)
-                                               name:UIContentSizeCategoryDidChangeNotification
-                                             object:nil];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Sign Up"];
@@ -106,9 +85,7 @@
   [navItem setRightBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                target:self
                                                                                action:@selector(handleAccountCreation)]];
-  [self setAutomaticallyAdjustsScrollViewInsets:NO];
-  [self makeContentPanel];
-  [PEUIUtils placeView:_scrollView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+  [_fullNameTf becomeFirstResponder];
 }
 
 - (UIView *)parentViewForAlerts {
@@ -118,10 +95,10 @@
   return self.view;
 }
 
-#pragma mark - GUI construction (making panels)
+#pragma mark - Make Content
 
-- (void)makeContentPanel {
-  _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
+- (NSArray *)makeContent {
+  UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0.0];
   CGFloat leftPadding = 8.0;
   UILabel *createAccountMsgLabel = [PEUIUtils labelWithKey:@"From here you can create a remote Gas Jot account. This will \
 enable your data records to be synced to Gas Jot's central server so you can access them from your other devices."
@@ -129,11 +106,10 @@ enable your data records to be synced to Gas Jot's central server so you can acc
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor darkGrayColor]
                                 verticalTextPadding:3.0
-                                         fitToWidth:(_scrollView.frame.size.width - leftPadding - 10.0)];
+                                         fitToWidth:(contentPanel.frame.size.width - leftPadding - 10.0)];
   UIView *createAccountMsgPanel = [PEUIUtils leftPadView:createAccountMsgLabel padding:leftPadding];
   
-  TextfieldMaker tfMaker =
-    [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:_scrollView];
+  TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:contentPanel];
   _fullNameTf = tfMaker(@"unauth.start.ca.fullnametf.pht");
   _emailTf = tfMaker(@"unauth.start.ca.emailtf.pht");
   _passwordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
@@ -143,35 +119,35 @@ enable your data records to be synced to Gas Jot's central server so you can acc
   
   // place views
   [PEUIUtils placeView:createAccountMsgPanel
-               atTopOf:_scrollView
+               atTopOf:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:75.0
+              vpadding:FPContentPanelTopPadding
               hpadding:0.0];
-  CGFloat totalHeight = createAccountMsgPanel.frame.size.height + 75.0;
+  CGFloat totalHeight = createAccountMsgPanel.frame.size.height + FPContentPanelTopPadding;
   [PEUIUtils placeView:_fullNameTf
                  below:createAccountMsgPanel
-                  onto:_scrollView
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:7.0
               hpadding:0];
   totalHeight += _fullNameTf.frame.size.height + 7.0;
   [PEUIUtils placeView:_emailTf
                  below:_fullNameTf
-                  onto:_scrollView
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5.0
               hpadding:0];
   totalHeight += _emailTf.frame.size.height + 5.0;
   [PEUIUtils placeView:_passwordTf
                  below:_emailTf
-                  onto:_scrollView
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5.0
               hpadding:0];
   totalHeight += _passwordTf.frame.size.height + 5.0;
   [PEUIUtils placeView:_confirmPasswordTf
                  below:_passwordTf
-                  onto:_scrollView
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:5.0
               hpadding:0];
@@ -187,24 +163,12 @@ enable your data records to be synced to Gas Jot's central server so you can acc
   UIView *instructionPanel = [PEUIUtils leftPadView:instructionLabel padding:leftPadding];
   [PEUIUtils placeView:instructionPanel
                  below:_confirmPasswordTf
-                  onto:_scrollView
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
-  if (totalHeight <= self.view.frame.size.height) {
-    [PEUIUtils setFrameHeight:self.view.frame.size.height ofView:_scrollView];
-    [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.3 * _scrollView.frame.size.height)];
-  } else {
-    [PEUIUtils setFrameHeight:totalHeight ofView:_scrollView];
-    [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.6 * _scrollView.frame.size.height)];
-  }
-  [_scrollView setDelaysContentTouches:NO];
-  [_scrollView setBounces:YES];
-  [PEUIUtils placeView:_scrollView
-               atTopOf:self.view
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:0.0
-              hpadding:0.0];
+  totalHeight += instructionPanel.frame.size.height + 4.0;
+  [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
   
   [_disposable dispose];
   RACSignal *signal =
@@ -239,6 +203,7 @@ enable your data records to be synced to Gas Jot's central server so you can acc
                         return @(createUsrErrMask);
                       }];
   _disposable = [signal setKeyPath:@"formStateMaskForAcctCreation" onObject:self nilValue:nil];
+  return @[contentPanel, @(YES), @(NO)];
 }
 
 - (FPEnableUserInteractionBlk)makeUserEnabledBlock {

@@ -58,9 +58,9 @@ NSString * const FPStatComparisonCellIdentifier = @"FPStatComparisonCellIdentifi
   return self;
 }
 
-#pragma mark - Helpers
+#pragma mark - Make Content
 
-- (UIView *)makeComparisonTable {
+- (NSArray *)makeContent {
   NSMutableArray *rowData = [NSMutableArray array];
   NSMutableArray *nilRowData = [NSMutableArray array];
   NSArray *entities = _entitiesToCompareBlk();
@@ -78,7 +78,7 @@ NSString * const FPStatComparisonCellIdentifier = @"FPStatComparisonCellIdentifi
     if (_entity && entity && [entity isEqual:_entity]) {
       entityName = [PEUIUtils attributedTextWithTemplate:@"%@"
                                             textToAccent:truncatedEntityName(entity)
-                                          accentTextFont:[UIFont boldSystemFontOfSize:16]
+                                          accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]
                                          accentTextColor:[UIColor fpAppBlue]];
     } else {
       entityName = truncatedEntityName(entity);
@@ -90,14 +90,18 @@ NSString * const FPStatComparisonCellIdentifier = @"FPStatComparisonCellIdentifi
     }
   }
   [rowData sortUsingComparator:_comparator];
+  UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0.0];
+  UIView *header = [FPUIUtils headerPanelWithText:_headerText relativeToView:self.view];
   UIView *tablePanel = [PEUIUtils tablePanelWithRowData:[rowData arrayByAddingObjectsFromArray:nilRowData]
                                               uitoolkit:_uitoolkit
                                              parentView:self.view];
-  UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
-  [scrollView setContentSize:CGSizeMake(tablePanel.frame.size.width, 1.125 * (tablePanel.frame.origin.y + tablePanel.frame.size.height))];
-  [scrollView addSubview:tablePanel];
-  [scrollView setBounces:YES];
-  return scrollView;
+  // place the views
+  [PEUIUtils placeView:header atTopOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:FPContentPanelTopPadding hpadding:0.0];
+  CGFloat totalHeight = header.frame.size.height + FPContentPanelTopPadding;
+  [PEUIUtils placeView:tablePanel below:header onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:8.0 hpadding:0.0];
+  totalHeight += tablePanel.frame.size.height + 8.0;
+  [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+  return @[contentPanel, @(YES), @(NO)];
 }
 
 #pragma mark - View controller lifecycle
@@ -106,38 +110,10 @@ NSString * const FPStatComparisonCellIdentifier = @"FPStatComparisonCellIdentifi
   [super viewDidLoad];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   [[self navigationItem] setTitleView:[PEUIUtils labelWithKey:_screenTitle
-                                                         font:[UIFont systemFontOfSize:14.0]
+                                                         font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]
                                               backgroundColor:[UIColor clearColor]
                                                     textColor:[UIColor blackColor]
                                           verticalTextPadding:0.0]];
-  
-  UIView *header = [FPUIUtils headerPanelWithText:_headerText relativeToView:self.view];
-  _comparisonTable = [self makeComparisonTable];
-  
-  // place the views
-  [PEUIUtils placeView:header atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:80.0 hpadding:8.0];
-  [PEUIUtils placeView:_comparisonTable
-                 below:header
-                  onto:self.view
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-  alignmentRelativeToView:self.view
-              vpadding:8.0
-              hpadding:0.0];
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
-  
-  // remove the views
-  CGRect comparisonTableFrame = _comparisonTable.frame;
-  [_comparisonTable removeFromSuperview];
-  
-  // refresh their data
-  _comparisonTable = [self makeComparisonTable];
-  
-  // re-add them
-  _comparisonTable.frame = comparisonTableFrame;
-  [self.view addSubview:_comparisonTable];
 }
 
 @end

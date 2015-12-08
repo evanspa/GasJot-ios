@@ -372,9 +372,9 @@ shouldSelectViewController:(UIViewController *)viewController {
                                          colorForTextfields:[UIColor whiteColor]
                                   heightFactorForTextfields:1.7
                                leftViewPaddingForTextfields:10
-                                  fontForTableCellTitlesBlk:^{ return [UIFont systemFontOfSize:16]; }
+                                  fontForTableCellTitlesBlk:^{ return [UIFont preferredFontForTextStyle:UIFontTextStyleBody]; }
                                     colorForTableCellTitles:[UIColor blackColor]
-                               fontForTableCellSubtitlesBlk:^{ return [UIFont systemFontOfSize:10]; }
+                               fontForTableCellSubtitlesBlk:^{ return [UIFont preferredFontForTextStyle:UIFontTextStyleCaption1]; }
                                  colorForTableCellSubtitles:[UIColor grayColor]];
 }
 

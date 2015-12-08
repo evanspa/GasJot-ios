@@ -23,6 +23,7 @@
 #import "FPReauthenticateController.h"
 #import "FPSplashController.h"
 #import <FlatUIKit/UIColor+FlatUI.h>
+#import "FPUIUtils.h"
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
@@ -33,10 +34,6 @@
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
-  UIScrollView *_doesHaveAuthTokenPanel;
-  //UIView *_doesHaveAuthTokenPanel;
-  //UIView *_notLoggedInPanel;
-  UIScrollView *_notLoggedInPanel;
 }
 
 #pragma mark - Initializers
@@ -55,12 +52,6 @@
   return self;
 }
 
-#pragma mark - Dynamic Type Support
-
-- (void)changeTextSize:(NSNotification *)notification {
-  [self viewDidAppear:YES];
-}
-
 #pragma mark - View Controller Lifecyle
 
 - (void)viewDidLoad {
@@ -68,35 +59,26 @@
 #ifdef FP_DEV
   [self pdvDevEnable];
 #endif
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(changeTextSize:)
-                                               name:UIContentSizeCategoryDidChangeNotification
-                                             object:nil];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Settings"];
-  [self setAutomaticallyAdjustsScrollViewInsets:NO]; // http://stackoverflow.com/questions/6523205/uiscrollview-adjusts-contentoffset-when-contentsize-changes
 }
 
-- (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
+- (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
+  // I need this because if the user taps to views the splash screen, I
+  // set the the nav-bar as hidden, so when the user comes back, I need to
+  // make it re-appear
   [[self.navigationController navigationBar] setHidden:NO];
-  [_notLoggedInPanel removeFromSuperview];
-  [_doesHaveAuthTokenPanel removeFromSuperview];
+}
+
+#pragma mark - Make Content
+
+- (NSArray *)makeContent {
   if ([APP isUserLoggedIn]) {
-    [self makeDoesHaveAuthTokenPanel];
-    [PEUIUtils placeView:_doesHaveAuthTokenPanel
-                 atTopOf:[self view]
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:0.0
-                hpadding:0.0];
+    return [self makeDoesHaveAuthTokenContent];
   } else {
-    [self makeNotLoggedInPanel];
-    [PEUIUtils placeView:_notLoggedInPanel
-                 atTopOf:[self view]
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:0.0
-                hpadding:0.0];
+    return [self makeNotLoggedInContent];
   }
 }
 
@@ -209,9 +191,9 @@ click on your device, navigate to 'Apps' and scroll down to the 'File Sharing' s
                             viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
 }
 
-- (void)makeDoesHaveAuthTokenPanel {
+- (NSArray *)makeDoesHaveAuthTokenContent {
+  UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0];
   CGFloat labelLeftPadding = 8.0;
-  _doesHaveAuthTokenPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
   UIView *changelogMsgPanel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"\
 Keeps your device synchronized with your remote account in case you've made edits \
 and deletions on other devices."
@@ -219,7 +201,7 @@ and deletions on other devices."
                                                              backgroundColor:[UIColor clearColor]
                                                                    textColor:[UIColor darkGrayColor]
                                                          verticalTextPadding:3.0
-                                                                  fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0]
+                                                                  fitToWidth:contentPanel.frame.size.width - 15.0]
                                              padding:labelLeftPadding];
   UIButton *changelogBtn = [_uitoolkit systemButtonMaker](@"Download all changes", nil, nil);
   [PEUIUtils placeView:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"download-icon"]]
@@ -227,7 +209,7 @@ and deletions on other devices."
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               hpadding:15.0];
   [[changelogBtn layer] setCornerRadius:0.0];
-  [PEUIUtils setFrameWidthOfView:changelogBtn ofWidth:1.0 relativeTo:_doesHaveAuthTokenPanel];
+  [PEUIUtils setFrameWidthOfView:changelogBtn ofWidth:1.0 relativeTo:contentPanel];
   UIFont* boldDescFont = [PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline];
   [changelogBtn bk_addEventHandler:^(id sender) {
     MBProgressHUD *changelogHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
@@ -369,28 +351,29 @@ Enable offline mode if you are making many saves and you want them done instantl
                                                     backgroundColor:[UIColor clearColor]
                                                           textColor:[UIColor darkGrayColor]
                                                 verticalTextPadding:3.0
-                                                         fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0];
+                                                         fitToWidth:contentPanel.frame.size.width - 15.0];
   UIView *offlineModeDescPanelWithPad = [PEUIUtils leftPadView:offlineModeDescLabel padding:labelLeftPadding];
   UILabel *offlineModeLabel = [PEUIUtils labelWithKey:@"Offline mode"
                                                  font:[_uitoolkit fontForButtonsBlk]()
                                       backgroundColor:[UIColor clearColor]
                                             textColor:[UIColor blackColor]
                                   verticalTextPadding:3.0];
-  UIView *offlineModeSwitchPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:_doesHaveAuthTokenPanel fixedHeight:(offlineModeLabel.frame.size.height + [_uitoolkit verticalPaddingForButtons])];
+  UIView *offlineModeSwitchPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:contentPanel fixedHeight:(offlineModeLabel.frame.size.height + [_uitoolkit verticalPaddingForButtons])];
   [offlineModeSwitchPanel setBackgroundColor:[UIColor whiteColor]];
   [PEUIUtils placeView:offlineModeLabel inMiddleOf:offlineModeSwitchPanel withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:15.0];
   [PEUIUtils placeView:offlineModeSwitch inMiddleOf:offlineModeSwitchPanel withAlignment:PEUIHorizontalAlignmentTypeRight hpadding:15.0];
   
-  [PEUIUtils placeView:offlineModeSwitchPanel atTopOf:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:90.0 hpadding:0.0];
-  CGFloat totalHeight = offlineModeSwitchPanel.frame.size.height + 90;
-  [PEUIUtils placeView:offlineModeDescPanelWithPad below:offlineModeSwitchPanel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
+  // place the views on the contentPanel
+  [PEUIUtils placeView:offlineModeSwitchPanel atTopOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:FPContentPanelTopPadding hpadding:0.0];
+  CGFloat totalHeight = offlineModeSwitchPanel.frame.size.height + FPContentPanelTopPadding;
+  [PEUIUtils placeView:offlineModeDescPanelWithPad below:offlineModeSwitchPanel onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
   totalHeight += offlineModeDescPanelWithPad.frame.size.height + 4.0;
-  [PEUIUtils placeView:changelogBtn below:offlineModeDescPanelWithPad onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
+  [PEUIUtils placeView:changelogBtn below:offlineModeDescPanelWithPad onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
   totalHeight += changelogBtn.frame.size.height + 30.0;
-  [PEUIUtils placeView:changelogMsgPanel below:changelogBtn onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
+  [PEUIUtils placeView:changelogMsgPanel below:changelogBtn onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:4.0 hpadding:0.0];
   totalHeight += changelogMsgPanel.frame.size.height + 4.0;
   UIButton *exportBtn = [self makeExportButton];
-  [PEUIUtils placeView:exportBtn below:changelogMsgPanel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
+  [PEUIUtils placeView:exportBtn below:changelogMsgPanel onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
   totalHeight += exportBtn.frame.size.height + 30.0;
   UILabel *exportMsgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"From here you can export your Gas Jot data to files which you can then download from iTunes to your computer.\n\nTip: Before exporting, use the %@ button to \
 ensure this device has your latest Gas Jot data."
@@ -401,20 +384,18 @@ ensure this device has your latest Gas Jot data."
                                               backgroundColor:[UIColor clearColor]
                                                     textColor:[UIColor darkGrayColor]
                                           verticalTextPadding:3.0
-                                                   fitToWidth:_doesHaveAuthTokenPanel.frame.size.width - 15.0];
-  [PEUIUtils placeView:exportMsgLabel below:exportBtn onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:_doesHaveAuthTokenPanel vpadding:4.0 hpadding:8.0];
+                                                   fitToWidth:contentPanel.frame.size.width - 15.0];
+  [PEUIUtils placeView:exportMsgLabel below:exportBtn onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:contentPanel vpadding:4.0 hpadding:8.0];
   totalHeight += exportMsgLabel.frame.size.height + 4.0;
-  UIView *splashScreenPanel = [self makeSplashScreenPanelFitSubtitleToWidth:(_doesHaveAuthTokenPanel.frame.size.width - 15.0)];
-  [PEUIUtils placeView:splashScreenPanel below:exportMsgLabel onto:_doesHaveAuthTokenPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:_doesHaveAuthTokenPanel vpadding:35.0 hpadding:0.0];
+  UIView *splashScreenPanel = [self makeSplashScreenPanelFitSubtitleToWidth:(contentPanel.frame.size.width - 15.0)];
+  [PEUIUtils placeView:splashScreenPanel below:exportMsgLabel onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:contentPanel vpadding:35.0 hpadding:0.0];
   totalHeight += splashScreenPanel.frame.size.height + 35.0;
-  [PEUIUtils setFrameHeight:totalHeight ofView:_doesHaveAuthTokenPanel];
-  [_doesHaveAuthTokenPanel setDelaysContentTouches:NO];
-  [_doesHaveAuthTokenPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.7 * _doesHaveAuthTokenPanel.frame.size.height)];
-  [_doesHaveAuthTokenPanel setBounces:YES];
+  [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+  return @[contentPanel, @(NO), @(NO)];
 }
 
-- (void)makeNotLoggedInPanel {
-  _notLoggedInPanel = [[UIScrollView alloc] initWithFrame:self.view.frame];
+- (NSArray *)makeNotLoggedInContent {
+  UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0];
   ButtonMaker buttonMaker = [_uitoolkit systemButtonMaker];
   NSString *message = @"This action will permanently delete your Gas Jot data from this device.";
   UIView *messagePanel = [self leftPaddingMessageWithText:message];
@@ -422,39 +403,37 @@ ensure this device has your latest Gas Jot data."
   [[deleteAllDataBtn layer] setCornerRadius:0.0];
   [deleteAllDataBtn setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
   [PEUIUtils placeView:[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"red-exclamation-icon"]] inMiddleOf:deleteAllDataBtn withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:15.0];
-  [PEUIUtils setFrameWidthOfView:deleteAllDataBtn ofWidth:1.0 relativeTo:_notLoggedInPanel];
+  [PEUIUtils setFrameWidthOfView:deleteAllDataBtn ofWidth:1.0 relativeTo:contentPanel];
   // place views onto panel
   [PEUIUtils placeView:deleteAllDataBtn
-               atTopOf:_notLoggedInPanel
+               atTopOf:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:90.0
+              vpadding:FPContentPanelTopPadding
               hpadding:0];
-  CGFloat totalHeight = deleteAllDataBtn.frame.size.height + 90.0;
+  CGFloat totalHeight = deleteAllDataBtn.frame.size.height + FPContentPanelTopPadding;
   [PEUIUtils placeView:messagePanel
                  below:deleteAllDataBtn
-                  onto:_notLoggedInPanel
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
   totalHeight += messagePanel.frame.size.height + 4.0;
   UIButton *exportBtn = [self makeExportButton];
-  [PEUIUtils placeView:exportBtn below:messagePanel onto:_notLoggedInPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
+  [PEUIUtils placeView:exportBtn below:messagePanel onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
   totalHeight += exportBtn.frame.size.height + 30.0;
   UILabel *exportMsgLabel = [PEUIUtils labelWithAttributeText:[[NSAttributedString alloc] initWithString:@"From here you can export your Gas Jot data to files which you can then download from iTunes to your computer."]
                                                          font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                               backgroundColor:[UIColor clearColor]
                                                     textColor:[UIColor darkGrayColor]
                                           verticalTextPadding:3.0
-                                                   fitToWidth:_notLoggedInPanel.frame.size.width - 15.0];
-  [PEUIUtils placeView:exportMsgLabel below:exportBtn onto:_notLoggedInPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:_doesHaveAuthTokenPanel vpadding:4.0 hpadding:8.0];
+                                                   fitToWidth:contentPanel.frame.size.width - 15.0];
+  [PEUIUtils placeView:exportMsgLabel below:exportBtn onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:contentPanel vpadding:4.0 hpadding:8.0];
   totalHeight += exportMsgLabel.frame.size.height + 4.0;
-  UIView *splashScreenPanel = [self makeSplashScreenPanelFitSubtitleToWidth:(_notLoggedInPanel.frame.size.width - 15.0)];
-  [PEUIUtils placeView:splashScreenPanel below:exportMsgLabel onto:_notLoggedInPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:_notLoggedInPanel vpadding:35.0 hpadding:0.0];
+  UIView *splashScreenPanel = [self makeSplashScreenPanelFitSubtitleToWidth:(contentPanel.frame.size.width - 15.0)];
+  [PEUIUtils placeView:splashScreenPanel below:exportMsgLabel onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft alignmentRelativeToView:contentPanel vpadding:35.0 hpadding:0.0];
   totalHeight += splashScreenPanel.frame.size.height + 35.0;
-  [PEUIUtils setFrameHeight:totalHeight ofView:_notLoggedInPanel];
-  [_notLoggedInPanel setDelaysContentTouches:NO];
-  [_notLoggedInPanel setContentSize:CGSizeMake(self.view.frame.size.width, 1.4 * _notLoggedInPanel.frame.size.height)];
-  [_notLoggedInPanel setBounces:YES];
+  [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+  return @[contentPanel, @(YES), @(NO)];
 }
 
 #pragma mark - Clear All Data

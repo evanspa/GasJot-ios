@@ -51,8 +51,6 @@ NSInteger const FPChartPreviousYearIndex = 2;
   FPSiblingEntityCount _siblingCountBlk;
   FPComparisonScreenMaker _comparisonScreenMakerBlk;
   FPValueFormatter _valueFormatter;
-  //UIView *_contentView;
-  UIScrollView *_contentView;
 }
 
 #pragma mark - Initializers
@@ -269,9 +267,9 @@ NSInteger const FPChartPreviousYearIndex = 2;
   segmentedControl.selectedSegmentIndex = 0;
   segmentedControl.backgroundColor = [UIColor lightGrayColor];
   segmentedControl.titleTextAttributes = @{NSForegroundColorAttributeName : [UIColor darkGrayColor],
-                                           NSFontAttributeName : [UIFont systemFontOfSize:[UIFont systemFontSize]]};
+                                           NSFontAttributeName : [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]};
   segmentedControl.selectedTitleTextAttributes = @{NSForegroundColorAttributeName : [UIColor whiteColor],
-                                                   NSFontAttributeName : [UIFont boldSystemFontOfSize:16.0]};
+                                                   NSFontAttributeName : [PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]};
   segmentedControl.selectionIndicatorColor = [UIColor fpAppBlue];
   segmentedControl.selectionIndicatorBoxOpacity = 0.0;
   segmentedControl.selectionStyle = HMSegmentedControlSelectionStyleBox;
@@ -308,7 +306,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
     });
   }];
   UILabel *trendLabel = [PEUIUtils labelWithKey:@"TREND"
-                                           font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
+                                           font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                 backgroundColor:[UIColor clearColor]
                                       textColor:[UIColor darkGrayColor]
                             verticalTextPadding:3.0];
@@ -319,40 +317,27 @@ NSInteger const FPChartPreviousYearIndex = 2;
   return @[panel, lineChartView];
 }
 
-#pragma mark - View controller lifecycle
+#pragma mark - Make Content
 
-- (void)viewDidLoad {
-  [super viewDidLoad];
-  [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
-  [self setTitle:_screenTitle];
-  [self setAutomaticallyAdjustsScrollViewInsets:NO];
-  
-  _tooltipView = [[JBChartTooltipView alloc] init];
-  _tooltipTipView = [[JBChartTooltipTipView alloc] init];
-  [_tooltipView setBackgroundColor:[UIColor blackColor]];
-  
-  _contentView = [[UIScrollView alloc] initWithFrame:self.view.frame];
-  [_contentView setContentSize:CGSizeMake(self.view.frame.size.width, 1.30 * self.view.frame.size.height)];
-  [_contentView setBounces:YES];
-  //_contentView = [PEUIUtils panelWithFixedWidth:self.view.frame.size.width fixedHeight:self.view.frame.size.height];
-  
+- (NSArray *)makeContent {
+  UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0.0];
   UILabel *entityLabel = nil;
   if (_entityTypeLabelText && _entityNameBlk && _entity) {
     NSString *entityName = [FPUtils truncatedText:_entityNameBlk(_entity) maxLength:27];
     NSAttributedString *entityHeaderText = [PEUIUtils attributedTextWithTemplate:[[NSString stringWithFormat:@"%@: ", _entityTypeLabelText] stringByAppendingString:@"%@"]
                                                                     textToAccent:entityName
-                                                                  accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                                  accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]
                                                                  accentTextColor:[UIColor fpAppBlue]];
     entityLabel = [PEUIUtils labelWithAttributeText:entityHeaderText
-                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                           fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                               font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
+                           fontForHeightCalculation:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor darkGrayColor]
                                 verticalTextPadding:3.0
                                          fitToWidth:self.view.frame.size.width - 15.0];
   } else if (_entityTypeLabelText) {
     entityLabel = [PEUIUtils labelWithKey:_entityTypeLabelText
-                                     font:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                     font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]
                           backgroundColor:[UIColor clearColor]
                                 textColor:[UIColor fpAppBlue]
                       verticalTextPadding:3.0
@@ -373,36 +358,41 @@ NSInteger const FPChartPreviousYearIndex = 2;
     });
   }
   // place the views
+  CGFloat totalHeight = 0.0;
   if (entityLabel) {
     [PEUIUtils placeView:entityLabel
-                 atTopOf:_contentView
+                 atTopOf:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:75.0 //13.0 (use '13.0' when _contentView is a scroll view); use 75.0 when not a scroll view
+                vpadding:FPContentPanelTopPadding
                 hpadding:8.0];
+    totalHeight += entityLabel.frame.size.height + FPContentPanelTopPadding;
     [PEUIUtils placeView:_aggregatesTable
                    below:entityLabel
-                    onto:_contentView
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
- alignmentRelativeToView:_contentView
+ alignmentRelativeToView:contentPanel
                 vpadding:4.0
                 hpadding:0.0];
+    totalHeight += _aggregatesTable.frame.size.height + 4.0;
   } else {
     [PEUIUtils placeView:_aggregatesTable
-                 atTopOf:_contentView
+                 atTopOf:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:75.0 //13.0 (use '13.0' when _contentView is a scroll view); use 75.0 when not a scroll view
+                vpadding:FPContentPanelTopPadding
                 hpadding:0.0];
+    totalHeight += _aggregatesTable.frame.size.height + FPContentPanelTopPadding;
   }
   UIView *aboveView = _aggregatesTable;
   if (lineChartPanel) {
     aboveView = lineChartPanel;
     [PEUIUtils placeView:lineChartPanel
                    below:_aggregatesTable
-                    onto:_contentView
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
  alignmentRelativeToView:self.view
                 vpadding:10.0
                 hpadding:0.0];
+    totalHeight += lineChartPanel.frame.size.height + 10.0;
   }
   if (_siblingCountBlk && _siblingCountBlk() > 1) {
     UIButton *compareBtn = [_uitoolkit systemButtonMaker](_compareButtonTitleText, nil, nil);
@@ -414,12 +404,26 @@ NSInteger const FPChartPreviousYearIndex = 2;
     } forControlEvents:UIControlEventTouchUpInside];
     [PEUIUtils placeView:compareBtn
                    below:aboveView
-                    onto:_contentView
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:8.0
                 hpadding:0.0];
+    totalHeight += compareBtn.frame.size.height + 8.0;
   }
-  [PEUIUtils placeView:_contentView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+  [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+  return @[contentPanel, @(YES), @(NO)];
+}
+
+#pragma mark - View controller lifecycle
+
+- (void)viewDidLoad {
+  [super viewDidLoad];
+  [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
+  [self setTitle:_screenTitle];
+  
+  _tooltipView = [[JBChartTooltipView alloc] init];
+  _tooltipTipView = [[JBChartTooltipTipView alloc] init];
+  [_tooltipView setBackgroundColor:[UIColor blackColor]];
 }
 
 - (void)viewDidAppear:(BOOL)animated {

@@ -23,8 +23,6 @@
   FPEntityNameBlk _entityNameBlk;
   id _entity;
   NSArray *(^_statLaunchButtonsBlk)(void);
-  UIView *_contentView;
-  UIScrollView *_scrollView;
 }
 
 #pragma mark - Initializers
@@ -47,19 +45,19 @@
   return self;
 }
 
-#pragma mark - Helpers
+#pragma mark - Make Content
 
-- (UIView *)makeContentPanel {
+- (NSArray *)makeContent {
   UILabel *entityLabel = nil;
   if (_entityNameBlk) {
     NSString *entityName = [FPUtils truncatedText:_entityNameBlk(_entity) maxLength:27];
     NSAttributedString *entityHeaderText = [PEUIUtils attributedTextWithTemplate:[[NSString stringWithFormat:@"%@: ", _entityTypeLabelText] stringByAppendingString:@"%@"]
                                                                     textToAccent:entityName
-                                                                  accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                                  accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]
                                                                  accentTextColor:[UIColor fpAppBlue]];
     entityLabel = [PEUIUtils labelWithAttributeText:entityHeaderText
-                                               font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                           fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                               font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
+                           fontForHeightCalculation:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]
                                     backgroundColor:[UIColor clearColor]
                                           textColor:[UIColor darkGrayColor]
                                 verticalTextPadding:3.0
@@ -89,8 +87,8 @@
         if (statLaunchButtonArray.count > 2) {
           NSAttributedString *descriptionAttrText = statLaunchButtonArray[2];
           descriptionLabel = [PEUIUtils labelWithAttributeText:descriptionAttrText
-                                                          font:[UIFont systemFontOfSize:[UIFont systemFontSize]]
-                                      fontForHeightCalculation:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]
+                                                          font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
+                                      fontForHeightCalculation:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]
                                                backgroundColor:[UIColor clearColor]
                                                      textColor:[UIColor darkGrayColor]
                                            verticalTextPadding:3.0
@@ -113,10 +111,11 @@
     } else if ([statLaunchButtonElement isKindOfClass:[NSString class]]) {
       NSString *groupHeadingText = statLaunchButtonElement;
       UIView *groupHeadingLabel = [PEUIUtils leftPadView:[PEUIUtils labelWithKey:groupHeadingText
-                                                                            font:[UIFont boldSystemFontOfSize:14.0]
+                                                                            font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                                                  backgroundColor:[UIColor clearColor]
                                                                        textColor:[UIColor fpAppBlue]
-                                                             verticalTextPadding:3.0]
+                                                             verticalTextPadding:3.0
+                                                                      fitToWidth:self.view.frame.size.width - 15.0]
                                                  padding:8.0];
       [viewColumn addObject:groupHeadingLabel];
     } else if ([statLaunchButtonElement isKindOfClass:[UIView class]]) {
@@ -131,9 +130,12 @@
     [views addObject:[PEUIUtils leftPadView:entityLabel padding:8.0]];
   }
   [views addObject:buttonsPanel];
-  return [PEUIUtils panelWithColumnOfViews:views
-               verticalPaddingBetweenViews:15.0
-                            viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
+  UIView *panel = [PEUIUtils panelWithColumnOfViews:views
+                        verticalPaddingBetweenViews:15.0
+                                     viewsAlignment:PEUIHorizontalAlignmentTypeLeft];
+  UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:panel.frame.size.height + FPContentPanelTopPadding];
+  [PEUIUtils placeView:panel atBottomOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+  return @[contentPanel, @(YES), @(NO)];
 }
 
 #pragma mark - View controller lifecycle
@@ -142,23 +144,6 @@
   [super viewDidLoad];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   [self setTitle:_screenTitle];
-  _contentView = [self makeContentPanel];
-  _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
-  [_scrollView setBounces:YES];
-  [_scrollView setDelaysContentTouches:YES];
-  [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.20 * (_contentView.frame.origin.y + _contentView.frame.size.height))];
-  [PEUIUtils placeView:_contentView atTopOf:_scrollView withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
-  [PEUIUtils placeView:_scrollView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:13.0 hpadding:0.0];
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
-  CGRect contentViewFrame = _contentView.frame;
-  [_contentView removeFromSuperview];
-  _contentView = [self makeContentPanel];
-  _contentView.frame = CGRectMake(contentViewFrame.origin.x, contentViewFrame.origin.y, contentViewFrame.size.width, _contentView.frame.size.height);
-  [_scrollView setContentSize:CGSizeMake(_scrollView.frame.size.width, 1.125 * (_contentView.frame.origin.y + _contentView.frame.size.height))];
-  [_scrollView addSubview:_contentView];
 }
 
 @end

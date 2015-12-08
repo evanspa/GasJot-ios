@@ -29,16 +29,13 @@
   NSString *_cellIdentifier;
   NSMutableArray *_dataSource;
   PEPageLoaderBlk _pageLoaderBlk;
-  CGFloat _heightForCells;
+  CGFloat (^_heightForCellsBlk)(void);
   FPDetailViewMaker _detailViewMaker;
   PEUIToolkit *_uitoolkit;
   NSIndexPath *_indexPathOfRemovedEntity;
   PEDoesEntityBelongToListView _doesEntityBelongToThisListView;
   PEWouldBeIndexOfEntity _wouldBeIndexOfEntity;
   BOOL _isPaginatedDataSource;
-  //NSMutableArray *_errorsForDelete;
-  //NSMutableArray *_successMessageTitlesForDelete;
-  //BOOL _receivedAuthReqdErrorOnDeleteAttempt;
   PEIsLoggedInBlk _isUserLoggedIn;
   PEIsAuthenticatedBlk _isAuthenticatedBlk;
   PEItemChildrenCounter _itemChildrenCounter;
@@ -59,7 +56,7 @@
                         cellIdentifier:(NSString *)cellIdentifier
                         initialObjects:(NSArray *)initialObjects
                             pageLoader:(PEPageLoaderBlk)pageLoaderBlk
-                        heightForCells:(CGFloat)heightForCells
+                     heightForCellsBlk:(CGFloat(^)(void))heightForCellsBlk
                        detailViewMaker:(FPDetailViewMaker)detailViewMaker
                              uitoolkit:(PEUIToolkit *)uitoolkit
         doesEntityBelongToThisListView:(PEDoesEntityBelongToListView)doesEntityBelongToThisListView
@@ -83,7 +80,7 @@
     _addItemAction = addItemActionBlk;
     _cellIdentifier = cellIdentifier;
     _pageLoaderBlk = pageLoaderBlk;
-    _heightForCells = heightForCells;
+    _heightForCellsBlk = heightForCellsBlk;
     _detailViewMaker = detailViewMaker;
     _uitoolkit = uitoolkit;
     _dataSource = [NSMutableArray array];
@@ -459,7 +456,7 @@
   NSAttributedString *attrBecameUnauthMessage =
   [PEUIUtils attributedTextWithTemplate:@"It appears you are no longer authenticated.  To re-authenticate, go to:\n\n%@."
                            textToAccent:@"Account \u2794 Re-authenticate"
-                         accentTextFont:[UIFont boldSystemFontOfSize:[UIFont systemFontSize]]];
+                         accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]];
   return [PEUIUtils warningAlertSectionWithMsgs:nil
                                           title:@"Authentication failure."
                                alertDescription:attrBecameUnauthMessage
@@ -796,7 +793,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
 - (CGFloat)tableView:(UITableView *)tableView
 heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-  return _heightForCells;
+  return _heightForCellsBlk();
 }
 
 - (void)tableView:(UITableView *)tableView

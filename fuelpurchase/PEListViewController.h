@@ -34,7 +34,7 @@ UITableViewDelegate, MBProgressHUDDelegate>
                         cellIdentifier:(NSString *)cellIdentifier
                         initialObjects:(NSArray *)initialObjects
                             pageLoader:(PEPageLoaderBlk)pageLoaderBlk
-                        heightForCells:(CGFloat)heightForCells
+                     heightForCellsBlk:(CGFloat(^)(void))heightForCellsBlk
                        detailViewMaker:(FPDetailViewMaker)detailViewMaker
                              uitoolkit:(PEUIToolkit *)uitoolkit
         doesEntityBelongToThisListView:(PEDoesEntityBelongToListView)doesEntityBelongToThisListView

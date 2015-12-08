@@ -11,8 +11,9 @@
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
+#import "PECustomController.h"
 
-@interface FPAccountController : UIViewController <MBProgressHUDDelegate>
+@interface FPAccountController : PECustomController <MBProgressHUDDelegate>
 
 #pragma mark - Initializers
 

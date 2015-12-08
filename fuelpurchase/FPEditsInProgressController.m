@@ -23,17 +23,6 @@
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
-  UIScrollView *_scrollView;
-  UIView *_eipsMessagePanel;
-  UIView *_noEipsMessagePanel;
-  UIView *_syncAllMessage;
-  // buttons
-  UIButton *_vehiclesButton;
-  UIButton *_fuelStationsButton;
-  UIButton *_envlogsButton;
-  UIButton *_fplogsButton;
-  UIButton *_syncAllButton;
-  CGPoint _scrollContentOffset;
 }
 
 #pragma mark - Initializers
@@ -86,7 +75,7 @@ mode."
 - (UIView *)paddedNoEipsInfoMessage {
   CGFloat leftPadding = 8.0;
   UILabel *infoMsgLabel = [PEUIUtils labelWithKey:@"You currently have no unsynced items."
-                                             font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle1] //[UIFont boldSystemFontOfSize:16.0]
+                                             font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle1]
                                   backgroundColor:[UIColor clearColor]
                                         textColor:[UIColor darkGrayColor]
                               verticalTextPadding:3.0
@@ -94,12 +83,9 @@ mode."
   return [PEUIUtils leftPadView:infoMsgLabel padding:leftPadding];
 }
 
-- (void)makeContentPanel {
-  _eipsMessagePanel = [self paddedEipsInfoMessage];
-  _noEipsMessagePanel = [self paddedNoEipsInfoMessage];
-  _syncAllMessage = [self syncAllInfoMessage];
-  
-  // get the EIP numbers
+#pragma mark - Make Content
+
+- (NSArray *)makeContent {
   NSInteger numEipVehicles = [_coordDao numUnsyncedVehiclesForUser:_user];
   NSInteger numEipFuelStations = [_coordDao numUnsyncedFuelStationsForUser:_user];
   NSInteger numEipFpLogs = [_coordDao numUnsyncedFuelPurchaseLogsForUser:_user];
@@ -108,202 +94,162 @@ mode."
   NSInteger totalNumSyncNeeded = [_coordDao totalNumSyncNeededEntitiesForUser:_user];
   UIColor *eipBadgeColor = [UIColor orangeColor];
   UIColor *eipBadgeTextColor = [UIColor blackColor];
-  _vehiclesButton = nil;
+  UIButton *vehiclesButton = nil;
   if (numEipVehicles > 0) {
-    _vehiclesButton = [PEUIUtils buttonWithLabel:@"Vehicles"
+    vehiclesButton = [PEUIUtils buttonWithLabel:@"Vehicles"
                                         badgeNum:numEipVehicles
                                       badgeColor:eipBadgeColor
                                   badgeTextColor:eipBadgeTextColor
                                addDisclosureIcon:YES
                                          handler:^{
-                                           _scrollContentOffset = _scrollView.contentOffset;
                                            [PEUIUtils displayController:[_screenToolkit newViewUnsyncedVehiclesScreenMaker](_user)
                                                          fromController:self
                                                                animated:YES]; }
                                        uitoolkit:_uitoolkit
                                   relativeToView:self.view];
   }
-  _fuelStationsButton = nil;
+  UIButton *fuelStationsButton = nil;
   if (numEipFuelStations > 0) {
-    _fuelStationsButton = [PEUIUtils buttonWithLabel:@"Gas Stations"
+    fuelStationsButton = [PEUIUtils buttonWithLabel:@"Gas Stations"
                                             badgeNum:numEipFuelStations
                                           badgeColor:eipBadgeColor
                                       badgeTextColor:eipBadgeTextColor
                                    addDisclosureIcon:YES
                                              handler:^{
-                                               _scrollContentOffset = _scrollView.contentOffset;
                                                [PEUIUtils displayController:[_screenToolkit newViewUnsyncedFuelStationsScreenMaker](_user)
                                                              fromController:self
                                                                    animated:YES]; }
                                            uitoolkit:_uitoolkit
                                       relativeToView:self.view];
   }
-  _fplogsButton = nil;
+  UIButton *fplogsButton = nil;
   if (numEipFpLogs > 0) {
-    _fplogsButton = [PEUIUtils buttonWithLabel:@"Gas Logs"
+    fplogsButton = [PEUIUtils buttonWithLabel:@"Gas Logs"
                                       badgeNum:numEipFpLogs
                                     badgeColor:eipBadgeColor
                                 badgeTextColor:eipBadgeTextColor
                              addDisclosureIcon:YES
                                        handler:^{
-                                         _scrollContentOffset = _scrollView.contentOffset;
                                          [PEUIUtils displayController:[_screenToolkit newViewUnsyncedFuelPurchaseLogsScreenMaker](_user)
                                                        fromController:self
                                                              animated:YES]; }
                                      uitoolkit:_uitoolkit
                                 relativeToView:self.view];
   }
-  _envlogsButton = nil;
+  UIButton *envlogsButton = nil;
   if (numEipEnvLogs > 0) {
-    _envlogsButton = [PEUIUtils buttonWithLabel:@"Odometer Logs"
+    envlogsButton = [PEUIUtils buttonWithLabel:@"Odometer Logs"
                                        badgeNum:numEipEnvLogs
                                      badgeColor:eipBadgeColor
                                  badgeTextColor:eipBadgeTextColor
                               addDisclosureIcon:YES
                                         handler:^{
-                                          _scrollContentOffset = _scrollView.contentOffset;
                                           [PEUIUtils displayController:[_screenToolkit newViewUnsyncedEnvironmentLogsScreenMaker](_user)
                                                         fromController:self
                                                               animated:YES]; }
                                       uitoolkit:_uitoolkit
                                  relativeToView:self.view];
   }
-  _syncAllButton = nil;
+  UIButton *syncAllButton = nil;
   if (totalNumSyncNeeded > 0) {
-    _syncAllButton = [PEUIUtils buttonWithLabel:@"Upload All"
-                                       badgeNum:totalNumSyncNeeded
-                                     badgeColor:[UIColor fpAppBlue]
-                                 badgeTextColor:[UIColor whiteColor]
-                              addDisclosureIcon:NO
-                                        handler:^{
-                                          [self syncAll];
-                                        }
-                                      uitoolkit:_uitoolkit
-                                 relativeToView:self.view];
+    syncAllButton = [PEUIUtils buttonWithLabel:@"Upload All"
+                                      badgeNum:totalNumSyncNeeded
+                                    badgeColor:[UIColor fpAppBlue]
+                                badgeTextColor:[UIColor whiteColor]
+                             addDisclosureIcon:NO
+                                       handler:^{
+                                         [self syncAll];
+                                       }
+                                     uitoolkit:_uitoolkit
+                                relativeToView:self.view];
   }
   // place the views
   UIView *messagePanel;
   if (totalNumEips > 0) {
-    messagePanel = _eipsMessagePanel;
+    messagePanel = [self paddedEipsInfoMessage];
   } else {
-    messagePanel = _noEipsMessagePanel;
+    messagePanel = [self paddedNoEipsInfoMessage];
   }
-  _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
+  UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0];
   [PEUIUtils placeView:messagePanel
-               atTopOf:_scrollView //self.view
+               atTopOf:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:75.0
+              vpadding:FPContentPanelTopPadding
               hpadding:0.0];
-  CGFloat totalHeight = messagePanel.frame.size.height + 75.0;
+  CGFloat totalHeight = messagePanel.frame.size.height + FPContentPanelTopPadding;
   UIView *topView = messagePanel;
-  if (_vehiclesButton) {
-    [PEUIUtils placeView:_vehiclesButton
+  if (vehiclesButton) {
+    [PEUIUtils placeView:vehiclesButton
                    below:topView
-                    onto:_scrollView //self.view
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:7.0
                 hpadding:0.0];
-    topView = _vehiclesButton;
-    totalHeight += _vehiclesButton.frame.size.height + 7.0;
+    topView = vehiclesButton;
+    totalHeight += vehiclesButton.frame.size.height + 7.0;
   }
-  if (_fuelStationsButton) {
-    [PEUIUtils placeView:_fuelStationsButton
+  if (fuelStationsButton) {
+    [PEUIUtils placeView:fuelStationsButton
                    below:topView
-                    onto:_scrollView //self.view
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:7.0
                 hpadding:0.0];
-    topView = _fuelStationsButton;
-    totalHeight += _fuelStationsButton.frame.size.height + 7.0;
+    topView = fuelStationsButton;
+    totalHeight += fuelStationsButton.frame.size.height + 7.0;
   }
-  if (_fplogsButton) {
-    [PEUIUtils placeView:_fplogsButton
+  if (fplogsButton) {
+    [PEUIUtils placeView:fplogsButton
                    below:topView
-                    onto:_scrollView //self.view
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:7.0
                 hpadding:0.0];
-    topView = _fplogsButton;
-    totalHeight += _fplogsButton.frame.size.height + 7.0;
+    topView = fplogsButton;
+    totalHeight += fplogsButton.frame.size.height + 7.0;
   }
-  if (_envlogsButton) {
-    [PEUIUtils placeView:_envlogsButton
+  if (envlogsButton) {
+    [PEUIUtils placeView:envlogsButton
                    below:topView
-                    onto:_scrollView //self.view
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:7.0
                 hpadding:0.0];
-    topView = _envlogsButton;
-    totalHeight += _envlogsButton.frame.size.height + 7.0;
+    topView = envlogsButton;
+    totalHeight += envlogsButton.frame.size.height + 7.0;
   }
   if (totalNumSyncNeeded > 0 && [APP doesUserHaveValidAuthToken]) {
     CGFloat vpadding = self.view.frame.size.height * 0.3;
-    [PEUIUtils placeView:_syncAllButton
-              atBottomOf:_scrollView //self.view
+    [PEUIUtils placeView:syncAllButton
+              atBottomOf:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:vpadding
                 hpadding:0.0];
-    totalHeight += _syncAllButton.frame.size.height + vpadding;
-    [PEUIUtils placeView:_syncAllMessage
-                   below:_syncAllButton
-                    onto:_scrollView //self.view
+    totalHeight += syncAllButton.frame.size.height + vpadding;
+    UIView *syncAllMessage = [self syncAllInfoMessage];
+    [PEUIUtils placeView:syncAllMessage
+                   below:syncAllButton
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:5.0
                 hpadding:0.0];
-    topView = _syncAllButton;
-    totalHeight += _syncAllMessage.frame.size.height + 5.0;
+    topView = syncAllButton;
+    totalHeight += syncAllMessage.frame.size.height + 5.0;
   }
-  if (totalHeight <= self.view.frame.size.height) {
-    [PEUIUtils setFrameHeight:self.view.frame.size.height ofView:_scrollView];
-     [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.3 * _scrollView.frame.size.height)];
-  } else {
-    [PEUIUtils setFrameHeight:totalHeight ofView:_scrollView];
-     [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.6 * _scrollView.frame.size.height)];
-  }
-  [_scrollView setDelaysContentTouches:NO];
-  [_scrollView setBounces:YES];
-  [PEUIUtils placeView:_scrollView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];  
-}
-
-#pragma mark - Dynamic Type Support
-
-- (void)changeTextSize:(NSNotification *)notification {
-  [self viewDidAppear:YES];
+  [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+  return @[contentPanel, @(YES), @(NO)];
 }
 
 #pragma mark - View Controller Lifecyle
-
-- (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:YES];
-  [_eipsMessagePanel removeFromSuperview];
-  [_noEipsMessagePanel removeFromSuperview];
-  [_vehiclesButton removeFromSuperview];
-  [_fuelStationsButton removeFromSuperview];
-  [_fplogsButton removeFromSuperview];
-  [_envlogsButton removeFromSuperview];
-  [_syncAllMessage removeFromSuperview];
-  [_syncAllButton removeFromSuperview];
-  [_scrollView removeFromSuperview];
-  [self makeContentPanel];
-  [_scrollView setContentOffset:_scrollContentOffset animated:NO];
-}
 
 - (void)viewDidLoad {
   [super viewDidLoad];
 #ifdef FP_DEV
   [self pdvDevEnable];
 #endif
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(changeTextSize:)
-                                               name:UIContentSizeCategoryDidChangeNotification
-                                             object:nil];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Unsynced Edits"];
-  [self setAutomaticallyAdjustsScrollViewInsets:NO];
-  [self makeContentPanel];
-  [PEUIUtils placeView:_scrollView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
-  _scrollContentOffset = _scrollView.contentOffset;
 }
 
 - (void)syncAll {

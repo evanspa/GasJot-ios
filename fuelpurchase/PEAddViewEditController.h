@@ -106,7 +106,7 @@ typedef void (^PEItemDeleter)(UIViewController *,
 typedef void (^PEItemLocalDeleter)(UIViewController *, id, NSIndexPath *);
 typedef void (^PEItemAddedBlk)(PEAddViewEditController *, id);
 typedef void (^PEItemChangedBlk)(id, NSIndexPath *);
-typedef void (^PEPrepareUIForUserInteractionBlk)(UIView *);
+typedef void (^PEPrepareUIForUserInteractionBlk)(PEAddViewEditController *, UIView *);
 typedef void (^PEViewDidAppearBlk)(PEAddViewEditController *);
 typedef NSArray *(^PEEntityValidatorBlk)(UIView *);
 typedef NSArray *(^PEMessagesFromErrMask)(NSInteger);
@@ -114,7 +114,7 @@ typedef void (^PEModalOperationStarted)(void);
 typedef void (^PEModalOperationDone)(void);
 typedef JGActionSheetSection *(^PEAddlContentSection)(PEAddViewEditController *, UIView *, id);
 
-@interface PEAddViewEditController : UIViewController <MBProgressHUDDelegate>
+@interface PEAddViewEditController : UIViewController <MBProgressHUDDelegate, UIScrollViewDelegate>
 
 #pragma mark - Initializers
 
@@ -272,5 +272,13 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
 @property (readonly, nonatomic) PEEntityToPanelBinderBlk entityToPanelBinder;
 
 @property (nonatomic) UIView *entityFormPanel;
+
+@property (nonatomic) CGPoint scrollContentOffset;
+
+@property (nonatomic) BOOL hasPoppedKeyboard;
+
+#pragma mark - Reset Scroll Offset
+
+- (void)resetScrollOffset;
 
 @end

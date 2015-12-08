@@ -10,8 +10,9 @@
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
 #import "FPCommonStatControllerConstants.h"
+#import "PECustomController.h"
 
-@interface FPCommonStatsLaunchController : UIViewController
+@interface FPCommonStatsLaunchController : PECustomController
 
 #pragma mark - Initializers
 

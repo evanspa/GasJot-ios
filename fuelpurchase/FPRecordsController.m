@@ -19,14 +19,7 @@
   PEUIToolkit *_uitoolkit;
   FPUser *_user;
   FPScreenToolkit *_screenToolkit;
-  UIView *_msgPanel;
-  UIButton *_vehiclesBtn;
-  UIButton *_fuelstationsBtn;
-  UIButton *_fplogsBtn;
-  UIButton *_envlogsBtn;
   UIButton *_unsyncedEditsBtn;
-  UIScrollView *_scrollView;
-  CGPoint _scrollContentOffset;
 }
 
 #pragma mark - Initializers
@@ -45,151 +38,133 @@
   return self;
 }
 
-#pragma mark - Dynamic Type Support
+#pragma mark - Make Content
 
-- (void)changeTextSize:(NSNotification *)notification {
-  [self viewDidAppear:YES];
-}
-
-#pragma mark - View Controller Lifecycle
-
-- (void)viewDidLoad {
-  [super viewDidLoad];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(changeTextSize:)
-                                               name:UIContentSizeCategoryDidChangeNotification
-                                             object:nil];
-  [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
-  UINavigationItem *navItem = [self navigationItem];
-  [navItem setTitle:@"Data Records"];
-  [self setAutomaticallyAdjustsScrollViewInsets:NO];
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
-  [_vehiclesBtn removeFromSuperview];
-  [_fuelstationsBtn removeFromSuperview];
-  [_fplogsBtn removeFromSuperview];
-  [_envlogsBtn removeFromSuperview];
-  [_scrollView removeFromSuperview];
-  
+- (NSArray *)makeContent {
+  UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0.0];
   CGFloat leftPadding = 8.0;
-  _msgPanel =  [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into all of your data records."
+  UIView *msgPanel =  [PEUIUtils leftPadView:[PEUIUtils labelWithKey:@"From here you can drill into all of your data records."
                                                          font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                               backgroundColor:[UIColor clearColor]
                                                     textColor:[UIColor darkGrayColor]
                                           verticalTextPadding:3.0
                                                    fitToWidth:self.view.frame.size.width - (leftPadding + 3.0)]
                               padding:leftPadding];
-  _vehiclesBtn = [PEUIUtils buttonWithLabel:@"Vehicles"
-                               tagForButton:nil
-                                recordCount:[_coordDao numVehiclesForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
-                     tagForRecordCountLabel:nil
-                          addDisclosureIcon:YES
-                                    handler:^{
-                                      _scrollContentOffset = _scrollView.contentOffset;
-                                      [PEUIUtils displayController:[_screenToolkit newViewVehiclesScreenMaker](_user)
-                                                    fromController:self
-                                                          animated:YES];
-                                    }
-                                  uitoolkit:_uitoolkit
-                             relativeToView:self.view];
-  _fuelstationsBtn = [PEUIUtils buttonWithLabel:@"Gas stations"
+  UIButton *vehiclesBtn = [PEUIUtils buttonWithLabel:@"Vehicles"
+                                        tagForButton:nil
+                                         recordCount:[_coordDao numVehiclesForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
+                              tagForRecordCountLabel:nil
+                                   addDisclosureIcon:YES
+                           addlVerticalButtonPadding:10.0
+                        recordCountFromBottomPadding:2.0
+                              recordCountLeftPadding:6.0
+                                             handler:^{
+                                               [PEUIUtils displayController:[_screenToolkit newViewVehiclesScreenMaker](_user)
+                                                             fromController:self
+                                                                   animated:YES];
+                                             }
+                                           uitoolkit:_uitoolkit
+                                      relativeToView:self.view];
+  UIButton *fuelstationsBtn = [PEUIUtils buttonWithLabel:@"Gas stations"
                                    tagForButton:nil
                                     recordCount:[_coordDao numFuelStationsForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
                          tagForRecordCountLabel:nil
                               addDisclosureIcon:YES
+                               addlVerticalButtonPadding:10.0
+                            recordCountFromBottomPadding:2.0
+                                  recordCountLeftPadding:6.0
                                         handler:^{
-                                          _scrollContentOffset = _scrollView.contentOffset;
                                           [PEUIUtils displayController:[_screenToolkit newViewFuelStationsScreenMaker](_user)
                                                         fromController:self
                                                               animated:YES];
                                         }
                                       uitoolkit:_uitoolkit
                                  relativeToView:self.view];
-  _fplogsBtn = [PEUIUtils buttonWithLabel:@"Gas logs"
+  UIButton *fplogsBtn = [PEUIUtils buttonWithLabel:@"Gas logs"
                              tagForButton:nil
                               recordCount:[_coordDao numFuelPurchaseLogsForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
                    tagForRecordCountLabel:nil
                         addDisclosureIcon:YES
+                         addlVerticalButtonPadding:10.0
+                      recordCountFromBottomPadding:2.0
+                            recordCountLeftPadding:6.0
                                   handler:^{
-                                    _scrollContentOffset = _scrollView.contentOffset;
                                     [PEUIUtils displayController:[_screenToolkit newViewFuelPurchaseLogsScreenMaker](_user)
                                                   fromController:self
                                                         animated:YES];
                                   }
                                 uitoolkit:_uitoolkit
                            relativeToView:self.view];
-  _envlogsBtn = [PEUIUtils buttonWithLabel:@"Odometer logs"
+  UIButton *envlogsBtn = [PEUIUtils buttonWithLabel:@"Odometer logs"
                               tagForButton:nil
                                recordCount:[_coordDao numEnvironmentLogsForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()]
                     tagForRecordCountLabel:nil
                          addDisclosureIcon:YES
+                          addlVerticalButtonPadding:10.0
+                       recordCountFromBottomPadding:2.0
+                             recordCountLeftPadding:6.0
                                    handler:^{
-                                     _scrollContentOffset = _scrollView.contentOffset;
-                                    [PEUIUtils displayController:[_screenToolkit newViewEnvironmentLogsScreenMaker](_user)
-                                                  fromController:self
-                                                        animated:YES];
-                                  }
+                                     [PEUIUtils displayController:[_screenToolkit newViewEnvironmentLogsScreenMaker](_user)
+                                                   fromController:self
+                                                         animated:YES];
+                                   }
                                  uitoolkit:_uitoolkit
                             relativeToView:self.view];
-  _scrollView = [[UIScrollView alloc] initWithFrame:self.view.frame];
-  [PEUIUtils placeView:_msgPanel
-               atTopOf:_scrollView
+  [PEUIUtils placeView:msgPanel
+               atTopOf:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:75.0
+              vpadding:FPContentPanelTopPadding
               hpadding:0.0];
-  CGFloat totalHeight = _msgPanel.frame.size.height + 75.0;
-  [PEUIUtils placeView:_vehiclesBtn
-                 below:_msgPanel
-                  onto:_scrollView //self.view
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:10.0
-              hpadding:0.0];
-  totalHeight += _vehiclesBtn.frame.size.height + 10.0;
-  [PEUIUtils placeView:_fuelstationsBtn
-                 below:_vehiclesBtn
-                  onto:_scrollView //self.view
+  CGFloat totalHeight = msgPanel.frame.size.height + FPContentPanelTopPadding;
+  [PEUIUtils placeView:vehiclesBtn
+                 below:msgPanel
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:10.0
               hpadding:0.0];
-  totalHeight += _fuelstationsBtn.frame.size.height + 10.0;
-  [PEUIUtils placeView:_fplogsBtn
-                 below:_fuelstationsBtn
-                  onto:_scrollView //self.view
+  totalHeight += vehiclesBtn.frame.size.height + 10.0;
+  [PEUIUtils placeView:fuelstationsBtn
+                 below:vehiclesBtn
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:10.0
               hpadding:0.0];
-  totalHeight += _fplogsBtn.frame.size.height + 10.0;
-  [PEUIUtils placeView:_envlogsBtn
-                 below:_fplogsBtn
-                  onto:_scrollView //self.view
+  totalHeight += fuelstationsBtn.frame.size.height + 10.0;
+  [PEUIUtils placeView:fplogsBtn
+                 below:fuelstationsBtn
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:10.0
               hpadding:0.0];
-  totalHeight += _envlogsBtn.frame.size.height + 10.0;
+  totalHeight += fplogsBtn.frame.size.height + 10.0;
+  [PEUIUtils placeView:envlogsBtn
+                 below:fplogsBtn
+                  onto:contentPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+              vpadding:10.0
+              hpadding:0.0];
+  totalHeight += envlogsBtn.frame.size.height + 10.0;
   
   [_unsyncedEditsBtn removeFromSuperview];
   if ([APP isUserLoggedIn]) {
     NSInteger numUnsynced = [_coordDao totalNumUnsyncedEntitiesForUser:_user];
     if (numUnsynced > 0) {
       _unsyncedEditsBtn = [self unsyncedEditsButtonWithBadgeNum:numUnsynced];
-      [PEUIUtils placeView:_unsyncedEditsBtn below:_envlogsBtn onto:_scrollView withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:25.0 hpadding:0.0];
+      [PEUIUtils placeView:_unsyncedEditsBtn below:envlogsBtn onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:25.0 hpadding:0.0];
       totalHeight += _unsyncedEditsBtn.frame.size.height + 25.0;
     }
   }
-  
-  if (totalHeight <= self.view.frame.size.height) {
-    [PEUIUtils setFrameHeight:self.view.frame.size.height ofView:_scrollView];
-    [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.3 * _scrollView.frame.size.height)];
-  } else {
-    [PEUIUtils setFrameHeight:totalHeight ofView:_scrollView];
-    [_scrollView setContentSize:CGSizeMake(self.view.frame.size.width, 1.6 * _scrollView.frame.size.height)];
-  }
-  [_scrollView setDelaysContentTouches:NO];
-  [_scrollView setBounces:YES];
-  [PEUIUtils placeView:_scrollView atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
-  [_scrollView setContentOffset:_scrollContentOffset animated:NO];
+  [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+  return @[contentPanel, @(YES), @(NO)];
+}
+
+#pragma mark - View Controller Lifecycle
+
+- (void)viewDidLoad {
+  [super viewDidLoad];
+  [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
+  UINavigationItem *navItem = [self navigationItem];
+  [navItem setTitle:@"Data Records"];
 }
 
 #pragma mark - Helpers
@@ -201,7 +176,6 @@
                      badgeTextColor:[UIColor whiteColor]
                   addDisclosureIcon:YES
                             handler:^{
-                               _scrollContentOffset = _scrollView.contentOffset;
                               [PEUIUtils displayController:[_screenToolkit newViewUnsyncedEditsScreenMaker](_user)
                                             fromController:self
                                                   animated:YES];

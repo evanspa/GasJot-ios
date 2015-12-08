@@ -25,13 +25,14 @@
 #import "FPScreenToolkit.h"
 #import <PEFuelPurchase-Model/FPStats.h>
 #import <JBChartView/JBLineChartView.h>
+#import "PECustomController.h"
 
 /**
  Presents a GUI representing the start-state of the application for an
  authenticated user.  This can also be thought of as presenting the 'main
  menu' state of the application.
  */
-@interface FPHomeController : UIViewController <JBLineChartViewDelegate, JBLineChartViewDataSource>
+@interface FPHomeController : PECustomController <JBLineChartViewDelegate, JBLineChartViewDataSource>
 
 #pragma mark - Initializers
 

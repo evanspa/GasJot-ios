@@ -14,11 +14,13 @@
 
 + (PESyncViewStyler)syncViewStylerWithUitoolkit:(PEUIToolkit *)uitoolkit
                            subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
+                       subtitleFitToWidthFactor:(CGFloat)subtitleFitToWidthFactor
                                      isLoggedIn:(BOOL)isLoggedIn {
   return [self syncViewStylerWithTitleBlk:nil
                    alwaysTopifyTitleLabel:NO
                                 uitoolkit:uitoolkit
                      subtitleLeftHPadding:subtitleLeftHPadding
+                 subtitleFitToWidthFactor:subtitleFitToWidthFactor
                                isLoggedIn:isLoggedIn];
 }
 
@@ -26,6 +28,7 @@
                         alwaysTopifyTitleLabel:(BOOL)alwaysTopifyTitleLabel
                                      uitoolkit:(PEUIToolkit *)uitoolkit
                           subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
+                      subtitleFitToWidthFactor:(CGFloat)subtitleFitToWidthFactor
                                     isLoggedIn:(BOOL)isLoggedIn {
   NSInteger titleTag = 89;
   NSInteger subtitleTag = 90;
@@ -53,32 +56,33 @@
     BOOL syncWarningTemporary = NO;
     CGFloat vpaddingForTopification = vpaddingForTopifiedTitleToFitSubtitle;
     if ([entity editInProgress]) {
-      subTitleMsg = @"Edit in progress.";
+      subTitleMsg = @"editing";
     } else if (isLoggedIn) {
       if ([entity syncInProgress]) {
-        subTitleMsg = @"Sync in progress.";
+        subTitleMsg = @"synching";
       } else if (![entity globalIdentifier] || ([entity editCount] > 0)) {
         if ([entity syncErrMask] && ([entity syncErrMask].integerValue > 0)) {
           syncWarningNeedsFix = YES;
-          subTitleMsg = @"Needs fixing.";
+          subTitleMsg = @"needs fixing";
           vpaddingForTopification = vpaddingForTopifiedTitleToFitNeedFixIcon;
         } else {
-          subTitleMsg = @"Sync needed.";
+          subTitleMsg = @"sync needed";
         }
       }
     }
     
     // place title label
+    UILabel *titleLabel = nil;
     if (titleBlk) {
-      UILabel *titleLabel = [uitoolkit tableCellTitleMaker](truncatedTitleText(entity));
+      titleLabel = [uitoolkit tableCellTitleMaker](truncatedTitleText(entity), view.frame.size.width);
       [titleLabel setTag:titleTag];
-      if (alwaysTopifyTitleLabel) {
+      /*if (alwaysTopifyTitleLabel) {
         [PEUIUtils placeView:titleLabel
                      atTopOf:view
                withAlignment:PEUIHorizontalAlignmentTypeLeft
                     vpadding:vpaddingForTopification
                     hpadding:15.0];
-      } else {
+      } else {*/
         if (subTitleMsg) {
           [PEUIUtils placeView:titleLabel
                        atTopOf:view
@@ -91,14 +95,13 @@
                  withAlignment:PEUIHorizontalAlignmentTypeLeft
                       hpadding:15.0];
         }
-      }
+      /*}*/
     }
     
     // place subtitle label
     if (subTitleMsg) {
       UIColor *textColor = [UIColor grayColor];
-      UILabel *subtitleLabel = [uitoolkit tableCellSubtitleMaker](subTitleMsg);
-      [subtitleLabel setTag:subtitleTag];
+      UILabel *subtitleLabel;
       if (syncWarningNeedsFix) {
         textColor = [UIColor sunflowerColor];
         UIImage *syncWarningIcon = [UIImage imageNamed:@"warning-icon"];
@@ -107,24 +110,32 @@
         [PEUIUtils placeView:syncWarningIconView
                   atBottomOf:view
                withAlignment:PEUIHorizontalAlignmentTypeLeft
-                    vpadding:2.0
-                    hpadding:subtitleLeftHPadding]; //2.0];
+                    vpadding:4.0
+                    hpadding:subtitleLeftHPadding];
+        subtitleLabel = [uitoolkit tableCellSubtitleMaker](subTitleMsg,
+                                                           (subtitleFitToWidthFactor * view.frame.size.width)
+                                                           - (syncWarningIconView.frame.size.width + 2.0));
         [PEUIUtils placeView:subtitleLabel
                 toTheRightOf:syncWarningIconView
                         onto:view
-               withAlignment:PEUIVerticalAlignmentTypeBottom
+               withAlignment:PEUIVerticalAlignmentTypeMiddle
                     hpadding:2.0];
       } else {
         if (syncWarningTemporary) {
           textColor = [UIColor sunflowerColor];
         }
+        subtitleLabel = [uitoolkit tableCellSubtitleMaker](subTitleMsg,
+                                                           (subtitleFitToWidthFactor * view.frame.size.width)
+                                                           - subtitleLeftHPadding);
         [PEUIUtils placeView:subtitleLabel
-                  atBottomOf:view
+                       below:titleLabel
+                        onto:view
                withAlignment:PEUIHorizontalAlignmentTypeLeft
-                    vpadding:2.0
-                    hpadding:subtitleLeftHPadding]; //2.0];
+                    vpadding:4.0
+                    hpadding:0.0];
       }
       [subtitleLabel setTextColor:textColor];
+      [subtitleLabel setTag:subtitleTag];
     }
   };
 }

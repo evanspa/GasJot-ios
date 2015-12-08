@@ -72,13 +72,22 @@ displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
 heightForRowAtIndexPath:(NSIndexPath *)indexPath {
   switch ([indexPath section]) {
     case 0:  // vehicle
-      return 45;
+      //return 45;
+      return [PEUIUtils sizeOfText:@""
+                          withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height +
+        _uitoolkit.verticalPaddingForButtons + 15.0;
       break;
     case 1:  // fuel station
-      return 50;
+      //return 50;
+      return [PEUIUtils sizeOfText:@""
+                          withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height +
+      _uitoolkit.verticalPaddingForButtons + 15.0;
       break;
     default: // log date
-      return 45;
+      //return 45;
+      return [PEUIUtils sizeOfText:@""
+                          withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height +
+      _uitoolkit.verticalPaddingForButtons + 15.0;
       break;
   }
 }
@@ -112,7 +121,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
                           animated:YES];
       break;
     default:
-      [PEUIUtils displayController:[_screenToolkit newDatePickerScreenMakerWithTitle:@"Log Date"
+      [PEUIUtils displayController:[_screenToolkit newDatePickerScreenMakerWithTitle:@"Purchased"
                                                                  initialSelectedDate:_pickedLogDate
                                                                  logDatePickedAction:_logDatePickedAction](_user)
                     fromController:_controllerCtx
@@ -131,45 +140,10 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
       break;
     case 1:
       [[cell textLabel] setText:@"Gas station"];
-      CGFloat hpadding;
-      if (_displayDisclosureIndicators) {
-        hpadding = 5.0;
-      } else {
-        hpadding = 15.0;
-      }
-      if (_selectedFuelStation) {
-        UIView *contentView = [cell contentView];
-        LabelMaker cellTitleMaker = [_uitoolkit tableCellTitleMaker];
-        NSString *name = [_selectedFuelStation name];
-        if ([name length] > 20) {
-          name = [[name substringToIndex:20] stringByAppendingString:@"..."];
-        }
-        UILabel *title = cellTitleMaker(name);
-        [title setTextColor:[UIColor grayColor]];
-        CLLocation *fuelStationLocation = [_selectedFuelStation location];
-        CGFloat distanceInfoVPadding = 2.0;
-        if (fuelStationLocation) {
-          CLLocation *latestCurrentLocation = [APP latestLocation];
-          if (latestCurrentLocation) {
-            distanceInfoVPadding = 7.0;
-            [PEUIUtils placeView:title atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:7.0 hpadding:hpadding];
-          } else {
-            [PEUIUtils placeView:title atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:2.0 hpadding:hpadding];
-          }
-        } else {
-          [PEUIUtils placeView:title atTopOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:2.0 hpadding:hpadding];
-        }
-        [_screenToolkit addDistanceInfoToTopOfCellContentView:contentView
-                                      withHorizontalAlignment:PEUIHorizontalAlignmentTypeRight
-                                          withVerticalPadding:(title.frame.size.height + distanceInfoVPadding)
-                                            horizontalPadding:hpadding
-                                              withFuelstation:_selectedFuelStation];
-      } else {
-        [[cell detailTextLabel] setText:@"(no gas stations found)"];
-      }
+      [[cell detailTextLabel] setText:(_selectedFuelStation ? [_selectedFuelStation name] : @"(no gas stations found)")];
       break;
     default:
-      [[cell textLabel] setText:@"Log date"];
+      [[cell textLabel] setText:@"Purchased"];
       [[cell detailTextLabel] setText:[PEUtils stringFromDate:_pickedLogDate withPattern:@"MM/dd/YYYY"]];
       break;
   }
@@ -193,9 +167,8 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
 
 -(UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  UITableViewCell *cell =
-    [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1
-                           reuseIdentifier:nil];
+  UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1
+                                                 reuseIdentifier:nil];
   if (_displayDisclosureIndicators) {
     [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
   } else {

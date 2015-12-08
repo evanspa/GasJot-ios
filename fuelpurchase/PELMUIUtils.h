@@ -15,12 +15,14 @@ typedef void (^PESyncViewStyler)(UIView *, id);
 
 + (PESyncViewStyler)syncViewStylerWithUitoolkit:(PEUIToolkit *)uitoolkit
                            subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
+                       subtitleFitToWidthFactor:(CGFloat)subtitleFitToWidthFactor
                                      isLoggedIn:(BOOL)isLoggedIn;
 
 + (PESyncViewStyler)syncViewStylerWithTitleBlk:(NSString *(^)(id))titleBlk
                         alwaysTopifyTitleLabel:(BOOL)alwaysTopifyTitleLabel
                                      uitoolkit:(PEUIToolkit *)uitoolkit
                           subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
+                      subtitleFitToWidthFactor:(CGFloat)subtitleFitToWidthFactor
                                     isLoggedIn:(BOOL)isLoggedIn;
 
 @end

@@ -48,7 +48,6 @@
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
-  UIView *_contentPanel;
   RACDisposable *_disposable;
 }
 
@@ -68,46 +67,28 @@
   return self;
 }
 
-#pragma mark - Dynamic Type Support
-
-- (void)changeTextSize:(NSNotification *)notification {
-  [self viewDidAppear:YES];
-}
-
 #pragma mark - View Controller Lifecyle
-
-- (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
-  [_contentPanel removeFromSuperview];
-  [self makeContentPanel];
-  [_passwordTf becomeFirstResponder];
-}
 
 - (void)viewDidLoad {
   [super viewDidLoad];
   #ifdef FP_DEV
     [self pdvDevEnable];
   #endif
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(changeTextSize:)
-                                               name:UIContentSizeCategoryDidChangeNotification
-                                             object:nil];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
-  
   UINavigationItem *navItem = [self navigationItem];
   [navItem setTitle:@"Re-authenticate"];
   [navItem setRightBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                target:self
                                                                                action:@selector(handleLightLogin)]];
-  [self makeContentPanel];
+  [_passwordTf becomeFirstResponder];
 }
 
-#pragma mark - GUI construction (making panels)
+#pragma mark - Make Content
 
-- (void)makeContentPanel {
-  _contentPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:[self view]];
+- (NSArray *)makeContent {
+  UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0.0];
   CGFloat leftPadding = 8.0;
-  [PEUIUtils setFrameHeightOfView:_contentPanel ofHeight:0.5 relativeTo:[self view]];
+  [PEUIUtils setFrameHeightOfView:contentPanel ofHeight:0.5 relativeTo:[self view]];
   UILabel *messageLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"Enter your password and hit %@ to re-authenticate."
                                                                                      textToAccent:@"Done"
                                                                                    accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]]
@@ -115,9 +96,9 @@
                                             backgroundColor:[UIColor clearColor]
                                                   textColor:[UIColor darkGrayColor]
                                         verticalTextPadding:3.0
-                                                 fitToWidth:(_contentPanel.frame.size.width - leftPadding)];
+                                                 fitToWidth:(contentPanel.frame.size.width - leftPadding)];
   UIView *messageLabelWithPad = [PEUIUtils leftPadView:messageLabel padding:leftPadding];
-  TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:_contentPanel];
+  TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:contentPanel];
   _passwordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
   [_passwordTf setSecureTextEntry:YES];
   [_disposable dispose];
@@ -133,27 +114,28 @@
   
   // place views
   [PEUIUtils placeView:_passwordTf
-               atTopOf:_contentPanel
+               atTopOf:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:0.0
+              vpadding:FPContentPanelTopPadding
               hpadding:0.0];
+  CGFloat totalHeight = _passwordTf.frame.size.height + FPContentPanelTopPadding;
   [PEUIUtils placeView:messageLabelWithPad
                  below:_passwordTf
-                  onto:_contentPanel
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:4.0
               hpadding:0.0];
-  [PEUIUtils placeView:[FPPanelToolkit forgotPasswordButtonForUser:_user coordinatorDao:_coordDao uitoolkit:_uitoolkit controller:self]
+  totalHeight += messageLabelWithPad.frame.size.height + 4.0;
+  UIView *forgotPasswordBtn = [FPPanelToolkit forgotPasswordButtonForUser:_user coordinatorDao:_coordDao uitoolkit:_uitoolkit controller:self];
+  [PEUIUtils placeView:forgotPasswordBtn
                  below:messageLabelWithPad
-                  onto:_contentPanel
+                  onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
               vpadding:20.0
               hpadding:leftPadding];
-  [PEUIUtils placeView:_contentPanel
-               atTopOf:[self view]
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:90.0
-              hpadding:0.0];
+  totalHeight += forgotPasswordBtn.frame.size.height + 20.0;
+  [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
+  return @[contentPanel, @(YES), @(NO)];
 }
 
 #pragma mark - Login event handling

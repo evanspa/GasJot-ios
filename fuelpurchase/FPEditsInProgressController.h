@@ -13,8 +13,9 @@
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
+#import "PECustomController.h"
 
-@interface FPEditsInProgressController : UIViewController
+@interface FPEditsInProgressController : PECustomController
 
 #pragma mark - Initializers
 

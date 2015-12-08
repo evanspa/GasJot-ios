@@ -11,11 +11,12 @@
 #import "FPScreenToolkit.h"
 #import <JBChartView/JBLineChartView.h>
 #import "FPCommonStatControllerConstants.h"
+#import "PECustomController.h"
 
 typedef NSUInteger(^FPSiblingEntityCount)(void);
 typedef UIViewController *(^FPComparisonScreenMaker)(void);
 
-@interface FPCommonStatController : UIViewController <JBLineChartViewDelegate, JBLineChartViewDataSource>
+@interface FPCommonStatController : PECustomController <JBLineChartViewDelegate, JBLineChartViewDataSource>
 
 #pragma mark - Initializers
 

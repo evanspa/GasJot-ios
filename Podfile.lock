@@ -49,7 +49,7 @@ PODS:
     - FMDB/common
   - HMSegmentedControl (1.5.2)
   - IQKeyboardManager (3.2.1.2)
-  - JBChartView (2.8.19)
+  - JBChartView (2.9.0)
   - KissXML (5.0)
   - MBProgressHUD (0.9.1)
   - OHHTTPStubs (3.1.12):
@@ -71,7 +71,7 @@ PODS:
     - AFNetworking (~> 2.5.4)
     - CocoaLumberjack (~> 1.9)
     - PEObjc-Commons (~> 1.0.73)
-  - PEObjc-Commons (1.0.93):
+  - PEObjc-Commons (1.0.99):
     - BlocksKit (~> 2.2.5)
   - PESimu-Select (1.0.4):
     - PEObjc-Commons (~> 1.0.86)
@@ -108,7 +108,7 @@ DEPENDENCIES:
   - PEDev-Console (~> 1.0.5)
   - PEFuelPurchase-Common (~> 1.0.12)
   - PEFuelPurchase-Model (~> 1.0.186)
-  - PEObjc-Commons (~> 1.0.93)
+  - PEObjc-Commons (~> 1.0.99)
   - ReactiveCocoa (~> 2.4.7)
   - UICKeyChainStore (~> 2.0.5)
 
@@ -121,7 +121,7 @@ SPEC CHECKSUMS:
   FMDB: 96e8f1bcc1329e269330f99770ad4285d9003e52
   HMSegmentedControl: 83b9686022d2176fb6457d2bdb61e5d6393fed7d
   IQKeyboardManager: 4adcd7cc9c17440a7cb74755f6f6c8389919c6bf
-  JBChartView: 196146fea321396bafc4b2116fd03acd7d725a64
+  JBChartView: 56ab6bf7b822440529a591d9babc4feba5b2dc89
   KissXML: ce643413d618ad69886d0d43c3792b7dedfe476e
   MBProgressHUD: c47f2c166c126cf2ce36498d80f33e754d4e93ad
   OHHTTPStubs: 8cf0cfe6f34f13fc88fdf5b2a1b2c2536e8c0261
@@ -129,7 +129,7 @@ SPEC CHECKSUMS:
   PEFuelPurchase-Common: 8b4ed986a89d064914a44d8a922078c9d622f445
   PEFuelPurchase-Model: 033aed384f986ad921dcd167cdb0c9550c450623
   PEHateoas-Client: 4eb23cd4a1c106ecab147abd87cd3cacac93d52f
-  PEObjc-Commons: a4a493c2e498d15f0596069a832e4a008d0aa99c
+  PEObjc-Commons: 52f9b949cd3400bf36e1dbae5cf5aff5dcbef929
   PESimu-Select: 88e3ab14e1b9e0f75e9b626103581bd488128674
   PEWire-Control: c2d18d4261d025182513466da9c6ed80e596f526
   PEXML-Utils: d36d0ab7337b92c120ec49b84f99e7b923bf8a24

@@ -23,12 +23,13 @@
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
+#import "PECustomController.h"
 
 /**
  Presents a GUI representing the start-state of the application for an
  unauthenticated user.
  */
-@interface FPAccountLoginController : UIViewController <MBProgressHUDDelegate>
+@interface FPAccountLoginController : PECustomController <MBProgressHUDDelegate>
 
 #pragma mark - Initializers
 

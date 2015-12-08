@@ -141,6 +141,16 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   }
 }
 
+- (CGFloat(^)(void))heightForCellsBlkWithExtraPadding:(CGFloat)extraPadding {
+  return ^CGFloat{ return [PEUIUtils sizeOfText:@""
+                                       withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height +
+    _uitoolkit.verticalPaddingForButtons + 15.0 + extraPadding; };
+}
+
+- (CGFloat(^)(void))heightForCellsBlk {
+  return [self heightForCellsBlkWithExtraPadding:10.0];
+}
+
 #pragma mark - Generic Screens
 
 - (FPAuthScreenMaker)newDatePickerScreenMakerWithTitle:(NSString *)title
@@ -241,9 +251,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                    addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
-    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
-      UITextField *userNameTf = (UITextField *)[entityPanel viewWithTag:FPUserTagName];
-      [userNameTf becomeFirstResponder];
+    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityPanel) {
+      if (![ctrl hasPoppedKeyboard]) {
+        UITextField *userNameTf = (UITextField *)[entityPanel viewWithTag:FPUserTagName];
+        [userNameTf becomeFirstResponder];
+        [ctrl setHasPoppedKeyboard:YES];
+      }
     };
     
     PEMergeBlk mergeBlk = ^ NSDictionary * (PEAddViewEditController *ctrl, FPUser *localUser, FPUser *remoteUser) {
@@ -880,29 +893,29 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
+                                                      subtitleFitToWidthFactor:1.0
                                                                     isLoggedIn:[APP isUserLoggedIn]];
-    return [[PEListViewController alloc]
-              initWithClassOfDataSourceObjects:[FPVehicle class]
-                                         title:@"Vehicles"
-                         isPaginatedDataSource:NO
-                               tableCellStyler:tableCellStyler
-                            itemSelectedAction:nil
-                           initialSelectedItem:nil
-                                 addItemAction:addVehicleAction
-                                cellIdentifier:@"FPVehicleCell"
-                                initialObjects:pageLoader(nil)
-                                    pageLoader:pageLoader
-                                heightForCells:52.0
-                               detailViewMaker:vehicleDetailViewMaker
-                                     uitoolkit:_uitoolkit
-                doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
-                          wouldBeIndexOfEntity:wouldBeIndexBlk
-                               isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                                isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                           itemChildrenCounter:[self vehicleItemChildrenCounter]
-                           itemChildrenMsgsBlk:[self vehicleItemChildrenMsgs]
-                                   itemDeleter:[self vehicleItemDeleterForUser:user]
-                              itemLocalDeleter:[self vehicleItemLocalDeleter]];
+    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPVehicle class]
+                                                                    title:@"Vehicles"
+                                                    isPaginatedDataSource:NO
+                                                          tableCellStyler:tableCellStyler
+                                                       itemSelectedAction:nil
+                                                      initialSelectedItem:nil
+                                                            addItemAction:addVehicleAction
+                                                           cellIdentifier:@"FPVehicleCell"
+                                                           initialObjects:pageLoader(nil)
+                                                               pageLoader:pageLoader
+                                                        heightForCellsBlk:[self heightForCellsBlk]
+                                                          detailViewMaker:vehicleDetailViewMaker
+                                                                uitoolkit:_uitoolkit
+                                           doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
+                                                     wouldBeIndexOfEntity:wouldBeIndexBlk
+                                                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      itemChildrenCounter:[self vehicleItemChildrenCounter]
+                                                      itemChildrenMsgsBlk:[self vehicleItemChildrenMsgs]
+                                                              itemDeleter:[self vehicleItemDeleterForUser:user]
+                                                         itemLocalDeleter:[self vehicleItemLocalDeleter]];
   };
 }
 
@@ -927,29 +940,29 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
+                                                      subtitleFitToWidthFactor:1.0
                                                                     isLoggedIn:[APP isUserLoggedIn]];
-    return [[PEListViewController alloc]
-              initWithClassOfDataSourceObjects:[FPVehicle class]
-                                         title:@"Unsynced Vehicles"
-                         isPaginatedDataSource:NO
-                               tableCellStyler:tableCellStyler
-                            itemSelectedAction:nil
-                           initialSelectedItem:nil
-                                 addItemAction:nil
-                                cellIdentifier:@"FPVehicleCell"
-                                initialObjects:pageLoader(nil)
-                                    pageLoader:pageLoader
-                                heightForCells:52.0
-                               detailViewMaker:vehicleDetailViewMaker
-                                     uitoolkit:_uitoolkit
-                doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
-                          wouldBeIndexOfEntity:wouldBeIndexBlk
-                               isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                                isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                           itemChildrenCounter:[self vehicleItemChildrenCounter]
-                           itemChildrenMsgsBlk:[self vehicleItemChildrenMsgs]
-                                   itemDeleter:[self vehicleItemDeleterForUser:user]
-                              itemLocalDeleter:[self vehicleItemLocalDeleter]];
+    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPVehicle class]
+                                                                    title:@"Unsynced Vehicles"
+                                                    isPaginatedDataSource:NO
+                                                          tableCellStyler:tableCellStyler
+                                                       itemSelectedAction:nil
+                                                      initialSelectedItem:nil
+                                                            addItemAction:nil
+                                                           cellIdentifier:@"FPVehicleCell"
+                                                           initialObjects:pageLoader(nil)
+                                                               pageLoader:pageLoader
+                                                        heightForCellsBlk:[self heightForCellsBlk]
+                                                          detailViewMaker:vehicleDetailViewMaker
+                                                                uitoolkit:_uitoolkit
+                                           doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
+                                                     wouldBeIndexOfEntity:wouldBeIndexBlk
+                                                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      itemChildrenCounter:[self vehicleItemChildrenCounter]
+                                                      itemChildrenMsgsBlk:[self vehicleItemChildrenMsgs]
+                                                              itemDeleter:[self vehicleItemDeleterForUser:user]
+                                                         itemLocalDeleter:[self vehicleItemLocalDeleter]];
   };
 }
 
@@ -975,29 +988,29 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
+                                                      subtitleFitToWidthFactor:1.0
                                                                     isLoggedIn:[APP isUserLoggedIn]];
-    return [[PEListViewController alloc]
-             initWithClassOfDataSourceObjects:[FPVehicle class]
-                                        title:@"Choose Vehicle"
-                        isPaginatedDataSource:NO
-                              tableCellStyler:tableCellStyler
-                           itemSelectedAction:itemSelectedAction
-                          initialSelectedItem:initialSelectedVehicle
-                                addItemAction:addVehicleAction
-                               cellIdentifier:@"FPVehicleCell"
-                               initialObjects:pageLoader(nil)
-                                   pageLoader:pageLoader
-                               heightForCells:52.0
-                              detailViewMaker:nil
-                                    uitoolkit:_uitoolkit
-               doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
-                         wouldBeIndexOfEntity:wouldBeIndexBlk
-                              isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                               isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                          itemChildrenCounter:nil
-                          itemChildrenMsgsBlk:nil
-                                  itemDeleter:nil
-                             itemLocalDeleter:nil];
+    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPVehicle class]
+                                                                    title:@"Choose Vehicle"
+                                                    isPaginatedDataSource:NO
+                                                          tableCellStyler:tableCellStyler
+                                                       itemSelectedAction:itemSelectedAction
+                                                      initialSelectedItem:initialSelectedVehicle
+                                                            addItemAction:addVehicleAction
+                                                           cellIdentifier:@"FPVehicleCell"
+                                                           initialObjects:pageLoader(nil)
+                                                               pageLoader:pageLoader
+                                                        heightForCellsBlk:[self heightForCellsBlk]
+                                                          detailViewMaker:nil
+                                                                uitoolkit:_uitoolkit
+                                           doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
+                                                     wouldBeIndexOfEntity:wouldBeIndexBlk
+                                                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      itemChildrenCounter:nil
+                                                      itemChildrenMsgsBlk:nil
+                                                              itemDeleter:nil
+                                                         itemLocalDeleter:nil];
   };
 }
 
@@ -1042,9 +1055,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                             addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                           error:[FPUtils localSaveErrorHandlerMaker]()];
     };
-    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
-      UITextField *vehicleNameTf = (UITextField *)[entityPanel viewWithTag:FPVehicleTagName];
-      [vehicleNameTf becomeFirstResponder];
+    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityPanel) {
+      if (![ctrl hasPoppedKeyboard]) {
+        UITextField *vehicleNameTf = (UITextField *)[entityPanel viewWithTag:FPVehicleTagName];
+        [vehicleNameTf becomeFirstResponder];
+        [ctrl setHasPoppedKeyboard:YES];
+      }
     };
     PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, BOOL dismissCtrlr, FPVehicle *newVehicle) {
       if (newVehicle && [newVehicle localMainIdentifier]) {
@@ -1164,9 +1180,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                            addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                          error:[FPUtils localSaveErrorHandlerMaker]()];
     };
-    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
-      UITextField *vehicleNameTf = (UITextField *)[entityPanel viewWithTag:FPVehicleTagName];
-      [vehicleNameTf becomeFirstResponder];
+    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityPanel) {
+      if (![ctrl hasPoppedKeyboard]) {
+        UITextField *vehicleNameTf = (UITextField *)[entityPanel viewWithTag:FPVehicleTagName];
+        [vehicleNameTf becomeFirstResponder];
+        [ctrl setHasPoppedKeyboard:YES];
+      }
     };
     PEMergeBlk mergeBlk = ^ NSDictionary * (PEAddViewEditController *ctrl, FPVehicle *localVehicle, FPVehicle *remoteVehicle) {
       FPVehicle *masterVehicle = [[_coordDao localDao] masterVehicleWithId:[localVehicle localMasterIdentifier]
@@ -2119,10 +2138,6 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                           withVerticalPadding:(CGFloat)verticalPadding
                             horizontalPadding:(CGFloat)horizontalPadding
                               withFuelstation:(FPFuelStation *)fuelstation {
-  UILabel * (^compressLabel)(UILabel *) = ^UILabel *(UILabel *label) {
-    [PEUIUtils setTextAndResize:[label text] forLabel:label];
-    return label;
-  };
   NSInteger distanceTag = 10;
   NSInteger unknownReasonTag = 11;
   [[contentView viewWithTag:distanceTag] removeFromSuperview];
@@ -2130,7 +2145,6 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   LabelMaker cellSubtitleMaker = [_uitoolkit tableCellSubtitleMaker];
   CLLocation *fuelStationLocation = [fuelstation location];
   UILabel *distance = nil;
-  UILabel *unknownReason = nil;
   if (fuelStationLocation) {
     CLLocation *latestCurrentLocation = [APP latestLocation];
     if (latestCurrentLocation) {
@@ -2144,25 +2158,15 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
         distanceUom = @"km";
         distanceVal = distanceVal / 1000.0;
       }
-      distance = cellSubtitleMaker([NSString stringWithFormat:@"%.1f %@ away", distanceVal, distanceUom]);
+      distance = cellSubtitleMaker([NSString stringWithFormat:@"%.1f %@", distanceVal, distanceUom],
+                                   (0.5 * contentView.frame.size.width) - horizontalPadding);
+      [distance setTag:distanceTag];
       if (isNearby) {
         [distance setTextColor:[UIColor greenSeaColor]];
       }
-      [PEUIUtils placeView:distance atTopOf:contentView withAlignment:horizontalAlignment vpadding:verticalPadding hpadding:horizontalPadding];
-    } else {
-      distance = compressLabel(cellSubtitleMaker(@"? away"));
-      unknownReason = compressLabel(cellSubtitleMaker(@"(current loc. unknown)"));
-      [PEUIUtils placeView:distance atTopOf:contentView withAlignment:horizontalAlignment vpadding:verticalPadding hpadding:horizontalPadding];
-      [PEUIUtils placeView:unknownReason below:distance onto:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:0.0 hpadding:0.0];
+      [PEUIUtils placeView:distance atBottomOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:0.0 hpadding:horizontalPadding];
     }
-  } else {
-    distance = compressLabel(cellSubtitleMaker(@"? away"));
-    unknownReason = compressLabel(cellSubtitleMaker(@"(gas station loc. unknown)"));
-    [PEUIUtils placeView:distance atTopOf:contentView withAlignment:horizontalAlignment vpadding:verticalPadding hpadding:horizontalPadding];
-    [PEUIUtils placeView:unknownReason below:distance onto:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:0.0 hpadding:0.0];
   }
-  [distance setTag:distanceTag];
-  [unknownReason setTag:unknownReasonTag];
 }
 
 - (FPAuthScreenMaker)newViewFuelStationsScreenMaker {
@@ -2198,11 +2202,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                        alwaysTopifyTitleLabel:YES
                                     uitoolkit:_uitoolkit
                          subtitleLeftHPadding:15.0
+                     subtitleFitToWidthFactor:0.5
                                    isLoggedIn:[APP isUserLoggedIn]](contentView, fuelstation);
-      CGFloat distanceInfoVPadding = 25.5;
+      CGFloat distanceInfoVPadding = 15.0; //25.5;
       if ([fuelstation location]) {
         if ([APP latestLocation]) {
-          distanceInfoVPadding = 28.5;
+          distanceInfoVPadding = 18.5; //28.5;
         }
       }
       [self addDistanceInfoToTopOfCellContentView:contentView
@@ -2211,28 +2216,27 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                 horizontalPadding:20.0
                                   withFuelstation:fuelstation];
     };
-    return [[PEListViewController alloc]
-             initWithClassOfDataSourceObjects:[FPFuelStation class]
-                                        title:@"Gas Stations"
-                        isPaginatedDataSource:NO
-                              tableCellStyler:tableCellStyler
-                           itemSelectedAction:nil
-                          initialSelectedItem:nil
-                                addItemAction:addFuelStationAction
-                               cellIdentifier:@"FPFuelStationCell"
-                               initialObjects:pageLoader(nil)
-                                   pageLoader:pageLoader
-                               heightForCells:52.0
-                              detailViewMaker:fuelStationDetailViewMaker
-                                    uitoolkit:_uitoolkit
-               doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
-                         wouldBeIndexOfEntity:wouldBeIndexBlk
-                              isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                               isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                          itemChildrenCounter:[self fuelStationItemChildrenCounter]
-                          itemChildrenMsgsBlk:[self fuelStationItemChildrenMsgs]
-                                  itemDeleter:[self fuelStationItemDeleterForUser:user]
-                             itemLocalDeleter:[self fuelStationItemLocalDeleter]];
+    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelStation class]
+                                                                    title:@"Gas Stations"
+                                                    isPaginatedDataSource:NO
+                                                          tableCellStyler:tableCellStyler
+                                                       itemSelectedAction:nil
+                                                      initialSelectedItem:nil
+                                                            addItemAction:addFuelStationAction
+                                                           cellIdentifier:@"FPFuelStationCell"
+                                                           initialObjects:pageLoader(nil)
+                                                               pageLoader:pageLoader
+                                                        heightForCellsBlk:[self heightForCellsBlkWithExtraPadding:15.0]
+                                                          detailViewMaker:fuelStationDetailViewMaker
+                                                                uitoolkit:_uitoolkit
+                                           doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
+                                                     wouldBeIndexOfEntity:wouldBeIndexBlk
+                                                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      itemChildrenCounter:[self fuelStationItemChildrenCounter]
+                                                      itemChildrenMsgsBlk:[self fuelStationItemChildrenMsgs]
+                                                              itemDeleter:[self fuelStationItemDeleterForUser:user]
+                                                         itemLocalDeleter:[self fuelStationItemLocalDeleter]];
   };
 }
 
@@ -2260,6 +2264,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                        alwaysTopifyTitleLabel:YES
                                     uitoolkit:_uitoolkit
                          subtitleLeftHPadding:15.0
+                     subtitleFitToWidthFactor:0.5
                                    isLoggedIn:[APP isUserLoggedIn]](contentView, fuelstation);
       CGFloat distanceInfoVPadding = 25.5;
       if ([fuelstation location]) {
@@ -2273,28 +2278,27 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                 horizontalPadding:20.0
                                   withFuelstation:fuelstation];
     };
-    return [[PEListViewController alloc]
-             initWithClassOfDataSourceObjects:[FPFuelStation class]
-                                        title:@"Unsynced Gas Stations"
-                        isPaginatedDataSource:NO
-                              tableCellStyler:tableCellStyler
-                           itemSelectedAction:nil
-                          initialSelectedItem:nil
-                                addItemAction:nil
-                               cellIdentifier:@"FPFuelStationCell"
-                               initialObjects:pageLoader(nil)
-                                   pageLoader:pageLoader
-                               heightForCells:52.0
-                              detailViewMaker:fuelStationDetailViewMaker
-                                    uitoolkit:_uitoolkit
-               doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
-                         wouldBeIndexOfEntity:wouldBeIndexBlk
-                              isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                               isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                          itemChildrenCounter:[self fuelStationItemChildrenCounter]
-                          itemChildrenMsgsBlk:[self fuelStationItemChildrenMsgs]
-                                  itemDeleter:[self fuelStationItemDeleterForUser:user]
-                             itemLocalDeleter:[self fuelStationItemLocalDeleter]];
+    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelStation class]
+                                                                    title:@"Unsynced Gas Stations"
+                                                    isPaginatedDataSource:NO
+                                                          tableCellStyler:tableCellStyler
+                                                       itemSelectedAction:nil
+                                                      initialSelectedItem:nil
+                                                            addItemAction:nil
+                                                           cellIdentifier:@"FPFuelStationCell"
+                                                           initialObjects:pageLoader(nil)
+                                                               pageLoader:pageLoader
+                                                        heightForCellsBlk:[self heightForCellsBlk]
+                                                          detailViewMaker:fuelStationDetailViewMaker
+                                                                uitoolkit:_uitoolkit
+                                           doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
+                                                     wouldBeIndexOfEntity:wouldBeIndexBlk
+                                                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      itemChildrenCounter:[self fuelStationItemChildrenCounter]
+                                                      itemChildrenMsgsBlk:[self fuelStationItemChildrenMsgs]
+                                                              itemDeleter:[self fuelStationItemDeleterForUser:user]
+                                                         itemLocalDeleter:[self fuelStationItemLocalDeleter]];
   };
 }
 
@@ -2324,6 +2328,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                        alwaysTopifyTitleLabel:YES
                                     uitoolkit:_uitoolkit
                          subtitleLeftHPadding:15.0
+                     subtitleFitToWidthFactor:0.5
                                    isLoggedIn:[APP isUserLoggedIn]](contentView, fuelstation);
       CGFloat distanceInfoVPadding = 25.5;
       if ([fuelstation location]) {
@@ -2337,28 +2342,27 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                 horizontalPadding:20.0
                                   withFuelstation:fuelstation];
     };
-    return [[PEListViewController alloc]
-             initWithClassOfDataSourceObjects:[FPFuelStation class]
-                                        title:@"Choose Gas Station"
-                        isPaginatedDataSource:NO
-                              tableCellStyler:tableCellStyler
-                           itemSelectedAction:itemSelectedAction
-                          initialSelectedItem:initialSelectedFuelStation
-                                addItemAction:addFuelStationAction
-                               cellIdentifier:@"FPFuelStationCell"
-                               initialObjects:pageLoader(nil)
-                                   pageLoader:pageLoader
-                               heightForCells:52.0
-                              detailViewMaker:nil
-                                    uitoolkit:_uitoolkit
-               doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
-                         wouldBeIndexOfEntity:wouldBeIndexBlk
-                              isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                               isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                          itemChildrenCounter:nil
-                          itemChildrenMsgsBlk:nil
-                                  itemDeleter:nil
-                             itemLocalDeleter:nil];
+    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelStation class]
+                                                                    title:@"Choose Gas Station"
+                                                    isPaginatedDataSource:NO
+                                                          tableCellStyler:tableCellStyler
+                                                       itemSelectedAction:itemSelectedAction
+                                                      initialSelectedItem:initialSelectedFuelStation
+                                                            addItemAction:addFuelStationAction
+                                                           cellIdentifier:@"FPFuelStationCell"
+                                                           initialObjects:pageLoader(nil)
+                                                               pageLoader:pageLoader
+                                                        heightForCellsBlk:[self heightForCellsBlk]
+                                                          detailViewMaker:nil
+                                                                uitoolkit:_uitoolkit
+                                           doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
+                                                     wouldBeIndexOfEntity:wouldBeIndexBlk
+                                                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      itemChildrenCounter:nil
+                                                      itemChildrenMsgsBlk:nil
+                                                              itemDeleter:nil
+                                                         itemLocalDeleter:nil];
   };
 }
 
@@ -2403,9 +2407,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                 addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                               error:[FPUtils localSaveErrorHandlerMaker]()];
     };
-    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
-      UITextField *nameTf = (UITextField *)[entityPanel viewWithTag:FPFuelStationTagName];
-      [nameTf becomeFirstResponder];
+    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityPanel) {
+      if (![ctrl hasPoppedKeyboard]) {
+        UITextField *nameTf = (UITextField *)[entityPanel viewWithTag:FPFuelStationTagName];
+        [nameTf becomeFirstResponder];
+        [ctrl setHasPoppedKeyboard:YES];
+      }
     };
     PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, BOOL dismissCtrlr, FPFuelStation *newFuelStation) {
       if (newFuelStation && [newFuelStation localMainIdentifier]) {
@@ -2529,9 +2536,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
                                              error:[FPUtils localSaveErrorHandlerMaker]()];
     };
-    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
-      UITextField *nameTf = (UITextField *)[entityPanel viewWithTag:FPFuelStationTagName];
-      [nameTf becomeFirstResponder];
+    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityPanel) {
+      if (![ctrl hasPoppedKeyboard]) {
+        UITextField *nameTf = (UITextField *)[entityPanel viewWithTag:FPFuelStationTagName];
+        [nameTf becomeFirstResponder];
+        [ctrl setHasPoppedKeyboard:YES];
+      }
     };
     PEMergeBlk mergeBlk = ^ NSDictionary * (PEAddViewEditController *ctrl, FPFuelStation *localFuelstation, FPFuelStation *remoteFuelstation) {
       FPFuelStation *masterFuelstation = [[_coordDao localDao] masterFuelstationWithId:[localFuelstation localMasterIdentifier]
@@ -3261,21 +3271,24 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
       [self deselectSelectedRowForTableOnView:ctrl.view tableViewTag:FPFpLogTagVehicleFuelStationAndDate];
     };
-    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityFormPanel) {
-      FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
+    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityFormPanel) {
+      if (![ctrl hasPoppedKeyboard]) {
+        FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds =
         (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[(UITableView *)[entityFormPanel viewWithTag:FPFpLogTagVehicleFuelStationAndDate] dataSource];
-      FPVehicle *selectedVehicle = [ds selectedVehicle];
-      if (!selectedVehicle.isDiesel) {
-        UITextField *octaneTf = (UITextField *)[entityFormPanel viewWithTag:FPFpLogTagOctane];
-        if (octaneTf.text.length == 0) {
-          [octaneTf becomeFirstResponder];
+        FPVehicle *selectedVehicle = [ds selectedVehicle];
+        if (!selectedVehicle.isDiesel) {
+          UITextField *octaneTf = (UITextField *)[entityFormPanel viewWithTag:FPFpLogTagOctane];
+          if (octaneTf.text.length == 0) {
+            [octaneTf becomeFirstResponder];
+          } else {
+            UITextField *prefillupDteTf = (UITextField *)[entityFormPanel viewWithTag:FPFpEnvLogCompositeTagPreFillupReportedDte];
+            [prefillupDteTf becomeFirstResponder];
+          }
         } else {
           UITextField *prefillupDteTf = (UITextField *)[entityFormPanel viewWithTag:FPFpEnvLogCompositeTagPreFillupReportedDte];
           [prefillupDteTf becomeFirstResponder];
         }
-      } else {
-        UITextField *prefillupDteTf = (UITextField *)[entityFormPanel viewWithTag:FPFpEnvLogCompositeTagPreFillupReportedDte];
-        [prefillupDteTf becomeFirstResponder];
+        [ctrl setHasPoppedKeyboard:YES];
       }
     };
     PEEntityAddCancelerBlk addCanceler = ^(PEAddViewEditController *ctrl, BOOL dismissCtrlr, FPLogEnvLogComposite *fpEnvLogComposite) {
@@ -3556,7 +3569,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
         } else if ([fieldName isEqualToString:FPFplogFuelstationGlobalIdField]) {
           [fields addObject:@[@"Gas station:", @(FPFpLogTagFuelstation), orNil([fuelstationForLocalFplog name]), orNil([fuelstationForRemoteFplog name])]];
         } else if ([fieldName isEqualToString:FPFplogPurchasedAtField]) {
-          [fields addObject:@[@"Purchased date:", @(FPFpLogTagPurchasedDate), [PEUtils stringFromDate:[localFplog purchasedAt] withPattern:@"MM/dd/YYYY"], [PEUtils stringFromDate:[remoteFplog purchasedAt] withPattern:@"MM/dd/YYYY"]]];
+          [fields addObject:@[@"Purchased:", @(FPFpLogTagPurchasedDate), [PEUtils stringFromDate:[localFplog purchasedAt] withPattern:@"MM/dd/YYYY"], [PEUtils stringFromDate:[remoteFplog purchasedAt] withPattern:@"MM/dd/YYYY"]]];
         } else if ([fieldName isEqualToString:FPFplogOctaneField]) {
           [fields addObject:@[@"Octane:", @(FPFpLogTagOctane), [PEUtils descriptionOrEmptyIfNil:[localFplog octane]], [PEUtils descriptionOrEmptyIfNil:[remoteFplog octane]]]];
         } else if ([fieldName isEqualToString:FPFplogOdometerField]) {
@@ -3564,7 +3577,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
         } else if ([fieldName isEqualToString:FPFplogGallonPriceField]) {
           [fields addObject:@[@"Price per gallon:", @(FPFpLogTagPricePerGallon), [PEUtils descriptionOrEmptyIfNil:[localFplog gallonPrice]], [PEUtils descriptionOrEmptyIfNil:[remoteFplog gallonPrice]]]];
         } else if ([fieldName isEqualToString:FPFplogCarWashPerGallonDiscountField]) {
-          [fields addObject:@[@"Car wash per-gallon discount:", @(FPFpLogTagCarWashPerGallonDiscount), [PEUtils descriptionOrEmptyIfNil:[localFplog carWashPerGallonDiscount]], [PEUtils descriptionOrEmptyIfNil:[remoteFplog carWashPerGallonDiscount]]]];
+          [fields addObject:@[@"Car Wash per-gal disc.:", @(FPFpLogTagCarWashPerGallonDiscount), [PEUtils descriptionOrEmptyIfNil:[localFplog carWashPerGallonDiscount]], [PEUtils descriptionOrEmptyIfNil:[remoteFplog carWashPerGallonDiscount]]]];
         } else if ([fieldName isEqualToString:FPFplogGotCarWashField]) {
           [fields addObject:@[@"Got car wash?", @(FPFpLogTagGotCarWash), [PEUtils yesNoFromBool:[localFplog gotCarWash]], [PEUtils yesNoFromBool:[remoteFplog gotCarWash]]]];
         } else if ([fieldName isEqualToString:FPFplogNumGallonsField]) {
@@ -3672,9 +3685,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       [ds setSelectedFuelStation:fuelstationForDownloadedFplog];
       [vehFsAndDateTableView reloadData];
     };
-    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
-      UITextField *octaneTf = (UITextField *)[entityPanel viewWithTag:FPFpLogTagOctane];
-      [octaneTf becomeFirstResponder];
+    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityPanel) {
+      if (![ctrl hasPoppedKeyboard]) {
+        UITextField *octaneTf = (UITextField *)[entityPanel viewWithTag:FPFpLogTagOctane];
+        [octaneTf becomeFirstResponder];
+        [ctrl setHasPoppedKeyboard:YES];
+      }
     };
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
       [self deselectSelectedRowForTableOnView:ctrl.view tableViewTag:FPFpLogTagVehicleFuelStationAndDate];
@@ -3811,6 +3827,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
+                                                      subtitleFitToWidthFactor:1.0
                                                                     isLoggedIn:[APP isUserLoggedIn]];
     return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
                                                                     title:@"Gas Logs"
@@ -3822,7 +3839,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                            cellIdentifier:@"FPFuelPurchaseLogCell"
                                                            initialObjects:initialFpLogs
                                                                pageLoader:pageLoader
-                                                           heightForCells:52.0
+                                                           heightForCellsBlk:[self heightForCellsBlk]
                                                           detailViewMaker:fpLogDetailViewMaker
                                                                 uitoolkit:_uitoolkit
                                            doesEntityBelongToThisListView:doesEntityBelongToThisListViewBlk
@@ -3890,29 +3907,29 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
+                                                      subtitleFitToWidthFactor:1.0
                                                                     isLoggedIn:[APP isUserLoggedIn]];
-    return [[PEListViewController alloc]
-             initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
-                                        title:@"Gas Logs"
-                        isPaginatedDataSource:YES
-                              tableCellStyler:tableCellStyler
-                           itemSelectedAction:nil
-                          initialSelectedItem:nil
-                                addItemAction:addFpLogAction
-                               cellIdentifier:@"FPFuelPurchaseLogCell"
-                               initialObjects:initialFpLogs
-                                   pageLoader:pageLoader
-                               heightForCells:52.0
-                              detailViewMaker:fpLogDetailViewMaker
-                                    uitoolkit:_uitoolkit
-               doesEntityBelongToThisListView:doesEntityBelongToThisListViewBlk
-                         wouldBeIndexOfEntity:wouldBeIndexBlk
-                              isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                               isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                          itemChildrenCounter:nil
-                          itemChildrenMsgsBlk:nil
-                                  itemDeleter:[self fplogItemDeleterForUser:user]
-                             itemLocalDeleter:[self fplogItemLocalDeleter]];
+    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
+                                                                    title:@"Gas Logs"
+                                                    isPaginatedDataSource:YES
+                                                          tableCellStyler:tableCellStyler
+                                                       itemSelectedAction:nil
+                                                      initialSelectedItem:nil
+                                                            addItemAction:addFpLogAction
+                                                           cellIdentifier:@"FPFuelPurchaseLogCell"
+                                                           initialObjects:initialFpLogs
+                                                               pageLoader:pageLoader
+                                                        heightForCellsBlk:[self heightForCellsBlk]
+                                                          detailViewMaker:fpLogDetailViewMaker
+                                                                uitoolkit:_uitoolkit
+                                           doesEntityBelongToThisListView:doesEntityBelongToThisListViewBlk
+                                                     wouldBeIndexOfEntity:wouldBeIndexBlk
+                                                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      itemChildrenCounter:nil
+                                                      itemChildrenMsgsBlk:nil
+                                                              itemDeleter:[self fplogItemDeleterForUser:user]
+                                                         itemLocalDeleter:[self fplogItemLocalDeleter]];
   };
 }
 
@@ -3968,29 +3985,29 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
+                                                      subtitleFitToWidthFactor:1.0
                                                                     isLoggedIn:[APP isUserLoggedIn]];
-    return [[PEListViewController alloc]
-             initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
-                                        title:@"Gas Logs"
-                        isPaginatedDataSource:YES
-                              tableCellStyler:tableCellStyler
-                           itemSelectedAction:nil
-                          initialSelectedItem:nil
-                                addItemAction:addFpLogAction
-                               cellIdentifier:@"FPFuelPurchaseLogCell"
-                               initialObjects:initialFpLogs
-                                   pageLoader:pageLoader
-                               heightForCells:52.0
-                              detailViewMaker:fpLogDetailViewMaker
-                                    uitoolkit:_uitoolkit
-               doesEntityBelongToThisListView:doesEntityBelongToThisListViewBlk
-                         wouldBeIndexOfEntity:wouldBeIndexBlk
-                              isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                               isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                          itemChildrenCounter:nil
-                          itemChildrenMsgsBlk:nil
-                                  itemDeleter:[self fplogItemDeleterForUser:user]
-                             itemLocalDeleter:[self fplogItemLocalDeleter]];
+    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
+                                                                    title:@"Gas Logs"
+                                                    isPaginatedDataSource:YES
+                                                          tableCellStyler:tableCellStyler
+                                                       itemSelectedAction:nil
+                                                      initialSelectedItem:nil
+                                                            addItemAction:addFpLogAction
+                                                           cellIdentifier:@"FPFuelPurchaseLogCell"
+                                                           initialObjects:initialFpLogs
+                                                               pageLoader:pageLoader
+                                                        heightForCellsBlk:[self heightForCellsBlk]
+                                                          detailViewMaker:fpLogDetailViewMaker
+                                                                uitoolkit:_uitoolkit
+                                           doesEntityBelongToThisListView:doesEntityBelongToThisListViewBlk
+                                                     wouldBeIndexOfEntity:wouldBeIndexBlk
+                                                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      itemChildrenCounter:nil
+                                                      itemChildrenMsgsBlk:nil
+                                                              itemDeleter:[self fplogItemDeleterForUser:user]
+                                                         itemLocalDeleter:[self fplogItemLocalDeleter]];
   };
 }
 
@@ -4018,29 +4035,29 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
+                                                      subtitleFitToWidthFactor:1.0
                                                                     isLoggedIn:[APP isUserLoggedIn]];
-    return [[PEListViewController alloc]
-             initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
-                                        title:@"Unsynced Gas Logs"
-                        isPaginatedDataSource:NO
-                              tableCellStyler:tableCellStyler
-                           itemSelectedAction:nil
-                          initialSelectedItem:nil
-                                addItemAction:nil
-                               cellIdentifier:@"FPFuelPurchaseLogCell"
-                               initialObjects:pageLoader(nil)
-                                   pageLoader:pageLoader
-                               heightForCells:52.0
-                              detailViewMaker:fpLogDetailViewMaker
-                                    uitoolkit:_uitoolkit
-               doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
-                         wouldBeIndexOfEntity:wouldBeIndexBlk
-                              isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                               isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                          itemChildrenCounter:nil
-                          itemChildrenMsgsBlk:nil
-                                  itemDeleter:[self fplogItemDeleterForUser:user]
-                             itemLocalDeleter:[self fplogItemLocalDeleter]];
+    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelPurchaseLog class]
+                                                                    title:@"Unsynced Gas Logs"
+                                                    isPaginatedDataSource:NO
+                                                          tableCellStyler:tableCellStyler
+                                                       itemSelectedAction:nil
+                                                      initialSelectedItem:nil
+                                                            addItemAction:nil
+                                                           cellIdentifier:@"FPFuelPurchaseLogCell"
+                                                           initialObjects:pageLoader(nil)
+                                                               pageLoader:pageLoader
+                                                        heightForCellsBlk:[self heightForCellsBlk]
+                                                          detailViewMaker:fpLogDetailViewMaker
+                                                                uitoolkit:_uitoolkit
+                                           doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
+                                                     wouldBeIndexOfEntity:wouldBeIndexBlk
+                                                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      itemChildrenCounter:nil
+                                                      itemChildrenMsgsBlk:nil
+                                                              itemDeleter:[self fplogItemDeleterForUser:user]
+                                                         itemLocalDeleter:[self fplogItemLocalDeleter]];
   };
 }
 
@@ -4120,9 +4137,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
         [[ctrl navigationController] dismissViewControllerAnimated:YES completion:nil];
       }
     };
-    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
-      UITextField *odometerTf = (UITextField *)[entityPanel viewWithTag:FPEnvLogTagOdometer];
-      [odometerTf becomeFirstResponder];
+    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityPanel) {
+      if (![ctrl hasPoppedKeyboard]) {
+        UITextField *odometerTf = (UITextField *)[entityPanel viewWithTag:FPEnvLogTagOdometer];
+        [odometerTf becomeFirstResponder];
+        [ctrl setHasPoppedKeyboard:YES];
+      }
     };
     PEAddlContentSection addlContentSection = ^(PEAddViewEditController *ctrl, UIView *entityFormPanel, FPEnvironmentLog *envlog) {
       FPEnvLogVehicleAndDateDataSourceDelegate *ds =
@@ -4408,9 +4428,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       [ds setSelectedVehicle:vehicleForDownloadedEnvlog];
       [vehicleAndDateTableView reloadData];
     };
-    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(UIView *entityPanel) {
-      UITextField *odometerTf = (UITextField *)[entityPanel viewWithTag:FPEnvLogTagOdometer];
-      [odometerTf becomeFirstResponder];
+    PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityPanel) {
+      if (![ctrl hasPoppedKeyboard]) {
+        UITextField *odometerTf = (UITextField *)[entityPanel viewWithTag:FPEnvLogTagOdometer];
+        [odometerTf becomeFirstResponder];
+        [ctrl setHasPoppedKeyboard:YES];
+      }
     };
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
       [self deselectSelectedRowForTableOnView:ctrl.view tableViewTag:FPEnvLogTagVehicleAndDate];
@@ -4538,6 +4561,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
+                                                      subtitleFitToWidthFactor:1.0
                                                                     isLoggedIn:[APP isUserLoggedIn]];
     return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPEnvironmentLog class]
                                                                     title:@"Odometer Logs"
@@ -4549,7 +4573,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                            cellIdentifier:@"FPEnvironmentLogCell"
                                                            initialObjects:initialEnvLogs
                                                                pageLoader:pageLoader
-                                                           heightForCells:52.0
+                                                           heightForCellsBlk:[self heightForCellsBlk]
                                                           detailViewMaker:envLogDetailViewMaker
                                                                 uitoolkit:_uitoolkit
                                            doesEntityBelongToThisListView:doesEntityBelongToThisListViewBlk
@@ -4612,29 +4636,29 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
+                                                      subtitleFitToWidthFactor:1.0
                                                                     isLoggedIn:[APP isUserLoggedIn]];
-    return [[PEListViewController alloc]
-             initWithClassOfDataSourceObjects:[FPEnvironmentLog class]
-                                        title:@"Odometer Logs"
-                        isPaginatedDataSource:YES
-                              tableCellStyler:tableCellStyler
-                           itemSelectedAction:nil
-                          initialSelectedItem:nil
-                                addItemAction:addEnvLogAction
-                               cellIdentifier:@"FPEnvironmentLogCell"
-                               initialObjects:initialEnvLogs
-                                   pageLoader:pageLoader
-                               heightForCells:52.0
-                              detailViewMaker:envLogDetailViewMaker
-                                    uitoolkit:_uitoolkit
-               doesEntityBelongToThisListView:doesEntityBelongToThisListViewBlk
-                         wouldBeIndexOfEntity:wouldBeIndexBlk
-                              isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                               isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                          itemChildrenCounter:nil
-                          itemChildrenMsgsBlk:nil
-                                  itemDeleter:[self envlogItemDeleterForUser:user]
-                             itemLocalDeleter:[self envlogItemLocalDeleter]];
+    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPEnvironmentLog class]
+                                                                    title:@"Odometer Logs"
+                                                    isPaginatedDataSource:YES
+                                                          tableCellStyler:tableCellStyler
+                                                       itemSelectedAction:nil
+                                                      initialSelectedItem:nil
+                                                            addItemAction:addEnvLogAction
+                                                           cellIdentifier:@"FPEnvironmentLogCell"
+                                                           initialObjects:initialEnvLogs
+                                                               pageLoader:pageLoader
+                                                        heightForCellsBlk:[self heightForCellsBlk]
+                                                          detailViewMaker:envLogDetailViewMaker
+                                                                uitoolkit:_uitoolkit
+                                           doesEntityBelongToThisListView:doesEntityBelongToThisListViewBlk
+                                                     wouldBeIndexOfEntity:wouldBeIndexBlk
+                                                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      itemChildrenCounter:nil
+                                                      itemChildrenMsgsBlk:nil
+                                                              itemDeleter:[self envlogItemDeleterForUser:user]
+                                                         itemLocalDeleter:[self envlogItemLocalDeleter]];
   };
 }
 
@@ -4660,29 +4684,29 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
+                                                      subtitleFitToWidthFactor:1.0
                                                                     isLoggedIn:[APP isUserLoggedIn]];
-    return [[PEListViewController alloc]
-             initWithClassOfDataSourceObjects:[FPEnvironmentLog class]
-                                        title:@"Unsynced Odometer Logs"
-                        isPaginatedDataSource:NO
-                              tableCellStyler:tableCellStyler
-                           itemSelectedAction:nil
-                          initialSelectedItem:nil
-                                addItemAction:nil
-                               cellIdentifier:@"FPEnvironmentLogCell"
-                               initialObjects:pageLoader(nil)
-                                   pageLoader:pageLoader
-                               heightForCells:52.0
-                              detailViewMaker:envLogDetailViewMaker
-                                    uitoolkit:_uitoolkit
-               doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
-                         wouldBeIndexOfEntity:wouldBeIndexBlk
-                              isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
-                               isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
-                          itemChildrenCounter:nil
-                          itemChildrenMsgsBlk:nil
-                                  itemDeleter:[self envlogItemDeleterForUser:user]
-                             itemLocalDeleter:[self envlogItemLocalDeleter]];
+    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPEnvironmentLog class]
+                                                                    title:@"Unsynced Odometer Logs"
+                                                    isPaginatedDataSource:NO
+                                                          tableCellStyler:tableCellStyler
+                                                       itemSelectedAction:nil
+                                                      initialSelectedItem:nil
+                                                            addItemAction:nil
+                                                           cellIdentifier:@"FPEnvironmentLogCell"
+                                                           initialObjects:pageLoader(nil)
+                                                               pageLoader:pageLoader
+                                                        heightForCellsBlk:[self heightForCellsBlk]
+                                                          detailViewMaker:envLogDetailViewMaker
+                                                                uitoolkit:_uitoolkit
+                                           doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
+                                                     wouldBeIndexOfEntity:wouldBeIndexBlk
+                                                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      itemChildrenCounter:nil
+                                                      itemChildrenMsgsBlk:nil
+                                                              itemDeleter:[self envlogItemDeleterForUser:user]
+                                                         itemLocalDeleter:[self envlogItemLocalDeleter]];
   };
 }
 
