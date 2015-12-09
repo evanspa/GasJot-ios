@@ -74,7 +74,7 @@
 
 #pragma mark - Make Content
 
-- (NSArray *)makeContent {
+- (NSArray *)makeContentWithOldContentPanel:(UIView *)existingContentPanel {
   if ([APP isUserLoggedIn]) {
     return [self makeDoesHaveAuthTokenContent];
   } else {
@@ -137,8 +137,8 @@
       NSString *docsDir = [paths objectAtIndex:0];
       NSString *vehiclesFileName = [NSString stringWithFormat:@"%@-vehicles.csv", [dateFormatter stringFromDate:now]];
       NSString *gasStationsFileName = [NSString stringWithFormat:@"%@-gas-stations.csv", [dateFormatter stringFromDate:now]];
-       NSString *gasLogsFileName = [NSString stringWithFormat:@"%@-gas-logs.csv", [dateFormatter stringFromDate:now]];
-       NSString *odometerLogsFileName = [NSString stringWithFormat:@"%@-odometer-logs.csv", [dateFormatter stringFromDate:now]];
+      NSString *gasLogsFileName = [NSString stringWithFormat:@"%@-gas-logs.csv", [dateFormatter stringFromDate:now]];
+      NSString *odometerLogsFileName = [NSString stringWithFormat:@"%@-odometer-logs.csv", [dateFormatter stringFromDate:now]];
       [_coordDao.localDao exportWithPathToVehiclesFile:[docsDir stringByAppendingPathComponent:vehiclesFileName]
                                        gasStationsFile:[docsDir stringByAppendingPathComponent:gasStationsFileName]
                                            gasLogsFile:[docsDir stringByAppendingPathComponent:gasLogsFileName]

@@ -319,7 +319,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
 
 #pragma mark - Make Content
 
-- (NSArray *)makeContent {
+- (NSArray *)makeContentWithOldContentPanel:(UIView *)existingContentPanel {
   UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0.0];
   UILabel *entityLabel = nil;
   if (_entityTypeLabelText && _entityNameBlk && _entity) {

@@ -60,7 +60,7 @@ NSString * const FPStatComparisonCellIdentifier = @"FPStatComparisonCellIdentifi
 
 #pragma mark - Make Content
 
-- (NSArray *)makeContent {
+- (NSArray *)makeContentWithOldContentPanel:(UIView *)existingContentPanel {
   NSMutableArray *rowData = [NSMutableArray array];
   NSMutableArray *nilRowData = [NSMutableArray array];
   NSArray *entities = _entitiesToCompareBlk();

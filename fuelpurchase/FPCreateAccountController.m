@@ -37,6 +37,13 @@
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
 #endif
 
+typedef NS_ENUM (NSInteger, FPCreateAccountTag) {
+  FPCreateAccountTagName = 1,
+  FPCreateAccountTagEmail,
+  FPCreateAccountTagPassword,
+  FPCreateAccountTagConfirmPassword
+};
+
 @interface FPCreateAccountController ()
 @property (nonatomic) NSUInteger formStateMaskForAcctCreation;
 @end
@@ -97,7 +104,7 @@
 
 #pragma mark - Make Content
 
-- (NSArray *)makeContent {
+- (NSArray *)makeContentWithOldContentPanel:(UIView *)existingContentPanel {
   UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0.0];
   CGFloat leftPadding = 8.0;
   UILabel *createAccountMsgLabel = [PEUIUtils labelWithKey:@"From here you can create a remote Gas Jot account. This will \
@@ -111,12 +118,21 @@ enable your data records to be synced to Gas Jot's central server so you can acc
   
   TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:contentPanel];
   _fullNameTf = tfMaker(@"unauth.start.ca.fullnametf.pht");
+  [_fullNameTf setTag:FPCreateAccountTagName];
   _emailTf = tfMaker(@"unauth.start.ca.emailtf.pht");
+  [_emailTf setTag:FPCreateAccountTagEmail];
   _passwordTf = tfMaker(@"unauth.start.ca.pwdtf.pht");
+  [_passwordTf setTag:FPCreateAccountTagPassword];
   [_passwordTf setSecureTextEntry:YES];
   _confirmPasswordTf = tfMaker(@"unauth.start.ca.pwdtf.cpht");
   [_confirmPasswordTf setSecureTextEntry:YES];
-  
+  [_confirmPasswordTf setTag:FPCreateAccountTagConfirmPassword];
+  if (existingContentPanel) {
+    [_fullNameTf setText:[(UITextField *)[existingContentPanel viewWithTag:FPCreateAccountTagName] text]];
+    [_emailTf setText:[(UITextField *)[existingContentPanel viewWithTag:FPCreateAccountTagEmail] text]];
+    [_passwordTf setText:[(UITextField *)[existingContentPanel viewWithTag:FPCreateAccountTagPassword] text]];
+    [_confirmPasswordTf setText:[(UITextField *)[existingContentPanel viewWithTag:FPCreateAccountTagConfirmPassword] text]];
+  }
   // place views
   [PEUIUtils placeView:createAccountMsgPanel
                atTopOf:contentPanel

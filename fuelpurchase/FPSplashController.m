@@ -141,7 +141,7 @@ CGFloat const FPSPLASH_CONTENT_HEIGH_FACTOR = 0.65;
 
 #pragma mark - Make Content
 
-- (NSArray *)makeContent {
+- (NSArray *)makeContentWithOldContentPanel:(UIView *)existingContentPanel {
   UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0.0];
   iCarousel *carousel = [[iCarousel alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
   [carousel setDataSource:self];

@@ -440,7 +440,8 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  if (_isAdd || _isEdit) {
+  if (_isEdit) {
+    _panelToEntityBinder(_entityFormPanel, _entity); // TODO - make sure this call is needed and works
     UIView *tmpNewFormPanel = _entityFormPanelMaker(self);
     [_entityFormPanel removeFromSuperview];
     _entityFormPanel = tmpNewFormPanel;
@@ -449,9 +450,19 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
     if (_prepareUIForUserInteractionBlk) {
       _prepareUIForUserInteractionBlk(self, _entityFormPanel);
     }
+  } else if (_isAdd) {
+    id tmpEntity = _entityMaker(_entityFormPanel);
+    UIView *tmpNewFormPanel = _entityFormPanelMaker(self);
+    [_entityFormPanel removeFromSuperview];
+    _entityFormPanel = tmpNewFormPanel;
+    [PEUIUtils placeView:_entityFormPanel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
+    _entityToPanelBinder(tmpEntity, _entityFormPanel);
+    if (_prepareUIForUserInteractionBlk) {
+      _prepareUIForUserInteractionBlk(self, _entityFormPanel);
+    }
   } else {
     [_entityViewPanel removeFromSuperview];
-    _entityViewPanel = _entityViewPanel = _entityViewPanelMaker(self, _parentEntity, _entity);
+    _entityViewPanel = _entityViewPanelMaker(self, _parentEntity, _entity);
     [PEUIUtils placeView:_entityViewPanel atTopOf:self.view withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:0.0 hpadding:0.0];
   }
   if (_viewDidAppearBlk) {
@@ -1106,10 +1117,10 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
           NSString *message;
           NSArray *subErrors = errorsForUpload[0][2];
           if ([subErrors count] > 1) {
-            message = @"There were problems uploading to the Gas Jot server.  The errors are as follows:";
+            message = @"There were problems uploading to the server.  The errors are as follows:";
             title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
           } else {
-            message = @"There was a problem uploading to the Gas Jot server.  The error is as follows:";
+            message = @"There was a problem uploading to the server.  The error is as follows:";
             title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
           }
           JGActionSheetSection *becameUnauthSection = nil;
@@ -1154,7 +1165,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                               NSString *mainMsgTitle,
                                                               NSString *recordTitle) {
     handleHudProgress(percentComplete);
-    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                  [NSNumber numberWithBool:NO],
                                  @[[NSString stringWithFormat:@"Not found."]],
                                  [NSNumber numberWithBool:NO],
@@ -1169,7 +1180,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                              NSString *mainMsgTitle,
                                                              NSString *recordTitle) {
     handleHudProgress(percentComplete);
-    [successMessageTitlesForUpload addObject:[NSString stringWithFormat:@"%@ saved to the Gas Jot server.", recordTitle]];
+    [successMessageTitlesForUpload addObject:[NSString stringWithFormat:@"%@ saved to the server.", recordTitle]];
     if (percentCompleteUploadingEntity == 1.0) {
       uploadDone(mainMsgTitle);
     }
@@ -1179,7 +1190,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                           NSString *recordTitle,
                                                                           NSDate *retryAfter) {
     handleHudProgress(percentComplete);
-    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                  [NSNumber numberWithBool:NO],
                                  @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
                                  [NSNumber numberWithBool:YES],
@@ -1194,7 +1205,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                   NSString *mainMsgTitle,
                                                                   NSString *recordTitle) {
     handleHudProgress(percentComplete);
-    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                  [NSNumber numberWithBool:NO],
                                  @[@"Temporary server error."],
                                  [NSNumber numberWithBool:NO],
@@ -1215,7 +1226,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
       computedErrMsgs = @[@"Unknown server error."];
       isErrorUserFixable = NO;
     }
-    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+    [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                  [NSNumber numberWithBool:isErrorUserFixable],
                                  computedErrMsgs,
                                  [NSNumber numberWithBool:NO],
@@ -1687,7 +1698,7 @@ merge conflicts.";
         [self disableUi];
         HUD.delegate = self;
         HUD.mode = _syncImmediateMBProgressHUDMode;
-        HUD.labelText = @"Saving to the Gas Jot server.";
+        HUD.labelText = @"Saving to the server.";
         __block float percentCompleteUploadingEntity = 0.0;
         HUD.progress = percentCompleteUploadingEntity;
         NSMutableArray *errorsForUpload = [NSMutableArray array];
@@ -1759,7 +1770,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                 NSArray *subErrors = errorsForUpload[0][2]; // because only single-record edit, we can skip the "not saved" msg title, and just display the sub-errors
                 if ([subErrors count] > 1) {
                   textToAccent = @"they have been saved locally";
-                  messageTemplate = @"Although there were problems syncing your edits to the Gas Jot server, %@.  The errors are as follows:";
+                  messageTemplate = @"Although there were problems syncing your edits to the server, %@.  The errors are as follows:";
                   fixNowActionTitle = @"I'll fix them now.";
                   fixLaterActionTitle = @"I'll fix them later.";
                   dealWithLaterActionTitle = @"I'll try syncing them later.";
@@ -1767,7 +1778,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                   title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
                 } else {
                   textToAccent = @"they have been saved locally";
-                  messageTemplate = @"Although there was a problem syncing your edits to the Gas Jot server, %@.  The error is as follows:";
+                  messageTemplate = @"Although there was a problem syncing your edits to the server, %@.  The error is as follows:";
                   fixLaterActionTitle = @"I'll fix it later.";
                   fixNowActionTitle = @"I'll fix it now.";
                   dealWithLaterActionTitle = @"I'll try syncing it later.";
@@ -1868,7 +1879,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                   NSString *mainMsgTitle,
                                                                   NSString *recordTitle) {
           handleHudProgress(percentComplete);
-          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[[NSString stringWithFormat:@"Not found."]],
                                        [NSNumber numberWithBool:NO],
@@ -1883,7 +1894,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                  NSString *mainMsgTitle,
                                                                  NSString *recordTitle) {
           handleHudProgress(percentComplete);
-          [successMessageTitlesForUpload addObject:[NSString stringWithFormat:@"%@ saved to the Gas Jot server.", recordTitle]];
+          [successMessageTitlesForUpload addObject:[NSString stringWithFormat:@"%@ saved to the server.", recordTitle]];
           if (percentCompleteUploadingEntity == 1.0) {
             immediateSyncDone(mainMsgTitle);
           }
@@ -1893,7 +1904,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                               NSString *recordTitle,
                                                                               NSDate *retryAfter) {
           handleHudProgress(percentComplete);
-          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
                                        [NSNumber numberWithBool:YES],
@@ -1908,7 +1919,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                        NSString *mainMsgTitle,
                                                                        NSString *recordTitle) {
           handleHudProgress(percentComplete);
-          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[@"Temporary server error."],
                                        [NSNumber numberWithBool:NO],
@@ -1929,7 +1940,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
             computedErrMsgs = @[@"Unknown server error."];
             isErrorUserFixable = NO;
           }
-          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                        [NSNumber numberWithBool:isErrorUserFixable],
                                        computedErrMsgs,
                                        [NSNumber numberWithBool:NO],
@@ -1945,7 +1956,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                       NSString *recordTitle,
                                                                       id latestEntity) {
           handleHudProgress(percentComplete);
-          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[[NSString stringWithFormat:@"Conflict."]],
                                        [NSNumber numberWithBool:NO],
@@ -1961,7 +1972,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                   NSString *recordTitle) {
           receivedAuthReqdErrorOnSaveAttempt = YES;
           handleHudProgress(percentComplete);
-          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[@"Authentication required."],
                                        [NSNumber numberWithBool:NO],
@@ -1977,7 +1988,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
                                                                                          NSString *recordTitle,
                                                                                          NSString *dependencyErrMsg) {
           handleHudProgress(percentComplete);
-          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+          [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                        [NSNumber numberWithBool:NO],
                                        @[dependencyErrMsg],
                                        [NSNumber numberWithBool:NO],
@@ -2127,7 +2138,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
       [self disableUi];
       HUD.delegate = self;
       HUD.mode = _syncImmediateMBProgressHUDMode;
-      HUD.labelText = @"Saving to the Gas Jot server...";
+      HUD.labelText = @"Saving to the server...";
       __block float percentCompleteUploadingEntity = 0.0;
       HUD.progress = percentCompleteUploadingEntity;
       NSMutableArray *errorsForUpload = [NSMutableArray array];
@@ -2149,9 +2160,9 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
               [HUD hide:YES afterDelay:0];
               [PEUIUtils showSuccessAlertWithMsgs:successMessageTitlesForUpload
                                             title:[NSString stringWithFormat:@"%@ saved.", mainMsgTitle]
-                                 alertDescription:[[NSAttributedString alloc] initWithString:@"Your records have been successfully saved to the Gas Jot server."]
+                                 alertDescription:[[NSAttributedString alloc] initWithString:@"Your records have been successfully saved to the server."]
                          additionalContentSection:(_addlContentSection != nil) ? _addlContentSection(self, _entityFormPanel, _newEntity) : nil
-                                         topInset:50.0
+                                         topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                       buttonTitle:@"Okay."
                                      buttonAction:^{
                                        notificationSenderForAdd(_newEntity);
@@ -2238,7 +2249,7 @@ locally.  Try uploading it later.";
               }
               if (!areAllBusyErrors()) {
                 NSString *title = [NSString stringWithFormat:@"Mixed results saving %@.", [mainMsgTitle lowercaseString]];
-                NSAttributedString *attrMessage = [PEUIUtils attributedTextWithTemplate:@"Some of the edits were saved to the Gas Jot server and some were not. \
+                NSAttributedString *attrMessage = [PEUIUtils attributedTextWithTemplate:@"Some of the edits were saved to the server and some were not. \
 The ones that did not %@ and will need to be fixed individually."
                                                        textToAccent:@"have been saved locally"
                                                      accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]];
@@ -2280,7 +2291,7 @@ The ones that did not %@ and will need to be fixed individually."
               }
               if (isMultiStepAdd) {
                 NSString *textToAccent = @"they have been saved locally";
-                NSString *messageTemplate = @"Although there were problems saving your edits to the Gas Jot server, %@.  The details are as follows:";
+                NSString *messageTemplate = @"Although there were problems saving your edits to the server, %@.  The details are as follows:";
                 fixNowActionTitle = @"I'll fix them now.";
                 fixLaterActionTitle = @"I'll fix them later.";
                 cancelActionTitle = @"Forget it.  Just cancel them.";
@@ -2302,12 +2313,12 @@ The ones that did not %@ and will need to be fixed individually."
                 NSArray *subErrors = errorsForUpload[0][2]; // because only single-record add, we can skip the "not saved" msg title, and just display the sub-errors
                 if ([subErrors count] > 1) {
                   title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
-                  messageTemplate = @"Although there were problems saving your edits to the Gas Jot server, %@.  The errors are as follows:";
+                  messageTemplate = @"Although there were problems saving your edits to the server, %@.  The errors are as follows:";
                   fixNowActionTitle = @"I'll fix them now.";
                   fixLaterActionTitle = @"I'll fix them later.";
                 } else {
                   title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
-                  messageTemplate = @"Although there was a problem saving your edits to the Gas Jot server, %@.  The error is as follows:";
+                  messageTemplate = @"Although there was a problem saving your edits to the server, %@.  The error is as follows:";
                   fixLaterActionTitle = @"I'll fix it later.";
                   fixNowActionTitle = @"I'll fix it now.";
                 }
@@ -2388,7 +2399,7 @@ The ones that did not %@ and will need to be fixed individually."
                                                                 NSString *mainMsgTitle,
                                                                 NSString *recordTitle) {
         handleHudProgress(percentComplete);
-        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                      [NSNumber numberWithBool:NO],
                                      @[[NSString stringWithFormat:@"Not found."]],
                                      [NSNumber numberWithBool:NO]]];
@@ -2400,7 +2411,7 @@ The ones that did not %@ and will need to be fixed individually."
                                                                NSString *mainMsgTitle,
                                                                NSString *recordTitle) {
         handleHudProgress(percentComplete);
-        [successMessageTitlesForUpload addObject:[NSString stringWithFormat:@"%@ saved to the Gas Jot server.", recordTitle]];
+        [successMessageTitlesForUpload addObject:[NSString stringWithFormat:@"%@ saved to the server.", recordTitle]];
         if (percentCompleteUploadingEntity == 1.0) {
           immediateSaveDone(mainMsgTitle);
         }
@@ -2410,7 +2421,7 @@ The ones that did not %@ and will need to be fixed individually."
                                                                             NSString *recordTitle,
                                                                             NSDate *retryAfter) {
         handleHudProgress(percentComplete);
-        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                      [NSNumber numberWithBool:NO],
                                      @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
                                      [NSNumber numberWithBool:YES]]];
@@ -2422,7 +2433,7 @@ The ones that did not %@ and will need to be fixed individually."
                                                                     NSString *mainMsgTitle,
                                                                     NSString *recordTitle) {
         handleHudProgress(percentComplete);
-        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                      [NSNumber numberWithBool:NO],
                                      @[@"Temporary server error."],
                                      [NSNumber numberWithBool:NO]]];
@@ -2440,7 +2451,7 @@ The ones that did not %@ and will need to be fixed individually."
           computedErrMsgs = @[@"Unknown server error."];
           isErrorUserFixable = NO;
         }
-        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                      [NSNumber numberWithBool:isErrorUserFixable],
                                      computedErrMsgs,
                                      [NSNumber numberWithBool:NO]]];
@@ -2453,7 +2464,7 @@ The ones that did not %@ and will need to be fixed individually."
                                                                 NSString *recordTitle) {
         receivedAuthReqdErrorOnAddAttempt = YES;
         handleHudProgress(percentComplete);
-        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                      [NSNumber numberWithBool:NO],
                                      @[@"Authentication required."],
                                      [NSNumber numberWithBool:NO]]];
@@ -2466,7 +2477,7 @@ The ones that did not %@ and will need to be fixed individually."
                                                                                       NSString *recordTitle,
                                                                                       NSString *dependencyErrMsg) {
         handleHudProgress(percentComplete);
-        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the Gas Jot server.", recordTitle],
+        [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                      [NSNumber numberWithBool:NO],
                                      @[dependencyErrMsg],
                                      [NSNumber numberWithBool:NO]]];

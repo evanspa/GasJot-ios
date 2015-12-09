@@ -85,7 +85,7 @@ mode."
 
 #pragma mark - Make Content
 
-- (NSArray *)makeContent {
+- (NSArray *)makeContentWithOldContentPanel:(UIView *)existingContentPanel {
   NSInteger numEipVehicles = [_coordDao numUnsyncedVehiclesForUser:_user];
   NSInteger numEipFuelStations = [_coordDao numUnsyncedFuelStationsForUser:_user];
   NSInteger numEipFpLogs = [_coordDao numUnsyncedFuelPurchaseLogsForUser:_user];

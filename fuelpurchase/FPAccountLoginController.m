@@ -38,6 +38,11 @@
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
 #endif
 
+typedef NS_ENUM (NSInteger, FPLoginTag) {
+  FPLoginTagEmail = 1,
+  FPloginTagPassword
+};
+
 @interface FPAccountLoginController ()
 @property (nonatomic) NSUInteger formStateMaskForSignIn;
 @end
@@ -104,7 +109,7 @@
 
 #pragma mark - Make Content 
 
-- (NSArray *)makeContent {
+- (NSArray *)makeContentWithOldContentPanel:(UIView *)existingContentPanel {
   UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0.0];
   CGFloat leftPadding = 8.0;
   UILabel *signInMsgLabel = [PEUIUtils labelWithKey:@"From here you can log into your remote \
@@ -117,8 +122,14 @@ Gas Jot account, connecting this device to it.  Your Gas Jot data will be downlo
   UIView *signInMsgPanel = [PEUIUtils leftPadView:signInMsgLabel padding:leftPadding];
   TextfieldMaker tfMaker = [_uitoolkit textfieldMakerForWidthOf:1.0 relativeTo:contentPanel];
   _emailTf = tfMaker(@"unauth.start.signin.emailtf.pht");
+  [_emailTf setTag:FPLoginTagEmail];
   _passwordTf = tfMaker(@"unauth.start.signin.pwdtf.pht");
   [_passwordTf setSecureTextEntry:YES];
+  [_passwordTf setTag:FPloginTagPassword];
+  if (existingContentPanel) {
+    [_emailTf setText:[(UITextField *)[existingContentPanel viewWithTag:FPLoginTagEmail] text]];
+    [_passwordTf setText:[(UITextField *)[existingContentPanel viewWithTag:FPloginTagPassword] text]];
+  }
   UILabel *instructionLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"Enter your credentials and tap %@."
                                                                                          textToAccent:@"Log In"
                                                                                        accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]]

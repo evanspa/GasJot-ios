@@ -47,7 +47,7 @@
 
 #pragma mark - Make Content
 
-- (NSArray *)makeContent {
+- (NSArray *)makeContentWithOldContentPanel:(UIView *)existingContentPanel {
   UILabel *entityLabel = nil;
   if (_entityNameBlk) {
     NSString *entityName = [FPUtils truncatedText:_entityNameBlk(_entity) maxLength:27];

@@ -7,6 +7,7 @@
 //
 
 #import "FPFuelStationCoordinatesTableDataSource.h"
+#import <PEObjc-Commons/PEUtils.h>
 
 @implementation FPFuelStationCoordinatesTableDataSource
 
@@ -20,6 +21,17 @@
     _longitude = longitude;
   }
   return self;
+}
+
+#pragma mark - Helpers
+
+- (NSString *)descriptionForCoordinate:(NSDecimalNumber *)coordinate {
+  if (![PEUtils isNil:coordinate]) {
+    if (![coordinate isEqualToNumber:[NSDecimalNumber notANumber]]) {
+      return [coordinate description];
+    }
+  }
+  return @"";
 }
 
 #pragma mark - Table view data source
@@ -41,11 +53,11 @@ titleForHeaderInSection:(NSInteger)section {
   switch ([indexPath row]) {
     case 0:
       [[cell textLabel] setText:@"Latitude"];
-      [[cell detailTextLabel] setText:(_latitude ? [_latitude description] : @"")];
+      [[cell detailTextLabel] setText:[self descriptionForCoordinate:_latitude]];
       break;
     default:
       [[cell textLabel] setText:@"Longitude"];
-      [[cell detailTextLabel] setText:(_longitude ? [_longitude description] : @"")];
+      [[cell detailTextLabel] setText:[self descriptionForCoordinate:_longitude]];
       break;
   }
   return cell;

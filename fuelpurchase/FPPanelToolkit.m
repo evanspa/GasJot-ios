@@ -1301,7 +1301,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
                 vpadding:8.0
                 hpadding:8.0];
     totalHeight += useCurrentLocationBtn.frame.size.height + 8.0;
-    UIButton *recomputeCoordsBtn = [PEUIUtils buttonWithKey:@"Compute coordinates from address above"
+    UIButton *recomputeCoordsBtn = [PEUIUtils buttonWithKey:@"Compute coordinates from\nabove address"
                                                        font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                             backgroundColor:[UIColor concreteColor]
                                                   textColor:[UIColor whiteColor]
@@ -1312,6 +1312,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
                                                cornerRadius:5.0
                                                      target:nil
                                                      action:nil];
+    recomputeCoordsBtn.titleLabel.textAlignment = NSTextAlignmentLeft;
     [recomputeCoordsBtn setTag:FPFuelStationTagRecomputeCoordinates];
     [recomputeCoordsBtn bk_addEventHandler:^(id sender) {
       [parentViewController.view endEditing:YES];
@@ -1844,7 +1845,6 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       if (!vehicle.isDiesel) {
         UITextField *octaneTf = (UITextField *)[parentView viewWithTag:FPFpLogTagOctane];
         if (!octaneTf) {
-          [octaneTf setKeyboardType:UIKeyboardTypeNumberPad];
           octaneTf = tfMaker(@"Octane", FPFpLogTagOctane);
         }
         NSNumber *defaultOctane = [vehicle defaultOctane];
@@ -1853,14 +1853,15 @@ To compute your location, you need to enable location services for Gas Jot.  If 
         } else {
           [octaneTf setText:@""];
         }
+        [octaneTf setKeyboardType:UIKeyboardTypeNumberPad];
         components[@(FPFpLogTagOctane)] = octaneTf;
       }
     } else {
       UITextField *octaneTf = (UITextField *)[parentView viewWithTag:FPFpLogTagOctane];
       if (!octaneTf) {
-        [octaneTf setKeyboardType:UIKeyboardTypeNumberPad];
         octaneTf = tfMaker(@"Octane", FPFpLogTagOctane);
       }
+      [octaneTf setKeyboardType:UIKeyboardTypeNumberPad];
       components[@(FPFpLogTagOctane)] = octaneTf;
     }
     UITextField *odometerTf = (UITextField *)[parentView viewWithTag:FPFplogTagOdometer];

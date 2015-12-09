@@ -29,7 +29,7 @@
 
 #pragma mark - Make Content
 
-- (NSArray *)makeContent { return nil; }
+- (NSArray *)makeContentWithOldContentPanel:(UIView *)existingContentPanel { return nil; }
 
 #pragma mark - Reset Scroll Offset
 
@@ -112,7 +112,7 @@
                                            selector:@selector(changeTextSize:)
                                                name:UIContentSizeCategoryDidChangeNotification
                                              object:nil];
-  NSArray *content = [self makeContent];
+  NSArray *content = [self makeContentWithOldContentPanel:nil];
   UIView *contentPanel = content[0];
   BOOL scrolling = [(NSNumber *)content[1] boolValue];
   BOOL center = [(NSNumber *) content[2] boolValue];
@@ -126,8 +126,8 @@
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   if (!_viewJustLoaded) {
+    NSArray *content = [self makeContentWithOldContentPanel:_displayPanel];
     [_displayPanel removeFromSuperview];
-    NSArray *content = [self makeContent];
     UIView *contentPanel = content[0];
     BOOL scrolling = [(NSNumber *)content[1] boolValue];
     BOOL center = [(NSNumber *) content[2] boolValue];

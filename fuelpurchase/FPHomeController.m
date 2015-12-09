@@ -928,7 +928,7 @@ alignmentRelativeToView:self.view
 
 #pragma mark - Make Content
 
-- (NSArray *)makeContent {
+- (NSArray *)makeContentWithOldContentPanel:(UIView *)existingContentPanel {
   switch (_currentState) {
     case FPHomeStateNoVehicles: {
       [[self.navigationController navigationBar] setHidden:YES];

@@ -16,7 +16,7 @@
 
 #pragma mark - Make Content
 
-- (NSArray *)makeContent;
+- (NSArray *)makeContentWithOldContentPanel:(UIView *)existingContentPanel;
 
 #pragma mark - Reset Scroll Offset
 

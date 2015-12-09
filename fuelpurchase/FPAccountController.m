@@ -56,7 +56,7 @@ NSInteger const kAccountStatusPanelTag = 12;
 
 #pragma mark - Make Content
 
-- (NSArray *)makeContent {
+- (NSArray *)makeContentWithOldContentPanel:(UIView *)existingContentPanel {
   if ([APP isUserLoggedIn]) {
     if ([APP doesUserHaveValidAuthToken]) {
       NSArray *content = [self makeDoesHaveAuthTokenContent];
@@ -405,7 +405,7 @@ alignmentRelativeToView:contentPanel
               hpadding:0.0];
   totalHeight += createAcctMsgLbl.frame.size.height + 8.0;
   [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
-  return @[contentPanel, @(NO), @(NO)];
+  return @[contentPanel, @(NO), @(YES)];
 }
 
 #pragma mark - Re-authenticate screen
