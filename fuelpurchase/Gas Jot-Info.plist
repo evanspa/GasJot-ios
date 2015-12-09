@@ -21,7 +21,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.4.0</string>
+	<string>1.4.1</string>
 	<key>FP Authentication Strength for Login Token</key>
 	<real>0.29999999999999999</real>
 	<key>FP Authentication scheme</key>
