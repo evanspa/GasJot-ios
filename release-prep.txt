@@ -1,0 +1,8 @@
+Do the following in preparation for a release:
+----------------------------------------------
++ Set scheme to 'Release'
++ manually increment the "version" config value from within Xcode (Gas Jot target
+-> 'Version' field on the 'General' screen).  You have to do this manually
+because the agvtool only seems to update the 'Build' value.
++ commit all code to git
++ run "./release <VERSION>"
