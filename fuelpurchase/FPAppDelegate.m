@@ -370,7 +370,7 @@ shouldSelectViewController:(UIViewController *)viewController {
                                 horizontalPaddingForButtons:25
                                        fontForTextfieldsBlk:^{ return [UIFont preferredFontForTextStyle:UIFontTextStyleBody]; }
                                          colorForTextfields:[UIColor whiteColor]
-                                  heightFactorForTextfields:1.7
+                                  heightFactorForTextfields:1.9
                                leftViewPaddingForTextfields:10
                                   fontForTableCellTitlesBlk:^{ return [UIFont preferredFontForTextStyle:UIFontTextStyleBody]; }
                                     colorForTableCellTitles:[UIColor blackColor]

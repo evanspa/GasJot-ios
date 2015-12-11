@@ -427,6 +427,12 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
   [self viewDidAppear:YES];
 }
 
+#pragma mark - Hide Keyboard
+
+- (void)hideKeyboard {
+  [self.view endEditing:YES];
+}
+
 #pragma mark - View Controller Lifecyle
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -476,6 +482,9 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
                                            selector:@selector(changeTextSize:)
                                                name:UIContentSizeCategoryDidChangeNotification
                                              object:nil];
+  UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)];
+  [gestureRecognizer setCancelsTouchesInView:NO];
+  [self.view addGestureRecognizer:gestureRecognizer];
   [[self view] setBackgroundColor:[_uitoolkit colorForWindows]];
   UINavigationItem *navItem = [self navigationItem];
   _backButton = [navItem leftBarButtonItem];

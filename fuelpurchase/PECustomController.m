@@ -37,6 +37,12 @@
   _scrollContentOffset = CGPointMake(0.0, 0.0);
 }
 
+#pragma mark - Hide Keyboard
+
+- (void)hideKeyboard {
+  [self.view endEditing:YES];
+}
+
 #pragma mark - Display Panel
 
 - (UIView *)makeDisplayPanelWithContentPanel:(UIView *)contentPanel
@@ -46,6 +52,8 @@
                                        scrolling:scrolling
                              scrollContentOffset:_scrollContentOffset
                                   scrollDelegate:self
+                            delaysContentTouches:YES
+                                         bounces:YES
                                 notScrollViewBlk:^{ [self resetScrollOffset]; }
                                         centered:center
                                       controller:self];
@@ -112,6 +120,9 @@
                                            selector:@selector(changeTextSize:)
                                                name:UIContentSizeCategoryDidChangeNotification
                                              object:nil];
+  UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)];
+  [gestureRecognizer setCancelsTouchesInView:NO];
+  [self.view addGestureRecognizer:gestureRecognizer];
   NSArray *content = [self makeContentWithOldContentPanel:nil];
   UIView *contentPanel = content[0];
   BOOL scrolling = [(NSNumber *)content[1] boolValue];
@@ -119,6 +130,7 @@
   _displayPanel = [self makeDisplayPanelWithContentPanel:contentPanel
                                            withScrolling:scrolling
                                                   center:center];
+  
   [self placeDisplayPanelWithCentering:center];
   _viewJustLoaded = YES;
 }

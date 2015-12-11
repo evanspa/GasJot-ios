@@ -14,6 +14,7 @@
 @implementation FPEnvLogVehicleAndDateDataSourceDelegate {
   FPCoordinatorDao *_coordDao;
   FPScreenToolkit *_screenToolkit;
+  PEUIToolkit *_uitoolkit;
   FPUser *_user;
   UIViewController *_controllerCtx;
   PEItemSelectedAction _vehicleSelectedAction;
@@ -42,6 +43,7 @@ displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
     _displayDisclosureIndicators = displayDisclosureIndicators;
     _user = user;
     _screenToolkit = screenToolkit;
+    _uitoolkit = [screenToolkit uitoolkit];
     __weak FPEnvLogVehicleAndDateDataSourceDelegate *weakSelf = self;
     _vehicleSelectedAction = ^(FPVehicle *selectedVehicle, NSIndexPath *indexPath, UIViewController *selectionController) {
       [weakSelf setSelectedVehicle:selectedVehicle];
@@ -82,6 +84,24 @@ heightForHeaderInSection:(NSInteger)section {
     return 15;
   }
   return 0;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView
+heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+  switch ([indexPath section]) {
+    case 0:  // vehicle
+      //return 50;
+      return [PEUIUtils sizeOfText:@""
+                          withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height +
+      _uitoolkit.verticalPaddingForButtons + 15.0;
+      break;
+    default: // log date
+      //return 45;
+      return [PEUIUtils sizeOfText:@""
+                          withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height +
+      _uitoolkit.verticalPaddingForButtons + 15.0;
+      break;
+  }
 }
 
 #pragma mark - Table view data source

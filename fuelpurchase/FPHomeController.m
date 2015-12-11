@@ -137,7 +137,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
     case FPHomeGasCostPerMileChartTag: {
       dataPoint = _gasCostPerMileDataSet[horizontalIndex];
       break;
-    }    
+    }
   }
   if (dataPoint) {
     if ([dataPoint count] == 2) {
@@ -657,10 +657,10 @@ alignmentRelativeToView:self.view
 - (NSArray *)noLogsYetContent {
   UILabel *msgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"%@ Create Logs"
                                                                                  textToAccent:@"Next:"
-                                                                               accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle3]
+                                                                               accentTextFont:[UIFont boldSystemFontOfSize:26.0]
                                                                               accentTextColor:[UIColor blackColor]]
-                                                        font:[UIFont preferredFontForTextStyle:UIFontTextStyleTitle3]
-                                    fontForHeightCalculation:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle3] 
+                                                        font:[UIFont systemFontOfSize:26.0]
+                                    fontForHeightCalculation:[UIFont boldSystemFontOfSize:26.0]
                                              backgroundColor:[UIColor clearColor]
                                                    textColor:[UIColor fpAppBlue]
                                          verticalTextPadding:3.0
@@ -674,7 +674,7 @@ alignmentRelativeToView:self.view
                                          fitToWidth:(0.90 * self.view.frame.size.width)];
   [msgLabel2 setTextAlignment:NSTextAlignmentCenter];
   UIButton *gasLogBtn = [PEUIUtils buttonWithKey:@"Create Gas Log"
-                                            font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle3]
+                                            font:[UIFont boldSystemFontOfSize:22.0]
                                  backgroundColor:[UIColor peterRiverColor]
                                        textColor:[UIColor whiteColor]
                     disabledStateBackgroundColor:nil
@@ -702,7 +702,7 @@ alignmentRelativeToView:self.view
                                             completion:nil];
   } forControlEvents:UIControlEventTouchUpInside];
   UIButton *odometerLogBtn = [PEUIUtils buttonWithKey:@"Create Odometer Log"
-                                                 font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle3]
+                                                 font:[UIFont boldSystemFontOfSize:22.0]
                                       backgroundColor:[UIColor peterRiverColor]
                                             textColor:[UIColor whiteColor]
                          disabledStateBackgroundColor:nil
@@ -757,7 +757,7 @@ alignmentRelativeToView:self.view
     [loginMsgPanel removeFromSuperview];
     loginMsgPanel = createAndPlaceLoginMsgPanel(0.85);
   }*/
-  [PEUIUtils placeView:loginArrowImgView atBottomOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:0.0 hpadding:15.0];
+  [PEUIUtils placeView:loginArrowImgView atBottomOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:0.0 hpadding:25.0];
   UILabel *jotBtnMsgLabel = [PEUIUtils labelWithKey:@"You can create any type of record from the Jot button at any time."
                                                font:[UIFont preferredFontForTextStyle:UIFontTextStyleCaption1]
                                     backgroundColor:[UIColor clearColor]
@@ -775,14 +775,14 @@ alignmentRelativeToView:self.view
   
   UILabel *introMsgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"%@ Create a Vehicle"
                                                                                       textToAccent:@"Step 1:"
-                                                                                    accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle3]
+                                                                                    accentTextFont:[UIFont boldSystemFontOfSize:26.0]
                                                                                    accentTextColor:[UIColor blackColor]]
-                                                        font:[UIFont preferredFontForTextStyle:UIFontTextStyleTitle3]
-                                    fontForHeightCalculation:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle3]
+                                                        font:[UIFont systemFontOfSize:26.0]
+                                    fontForHeightCalculation:[UIFont boldSystemFontOfSize:26.0]
                                              backgroundColor:[UIColor clearColor]
                                                    textColor:[UIColor fpAppBlue]
-                                         verticalTextPadding:3.0
-                                                  fitToWidth:(0.90 * self.view.frame.size.width)];
+                                         verticalTextPadding:2.0
+                                                  fitToWidth:(0.95 * self.view.frame.size.width)];
   [introMsgLabel setTextAlignment:NSTextAlignmentCenter];
   UILabel *intro2MsgLabel = [PEUIUtils labelWithKey:@"Create a vehicle and you'll be able to create gas and odometer logs against it."
                                                font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
@@ -792,7 +792,7 @@ alignmentRelativeToView:self.view
                                          fitToWidth:(0.90 * self.view.frame.size.width)];
   [intro2MsgLabel setTextAlignment:NSTextAlignmentCenter];
   UIButton *createVehicleBtn = [PEUIUtils buttonWithKey:@"Create Vehicle"
-                                                   font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleTitle3]
+                                                   font:[UIFont boldSystemFontOfSize:24.0]
                                         backgroundColor:[UIColor peterRiverColor]
                                               textColor:[UIColor whiteColor]
                            disabledStateBackgroundColor:nil
