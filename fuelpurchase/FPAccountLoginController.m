@@ -48,7 +48,7 @@ typedef NS_ENUM (NSInteger, FPLoginTag) {
 @end
 
 @implementation FPAccountLoginController {
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   UITextField *_emailTf;
   UITextField *_passwordTf;
   UIButton *_signInBtn;
@@ -63,7 +63,7 @@ typedef NS_ENUM (NSInteger, FPLoginTag) {
 
 #pragma mark - Initializers
 
-- (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
+- (id)initWithStoreCoordinator:(id<FPCoordinatorDao>)coordDao
                      localUser:(FPUser *)localUser
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit {
@@ -418,44 +418,44 @@ edits, the Gas Jot server is asking for you to authenticate again.  Sorry about 
       HUD.delegate = self;
       HUD.labelText = @"Logging in...";
       enableUserInteraction(NO);
-      [_coordDao loginWithEmail:[[_emailTf text] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
-                       password:[_passwordTf text]
-   andLinkRemoteUserToLocalUser:_localUser
-  preserveExistingLocalEntities:syncLocalEntities
-                remoteStoreBusy:^(NSDate *retryAfter) {
-                  dispatch_async(dispatch_get_main_queue(), ^{
-                    [HUD hide:YES];
-                    [PEUIUtils showWaitAlertWithMsgs:nil
-                                               title:@"Server Busy."
-                                    alertDescription:[[NSAttributedString alloc] initWithString:@"We apologize, but the Gas Jot server is currently \
-busy.  Please try logging in a little later."]
-                                            topInset:[PEUIUtils topInsetForAlertsWithController:self]
-                                         buttonTitle:@"Okay."
-                                        buttonAction:^{
-                                          enableUserInteraction(YES);
-                                        }
-                                      relativeToView:[self parentViewForAlerts]];
-                  });
-                }
-              completionHandler:^(FPUser *user, NSError *err) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                  [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD,
-                                                                      successBlk,
-                                                                      ^{ enableUserInteraction(YES); },
-                                                                      self,
-                                                                      [self parentViewForAlerts])(err);
-                  if (user) {
-                    NSDate *mostRecentUpdatedAt =
-                    [[_coordDao localDao] mostRecentMasterUpdateForUser:user
-                                                                  error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, [self parentViewForAlerts])];
-                    DDLogDebug(@"in FPAccountLoginController/handleSignIn, login success, mostRecentUpdatedAt: [%@](%@)", mostRecentUpdatedAt, [PEUtils millisecondsFromDate:mostRecentUpdatedAt]);
-                    if (mostRecentUpdatedAt) {
-                      [APP setChangelogUpdatedAt:mostRecentUpdatedAt];
-                    }
-                  }
-                });
-              }
-          localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, [self parentViewForAlerts])];
+      [_coordDao.userCoordinatorDao loginWithEmail:[[_emailTf text] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
+                                          password:[_passwordTf text]
+                      andLinkRemoteUserToLocalUser:_localUser
+                     preserveExistingLocalEntities:syncLocalEntities
+                                   remoteStoreBusy:^(NSDate *retryAfter) {
+                                     dispatch_async(dispatch_get_main_queue(), ^{
+                                       [HUD hide:YES];
+                                       [PEUIUtils showWaitAlertWithMsgs:nil
+                                                                  title:@"Server Busy."
+                                                       alertDescription:[[NSAttributedString alloc] initWithString:@"We apologize, but the Gas Jot server is currently \
+                                                                         busy.  Please try logging in a little later."]
+                                                               topInset:[PEUIUtils topInsetForAlertsWithController:self]
+                                                            buttonTitle:@"Okay."
+                                                           buttonAction:^{
+                                                             enableUserInteraction(YES);
+                                                           }
+                                                         relativeToView:[self parentViewForAlerts]];
+                                     });
+                                   }
+                                 completionHandler:^(FPUser *user, NSError *err) {
+                                   dispatch_async(dispatch_get_main_queue(), ^{
+                                     [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD,
+                                                                                         successBlk,
+                                                                                         ^{ enableUserInteraction(YES); },
+                                                                                         self,
+                                                                                         [self parentViewForAlerts])(err);
+                                     if (user) {
+                                       NSDate *mostRecentUpdatedAt =
+                                       [_coordDao mostRecentMasterUpdateForUser:user
+                                                                          error:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, [self parentViewForAlerts])];
+                                       DDLogDebug(@"in FPAccountLoginController/handleSignIn, login success, mostRecentUpdatedAt: [%@](%@)", mostRecentUpdatedAt, [PEUtils millisecondsFromDate:mostRecentUpdatedAt]);
+                                       if (mostRecentUpdatedAt) {
+                                         [APP setChangelogUpdatedAt:mostRecentUpdatedAt];
+                                       }
+                                     }
+                                   });
+                                 }
+                             localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, [self parentViewForAlerts])];
     };
     if (_preserveExistingLocalEntities == nil) { // first time asked
       if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {

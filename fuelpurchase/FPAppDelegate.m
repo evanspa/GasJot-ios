@@ -22,6 +22,7 @@
 #import <PEObjc-Commons/PEUtils.h>
 #import <FlatUIKit/UIColor+FlatUI.h>
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
+#import <PEFuelPurchase-Model/FPCoordinatorDaoImpl.h>
 #import <UICKeyChainStore/UICKeyChainStore.h>
 #import "FPAppDelegate.h"
 #import <PEFuelPurchase-Model/FPUser.h>
@@ -116,7 +117,7 @@ NSString * const FPAppKeychainService = @"fp-app";
   CGFloat _userAuthenticationStrength;
   MBProgressHUD *_HUD;
   NSString *_authToken;
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   NSMutableArray *_locations;
@@ -239,14 +240,14 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [_coordDao pruneAllSyncedEntitiesWithError:[FPUtils localSaveErrorHandlerMaker]()];
   _keychainStore = [UICKeyChainStore keyChainStoreWithService:@"name.paulevans.fpauth-token"];
   _keychainStore.accessibility = UICKeyChainStoreAccessibilityWhenUnlocked;
-  _user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
+  _user = (FPUser *)[_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
   _locations = [NSMutableArray array];
   _locationManager = [[CLLocationManager alloc] init];
   [_locationManager setDelegate:self];
   if (_user) {    
     _authToken = [self storedAuthenticationTokenForUser:_user];
     if (_authToken) {
-      [_coordDao setAuthToken:_authToken];
+      [_coordDao.userCoordinatorDao setAuthToken:_authToken];
     }
     if ([self isUserLoggedIn]) {
       if ([self doesUserHaveValidAuthToken]) {
@@ -420,34 +421,34 @@ shouldSelectViewController:(UIViewController *)viewController {
                                      FPDataFileExtension]];
   DDLogInfo(@"About to load local database from: [%@]", [localSqlLiteDataFileUrl absoluteString]);
   NSString *restServiceMtVersion = bundleVal(FPRestServiceMtVersionKey);
-  _coordDao = [[FPCoordinatorDao alloc] initWithSqliteDataFilePath:[localSqlLiteDataFileUrl absoluteString]
-                                        localDatabaseCreationError:[FPUtils localDatabaseCreationErrorHandlerMaker]()
-                                    timeoutForMainThreadOperations:intBundleVal(FPTimeoutForCoordDaoMainThreadOpsKey)
-                                                     acceptCharset:[HCCharset UTF8]
-                                                    acceptLanguage:bundleVal(FPRestServicePreferredLanguageKey)
-                                                contentTypeCharset:[HCCharset UTF8]
-                                                        authScheme:bundleVal(FPAuthenticationSchemeKey)
-                                                authTokenParamName:bundleVal(FPAuthenticationTokenNameKey)
-                                                         authToken:nil
-                                               errorMaskHeaderName:bundleVal(FPErrorMaskHeaderNameKey)
-                                        establishSessionHeaderName:bundleVal(FPEstablishSessionHeaderNameKey)
-                                       authTokenResponseHeaderName:bundleVal(FPAuthTokenResponseHeaderNameKey)
-                                         ifModifiedSinceHeaderName:bundleVal(FPIfModifiedSinceHeaderNameKey)
-                                       ifUnmodifiedSinceHeaderName:bundleVal(FPIfUnmodifiedSinceHeaderNameKey)
-                                       loginFailedReasonHeaderName:bundleVal(FPLoginFailedReasonHeaderNameKey)
-                                     accountClosedReasonHeaderName:bundleVal(FPAccountClosedReasonHeaderNameKey)
-                                      bundleHoldingApiJsonResource:mainBundle
-                                         nameOfApiJsonResourceFile:FPAPIResourceFileName
-                                                   apiResMtVersion:restServiceMtVersion
-                                             changelogResMtVersion:restServiceMtVersion
-                                                  userResMtVersion:restServiceMtVersion
-                                               vehicleResMtVersion:restServiceMtVersion
-                                           fuelStationResMtVersion:restServiceMtVersion
-                                       fuelPurchaseLogResMtVersion:restServiceMtVersion
-                                        environmentLogResMtVersion:restServiceMtVersion
-                                                 authTokenDelegate:self
-                                          allowInvalidCertificates:YES];
-  [_coordDao initializeLocalDatabaseWithError:[FPUtils localSaveErrorHandlerMaker]()];
+  _coordDao = [[FPCoordinatorDaoImpl alloc] initWithSqliteDataFilePath:[localSqlLiteDataFileUrl absoluteString]
+                                            localDatabaseCreationError:[FPUtils localDatabaseCreationErrorHandlerMaker]()
+                                        timeoutForMainThreadOperations:intBundleVal(FPTimeoutForCoordDaoMainThreadOpsKey)
+                                                         acceptCharset:[HCCharset UTF8]
+                                                        acceptLanguage:bundleVal(FPRestServicePreferredLanguageKey)
+                                                    contentTypeCharset:[HCCharset UTF8]
+                                                            authScheme:bundleVal(FPAuthenticationSchemeKey)
+                                                    authTokenParamName:bundleVal(FPAuthenticationTokenNameKey)
+                                                             authToken:nil
+                                                   errorMaskHeaderName:bundleVal(FPErrorMaskHeaderNameKey)
+                                            establishSessionHeaderName:bundleVal(FPEstablishSessionHeaderNameKey)
+                                           authTokenResponseHeaderName:bundleVal(FPAuthTokenResponseHeaderNameKey)
+                                             ifModifiedSinceHeaderName:bundleVal(FPIfModifiedSinceHeaderNameKey)
+                                           ifUnmodifiedSinceHeaderName:bundleVal(FPIfUnmodifiedSinceHeaderNameKey)
+                                           loginFailedReasonHeaderName:bundleVal(FPLoginFailedReasonHeaderNameKey)
+                                         accountClosedReasonHeaderName:bundleVal(FPAccountClosedReasonHeaderNameKey)
+                                          bundleHoldingApiJsonResource:mainBundle
+                                             nameOfApiJsonResourceFile:FPAPIResourceFileName
+                                                       apiResMtVersion:restServiceMtVersion
+                                                 changelogResMtVersion:restServiceMtVersion
+                                                      userResMtVersion:restServiceMtVersion
+                                                   vehicleResMtVersion:restServiceMtVersion
+                                               fuelStationResMtVersion:restServiceMtVersion
+                                           fuelPurchaseLogResMtVersion:restServiceMtVersion
+                                            environmentLogResMtVersion:restServiceMtVersion
+                                                     authTokenDelegate:self
+                                              allowInvalidCertificates:YES];
+  [_coordDao initializeDatabaseWithError:[FPUtils localSaveErrorHandlerMaker]()];
 }
 
 #pragma mark - FPAuthTokenDelegate protocol
@@ -483,7 +484,7 @@ in an unauthenticated state.  Is main thread?  %@", [PEUtils yesNoFromBool:[NSTh
 }
 
 - (BOOL)isUserLoggedIn {
-  FPUser *user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
+  FPUser *user = (FPUser *)[_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
   if (user) {
     if ([user globalIdentifier]) {
       return YES;
@@ -493,7 +494,7 @@ in an unauthenticated state.  Is main thread?  %@", [PEUtils yesNoFromBool:[NSTh
 }
 
 - (BOOL)doesUserHaveValidAuthToken {
-  FPUser *user = [_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
+  FPUser *user = (FPUser *)[_coordDao userWithError:[FPUtils localFetchErrorHandlerMaker]()];
   if ([self storedAuthenticationTokenForUser:user]) {
     return YES;
   }

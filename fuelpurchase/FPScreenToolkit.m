@@ -44,7 +44,7 @@ NSInteger const PAGINATION_PAGE_SIZE = 30;
 NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 
 @implementation FPScreenToolkit {
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   FPPanelToolkit *_panelToolkit;
   PELMDaoErrorBlk _errorBlk;
   FPReportViews *_reportViews;
@@ -55,7 +55,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 
 #pragma mark - Initializers
 
-- (id)initWithCoordinatorDao:(FPCoordinatorDao *)coordDao
+- (id)initWithCoordinatorDao:(id<FPCoordinatorDao>)coordDao
                    uitoolkit:(PEUIToolkit *)uitoolkit
                        error:(PELMDaoErrorBlk)errorBlk {
   self = [super init];
@@ -66,8 +66,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                      screenToolkit:self
                                                          uitoolkit:uitoolkit
                                                              error:errorBlk];
-    _reportViews = [[FPReportViews alloc] initWithStats:[[FPStats alloc] initWithLocalDao:_coordDao.localDao errorBlk:errorBlk]];
-    _stats = [[FPStats alloc] initWithLocalDao:_coordDao.localDao errorBlk:[FPUtils localFetchErrorHandlerMaker]()];
+    _reportViews = [[FPReportViews alloc] initWithStats:[[FPStats alloc] initWithLocalDao:_coordDao errorBlk:errorBlk]];
+    _stats = [[FPStats alloc] initWithLocalDao:_coordDao errorBlk:[FPUtils localFetchErrorHandlerMaker]()];
     _currencyFormatter = [PEUtils currencyFormatter];
     _generalFormatter = [[NSNumberFormatter alloc] init];
     [_generalFormatter setNumberStyle:NSNumberFormatterDecimalStyle];
@@ -241,15 +241,15 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                          PESyncDependencyUnsynced depUnsyncedBlk) {
       NSString *mainMsgFragment = @"saving user account to the server";
       NSString *recordTitle = @"User account";
-      [_coordDao markAsDoneEditingAndSyncUserImmediate:user
-                                   notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                        addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
-                                addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                    addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveUsrErrMsgs:errMask]); [APP refreshTabs];}
-                                       addlConflictBlk:^(FPUser *latestUser) {conflictBlk(1, mainMsgFragment, recordTitle, latestUser); [APP refreshTabs];}
-                                   addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
-                                                 error:[FPUtils localSaveErrorHandlerMaker]()];
+      [_coordDao.userCoordinatorDao markAsDoneEditingAndSyncUserImmediate:user
+                                                      notFoundOnServerBlk:^{notFoundBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                           addlSuccessBlk:^{successBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                   addlRemoteStoreBusyBlk:^(NSDate *retryAfter) {retryAfterBlk(1, mainMsgFragment, recordTitle, retryAfter); [APP refreshTabs];}
+                                                   addlTempRemoteErrorBlk:^{tempErrBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                       addlRemoteErrorBlk:^(NSInteger errMask) {errBlk(1, mainMsgFragment, recordTitle, [FPUtils computeSaveUsrErrMsgs:errMask]); [APP refreshTabs];}
+                                                          addlConflictBlk:^(PELMUser *latestUser) {conflictBlk(1, mainMsgFragment, recordTitle, latestUser); [APP refreshTabs];}
+                                                      addlAuthRequiredBlk:^{authReqdBlk(1, mainMsgFragment, recordTitle); [APP refreshTabs];}
+                                                                    error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityPanel) {
       if (![ctrl hasPoppedKeyboard]) {
@@ -260,8 +260,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     
     PEMergeBlk mergeBlk = ^ NSDictionary * (PEAddViewEditController *ctrl, FPUser *localUser, FPUser *remoteUser) {
-      FPUser *masterUser = [[_coordDao localDao] masterUserWithId:[localUser localMasterIdentifier]
-                                                            error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPUser *masterUser = (FPUser *)[_coordDao masterUserWithId:[localUser localMasterIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
       return [FPUser mergeRemoteUser:remoteUser withLocalUser:localUser localMasterUser:masterUser];
     };
     PEConflictResolveFields conflictResolveFieldsBlk = ^(PEAddViewEditController *ctrl,
@@ -312,18 +311,18 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       NSString *mainMsgFragment = @"fetching user account";
       NSString *recordTitle = @"User account";
       float percentOfFetching = 1.0;
-      [_coordDao fetchUser:user
-           ifModifiedSince:[user updatedAt]
-       notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle);}
-                successBlk:^(FPUser *fetchedUser) {successBlk(percentOfFetching, mainMsgFragment, recordTitle, fetchedUser);}
-        remoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(percentOfFetching, mainMsgFragment, recordTitle, retryAfter);}
-        tempRemoteErrorBlk:^{tempErrBlk(percentOfFetching, mainMsgFragment, recordTitle);}
-       addlAuthRequiredBlk:^{authReqdBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}];
+      [_coordDao.userCoordinatorDao fetchUser:user
+                              ifModifiedSince:[user updatedAt]
+                          notFoundOnServerBlk:^{notFoundBlk(percentOfFetching, mainMsgFragment, recordTitle);}
+                                   successBlk:^(PELMUser *fetchedUser) {successBlk(percentOfFetching, mainMsgFragment, recordTitle, fetchedUser);}
+                           remoteStoreBusyBlk:^(NSDate *retryAfter){retryAfterBlk(percentOfFetching, mainMsgFragment, recordTitle, retryAfter);}
+                           tempRemoteErrorBlk:^{tempErrBlk(percentOfFetching, mainMsgFragment, recordTitle);}
+                          addlAuthRequiredBlk:^{authReqdBlk(percentOfFetching, mainMsgFragment, recordTitle); [APP refreshTabs];}];
     };
     PEPostDownloaderSaver postDownloadSaverBlk = ^ (PEAddViewEditController *ctrl,
                                                     FPUser *downloadedUser,
                                                     FPUser *user) {
-      [[_coordDao localDao] saveMasterUser:downloadedUser error:[FPUtils localSaveErrorHandlerMaker]()];
+      [_coordDao saveMasterUser:downloadedUser error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
       [FPPanelToolkit refreshAccountStatusPanelForUser:user
@@ -427,7 +426,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                                   ^{ return [self newMinSpentOnGasStatsScreenMaker](user); }]];
                                                    [statLaunchButtons addObject:@[@"Max monthly spend",
                                                                                   ^{ return [self newMaxSpentOnGasStatsScreenMaker](user); }]];
-                                                   NSArray *octanes = [_coordDao.localDao distinctOctanesForUser:user error:_errorBlk];
+                                                   NSArray *octanes = [_coordDao distinctOctanesForUser:user error:_errorBlk];
                                                    for (NSNumber *octane in octanes) {
                                                      [statLaunchButtons addObject:[NSString stringWithFormat:@"%@ OCTANE - PRICE STATS", octane]];
                                                      [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Avg price of %@", octane],
@@ -437,7 +436,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                      [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Max price of %@", octane],
                                                                                     ^{ return [self newMaxPricePerGallonStatsScreenMakerWithOctane:octane](user); }]];
                                                    }
-                                                   if ([_coordDao.localDao hasDieselLogsForUser:user error:_errorBlk]) {
+                                                   if ([_coordDao hasDieselLogsForUser:user error:_errorBlk]) {
                                                      [statLaunchButtons addObject:@"DIESEL - PRICE STATS"];
                                                      [statLaunchButtons addObject:@[@"Avg price of diesel",
                                                                                     ^{ return [self newAvgPricePerDieselGallonStatsScreenMaker](user); }]];
@@ -857,7 +856,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 
 - (PEItemLocalDeleter)vehicleItemLocalDeleter {
   return ^ (UIViewController *listViewController, FPVehicle *vehicle, NSIndexPath *indexPath) {
-    [[_coordDao localDao] deleteVehicle:vehicle error:[FPUtils localSaveErrorHandlerMaker]()];
+    [_coordDao deleteVehicle:vehicle error:[FPUtils localSaveErrorHandlerMaker]()];
     [APP refreshTabs];
   };
 }
@@ -1188,8 +1187,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       }
     };
     PEMergeBlk mergeBlk = ^ NSDictionary * (PEAddViewEditController *ctrl, FPVehicle *localVehicle, FPVehicle *remoteVehicle) {
-      FPVehicle *masterVehicle = [[_coordDao localDao] masterVehicleWithId:[localVehicle localMasterIdentifier]
-                                                                     error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPVehicle *masterVehicle = [_coordDao masterVehicleWithId:[localVehicle localMasterIdentifier]
+                                                          error:[FPUtils localFetchErrorHandlerMaker]()];
       return [FPVehicle mergeRemoteVehicle:remoteVehicle withLocalVehicle:localVehicle localMasterVehicle:masterVehicle];
     };
     PEConflictResolveFields conflictResolveFieldsBlk = ^(PEAddViewEditController *ctrl,
@@ -1292,7 +1291,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEPostDownloaderSaver postDownloadSaverBlk = ^ (PEAddViewEditController *ctrl,
                                                     FPVehicle *downloadedVehicle,
                                                     FPVehicle *vehicle) {
-      [[_coordDao localDao] saveMasterVehicle:downloadedVehicle forUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
+      [_coordDao saveMasterVehicle:downloadedVehicle forUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
       UIButton *viewFplogsBtn = (UIButton *)[ctrl.view viewWithTag:FPVehicleTagViewFplogsBtn];
@@ -1398,7 +1397,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                                   ^{ return [self newVehicleMinSpentOnGasStatsScreenMakerWithVehicle:vehicle](user); }]];
                                                    [statLaunchButtons addObject:@[@"Max monthly spend",
                                                                                   ^{ return [self newVehicleMaxSpentOnGasStatsScreenMakerWithVehicle:vehicle](user); }]];
-                                                   NSArray *octanes = [_coordDao.localDao distinctOctanesForVehicle:vehicle error:_errorBlk];
+                                                   NSArray *octanes = [_coordDao distinctOctanesForVehicle:vehicle error:_errorBlk];
                                                    for (NSNumber *octane in octanes) {
                                                      [statLaunchButtons addObject:[NSString stringWithFormat:@"%@ OCTANE - PRICE STATS", octane]];
                                                      [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Avg price of %@", octane],
@@ -1408,7 +1407,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                      [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Max price of %@", octane],
                                                                                     ^{ return [self newVehicleMaxPricePerGallonStatsScreenMakerWithVehicle:vehicle octane:octane](user); }]];
                                                    }
-                                                   if ([_coordDao.localDao hasDieselLogsForVehicle:vehicle error:_errorBlk]) {
+                                                   if ([_coordDao hasDieselLogsForVehicle:vehicle error:_errorBlk]) {
                                                      [statLaunchButtons addObject:@"DIESEL - PRICE STATS"];
                                                      [statLaunchButtons addObject:@[@"Avg price of diesel",
                                                                                     ^{ return [self newAvgPricePerDieselGallonStatsScreenMakerWithVehicle:vehicle](user); }]];
@@ -2117,7 +2116,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 
 - (PEItemLocalDeleter)fuelStationItemLocalDeleter {
   return ^ (UIViewController *listViewController, FPFuelStation *fuelStation, NSIndexPath *indexPath) {
-    [[_coordDao localDao] deleteFuelstation:fuelStation error:[FPUtils localSaveErrorHandlerMaker]()];
+    [_coordDao deleteFuelstation:fuelStation error:[FPUtils localSaveErrorHandlerMaker]()];
     [APP refreshTabs];
   };
 }
@@ -2544,7 +2543,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       }
     };
     PEMergeBlk mergeBlk = ^ NSDictionary * (PEAddViewEditController *ctrl, FPFuelStation *localFuelstation, FPFuelStation *remoteFuelstation) {
-      FPFuelStation *masterFuelstation = [[_coordDao localDao] masterFuelstationWithId:[localFuelstation localMasterIdentifier]
+      FPFuelStation *masterFuelstation = [_coordDao masterFuelstationWithId:[localFuelstation localMasterIdentifier]
                                                                                  error:[FPUtils localFetchErrorHandlerMaker]()];
       return [FPFuelStation mergeRemoteFuelstation:remoteFuelstation withLocalFuelstation:localFuelstation localMasterFuelstation:masterFuelstation];
     };
@@ -2633,7 +2632,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEPostDownloaderSaver postDownloadSaverBlk = ^ (PEAddViewEditController *ctrl,
                                                     FPFuelStation *downloadedFuelstation,
                                                     FPFuelStation *fuelstation) {
-      [[_coordDao localDao] saveMasterFuelstation:downloadedFuelstation forUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
+      [_coordDao saveMasterFuelstation:downloadedFuelstation forUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEViewDidAppearBlk viewDidAppearBlk = ^(PEAddViewEditController *ctrl) {
       UIButton *viewFplogsBtn = (UIButton *)[ctrl.view viewWithTag:FPFuelStationTagViewFplogsBtn];
@@ -2705,7 +2704,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                                                   ^{ return [self newFuelStationMinSpentOnGasStatsScreenMakerWithFuelstation:fuelstation](user); }]];
                                                    [statLaunchButtons addObject:@[@"Max monthly spend",
                                                                                   ^{ return [self newFuelStationMaxSpentOnGasStatsScreenMakerWithFuelstation:fuelstation](user); }]];
-                                                   NSArray *octanes = [_coordDao.localDao distinctOctanesForFuelstation:fuelstation error:_errorBlk];
+                                                   NSArray *octanes = [_coordDao distinctOctanesForFuelstation:fuelstation error:_errorBlk];
                                                    for (NSNumber *octane in octanes) {
                                                      [statLaunchButtons addObject:[NSString stringWithFormat:@"%@ OCTANE - PRICE STATS", octane]];
                                                      [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Avg price of %@", octane],
@@ -2715,7 +2714,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                      [statLaunchButtons addObject:@[[NSString stringWithFormat:@"Max price of %@", octane],
                                                                                     ^{ return [self newFuelStationMaxPricePerGallonStatsScreenMakerWithFuelstation:fuelstation octane:octane](user); }]];
                                                    }
-                                                   if ([_coordDao.localDao hasDieselLogsForFuelstation:fuelstation error:_errorBlk]) {
+                                                   if ([_coordDao hasDieselLogsForFuelstation:fuelstation error:_errorBlk]) {
                                                      [statLaunchButtons addObject:@"DIESEL - PRICE STATS"];
                                                      [statLaunchButtons addObject:@[@"Avg price of diesel",
                                                                                     ^{ return [self newAvgPricePerDieselGallonStatsScreenMakerWithFuelstation:fuelstation](user); }]];
@@ -3524,8 +3523,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                  error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PENumRemoteDepsNotLocal numRemoteDepsNotLocalBlk = ^ NSInteger (FPFuelPurchaseLog *remoteFplog) {
-      FPVehicle *vehicle = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
-      FPFuelStation *fuelstation = [[_coordDao localDao] masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPVehicle *vehicle = [_coordDao masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPFuelStation *fuelstation = [_coordDao masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
       NSInteger numNonLocalDeps = 0;
       if (!vehicle) numNonLocalDeps++;
       if (!fuelstation) numNonLocalDeps++;
@@ -3538,8 +3537,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                              PESyncRetryAfterBlk retryAfterBlk,
                                              PESyncServerTempErrorBlk tempErrBlk,
                                              PESyncAuthRequiredBlk authReqdBlk) {
-      FPVehicle *vehicle = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
-      FPFuelStation *fuelstation = [[_coordDao localDao] masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPVehicle *vehicle = [_coordDao masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPFuelStation *fuelstation = [_coordDao masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
       float percentOfFetching = 1.0;
       if (!vehicle && !fuelstation) {
         percentOfFetching = 0.5;
@@ -3570,20 +3569,20 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       }
     };
     PEMergeBlk mergeBlk = ^ NSDictionary * (PEAddViewEditController *ctrl, FPFuelPurchaseLog *localFplog, FPFuelPurchaseLog *remoteFplog) {
-      FPFuelPurchaseLog *masterFplog = [[_coordDao localDao] masterFplogWithId:[localFplog localMasterIdentifier]
+      FPFuelPurchaseLog *masterFplog = [_coordDao masterFplogWithId:[localFplog localMasterIdentifier]
                                                                          error:[FPUtils localFetchErrorHandlerMaker]()];
       UITableView *vehFsAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
       FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds = (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehFsAndDateTableView dataSource];
       FPVehicle *vehicleForLocalFplog = [ds selectedVehicle];
-      FPVehicle *vehicleForMasterFplog = [[_coordDao localDao] masterVehicleForMasterFpLog:masterFplog error:[FPUtils localFetchErrorHandlerMaker]()];
-      FPVehicle *vehicleForRemoteFplog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPVehicle *vehicleForMasterFplog = [_coordDao masterVehicleForMasterFpLog:masterFplog error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPVehicle *vehicleForRemoteFplog = [_coordDao masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
       NSString *origLocalFplogVehicleGlobalId = [vehicleForLocalFplog globalIdentifier];
       [localFplog setVehicleGlobalIdentifier:[vehicleForLocalFplog globalIdentifier]];
       [masterFplog setVehicleGlobalIdentifier:[vehicleForMasterFplog globalIdentifier]];
       [remoteFplog setVehicleGlobalIdentifier:[vehicleForRemoteFplog globalIdentifier]];
       FPFuelStation *fuelstationForLocalFplog = [ds selectedFuelStation];
-      FPFuelStation *fuelstationForMasterFplog = [[_coordDao localDao] masterFuelstationForMasterFpLog:masterFplog error:[FPUtils localFetchErrorHandlerMaker]()];
-      FPFuelStation *fuelstationForRemoteFplog = [[_coordDao localDao] masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPFuelStation *fuelstationForMasterFplog = [_coordDao masterFuelstationForMasterFpLog:masterFplog error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPFuelStation *fuelstationForRemoteFplog = [_coordDao masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
       NSString *origLocalFplogFuelstationGlobalId = [fuelstationForLocalFplog globalIdentifier];
       [localFplog setFuelStationGlobalIdentifier:[fuelstationForLocalFplog globalIdentifier]];
       [masterFplog setFuelStationGlobalIdentifier:[fuelstationForMasterFplog globalIdentifier]];
@@ -3602,10 +3601,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       UITableView *vehFsAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
       FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds = (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehFsAndDateTableView dataSource];
       FPVehicle *vehicleForLocalFplog = [ds selectedVehicle];
-      FPVehicle *vehicleForRemoteFplog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier]
+      FPVehicle *vehicleForRemoteFplog = [_coordDao masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier]
                                                                                    error:[FPUtils localFetchErrorHandlerMaker]()];
       FPFuelStation *fuelstationForLocalFplog = [ds selectedFuelStation];
-      FPFuelStation *fuelstationForRemoteFplog = [[_coordDao localDao] masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier]
+      FPFuelStation *fuelstationForRemoteFplog = [_coordDao masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier]
                                                                                                error:[FPUtils localFetchErrorHandlerMaker]()];
       PEOrNil orNil = [PEUtils orNilMaker];
       NSMutableArray *fields = [NSMutableArray arrayWithCapacity:mergeConflicts.count];
@@ -3668,14 +3667,14 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
               break;
             case FPFpLogTagVehicle:
             {
-              FPVehicle *vehicleForRemoteFplog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier]
+              FPVehicle *vehicleForRemoteFplog = [_coordDao masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier]
                                                                                            error:[FPUtils localFetchErrorHandlerMaker]()];
               [ds setSelectedVehicle:vehicleForRemoteFplog];
               break;
             }
             case FPFpLogTagFuelstation:
             {
-              FPFuelStation *fuelstationForRemoteFplog = [[_coordDao localDao] masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier]
+              FPFuelStation *fuelstationForRemoteFplog = [_coordDao masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier]
                                                                                                        error:[FPUtils localFetchErrorHandlerMaker]()];
               [ds setSelectedFuelStation:fuelstationForRemoteFplog];
               break;
@@ -3688,9 +3687,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEUpdateDepsPanel updateDepsPanel = ^(PEAddViewEditController *ctrl, FPFuelPurchaseLog *remoteFplog) {
       UITableView *vehFsAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPFpLogTagVehicleFuelStationAndDate];
       FPFpLogVehicleFuelStationDateDataSourceAndDelegate *ds = (FPFpLogVehicleFuelStationDateDataSourceAndDelegate *)[vehFsAndDateTableView dataSource];
-      FPVehicle *vehicleForRemoteFplog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier]
+      FPVehicle *vehicleForRemoteFplog = [_coordDao masterVehicleWithGlobalId:[remoteFplog vehicleGlobalIdentifier]
                                                                                    error:[FPUtils localFetchErrorHandlerMaker]()];
-      FPFuelStation *fuelstationForRemoteFplog = [[_coordDao localDao] masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier]
+      FPFuelStation *fuelstationForRemoteFplog = [_coordDao masterFuelstationWithGlobalId:[remoteFplog fuelStationGlobalIdentifier]
                                                                                                error:[FPUtils localFetchErrorHandlerMaker]()];
       [ds setSelectedVehicle:vehicleForRemoteFplog];
       [ds setSelectedFuelStation:fuelstationForRemoteFplog];
@@ -3717,11 +3716,11 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEPostDownloaderSaver postDownloadSaverBlk = ^ (PEAddViewEditController *ctrl,
                                                     FPFuelPurchaseLog *downloadedFplog,
                                                     FPFuelPurchaseLog *fplog) {
-      FPVehicle *vehicleForDownloadedFplog = [[_coordDao localDao] masterVehicleWithGlobalId:[downloadedFplog vehicleGlobalIdentifier]
+      FPVehicle *vehicleForDownloadedFplog = [_coordDao masterVehicleWithGlobalId:[downloadedFplog vehicleGlobalIdentifier]
                                                                                        error:[FPUtils localFetchErrorHandlerMaker]()];
-      FPFuelStation *fuelstationForDownloadedFplog = [[_coordDao localDao] masterFuelstationWithGlobalId:[downloadedFplog fuelStationGlobalIdentifier]
+      FPFuelStation *fuelstationForDownloadedFplog = [_coordDao masterFuelstationWithGlobalId:[downloadedFplog fuelStationGlobalIdentifier]
                                                                                                    error:[FPUtils localFetchErrorHandlerMaker]()];
-      [[_coordDao localDao] saveMasterFuelPurchaseLog:downloadedFplog
+      [_coordDao saveMasterFuelPurchaseLog:downloadedFplog
                                            forVehicle:vehicleForDownloadedFplog
                                        forFuelstation:fuelstationForDownloadedFplog
                                               forUser:user
@@ -3828,7 +3827,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 
 - (PEItemLocalDeleter)fplogItemLocalDeleter {
   return ^ (UIViewController *listViewController, FPFuelPurchaseLog *fplog, NSIndexPath *indexPath) {
-    [[_coordDao localDao] deleteFuelPurchaseLog:fplog error:[FPUtils localSaveErrorHandlerMaker]()];
+    [_coordDao deleteFuelPurchaseLog:fplog error:[FPUtils localSaveErrorHandlerMaker]()];
     [APP refreshTabs];
   };
 }
@@ -4331,7 +4330,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                 error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PENumRemoteDepsNotLocal numRemoteDepsNotLocalBlk = ^ NSInteger (FPEnvironmentLog *remoteEnvlog) {
-      FPVehicle *vehicle = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPVehicle *vehicle = [_coordDao masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
       if (vehicle) {
         return 0;
       }
@@ -4356,14 +4355,14 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                               error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEMergeBlk mergeBlk = ^ NSDictionary * (PEAddViewEditController *ctrl, FPEnvironmentLog *localEnvlog, FPEnvironmentLog *remoteEnvlog) {
-      FPEnvironmentLog *masterEnvlog = [[_coordDao localDao] masterEnvlogWithId:[localEnvlog localMasterIdentifier]
+      FPEnvironmentLog *masterEnvlog = [_coordDao masterEnvlogWithId:[localEnvlog localMasterIdentifier]
                                                                           error:[FPUtils localFetchErrorHandlerMaker]()];
       UITableView *vehicleAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPEnvLogTagVehicleAndDate];
       FPEnvLogVehicleAndDateDataSourceDelegate *ds = (FPEnvLogVehicleAndDateDataSourceDelegate *)[vehicleAndDateTableView dataSource];
       // the vehicles to compare
       FPVehicle *vehicleForLocalEnvlog = [ds selectedVehicle];
-      FPVehicle *vehicleForMasterEnvlog = [[_coordDao localDao] masterVehicleForMasterEnvLog:masterEnvlog error:[FPUtils localFetchErrorHandlerMaker]()];
-      FPVehicle *vehicleForRemoteEnvlog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPVehicle *vehicleForMasterEnvlog = [_coordDao masterVehicleForMasterEnvLog:masterEnvlog error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPVehicle *vehicleForRemoteEnvlog = [_coordDao masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier] error:[FPUtils localFetchErrorHandlerMaker]()];
       NSString *origLocalEnvlogVehicleGlobalId = [vehicleForLocalEnvlog globalIdentifier];
       // well, really we're only going to compare global IDs using our existing 'mergeRemoteEnvlog' function
       [localEnvlog setVehicleGlobalIdentifier:[vehicleForLocalEnvlog globalIdentifier]];
@@ -4382,7 +4381,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       UITableView *vehicleAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPEnvLogTagVehicleAndDate];
       FPEnvLogVehicleAndDateDataSourceDelegate *ds = (FPEnvLogVehicleAndDateDataSourceDelegate *)[vehicleAndDateTableView dataSource];
       FPVehicle *vehicleForLocalEnvlog = [ds selectedVehicle];
-      FPVehicle *vehicleForRemoteEnvlog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier]
+      FPVehicle *vehicleForRemoteEnvlog = [_coordDao masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier]
                                                                                     error:[FPUtils localFetchErrorHandlerMaker]()];
       NSMutableArray *fields = [NSMutableArray arrayWithCapacity:mergeConflicts.count];
       [mergeConflicts enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
@@ -4437,7 +4436,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
               break;
             case FPEnvLogTagVehicle:
             {
-              FPVehicle *vehicleForRemoteEnvlog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier]
+              FPVehicle *vehicleForRemoteEnvlog = [_coordDao masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier]
                                                                                             error:[FPUtils localFetchErrorHandlerMaker]()];
               [ds setSelectedVehicle:vehicleForRemoteEnvlog];
               break;
@@ -4450,7 +4449,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEUpdateDepsPanel updateDepsPanel = ^(PEAddViewEditController *ctrl, FPEnvironmentLog *remoteEnvlog) {
       UITableView *vehicleAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPEnvLogTagVehicleAndDate];
       FPEnvLogVehicleAndDateDataSourceDelegate *ds = (FPEnvLogVehicleAndDateDataSourceDelegate *)[vehicleAndDateTableView dataSource];
-      FPVehicle *vehicleForRemoteEnvlog = [[_coordDao localDao] masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier]
+      FPVehicle *vehicleForRemoteEnvlog = [_coordDao masterVehicleWithGlobalId:[remoteEnvlog vehicleGlobalIdentifier]
                                                                                     error:[FPUtils localFetchErrorHandlerMaker]()];
       [ds setSelectedVehicle:vehicleForRemoteEnvlog];
     };
@@ -4476,9 +4475,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEPostDownloaderSaver postDownloadSaverBlk = ^ (PEAddViewEditController *ctrl,
                                                     FPEnvironmentLog *downloadedEnvlog,
                                                     FPEnvironmentLog *envlog) {
-      FPVehicle *vehicleForDownloadedEnvlog = [[_coordDao localDao] masterVehicleWithGlobalId:[downloadedEnvlog vehicleGlobalIdentifier]
+      FPVehicle *vehicleForDownloadedEnvlog = [_coordDao masterVehicleWithGlobalId:[downloadedEnvlog vehicleGlobalIdentifier]
                                                                                         error:[FPUtils localFetchErrorHandlerMaker]()];
-      [[_coordDao localDao] saveMasterEnvironmentLog:downloadedEnvlog forVehicle:vehicleForDownloadedEnvlog forUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
+      [_coordDao saveMasterEnvironmentLog:downloadedEnvlog forVehicle:vehicleForDownloadedEnvlog forUser:user error:[FPUtils localSaveErrorHandlerMaker]()];
       UITableView *vehicleAndDateTableView = (UITableView *)[[ctrl view] viewWithTag:FPEnvLogTagVehicleAndDate];
       FPEnvLogVehicleAndDateDataSourceDelegate *ds = (FPEnvLogVehicleAndDateDataSourceDelegate *)[vehicleAndDateTableView dataSource];
       [ds setSelectedVehicle:vehicleForDownloadedEnvlog];
@@ -4571,7 +4570,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
 
 - (PEItemLocalDeleter)envlogItemLocalDeleter {
   return ^ (UIViewController *listViewController, FPEnvironmentLog *envlog, NSIndexPath *indexPath) {
-    [[_coordDao localDao] deleteEnvironmentLog:envlog error:[FPUtils localSaveErrorHandlerMaker]()];
+    [_coordDao deleteEnvironmentLog:envlog error:[FPUtils localSaveErrorHandlerMaker]()];
     [APP refreshTabs];
   };
 }

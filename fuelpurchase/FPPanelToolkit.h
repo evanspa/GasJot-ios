@@ -13,14 +13,14 @@
 #import "FPScreenToolkit.h"
 
 typedef NS_ENUM (NSInteger, FPUserTag) {
-  FPUserTagName,
+  FPUserTagName = 1,
   FPUserTagEmail,
   FPUserTagPassword,
   FPUserTagConfirmPassword
 };
 
 typedef NS_ENUM (NSInteger, FPVehicleTag) {
-  FPVehicleTagName = 1,
+  FPVehicleTagName = 5,
   FPVehicleTagTakesDieselSwitch,
   FPVehicleTagTakesDieselPanel,
   FPVehicleTagDefaultOctane,
@@ -44,7 +44,7 @@ typedef NS_ENUM (NSInteger, FPVehicleTag) {
 };
 
 typedef NS_ENUM (NSInteger, FPFuelStationTag) {
-  FPFuelStationTagName = 22,
+  FPFuelStationTagName = 26,
   FPFuelStationTagStreet,
   FPFuelStationTagCity,
   FPFuelStationTagState,
@@ -57,12 +57,12 @@ typedef NS_ENUM (NSInteger, FPFuelStationTag) {
 };
 
 typedef NS_ENUM (NSInteger, FPFpEnvLogCompositeTag) {
-  FPFpEnvLogCompositeTagPreFillupReportedDte = 32,
+  FPFpEnvLogCompositeTagPreFillupReportedDte = 36,
   FPFpEnvLogCompositeTagPostFillupReportedDte
 };
 
 typedef NS_ENUM (NSInteger, FPFpLogTag) {
-  FPFpLogTagVehicleFuelStationAndDate = 34,
+  FPFpLogTagVehicleFuelStationAndDate = 38,
   FPFpLogTagNumGallons,
   FPFpLogTagPricePerGallon,
   FPFpLogTagDieselSwitch,
@@ -78,7 +78,7 @@ typedef NS_ENUM (NSInteger, FPFpLogTag) {
 };
 
 typedef NS_ENUM (NSInteger, FPEnvLogTag) {
-  FPEnvLogTagVehicleAndDate = 47,
+  FPEnvLogTagVehicleAndDate = 51,
   FPEnvLogTagOdometer,
   FPEnvLogTagReportedAvgMpg,
   FPEnvLogTagReportedAvgMph,
@@ -96,7 +96,7 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 
 #pragma mark - Initializers
 
-- (id)initWithCoordinatorDao:(FPCoordinatorDao *)coordDao
+- (id)initWithCoordinatorDao:(id<FPCoordinatorDao>)coordDao
                screenToolkit:(FPScreenToolkit *)screenToolkit
                    uitoolkit:(PEUIToolkit *)uitoolkit
                        error:(PELMDaoErrorBlk)errorBlk;
@@ -116,7 +116,7 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 + (UIView *)accountStatusPanelForUser:(FPUser *)user
                              panelTag:(NSNumber *)panelTag
                  includeRefreshButton:(BOOL)includeRefreshButton
-                       coordinatorDao:(FPCoordinatorDao *)coordDao
+                       coordinatorDao:(id<FPCoordinatorDao>)coordDao
                             uitoolkit:(PEUIToolkit *)uitoolkit
                        relativeToView:(UIView *)relativeToView
                            controller:(UIViewController *)controller;
@@ -124,13 +124,13 @@ FOUNDATION_EXPORT NSString * const FPFpLogEntityMakerFuelStationEntry;
 + (void)refreshAccountStatusPanelForUser:(FPUser *)user
                                 panelTag:(NSNumber *)panelTag
                     includeRefreshButton:(BOOL)includeRefreshButton
-                          coordinatorDao:(FPCoordinatorDao *)coordDao
+                          coordinatorDao:(id<FPCoordinatorDao>)coordDao
                                uitoolkit:(PEUIToolkit *)uitoolkit
                           relativeToView:(UIView *)relativeToView
                               controller:(UIViewController *)controller;
 
 + (UIButton *)forgotPasswordButtonForUser:(FPUser *)user
-                           coordinatorDao:(FPCoordinatorDao *)coordDao
+                           coordinatorDao:(id<FPCoordinatorDao>)coordDao
                                 uitoolkit:(PEUIToolkit *)uitoolkit
                                controller:(UIViewController *)controller;
 

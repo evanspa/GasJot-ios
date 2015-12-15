@@ -33,7 +33,7 @@
 
 #pragma mark - Initializers
 
-- (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
+- (id)initWithStoreCoordinator:(id<FPCoordinatorDao>)coordDao
                           user:(FPUser *)user
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit;

@@ -62,7 +62,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
 };
 
 @implementation FPHomeController {
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   PEUIToolkit *_uitoolkit;
   FPUser *_user;
   FPStats *_stats;
@@ -90,7 +90,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
 
 #pragma mark - Initializers
 
-- (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
+- (id)initWithStoreCoordinator:(id<FPCoordinatorDao>)coordDao
                           user:(FPUser *)user
                          stats:(FPStats *)stats
                      uitoolkit:(PEUIToolkit *)uitoolkit
@@ -292,7 +292,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
                                          textColor:[UIColor whiteColor]
                       disabledStateBackgroundColor:nil
                             disabledStateTextColor:nil
-                                   verticalPadding:10.0
+                                   verticalPadding:14.0
                                  horizontalPadding:50.0
                                       cornerRadius:3.0
                                             target:nil
@@ -343,7 +343,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
                                      textColor:[UIColor whiteColor]
                   disabledStateBackgroundColor:nil
                         disabledStateTextColor:nil
-                               verticalPadding:10.0
+                               verticalPadding:14.0
                              horizontalPadding:55.0
                                   cornerRadius:3.0
                                         target:nil
@@ -475,7 +475,7 @@ alignmentRelativeToView:chart
 
 - (NSNumber *)octaneOfLastVehicleInCtxGasLog {
   FPVehicle *vehicle = [_coordDao vehicleForMostRecentFuelPurchaseLogForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()];
-  FPFuelPurchaseLog *fplog = [_coordDao.localDao lastGasLogForVehicle:vehicle error:[FPUtils localFetchErrorHandlerMaker]()];
+  FPFuelPurchaseLog *fplog = [_coordDao lastGasLogForVehicle:vehicle error:[FPUtils localFetchErrorHandlerMaker]()];
   if (fplog) {
     return fplog.octane;
   }
@@ -484,7 +484,7 @@ alignmentRelativeToView:chart
 
 - (FPFuelPurchaseLog *)lastFplogOfLastVehicleInCtxGasLog {
   FPVehicle *vehicle = [_coordDao vehicleForMostRecentFuelPurchaseLogForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()];
-  return [_coordDao.localDao lastGasLogForVehicle:vehicle error:[FPUtils localFetchErrorHandlerMaker]()];
+  return [_coordDao lastGasLogForVehicle:vehicle error:[FPUtils localFetchErrorHandlerMaker]()];
 }
 
 - (NSString *)formattedValueForValue:(id)value formatter:(NSString *(^)(id))formatter {
@@ -821,11 +821,11 @@ alignmentRelativeToView:self.view
 - (FPHomeState)currentState {
   NSArray *vehicles = [_coordDao vehiclesForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()];
   if (vehicles.count > 0) {
-    FPFuelPurchaseLog *fplog = [_coordDao.localDao firstGasLogForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()];
+    FPFuelPurchaseLog *fplog = [_coordDao firstGasLogForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()];
     if (fplog) {
       return FPHomeStateHasLogs;
     } else {
-      FPEnvironmentLog *envlog = [_coordDao.localDao firstOdometerLogForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()];
+      FPEnvironmentLog *envlog = [_coordDao firstOdometerLogForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()];
       if (envlog) {
         return FPHomeStateHasLogs;
       } else {

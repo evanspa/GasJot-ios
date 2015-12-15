@@ -19,7 +19,7 @@ NSString * const FPCommonStatComparisonTextIfNilStat = @"---";
 NSString * const FPStatComparisonCellIdentifier = @"FPStatComparisonCellIdentifier";
 
 @implementation FPCommonStatComparisonController {
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   PEUIToolkit *_uitoolkit;
   NSString *_screenTitle;
   FPEntityNameBlk _entityName;

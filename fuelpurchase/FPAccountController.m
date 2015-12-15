@@ -32,7 +32,7 @@
 NSInteger const kAccountStatusPanelTag = 12;
 
 @implementation FPAccountController {
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
@@ -40,7 +40,7 @@ NSInteger const kAccountStatusPanelTag = 12;
 
 #pragma mark - Initializers
 
-- (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
+- (id)initWithStoreCoordinator:(id<FPCoordinatorDao>)coordDao
                           user:(FPUser *)user
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit {
@@ -459,7 +459,7 @@ alignmentRelativeToView:contentPanel
     dispatch_async(dispatch_get_main_queue(), ^{
       [HUD hide:YES];
       [APP clearKeychain];
-      [_coordDao resetAsLocalUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
+      [_coordDao.userCoordinatorDao resetAsLocalUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
       [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLogoutNotification
                                                           object:nil
                                                         userInfo:nil];
@@ -493,10 +493,10 @@ simply be saved locally.";
     // tell the user that logout was successful.  The server should have the smarts to eventually delete
     // the token from its database based on a set of rules anyway (e.g., natural expiration date, or,
     // invalidation after N-amount of inactivity, etc)
-    [_coordDao logoutUser:_user
-       remoteStoreBusyBlk:^(NSDate *retryAfter) { postAuthTokenNoMatterWhat(); }
-        addlCompletionBlk:^{ postAuthTokenNoMatterWhat(); }
-    localSaveErrorHandler:[FPUtils localSaveErrorHandlerMaker]()];
+    [_coordDao.userCoordinatorDao logoutUser:_user
+                          remoteStoreBusyBlk:^(NSDate *retryAfter) { postAuthTokenNoMatterWhat(); }
+                           addlCompletionBlk:^{ postAuthTokenNoMatterWhat(); }
+                       localSaveErrorHandler:[FPUtils localSaveErrorHandlerMaker]()];
   };
   NSInteger numUnsyncedEdits = [_coordDao totalNumUnsyncedEntitiesForUser:_user];
   if (numUnsyncedEdits > 0) {

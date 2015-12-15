@@ -26,7 +26,7 @@ carWashPerGallonDiscount:(NSDecimalNumber *)carWashPerGallonDiscount
     preFillupReportedDte:(NSNumber *)preFillupReportedDte
    postFillupReportedDte:(NSNumber *)postFillupReportedDte
                  logDate:(NSDate *)logDate
-                coordDao:(FPCoordinatorDao *)coordDao;
+                coordDao:(id<FPCoordinatorDao>)coordDao;
 
 @property (nonatomic, readonly) FPFuelPurchaseLog *fpLog;
 @property (nonatomic, readonly) FPEnvironmentLog *preFillupEnvLog;

@@ -17,7 +17,7 @@
 CGFloat const FPSPLASH_CONTENT_HEIGH_FACTOR = 0.65;
 
 @implementation FPSplashController {
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   NSArray *_carouselViewMakers;
@@ -30,7 +30,7 @@ CGFloat const FPSPLASH_CONTENT_HEIGH_FACTOR = 0.65;
 
 #pragma mark - Initializers
 
-- (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
+- (id)initWithStoreCoordinator:(id<FPCoordinatorDao>)coordDao
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit
            letsGoButtonEnabled:(BOOL)letsGoButtonEnabled {
@@ -191,7 +191,7 @@ CGFloat const FPSPLASH_CONTENT_HEIGH_FACTOR = 0.65;
 }
 
 - (void)startUsing {
-  FPUser *user = [_coordDao newLocalUserWithError:[FPUtils localSaveErrorHandlerMaker]()];
+  FPUser *user = (FPUser *)[_coordDao.userCoordinatorDao newLocalUserWithError:[FPUtils localSaveErrorHandlerMaker]()];
   UITabBarController *tabBarController = (UITabBarController *)[_screenToolkit newTabBarHomeLandingScreenMakerIsLoggedIn:NO
                                                                                                          tagForJotButton:FPJotButtonTag](user);
   [APP setUser:user tabBarController:tabBarController];

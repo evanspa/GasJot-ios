@@ -49,7 +49,7 @@ typedef NS_ENUM (NSInteger, FPCreateAccountTag) {
 @end
 
 @implementation FPCreateAccountController {
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   UITextField *_fullNameTf;
   UITextField *_emailTf;
   UITextField *_passwordTf;
@@ -64,7 +64,7 @@ typedef NS_ENUM (NSInteger, FPCreateAccountTag) {
 
 #pragma mark - Initializers
 
-- (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
+- (id)initWithStoreCoordinator:(id<FPCoordinatorDao>)coordDao
                      localUser:(FPUser *)localUser
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit {
@@ -412,22 +412,22 @@ is asking for you to authenticate again.  Sorry about that. To authenticate, tap
       enableUserInteraction(NO);
       HUD.delegate = self;
       HUD.labelText = @"Creating account...";
-      [_coordDao establishRemoteAccountForLocalUser:_localUser
-                      preserveExistingLocalEntities:syncLocalEntities
-                                    remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self, [self parentViewForAlerts])
-                                  completionHandler:^(FPUser *user, NSError *err) {
-                                    dispatch_async(dispatch_get_main_queue(), ^{
-                                    [FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD,
-                                                                                                       successBlk,
-                                                                                                       ^{ enableUserInteraction(YES); },
-                                                                                                       self,
-                                                                                                       [self parentViewForAlerts])(user, err);
-                                    DDLogDebug(@"in FPCreateAccountController/handleAccountCreation, calling [APP setChangelogUpdatedAt:(%@)", [PEUtils millisecondsFromDate:user.updatedAt]);
-                                    [APP setChangelogUpdatedAt:[user updatedAt]];
-                                    });
-                                  }
-                                                   
-                              localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, [self parentViewForAlerts])];
+      [_coordDao.userCoordinatorDao establishRemoteAccountForLocalUser:_localUser
+                                         preserveExistingLocalEntities:syncLocalEntities
+                                                       remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self, [self parentViewForAlerts])
+                                                     completionHandler:^(PELMUser *user, NSError *err) {
+                                                       dispatch_async(dispatch_get_main_queue(), ^{
+                                                         [FPUtils synchUnitOfWorkHandlerMakerWithErrMsgsMaker:errMsgsMaker](HUD,
+                                                                                                                            successBlk,
+                                                                                                                            ^{ enableUserInteraction(YES); },
+                                                                                                                            self,
+                                                                                                                            [self parentViewForAlerts])((FPUser *)user, err);
+                                                         DDLogDebug(@"in FPCreateAccountController/handleAccountCreation, calling [APP setChangelogUpdatedAt:(%@)", [PEUtils millisecondsFromDate:user.updatedAt]);
+                                                         [APP setChangelogUpdatedAt:[user updatedAt]];
+                                                       });
+                                                     }
+       
+                                                 localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, [self parentViewForAlerts])];
     };
     if (_preserveExistingLocalEntities == nil) { // first time asked
       if ([_coordDao doesUserHaveAnyUnsyncedEntities:_localUser]) {

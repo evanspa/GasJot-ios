@@ -12,7 +12,7 @@
 #import <PEFuelPurchase-Model/PELMNotificationUtils.h>
 
 @implementation FPEnvLogVehicleAndDateDataSourceDelegate {
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   FPScreenToolkit *_screenToolkit;
   PEUIToolkit *_uitoolkit;
   FPUser *_user;
@@ -30,7 +30,7 @@
       vehicleSelectedAction:(PEItemSelectedAction)vehicleSelectedAction
         logDatePickedAction:(void(^)(NSDate *))logDatePickedAction
 displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
-             coordinatorDao:(FPCoordinatorDao *)coordDao
+             coordinatorDao:(id<FPCoordinatorDao>)coordDao
                        user:(FPUser *)user
               screenToolkit:(FPScreenToolkit *)screenToolkit
                       error:(PELMDaoErrorBlk)errorBlk {
@@ -123,7 +123,7 @@ heightForRowAtIndexPath:(NSIndexPath *)indexPath {
   switch ([indexPath section]) {
     case 0:
       [[cell textLabel] setText:@"Vehicle"];
-      [[cell detailTextLabel] setText:(_selectedVehicle ? [_selectedVehicle name] : @"(no vehicles found)")];
+      [[cell detailTextLabel] setText:(_selectedVehicle ? [_selectedVehicle name] : @"(create vehicle)")];
       break;
     default:
       [[cell textLabel] setText:@"Log date"];

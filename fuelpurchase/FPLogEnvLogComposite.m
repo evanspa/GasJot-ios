@@ -23,7 +23,7 @@ carWashPerGallonDiscount:(NSDecimalNumber *)carWashPerGallonDiscount
     preFillupReportedDte:(NSNumber *)preFillupReportedDte
    postFillupReportedDte:(NSNumber *)postFillupReportedDte
                  logDate:(NSDate *)logDate
-                coordDao:(FPCoordinatorDao *)coordDao {
+                coordDao:(id<FPCoordinatorDao>)coordDao {
   self = [super init];
   if (self) {
     _fpLog = [coordDao fuelPurchaseLogWithNumGallons:numGallons

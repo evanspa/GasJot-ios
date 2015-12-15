@@ -21,7 +21,7 @@
       vehicleSelectedAction:(PEItemSelectedAction)vehicleSelectedAction
         logDatePickedAction:(void(^)(NSDate *))logDatePickedAction
 displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
-             coordinatorDao:(FPCoordinatorDao *)coordDao
+             coordinatorDao:(id<FPCoordinatorDao>)coordDao
                        user:(FPUser *)user
               screenToolkit:(FPScreenToolkit *)screenToolkit
                       error:(PELMDaoErrorBlk)errorBlk;

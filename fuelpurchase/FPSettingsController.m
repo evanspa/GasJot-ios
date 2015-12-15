@@ -30,7 +30,7 @@
 #endif
 
 @implementation FPSettingsController {
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
@@ -38,7 +38,7 @@
 
 #pragma mark - Initializers
 
-- (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
+- (id)initWithStoreCoordinator:(id<FPCoordinatorDao>)coordDao
                           user:(FPUser *)user
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit {
@@ -139,12 +139,12 @@
       NSString *gasStationsFileName = [NSString stringWithFormat:@"%@-gas-stations.csv", [dateFormatter stringFromDate:now]];
       NSString *gasLogsFileName = [NSString stringWithFormat:@"%@-gas-logs.csv", [dateFormatter stringFromDate:now]];
       NSString *odometerLogsFileName = [NSString stringWithFormat:@"%@-odometer-logs.csv", [dateFormatter stringFromDate:now]];
-      [_coordDao.localDao exportWithPathToVehiclesFile:[docsDir stringByAppendingPathComponent:vehiclesFileName]
-                                       gasStationsFile:[docsDir stringByAppendingPathComponent:gasStationsFileName]
-                                           gasLogsFile:[docsDir stringByAppendingPathComponent:gasLogsFileName]
-                                      odometerLogsFile:[docsDir stringByAppendingPathComponent:odometerLogsFileName]
-                                                  user:_user
-                                                 error:[FPUtils localFetchErrorHandlerMaker]()];
+      [_coordDao exportWithPathToVehiclesFile:[docsDir stringByAppendingPathComponent:vehiclesFileName]
+                              gasStationsFile:[docsDir stringByAppendingPathComponent:gasStationsFileName]
+                                  gasLogsFile:[docsDir stringByAppendingPathComponent:gasLogsFileName]
+                             odometerLogsFile:[docsDir stringByAppendingPathComponent:odometerLogsFileName]
+                                         user:_user
+                                        error:[FPUtils localFetchErrorHandlerMaker]()];
       dispatch_async(dispatch_get_main_queue(), ^{
         [MBProgressHUD hideHUDForView:self.view animated:YES];
         [PEUIUtils showSuccessAlertWithMsgs:@[vehiclesFileName, gasStationsFileName, gasLogsFileName, odometerLogsFileName]
@@ -225,103 +225,103 @@ and deletions on other devices."
                            buttonAction:^{}
                          relativeToView:self.tabBarController.view];
     };
-    [_coordDao fetchChangelogForUser:_user
-                     ifModifiedSince:[APP changelogUpdatedAt]
-                 notFoundOnServerBlk:^{
-                   dispatch_async(dispatch_get_main_queue(), ^{
-                     [changelogHud hide:YES];
-                     displayUnexpectedErrorAlert();
-                   });
-                 }
-                          successBlk:^(FPChangelog *changelog) {
-                            dispatch_async(dispatch_get_main_queue(), ^{
-                              [changelogHud hide:YES];
-                              void (^displayAlreadySynchronizedAlert)(void) = ^{
-                                [PEUIUtils showInfoAlertWithTitle:@"Already up-to-date."
-                                                 alertDescription:[[NSAttributedString alloc] initWithString:@"Your device is already fully synchronized with your account."]
-                                                         topInset:[PEUIUtils topInsetForAlertsWithController:self]
-                                                      buttonTitle:@"Okay."
-                                                     buttonAction:^{ }
-                                                   relativeToView:self.tabBarController.view];
-                              };
-                              if (changelog) {
-                                DDLogDebug(@"in FPSettingsController/fetchChangelog success, calling [APP setChangelogUpdatedAt:(%@)", [PEUtils millisecondsFromDate:changelog.updatedAt]);
-                                [APP setChangelogUpdatedAt:changelog.updatedAt];
-                                NSArray *report = [_coordDao saveChangelog:changelog forUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
-                                NSInteger numDeletes = [report[0] integerValue];
-                                NSInteger numUpdates = [report[1] integerValue];
-                                NSInteger numInserts = [report[2] integerValue];
-                                if ((numDeletes + numUpdates + numInserts) > 0) {
-                                  NSMutableArray *msgs = [NSMutableArray array];
-                                  void (^addMessage)(NSInteger, NSString *) = ^(NSInteger value, NSString *desc) {
-                                    if (value == 1) {
-                                      [msgs addObject:[NSString stringWithFormat:@"%ld record %@.", (long)value, desc]];
-                                    } else if (value > 1) {
-                                      [msgs addObject:[NSString stringWithFormat:@"%ld records %@.", (long)value, desc]];
+    [_coordDao.userCoordinatorDao fetchChangelogForUser:_user
+                                        ifModifiedSince:[APP changelogUpdatedAt]
+                                    notFoundOnServerBlk:^{
+                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                        [changelogHud hide:YES];
+                                        displayUnexpectedErrorAlert();
+                                      });
                                     }
-                                  };
-                                  addMessage(numDeletes, @"removed");
-                                  addMessage(numUpdates, @"updated");
-                                  addMessage(numInserts, @"added");
-                                  [PEUIUtils showSuccessAlertWithMsgs:msgs
-                                                                title:@"Synchronized."
-                                                     alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You have successfully synchronized your account to this device, incorporating the following changes:"]
-                                                             topInset:[PEUIUtils topInsetForAlertsWithController:self]
-                                                          buttonTitle:@"Okay."
-                                                         buttonAction:^{
-                                                            [APP refreshTabs];
-                                                            [APP resetUserInterface];
-                                                          }
-                                                       relativeToView:self.tabBarController.view];
-                                } else {
-                                  displayAlreadySynchronizedAlert();
-                                }
-                              } else {
-                                displayAlreadySynchronizedAlert();
-                              }
-                            });
-                          }
-                  remoteStoreBusyBlk:^(NSDate *retryAfter) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                      [changelogHud hide:YES];
-                      [PEUIUtils showWaitAlertWithMsgs:nil
-                                                 title:@"Server is busy."
-                                      alertDescription:[[NSAttributedString alloc] initWithString:@"\
-The server is currently busy at the moment. Please try this again later."]
-                                              topInset:[PEUIUtils topInsetForAlertsWithController:self]
-                                           buttonTitle:@"Okay."
-                                          buttonAction:^{}
-                                        relativeToView:self.tabBarController.view];
-                    });
-                  }
-                  tempRemoteErrorBlk:^{
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                      [changelogHud hide:YES];
-                      displayUnexpectedErrorAlert();
-                    });
-                  }
-                 addlAuthRequiredBlk:^{
-                   dispatch_async(dispatch_get_main_queue(), ^{
-                     [changelogHud hide:YES];
-                     [APP refreshTabs];
-                     NSAttributedString *attrBecameUnauthMessage =
-                     [PEUIUtils attributedTextWithTemplate:@"Well this is awkward.  While syncing your account, the server is asking for you \
-to re-authenticate.\n\nTo re-authenticate, go to:\n\n%@."
-                                              textToAccent:@"Account \u2794 Re-authenticate"
-                                            accentTextFont:boldDescFont];
-                     [PEUIUtils showWarningAlertWithMsgs:nil
-                                                   title:@"Authentication Failure."
-                                        alertDescription:attrBecameUnauthMessage
-                                                topInset:[PEUIUtils topInsetForAlertsWithController:self]
-                                             buttonTitle:@"Okay."
-                                            buttonAction:^{
-                                              [APP refreshTabs];
-                                              [self viewDidAppear:YES];
-                                            }
-                                          relativeToView:self.tabBarController.view];
-                   });
-                 }];
+                                             successBlk:^(PEChangelog *changelog) {
+                                               dispatch_async(dispatch_get_main_queue(), ^{
+                                                 [changelogHud hide:YES];
+                                                 void (^displayAlreadySynchronizedAlert)(void) = ^{
+                                                   [PEUIUtils showInfoAlertWithTitle:@"Already up-to-date."
+                                                                    alertDescription:[[NSAttributedString alloc] initWithString:@"Your device is already fully synchronized with your account."]
+                                                                            topInset:[PEUIUtils topInsetForAlertsWithController:self]
+                                                                         buttonTitle:@"Okay."
+                                                                        buttonAction:^{ }
+                                                                      relativeToView:self.tabBarController.view];
+                                                 };
+                                                 if (changelog) {
+                                                   DDLogDebug(@"in FPSettingsController/fetchChangelog success, calling [APP setChangelogUpdatedAt:(%@)", [PEUtils millisecondsFromDate:changelog.updatedAt]);
+                                                   [APP setChangelogUpdatedAt:changelog.updatedAt];
+                                                   NSArray *report = [_coordDao saveChangelog:changelog forUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
+                                                   NSInteger numDeletes = [report[0] integerValue];
+                                                   NSInteger numUpdates = [report[1] integerValue];
+                                                   NSInteger numInserts = [report[2] integerValue];
+                                                   if ((numDeletes + numUpdates + numInserts) > 0) {
+                                                     NSMutableArray *msgs = [NSMutableArray array];
+                                                     void (^addMessage)(NSInteger, NSString *) = ^(NSInteger value, NSString *desc) {
+                                                       if (value == 1) {
+                                                         [msgs addObject:[NSString stringWithFormat:@"%ld record %@.", (long)value, desc]];
+                                                       } else if (value > 1) {
+                                                         [msgs addObject:[NSString stringWithFormat:@"%ld records %@.", (long)value, desc]];
+                                                       }
+                                                     };
+                                                     addMessage(numDeletes, @"removed");
+                                                     addMessage(numUpdates, @"updated");
+                                                     addMessage(numInserts, @"added");
+                                                     [PEUIUtils showSuccessAlertWithMsgs:msgs
+                                                                                   title:@"Synchronized."
+                                                                        alertDescription:[[NSAttributedString alloc] initWithString:@"\
+                                                                                          You have successfully synchronized your account to this device, incorporating the following changes:"]
+                                                                                topInset:[PEUIUtils topInsetForAlertsWithController:self]
+                                                                             buttonTitle:@"Okay."
+                                                                            buttonAction:^{
+                                                                              [APP refreshTabs];
+                                                                              [APP resetUserInterface];
+                                                                            }
+                                                                          relativeToView:self.tabBarController.view];
+                                                   } else {
+                                                     displayAlreadySynchronizedAlert();
+                                                   }
+                                                 } else {
+                                                   displayAlreadySynchronizedAlert();
+                                                 }
+                                               });
+                                             }
+                                     remoteStoreBusyBlk:^(NSDate *retryAfter) {
+                                       dispatch_async(dispatch_get_main_queue(), ^{
+                                         [changelogHud hide:YES];
+                                         [PEUIUtils showWaitAlertWithMsgs:nil
+                                                                    title:@"Server is busy."
+                                                         alertDescription:[[NSAttributedString alloc] initWithString:@"\
+                                                                           The server is currently busy at the moment. Please try this again later."]
+                                                                 topInset:[PEUIUtils topInsetForAlertsWithController:self]
+                                                              buttonTitle:@"Okay."
+                                                             buttonAction:^{}
+                                                           relativeToView:self.tabBarController.view];
+                                       });
+                                     }
+                                     tempRemoteErrorBlk:^{
+                                       dispatch_async(dispatch_get_main_queue(), ^{
+                                         [changelogHud hide:YES];
+                                         displayUnexpectedErrorAlert();
+                                       });
+                                     }
+                                    addlAuthRequiredBlk:^{
+                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                        [changelogHud hide:YES];
+                                        [APP refreshTabs];
+                                        NSAttributedString *attrBecameUnauthMessage =
+                                        [PEUIUtils attributedTextWithTemplate:@"Well this is awkward.  While syncing your account, the server is asking for you \
+                                         to re-authenticate.\n\nTo re-authenticate, go to:\n\n%@."
+                                                                 textToAccent:@"Account \u2794 Re-authenticate"
+                                                               accentTextFont:boldDescFont];
+                                        [PEUIUtils showWarningAlertWithMsgs:nil
+                                                                      title:@"Authentication Failure."
+                                                           alertDescription:attrBecameUnauthMessage
+                                                                   topInset:[PEUIUtils topInsetForAlertsWithController:self]
+                                                                buttonTitle:@"Okay."
+                                                               buttonAction:^{
+                                                                 [APP refreshTabs];
+                                                                 [self viewDidAppear:YES];
+                                                               }
+                                                             relativeToView:self.tabBarController.view];
+                                      });
+                                    }];
   } forControlEvents:UIControlEventTouchUpInside];
   UISwitch *offlineModeSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
   [offlineModeSwitch setOn:[APP offlineMode]];
@@ -456,7 +456,7 @@ ensure this device has your latest Gas Jot data."
         break;
       case 1: // delete
         [sheet dismissAnimated:YES];
-        [_coordDao resetAsLocalUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
+        [_coordDao.userCoordinatorDao resetAsLocalUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
         [[NSNotificationCenter defaultCenter] postNotificationName:FPAppDeleteAllDataNotification
                                                             object:nil
                                                           userInfo:nil];
@@ -517,7 +517,7 @@ ensure this device has your latest Gas Jot data."
     dispatch_async(dispatch_get_main_queue(), ^{
       [HUD hide:YES];
       [APP clearKeychain];
-      [_coordDao resetAsLocalUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
+      [_coordDao.userCoordinatorDao resetAsLocalUser:_user error:[FPUtils localSaveErrorHandlerMaker]()];
       [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLogoutNotification
                                                           object:nil
                                                         userInfo:nil];
@@ -549,10 +549,10 @@ simply be saved locally.";
     // tell the user that logout was successful.  The server should have the smarts to eventually delete
     // the token from its database based on a set of rules anyway (e.g., natural expiration date, or,
     // invalidation after N-amount of inactivity, etc)
-    [_coordDao logoutUser:_user
-       remoteStoreBusyBlk:^(NSDate *retryAfter) { postAuthTokenNoMatterWhat(); }
-        addlCompletionBlk:^{ postAuthTokenNoMatterWhat(); }
-    localSaveErrorHandler:[FPUtils localSaveErrorHandlerMaker]()];
+    [_coordDao.userCoordinatorDao logoutUser:_user
+                          remoteStoreBusyBlk:^(NSDate *retryAfter) { postAuthTokenNoMatterWhat(); }
+                           addlCompletionBlk:^{ postAuthTokenNoMatterWhat(); }
+                       localSaveErrorHandler:[FPUtils localSaveErrorHandlerMaker]()];
   };
   NSInteger numUnsyncedEdits = [_coordDao totalNumUnsyncedEntitiesForUser:_user];
   if (numUnsyncedEdits > 0) {

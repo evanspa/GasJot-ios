@@ -21,7 +21,7 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
 
 #pragma mark - Initializers
 
-- (id)initWithCoordinatorDao:(FPCoordinatorDao *)coordDao
+- (id)initWithCoordinatorDao:(id<FPCoordinatorDao>)coordDao
                    uitoolkit:(PEUIToolkit *)uitoolkit
                        error:(PELMDaoErrorBlk)errorBlk;
 

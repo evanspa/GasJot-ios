@@ -42,7 +42,7 @@
 @end
 
 @implementation FPForgotPasswordController {
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   UITextField *_emailTf;
   CGFloat animatedDistance;
   PEUIToolkit *_uitoolkit;
@@ -52,7 +52,7 @@
 
 #pragma mark - Initializers
 
-- (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
+- (id)initWithStoreCoordinator:(id<FPCoordinatorDao>)coordDao
                           user:(FPUser *)user
                      uitoolkit:(PEUIToolkit *)uitoolkit {
   self = [super initWithNibName:nil bundle:nil];
@@ -157,66 +157,65 @@
     enableUserInteraction(NO);
     sendPasswordResetEmailHud.labelText = @"Sending password reset email...";
     NSString *emailAddress = [_emailTf text];
-    [_coordDao sendPasswordResetEmailToEmail:emailAddress
-                          remoteStoreBusyBlk:^(NSDate *retryAfter) {
-                            dispatch_async(dispatch_get_main_queue(), ^{
-                              [sendPasswordResetEmailHud hide:YES afterDelay:0.0];
-                              [PEUIUtils showWaitAlertWithMsgs:nil
-                                                         title:@"Busy with maintenance."
-                                              alertDescription:[[NSAttributedString alloc] initWithString:@"\
-                                                                The server is currently busy at the moment undergoing maintenance.\n\n\
-                                                                We apologize for the inconvenience.  Please try this again later."]
-                                                      topInset:[PEUIUtils topInsetForAlertsWithController:self]
-                                                   buttonTitle:@"Okay."
-                                                  buttonAction:^{ enableUserInteraction(YES); }
-                                                relativeToView:self.tabBarController.view];
-                            });
-                          }
-                                  successBlk:^{
-                                    dispatch_async(dispatch_get_main_queue(), ^{
-                                      [sendPasswordResetEmailHud hide:YES afterDelay:0.0];
-                                      NSAttributedString *attrMessage =
-                                      [PEUIUtils attributedTextWithTemplate:@"The password reset email was sent to: %@."
-                                                               textToAccent:emailAddress
-                                                             accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]];
-                                      [PEUIUtils showSuccessAlertWithTitle:@"Password reset e-mail sent."
-                                                          alertDescription:attrMessage
-                                                                  topInset:[PEUIUtils topInsetForAlertsWithController:self]
-                                                               buttonTitle:@"Okay."
-                                                              buttonAction:^{
-                                                                [self dismissViewControllerAnimated:YES completion:^{
-                                                                  enableUserInteraction(YES);
-                                                                }];
-                                                              }
-                                                            relativeToView:self.view];
-                                    });
-                                  }
-                             unknownEmailBlk:^{
-                               dispatch_async(dispatch_get_main_queue(), ^{
-                                 [sendPasswordResetEmailHud hide:YES afterDelay:0.0];
-                                 [PEUIUtils showErrorAlertWithMsgs:nil
-                                                             title:@"Unknown e-mail address."
-                                                  alertDescription:[[NSAttributedString alloc] initWithString:@"\
-                                                                    The email address you provided is not associated with any Gas Jot accounts."]
-                                                          topInset:[PEUIUtils topInsetForAlertsWithController:self]
-                                                       buttonTitle:@"Okay."
-                                                      buttonAction:^{ enableUserInteraction(YES); }
-                                                    relativeToView:self.view];
-                               });
-                             }
-                                    errorBlk:^{
-                                      dispatch_async(dispatch_get_main_queue(), ^{
-                                        [sendPasswordResetEmailHud hide:YES afterDelay:0.0];
-                                        [PEUIUtils showErrorAlertWithMsgs:nil
-                                                                    title:@"Something went wrong."
-                                                         alertDescription:[[NSAttributedString alloc] initWithString:@"\
-                                                                           Oops.  Something went wrong in attempting to send you a password reset email.  Please try this again a little later."]
-                                                                 topInset:[PEUIUtils topInsetForAlertsWithController:self]
-                                                              buttonTitle:@"Okay."
-                                                             buttonAction:^{ enableUserInteraction(YES); }
-                                                           relativeToView:self.view];
-                                      });
-                                    }];
+    [_coordDao.userCoordinatorDao sendPasswordResetEmailToEmail:emailAddress
+                                             remoteStoreBusyBlk:^(NSDate *retryAfter) {
+                                               dispatch_async(dispatch_get_main_queue(), ^{
+                                                 [sendPasswordResetEmailHud hide:YES afterDelay:0.0];
+                                                 [PEUIUtils showWaitAlertWithMsgs:nil
+                                                                            title:@"Busy with maintenance."
+                                                                 alertDescription:[[NSAttributedString alloc] initWithString:@"\
+The server is currently busy at the moment undergoing maintenance.\n\n\
+We apologize for the inconvenience.  Please try this again later."]
+                                                                         topInset:[PEUIUtils topInsetForAlertsWithController:self]
+                                                                      buttonTitle:@"Okay."
+                                                                     buttonAction:^{ enableUserInteraction(YES); }
+                                                                   relativeToView:self.tabBarController.view];
+                                               });
+                                             }
+                                                     successBlk:^{
+                                                       dispatch_async(dispatch_get_main_queue(), ^{
+                                                         [sendPasswordResetEmailHud hide:YES afterDelay:0.0];
+                                                         NSAttributedString *attrMessage =
+                                                         [PEUIUtils attributedTextWithTemplate:@"The password reset email was sent to: %@."
+                                                                                  textToAccent:emailAddress
+                                                                                accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]];
+                                                         [PEUIUtils showSuccessAlertWithTitle:@"Password reset e-mail sent."
+                                                                             alertDescription:attrMessage
+                                                                                     topInset:[PEUIUtils topInsetForAlertsWithController:self]
+                                                                                  buttonTitle:@"Okay."
+                                                                                 buttonAction:^{
+                                                                                   [self dismissViewControllerAnimated:YES completion:^{
+                                                                                     enableUserInteraction(YES);
+                                                                                   }];
+                                                                                 }
+                                                                               relativeToView:self.view];
+                                                       });
+                                                     }
+                                                unknownEmailBlk:^{
+                                                  dispatch_async(dispatch_get_main_queue(), ^{
+                                                    [sendPasswordResetEmailHud hide:YES afterDelay:0.0];
+                                                    [PEUIUtils showErrorAlertWithMsgs:nil
+                                                                                title:@"Unknown e-mail address."
+                                                                     alertDescription:[[NSAttributedString alloc] initWithString:@"The email address you provided is not associated with any Gas Jot accounts."]
+                                                                             topInset:[PEUIUtils topInsetForAlertsWithController:self]
+                                                                          buttonTitle:@"Okay."
+                                                                         buttonAction:^{ enableUserInteraction(YES); }
+                                                                       relativeToView:self.view];
+                                                  });
+                                                }
+                                                       errorBlk:^{
+                                                         dispatch_async(dispatch_get_main_queue(), ^{
+                                                           [sendPasswordResetEmailHud hide:YES afterDelay:0.0];
+                                                           [PEUIUtils showErrorAlertWithMsgs:nil
+                                                                                       title:@"Something went wrong."
+                                                                            alertDescription:[[NSAttributedString alloc] initWithString:@"\
+Oops.  Something went wrong in attempting to send you a password reset email.  Please try this again a little later."]
+                                                                                    topInset:[PEUIUtils topInsetForAlertsWithController:self]
+                                                                                 buttonTitle:@"Okay."
+                                                                                buttonAction:^{ enableUserInteraction(YES); }
+                                                                              relativeToView:self.view];
+                                                         });
+                                                       }];
   } else {
     NSArray *errMsgs = [FPUtils computeSaveUsrErrMsgs:_formStateMask];
     [PEUIUtils showWarningAlertWithMsgs:errMsgs

@@ -13,7 +13,7 @@
 #import "FPNames.h"
 
 @implementation FPFpLogVehicleFuelStationDateDataSourceAndDelegate {
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   FPScreenToolkit *_screenToolkit;
   PEUIToolkit *_uitoolkit;
   FPUser *_user;
@@ -34,7 +34,7 @@
   fuelStationSelectedAction:(PEItemSelectedAction)fuelStationSelectedAction
         logDatePickedAction:(void(^)(NSDate *))logDatePickedAction
 displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
-             coordinatorDao:(FPCoordinatorDao *)coordDao
+             coordinatorDao:(id<FPCoordinatorDao>)coordDao
                        user:(FPUser *)user
               screenToolkit:(FPScreenToolkit *)screenToolkit
                       error:(PELMDaoErrorBlk)errorBlk {
@@ -136,11 +136,11 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
   switch ([indexPath section]) {
     case 0:
       [[cell textLabel] setText:@"Vehicle"];
-      [[cell detailTextLabel] setText:(_selectedVehicle ? [_selectedVehicle name] : @"(no vehicles found)")];
+      [[cell detailTextLabel] setText:(_selectedVehicle ? [_selectedVehicle name] : @"(create vehicle)")];
       break;
     case 1:
       [[cell textLabel] setText:@"Gas station"];
-      [[cell detailTextLabel] setText:(_selectedFuelStation ? [_selectedFuelStation name] : @"(no gas stations found)")];
+      [[cell detailTextLabel] setText:(_selectedFuelStation ? [_selectedFuelStation name] : @"(create gas station)")];
       break;
     default:
       [[cell textLabel] setText:@"Purchased"];

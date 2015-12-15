@@ -16,7 +16,7 @@
 
 @implementation FPCommonStatsLaunchController {
   NSString *_screenTitle;
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   NSString *_entityTypeLabelText;

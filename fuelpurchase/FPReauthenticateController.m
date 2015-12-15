@@ -42,7 +42,7 @@
 @end
 
 @implementation FPReauthenticateController {
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   UITextField *_passwordTf;
   CGFloat animatedDistance;
   PEUIToolkit *_uitoolkit;
@@ -53,7 +53,7 @@
 
 #pragma mark - Initializers
 
-- (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
+- (id)initWithStoreCoordinator:(id<FPCoordinatorDao>)coordDao
                           user:(FPUser *)user
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit {
@@ -304,22 +304,22 @@ authenticate again.  Sorry about that.  To authenticate, tap the %@ button."
       enableUserInteraction(NO);
       HUD.delegate = self;
       HUD.labelText = @"Re-authenticating...";
-      [_coordDao lightLoginForUser:_user
-                          password:[_passwordTf text]
-                   remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self, self.tabBarController.view)
-                 completionHandler:^(NSError *err) {
-                   dispatch_async(dispatch_get_main_queue(), ^{
-                     if (err) {
-                       enableUserInteraction(YES);
-                     }
-                     [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD,
-                                                                         successBlk,
-                                                                         ^{ enableUserInteraction(YES); },
-                                                                         self,
-                                                                         self.tabBarController.view)(err);
-                   });
-                 }
-             localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, self.tabBarController.view)];
+      [_coordDao.userCoordinatorDao lightLoginForUser:_user
+                                             password:[_passwordTf text]
+                                      remoteStoreBusy:[FPUtils serverBusyHandlerMakerForUI](HUD, self, self.tabBarController.view)
+                                    completionHandler:^(NSError *err) {
+                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                        if (err) {
+                                          enableUserInteraction(YES);
+                                        }
+                                        [FPUtils loginHandlerWithErrMsgsMaker:errMsgsMaker](HUD,
+                                                                                            successBlk,
+                                                                                            ^{ enableUserInteraction(YES); },
+                                                                                            self,
+                                                                                            self.tabBarController.view)(err);
+                                      });
+                                    }
+                                localSaveErrorHandler:[FPUtils localDatabaseErrorHudHandlerMaker](HUD, self, self.tabBarController.view)];
     };
     doLightLogin([_coordDao doesUserHaveAnyUnsyncedEntities:_user]);
   } else {

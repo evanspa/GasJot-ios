@@ -19,7 +19,7 @@
 #endif
 
 @implementation FPEditsInProgressController {
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   FPUser *_user;
@@ -27,7 +27,7 @@
 
 #pragma mark - Initializers
 
-- (id)initWithStoreCoordinator:(FPCoordinatorDao *)coordDao
+- (id)initWithStoreCoordinator:(id<FPCoordinatorDao>)coordDao
                           user:(FPUser *)user
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit {
@@ -219,13 +219,13 @@ mode."
     totalHeight += envlogsButton.frame.size.height + 7.0;
   }
   if (totalNumSyncNeeded > 0 && [APP doesUserHaveValidAuthToken]) {
-    CGFloat vpadding = self.view.frame.size.height * 0.3;
     [PEUIUtils placeView:syncAllButton
-              atBottomOf:contentPanel
+                   below:topView
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:vpadding
+                vpadding:25.0
                 hpadding:0.0];
-    totalHeight += syncAllButton.frame.size.height + vpadding;
+    totalHeight += syncAllButton.frame.size.height + 25.0;
     UIView *syncAllMessage = [self syncAllInfoMessage];
     [PEUIUtils placeView:syncAllMessage
                    below:syncAllButton

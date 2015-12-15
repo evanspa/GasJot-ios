@@ -34,7 +34,7 @@ NSString * const FPPanelToolkitVehicleDefaultOctaneNaPlaceholerText = @"Default 
 //NSString * const FPPanelToolkitFplogOctaneNaPlaceholerText = @"Octane (NOT APPLICABLE)";
 
 @implementation FPPanelToolkit {
-  FPCoordinatorDao *_coordDao;
+  id<FPCoordinatorDao> _coordDao;
   PEUIToolkit *_uitoolkit;
   FPScreenToolkit *_screenToolkit;
   NSMutableArray *_tableViewDataSources;
@@ -44,7 +44,7 @@ NSString * const FPPanelToolkitVehicleDefaultOctaneNaPlaceholerText = @"Default 
 
 #pragma mark - Initializers
 
-- (id)initWithCoordinatorDao:(FPCoordinatorDao *)coordDao
+- (id)initWithCoordinatorDao:(id<FPCoordinatorDao>)coordDao
                screenToolkit:(FPScreenToolkit *)screenToolkit
                    uitoolkit:(PEUIToolkit *)uitoolkit
                        error:(PELMDaoErrorBlk)errorBlk {
@@ -55,7 +55,7 @@ NSString * const FPPanelToolkitVehicleDefaultOctaneNaPlaceholerText = @"Default 
     _screenToolkit = screenToolkit;
     _tableViewDataSources = [NSMutableArray array];
     _errorBlk = errorBlk;
-    _stats = [[FPStats alloc] initWithLocalDao:_coordDao.localDao errorBlk:errorBlk];
+    _stats = [[FPStats alloc] initWithLocalDao:_coordDao errorBlk:errorBlk];
   }
   return self;
 }
@@ -245,7 +245,7 @@ return [PEUIUtils tablePanelWithRowData:rowData
 + (UIView *)accountStatusPanelForUser:(FPUser *)user
                              panelTag:(NSNumber *)panelTag
                  includeRefreshButton:(BOOL)includeRefreshButton
-                       coordinatorDao:(FPCoordinatorDao *)coordDao
+                       coordinatorDao:(id<FPCoordinatorDao>)coordDao
                             uitoolkit:(PEUIToolkit *)uitoolkit
                        relativeToView:(UIView *)relativeToView
                            controller:(UIViewController *)controller {
@@ -275,7 +275,7 @@ return [PEUIUtils tablePanelWithRowData:rowData
                                               textColor:[UIColor whiteColor]
                            disabledStateBackgroundColor:nil
                                  disabledStateTextColor:nil
-                                        verticalPadding:8.5
+                                        verticalPadding:14.0
                                       horizontalPadding:20.0
                                            cornerRadius:5.0
                                                  target:nil
@@ -284,49 +284,49 @@ return [PEUIUtils tablePanelWithRowData:rowData
         MBProgressHUD *sendVerificationEmailHud = [MBProgressHUD showHUDAddedTo:relativeToView animated:YES];
         enableUserInteraction(NO);
         sendVerificationEmailHud.labelText = @"Sending verification email...";
-        [coordDao resendVerificationEmailForUser:user
-                              remoteStoreBusyBlk:^(NSDate *retryAfter) {
-                                dispatch_async(dispatch_get_main_queue(), ^{
-                                  [sendVerificationEmailHud hide:YES afterDelay:0.0];
-                                  [PEUIUtils showWaitAlertWithMsgs:nil
-                                                             title:@"Busy with maintenance."
-                                                  alertDescription:[[NSAttributedString alloc] initWithString:@"\
-The server is currently busy at the moment undergoing maintenance.\n\n\
-We apologize for the inconvenience.  Please try re-sending the verification email later."]
-                                                          topInset:[PEUIUtils topInsetForAlertsWithController:controller]
-                                                       buttonTitle:@"Okay."
-                                                      buttonAction:^{ enableUserInteraction(YES); }
-                                                    relativeToView:controller.tabBarController.view];
-                                });
-                              }
-                               successBlk:^{
-                                 dispatch_async(dispatch_get_main_queue(), ^{
-                                   [sendVerificationEmailHud hide:YES afterDelay:0.0];
-                                   NSAttributedString *attrMessage =
-                                   [PEUIUtils attributedTextWithTemplate:@"The verification email was sent to at: %@."
-                                                            textToAccent:[user email]
-                                                          accentTextFont:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]];
-                                   [PEUIUtils showSuccessAlertWithTitle:@"Verification e-mail sent."
-                                                       alertDescription:attrMessage
-                                                               topInset:[PEUIUtils topInsetForAlertsWithController:controller]
-                                                            buttonTitle:@"Okay."
-                                                           buttonAction:^{ enableUserInteraction(YES); }
-                                                         relativeToView:controller.tabBarController.view];
-                                 });
-                               }
-                                        errorBlk:^{
-                                          dispatch_async(dispatch_get_main_queue(), ^{
-                                            [sendVerificationEmailHud hide:YES afterDelay:0.0];
-                                            [PEUIUtils showErrorAlertWithMsgs:nil
-                                                                        title:@"Something went wrong."
-                                                             alertDescription:[[NSAttributedString alloc] initWithString:@"\
-Oops.  Something went wrong in attempting to send you a verification email.  Please try this again a little later."]
-                                                                     topInset:[PEUIUtils topInsetForAlertsWithController:controller]
-                                                                  buttonTitle:@"Okay."
-                                                                 buttonAction:^{ enableUserInteraction(YES); }
-                                                               relativeToView:controller.tabBarController.view];
-                                          });
-                                        }];
+        [coordDao.userCoordinatorDao resendVerificationEmailForUser:user
+                                                 remoteStoreBusyBlk:^(NSDate *retryAfter) {
+                                                   dispatch_async(dispatch_get_main_queue(), ^{
+                                                     [sendVerificationEmailHud hide:YES afterDelay:0.0];
+                                                     [PEUIUtils showWaitAlertWithMsgs:nil
+                                                                                title:@"Busy with maintenance."
+                                                                     alertDescription:[[NSAttributedString alloc] initWithString:@"\
+                                                                                       The server is currently busy at the moment undergoing maintenance.\n\n\
+                                                                                       We apologize for the inconvenience.  Please try re-sending the verification email later."]
+                                                                             topInset:[PEUIUtils topInsetForAlertsWithController:controller]
+                                                                          buttonTitle:@"Okay."
+                                                                         buttonAction:^{ enableUserInteraction(YES); }
+                                                                       relativeToView:controller.tabBarController.view];
+                                                   });
+                                                 }
+                                                         successBlk:^{
+                                                           dispatch_async(dispatch_get_main_queue(), ^{
+                                                             [sendVerificationEmailHud hide:YES afterDelay:0.0];
+                                                             NSAttributedString *attrMessage =
+                                                             [PEUIUtils attributedTextWithTemplate:@"The verification email was sent to at: %@."
+                                                                                      textToAccent:[user email]
+                                                                                    accentTextFont:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]];
+                                                             [PEUIUtils showSuccessAlertWithTitle:@"Verification e-mail sent."
+                                                                                 alertDescription:attrMessage
+                                                                                         topInset:[PEUIUtils topInsetForAlertsWithController:controller]
+                                                                                      buttonTitle:@"Okay."
+                                                                                     buttonAction:^{ enableUserInteraction(YES); }
+                                                                                   relativeToView:controller.tabBarController.view];
+                                                           });
+                                                         }
+                                                           errorBlk:^{
+                                                             dispatch_async(dispatch_get_main_queue(), ^{
+                                                               [sendVerificationEmailHud hide:YES afterDelay:0.0];
+                                                               [PEUIUtils showErrorAlertWithMsgs:nil
+                                                                                           title:@"Something went wrong."
+                                                                                alertDescription:[[NSAttributedString alloc] initWithString:@"\
+                                                                                                  Oops.  Something went wrong in attempting to send you a verification email.  Please try this again a little later."]
+                                                                                        topInset:[PEUIUtils topInsetForAlertsWithController:controller]
+                                                                                     buttonTitle:@"Okay."
+                                                                                    buttonAction:^{ enableUserInteraction(YES); }
+                                                                                  relativeToView:controller.tabBarController.view];
+                                                             });
+                                                           }];
       } forControlEvents:UIControlEventTouchUpInside];
       return sendEmailBtn;
     };
@@ -341,7 +341,7 @@ Oops.  Something went wrong in attempting to send you a verification email.  Ple
                                             textColor:[UIColor whiteColor]
                          disabledStateBackgroundColor:nil
                                disabledStateTextColor:nil
-                                      verticalPadding:8.5
+                                      verticalPadding:14.0
                                     horizontalPadding:20.0
                                          cornerRadius:5.0
                                                target:nil
@@ -382,7 +382,7 @@ Use the %@ button to have a new account verification link emailed to you."
               } else { // user account modified
                 [user setUpdatedAt:[downloadedUser updatedAt]];
                 [user overwriteDomainProperties:downloadedUser];
-                [[coordDao localDao] saveMasterUser:downloadedUser error:[FPUtils localSaveErrorHandlerMaker]()];
+                [coordDao saveMasterUser:downloadedUser error:[FPUtils localSaveErrorHandlerMaker]()];
                 if ([PEUtils isNil:[user verifiedAt]]) {  // user account modified, but still not verified
                   stillNotVerifiedAlert();
                 } else {  // user account verified
@@ -482,13 +482,13 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
         };
         NSString *mainMsgFragment = @"refreshing account status";
         NSString *recordTitle = @"Account status";
-        [coordDao fetchUser:user
-            ifModifiedSince:[user updatedAt]
-        notFoundOnServerBlk:^{refreshNotFoundBlk(mainMsgFragment, recordTitle);}
-                 successBlk:^(FPUser *fetchedUser) {refreshSuccessBlk(mainMsgFragment, recordTitle, fetchedUser);}
-         remoteStoreBusyBlk:^(NSDate *retryAfter){refreshRetryAfterBlk(mainMsgFragment, recordTitle, retryAfter);}
-         tempRemoteErrorBlk:^{refreshServerTempError(mainMsgFragment, recordTitle);}
-        addlAuthRequiredBlk:^{refreshAuthReqdBlk(mainMsgFragment, recordTitle); [APP refreshTabs];}];        
+        [coordDao.userCoordinatorDao fetchUser:user
+                               ifModifiedSince:[user updatedAt]
+                           notFoundOnServerBlk:^{refreshNotFoundBlk(mainMsgFragment, recordTitle);}
+                                    successBlk:^(PELMUser *fetchedUser) {refreshSuccessBlk(mainMsgFragment, recordTitle, fetchedUser);}
+                            remoteStoreBusyBlk:^(NSDate *retryAfter){refreshRetryAfterBlk(mainMsgFragment, recordTitle, retryAfter);}
+                            tempRemoteErrorBlk:^{refreshServerTempError(mainMsgFragment, recordTitle);}
+                           addlAuthRequiredBlk:^{refreshAuthReqdBlk(mainMsgFragment, recordTitle); [APP refreshTabs];}];
       } forControlEvents:UIControlEventTouchUpInside];
       [PEUIUtils placeView:refreshBtn inMiddleOf:buttonsView withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:8.0];
       UIButton *resendEmailBtn = makeSendEmailBtn();
@@ -533,7 +533,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
 + (void)refreshAccountStatusPanelForUser:(FPUser *)user
                                 panelTag:(NSNumber *)panelTag
                     includeRefreshButton:(BOOL)includeRefreshButton
-                          coordinatorDao:(FPCoordinatorDao *)coordDao
+                          coordinatorDao:(id<FPCoordinatorDao>)coordDao
                                uitoolkit:(PEUIToolkit *)uitoolkit
                           relativeToView:(UIView *)relativeToView
                               controller:(UIViewController *)controller {
@@ -552,7 +552,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
 }
 
 + (UIButton *)forgotPasswordButtonForUser:(FPUser *)user
-                           coordinatorDao:(FPCoordinatorDao *)coordDao
+                           coordinatorDao:(id<FPCoordinatorDao>)coordDao
                                 uitoolkit:(PEUIToolkit *)uitoolkit
                                controller:(UIViewController *)controller {
   UIButton *forgotPasswordBtn = [PEUIUtils buttonWithKey:@"Forgot password?"
@@ -561,7 +561,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                                textColor:[UIColor whiteColor]
                             disabledStateBackgroundColor:nil
                                   disabledStateTextColor:nil
-                                         verticalPadding:8.5
+                                         verticalPadding:14.0
                                        horizontalPadding:20.0
                                             cornerRadius:5.0
                                                   target:nil
@@ -1269,7 +1269,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                                      textColor:[UIColor whiteColor]
                                   disabledStateBackgroundColor:nil
                                         disabledStateTextColor:nil
-                                               verticalPadding:8.5
+                                               verticalPadding:24.0
                                              horizontalPadding:20.0
                                                   cornerRadius:5.0
                                                         target:nil
@@ -1343,7 +1343,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
                                                   textColor:[UIColor whiteColor]
                                disabledStateBackgroundColor:nil
                                      disabledStateTextColor:nil
-                                            verticalPadding:8.5
+                                            verticalPadding:14.0
                                           horizontalPadding:20.0
                                                cornerRadius:5.0
                                                      target:nil

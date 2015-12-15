@@ -20,8 +20,7 @@
 
 #import <UIKit/UIKit.h>
 #import <MBProgressHUD/MBProgressHUD.h>
-#import <PEFuelPurchase-Common/FPAuthTokenDelegate.h>
-//#import <PEFuelPurchase-Model/FPCoordinatorDao.h>
+#import <PEFuelPurchase-Model/PEAuthTokenDelegate.h>
 #import "FPCoordinatorDao.h"
 #import <PEObjc-Commons/PEUIToolkit.h>
 
@@ -37,7 +36,7 @@ FOUNDATION_EXPORT NSInteger const FPJotButtonTag;
 @interface FPAppDelegate : UIResponder <UIApplicationDelegate,
   CLLocationManagerDelegate,
   MBProgressHUDDelegate,
-  FPAuthTokenDelegate,
+  PEAuthTokenDelegate,
   UITabBarControllerDelegate
 #ifdef FP_DEV
   ,PDVDevEnabled
