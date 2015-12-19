@@ -18,11 +18,14 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#import <UIKit/UIKit.h>
+@import UIKit;
+@import CoreLocation;
+
 #import <MBProgressHUD/MBProgressHUD.h>
-#import <PEFuelPurchase-Model/PEAuthTokenDelegate.h>
-#import "FPCoordinatorDao.h"
+#import <PELocal-Data/PEAuthTokenDelegate.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
+
+#import "FPCoordinatorDao.h"
 
 #ifdef FP_DEV
   #import <PEDev-Console/PDVDevEnabled.h>

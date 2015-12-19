@@ -1,23 +1,23 @@
 PODS:
-  - AFNetworking (2.5.4):
-    - AFNetworking/NSURLConnection (= 2.5.4)
-    - AFNetworking/NSURLSession (= 2.5.4)
-    - AFNetworking/Reachability (= 2.5.4)
-    - AFNetworking/Security (= 2.5.4)
-    - AFNetworking/Serialization (= 2.5.4)
-    - AFNetworking/UIKit (= 2.5.4)
-  - AFNetworking/NSURLConnection (2.5.4):
+  - AFNetworking (2.6.3):
+    - AFNetworking/NSURLConnection (= 2.6.3)
+    - AFNetworking/NSURLSession (= 2.6.3)
+    - AFNetworking/Reachability (= 2.6.3)
+    - AFNetworking/Security (= 2.6.3)
+    - AFNetworking/Serialization (= 2.6.3)
+    - AFNetworking/UIKit (= 2.6.3)
+  - AFNetworking/NSURLConnection (2.6.3):
     - AFNetworking/Reachability
     - AFNetworking/Security
     - AFNetworking/Serialization
-  - AFNetworking/NSURLSession (2.5.4):
+  - AFNetworking/NSURLSession (2.6.3):
     - AFNetworking/Reachability
     - AFNetworking/Security
     - AFNetworking/Serialization
-  - AFNetworking/Reachability (2.5.4)
-  - AFNetworking/Security (2.5.4)
-  - AFNetworking/Serialization (2.5.4)
-  - AFNetworking/UIKit (2.5.4):
+  - AFNetworking/Reachability (2.6.3)
+  - AFNetworking/Security (2.6.3)
+  - AFNetworking/Serialization (2.6.3)
+  - AFNetworking/UIKit (2.6.3):
     - AFNetworking/NSURLConnection
     - AFNetworking/NSURLSession
   - BlocksKit (2.2.5):
@@ -49,7 +49,7 @@ PODS:
     - FMDB/common
   - HMSegmentedControl (1.5.2)
   - IQKeyboardManager (3.2.1.1)
-  - JBChartView (2.9.0)
+  - JBChartView (2.9.1)
   - KissXML (5.0)
   - MBProgressHUD (0.9.1)
   - OHHTTPStubs (3.1.12):
@@ -59,19 +59,25 @@ PODS:
     - PEObjc-Commons (~> 1.0.89)
     - PESimu-Select (~> 1.0.4)
   - PEFuelPurchase-Common (1.0.12)
-  - PEFuelPurchase-Model (1.0.191):
+  - PEFuelPurchase-Model (1.0.200):
     - CHCSVParser (~> 2.1.0)
     - CocoaLumberjack (~> 1.9)
     - FMDB (~> 2.5)
     - PEFuelPurchase-Common (~> 1.0.12)
-    - PEHateoas-Client (~> 1.0.8)
-    - PEObjc-Commons (~> 1.0.100)
+    - PEHateoas-Client (~> 1.0.14)
+    - PELocal-Data (~> 0.0.9)
+    - PEObjc-Commons (~> 1.0.102)
     - UICKeyChainStore (~> 2.0.4)
-  - PEHateoas-Client (1.0.8):
-    - AFNetworking (~> 2.5.4)
+  - PEHateoas-Client (1.0.14):
+    - AFNetworking (~> 2.6.3)
     - CocoaLumberjack (~> 1.9)
-    - PEObjc-Commons (~> 1.0.73)
-  - PEObjc-Commons (1.0.101):
+    - PEObjc-Commons (~> 1.0.101)
+  - PELocal-Data (0.0.9):
+    - CocoaLumberjack (~> 1.9)
+    - FMDB (~> 2.5)
+    - PEHateoas-Client (~> 1.0.14)
+    - PEObjc-Commons (~> 1.0.101)
+  - PEObjc-Commons (1.0.102):
     - BlocksKit (~> 2.2.5)
   - PESimu-Select (1.0.4):
     - PEObjc-Commons (~> 1.0.86)
@@ -94,7 +100,7 @@ PODS:
   - UICKeyChainStore (2.0.5)
 
 DEPENDENCIES:
-  - AFNetworking (= 2.5.4)
+  - AFNetworking (= 2.6.3)
   - BlocksKit (= 2.2.5)
   - CHCSVParser (= 2.1.0)
   - CocoaLumberjack (= 1.9.2)
@@ -107,13 +113,14 @@ DEPENDENCIES:
   - OHHTTPStubs (= 3.1.12)
   - PEDev-Console (= 1.0.5)
   - PEFuelPurchase-Common (= 1.0.12)
-  - PEFuelPurchase-Model (= 1.0.191)
-  - PEObjc-Commons (= 1.0.101)
+  - PEFuelPurchase-Model (= 1.0.200)
+  - PELocal-Data (= 0.0.9)
+  - PEObjc-Commons (= 1.0.102)
   - ReactiveCocoa (= 2.4.7)
   - UICKeyChainStore (= 2.0.5)
 
 SPEC CHECKSUMS:
-  AFNetworking: 05edc0ac4c4c8cf57bcf4b84be5b0744b6d8e71e
+  AFNetworking: cb8d14a848e831097108418f5d49217339d4eb60
   BlocksKit: 7f422b971407001178d181a43b99014ea2591fe6
   CHCSVParser: 3bcc7bdb72111a31222e95d57eacceefe4e537e8
   CocoaLumberjack: 628fca2e88ef06f7cf6817309aa405f325d9a6fa
@@ -121,15 +128,16 @@ SPEC CHECKSUMS:
   FMDB: 96e8f1bcc1329e269330f99770ad4285d9003e52
   HMSegmentedControl: 83b9686022d2176fb6457d2bdb61e5d6393fed7d
   IQKeyboardManager: 6aeae6a2014d66461c48f6753dd693e92eaf6524
-  JBChartView: 56ab6bf7b822440529a591d9babc4feba5b2dc89
+  JBChartView: ca18e487c3d3ee68753716d41b260106e2859f63
   KissXML: ce643413d618ad69886d0d43c3792b7dedfe476e
   MBProgressHUD: c47f2c166c126cf2ce36498d80f33e754d4e93ad
   OHHTTPStubs: 8cf0cfe6f34f13fc88fdf5b2a1b2c2536e8c0261
   PEDev-Console: 4ee13ef5f0ed0b1c227ba6d696db467cb96dd6c3
   PEFuelPurchase-Common: 8b4ed986a89d064914a44d8a922078c9d622f445
-  PEFuelPurchase-Model: 7eeed8910baeab1d1b47e72139421942d331d200
-  PEHateoas-Client: 4eb23cd4a1c106ecab147abd87cd3cacac93d52f
-  PEObjc-Commons: 1dc819c655df6f37ff3ecbc22db00a95dbd15dbd
+  PEFuelPurchase-Model: 8aef4907cc571be278df4d4fbdeda5d22f0b2279
+  PEHateoas-Client: 89aa69b5a2e1922f131b99de4d761deed9878589
+  PELocal-Data: 0979934548046aa8c114a52639761a25b31e789c
+  PEObjc-Commons: f2838b055a5f1b22aa3184e34cd9e72210250c8c
   PESimu-Select: 88e3ab14e1b9e0f75e9b626103581bd488128674
   PEWire-Control: c2d18d4261d025182513466da9c6ed80e596f526
   PEXML-Utils: d36d0ab7337b92c120ec49b84f99e7b923bf8a24

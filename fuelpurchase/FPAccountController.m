@@ -13,7 +13,7 @@
 #import "PELMUIUtils.h"
 #import "FPNames.h"
 #import "FPUtils.h"
-#import <PEFuelPurchase-Model/PELMNotificationUtils.h>
+#import <PELocal-Data/PELMNotificationUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEObjc-Commons/UIImage+PEAdditions.h>
 #import <PEObjc-Commons/UIView+PERoundify.h>
@@ -24,6 +24,8 @@
 #import "FPPanelToolkit.h"
 #import <FlatUIKit/UIColor+FlatUI.h>
 #import "FPUIUtils.h"
+#import <PELocal-Data/PEUserCoordinatorDao.h>
+#import <PEFuelPurchase-Model/FPLocalDao.h>
 
 #ifdef FP_DEV
 #import <PEDev-Console/UIViewController+PEDevConsole.h>

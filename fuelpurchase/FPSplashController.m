@@ -13,6 +13,7 @@
 #import "UIColor+FPAdditions.h"
 #import <FlatUIKit/UIColor+FlatUI.h>
 #import "FPUIUtils.h"
+#import <PELocal-Data/PEUserCoordinatorDao.h>
 
 CGFloat const FPSPLASH_CONTENT_HEIGH_FACTOR = 0.65;
 

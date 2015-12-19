@@ -22,7 +22,7 @@
 #import <AFNetworking/AFHTTPRequestOperationManager.h>
 #import <MBProgressHUD/MBProgressHUD.h>
 #import <PEFuelPurchase-Model/FPUser.h>
-#import <PEFuelPurchase-Model/PELMUtils.h>
+#import <PELocal-Data/PELMUtils.h>
 
 typedef NSArray * (^ErrMsgsMaker)(NSInteger errCode);
 

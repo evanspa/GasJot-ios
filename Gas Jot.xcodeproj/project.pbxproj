@@ -284,16 +284,16 @@
 			name = "Table Data Sources";
 			sourceTree = "<group>";
 		};
-		186E0B7819CD1BDD00CE4B3A /* PE UI Commons */ = {
+		186E0B7819CD1BDD00CE4B3A /* PEUI-Commons */ = {
 			isa = PBXGroup;
 			children = (
 				CA90F4211B45AB4C005FAB35 /* Server Sync Action Sheet */,
 				CAD8AE4E1B2B28E200276F4F /* Local Data UI Utils */,
 				18F61A821A96129E00BA631A /* Categories */,
 				186E0B7919CD1BEA00CE4B3A /* Pull-to-Refresh List View Controller */,
-				CAB61BFA1C11D6D40008F12B /* Custom Screen */,
+				CAB61BFA1C11D6D40008F12B /* Custom Screen Base */,
 			);
-			name = "PE UI Commons";
+			name = "PEUI-Commons";
 			sourceTree = "<group>";
 		};
 		186E0B7919CD1BEA00CE4B3A /* Pull-to-Refresh List View Controller */ = {
@@ -429,7 +429,7 @@
 		18D6DFB117F68005006B300D /* Gas Jot */ = {
 			isa = PBXGroup;
 			children = (
-				186E0B7819CD1BDD00CE4B3A /* PE UI Commons */,
+				186E0B7819CD1BDD00CE4B3A /* PEUI-Commons */,
 				189AC7521A78030D00A6CFE3 /* Model */,
 				185D38CC1815952B0007587A /* App Delegate */,
 				CA7D5A241B383F4500433581 /* Notifications */,
@@ -653,13 +653,13 @@
 			name = "Re-authenticate";
 			sourceTree = "<group>";
 		};
-		CAB61BFA1C11D6D40008F12B /* Custom Screen */ = {
+		CAB61BFA1C11D6D40008F12B /* Custom Screen Base */ = {
 			isa = PBXGroup;
 			children = (
 				CAB61BFB1C11D6F60008F12B /* PECustomController.h */,
 				CAB61BFC1C11D6F60008F12B /* PECustomController.m */,
 			);
-			name = "Custom Screen";
+			name = "Custom Screen Base";
 			sourceTree = "<group>";
 		};
 		CABF51701BD499370083B460 /* Stat Screens */ = {

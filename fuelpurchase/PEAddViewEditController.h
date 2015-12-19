@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import <PEObjc-Commons/PEUIUtils.h>
-#import <PEFuelPurchase-Model/PELMMainSupport.h>
+#import <PELocal-Data/PELMMainSupport.h>
 #import <MBProgressHUD/MBProgressHUD.h>
 
 @class PEListViewController;

@@ -13,6 +13,7 @@
 #import "FPUIUtils.h"
 #import "FPUtils.h"
 #import "UIColor+FPAdditions.h"
+#import <PEFuelPurchase-Model/FPLocalDao.h>
 
 @implementation FPRecordsController {
   id<FPCoordinatorDao> _coordDao;

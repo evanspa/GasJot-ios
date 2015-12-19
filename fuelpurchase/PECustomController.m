@@ -8,11 +8,13 @@
 
 #import "PECustomController.h"
 #import <PEObjc-Commons/PEUIUtils.h>
+#import <PELocal-Data/PELMNotificationNames.h>
 
 @implementation PECustomController {
   UIView *_displayPanel;
   CGPoint _scrollContentOffset;
-  BOOL _viewJustLoaded;
+  //BOOL _viewJustLoaded;
+  BOOL _needsRepaint;
 }
 
 #pragma mark - Dynamic Type Support
@@ -41,6 +43,12 @@
 
 - (void)hideKeyboard {
   [self.view endEditing:YES];
+}
+
+#pragma mark - Notification Observing
+
+- (void)databaseUpdate:(NSNotification *)notification {
+  _needsRepaint = YES;
 }
 
 #pragma mark - Display Panel
@@ -120,6 +128,10 @@
                                            selector:@selector(changeTextSize:)
                                                name:UIContentSizeCategoryDidChangeNotification
                                              object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(databaseUpdate:)
+                                               name:PELMNotificationDbUpdate
+                                             object:nil];
   UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)];
   [gestureRecognizer setCancelsTouchesInView:NO];
   [self.view addGestureRecognizer:gestureRecognizer];
@@ -132,12 +144,12 @@
                                                   center:center];
   
   [self placeDisplayPanelWithCentering:center];
-  _viewJustLoaded = YES;
+  _needsRepaint = NO;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  if (!_viewJustLoaded) {
+  if (_needsRepaint) {
     NSArray *content = [self makeContentWithOldContentPanel:_displayPanel];
     [_displayPanel removeFromSuperview];
     UIView *contentPanel = content[0];
@@ -147,8 +159,8 @@
                                              withScrolling:scrolling
                                                     center:center];
     [self placeDisplayPanelWithCentering:center];
+    _needsRepaint = NO;
   }
-  _viewJustLoaded = NO;
 }
 
 @end

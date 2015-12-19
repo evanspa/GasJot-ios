@@ -6,11 +6,17 @@
 //  Copyright © 2015 Paul Evans. All rights reserved.
 //
 
-#import "FPReportViews.h"
-#import "FPUtils.h"
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <FlatUIKit/UIColor+FlatUI.h>
+
+#import <PEFuelPurchase-Model/FPVehicle.h>
+#import <PEFuelPurchase-Model/FPFuelStation.h>
+#import <PEFuelPurchase-Model/FPFuelPurchaseLog.h>
+#import <PEFuelPurchase-Model/FPEnvironmentLog.h>
+
+#import "FPReportViews.h"
+#import "FPUtils.h"
 
 NSString * const FPOdometerLogFunFactIndexDefaultsKey = @"FPOdometerLogFunFactIndex";
 NSString * const FPGasLogFunFactIndexDefaultsKey = @"FPGasLogFunFactIndex";

@@ -13,6 +13,8 @@
 #import "FPUIUtils.h"
 #import "FPUtils.h"
 #import "UIColor+FPAdditions.h"
+#import <PEFuelPurchase-Model/FPCoordinatorDao.h>
+#import <PEFuelPurchase-Model/FPLocalDao.h>
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>

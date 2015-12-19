@@ -19,7 +19,7 @@
 #import "PEListViewController.h"
 #import "PEAddViewEditController.h"
 #import "FPUtils.h"
-#import <PEFuelPurchase-Model/PELMNotificationUtils.h>
+#import <PELocal-Data/PELMNotificationUtils.h>
 #import "FPPanelToolkit.h"
 #import "FPFpLogVehicleFuelStationDateDataSourceAndDelegate.h"
 #import "FPEnvLogVehicleAndDateDataSourceDelegate.h"
@@ -39,6 +39,13 @@
 #import <PEFuelPurchase-Model/FPStats.h>
 #import "FPCommonStatsLaunchController.h"
 #import "FPCommonStatComparisonController.h"
+#import <PELocal-Data/PEUserCoordinatorDao.h>
+#import <PEFuelPurchase-Model/FPLocalDao.h>
+#import <PELocal-Data/PELocalDao.h>
+#import <PEFuelPurchase-Model/FPVehicle.h>
+#import <PEFuelPurchase-Model/FPFuelStation.h>
+#import <PEFuelPurchase-Model/FPFuelPurchaseLog.h>
+#import <PEFuelPurchase-Model/FPEnvironmentLog.h>
 
 NSInteger const PAGINATION_PAGE_SIZE = 30;
 NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;

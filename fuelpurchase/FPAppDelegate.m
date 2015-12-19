@@ -18,16 +18,19 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
+#import "FPAppDelegate.h"
+
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
+#import <PEObjc-Commons/PEUIToolkit.h>
 #import <FlatUIKit/UIColor+FlatUI.h>
+#import <UICKeyChainStore/UICKeyChainStore.h>
+#import <IQKeyboardManager/IQKeyboardManager.h>
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 #import <PEFuelPurchase-Model/FPCoordinatorDaoImpl.h>
-#import <UICKeyChainStore/UICKeyChainStore.h>
-#import "FPAppDelegate.h"
 #import <PEFuelPurchase-Model/FPUser.h>
-#import <IQKeyboardManager/IQKeyboardManager.h>
-#import <PEObjc-Commons/PEUIToolkit.h>
+#import <PELocal-Data/PEUserCoordinatorDao.h>
+#import <PEHateoas-Client/HCCharset.h>
 #import "FPUtils.h"
 #import "FPSettingsController.h"
 #import "FPEditsInProgressController.h"

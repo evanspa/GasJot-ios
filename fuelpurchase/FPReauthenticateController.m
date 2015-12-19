@@ -32,6 +32,7 @@
 #import <FlatUIKit/UIColor+FlatUI.h>
 #import "FPUIUtils.h"
 #import "FPPanelToolkit.h"
+#import <PELocal-Data/PEUserCoordinatorDao.h>
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>

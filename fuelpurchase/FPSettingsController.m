@@ -13,10 +13,15 @@
 #import "PELMUIUtils.h"
 #import "FPNames.h"
 #import "FPUtils.h"
-#import <PEFuelPurchase-Model/PELMNotificationUtils.h>
+#import <PELocal-Data/PELMNotificationUtils.h>
+#import <PELocal-Data/PEUserCoordinatorDao.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import <PEObjc-Commons/UIImage+PEAdditions.h>
 #import <PEObjc-Commons/UIView+PERoundify.h>
+#import <PELocal-Data/PEChangelog.h>
+#import <PEFuelPurchase-Model/FPCoordinatorDao.h>
+#import <PEFuelPurchase-Model/FPLocalDao.h>
+#import <PELocal-Data/PELocalDao.h>
 #import "FPAppNotificationNames.h"
 #import "FPCreateAccountController.h"
 #import "FPAccountLoginController.h"

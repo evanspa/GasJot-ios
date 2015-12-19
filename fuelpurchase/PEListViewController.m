@@ -9,7 +9,7 @@
 #import "PEListViewController.h"
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
-#import <PEFuelPurchase-Model/PELMNotificationUtils.h>
+#import <PELocal-Data/PELMNotificationUtils.h>
 #import "PEObjc-Commons/NSMutableArray+PEAdditions.h"
 #import "UIScrollView+PEAdditions.h"
 #import "FPLogging.h"

@@ -2,11 +2,12 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 platform :ios, '8.4'
 
-pod 'PEFuelPurchase-Model', '1.0.191'
+pod 'PEFuelPurchase-Model', '1.0.200'
+pod 'PELocal-Data', '0.0.9'
 pod 'PEFuelPurchase-Common', '1.0.12'
-pod 'PEObjc-Commons', '1.0.101'
+pod 'PEObjc-Commons', '1.0.102'
 pod 'ReactiveCocoa', '2.4.7', :inhibit_warnings => true
-pod 'AFNetworking', '2.5.4', :inhibit_warnings => true
+pod 'AFNetworking', '2.6.3', :inhibit_warnings => true
 pod 'CocoaLumberjack', '1.9.2'
 pod 'MBProgressHUD', '0.9.1'
 pod 'FlatUIKit', '1.6.2', :inhibit_warnings => true

@@ -20,6 +20,13 @@
 #import "FPUIUtils.h"
 #import "FPForgotPasswordController.h"
 #import <PEFuelPurchase-Model/FPStats.h>
+#import <PELocal-Data/PEUserCoordinatorDao.h>
+#import <PEFuelPurchase-Model/FPLocalDao.h>
+#import <PELocal-Data/PELocalDao.h>
+#import <PEFuelPurchase-Model/FPVehicle.h>
+#import <PEFuelPurchase-Model/FPFuelStation.h>
+#import <PEFuelPurchase-Model/FPFuelPurchaseLog.h>
+#import <PEFuelPurchase-Model/FPEnvironmentLog.h>
 
 NSString * const FPFpLogEntityMakerFpLogEntry = @"FPFpLogEntityMakerFpLogEntry";
 NSString * const FPFpLogEntityMakerVehicleEntry = @"FPFpLogEntityMakerVehicleEntry";
@@ -29,9 +36,6 @@ NSString * const FPPanelToolkitNaText = @"---";
 
 NSString * const FPPanelToolkitVehicleDefaultOctanePlaceholerText = @"Default octane";
 NSString * const FPPanelToolkitVehicleDefaultOctaneNaPlaceholerText = @"Default octane (NOT APPLICABLE)";
-
-//NSString * const FPPanelToolkitFplogOctanePlaceholerText = @"Octane";
-//NSString * const FPPanelToolkitFplogOctaneNaPlaceholerText = @"Octane (NOT APPLICABLE)";
 
 @implementation FPPanelToolkit {
   id<FPCoordinatorDao> _coordDao;

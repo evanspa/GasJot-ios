@@ -25,6 +25,7 @@
 #import <PEHateoas-Client/HCResource.h>
 #import "FPLogging.h"
 #import "FPNames.h"
+#import <PEFuelPurchase-Model/FPFuelStation.h>
 
 @implementation FPUtils
 

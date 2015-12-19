@@ -36,6 +36,12 @@
 #import "FPUIUtils.h"
 #import <JBChartView/JBLineChartView.h>
 #import <BlocksKit/UIControl+BlocksKit.h>
+#import <PEFuelPurchase-Model/FPCoordinatorDao.h>
+#import <PEFuelPurchase-Model/FPLocalDao.h>
+#import <PEFuelPurchase-Model/FPVehicle.h>
+#import <PEFuelPurchase-Model/FPFuelStation.h>
+#import <PEFuelPurchase-Model/FPFuelPurchaseLog.h>
+#import <PEFuelPurchase-Model/FPEnvironmentLog.h>
 
 NSString * const FPHomeTextIfNilStat = @"---";
 
@@ -285,18 +291,63 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
 
 #pragma mark - Helpers
 
+- (UIButton *)makeFindNearbyGasButton {
+  UIButton *nearbyGasButton = [PEUIUtils buttonWithKey:@"Find nearby gas"
+                                                  font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
+                                       backgroundColor:[UIColor emerlandColor]
+                                             textColor:[UIColor whiteColor]
+                          disabledStateBackgroundColor:nil
+                                disabledStateTextColor:nil
+                                       verticalPadding:23.0
+                                     horizontalPadding:50.0
+                                          cornerRadius:0.0
+                                                target:nil
+                                                action:nil];
+  [PEUIUtils setFrameWidthOfView:nearbyGasButton ofWidth:1.0 relativeTo:self.view];
+  [nearbyGasButton bk_addEventHandler:^(id sender) {
+    
+  } forControlEvents:UIControlEventTouchUpInside];
+  return nearbyGasButton;
+}
+
+- (UIButton *)vehicleInCtxStatsButton {
+  FPVehicle *vehicle = [_coordDao vehicleWithMostRecentLogForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()];
+  NSString *vehicleName = [vehicle name];
+  UIFont *buttonFont = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+  vehicleName = [PEUIUtils truncatedTextForText:vehicleName font:buttonFont availableWidth:self.view.frame.size.width * 0.70];
+  UIButton *statsBtn = [PEUIUtils buttonWithKey:[NSString stringWithFormat:@"%@ stats", vehicleName]
+                                           font:buttonFont
+                                backgroundColor:[UIColor peterRiverColor]
+                                      textColor:[UIColor whiteColor]
+                   disabledStateBackgroundColor:nil
+                         disabledStateTextColor:nil
+                                verticalPadding:17.0
+                              horizontalPadding:50.0
+                                   cornerRadius:0.0
+                                         target:nil
+                                         action:nil];
+  [PEUIUtils setFrameWidthOfView:statsBtn ofWidth:1.0 relativeTo:self.view];
+  [PEUIUtils addDisclosureIndicatorToButton:statsBtn];
+  [statsBtn bk_addEventHandler:^(id sender) {
+    [[self navigationController] pushViewController:[_screenToolkit newVehicleStatsLaunchScreenMakerWithVehicle:vehicle parentController:self](_user)
+                                           animated:YES];
+  } forControlEvents:UIControlEventTouchUpInside];
+  return statsBtn;
+}
+
 - (UIButton *)makeAllStatsButton {
-  UIButton *allStatsBtn = [PEUIUtils buttonWithKey:@"all stats"
-                                              font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
-                                   backgroundColor:[UIColor grayColor]
+  UIButton *allStatsBtn = [PEUIUtils buttonWithKey:@"All stats"
+                                              font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
+                                   backgroundColor:[UIColor peterRiverColor]
                                          textColor:[UIColor whiteColor]
                       disabledStateBackgroundColor:nil
                             disabledStateTextColor:nil
-                                   verticalPadding:14.0
+                                   verticalPadding:17.0
                                  horizontalPadding:50.0
-                                      cornerRadius:3.0
+                                      cornerRadius:0.0
                                             target:nil
                                             action:nil];
+  [PEUIUtils setFrameWidthOfView:allStatsBtn ofWidth:1.0 relativeTo:self.view];
   [PEUIUtils addDisclosureIndicatorToButton:allStatsBtn];
   [allStatsBtn bk_addEventHandler:^(id sender) {
     [[self navigationController] pushViewController:[_screenToolkit newUserStatsLaunchScreenMakerWithParentController:self](_user)
@@ -339,7 +390,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
   JBLineChartView *chart = [self makeLineChartWithTag:chartTag];
   UIButton *moreBtn = [PEUIUtils buttonWithKey:@"more"
                                           font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
-                               backgroundColor:[UIColor grayColor]
+                               backgroundColor:[UIColor belizeHoleColor]
                                      textColor:[UIColor whiteColor]
                   disabledStateBackgroundColor:nil
                         disabledStateTextColor:nil
@@ -560,13 +611,47 @@ alignmentRelativeToView:chart
 
 - (NSArray *)makeHasLogsContent {
   UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:self.view fixedHeight:0.0];
+  UIButton *nearbyGasBtn = [self makeFindNearbyGasButton];
+  [PEUIUtils placeView:nearbyGasBtn
+               atTopOf:contentPanel
+         withAlignment:PEUIHorizontalAlignmentTypeCenter
+              vpadding:FPContentPanelTopPadding
+              hpadding:0.0];
+  __block CGFloat totalHeight = nearbyGasBtn.frame.size.height + FPContentPanelTopPadding;
   UIButton *allStatsBtn = [self makeAllStatsButton];
   [PEUIUtils placeView:allStatsBtn
-               atTopOf:contentPanel
-         withAlignment:PEUIHorizontalAlignmentTypeLeft
-              vpadding:FPContentPanelTopPadding
-              hpadding:8.0];
-  __block CGFloat totalHeight = allStatsBtn.frame.size.height + FPContentPanelTopPadding;
+                 below:nearbyGasBtn
+                  onto:contentPanel
+         withAlignment:PEUIHorizontalAlignmentTypeCenter
+              vpadding:10.0
+              hpadding:0.0];
+  totalHeight += allStatsBtn.frame.size.height + 10.0;
+  UIView *belowView = allStatsBtn;
+  if ([_coordDao numVehiclesForUser:_user error:[FPUtils localFetchErrorHandlerMaker]()] > 1) {
+    UIButton *vehStatsBtn = [self vehicleInCtxStatsButton];
+    [PEUIUtils placeView:vehStatsBtn
+                   below:allStatsBtn
+                    onto:contentPanel
+           withAlignment:PEUIHorizontalAlignmentTypeCenter
+                vpadding:10.0
+                hpadding:0.0];
+    totalHeight += vehStatsBtn.frame.size.height + 10.0;
+    UILabel *vehBtnMsgLabel = [PEUIUtils labelWithKey:@"(this is your most recently used vehicle)"
+                                                 font:[PEUIUtils italicFontForTextStyle:UIFontTextStyleCaption1]
+                                      backgroundColor:[UIColor clearColor]
+                                            textColor:[UIColor darkGrayColor]
+                                  verticalTextPadding:3.0
+                                           fitToWidth:contentPanel.frame.size.width];
+    [PEUIUtils placeView:vehBtnMsgLabel
+                   below:vehStatsBtn
+                    onto:contentPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+ alignmentRelativeToView:contentPanel
+                vpadding:0.0
+                hpadding:8.0];
+    totalHeight += vehBtnMsgLabel.frame.size.height + 0.0;
+    belowView = vehBtnMsgLabel;
+  }
   __block UIView *daysBetweenFillupPanel;
   __block UIView *pricePerGallonPanel;
   __block UIView *gasCostPerMilePanel;
@@ -619,7 +704,7 @@ alignmentRelativeToView:chart
                               _spentOnGasChart = section[1];
                             }];
   [PEUIUtils placeView:daysBetweenFillupPanel
-                 below:allStatsBtn
+                 below:belowView
                   onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeLeft
 alignmentRelativeToView:self.view

@@ -33,6 +33,9 @@
 #import "FPUIUtils.h"
 #import <FlatUIKit/UIColor+FlatUI.h>
 #import "FPPanelToolkit.h"
+#import <PELocal-Data/PELocalDao.h>
+#import <PELocal-Data/PEUserCoordinatorDao.h>
+#import <PEFuelPurchase-Model/FPLocalDao.h>
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>

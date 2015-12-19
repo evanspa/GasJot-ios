@@ -32,6 +32,7 @@
 #import "FPNames.h"
 #import <PEObjc-Commons/JGActionSheet.h>
 #import "FPUIUtils.h"
+#import <PELocal-Data/PEUserCoordinatorDao.h>
 
 #ifdef FP_DEV
   #import <PEDev-Console/UIViewController+PEDevConsole.h>
