@@ -7,8 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <PEFuelPurchase-Model/FPCoordinatorDao.h>
-#import "FPScreenToolkit.h"
+#import <PELocal-Data/PELMDefs.h>
+#import "PEUIDefs.h"
+
+@class FPUser;
+@class FPVehicle;
+@class FPScreenToolkit;
+@protocol FPCoordinatorDao;
 
 @interface FPEnvLogVehicleAndDateDataSourceDelegate : NSObject
 <UITableViewDataSource, UITableViewDelegate>

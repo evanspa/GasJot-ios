@@ -44,6 +44,7 @@
 #import <PELocal-Data/PELocalDao.h>
 #import <PEFuelPurchase-Model/FPVehicle.h>
 #import <PEFuelPurchase-Model/FPFuelStation.h>
+#import <PEFuelPurchase-Model/FPFuelStationType.h>
 #import <PEFuelPurchase-Model/FPFuelPurchaseLog.h>
 #import <PEFuelPurchase-Model/FPEnvironmentLog.h>
 
@@ -58,6 +59,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   FPStats *_stats;
   NSNumberFormatter *_currencyFormatter;
   NSNumberFormatter *_generalFormatter;
+  NSArray *_fuelstationTypes;
 }
 
 #pragma mark - Initializers
@@ -74,11 +76,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                          uitoolkit:uitoolkit
                                                              error:errorBlk];
     _reportViews = [[FPReportViews alloc] initWithStats:[[FPStats alloc] initWithLocalDao:_coordDao errorBlk:errorBlk]];
-    _stats = [[FPStats alloc] initWithLocalDao:_coordDao errorBlk:[FPUtils localFetchErrorHandlerMaker]()];
+    _stats = [[FPStats alloc] initWithLocalDao:_coordDao errorBlk:errorBlk];
     _currencyFormatter = [PEUtils currencyFormatter];
     _generalFormatter = [[NSNumberFormatter alloc] init];
     [_generalFormatter setNumberStyle:NSNumberFormatterDecimalStyle];
     [_generalFormatter setMaximumFractionDigits:1];
+    _fuelstationTypes = [_coordDao fuelstationTypesWithError:errorBlk];
   }
   return self;
 }
@@ -881,7 +884,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                  animated:YES
                                completion:nil];
     };
-    FPDetailViewMaker vehicleDetailViewMaker = ^UIViewController *(PEListViewController *listViewCtrl,
+    PEDetailViewMaker vehicleDetailViewMaker = ^UIViewController *(PEListViewController *listViewCtrl,
                                                                    id dataObject,
                                                                    NSIndexPath *indexPath,
                                                                    PEItemChangedBlk itemChangedBlk) {
@@ -895,7 +898,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPVehicle *v1, FPVehicle *v2){return [v1 isEqualToVehicle:v2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
-    PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPVehicle *vehicle) {return [vehicle name];}
+    PETableCellContentViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPVehicle *vehicle) {return [vehicle name];}
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
@@ -921,13 +924,14 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenCounter:[self vehicleItemChildrenCounter]
                                                       itemChildrenMsgsBlk:[self vehicleItemChildrenMsgs]
                                                               itemDeleter:[self vehicleItemDeleterForUser:user]
-                                                         itemLocalDeleter:[self vehicleItemLocalDeleter]];
+                                                         itemLocalDeleter:[self vehicleItemLocalDeleter]
+                                                             isEntityType:YES];
   };
 }
 
 - (FPAuthScreenMaker)newViewUnsyncedVehiclesScreenMaker {
   return ^ UIViewController *(FPUser *user) {
-    FPDetailViewMaker vehicleDetailViewMaker = ^UIViewController *(PEListViewController *listViewCtrl,
+    PEDetailViewMaker vehicleDetailViewMaker = ^UIViewController *(PEListViewController *listViewCtrl,
                                                                    id dataObject,
                                                                    NSIndexPath *indexPath,
                                                                    PEItemChangedBlk itemChangedBlk) {
@@ -942,7 +946,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPVehicle *v1, FPVehicle *v2){return [v1 isEqualToVehicle:v2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
-    PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPVehicle *vehicle) {return [vehicle name];}
+    PETableCellContentViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPVehicle *vehicle) {return [vehicle name];}
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
@@ -968,7 +972,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenCounter:[self vehicleItemChildrenCounter]
                                                       itemChildrenMsgsBlk:[self vehicleItemChildrenMsgs]
                                                               itemDeleter:[self vehicleItemDeleterForUser:user]
-                                                         itemLocalDeleter:[self vehicleItemLocalDeleter]];
+                                                         itemLocalDeleter:[self vehicleItemLocalDeleter]
+                                                             isEntityType:YES];
   };
 }
 
@@ -990,7 +995,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPVehicle *v1, FPVehicle *v2){return [v1 isEqualToVehicle:v2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
-    PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPVehicle *vehicle) {return [vehicle name];}
+    PETableCellContentViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPVehicle *vehicle) {return [vehicle name];}
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
@@ -1016,7 +1021,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenCounter:nil
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:nil
-                                                         itemLocalDeleter:nil];
+                                                         itemLocalDeleter:nil
+                                                             isEntityType:YES];
   };
 }
 
@@ -1094,7 +1100,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     return [PEAddViewEditController addEntityCtrlrWithUitoolkit:_uitoolkit
                                              listViewController:listViewController
                                                    itemAddedBlk:itemAddedBlk
-                                           entityFormPanelMaker:[_panelToolkit vehicleFormPanelMakerIncludeLogButtons:NO]
+                                           entityFormPanelMaker:[_panelToolkit vehicleFormPanelMaker]
                                             entityToPanelBinder:[_panelToolkit vehicleToVehiclePanelBinder]
                                             panelToEntityBinder:[_panelToolkit vehicleFormPanelToVehicleBinder]
                                                     entityTitle:@"Vehicle"
@@ -1316,7 +1322,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                     entityIndexPath:vehicleIndexPath
                                                           uitoolkit:_uitoolkit
                                                      itemChangedBlk:itemChangedBlk
-                                               entityFormPanelMaker:[_panelToolkit vehicleFormPanelMakerIncludeLogButtons:YES]
+                                               entityFormPanelMaker:[_panelToolkit vehicleFormPanelMaker]
                                                entityViewPanelMaker:[_panelToolkit vehicleViewPanelMaker]
                                                 entityToPanelBinder:[_panelToolkit vehicleToVehiclePanelBinder]
                                                 panelToEntityBinder:[_panelToolkit vehicleFormPanelToVehicleBinder]
@@ -2187,7 +2193,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                   animated:YES
                                 completion:nil];
     };
-    FPDetailViewMaker fuelStationDetailViewMaker = ^UIViewController *(PEListViewController *listViewCtlr,
+    PEDetailViewMaker fuelStationDetailViewMaker = ^UIViewController *(PEListViewController *listViewCtlr,
                                                                        id dataObject,
                                                                        NSIndexPath *indexPath,
                                                                        PEItemChangedBlk itemChangedBlk) {
@@ -2203,7 +2209,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelStation *fs1, FPFuelStation *fs2){return [fs1 isEqualToFuelStation:fs2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
-    PESyncViewStyler tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
+    PETableCellContentViewStyler tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
       [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
                        alwaysTopifyTitleLabel:YES
                                     uitoolkit:_uitoolkit
@@ -2242,13 +2248,14 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenCounter:[self fuelStationItemChildrenCounter]
                                                       itemChildrenMsgsBlk:[self fuelStationItemChildrenMsgs]
                                                               itemDeleter:[self fuelStationItemDeleterForUser:user]
-                                                         itemLocalDeleter:[self fuelStationItemLocalDeleter]];
+                                                         itemLocalDeleter:[self fuelStationItemLocalDeleter]
+                                                             isEntityType:YES];
   };
 }
 
 - (FPAuthScreenMaker)newViewUnsyncedFuelStationsScreenMaker {
   return ^ UIViewController *(FPUser *user) {
-    FPDetailViewMaker fuelStationDetailViewMaker = ^UIViewController *(PEListViewController *listViewCtlr,
+    PEDetailViewMaker fuelStationDetailViewMaker = ^UIViewController *(PEListViewController *listViewCtlr,
                                                                        id dataObject,
                                                                        NSIndexPath *indexPath,
                                                                        PEItemChangedBlk itemChangedBlk) {
@@ -2265,7 +2272,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelStation *fs1, FPFuelStation *fs2){return [fs1 isEqualToFuelStation:fs2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
-    PESyncViewStyler tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
+    PETableCellContentViewStyler tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
       [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
                        alwaysTopifyTitleLabel:YES
                                     uitoolkit:_uitoolkit
@@ -2304,7 +2311,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenCounter:[self fuelStationItemChildrenCounter]
                                                       itemChildrenMsgsBlk:[self fuelStationItemChildrenMsgs]
                                                               itemDeleter:[self fuelStationItemDeleterForUser:user]
-                                                         itemLocalDeleter:[self fuelStationItemLocalDeleter]];
+                                                         itemLocalDeleter:[self fuelStationItemLocalDeleter]
+                                                             isEntityType:YES];
   };
 }
 
@@ -2329,7 +2337,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelStation *fs1, FPFuelStation *fs2){return [fs1 isEqualToFuelStation:fs2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
-    PESyncViewStyler tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
+    PETableCellContentViewStyler tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
       [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
                        alwaysTopifyTitleLabel:YES
                                     uitoolkit:_uitoolkit
@@ -2368,7 +2376,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenCounter:nil
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:nil
-                                                         itemLocalDeleter:nil];
+                                                         itemLocalDeleter:nil
+                                                             isEntityType:YES];
   };
 }
 
@@ -2379,6 +2388,42 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       [PEUIUtils newTfCannotBeEmptyBlkForMsgs:errMsgs entityPanel:fuelStationPanel];
     cannotBeBlankCollector(FPFuelStationTagName, @"Name cannot be empty.");
     return errMsgs;
+  };
+}
+
+- (FPAuthScreenMaker)newFuelstationTypesForSelectionScreenMakerWithItemSelectedAction:(PEItemSelectedAction)itemSelectedAction
+                                                                  initialSelectedType:(FPFuelStationType *)initialSelectedType {
+  return ^ UIViewController *(FPUser *user) {
+    PEPageLoaderBlk pageLoader = ^ NSArray * (FPFuelStationType *lastFsType) { return _fuelstationTypes; };
+    PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelStationType *fsType1, FPFuelStationType *fsType2){return [fsType1 isEqualToFuelStationType:fsType2];}
+                                                                     entityFetcher:^{ return pageLoader(nil); }];
+    PETableCellContentViewStyler tableCellStyler = [FPUtils fuelstationTypeTableCellStylerWithTitleBlk:^(FPFuelStationType *fsType) {return [fsType name];}
+                                                                                             uitoolkit:_uitoolkit
+                                                                                  subtitleLeftHPadding:15.0
+                                                                              subtitleFitToWidthFactor:1.0
+                                                                                            isLoggedIn:[APP isUserLoggedIn]];
+    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPVehicle class]
+                                                                    title:@"Choose Brand"
+                                                    isPaginatedDataSource:NO
+                                                          tableCellStyler:tableCellStyler
+                                                       itemSelectedAction:itemSelectedAction
+                                                      initialSelectedItem:initialSelectedType
+                                                            addItemAction:nil
+                                                           cellIdentifier:@"FPFuelstationBrandCell"
+                                                           initialObjects:pageLoader(nil)
+                                                               pageLoader:pageLoader
+                                                        heightForCellsBlk:[self heightForCellsBlk]
+                                                          detailViewMaker:nil
+                                                                uitoolkit:_uitoolkit
+                                           doesEntityBelongToThisListView:^BOOL(PELMMainSupport *entity){return YES;}
+                                                     wouldBeIndexOfEntity:wouldBeIndexBlk
+                                                          isAuthenticated:^{ return [APP doesUserHaveValidAuthToken]; }
+                                                           isUserLoggedIn:^{ return [APP isUserLoggedIn]; }
+                                                      itemChildrenCounter:nil
+                                                      itemChildrenMsgsBlk:nil
+                                                              itemDeleter:nil
+                                                         itemLocalDeleter:nil
+                                                             isEntityType:NO];
   };
 }
 
@@ -2446,7 +2491,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     return [PEAddViewEditController addEntityCtrlrWithUitoolkit:_uitoolkit
                                              listViewController:listViewController
                                                    itemAddedBlk:itemAddedBlk
-                                           entityFormPanelMaker:[_panelToolkit fuelstationFormPanelMakerIncludeLogButton:NO]
+                                           entityFormPanelMaker:[_panelToolkit fuelstationFormPanelMakerWithUser:user defaultFsTypeBlk:^{return _fuelstationTypes[0];}]
                                             entityToPanelBinder:[_panelToolkit fuelstationToFuelstationPanelBinder]
                                             panelToEntityBinder:[_panelToolkit fuelstationFormPanelToFuelstationBinder]
                                                     entityTitle:@"Gas Station"
@@ -2483,14 +2528,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEEntityEditCancelerBlk fuelStationEditCanceler = ^ (PEAddViewEditController *ctrl, PELMModelSupport *entity) {
       FPFuelStation *fuelStation = (FPFuelStation *)entity;
-      [_coordDao cancelEditOfFuelStation:fuelStation
-                                   error:[FPUtils localSaveErrorHandlerMaker]()];
+      [_coordDao cancelEditOfFuelStation:fuelStation error:[FPUtils localSaveErrorHandlerMaker]()];
       [APP refreshTabs];
     };
     PESaveEntityBlk fuelStationSaver = ^(PEAddViewEditController *ctrl, PELMModelSupport *entity) {
       FPFuelStation *fuelStation = (FPFuelStation *)entity;
-      [_coordDao saveFuelStation:fuelStation
-                           error:[FPUtils localSaveErrorHandlerMaker]()];
+      [_coordDao saveFuelStation:fuelStation error:[FPUtils localSaveErrorHandlerMaker]()];
     };
     PEMarkAsDoneEditingLocalBlk doneEditingFuelStationLocal = ^(PEAddViewEditController *ctrl, FPFuelStation *fuelStation) {
       [_coordDao markAsDoneEditingFuelStation:fuelStation error:[FPUtils localSaveErrorHandlerMaker]()];
@@ -2562,7 +2605,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       [mergeConflicts enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         NSString *fieldName = key;
         if ([fieldName isEqualToString:FPFuelstationNameField]) {
-          [fields addObject:@[@"Gas station name:", @(FPFuelStationTagName), [PEUtils emptyIfNil:[localFuelstation name]], [PEUtils emptyIfNil:[remoteFuelstation name]]]];
+          [fields addObject:@[@"Nickname:", @(FPFuelStationTagName), [PEUtils emptyIfNil:[localFuelstation name]], [PEUtils emptyIfNil:[remoteFuelstation name]]]];
         } else if ([fieldName isEqualToString:FPFuelstationStreetField]) {
           [fields addObject:@[@"Street:", @(FPFuelStationTagStreet), [PEUtils emptyIfNil:[localFuelstation street]], [PEUtils emptyIfNil:[remoteFuelstation street]]]];
         } else if ([fieldName isEqualToString:FPFuelstationCityField]) {
@@ -2653,7 +2696,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                     entityIndexPath:fuelStationIndexPath
                                                           uitoolkit:_uitoolkit
                                                      itemChangedBlk:itemChangedBlk
-                                               entityFormPanelMaker:[_panelToolkit fuelstationFormPanelMakerIncludeLogButton:YES]
+                                               entityFormPanelMaker:[_panelToolkit fuelstationFormPanelMakerWithUser:user defaultFsTypeBlk:^{return fuelStation.type;}]
                                                entityViewPanelMaker:[_panelToolkit fuelstationViewPanelMaker]
                                                 entityToPanelBinder:[_panelToolkit fuelstationToFuelstationPanelBinder]
                                                 panelToEntityBinder:[_panelToolkit fuelstationFormPanelToFuelstationBinder]
@@ -3855,7 +3898,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                   animated:YES
                                 completion:nil];
     };
-    FPDetailViewMaker fpLogDetailViewMaker =
+    PEDetailViewMaker fpLogDetailViewMaker =
     ^UIViewController *(PEListViewController *listViewCtrlr,
                         id dataObject,
                         NSIndexPath *indexPath,
@@ -3885,7 +3928,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                          newerThan:[fpLog purchasedAt]
                                              error:[FPUtils localFetchErrorHandlerMaker]()];
     };
-    PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog) {return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];}
+    PETableCellContentViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog) {return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];}
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
@@ -3911,7 +3954,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenCounter:nil
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:[self fplogItemDeleterForUser:user]
-                                                         itemLocalDeleter:[self fplogItemLocalDeleter]];
+                                                         itemLocalDeleter:[self fplogItemLocalDeleter]
+                                                             isEntityType:YES];
   };
 }
 
@@ -3932,7 +3976,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                   animated:YES
                                 completion:nil];
     };
-    FPDetailViewMaker fpLogDetailViewMaker =
+    PEDetailViewMaker fpLogDetailViewMaker =
       ^UIViewController *(PEListViewController *listViewCtrlr,
                           id dataObject,
                           NSIndexPath *indexPath,
@@ -3965,7 +4009,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                             newerThan:[fpLog purchasedAt]
                                                 error:[FPUtils localFetchErrorHandlerMaker]()];
     };
-    PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog) {return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];}
+    PETableCellContentViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog) {return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];}
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
@@ -3991,7 +4035,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenCounter:nil
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:[self fplogItemDeleterForUser:user]
-                                                         itemLocalDeleter:[self fplogItemLocalDeleter]];
+                                                         itemLocalDeleter:[self fplogItemLocalDeleter]
+                                                             isEntityType:YES];
   };
 }
 
@@ -4010,7 +4055,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                   animated:YES
                                 completion:nil];
     };
-    FPDetailViewMaker fpLogDetailViewMaker =
+    PEDetailViewMaker fpLogDetailViewMaker =
     ^UIViewController *(PEListViewController *listViewCtrlr,
                         id dataObject,
                         NSIndexPath *indexPath,
@@ -4043,7 +4088,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                 newerThan:[fpLog purchasedAt]
                                                     error:[FPUtils localFetchErrorHandlerMaker]()];
     };
-    PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog) {return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];}
+    PETableCellContentViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog) {return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];}
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
@@ -4069,13 +4114,14 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenCounter:nil
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:[self fplogItemDeleterForUser:user]
-                                                         itemLocalDeleter:[self fplogItemLocalDeleter]];
+                                                         itemLocalDeleter:[self fplogItemLocalDeleter]
+                                                             isEntityType:YES];
   };
 }
 
 - (FPAuthScreenMaker)newViewUnsyncedFuelPurchaseLogsScreenMaker {
   return ^ UIViewController *(FPUser *user) {
-    FPDetailViewMaker fpLogDetailViewMaker =
+    PEDetailViewMaker fpLogDetailViewMaker =
       ^UIViewController *(PEListViewController *listViewCtrlr,
                           id dataObject,
                           NSIndexPath *indexPath,
@@ -4093,7 +4139,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelPurchaseLog *f1, FPFuelPurchaseLog *f2){return [f1 isEqualToFuelPurchaseLog:f2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
-    PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog) {return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];}
+    PETableCellContentViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelPurchaseLog *fpLog) {return [PEUtils stringFromDate:[fpLog purchasedAt] withPattern:@"MM/dd/YYYY"];}
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
@@ -4119,7 +4165,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenCounter:nil
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:[self fplogItemDeleterForUser:user]
-                                                         itemLocalDeleter:[self fplogItemLocalDeleter]];
+                                                         itemLocalDeleter:[self fplogItemLocalDeleter]
+                                                             isEntityType:YES];
   };
 }
 
@@ -4595,7 +4642,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                   animated:YES
                                 completion:nil];
     };
-    FPDetailViewMaker envLogDetailViewMaker =
+    PEDetailViewMaker envLogDetailViewMaker =
     ^UIViewController *(PEListViewController *listViewCtrlr,
                         id dataObject,
                         NSIndexPath *indexPath,
@@ -4619,7 +4666,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       FPEnvironmentLog *envLog = (FPEnvironmentLog *)entity;
       return [_coordDao numEnvironmentLogsForUser:user newerThan:[envLog logDate] error:[FPUtils localFetchErrorHandlerMaker]()];
     };
-    PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPEnvironmentLog *envLog) {return [PEUtils stringFromDate:[envLog logDate] withPattern:@"MM/dd/YYYY"];}
+    PETableCellContentViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPEnvironmentLog *envLog) {return [PEUtils stringFromDate:[envLog logDate] withPattern:@"MM/dd/YYYY"];}
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
@@ -4645,7 +4692,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenCounter:nil
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:[self envlogItemDeleterForUser:user]
-                                                         itemLocalDeleter:[self envlogItemLocalDeleter]];
+                                                         itemLocalDeleter:[self envlogItemLocalDeleter]
+                                                             isEntityType:YES];
   };
 }
 
@@ -4662,7 +4710,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                   animated:YES
                                 completion:nil];
     };
-    FPDetailViewMaker envLogDetailViewMaker =
+    PEDetailViewMaker envLogDetailViewMaker =
     ^UIViewController *(PEListViewController *listViewCtrlr,
                         id dataObject,
                         NSIndexPath *indexPath,
@@ -4694,7 +4742,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                            newerThan:[envLog logDate]
                                                error:[FPUtils localFetchErrorHandlerMaker]()];
     };
-    PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPEnvironmentLog *envLog) {return [PEUtils stringFromDate:[envLog logDate] withPattern:@"MM/dd/YYYY"];}
+    PETableCellContentViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPEnvironmentLog *envLog) {return [PEUtils stringFromDate:[envLog logDate] withPattern:@"MM/dd/YYYY"];}
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
@@ -4720,13 +4768,14 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenCounter:nil
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:[self envlogItemDeleterForUser:user]
-                                                         itemLocalDeleter:[self envlogItemLocalDeleter]];
+                                                         itemLocalDeleter:[self envlogItemLocalDeleter]
+                                                             isEntityType:YES];
   };
 }
 
 - (FPAuthScreenMaker)newViewUnsyncedEnvironmentLogsScreenMaker {
   return ^ UIViewController *(FPUser *user) {
-    FPDetailViewMaker envLogDetailViewMaker =
+    PEDetailViewMaker envLogDetailViewMaker =
     ^UIViewController *(PEListViewController *listViewCtrlr,
                         id dataObject,
                         NSIndexPath *indexPath,
@@ -4742,7 +4791,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPEnvironmentLog *e1, FPEnvironmentLog *e2){return [e1 isEqualToEnvironmentLog:e2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
-    PESyncViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPEnvironmentLog *envLog) {return [PEUtils stringFromDate:[envLog logDate] withPattern:@"MM/dd/YYYY"];}
+    PETableCellContentViewStyler tableCellStyler = [PELMUIUtils syncViewStylerWithTitleBlk:^(FPEnvironmentLog *envLog) {return [PEUtils stringFromDate:[envLog logDate] withPattern:@"MM/dd/YYYY"];}
                                                         alwaysTopifyTitleLabel:NO
                                                                      uitoolkit:_uitoolkit
                                                           subtitleLeftHPadding:15.0
@@ -4768,7 +4817,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenCounter:nil
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:[self envlogItemDeleterForUser:user]
-                                                         itemLocalDeleter:[self envlogItemLocalDeleter]];
+                                                         itemLocalDeleter:[self envlogItemLocalDeleter]
+                                                             isEntityType:YES];
   };
 }
 

@@ -25,8 +25,10 @@
 #import <PELocal-Data/PELocalDao.h>
 #import <PEFuelPurchase-Model/FPVehicle.h>
 #import <PEFuelPurchase-Model/FPFuelStation.h>
+#import <PEFuelPurchase-Model/FPFuelStationType.h>
 #import <PEFuelPurchase-Model/FPFuelPurchaseLog.h>
 #import <PEFuelPurchase-Model/FPEnvironmentLog.h>
+#import "FPFuelstationTypeDsDelegate.h"
 
 NSString * const FPFpLogEntityMakerFpLogEntry = @"FPFpLogEntityMakerFpLogEntry";
 NSString * const FPFpLogEntityMakerVehicleEntry = @"FPFpLogEntityMakerVehicleEntry";
@@ -756,7 +758,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
   };
 }
 
-- (PEEntityPanelMakerBlk)vehicleFormPanelMakerIncludeLogButtons:(BOOL)includeLogButtons {
+- (PEEntityPanelMakerBlk)vehicleFormPanelMaker {
   return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
     TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:parentView];
@@ -1150,7 +1152,16 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
   return ^ UIView * (PEAddViewEditController *parentViewController, FPUser *user, FPFuelStation *fuelstation) {
     UIView *parentView = [parentViewController view];
     UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:parentView fixedHeight:0.0];
-    UIView *fuelstationDataPanel = [self tablePanelWithRowData:@[@[@"Gas station name", [PEUtils emptyIfNil:[fuelstation name]]],
+    NSDictionary *components = [self fuelstationFormComponentsWithUser:user displayDisclosureIndicators:NO fsType:fuelstation.type](parentViewController);
+    UITableView *fsTypeTableView = (UITableView *)components[@(FPFuelStationTagType)];
+    [fsTypeTableView setUserInteractionEnabled:NO];
+    [PEUIUtils placeView:fsTypeTableView
+                 atTopOf:contentPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:0.0
+                hpadding:0.0];
+    CGFloat totalHeight = fsTypeTableView.frame.size.height;
+    UIView *fuelstationDataPanel = [self tablePanelWithRowData:@[@[@"Nickname", [PEUtils emptyIfNil:[fuelstation name]]],
                                                                  @[@"Street", [PEUtils emptyIfNil:[fuelstation street]]],
                                                                  @[@"City", [PEUtils emptyIfNil:[fuelstation city]]],
                                                                  @[@"State", [PEUtils emptyIfNil:[fuelstation state]]],
@@ -1158,11 +1169,12 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                                      uitoolkit:_uitoolkit
                                                     parentView:parentView];
     [PEUIUtils placeView:fuelstationDataPanel
-                 atTopOf:contentPanel
+                   below:fsTypeTableView
+                    onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:FPContentPanelTopPadding
+                vpadding:10.0
                 hpadding:0.0];
-    CGFloat totalHeight = fuelstationDataPanel.frame.size.height + FPContentPanelTopPadding;
+    totalHeight = fuelstationDataPanel.frame.size.height + 10.0;
     UITableView *coordinatesTableView = [self placeCoordinatesTableOntoFuelstationPanel:contentPanel
                                                                             fuelstation:fuelstation
                                                                               belowView:fuelstationDataPanel
@@ -1214,24 +1226,85 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
   };
 }
 
-- (PEEntityPanelMakerBlk)fuelstationFormPanelMakerIncludeLogButton:(BOOL)includeLogButton {
-  return ^ UIView * (PEAddViewEditController *parentViewController) {
+- (PEComponentsMakerBlk)fuelstationFormComponentsWithUser:(FPUser *)user
+                              displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
+                                                   fsType:(FPFuelStationType *)fsType {
+  return ^ NSDictionary * (UIViewController *parentViewController) {
+    NSMutableDictionary *components = [NSMutableDictionary dictionary];
     UIView *parentView = [parentViewController view];
-    //UIView *fuelStationPanel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:parentView];
-    UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:parentView fixedHeight:0.0];
-    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:contentPanel];
-    UITextField *fuelStationNameTf = tfMaker(@"Gas station name", FPFuelStationTagName);
+    UITableView *fsTypeTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 0, 0) style:UITableViewStyleGrouped];
+    [fsTypeTableView setScrollEnabled:NO];
+    [fsTypeTableView setTag:FPFuelStationTagType];
+    [PEUIUtils setFrameWidthOfView:fsTypeTableView ofWidth:1.0 relativeTo:parentView];
+    [PEUIUtils setFrameHeight:((1 * [PEUIUtils sizeOfText:@"" withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height) + 52)
+                       ofView:fsTypeTableView];
+    PEItemSelectedAction fsTypeSelectedAction = ^(FPFuelStationType *fsType, NSIndexPath *indexPath, UIViewController *fsTypeSelectionController) {
+      [[fsTypeSelectionController navigationController] popViewControllerAnimated:YES];
+      [fsTypeTableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]]
+                             withRowAnimation:UITableViewRowAnimationAutomatic];
+    };
+    FPFuelstationTypeDsDelegate *fsTypeDs = [[FPFuelstationTypeDsDelegate alloc] initWithControllerCtx:parentViewController
+                                                                                                fsType:fsType
+                                                                                  fsTypeSelectedAction:fsTypeSelectedAction
+                                                                           displayDisclosureIndicators:displayDisclosureIndicators
+                                                                                        coordinatorDao:_coordDao
+                                                                                                  user:user
+                                                                                         screenToolkit:_screenToolkit
+                                                                                                 error:_errorBlk];
+    [_tableViewDataSources addObject:fsTypeDs];
+    fsTypeTableView.sectionHeaderHeight = 2.0;
+    fsTypeTableView.sectionFooterHeight = 2.0;
+    [fsTypeTableView setDataSource:fsTypeDs];
+    [fsTypeTableView setDelegate:fsTypeDs];
+    components[@(FPFuelStationTagType)] = fsTypeTableView;
+    TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:parentView];
+    UITextField *fuelStationNameTf = tfMaker(@"Station nickname", FPFuelStationTagName);
+    components[@(FPFuelStationTagName)] = fuelStationNameTf;
     UITextField *fuelStationStreetTf = tfMaker(@"Street", FPFuelStationTagStreet);
+    components[@(FPFuelStationTagStreet)] = fuelStationStreetTf;
     UITextField *fuelStationCityTf = tfMaker(@"City", FPFuelStationTagCity);
+    components[@(FPFuelStationTagCity)] = fuelStationCityTf;
     UITextField *fuelStationStateTf = tfMaker(@"State", FPFuelStationTagState);
+    components[@(FPFuelStationTagState)] = fuelStationStateTf;
     UITextField *fuelStationZipTf = tfMaker(@"Zip", FPFuelStationTagZip);
     [fuelStationZipTf setKeyboardType:UIKeyboardTypeNumberPad];
-    [PEUIUtils placeView:fuelStationNameTf
+    components[@(FPFuelStationTagZip)] = fuelStationZipTf;
+    return components;
+  };
+}
+
+- (PEEntityPanelMakerBlk)fuelstationFormPanelMakerWithUser:(FPUser *)user
+                                          defaultFsTypeBlk:(FPFuelStationType *(^)(void))defaultFsTypeBlk {
+  return ^ UIView * (PEAddViewEditController *parentViewController) {
+    UIView *parentView = [parentViewController view];
+    FPFuelstationTypeDsDelegate *fsTypeDs = (FPFuelstationTypeDsDelegate *)[(UITableView *)[parentView viewWithTag:FPFuelStationTagType] dataSource];
+    FPFuelStationType *fsType;
+    if (fsTypeDs) {
+      fsType = [fsTypeDs selectedFsType];
+    } else {
+      fsType = defaultFsTypeBlk();
+    }
+    UIView *contentPanel = [PEUIUtils panelWithWidthOf:1.0 relativeToView:parentView fixedHeight:0.0];
+    NSDictionary *components = [self fuelstationFormComponentsWithUser:user displayDisclosureIndicators:YES fsType:fsType](parentViewController);
+    UITableView *fsTypeTableView = (UITableView *)components[@(FPFuelStationTagType)];
+    UITextField *fuelStationNameTf = components[@(FPFuelStationTagName)];
+    UITextField *fuelStationStreetTf = components[@(FPFuelStationTagStreet)];
+    UITextField *fuelStationCityTf = components[@(FPFuelStationTagCity)];
+    UITextField *fuelStationStateTf = components[@(FPFuelStationTagState)];
+    UITextField *fuelStationZipTf = components[@(FPFuelStationTagZip)];
+    [PEUIUtils placeView:fsTypeTableView
                  atTopOf:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeLeft
-                vpadding:FPContentPanelTopPadding
+                vpadding:0.0
                 hpadding:0];
-    CGFloat totalHeight = fuelStationNameTf.frame.size.height + FPContentPanelTopPadding;
+    CGFloat totalHeight = fsTypeTableView.frame.size.height;
+    [PEUIUtils placeView:fuelStationNameTf
+                   below:fsTypeTableView
+                    onto:contentPanel
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                vpadding:10.0
+                hpadding:0.0];
+    totalHeight += fuelStationNameTf.frame.size.height + 10.0;
     [PEUIUtils placeView:fuelStationStreetTf
                    below:fuelStationNameTf
                     onto:contentPanel
@@ -1438,6 +1511,8 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       [coordinatesTableView dataSource];
     [fuelStation setLatitude:[ds latitude]];
     [fuelStation setLongitude:[ds longitude]];
+    FPFuelstationTypeDsDelegate *fsTypeDs = (FPFuelstationTypeDsDelegate *)[(UITableView *)[panel viewWithTag:FPFuelStationTagType] dataSource];
+    [fuelStation setType:fsTypeDs.selectedFsType];
   };
 }
 
@@ -1461,6 +1536,10 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     [dataSource setLatitude:[fuelStation latitude]];
     [dataSource setLongitude:[fuelStation longitude]];
     [coordinatesTableView reloadData];
+    UITableView *fsTypeTableView = (UITableView *)[panel viewWithTag:FPFuelStationTagType];
+    FPFuelstationTypeDsDelegate *fsTypeDs = (FPFuelstationTypeDsDelegate *)[fsTypeTableView dataSource];
+    [fsTypeDs setSelectedFsType:fuelStation.type];
+    [fsTypeTableView reloadData];
   };
 }
 
@@ -1478,6 +1557,8 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     enabDisab(FPFuelStationTagZip);
     enabDisab(FPFuelStationTagUseCurrentLocation);
     enabDisab(FPFuelStationTagRecomputeCoordinates);
+    UITableView *fsTypeTableView = (UITableView *)[panel viewWithTag:FPFuelStationTagType];
+    [fsTypeTableView setUserInteractionEnabled:enable];
   };
 }
 
@@ -1490,8 +1571,8 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       (UITableView *)[panel viewWithTag:FPFuelStationTagLocationCoordinates];
     FPFuelStationCoordinatesTableDataSource *ds =
       [coordinatesTableView dataSource];
-    
     FPFuelStation *newFuelstation = [_coordDao fuelStationWithName:tfstr(FPFuelStationTagName)
+                                                              type:[[FPFuelStationType alloc] initWithIdentifier:@(0) name:@"Other" iconImgName:@""]
                                                             street:tfstr(FPFuelStationTagStreet)
                                                               city:tfstr(FPFuelStationTagCity)
                                                              state:tfstr(FPFuelStationTagState)
@@ -1847,9 +1928,8 @@ To compute your location, you need to enable location services for Gas Jot.  If 
       [vehicleFuelStationDateTableView setScrollEnabled:NO];
       [vehicleFuelStationDateTableView setTag:FPFpLogTagVehicleFuelStationAndDate];
       [PEUIUtils setFrameWidthOfView:vehicleFuelStationDateTableView ofWidth:1.0 relativeTo:parentView];
-      [PEUIUtils setFrameHeight:((3 * [PEUIUtils sizeOfText:@"" withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height) + 130) //180.0
+      [PEUIUtils setFrameHeight:((3 * [PEUIUtils sizeOfText:@"" withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height) + 130)
                          ofView:vehicleFuelStationDateTableView];
-      //[PEUIUtils applyBorderToView:vehicleFuelStationDateTableView withColor:[UIColor redColor]];
       vehicleFuelStationDateTableView.sectionHeaderHeight = 2.0;
       vehicleFuelStationDateTableView.sectionFooterHeight = 2.0;
       PEItemSelectedAction vehicleSelectedAction = ^(FPVehicle *vehicle, NSIndexPath *indexPath, UIViewController *vehicleSelectionController) {
@@ -2220,14 +2300,12 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     TaggedTextfieldMaker tfMaker = [_uitoolkit taggedTextfieldMakerForWidthOf:1.0 relativeTo:parentView];
     UITableView *vehicleAndLogDateTableView = (UITableView *)[parentView viewWithTag:FPEnvLogTagVehicleAndDate];
     if (!vehicleAndLogDateTableView) {
-      vehicleAndLogDateTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)
-                                                                style:UITableViewStyleGrouped];
+      vehicleAndLogDateTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 0, 0) style:UITableViewStyleGrouped];
       [vehicleAndLogDateTableView setScrollEnabled:NO];
       [vehicleAndLogDateTableView setTag:FPEnvLogTagVehicleAndDate];
       [PEUIUtils setFrameWidthOfView:vehicleAndLogDateTableView ofWidth:1.0 relativeTo:parentView];
       [PEUIUtils setFrameHeight:((2 * [PEUIUtils sizeOfText:@"" withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height) + 91) //124.96
                          ofView:vehicleAndLogDateTableView];
-      //[PEUIUtils applyBorderToView:vehicleAndLogDateTableView withColor:[UIColor redColor]];
       PEItemSelectedAction vehicleSelectedAction = ^(FPVehicle *vehicle, NSIndexPath *indexPath, UIViewController *vehicleSelectionController) {
         [[vehicleSelectionController navigationController] popViewControllerAnimated:YES];
         [vehicleAndLogDateTableView

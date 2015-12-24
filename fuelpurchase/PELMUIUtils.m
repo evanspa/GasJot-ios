@@ -13,10 +13,10 @@
 
 @implementation PELMUIUtils
 
-+ (PESyncViewStyler)syncViewStylerWithUitoolkit:(PEUIToolkit *)uitoolkit
-                           subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
-                       subtitleFitToWidthFactor:(CGFloat)subtitleFitToWidthFactor
-                                     isLoggedIn:(BOOL)isLoggedIn {
++ (PETableCellContentViewStyler)syncViewStylerWithUitoolkit:(PEUIToolkit *)uitoolkit
+                                       subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
+                                   subtitleFitToWidthFactor:(CGFloat)subtitleFitToWidthFactor
+                                                 isLoggedIn:(BOOL)isLoggedIn {
   return [self syncViewStylerWithTitleBlk:nil
                    alwaysTopifyTitleLabel:NO
                                 uitoolkit:uitoolkit
@@ -25,12 +25,12 @@
                                isLoggedIn:isLoggedIn];
 }
 
-+ (PESyncViewStyler)syncViewStylerWithTitleBlk:(NSString *(^)(id))titleBlk
-                        alwaysTopifyTitleLabel:(BOOL)alwaysTopifyTitleLabel
-                                     uitoolkit:(PEUIToolkit *)uitoolkit
-                          subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
-                      subtitleFitToWidthFactor:(CGFloat)subtitleFitToWidthFactor
-                                    isLoggedIn:(BOOL)isLoggedIn {
++ (PETableCellContentViewStyler)syncViewStylerWithTitleBlk:(NSString *(^)(id))titleBlk
+                                    alwaysTopifyTitleLabel:(BOOL)alwaysTopifyTitleLabel
+                                                 uitoolkit:(PEUIToolkit *)uitoolkit
+                                      subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
+                                  subtitleFitToWidthFactor:(CGFloat)subtitleFitToWidthFactor
+                                                isLoggedIn:(BOOL)isLoggedIn {
   NSInteger titleTag = 89;
   NSInteger subtitleTag = 90;
   NSInteger warningIconTag = 91;

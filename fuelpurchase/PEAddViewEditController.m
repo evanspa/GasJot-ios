@@ -447,7 +447,7 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   if (_isEdit) {
-    _panelToEntityBinder(_entityFormPanel, _entity); // TODO - make sure this call is needed and works
+    _panelToEntityBinder(_entityFormPanel, _entity);
     UIView *tmpNewFormPanel = _entityFormPanelMaker(self);
     [_entityFormPanel removeFromSuperview];
     _entityFormPanel = tmpNewFormPanel;

@@ -104,6 +104,34 @@
 
 #pragma mark - Fuel Station Helpers
 
++ (PETableCellContentViewStyler)fuelstationTypeTableCellStylerWithTitleBlk:(NSString *(^)(id))titleBlk
+                                                                 uitoolkit:(PEUIToolkit *)uitoolkit
+                                                      subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
+                                                  subtitleFitToWidthFactor:(CGFloat)subtitleFitToWidthFactor
+                                                                isLoggedIn:(BOOL)isLoggedIn {
+  void (^removeView)(NSInteger, UIView *) = ^(NSInteger tag, UIView *view) {
+    [[view viewWithTag:tag] removeFromSuperview];
+  };
+  NSString * (^truncatedTitleText)(id) = ^NSString *(id dataObject) {
+    NSInteger maxLength = 35;
+    NSString *title = titleBlk(dataObject);
+    if ([title length] > maxLength) {
+      title = [[title substringToIndex:maxLength] stringByAppendingString:@"..."];
+    }
+    return title;
+  };
+  NSInteger titleTag = 89;
+  return ^(UIView *view, FPFuelStationType *fsType) {
+    removeView(titleTag, view);
+    UILabel *titleLabel = titleLabel = [uitoolkit tableCellTitleMaker](truncatedTitleText(fsType), view.frame.size.width);
+    [titleLabel setTag:titleTag];
+    [PEUIUtils placeView:titleLabel
+              inMiddleOf:view
+           withAlignment:PEUIHorizontalAlignmentTypeLeft
+                hpadding:15.0];
+  };
+}
+
 + (NSArray *)computeSaveFuelStationErrMsgs:(NSInteger)saveFuelStationErrMask {
   NSMutableArray *errMsgs = [NSMutableArray array];
   if (saveFuelStationErrMask & FPSaveFuelStationNameNotProvided) {

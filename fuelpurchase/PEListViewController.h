@@ -7,17 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "PEUIDefs.h"
 #import "PEAddViewEditController.h"
 
 @class PEListViewController;
-
-typedef NSArray *(^PEPageRefresherBlk)(id);
-typedef NSArray *(^PEPageLoaderBlk)(id);
-typedef void (^PESyncViewStyler)(UIView *, id);
-typedef void (^PEItemSelectedAction)(id, NSIndexPath *, UIViewController *);
-typedef UIViewController *(^FPDetailViewMaker)(PEListViewController *, id, NSIndexPath *, PEItemChangedBlk);
-typedef BOOL (^PEDoesEntityBelongToListView)(PELMMainSupport *);
-typedef NSInteger (^PEWouldBeIndexOfEntity)(PELMMainSupport *);
 
 @interface PEListViewController : UIViewController <UITableViewDataSource,
 UITableViewDelegate, MBProgressHUDDelegate>
@@ -27,7 +20,7 @@ UITableViewDelegate, MBProgressHUDDelegate>
 - (id)initWithClassOfDataSourceObjects:(Class)classOfDataSourceObjects
                                  title:(NSString *)title
                  isPaginatedDataSource:(BOOL)isPaginatedDataSource
-                       tableCellStyler:(PESyncViewStyler)tableCellStyler
+                       tableCellStyler:(PETableCellContentViewStyler)tableCellStyler
                     itemSelectedAction:(PEItemSelectedAction)itemSelectedAction
                    initialSelectedItem:(id)initialSelectedItem
                          addItemAction:(void(^)(PEListViewController *, PEItemAddedBlk))addItemActionBlk 
@@ -35,7 +28,7 @@ UITableViewDelegate, MBProgressHUDDelegate>
                         initialObjects:(NSArray *)initialObjects
                             pageLoader:(PEPageLoaderBlk)pageLoaderBlk
                      heightForCellsBlk:(CGFloat(^)(void))heightForCellsBlk
-                       detailViewMaker:(FPDetailViewMaker)detailViewMaker
+                       detailViewMaker:(PEDetailViewMaker)detailViewMaker
                              uitoolkit:(PEUIToolkit *)uitoolkit
         doesEntityBelongToThisListView:(PEDoesEntityBelongToListView)doesEntityBelongToThisListView
                   wouldBeIndexOfEntity:(PEWouldBeIndexOfEntity)wouldBeIndexOfEntity
@@ -44,7 +37,8 @@ UITableViewDelegate, MBProgressHUDDelegate>
                    itemChildrenCounter:(PEItemChildrenCounter)itemChildrenCounter
                    itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
                            itemDeleter:(PEItemDeleter)itemDeleter
-                      itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter;
+                      itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
+                          isEntityType:(BOOL)isEntityType;
 
 #pragma mark - Entity changed methods
 

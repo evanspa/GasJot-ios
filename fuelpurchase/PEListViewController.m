@@ -22,7 +22,7 @@
   Class _classOfDataSourceObjects;
   NSString *_title;
   UITableView *_tableView;
-  PESyncViewStyler _tableCellStyler;
+  PETableCellContentViewStyler _tableCellStyler;
   PEItemSelectedAction _itemSelectedAction;
   id _initialSelectedItem;
   void (^_addItemAction)(PEListViewController *, PEItemAddedBlk);
@@ -30,7 +30,7 @@
   NSMutableArray *_dataSource;
   PEPageLoaderBlk _pageLoaderBlk;
   CGFloat (^_heightForCellsBlk)(void);
-  FPDetailViewMaker _detailViewMaker;
+  PEDetailViewMaker _detailViewMaker;
   PEUIToolkit *_uitoolkit;
   NSIndexPath *_indexPathOfRemovedEntity;
   PEDoesEntityBelongToListView _doesEntityBelongToThisListView;
@@ -42,6 +42,7 @@
   PEItemChildrenMsgsBlk _itemChildrenMsgsBlk;
   PEItemDeleter _itemDeleter;
   PEItemLocalDeleter _itemLocalDeleter;
+  BOOL _isEntityType;
 }
 
 #pragma mark - Initializers
@@ -49,7 +50,7 @@
 - (id)initWithClassOfDataSourceObjects:(Class)classOfDataSourceObjects
                                  title:(NSString *)title
                  isPaginatedDataSource:(BOOL)isPaginatedDataSource
-                       tableCellStyler:(PESyncViewStyler)tableCellStyler
+                       tableCellStyler:(PETableCellContentViewStyler)tableCellStyler
                     itemSelectedAction:(PEItemSelectedAction)itemSelectedAction
                    initialSelectedItem:(id)initialSelectedItem
                          addItemAction:(void(^)(PEListViewController *, PEItemAddedBlk))addItemActionBlk
@@ -57,7 +58,7 @@
                         initialObjects:(NSArray *)initialObjects
                             pageLoader:(PEPageLoaderBlk)pageLoaderBlk
                      heightForCellsBlk:(CGFloat(^)(void))heightForCellsBlk
-                       detailViewMaker:(FPDetailViewMaker)detailViewMaker
+                       detailViewMaker:(PEDetailViewMaker)detailViewMaker
                              uitoolkit:(PEUIToolkit *)uitoolkit
         doesEntityBelongToThisListView:(PEDoesEntityBelongToListView)doesEntityBelongToThisListView
                   wouldBeIndexOfEntity:(PEWouldBeIndexOfEntity)wouldBeIndexOfEntity
@@ -66,7 +67,8 @@
                    itemChildrenCounter:(PEItemChildrenCounter)itemChildrenCounter
                    itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
                            itemDeleter:(PEItemDeleter)itemDeleter
-                      itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter {
+                      itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
+                          isEntityType:(BOOL)isEntityType {
   NSAssert(!(detailViewMaker && initialSelectedItem), @"detailViewMaker and initialSelectedItem cannot BOTH be provided");
   NSAssert(!(detailViewMaker && itemSelectedAction), @"detailViewMaker and itemSelectedAction cannot BOTH be provided");
   self = [super initWithNibName:nil bundle:nil];
@@ -99,6 +101,7 @@
     _itemChildrenMsgsBlk = itemChildrenMsgsBlk;
     _itemDeleter = itemDeleter;
     _itemLocalDeleter = itemLocalDeleter;
+    _isEntityType = isEntityType;
   }
   return self;
 }
@@ -126,7 +129,7 @@
 
 #pragma mark - Entity changed methods
 
-- (BOOL)handleUpdatedEntity:(PELMMainSupport *)updatedEntity {
+- (BOOL)handleUpdatedEntity:(id)updatedEntity {
   BOOL entityUpdated = NO;
   DDLogDebug(@"=== begin === in PELVC/handleUpdatedEntity: (hUE) =============================");
   // first (of 2) checks of belonging - type check:
@@ -216,7 +219,7 @@
   return entityUpdated;
 }
 
-- (BOOL)handleRemovedEntity:(PELMMainSupport *)removedEntity {
+- (BOOL)handleRemovedEntity:(id<PELMIdentifiable>)removedEntity {
   BOOL entityRemoved = NO;
   DDLogDebug(@"=== begin === in PELVC/handleRemovedEntity: (hRE) =============================");
   DDLogDebug(@"hRE, removedEntity's localMainIdentifier: %@", [removedEntity localMainIdentifier]);
@@ -263,7 +266,7 @@
   return entityRemoved;
 }
 
-- (BOOL)handleAddedEntity:(PELMMainSupport *)addedEntity {
+- (BOOL)handleAddedEntity:(id)addedEntity {
   BOOL entityAdded = NO;
   DDLogDebug(@"=== begin === in PELVC/handleAddedEntity: (hAE)");
   if ([addedEntity isKindOfClass:_classOfDataSourceObjects]) {
@@ -378,7 +381,9 @@
               hpadding:0.0];
   [_tableView registerClass:[UITableViewCell class]
      forCellReuseIdentifier:_cellIdentifier];
-  [self initializeNotificationObserving];
+  if (_isEntityType) {
+    [self initializeNotificationObserving];
+  }
 }
 
 #pragma mark - UIScrollViewDelegate
@@ -771,7 +776,7 @@ as follows:";
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
   if (editingStyle == UITableViewCellEditingStyleDelete) {
     if (_itemDeleter) {
-      PELMMainSupport *item = _dataSource[[indexPath row]];
+      id item = _dataSource[[indexPath row]];
       [self deleteItem:item forRowAtIndexPath:indexPath];
     }
   }

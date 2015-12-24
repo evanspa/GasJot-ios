@@ -23,6 +23,7 @@
 #import <MBProgressHUD/MBProgressHUD.h>
 #import <PEFuelPurchase-Model/FPUser.h>
 #import <PELocal-Data/PELMUtils.h>
+#import "PEUIDefs.h"
 
 typedef NSArray * (^ErrMsgsMaker)(NSInteger errCode);
 
@@ -56,6 +57,12 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
 + (NSArray *)computeSaveVehicleErrMsgs:(NSInteger)saveVehicleErrMask;
 
 #pragma mark - Fuel Station Helpers
+
++ (PETableCellContentViewStyler)fuelstationTypeTableCellStylerWithTitleBlk:(NSString *(^)(id))titleBlk
+                                                                 uitoolkit:(PEUIToolkit *)uitoolkit
+                                                      subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
+                                                  subtitleFitToWidthFactor:(CGFloat)subtitleFitToWidthFactor
+                                                                isLoggedIn:(BOOL)isLoggedIn;
 
 + (NSArray *)computeSaveFuelStationErrMsgs:(NSInteger)saveFuelStationErrMask;
 

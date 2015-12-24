@@ -343,7 +343,7 @@ mode."
                                                                         buttonTitle:@"Okay."
                                                                        buttonAction:^{
                                                                          enableUserInteraction(YES);
-                                                                         [self viewWillAppear:YES];
+                                                                         [self viewDidAppear:YES];
                                                                        }
                                                                      relativeToView:self.tabBarController.view];
                                               } else {
@@ -510,7 +510,7 @@ one of your records.  Try syncing it later.";
                                                 [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
                                                   enableUserInteraction(YES);
                                                   [sheet dismissAnimated:YES];
-                                                  [self viewWillAppear:YES];
+                                                  [self viewDidAppear:YES];
                                                 }];
                                                 [alertSheet showInView:self.tabBarController.view animated:YES];
                                               }

@@ -37,6 +37,7 @@
 		18D6DFBE17F68005006B300D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18D6DFBD17F68005006B300D /* Images.xcassets */; };
 		18EC863019EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18EC862F19EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m */; };
 		18F61A891A96133000BA631A /* UIScrollView+PEAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */; };
+		CA48D1BE1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CA48D1BD1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.m */; };
 		CA7D5A271B383F5A00433581 /* FPAppNotificationNames.m in Sources */ = {isa = PBXBuildFile; fileRef = CA7D5A261B383F5A00433581 /* FPAppNotificationNames.m */; };
 		CA7D5A2E1B3851E200433581 /* FPAccountLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA7D5A2D1B3851E200433581 /* FPAccountLoginController.m */; };
 		CA813DB11BDF04A000B74A24 /* FPCommonStatComparisonController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA813DB01BDF04A000B74A24 /* FPCommonStatComparisonController.m */; };
@@ -124,6 +125,9 @@
 		C1FEBEB6E7DB4F50A4FCEA3D /* libPods-fuelpurchase-dev.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fuelpurchase-dev.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C620C668F12CED8B0A128354 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		C8F7D920AF4FE86756CE0393 /* libPods-PEFuelPurchase-App-dev.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PEFuelPurchase-App-dev.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA48D1BC1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPFuelstationTypeDsDelegate.h; sourceTree = "<group>"; };
+		CA48D1BD1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPFuelstationTypeDsDelegate.m; sourceTree = "<group>"; };
+		CA48D1C01C29D9FA00FFD650 /* PEUIDefs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PEUIDefs.h; sourceTree = "<group>"; };
 		CA6203E51B21D99200CF9C91 /* libPods-PEFuelPurchase-App-dev.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libPods-PEFuelPurchase-App-dev.a"; path = "Pods/../build/Debug-iphoneos/libPods-PEFuelPurchase-App-dev.a"; sourceTree = "<group>"; };
 		CA6203E71B21D9DE00CF9C91 /* libPods-PEFuelPurchase-App-dev-KissXML.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libPods-PEFuelPurchase-App-dev-KissXML.a"; path = "Pods/../build/Debug-iphoneos/libPods-PEFuelPurchase-App-dev-KissXML.a"; sourceTree = "<group>"; };
 		CA6203E81B21D9DE00CF9C91 /* libPods-PEFuelPurchase-App-dev-OHHTTPStubs.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libPods-PEFuelPurchase-App-dev-OHHTTPStubs.a"; path = "Pods/../build/Debug-iphoneos/libPods-PEFuelPurchase-App-dev-OHHTTPStubs.a"; sourceTree = "<group>"; };
@@ -277,6 +281,7 @@
 		186ADB2F19E3A1A7003AD788 /* Table Data Sources */ = {
 			isa = PBXGroup;
 			children = (
+				CA48D1BB1C29D8C000FFD650 /* Fuel Station Type */,
 				1865B7D619FDEA0200E98D26 /* Env Log Vehicle and Date Selection */,
 				18EC862D19EBF571006C104A /* Fp Log Vehicle, Fuel Station and Date Selection */,
 				18EC862C19EB0769006C104A /* Fuel Station Coordinates */,
@@ -287,6 +292,7 @@
 		186E0B7819CD1BDD00CE4B3A /* PEUI-Commons */ = {
 			isa = PBXGroup;
 			children = (
+				CA48D1BF1C29D9E700FFD650 /* Definitions */,
 				CA90F4211B45AB4C005FAB35 /* Server Sync Action Sheet */,
 				CAD8AE4E1B2B28E200276F4F /* Local Data UI Utils */,
 				18F61A821A96129E00BA631A /* Categories */,
@@ -493,6 +499,23 @@
 				18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */,
 			);
 			name = UIScrollView;
+			sourceTree = "<group>";
+		};
+		CA48D1BB1C29D8C000FFD650 /* Fuel Station Type */ = {
+			isa = PBXGroup;
+			children = (
+				CA48D1BC1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.h */,
+				CA48D1BD1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.m */,
+			);
+			name = "Fuel Station Type";
+			sourceTree = "<group>";
+		};
+		CA48D1BF1C29D9E700FFD650 /* Definitions */ = {
+			isa = PBXGroup;
+			children = (
+				CA48D1C01C29D9FA00FFD650 /* PEUIDefs.h */,
+			);
+			name = Definitions;
 			sourceTree = "<group>";
 		};
 		CA7D5A241B383F4500433581 /* Notifications */ = {
@@ -943,6 +966,7 @@
 				18010C5A180E4752005F5CEB /* FPHomeController.m in Sources */,
 				183E1416180237A2009E9085 /* FPUtils.m in Sources */,
 				18AC0722181ACC8C001FF24E /* FPLogging.m in Sources */,
+				CA48D1BE1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.m in Sources */,
 				1865B7D919FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m in Sources */,
 				18C3CD7419DC3B440092C002 /* FPPanelToolkit.m in Sources */,
 				CAFC84821BA7479C00FAEB66 /* FPUIUtils.m in Sources */,

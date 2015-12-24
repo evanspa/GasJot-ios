@@ -123,6 +123,9 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
 - (FPAuthScreenMaker)newFuelStationsForSelectionScreenMakerWithItemSelectedAction:(PEItemSelectedAction)itemSelectedAction
                                                        initialSelectedFuelStation:(FPFuelStation *)initialSelectedFuelStation;
 
+- (FPAuthScreenMaker)newFuelstationTypesForSelectionScreenMakerWithItemSelectedAction:(PEItemSelectedAction)itemSelectedAction
+                                                                  initialSelectedType:(FPFuelStationType *)initialSelectedType;
+
 - (FPAuthScreenMaker)newAddFuelStationScreenMakerWithBlk:(PEItemAddedBlk)itemAddedBlk
                                       listViewController:(PEListViewController *)listViewController;
 
