@@ -77,7 +77,7 @@ PODS:
     - FMDB (~> 2.5)
     - PEHateoas-Client (~> 1.0.14)
     - PEObjc-Commons (~> 1.0.101)
-  - PEObjc-Commons (1.0.102):
+  - PEObjc-Commons (1.0.104):
     - BlocksKit (~> 2.2.5)
   - PESimu-Select (1.0.4):
     - PEObjc-Commons (~> 1.0.86)
@@ -115,7 +115,7 @@ DEPENDENCIES:
   - PEFuelPurchase-Common (= 1.0.12)
   - PEFuelPurchase-Model (= 1.0.208)
   - PELocal-Data (= 0.0.15)
-  - PEObjc-Commons (= 1.0.102)
+  - PEObjc-Commons (= 1.0.104)
   - ReactiveCocoa (= 2.4.7)
   - UICKeyChainStore (= 2.0.5)
 
@@ -137,7 +137,7 @@ SPEC CHECKSUMS:
   PEFuelPurchase-Model: 6b8a7ea166dcffd9e2dd06d83c0ff271dce5cd7c
   PEHateoas-Client: 89aa69b5a2e1922f131b99de4d761deed9878589
   PELocal-Data: b58567eb5478010a6c84d12669b0ab1b67dfb302
-  PEObjc-Commons: f2838b055a5f1b22aa3184e34cd9e72210250c8c
+  PEObjc-Commons: ef43f73252e2ca083254cc1f371e1fd0ab3260bd
   PESimu-Select: 88e3ab14e1b9e0f75e9b626103581bd488128674
   PEWire-Control: c2d18d4261d025182513466da9c6ed80e596f526
   PEXML-Utils: d36d0ab7337b92c120ec49b84f99e7b923bf8a24

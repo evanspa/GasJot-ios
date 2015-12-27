@@ -22,6 +22,7 @@
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/UIImage+PEAdditions.h>
 #import <PEObjc-Commons/UIView+PERoundify.h>
+#import <PEObjc-Commons/UIView+PEBorders.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import "UIColor+FPAdditions.h"
 #import "FPHomeController.h"
@@ -377,6 +378,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
                         chartTitleTag:(NSInteger)chartTitleTag
                     addlLabelsViewBlk:(UIView *(^)(void))addlLabelsViewBlk
               moreButtonControllerBlk:(UIViewController *(^)(void))moreButtonControllerBlk
+                          borderColor:(UIColor *)borderColor
                             resultBlk:(void(^)(NSArray *))resultBlk {
   UIView *panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:self.view];
   [panel setBackgroundColor:[UIColor whiteColor]];
@@ -448,6 +450,8 @@ alignmentRelativeToView:chart
                              5.0 +
                              7.5)
                      ofView:panel];
+  [panel addTopBorderWithColor:borderColor andWidth:3.0];
+  [panel addBottomBorderWithColor:borderColor andWidth:3.0];
   resultBlk(@[panel, chart]);
 }
 
@@ -662,6 +666,7 @@ alignmentRelativeToView:chart
                         chartTitleTag:FPHomeDaysBetweenFillupsChartTitleTag
                     addlLabelsViewBlk:^{ return [self makeDaysBetweenFillupsDataTableWithValues:dummyVals];}
               moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newAvgDaysBetweenFillupsStatsScreenMaker](_user);}
+                          borderColor:[UIColor cloudsColor]
                             resultBlk:^(NSArray *section) {
                               daysBetweenFillupPanel = section[0];
                               _daysBetweenFillupsChart = section[1];
@@ -681,6 +686,7 @@ alignmentRelativeToView:chart
                         chartTitleTag:FPHomePriceOfGasChartTitleTag
                     addlLabelsViewBlk:^UIView *(void) { return [self makePricePerGallonDataTableWithValues:dummyVals];}
               moreButtonControllerBlk:moreBtnCtrlBlk
+                          borderColor:[UIColor whiteColor]
                             resultBlk:^(NSArray *section) {
                               pricePerGallonPanel = section[0];
                               _priceOfGasChart = section[1];
@@ -690,6 +696,7 @@ alignmentRelativeToView:chart
                         chartTitleTag:FPHomeGasCostPerMileChartTitleTag
                     addlLabelsViewBlk:^UIView *(void) { return [self makeAvgGasCostPerMileDataTableWithValues:dummyVals];}
               moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newAvgGasCostPerMileStatsScreenMaker](_user); }
+                          borderColor:[UIColor cloudsColor]
                             resultBlk:^(NSArray *section) {
                               gasCostPerMilePanel = section[0];
                               _gasCostPerMileChart = section[1];
@@ -699,6 +706,7 @@ alignmentRelativeToView:chart
                         chartTitleTag:FPHomeSpentOnGasChartTitleTag
                     addlLabelsViewBlk:^UIView *(void) { return [self makeSpentOnGasDataTableWithValues:dummyVals];}
               moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newSpentOnGasStatsScreenMaker](_user); }
+                          borderColor:[UIColor whiteColor]
                             resultBlk:^(NSArray *section) {
                               spentOnGasPanel = section[0];
                               _spentOnGasChart = section[1];

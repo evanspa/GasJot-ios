@@ -818,13 +818,10 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath {
   id dataObject = _dataSource[indexPath.row];
-  UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:_cellIdentifier
-                                                          forIndexPath:indexPath];
+  UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:_cellIdentifier forIndexPath:indexPath];
   if (_detailViewMaker) {
     [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
   }
-  //NSLog(@"_initialSelectedItem: %@", _initialSelectedItem);
-  //NSLog(@"dataObject: %@", dataObject);
   if (_initialSelectedItem) {
     if ([_initialSelectedItem isEqual:dataObject]) {
       [cell setAccessoryType:UITableViewCellAccessoryCheckmark];

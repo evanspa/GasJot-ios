@@ -5,7 +5,7 @@ platform :ios, '8.4'
 pod 'PEFuelPurchase-Model', '1.0.208'
 pod 'PELocal-Data', '0.0.15'
 pod 'PEFuelPurchase-Common', '1.0.12'
-pod 'PEObjc-Commons', '1.0.102'
+pod 'PEObjc-Commons', '1.0.104'
 pod 'ReactiveCocoa', '2.4.7', :inhibit_warnings => true
 pod 'AFNetworking', '2.6.3', :inhibit_warnings => true
 pod 'CocoaLumberjack', '1.9.2'

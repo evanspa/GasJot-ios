@@ -13,6 +13,10 @@
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
 
+NSInteger const FPFSTypeDsDelegateBrandLabelTag      = 1;
+NSInteger const FPFSTypeDsDelegateBrandValueLabelTag = 2;
+NSInteger const FPFSTypeDsDelegateBrandIconImgTag    = 3;
+
 @implementation FPFuelstationTypeDsDelegate {
   id<FPCoordinatorDao> _coordDao;
   FPScreenToolkit *_screenToolkit;
@@ -68,10 +72,54 @@ displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
   return 15;
 }
 
+- (void)tableView:(UITableView *)tableView
+  willDisplayCell:(UITableViewCell *)cell
+forRowAtIndexPath:(NSIndexPath *)indexPath {
+  UIView *contentView = cell.contentView;
+  UIView *brandLabel = [contentView viewWithTag:FPFSTypeDsDelegateBrandLabelTag];
+  UIView *brandValueLabel = [contentView viewWithTag:FPFSTypeDsDelegateBrandValueLabelTag];
+  UIView *brandIconImg = [contentView viewWithTag:FPFSTypeDsDelegateBrandIconImgTag];
+  [PEUIUtils positionView:brandLabel inMiddleOf:contentView withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:15.0];
+  [PEUIUtils positionView:brandValueLabel inMiddleOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight hpadding:15.0];
+  [PEUIUtils positionView:brandIconImg toTheLeftOf:brandValueLabel onto:contentView withAlignment:PEUIVerticalAlignmentTypeMiddle hpadding:10.0];
+}
+
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
   return [PEUIUtils sizeOfText:@"" withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height +
   _uitoolkit.verticalPaddingForButtons + 15.0;
 }
+
+#pragma mark - Helpers
+
+/*+ (NSArray *)fstypeViewsForAvailableWidth:(CGFloat)availableWidth
+                                   fstype:(FPFuelStationType *)fstype {
+  availableWidth -= (15.0 * 2); // subtract left and right margins
+  UILabel *brandLabel = [PEUIUtils labelWithKey:@"Brand"
+                                           font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
+                                backgroundColor:[UIColor clearColor]
+                                      textColor:[UIColor blackColor]
+                            verticalTextPadding:3.0];
+  [brandLabel setTag:FPFSTypeDsDelegateBrandLabelTag];
+  availableWidth -= brandLabel.frame.size.width;
+  UIImage *iconImg = [UIImage imageNamed:fstype.iconImgName];
+  UIImageView *imgView = nil;
+  if (iconImg) {
+    UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImg];
+    [imgView setTag:FPFSTypeDsDelegateBrandIconImgTag];
+    availableWidth -= imgView.frame.size.width;
+  }
+  NSString *fstypeName = [PEUIUtils truncatedTextForText:fstype.name
+                                                    font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
+                                          availableWidth:availableWidth];
+  UILabel *brandValueLabel = [PEUIUtils labelWithKey:fstypeName
+                                                font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
+                                     backgroundColor:[UIColor clearColor]
+                                           textColor:[UIColor grayColor]
+                                 verticalTextPadding:3.0
+                                          fitToWidth:availableWidth];
+  [brandValueLabel setTag:FPFSTypeDsDelegateBrandValueLabelTag];
+  return @[brandLabel, brandValueLabel, imgView];
+}*/
 
 #pragma mark - Table view data source
 
@@ -79,17 +127,41 @@ displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
   return 1;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView
- numberOfRowsInSection:(NSInteger)section {
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
   return 1;
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView
-         cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1
-                                                 reuseIdentifier:nil];
-  [[cell textLabel] setText:@"Brand"];
-  [[cell detailTextLabel] setText:[_selectedFsType name]];
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+  UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:nil];
+  UIView *contentView = cell.contentView;
+  CGFloat availableWidth = contentView.frame.size.width;
+  availableWidth -= (15.0 * 2); // subtract left and right margins
+  UILabel *brandLabel = [PEUIUtils labelWithKey:@"Brand"
+                                           font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
+                                backgroundColor:[UIColor clearColor]
+                                      textColor:[UIColor blackColor]
+                            verticalTextPadding:3.0];
+  [brandLabel setTag:FPFSTypeDsDelegateBrandLabelTag];
+  [contentView addSubview:brandLabel];
+  availableWidth -= brandLabel.frame.size.width;
+  UIImage *iconImg = [UIImage imageNamed:_selectedFsType.iconImgName];
+  if (iconImg) {
+    UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImg];
+    [imgView setTag:FPFSTypeDsDelegateBrandIconImgTag];
+    [contentView addSubview:imgView];
+    availableWidth -= imgView.frame.size.width;
+  }
+  NSString *fstypeName = [PEUIUtils truncatedTextForText:_selectedFsType.name
+                                                    font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
+                                          availableWidth:availableWidth];
+  UILabel *brandValueLabel = [PEUIUtils labelWithKey:fstypeName
+                                                font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
+                                     backgroundColor:[UIColor clearColor]
+                                           textColor:[UIColor grayColor]
+                                 verticalTextPadding:3.0
+                                          fitToWidth:availableWidth];
+  [brandValueLabel setTag:FPFSTypeDsDelegateBrandValueLabelTag];
+  [contentView addSubview:brandValueLabel];
   if (_displayDisclosureIndicators) {
     [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
   } else {

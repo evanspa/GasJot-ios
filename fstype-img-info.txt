@@ -1,0 +1,42 @@
+  insertFSType(0,  @"Other",    0); - @2 (70 x 70)
+  insertFSType(1,  @"Exxon",    1); - @2 (128 x 70)
+  insertFSType(2,  @"Marathon", 2); - @2 (90 x 70)
+  insertFSType(3,  @"Shell",    3); - @2 (76 x 70)
+  insertFSType(4,  @"BP",       4); - @2 (52 x 70)
+  insertFSType(5,  @"7-Eleven", 5); - @2 (72 x 70)
+  insertFSType(6,  @"Chevron",  6); - @2 (63 x 70)
+  insertFSType(7,  @"Hess",     7); - @2 (118 x 70)
+  insertFSType(8,  @"Sunoco",   8); - @2 (110 x 70)
+  insertFSType(9,  @"CITGO",    9); - @2 (65 x 70)
+  insertFSType(10, @"GULF",     10); - @2 (77 x 70)
+
+  insertFSType(11,  @"Sam's Club", 11); - @2 (70 x 70)
+  insertFSType(12,  @"BJ's",       12); - @2 (82 x 70)
+  insertFSType(13,  @"Costco",     13); - @2 (195 x 70)
+
+  insertFSType(14, @"Sheetz",   14); - @2 (270 x 70)
+  insertFSType(15, @"Texaco",   15); - @2 (70 x 70)
+  insertFSType(16, @"Valero",   16); - @2 (140 x 70)
+  insertFSType(17, @"76",       17); - @2 (70 x 70)
+  insertFSType(18, @"Circle K", 18); - @2 (81 x 70)
+  insertFSType(19, @"Getty",    19); - @2 (170 x 70)
+
+  insertFSType(20, @"QuikTrip",          20); - @2 (64 x 70)
+  insertFSType(21, @"Friendship Xpress", 21); uses fstype-0
+  insertFSType(22, @"Murphy USA",        22); - @2 (150 x 70)
+  insertFSType(23, @"Stewart's",         23); - @2 (120 x 70)
+  insertFSType(24, @"Cumberland Farms",  24);
+  insertFSType(25, @"Go-Mart",           25);
+  insertFSType(26, @"Clark",             26);
+  insertFSType(27, @"Kwik Trip",         27);
+  insertFSType(28, @"Sinclair",          28);
+  insertFSType(29, @"Pilot",             29);
+  insertFSType(30, @"Love's",            30);
+  insertFSType(31, @"Royal Farms",       31);
+  insertFSType(32, @"Kroger",            32);
+  insertFSType(33, @"Rutter's",          33);
+  insertFSType(34, @"Speedway",          34);
+  insertFSType(35, @"Kum & Go",          35);
+  insertFSType(36, @"Mobile",            36);
+  insertFSType(37, @"Clark",             37);
+  insertFSType(38, @"ARCO",              38);
