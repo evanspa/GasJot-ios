@@ -26,6 +26,7 @@
 #import "FPLogging.h"
 #import "FPNames.h"
 #import <PEFuelPurchase-Model/FPFuelStation.h>
+#import <PEFuelPurchase-Model/FPFuelStationType.h>
 
 @implementation FPUtils
 
@@ -104,69 +105,13 @@
 
 #pragma mark - Fuel Station Helpers
 
-+ (PETableCellContentViewStyler)fuelstationTypeTableCellStylerWithTitleBlk:(NSString *(^)(id))titleBlk
-                                                                 uitoolkit:(PEUIToolkit *)uitoolkit
-                                                      subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
-                                                  subtitleFitToWidthFactor:(CGFloat)subtitleFitToWidthFactor
-                                                                isLoggedIn:(BOOL)isLoggedIn {
-  void (^removeView)(NSInteger, UIView *) = ^(NSInteger tag, UIView *view) {
-    [[view viewWithTag:tag] removeFromSuperview];
-  };
-  NSString * (^truncatedTitleText)(id) = ^NSString *(id dataObject) {
-    NSInteger maxLength = 35;
-    NSString *title = titleBlk(dataObject);
-    if ([title length] > maxLength) {
-      title = [[title substringToIndex:maxLength] stringByAppendingString:@"..."];
-    }
-    return title;
-  };
-  NSInteger titleTag = 89;
-  return ^(UIView *tableCellContentView, FPFuelStationType *fsType) {
-    removeView(titleTag, tableCellContentView);
-    UILabel *titleLabel = titleLabel = [uitoolkit tableCellTitleMaker](truncatedTitleText(fsType), tableCellContentView.frame.size.width);
-    [titleLabel setTag:titleTag];
-    [PEUIUtils placeView:titleLabel
-              inMiddleOf:tableCellContentView
-           withAlignment:PEUIHorizontalAlignmentTypeLeft
-                hpadding:15.0];
-    
-    
-    /*CGFloat availableWidth = tableCellContentView.frame.size.width;
-    availableWidth -= (15.0 * 2); // subtract left and right margins
-    UILabel *brandLabel = [PEUIUtils labelWithKey:@"Brand"
-                                             font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
-                                  backgroundColor:[UIColor clearColor]
-                                        textColor:[UIColor blackColor]
-                              verticalTextPadding:3.0];
-    [brandLabel setTag:FPFSTypeDsDelegateBrandLabelTag];
-    [tableCellContentView addSubview:brandLabel];
-    availableWidth -= brandLabel.frame.size.width;
-    UIImage *iconImg = [UIImage imageNamed:_selectedFsType.iconImgName];
-    if (iconImg) {
-      UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImg];
-      [imgView setTag:FPFSTypeDsDelegateBrandIconImgTag];
-      [tableCellContentView addSubview:imgView];
-      availableWidth -= imgView.frame.size.width;
-    }
-    NSString *fstypeName = [PEUIUtils truncatedTextForText:fsType.name
-                                                      font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
-                                            availableWidth:availableWidth];
-    UILabel *brandValueLabel = [PEUIUtils labelWithKey:fstypeName
-                                                  font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
-                                       backgroundColor:[UIColor clearColor]
-                                             textColor:[UIColor grayColor]
-                                   verticalTextPadding:3.0
-                                            fitToWidth:availableWidth];
-    [brandValueLabel setTag:FPFSTypeDsDelegateBrandValueLabelTag];
-    [tableCellContentView addSubview:brandValueLabel];*/
-    
-  };
-}
-
 + (NSArray *)computeSaveFuelStationErrMsgs:(NSInteger)saveFuelStationErrMask {
   NSMutableArray *errMsgs = [NSMutableArray array];
   if (saveFuelStationErrMask & FPSaveFuelStationNameNotProvided) {
     [errMsgs addObject:LS(@"savefuelstation.name-notprovided")];
+  }
+  if (saveFuelStationErrMask & FPSaveFuelStationNameContainsPurplex) {
+    [errMsgs addObject:LS(@"savefuelstation.name-contains-purplex")];
   }
   return errMsgs;
 }

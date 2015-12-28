@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <JBChartView/JBLineChartView.h>
+#import "PEUIDefs.h"
 #import "JBChartTooltipTipView.h"
 #import "JBChartTooltipView.h"
 
@@ -33,6 +34,13 @@ FOUNDATION_EXPORT NSInteger const FPContentPanelTopPadding;
                  animated:(BOOL)animated
                 chartView:(JBChartView *)chartView
            controllerView:(UIView *)controllerView;
+
+#pragma mark - Table Cell Stylers
+
++ (PETableCellContentViewStyler)fsTypeTableCellStylerWithUitoolkit:(PEUIToolkit *)uitoolkit;
+
++ (PETableCellContentViewStyler)fsTableCellStylerWithUitoolkit:(PEUIToolkit *)uitoolkit
+                                                    isLoggedIn:(BOOL)isLoggedIn;
 
 #pragma mark - Helpers
 

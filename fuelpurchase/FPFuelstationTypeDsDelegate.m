@@ -79,7 +79,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
   UIView *brandLabel = [contentView viewWithTag:FPFSTypeDsDelegateBrandLabelTag];
   UIView *brandValueLabel = [contentView viewWithTag:FPFSTypeDsDelegateBrandValueLabelTag];
   UIView *brandIconImg = [contentView viewWithTag:FPFSTypeDsDelegateBrandIconImgTag];
-  [PEUIUtils positionView:brandLabel inMiddleOf:contentView withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:15.0];
+  [PEUIUtils positionView:brandLabel inMiddleOf:contentView withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:10.0];
   [PEUIUtils positionView:brandValueLabel inMiddleOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight hpadding:15.0];
   [PEUIUtils positionView:brandIconImg toTheLeftOf:brandValueLabel onto:contentView withAlignment:PEUIVerticalAlignmentTypeMiddle hpadding:10.0];
 }
@@ -88,38 +88,6 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
   return [PEUIUtils sizeOfText:@"" withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height +
   _uitoolkit.verticalPaddingForButtons + 15.0;
 }
-
-#pragma mark - Helpers
-
-/*+ (NSArray *)fstypeViewsForAvailableWidth:(CGFloat)availableWidth
-                                   fstype:(FPFuelStationType *)fstype {
-  availableWidth -= (15.0 * 2); // subtract left and right margins
-  UILabel *brandLabel = [PEUIUtils labelWithKey:@"Brand"
-                                           font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
-                                backgroundColor:[UIColor clearColor]
-                                      textColor:[UIColor blackColor]
-                            verticalTextPadding:3.0];
-  [brandLabel setTag:FPFSTypeDsDelegateBrandLabelTag];
-  availableWidth -= brandLabel.frame.size.width;
-  UIImage *iconImg = [UIImage imageNamed:fstype.iconImgName];
-  UIImageView *imgView = nil;
-  if (iconImg) {
-    UIImageView *imgView = [[UIImageView alloc] initWithImage:iconImg];
-    [imgView setTag:FPFSTypeDsDelegateBrandIconImgTag];
-    availableWidth -= imgView.frame.size.width;
-  }
-  NSString *fstypeName = [PEUIUtils truncatedTextForText:fstype.name
-                                                    font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
-                                          availableWidth:availableWidth];
-  UILabel *brandValueLabel = [PEUIUtils labelWithKey:fstypeName
-                                                font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
-                                     backgroundColor:[UIColor clearColor]
-                                           textColor:[UIColor grayColor]
-                                 verticalTextPadding:3.0
-                                          fitToWidth:availableWidth];
-  [brandValueLabel setTag:FPFSTypeDsDelegateBrandValueLabelTag];
-  return @[brandLabel, brandValueLabel, imgView];
-}*/
 
 #pragma mark - Table view data source
 
@@ -135,7 +103,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
   UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:nil];
   UIView *contentView = cell.contentView;
   CGFloat availableWidth = contentView.frame.size.width;
-  availableWidth -= (15.0 * 2); // subtract left and right margins
+  availableWidth -= (10.0 + 15.0); // subtract left and right margins
   UILabel *brandLabel = [PEUIUtils labelWithKey:@"Brand"
                                            font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
                                 backgroundColor:[UIColor clearColor]

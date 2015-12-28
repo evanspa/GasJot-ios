@@ -47,7 +47,7 @@
     }
     return title;
   };
-  return ^(UIView *view, id dataObject) {
+  return ^(UITableViewCell *cell, UIView *view, id dataObject) {
     removeView(titleTag, view);
     removeView(subtitleTag, view);
     removeView(warningIconTag, view);
@@ -77,26 +77,18 @@
     if (titleBlk) {
       titleLabel = [uitoolkit tableCellTitleMaker](truncatedTitleText(entity), view.frame.size.width);
       [titleLabel setTag:titleTag];
-      /*if (alwaysTopifyTitleLabel) {
+      if (subTitleMsg) {
         [PEUIUtils placeView:titleLabel
                      atTopOf:view
                withAlignment:PEUIHorizontalAlignmentTypeLeft
                     vpadding:vpaddingForTopification
                     hpadding:15.0];
-      } else {*/
-        if (subTitleMsg) {
-          [PEUIUtils placeView:titleLabel
-                       atTopOf:view
-                 withAlignment:PEUIHorizontalAlignmentTypeLeft
-                      vpadding:vpaddingForTopification
-                      hpadding:15.0];
-        } else {
-          [PEUIUtils placeView:titleLabel
-                    inMiddleOf:view
-                 withAlignment:PEUIHorizontalAlignmentTypeLeft
-                      hpadding:15.0];
-        }
-      /*}*/
+      } else {
+        [PEUIUtils placeView:titleLabel
+                  inMiddleOf:view
+               withAlignment:PEUIHorizontalAlignmentTypeLeft
+                    hpadding:15.0];
+      }
     }
     
     // place subtitle label

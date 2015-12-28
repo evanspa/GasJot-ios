@@ -10,11 +10,9 @@
 @class PEAddViewEditController;
 @class JGActionSheetSection;
 
-typedef void (^PETableCellContentViewStyler)(UIView *, id);
-
 typedef NSArray *(^PEPageRefresherBlk)(id);
 typedef NSArray *(^PEPageLoaderBlk)(id);
-typedef void (^PETableCellContentViewStyler)(UIView *, id);
+typedef void (^PETableCellContentViewStyler)(UITableViewCell *, UIView *, id);
 typedef void (^PEItemSelectedAction)(id, NSIndexPath *, UIViewController *);
 typedef void (^PEItemChangedBlk)(id, NSIndexPath *);
 typedef UIViewController *(^PEDetailViewMaker)(PEListViewController *, id, NSIndexPath *, PEItemChangedBlk);

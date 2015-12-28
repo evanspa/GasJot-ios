@@ -2134,7 +2134,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   };
 }
 
-- (void)addDistanceInfoToTopOfCellContentView:(UIView *)contentView
+/*- (void)addDistanceInfoToTopOfCellContentView:(UIView *)contentView
                           withVerticalPadding:(CGFloat)verticalPadding
                             horizontalPadding:(CGFloat)horizontalPadding
                               withFuelstation:(FPFuelStation *)fuelstation {
@@ -2179,7 +2179,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       [PEUIUtils placeView:distance atBottomOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:0.0 hpadding:horizontalPadding];
     }
   }
-}
+}*/
 
 - (FPAuthScreenMaker)newViewFuelStationsScreenMaker {
   return ^ UIViewController *(FPUser *user) {
@@ -2209,17 +2209,17 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelStation *fs1, FPFuelStation *fs2){return [fs1 isEqualToFuelStation:fs2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
-    PETableCellContentViewStyler tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
+    /*PETableCellContentViewStyler tableCellStyler = ^(UITableViewCell *cell, UIView *contentView, FPFuelStation *fuelstation) {
       [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
                        alwaysTopifyTitleLabel:YES
                                     uitoolkit:_uitoolkit
                          subtitleLeftHPadding:15.0
                      subtitleFitToWidthFactor:0.5
-                                   isLoggedIn:[APP isUserLoggedIn]](contentView, fuelstation);
-      CGFloat distanceInfoVPadding = 15.0; //25.5;
+                                   isLoggedIn:[APP isUserLoggedIn]](cell, contentView, fuelstation);
+      CGFloat distanceInfoVPadding = 15.0;
       if ([fuelstation location]) {
         if ([APP latestLocation]) {
-          distanceInfoVPadding = 18.5; //28.5;
+          distanceInfoVPadding = 18.5;
         }
       }
       [self addDistanceInfoToTopOfCellContentView:contentView
@@ -2227,11 +2227,11 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                               withVerticalPadding:distanceInfoVPadding
                                 horizontalPadding:20.0
                                   withFuelstation:fuelstation];
-    };
+    };*/
     return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelStation class]
                                                                     title:@"Gas Stations"
                                                     isPaginatedDataSource:NO
-                                                          tableCellStyler:tableCellStyler
+                                                          tableCellStyler:[FPUIUtils fsTableCellStylerWithUitoolkit:_uitoolkit isLoggedIn:[APP isUserLoggedIn]] //tableCellStyler
                                                        itemSelectedAction:nil
                                                       initialSelectedItem:nil
                                                             addItemAction:addFuelStationAction
@@ -2272,13 +2272,13 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelStation *fs1, FPFuelStation *fs2){return [fs1 isEqualToFuelStation:fs2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
-    PETableCellContentViewStyler tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
+    /*PETableCellContentViewStyler tableCellStyler = ^(UITableViewCell *cell, UIView *contentView, FPFuelStation *fuelstation) {
       [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
                        alwaysTopifyTitleLabel:YES
                                     uitoolkit:_uitoolkit
                          subtitleLeftHPadding:15.0
                      subtitleFitToWidthFactor:0.5
-                                   isLoggedIn:[APP isUserLoggedIn]](contentView, fuelstation);
+                                   isLoggedIn:[APP isUserLoggedIn]](cell, contentView, fuelstation);
       CGFloat distanceInfoVPadding = 25.5;
       if ([fuelstation location]) {
         if ([APP latestLocation]) {
@@ -2290,11 +2290,11 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                               withVerticalPadding:distanceInfoVPadding
                                 horizontalPadding:20.0
                                   withFuelstation:fuelstation];
-    };
+    };*/
     return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelStation class]
                                                                     title:@"Unsynced Gas Stations"
                                                     isPaginatedDataSource:NO
-                                                          tableCellStyler:tableCellStyler
+                                                          tableCellStyler:[FPUIUtils fsTableCellStylerWithUitoolkit:_uitoolkit isLoggedIn:[APP isUserLoggedIn]]
                                                        itemSelectedAction:nil
                                                       initialSelectedItem:nil
                                                             addItemAction:nil
@@ -2337,13 +2337,13 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelStation *fs1, FPFuelStation *fs2){return [fs1 isEqualToFuelStation:fs2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
-    PETableCellContentViewStyler tableCellStyler = ^(UIView *contentView, FPFuelStation *fuelstation) {
+    /*PETableCellContentViewStyler tableCellStyler = ^(UITableViewCell *cell, UIView *contentView, FPFuelStation *fuelstation) {
       [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
                        alwaysTopifyTitleLabel:YES
                                     uitoolkit:_uitoolkit
                          subtitleLeftHPadding:15.0
                      subtitleFitToWidthFactor:0.5
-                                   isLoggedIn:[APP isUserLoggedIn]](contentView, fuelstation);
+                                   isLoggedIn:[APP isUserLoggedIn]](cell, contentView, fuelstation);
       CGFloat distanceInfoVPadding = 25.5;
       if ([fuelstation location]) {
         if ([APP latestLocation]) {
@@ -2355,11 +2355,11 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                               withVerticalPadding:distanceInfoVPadding
                                 horizontalPadding:20.0
                                   withFuelstation:fuelstation];
-    };
+    };*/
     return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelStation class]
                                                                     title:@"Choose Gas Station"
                                                     isPaginatedDataSource:NO
-                                                          tableCellStyler:tableCellStyler
+                                                          tableCellStyler:[FPUIUtils fsTableCellStylerWithUitoolkit:_uitoolkit isLoggedIn:[APP isUserLoggedIn]] //tableCellStyler
                                                        itemSelectedAction:itemSelectedAction
                                                       initialSelectedItem:initialSelectedFuelStation
                                                             addItemAction:addFuelStationAction
@@ -2397,15 +2397,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEPageLoaderBlk pageLoader = ^ NSArray * (FPFuelStationType *lastFsType) { return _fuelstationTypes; };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelStationType *fsType1, FPFuelStationType *fsType2){return [fsType1 isEqualToFuelStationType:fsType2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
-    PETableCellContentViewStyler tableCellStyler = [FPUtils fuelstationTypeTableCellStylerWithTitleBlk:^(FPFuelStationType *fsType) {return [fsType name];}
-                                                                                             uitoolkit:_uitoolkit
-                                                                                  subtitleLeftHPadding:15.0
-                                                                              subtitleFitToWidthFactor:1.0
-                                                                                            isLoggedIn:[APP isUserLoggedIn]];
-    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPVehicle class]
+    return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelStationType class]
                                                                     title:@"Choose Brand"
                                                     isPaginatedDataSource:NO
-                                                          tableCellStyler:tableCellStyler
+                                                          tableCellStyler:[FPUIUtils fsTypeTableCellStylerWithUitoolkit:_uitoolkit]
                                                        itemSelectedAction:itemSelectedAction
                                                       initialSelectedItem:initialSelectedType
                                                             addItemAction:nil

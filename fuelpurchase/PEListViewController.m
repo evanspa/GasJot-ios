@@ -10,6 +10,7 @@
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import <PELocal-Data/PELMNotificationUtils.h>
+#import <PELocal-Data/PELMIdentifiable.h>
 #import "PEObjc-Commons/NSMutableArray+PEAdditions.h"
 #import "UIScrollView+PEAdditions.h"
 #import "FPLogging.h"
@@ -24,7 +25,7 @@
   UITableView *_tableView;
   PETableCellContentViewStyler _tableCellStyler;
   PEItemSelectedAction _itemSelectedAction;
-  id _initialSelectedItem;
+  id<PELMIdentifiable> _initialSelectedItem;
   void (^_addItemAction)(PEListViewController *, PEItemAddedBlk);
   NSString *_cellIdentifier;
   NSMutableArray *_dataSource;
@@ -85,16 +86,10 @@
     _heightForCellsBlk = heightForCellsBlk;
     _detailViewMaker = detailViewMaker;
     _uitoolkit = uitoolkit;
-    _dataSource = [NSMutableArray array];
+    _dataSource = [NSMutableArray arrayWithArray:initialObjects];
     _indexPathOfRemovedEntity = nil;
     _doesEntityBelongToThisListView = doesEntityBelongToThisListView;
     _wouldBeIndexOfEntity = wouldBeIndexOfEntity;
-    if (_initialSelectedItem) {
-      [_dataSource addObject:_initialSelectedItem]; // initial selected is always at top
-    }
-    [_dataSource addObjectsFromArray:[self truncateInitialSelectedItemFromItems:initialObjects]];
-    //_errorsForDelete = [NSMutableArray array];
-    //_successMessageTitlesForDelete = [NSMutableArray array];
     _isAuthenticatedBlk = isAuthenticatedBlk;
     _isUserLoggedIn = isUserLoggedIn;
     _itemChildrenCounter = itemChildrenCounter;
@@ -384,6 +379,14 @@
   if (_isEntityType) {
     [self initializeNotificationObserving];
   }
+  if (_initialSelectedItem) {
+    NSNumber *index = [self indexOfEntity:_initialSelectedItem];
+    if (index) {
+      [_tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:index.integerValue inSection:0]
+                        atScrollPosition:UITableViewScrollPositionMiddle
+                                animated:YES];
+    }
+  }
 }
 
 #pragma mark - UIScrollViewDelegate
@@ -440,10 +443,6 @@
                         withRowAnimation:UITableViewRowAnimationTop];
       [_tableView endUpdates];
     }
-  } else {
-    [_dataSource removeAllObjects];
-    [_dataSource addObjectsFromArray:_pageLoaderBlk(nil)];
-    [_tableView reloadData];
   }
 }
 
@@ -488,9 +487,7 @@
         [PEUIUtils showWarningConfirmAlertWithMsgs:_itemChildrenMsgsBlk(item)
                                              title:@"Are you sure?"
                                   alertDescription:[[NSAttributedString alloc] initWithString:@"\
-Deleting this record will result in the \
-following child-records being deleted.\n\n\
-Are you sure you want to continue?"]
+Deleting this record will result in the following child-records being deleted.\n\nAre you sure you want to continue?"]
                                           topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                    okayButtonTitle:@"Yes, delete."
                                   okayButtonAction:^{deleter();}
@@ -597,16 +594,10 @@ It has now been removed from this device."]
               NSString *message;
               NSArray *subErrors = errorsForDelete[0][2];
               if ([subErrors count] > 1) {
-                message = @"\
-There were problems deleting your \
-entity from the server.  The errors are \
-as follows:";
+                message = @"There were problems deleting your entity from the server.  The errors are as follows:";
                 title = [NSString stringWithFormat:@"Errors %@.", mainMsgTitle];
               } else {
-                message = @"\
-There was a problem deleting your \
-entity from the server.  The error is \
-as follows:";
+                message = @"There was a problem deleting your entity from the server.  The error is as follows:";
                 title = [NSString stringWithFormat:@"Error %@.", mainMsgTitle];
               }
               NSMutableArray *sections = [NSMutableArray array];
@@ -782,8 +773,7 @@ as follows:";
   }
 }
 
-- (void)tableView:(UITableView *)tableView
-didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
   if (_itemSelectedAction) {
     _itemSelectedAction(_dataSource[[indexPath row]], indexPath, self);
   } else if (_detailViewMaker) {
@@ -796,8 +786,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
   }
 }
 
-- (CGFloat)tableView:(UITableView *)tableView
-heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
   return _heightForCellsBlk();
 }
 
@@ -805,25 +794,24 @@ heightForRowAtIndexPath:(NSIndexPath *)indexPath {
   willDisplayCell:(UITableViewCell *)cell
 forRowAtIndexPath:(NSIndexPath *)indexPath {
   id dataObject = _dataSource[indexPath.row];
-  _tableCellStyler([cell contentView], dataObject);
+  _tableCellStyler(cell, [cell contentView], dataObject);
 }
 
 #pragma mark - Table view data source
 
-- (NSInteger)tableView:(UITableView *)tableView
- numberOfRowsInSection:(NSInteger)section {
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
   return [_dataSource count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  id dataObject = _dataSource[indexPath.row];
+  id<PELMIdentifiable> dataObject = _dataSource[indexPath.row];
   UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:_cellIdentifier forIndexPath:indexPath];
   if (_detailViewMaker) {
     [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
   }
   if (_initialSelectedItem) {
-    if ([_initialSelectedItem isEqual:dataObject]) {
+    if ([_initialSelectedItem doesHaveEqualIdentifiers:dataObject]) {
       [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
     } else {
       [cell setAccessoryType:UITableViewCellAccessoryNone];

@@ -105,7 +105,7 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
 
 #pragma mark - Fuel Station Screens
 
-- (void)addDistanceInfoToTopOfCellContentView:(UIView *)contentView
+/*- (void)addDistanceInfoToTopOfCellContentView:(UIView *)contentView
                           withVerticalPadding:(CGFloat)verticalPadding
                             horizontalPadding:(CGFloat)horizontalPadding
                               withFuelstation:(FPFuelStation *)fuelstation;
@@ -114,7 +114,7 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
                       withHorizontalAlignment:(PEUIHorizontalAlignmentType)horizontalAlignment
                           withVerticalPadding:(CGFloat)verticalPadding
                             horizontalPadding:(CGFloat)horizontalPadding
-                              withFuelstation:(FPFuelStation *)fuelstation;
+                              withFuelstation:(FPFuelStation *)fuelstation;*/
 
 - (FPAuthScreenMaker)newViewFuelStationsScreenMaker;
 

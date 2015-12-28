@@ -118,6 +118,7 @@
  * 'Save Fuel Station' error messages
  ***************************************************************/
 "savefuelstation.name-notprovided" = "Name cannot be empty.";
+"savefuelstation.name-contains-purplex" = "Name cannot contain purplex.";
 
 /***************************************************************
  * 'Save Vehicle' error messages

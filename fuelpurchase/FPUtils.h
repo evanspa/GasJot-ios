@@ -58,12 +58,6 @@ typedef void (^(^LocalDatabaseErrorHandlerMaker)(void))(NSError *, int, NSString
 
 #pragma mark - Fuel Station Helpers
 
-+ (PETableCellContentViewStyler)fuelstationTypeTableCellStylerWithTitleBlk:(NSString *(^)(id))titleBlk
-                                                                 uitoolkit:(PEUIToolkit *)uitoolkit
-                                                      subtitleLeftHPadding:(CGFloat)subtitleLeftHPadding
-                                                  subtitleFitToWidthFactor:(CGFloat)subtitleFitToWidthFactor
-                                                                isLoggedIn:(BOOL)isLoggedIn;
-
 + (NSArray *)computeSaveFuelStationErrMsgs:(NSInteger)saveFuelStationErrMask;
 
 + (NSArray *)sortFuelstations:(NSArray *)fuelstations
