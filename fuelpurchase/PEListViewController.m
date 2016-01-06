@@ -21,14 +21,12 @@
 
 @implementation PEListViewController {
   Class _classOfDataSourceObjects;
-  NSString *_title;
-  UITableView *_tableView;
+  NSString *_title;  
   PETableCellContentViewStyler _tableCellStyler;
   PEItemSelectedAction _itemSelectedAction;
   id<PELMIdentifiable> _initialSelectedItem;
   void (^_addItemAction)(PEListViewController *, PEItemAddedBlk);
-  NSString *_cellIdentifier;
-  NSMutableArray *_dataSource;
+  NSString *_cellIdentifier;  
   PEPageLoaderBlk _pageLoaderBlk;
   CGFloat (^_heightForCellsBlk)(void);
   PEDetailViewMaker _detailViewMaker;
@@ -44,6 +42,7 @@
   PEItemDeleter _itemDeleter;
   PEItemLocalDeleter _itemLocalDeleter;
   BOOL _isEntityType;
+  PEViewDidAppearBlk _viewDidAppearBlk;
 }
 
 #pragma mark - Initializers
@@ -69,7 +68,8 @@
                    itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
                            itemDeleter:(PEItemDeleter)itemDeleter
                       itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
-                          isEntityType:(BOOL)isEntityType {
+                          isEntityType:(BOOL)isEntityType
+                      viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk {
   NSAssert(!(detailViewMaker && initialSelectedItem), @"detailViewMaker and initialSelectedItem cannot BOTH be provided");
   NSAssert(!(detailViewMaker && itemSelectedAction), @"detailViewMaker and itemSelectedAction cannot BOTH be provided");
   self = [super initWithNibName:nil bundle:nil];
@@ -97,6 +97,7 @@
     _itemDeleter = itemDeleter;
     _itemLocalDeleter = itemLocalDeleter;
     _isEntityType = isEntityType;
+    _viewDidAppearBlk = viewDidAppearBlk;
   }
   return self;
 }
@@ -348,6 +349,9 @@
   if ([_tableView indexPathForSelectedRow]) {
     [_tableView deselectRowAtIndexPath:[_tableView indexPathForSelectedRow]
                               animated:YES];
+  }
+  if (_viewDidAppearBlk) {
+    _viewDidAppearBlk(self);
   }
 }
 

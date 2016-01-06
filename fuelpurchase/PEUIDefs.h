@@ -111,7 +111,7 @@ typedef void (^PEItemDeleter)(UIViewController *,
 typedef void (^PEItemLocalDeleter)(UIViewController *, id, NSIndexPath *);
 typedef void (^PEItemAddedBlk)(PEAddViewEditController *, id);
 typedef void (^PEPrepareUIForUserInteractionBlk)(PEAddViewEditController *, UIView *);
-typedef void (^PEViewDidAppearBlk)(PEAddViewEditController *);
+typedef void (^PEViewDidAppearBlk)(id);
 typedef NSArray *(^PEEntityValidatorBlk)(UIView *);
 typedef NSArray *(^PEMessagesFromErrMask)(NSInteger);
 typedef void (^PEModalOperationStarted)(void);

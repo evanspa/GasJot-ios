@@ -1498,9 +1498,7 @@ entity's dependency.";
       [[[self navigationItem] leftBarButtonItem] setEnabled:NO]; // ensures 'Cancel' button stays grayed-out
       [_deleteBarButtonItem setEnabled:NO];
       [self.view endEditing:YES]; // dismiss the keyboard
-      NSString *desc = @"\
-Use the form below to resolve the \
-merge conflicts.";
+      NSString *desc = @"Use the form below to resolve the merge conflicts.";
       [PEUIUtils showConflictResolverWithTitle:@"Conflict resolver."
                               alertDescription:[[NSAttributedString alloc] initWithString:desc]
                          conflictResolveFields:_conflictResolveFields(self, mergeConflicts, _entity, latestEntity)

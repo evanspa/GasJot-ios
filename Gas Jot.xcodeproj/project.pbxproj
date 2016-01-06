@@ -38,6 +38,7 @@
 		18EC863019EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18EC862F19EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m */; };
 		18F61A891A96133000BA631A /* UIScrollView+PEAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */; };
 		CA48D1BE1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CA48D1BD1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.m */; };
+		CA48D1E51C34FC5200FFD650 /* FPLocateNearbyGasController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA48D1E41C34FC5200FFD650 /* FPLocateNearbyGasController.m */; };
 		CA7D5A271B383F5A00433581 /* FPAppNotificationNames.m in Sources */ = {isa = PBXBuildFile; fileRef = CA7D5A261B383F5A00433581 /* FPAppNotificationNames.m */; };
 		CA7D5A2E1B3851E200433581 /* FPAccountLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA7D5A2D1B3851E200433581 /* FPAccountLoginController.m */; };
 		CA813DB11BDF04A000B74A24 /* FPCommonStatComparisonController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA813DB01BDF04A000B74A24 /* FPCommonStatComparisonController.m */; };
@@ -128,6 +129,8 @@
 		CA48D1BC1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPFuelstationTypeDsDelegate.h; sourceTree = "<group>"; };
 		CA48D1BD1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPFuelstationTypeDsDelegate.m; sourceTree = "<group>"; };
 		CA48D1C01C29D9FA00FFD650 /* PEUIDefs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PEUIDefs.h; sourceTree = "<group>"; };
+		CA48D1E31C34FC5200FFD650 /* FPLocateNearbyGasController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPLocateNearbyGasController.h; sourceTree = "<group>"; };
+		CA48D1E41C34FC5200FFD650 /* FPLocateNearbyGasController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPLocateNearbyGasController.m; sourceTree = "<group>"; };
 		CA6203E51B21D99200CF9C91 /* libPods-PEFuelPurchase-App-dev.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libPods-PEFuelPurchase-App-dev.a"; path = "Pods/../build/Debug-iphoneos/libPods-PEFuelPurchase-App-dev.a"; sourceTree = "<group>"; };
 		CA6203E71B21D9DE00CF9C91 /* libPods-PEFuelPurchase-App-dev-KissXML.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libPods-PEFuelPurchase-App-dev-KissXML.a"; path = "Pods/../build/Debug-iphoneos/libPods-PEFuelPurchase-App-dev-KissXML.a"; sourceTree = "<group>"; };
 		CA6203E81B21D9DE00CF9C91 /* libPods-PEFuelPurchase-App-dev-OHHTTPStubs.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libPods-PEFuelPurchase-App-dev-OHHTTPStubs.a"; path = "Pods/../build/Debug-iphoneos/libPods-PEFuelPurchase-App-dev-OHHTTPStubs.a"; sourceTree = "<group>"; };
@@ -352,6 +355,7 @@
 				CAFC847B1BA71FB700FAEB66 /* Account Screen */,
 				180EDA3219C7C87E00C782A6 /* Unsynced Edits Screen */,
 				180EDA2D19C7C2AB00C782A6 /* Settings Screen */,
+				CA48D1E21C34FAFC00FFD650 /* Locate Nearby Gas */,
 				18010C57180E470C005F5CEB /* Home Screen */,
 			);
 			name = "Custom Screens";
@@ -516,6 +520,15 @@
 				CA48D1C01C29D9FA00FFD650 /* PEUIDefs.h */,
 			);
 			name = Definitions;
+			sourceTree = "<group>";
+		};
+		CA48D1E21C34FAFC00FFD650 /* Locate Nearby Gas */ = {
+			isa = PBXGroup;
+			children = (
+				CA48D1E31C34FC5200FFD650 /* FPLocateNearbyGasController.h */,
+				CA48D1E41C34FC5200FFD650 /* FPLocateNearbyGasController.m */,
+			);
+			name = "Locate Nearby Gas";
 			sourceTree = "<group>";
 		};
 		CA7D5A241B383F4500433581 /* Notifications */ = {
@@ -933,6 +946,7 @@
 				CA8AC4B91BDE8923008603C0 /* JBChartTooltipTipView.m in Sources */,
 				CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */,
 				CA90F4241B45AB7F005FAB35 /* PEServerSyncActionSheet.m in Sources */,
+				CA48D1E51C34FC5200FFD650 /* FPLocateNearbyGasController.m in Sources */,
 				18B17D5719DAE696001D2BF6 /* PEAddViewEditController.m in Sources */,
 				18F61A891A96133000BA631A /* UIScrollView+PEAdditions.m in Sources */,
 				CAEE0C9A1BC9830E00FAB0BF /* FPReportViews.m in Sources */,

@@ -43,6 +43,7 @@
 #import <PEFuelPurchase-Model/FPFuelStation.h>
 #import <PEFuelPurchase-Model/FPFuelPurchaseLog.h>
 #import <PEFuelPurchase-Model/FPEnvironmentLog.h>
+#import "FPLocateNearbyGasController.h"
 
 NSString * const FPHomeTextIfNilStat = @"---";
 
@@ -293,7 +294,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
 #pragma mark - Helpers
 
 - (UIButton *)makeFindNearbyGasButton {
-  UIButton *nearbyGasButton = [PEUIUtils buttonWithKey:@"Find nearby gas"
+  UIButton *nearbyGasButton = [PEUIUtils buttonWithKey:@"Locate nearby gas"
                                                   font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
                                        backgroundColor:[UIColor emerlandColor]
                                              textColor:[UIColor whiteColor]
@@ -306,6 +307,12 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
                                                 action:nil];
   [PEUIUtils setFrameWidthOfView:nearbyGasButton ofWidth:1.0 relativeTo:self.view];
   [nearbyGasButton bk_addEventHandler:^(id sender) {
+    [self presentViewController:[PEUIUtils navigationControllerWithController:[[FPLocateNearbyGasController alloc] initWithStoreCoordinator:_coordDao
+                                                                                                                                  uitoolkit:_uitoolkit
+                                                                                                                              screenToolkit:_screenToolkit]
+                                                          navigationBarHidden:NO]
+                       animated:YES
+                     completion:nil];
     
   } forControlEvents:UIControlEventTouchUpInside];
   return nearbyGasButton;

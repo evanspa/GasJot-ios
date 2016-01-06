@@ -38,7 +38,14 @@ UITableViewDelegate, MBProgressHUDDelegate>
                    itemChildrenMsgsBlk:(PEItemChildrenMsgsBlk)itemChildrenMsgsBlk
                            itemDeleter:(PEItemDeleter)itemDeleter
                       itemLocalDeleter:(PEItemLocalDeleter)itemLocalDeleter
-                          isEntityType:(BOOL)isEntityType;
+                          isEntityType:(BOOL)isEntityType
+                      viewDidAppearBlk:(PEViewDidAppearBlk)viewDidAppearBlk;
+
+#pragma mark - Properties
+
+@property (nonatomic, readonly) NSMutableArray *dataSource;
+
+@property (nonatomic) UITableView *tableView;
 
 #pragma mark - Entity changed methods
 

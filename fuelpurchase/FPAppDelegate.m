@@ -449,6 +449,7 @@ shouldSelectViewController:(UIViewController *)viewController {
                                                fuelStationResMtVersion:restServiceMtVersion
                                            fuelPurchaseLogResMtVersion:restServiceMtVersion
                                             environmentLogResMtVersion:restServiceMtVersion
+                                          priceEventStreamResMtVersion:restServiceMtVersion
                                                      authTokenDelegate:self
                                               allowInvalidCertificates:YES];
   [_coordDao initializeDatabaseWithError:[FPUtils localSaveErrorHandlerMaker]()];

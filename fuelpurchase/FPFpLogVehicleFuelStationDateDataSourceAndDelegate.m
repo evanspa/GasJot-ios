@@ -13,7 +13,9 @@
 #import <PELocal-Data/PELMNotificationUtils.h>
 #import <PEFuelPurchase-Model/FPVehicle.h>
 #import <PEFuelPurchase-Model/FPFuelStation.h>
+#import <PEFuelPurchase-Model/FPFuelStationType.h>
 #import "FPNames.h"
+#import "FPUIUtils.h"
 
 @implementation FPFpLogVehicleFuelStationDateDataSourceAndDelegate {
   id<FPCoordinatorDao> _coordDao;
@@ -71,40 +73,34 @@ displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
 
 #pragma mark - Table view delegate
 
-- (CGFloat)tableView:(UITableView *)tableView
-heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
   switch ([indexPath section]) {
     case 0:  // vehicle
       //return 45;
-      return [PEUIUtils sizeOfText:@""
-                          withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height +
+      return [PEUIUtils sizeOfText:@"" withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height +
         _uitoolkit.verticalPaddingForButtons + 15.0;
       break;
     case 1:  // fuel station
       //return 50;
-      return [PEUIUtils sizeOfText:@""
-                          withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height +
+      return [PEUIUtils sizeOfText:@"" withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height +
       _uitoolkit.verticalPaddingForButtons + 15.0;
       break;
     default: // log date
       //return 45;
-      return [PEUIUtils sizeOfText:@""
-                          withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height +
+      return [PEUIUtils sizeOfText:@"" withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height +
       _uitoolkit.verticalPaddingForButtons + 15.0;
       break;
   }
 }
 
-- (CGFloat)tableView:(UITableView *)tableView
-heightForHeaderInSection:(NSInteger)section {
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
   if (section == 0) {
     return 15;
   }
   return 0;
 }
 
-- (CGFloat)tableView:(UITableView *)tableView
-heightForFooterInSection:(NSInteger)section {
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
   return 0;
 }
 
@@ -133,18 +129,48 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
   }
 }
 
-- (void)tableView:(UITableView *)tableView
-  willDisplayCell:(UITableViewCell *)cell
-forRowAtIndexPath:(NSIndexPath *)indexPath {
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
   switch ([indexPath section]) {
     case 0:
       [[cell textLabel] setText:@"Vehicle"];
       [[cell detailTextLabel] setText:(_selectedVehicle ? [_selectedVehicle name] : @"(create vehicle)")];
       break;
-    case 1:
-      [[cell textLabel] setText:@"Gas station"];
-      [[cell detailTextLabel] setText:(_selectedFuelStation ? [_selectedFuelStation name] : @"(create gas station)")];
+    case 1: {
+      if (_selectedFuelStation) {
+        UIView *contentView = cell.contentView;
+        CGFloat availableWidth = contentView.frame.size.width;
+        availableWidth -= (10.0 + 15.0 + 10.0); // the hpaddings used in the placeView calls
+        UILabel *stationLabel = [PEUIUtils labelWithKey:@"Station"
+                                                   font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
+                                        backgroundColor:[UIColor clearColor]
+                                              textColor:[UIColor blackColor]
+                                    verticalTextPadding:3.0];
+        availableWidth -= stationLabel.frame.size.width;
+        UIImageView *imgView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:_selectedFuelStation.type.iconImgName]];
+        availableWidth -= imgView.frame.size.width;
+        NSString *fstypeName = [PEUIUtils truncatedTextForText:_selectedFuelStation.name
+                                                          font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
+                                                availableWidth:availableWidth];
+        UILabel *stationNameLabel = [PEUIUtils labelWithKey:fstypeName
+                                                       font:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]
+                                            backgroundColor:[UIColor clearColor]
+                                                  textColor:[UIColor grayColor]
+                                        verticalTextPadding:3.0
+                                                 fitToWidth:availableWidth];
+        [PEUIUtils placeView:stationLabel inMiddleOf:contentView withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:10.0];
+        [PEUIUtils placeView:stationNameLabel inMiddleOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight hpadding:15.0];
+        [PEUIUtils placeView:imgView toTheLeftOf:stationNameLabel onto:contentView withAlignment:PEUIVerticalAlignmentTypeMiddle hpadding:10.0];
+        [FPUIUtils addDistanceInfoToFsCellContentView:contentView
+                              withHorizontalAlignment:PEUIHorizontalAlignmentTypeRight
+                                  withVerticalPadding:0.0
+                                    horizontalPadding:10.0
+                                      withFuelstation:_selectedFuelStation
+                                            uitoolkit:_uitoolkit];
+      } else {
+        [[cell detailTextLabel] setText:@"(create gas station)"];
+      }
       break;
+    }
     default:
       [[cell textLabel] setText:@"Purchased"];
       [[cell detailTextLabel] setText:[PEUtils stringFromDate:_pickedLogDate withPattern:@"MM/dd/YYYY"]];
@@ -163,13 +189,11 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
   return 3;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView
- numberOfRowsInSection:(NSInteger)section {
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
   return 1;
 }
 
--(UITableViewCell *)tableView:(UITableView *)tableView
-         cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
   UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1
                                                  reuseIdentifier:nil];
   if (_displayDisclosureIndicators) {

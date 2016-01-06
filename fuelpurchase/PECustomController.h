@@ -14,6 +14,8 @@
 
 @property (nonatomic) CGPoint scrollContentOffset;
 
+@property (nonatomic) BOOL needsRepaint;
+
 #pragma mark - Make Content
 
 - (NSArray *)makeContentWithOldContentPanel:(UIView *)existingContentPanel;

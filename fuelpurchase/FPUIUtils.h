@@ -11,6 +11,7 @@
 #import "PEUIDefs.h"
 #import "JBChartTooltipTipView.h"
 #import "JBChartTooltipView.h"
+#import <PEObjc-Commons/PEUIUtils.h>
 
 typedef void (^FPEnableUserInteractionBlk)(BOOL);
 
@@ -38,6 +39,13 @@ FOUNDATION_EXPORT NSInteger const FPContentPanelTopPadding;
 #pragma mark - Table Cell Stylers
 
 + (PETableCellContentViewStyler)fsTypeTableCellStylerWithUitoolkit:(PEUIToolkit *)uitoolkit;
+
++ (void)addDistanceInfoToFsCellContentView:(UIView *)contentView
+                   withHorizontalAlignment:(PEUIHorizontalAlignmentType)horizontalAlignment
+                       withVerticalPadding:(CGFloat)verticalPadding
+                         horizontalPadding:(CGFloat)horizontalPadding
+                           withFuelstation:(FPFuelStation *)fuelstation
+                                 uitoolkit:(PEUIToolkit *)uitoolkit;
 
 + (PETableCellContentViewStyler)fsTableCellStylerWithUitoolkit:(PEUIToolkit *)uitoolkit
                                                     isLoggedIn:(BOOL)isLoggedIn;

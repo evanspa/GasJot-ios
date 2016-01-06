@@ -47,6 +47,7 @@
 #import <PEFuelPurchase-Model/FPFuelStationType.h>
 #import <PEFuelPurchase-Model/FPFuelPurchaseLog.h>
 #import <PEFuelPurchase-Model/FPEnvironmentLog.h>
+#import "FPFuelstationTypeDsDelegate.h"
 
 NSInteger const PAGINATION_PAGE_SIZE = 30;
 NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
@@ -925,7 +926,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenMsgsBlk:[self vehicleItemChildrenMsgs]
                                                               itemDeleter:[self vehicleItemDeleterForUser:user]
                                                          itemLocalDeleter:[self vehicleItemLocalDeleter]
-                                                             isEntityType:YES];
+                                                             isEntityType:YES
+                                                         viewDidAppearBlk:nil];
   };
 }
 
@@ -973,7 +975,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenMsgsBlk:[self vehicleItemChildrenMsgs]
                                                               itemDeleter:[self vehicleItemDeleterForUser:user]
                                                          itemLocalDeleter:[self vehicleItemLocalDeleter]
-                                                             isEntityType:YES];
+                                                             isEntityType:YES
+                                                         viewDidAppearBlk:^(PEListViewController *listController){[listController.tableView reloadData];}];
   };
 }
 
@@ -1022,7 +1025,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:nil
                                                          itemLocalDeleter:nil
-                                                             isEntityType:YES];
+                                                             isEntityType:YES
+                                                         viewDidAppearBlk:nil];
   };
 }
 
@@ -2209,25 +2213,6 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelStation *fs1, FPFuelStation *fs2){return [fs1 isEqualToFuelStation:fs2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
-    /*PETableCellContentViewStyler tableCellStyler = ^(UITableViewCell *cell, UIView *contentView, FPFuelStation *fuelstation) {
-      [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
-                       alwaysTopifyTitleLabel:YES
-                                    uitoolkit:_uitoolkit
-                         subtitleLeftHPadding:15.0
-                     subtitleFitToWidthFactor:0.5
-                                   isLoggedIn:[APP isUserLoggedIn]](cell, contentView, fuelstation);
-      CGFloat distanceInfoVPadding = 15.0;
-      if ([fuelstation location]) {
-        if ([APP latestLocation]) {
-          distanceInfoVPadding = 18.5;
-        }
-      }
-      [self addDistanceInfoToTopOfCellContentView:contentView
-                          withHorizontalAlignment:PEUIHorizontalAlignmentTypeRight
-                              withVerticalPadding:distanceInfoVPadding
-                                horizontalPadding:20.0
-                                  withFuelstation:fuelstation];
-    };*/
     return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelStation class]
                                                                     title:@"Gas Stations"
                                                     isPaginatedDataSource:NO
@@ -2249,7 +2234,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenMsgsBlk:[self fuelStationItemChildrenMsgs]
                                                               itemDeleter:[self fuelStationItemDeleterForUser:user]
                                                          itemLocalDeleter:[self fuelStationItemLocalDeleter]
-                                                             isEntityType:YES];
+                                                             isEntityType:YES
+                                                         viewDidAppearBlk:nil];
   };
 }
 
@@ -2265,32 +2251,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                listViewController:listViewCtlr](user);
     };
     PEPageLoaderBlk pageLoader = ^ NSArray * (id lastObject) {
-      NSArray *fuelstations = [_coordDao unsyncedFuelStationsForUser:user
-                                                               error:[FPUtils localFetchErrorHandlerMaker]()];
+      NSArray *fuelstations = [_coordDao unsyncedFuelStationsForUser:user error:[FPUtils localFetchErrorHandlerMaker]()];
       fuelstations = [FPUtils sortFuelstations:fuelstations inAscOrderByDistanceFrom:[APP latestLocation]];
       return fuelstations;
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelStation *fs1, FPFuelStation *fs2){return [fs1 isEqualToFuelStation:fs2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
-    /*PETableCellContentViewStyler tableCellStyler = ^(UITableViewCell *cell, UIView *contentView, FPFuelStation *fuelstation) {
-      [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
-                       alwaysTopifyTitleLabel:YES
-                                    uitoolkit:_uitoolkit
-                         subtitleLeftHPadding:15.0
-                     subtitleFitToWidthFactor:0.5
-                                   isLoggedIn:[APP isUserLoggedIn]](cell, contentView, fuelstation);
-      CGFloat distanceInfoVPadding = 25.5;
-      if ([fuelstation location]) {
-        if ([APP latestLocation]) {
-          distanceInfoVPadding = 28.5;
-        }
-      }
-      [self addDistanceInfoToTopOfCellContentView:contentView
-                          withHorizontalAlignment:PEUIHorizontalAlignmentTypeRight
-                              withVerticalPadding:distanceInfoVPadding
-                                horizontalPadding:20.0
-                                  withFuelstation:fuelstation];
-    };*/
     return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelStation class]
                                                                     title:@"Unsynced Gas Stations"
                                                     isPaginatedDataSource:NO
@@ -2312,7 +2278,12 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenMsgsBlk:[self fuelStationItemChildrenMsgs]
                                                               itemDeleter:[self fuelStationItemDeleterForUser:user]
                                                          itemLocalDeleter:[self fuelStationItemLocalDeleter]
-                                                             isEntityType:YES];
+                                                             isEntityType:YES
+                                                         viewDidAppearBlk:^(PEListViewController *listController) {
+                                                           [listController.dataSource removeAllObjects];
+                                                           [listController.dataSource addObjectsFromArray:pageLoader(nil)];
+                                                           [listController.tableView reloadData];
+                                                         }];
   };
 }
 
@@ -2337,29 +2308,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     };
     PEWouldBeIndexOfEntity wouldBeIndexBlk = [self wouldBeIndexBlkForEqualityBlock:^(FPFuelStation *fs1, FPFuelStation *fs2){return [fs1 isEqualToFuelStation:fs2];}
                                                                      entityFetcher:^{ return pageLoader(nil); }];
-    /*PETableCellContentViewStyler tableCellStyler = ^(UITableViewCell *cell, UIView *contentView, FPFuelStation *fuelstation) {
-      [PELMUIUtils syncViewStylerWithTitleBlk:^(FPFuelStation *fuelStation) {return [fuelStation name];}
-                       alwaysTopifyTitleLabel:YES
-                                    uitoolkit:_uitoolkit
-                         subtitleLeftHPadding:15.0
-                     subtitleFitToWidthFactor:0.5
-                                   isLoggedIn:[APP isUserLoggedIn]](cell, contentView, fuelstation);
-      CGFloat distanceInfoVPadding = 25.5;
-      if ([fuelstation location]) {
-        if ([APP latestLocation]) {
-          distanceInfoVPadding = 28.5;
-        }
-      }
-      [self addDistanceInfoToTopOfCellContentView:contentView
-                          withHorizontalAlignment:PEUIHorizontalAlignmentTypeRight
-                              withVerticalPadding:distanceInfoVPadding
-                                horizontalPadding:20.0
-                                  withFuelstation:fuelstation];
-    };*/
     return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelStation class]
                                                                     title:@"Choose Gas Station"
                                                     isPaginatedDataSource:NO
-                                                          tableCellStyler:[FPUIUtils fsTableCellStylerWithUitoolkit:_uitoolkit isLoggedIn:[APP isUserLoggedIn]] //tableCellStyler
+                                                          tableCellStyler:[FPUIUtils fsTableCellStylerWithUitoolkit:_uitoolkit isLoggedIn:[APP isUserLoggedIn]]
                                                        itemSelectedAction:itemSelectedAction
                                                       initialSelectedItem:initialSelectedFuelStation
                                                             addItemAction:addFuelStationAction
@@ -2377,7 +2329,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:nil
                                                          itemLocalDeleter:nil
-                                                             isEntityType:YES];
+                                                             isEntityType:YES
+                                                         viewDidAppearBlk:nil];
   };
 }
 
@@ -2418,7 +2371,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:nil
                                                          itemLocalDeleter:nil
-                                                             isEntityType:NO];
+                                                             isEntityType:NO
+                                                         viewDidAppearBlk:nil];
   };
 }
 
@@ -2590,6 +2544,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEMergeBlk mergeBlk = ^ NSDictionary * (PEAddViewEditController *ctrl, FPFuelStation *localFuelstation, FPFuelStation *remoteFuelstation) {
       FPFuelStation *masterFuelstation = [_coordDao masterFuelstationWithId:[localFuelstation localMasterIdentifier]
                                                                                  error:[FPUtils localFetchErrorHandlerMaker]()];
+      
+      UITableView *fsTypeTableView = (UITableView *)[[ctrl view] viewWithTag:FPFuelStationTagType];
+      FPFuelstationTypeDsDelegate *ds = (FPFuelstationTypeDsDelegate *)[fsTypeTableView dataSource];
+      localFuelstation.type = [ds selectedFsType];
       return [FPFuelStation mergeRemoteFuelstation:remoteFuelstation withLocalFuelstation:localFuelstation localMasterFuelstation:masterFuelstation];
     };
     PEConflictResolveFields conflictResolveFieldsBlk = ^(PEAddViewEditController *ctrl,
@@ -2599,7 +2557,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
       NSMutableArray *fields = [NSMutableArray arrayWithCapacity:mergeConflicts.count];
       [mergeConflicts enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
         NSString *fieldName = key;
-        if ([fieldName isEqualToString:FPFuelstationNameField]) {
+        if ([fieldName isEqualToString:FPFuelstationTypeField]) {
+          [fields addObject:@[@"Brand:", @(FPFuelStationTagType), [PEUtils emptyIfNil:localFuelstation.type.name], [PEUtils emptyIfNil:remoteFuelstation.type.name]]];
+        } else if ([fieldName isEqualToString:FPFuelstationNameField]) {
           [fields addObject:@[@"Nickname:", @(FPFuelStationTagName), [PEUtils emptyIfNil:[localFuelstation name]], [PEUtils emptyIfNil:[remoteFuelstation name]]]];
         } else if ([fieldName isEqualToString:FPFuelstationStreetField]) {
           [fields addObject:@[@"Street:", @(FPFuelStationTagStreet), [PEUtils emptyIfNil:[localFuelstation street]], [PEUtils emptyIfNil:[remoteFuelstation street]]]];
@@ -2629,6 +2589,9 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
         UILabel *remoteValue = valueLabelPair[1];
         if (remoteValue.tag > 0) {
           switch (remoteValue.tag) {
+            case FPFuelStationTagType:
+              [resolvedFuelstation setType:[remoteFuelstation type]];
+              break;
             case FPFuelStationTagName:
               [resolvedFuelstation setName:[remoteFuelstation name]];
               break;
@@ -3950,7 +3913,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:[self fplogItemDeleterForUser:user]
                                                          itemLocalDeleter:[self fplogItemLocalDeleter]
-                                                             isEntityType:YES];
+                                                             isEntityType:YES
+                                                         viewDidAppearBlk:nil];
   };
 }
 
@@ -4031,7 +3995,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:[self fplogItemDeleterForUser:user]
                                                          itemLocalDeleter:[self fplogItemLocalDeleter]
-                                                             isEntityType:YES];
+                                                             isEntityType:YES
+                                                         viewDidAppearBlk:nil];
   };
 }
 
@@ -4110,7 +4075,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:[self fplogItemDeleterForUser:user]
                                                          itemLocalDeleter:[self fplogItemLocalDeleter]
-                                                             isEntityType:YES];
+                                                             isEntityType:YES
+                                                         viewDidAppearBlk:nil];
   };
 }
 
@@ -4161,7 +4127,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:[self fplogItemDeleterForUser:user]
                                                          itemLocalDeleter:[self fplogItemLocalDeleter]
-                                                             isEntityType:YES];
+                                                             isEntityType:YES
+                                                         viewDidAppearBlk:^(PEListViewController *listController){[listController.tableView reloadData];}];
   };
 }
 
@@ -4677,7 +4644,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                            cellIdentifier:@"FPEnvironmentLogCell"
                                                            initialObjects:initialEnvLogs
                                                                pageLoader:pageLoader
-                                                           heightForCellsBlk:[self heightForCellsBlk]
+                                                        heightForCellsBlk:[self heightForCellsBlk]
                                                           detailViewMaker:envLogDetailViewMaker
                                                                 uitoolkit:_uitoolkit
                                            doesEntityBelongToThisListView:doesEntityBelongToThisListViewBlk
@@ -4688,7 +4655,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:[self envlogItemDeleterForUser:user]
                                                          itemLocalDeleter:[self envlogItemLocalDeleter]
-                                                             isEntityType:YES];
+                                                             isEntityType:YES
+                                                         viewDidAppearBlk:nil];
   };
 }
 
@@ -4764,7 +4732,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:[self envlogItemDeleterForUser:user]
                                                          itemLocalDeleter:[self envlogItemLocalDeleter]
-                                                             isEntityType:YES];
+                                                             isEntityType:YES
+                                                         viewDidAppearBlk:nil];
   };
 }
 
@@ -4813,7 +4782,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                       itemChildrenMsgsBlk:nil
                                                               itemDeleter:[self envlogItemDeleterForUser:user]
                                                          itemLocalDeleter:[self envlogItemLocalDeleter]
-                                                             isEntityType:YES];
+                                                             isEntityType:YES
+                                                         viewDidAppearBlk:^(PEListViewController *listController){[listController.tableView reloadData];}];
   };
 }
 

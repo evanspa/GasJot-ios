@@ -13,8 +13,6 @@
 @implementation PECustomController {
   UIView *_displayPanel;
   CGPoint _scrollContentOffset;
-  //BOOL _viewJustLoaded;
-  BOOL _needsRepaint;
 }
 
 #pragma mark - Dynamic Type Support
