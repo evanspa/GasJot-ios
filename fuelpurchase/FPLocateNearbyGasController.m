@@ -167,6 +167,7 @@ busy undergoing maintenance.  Please try again later."]
   [PEUIUtils placeView:fsIconAndNamePanel inMiddleOf:gasStationPanel withAlignment:PEUIHorizontalAlignmentTypeLeft hpadding:5.0];
   UIView *btnsPanel = [PEUIUtils panelWithFixedWidth:(gasStationPanel.frame.size.width - (fsIconAndNamePanel.frame.size.width + 5.0 + 10.0))
                                          fixedHeight:gasStationPanel.frame.size.height];
+  //[PEUIUtils applyBorderToView:btnsPanel withColor:[UIColor redColor]];
   UIButton *directionsBtn = [PEUIUtils buttonWithKey:@"Route"
                                                 font:[PEUIUtils boldFontForTextStyle:UIFontTextStyleCaption1]
                                      backgroundColor:[UIColor peterRiverColor]
@@ -174,7 +175,7 @@ busy undergoing maintenance.  Please try again later."]
                         disabledStateBackgroundColor:nil
                               disabledStateTextColor:nil
                                      verticalPadding:12.5
-                                   horizontalPadding:40.0
+                                   horizontalPadding:20.0
                                         cornerRadius:5.0
                                               target:nil
                                               action:nil];
@@ -185,12 +186,14 @@ busy undergoing maintenance.  Please try again later."]
                         disabledStateBackgroundColor:nil
                               disabledStateTextColor:nil
                                      verticalPadding:12.5
-                                   horizontalPadding:18.0
+                                   horizontalPadding:12.0
                                         cornerRadius:5.0
                                               target:nil
                                               action:nil];
-  [PEUIUtils placeView:directionsBtn atTopOf:btnsPanel withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:12.5 hpadding:15.0];
-  [PEUIUtils placeView:logBtn below:directionsBtn onto:btnsPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:8.0 hpadding:0.0];
+  
+  [PEUIUtils placeView:directionsBtn atTopOf:btnsPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:12.5 hpadding:10.0];
+  //[PEUIUtils placeView:logBtn below:directionsBtn onto:btnsPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:8.0 hpadding:0.0];
+  [PEUIUtils placeView:logBtn toTheRightOf:directionsBtn onto:btnsPanel withAlignment:PEUIVerticalAlignmentTypeMiddle hpadding:10.0];
   
   [PEUIUtils placeView:btnsPanel
           toTheRightOf:fsIconAndNamePanel

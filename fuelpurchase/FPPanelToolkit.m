@@ -7,6 +7,7 @@
 //
 
 #import "FPPanelToolkit.h"
+@import Contacts;
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import "FPFuelStationCoordinatesTableDataSource.h"
@@ -1354,9 +1355,58 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     [useCurrentLocationBtn setTag:FPFuelStationTagUseCurrentLocation];
     [useCurrentLocationBtn bk_addEventHandler:^(id sender) {
       [parentViewController.view endEditing:YES];
-      [FPUIUtils actionWithCurrentLocationBlk:^(CLLocation *currentLocation) {
-        [ds setLatitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].latitude]];
-        [ds setLongitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].longitude]];
+      [FPUIUtils actionWithCurrentLocationBlk:^(CLLocation *currentLocation2) {
+        
+        //[ds setLatitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].latitude]];
+        //[ds setLongitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].longitude]];
+        
+        CLLocation *currentLocation = [[CLLocation alloc] initWithLatitude:ds.latitude.doubleValue longitude:ds.longitude.doubleValue];
+        
+        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:parentView animated:YES];
+        hud.labelText = @"Looking up address...";
+        CLGeocoder *geocoder = [[CLGeocoder alloc] init];
+        [geocoder reverseGeocodeLocation:currentLocation
+                       completionHandler:^(NSArray<CLPlacemark *> * _Nullable placemarks, NSError * _Nullable error) {
+                         [hud hide:YES];
+                         if (error) {
+                           [PEUIUtils showErrorAlertWithMsgs:nil
+                                                       title:@"Error looking up address."
+                                            alertDescription:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"Oops.  There was an error attempting to lookup the address: %@", error.description]]
+                                                    topInset:[PEUIUtils topInsetForAlertsWithController:parentViewController]
+                                                 buttonTitle:@"Okay."
+                                                buttonAction:^{}
+                                              relativeToView:[parentViewController parentViewForAlerts]];
+                         } else {
+                           if ([placemarks count] > 0) {
+                             NSLog(@"pm - 0");
+                             CLPlacemark *placemark = placemarks[0];
+                             NSDictionary *addressDict = placemark.addressDictionary;
+                             if (addressDict) {
+                               NSLog(@"pm - dict: %@", addressDict);
+                               NSLog(@"CNPostalAddressStreetKey: %@", CNPostalAddressStreetKey);
+                               void (^setText)(NSString *, UITextField *) = ^ (NSString *key, UITextField *tf) {
+                                 NSString *val = [addressDict objectForKey:key];
+                                 if (![PEUtils isNil:val]) {
+                                   [tf setText:val];
+                                 }
+                               };
+                               setText(CNPostalAddressStreetKey, fuelStationStreetTf);
+                               setText(CNPostalAddressCityKey, fuelStationCityTf);
+                               setText(CNPostalAddressPostalCodeKey, fuelStationZipTf);
+                               setText(CNPostalAddressStateKey, fuelStationStateTf);
+                             }
+                           } else {
+                             [PEUIUtils showWarningAlertWithMsgs:nil
+                                                           title:@"Address not found."
+                                                alertDescription:[[NSAttributedString alloc] initWithString:@"Unable to lookup address given your current location."]
+                                                        topInset:[PEUIUtils topInsetForAlertsWithController:parentViewController]
+                                                     buttonTitle:@"Okay."
+                                                    buttonAction:^{}
+                                                  relativeToView:[parentViewController parentViewForAlerts]];
+                           }
+                         }
+                       }];
+        
         [coordinatesTableView reloadData];
       }
                      locationNeededReasonText:@"To compute your current location"

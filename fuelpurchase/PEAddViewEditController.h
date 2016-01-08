@@ -183,4 +183,8 @@ entityRemovedNotificationName:(NSString *)entityRemovedNotificationName
 
 - (void)resetScrollOffset;
 
+#pragma mark - Helpers
+
+- (UIView *)parentViewForAlerts;
+
 @end

@@ -95,11 +95,7 @@ CGFloat const FPSPLASH_CONTENT_HEIGH_FACTOR = 0.65;
 }
 
 - (UIView *)carouselViewWithImageNamed:(NSString *)imageName {
-  UIView *panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:FPSPLASH_CONTENT_HEIGH_FACTOR relativeToView:self.view];
-  [panel setBackgroundColor:[UIColor clearColor]];
-  UIImageView *imgView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:imageName]];
-  [PEUIUtils placeView:imgView atBottomOf:panel withAlignment:PEUIHorizontalAlignmentTypeCenter vpadding:5.0 hpadding:0.0];
-  return panel;
+  return [[UIImageView alloc] initWithImage:[UIImage imageNamed:imageName]];
 }
 
 - (UIView *)newWhiteDot {
@@ -151,6 +147,7 @@ CGFloat const FPSPLASH_CONTENT_HEIGH_FACTOR = 0.65;
   [PEUIUtils setFrameHeightOfView:carousel ofHeight:FPSPLASH_CONTENT_HEIGH_FACTOR relativeTo:self.view];
   [carousel setPagingEnabled:YES];
   [carousel setBounceDistance:0.25];
+  [carousel setTag:1];
   [[self.navigationController navigationBar] setHidden:YES];
   _isCarouselRemoved = NO;
   [PEUIUtils placeView:carousel atTopOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:FPContentPanelTopPadding hpadding:0.0];
@@ -178,13 +175,28 @@ CGFloat const FPSPLASH_CONTENT_HEIGH_FACTOR = 0.65;
   UIButton *startUsing = button(@"Let's Go!", self, @selector(startUsing));
   [startUsing setUserInteractionEnabled:_letsGoButtonEnabled];
   [PEUIUtils addDisclosureIndicatorToButton:startUsing];
-  [PEUIUtils placeView:startUsing below:_dotsPanel onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeCenter alignmentRelativeToView:self.view vpadding:25.0 hpadding:0.0];
+  [PEUIUtils placeView:startUsing
+                 below:_dotsPanel
+                  onto:contentPanel
+         withAlignment:PEUIHorizontalAlignmentTypeCenter
+alignmentRelativeToView:self.view
+              vpadding:25.0
+              hpadding:0.0];
   totalHeight += startUsing.frame.size.height + 25.0;
   [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
   return @[contentPanel, @(NO), @(YES)];
 }
 
 #pragma mark - View controller lifecycle
+
+- (void)viewWillDisappear:(BOOL)animated {
+  // this is needed because otherwise, when this controller gets dismissed,
+  // a 'ghost' of the carousel is displayed for a brief moment after the
+  // controller is dimissed; this snippet below fixes that
+  UIView *carousel = [self.view viewWithTag:1];
+  [carousel removeFromSuperview];
+  [super viewWillDisappear:YES];
+}
 
 - (void)viewDidLoad {
   [super viewDidLoad];
