@@ -2,10 +2,10 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 platform :ios, '8.4'
 
-pod 'PEFuelPurchase-Model', '1.0.212'
+pod 'PEFuelPurchase-Model', '1.0.216'
 pod 'PELocal-Data', '0.0.16'
 pod 'PEFuelPurchase-Common', '1.0.12'
-pod 'PEObjc-Commons', '1.0.104'
+pod 'PEObjc-Commons', '1.0.108'
 pod 'ReactiveCocoa', '2.4.7', :inhibit_warnings => true
 pod 'AFNetworking', '2.6.3', :inhibit_warnings => true
 pod 'CocoaLumberjack', '1.9.2'
@@ -17,6 +17,7 @@ pod 'BlocksKit', '2.2.5', :inhibit_warnings => true
 pod 'JBChartView', :inhibit_warnings => true
 pod 'HMSegmentedControl', :inhibit_warnings => true
 pod 'CHCSVParser', '2.1.0', :inhibit_warnings => true
+pod 'DateTools', '1.7.0', :inhibit_warnings => true
 
 pod 'PEDev-Console', '1.0.5', :configurations => ['Debug']
 pod 'KissXML', '5.0', :inhibit_warnings => true

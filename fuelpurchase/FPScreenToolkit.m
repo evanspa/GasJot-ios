@@ -4876,18 +4876,11 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     NSInteger addFuelstationBtnTag = 725;
     NSInteger addGasLogBtnTag = 726;
     NSInteger addOdometerLogBtnTag = 727;
-    UIButton *(^newButton)(NSString *, NSInteger, CGFloat, UIView *) = ^UIButton * (NSString *imgName, NSInteger tagValue, CGFloat hpaddingOnParentView, UIView *theJotPanel) {
+    UIButton *(^newButton)(NSString *, NSInteger, UIView *) = ^UIButton * (NSString *imgName, NSInteger tagValue, UIView *theJotPanel) {
       UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 50.0, 50.0)];
       [button setBackgroundImage:[UIImage imageNamed:imgName] forState:UIControlStateNormal];
       [button setTag:tagValue];
-      [weakTabBarCtrl.view addSubview:button];
       [PEUIUtils setFrameY:belowScreenY ofView:button];
-      [PEUIUtils setFrameX:[PEUIUtils XForWidth:button.frame.size.width
-                                  withAlignment:PEUIHorizontalAlignmentTypeLeft
-                                 relativeToView:theJotPanel
-                                       hpadding:hpaddingOnParentView]
-                    ofView:button];
-      button.transform = CGAffineTransformMakeScale(0.1, 0.1);
       return button;
     };
     PEListViewController *(^listViewController)(void) = ^PEListViewController * {
@@ -4964,7 +4957,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                           completion:^{ dismissJotPanel(); }];
       };
       if (jotting) {
-        addOdometerLogBtn = newButton(@"jot-odometer", addOdometerLogBtnTag, 10, jotPanel);
+        addOdometerLogBtn = newButton(@"jot-odometer", addOdometerLogBtnTag, jotPanel);
         [addOdometerLogBtn bk_addEventHandler:^(id sender) {
           configJotButton(^UIViewController * (PEItemAddedBlk itemAddedBlk) {
             return [self newAddEnvironmentLogScreenMakerWithBlk:itemAddedBlk
@@ -4972,7 +4965,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                              listViewController:listViewController()](user);
           });
         } forControlEvents:UIControlEventTouchUpInside];
-        addGasLogBtn = newButton(@"jot-gas", addGasLogBtnTag, 77, jotPanel);
+        addGasLogBtn = newButton(@"jot-gas", addGasLogBtnTag, jotPanel);
         [addGasLogBtn bk_addEventHandler:^(id sender) {
           configJotButton(^UIViewController * (PEItemAddedBlk itemAddedBlk) {
             return [self newAddFuelPurchaseLogScreenMakerWithBlk:itemAddedBlk
@@ -4984,18 +4977,39 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                               listViewController:listViewController()](user);
           });
         } forControlEvents:UIControlEventTouchUpInside];
-        addFuelstationBtn = newButton(@"jot-fuelstation", addFuelstationBtnTag, 144, jotPanel);
+        addFuelstationBtn = newButton(@"jot-fuelstation", addFuelstationBtnTag, jotPanel);
         [addFuelstationBtn bk_addEventHandler:^(id sender) {
           configJotButton(^UIViewController * (PEItemAddedBlk itemAddedBlk) {
             return [self newAddFuelStationScreenMakerWithBlk:itemAddedBlk listViewController:listViewController()](user);
           });
         } forControlEvents:UIControlEventTouchUpInside];
-        addVehicleBtn = newButton(@"jot-vehicle", addVehicleBtnTag, 211, jotPanel);
+        addVehicleBtn = newButton(@"jot-vehicle", addVehicleBtnTag, jotPanel);
         [addVehicleBtn bk_addEventHandler:^(id sender) {
           configJotButton(^UIViewController * (PEItemAddedBlk itemAddedBlk) {
             return [self newAddVehicleScreenMakerWithDelegate:itemAddedBlk listViewController:listViewController()](user);
           });
         } forControlEvents:UIControlEventTouchUpInside];
+        
+        CGFloat commonOriginalImageWidth = 50.0;
+        CGFloat availablePadWidth = jotPanel.frame.size.width - (commonOriginalImageWidth * 4);
+        CGFloat individualPadWidth = availablePadWidth / 5;
+        [PEUIUtils setFrameX:(jotPanel.frame.origin.x + individualPadWidth)
+                      ofView:addOdometerLogBtn];
+        [PEUIUtils setFrameX:(addOdometerLogBtn.frame.origin.x + commonOriginalImageWidth + individualPadWidth)
+                      ofView:addGasLogBtn];
+        [PEUIUtils setFrameX:(addGasLogBtn.frame.origin.x + commonOriginalImageWidth + individualPadWidth)
+                      ofView:addFuelstationBtn];
+        [PEUIUtils setFrameX:(addFuelstationBtn.frame.origin.x + commonOriginalImageWidth + individualPadWidth)
+                      ofView:addVehicleBtn];
+        [weakTabBarCtrl.view addSubview:addOdometerLogBtn];
+        [weakTabBarCtrl.view addSubview:addGasLogBtn];
+        [weakTabBarCtrl.view addSubview:addFuelstationBtn];
+        [weakTabBarCtrl.view addSubview:addVehicleBtn];
+        addOdometerLogBtn.transform = CGAffineTransformMakeScale(0.1, 0.1);
+        addGasLogBtn.transform = CGAffineTransformMakeScale(0.1, 0.1);
+        addFuelstationBtn.transform = CGAffineTransformMakeScale(0.1, 0.1);
+        addVehicleBtn.transform = CGAffineTransformMakeScale(0.1, 0.1);
+        
         rotationAmount = 180 * M_PI/180;
         UIView *dimmedBackgroundView = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:weakTabBarCtrl.view];
         [dimmedBackgroundView setTag:dimmedBgPanelTag];

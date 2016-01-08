@@ -51,6 +51,7 @@
 		CA8AC4C41BDEB338008603C0 /* FPCommonStatController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4C31BDEB338008603C0 /* FPCommonStatController.m */; };
 		CA90F4241B45AB7F005FAB35 /* PEServerSyncActionSheet.m in Sources */ = {isa = PBXBuildFile; fileRef = CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */; };
 		CA920C121B21F48900A848EA /* fpapi-resource.localdev.json in Resources */ = {isa = PBXBuildFile; fileRef = 18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */; };
+		CA9E39A51C40018A009A91DE /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CA9E39A41C40018A009A91DE /* Launch Screen.storyboard */; };
 		CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */; };
 		CAB61BFD1C11D6F60008F12B /* PECustomController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAB61BFC1C11D6F60008F12B /* PECustomController.m */; };
 		CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = CAD8AE501B2B291000276F4F /* PELMUIUtils.m */; };
@@ -168,6 +169,7 @@
 		CA8AC4C31BDEB338008603C0 /* FPCommonStatController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPCommonStatController.m; sourceTree = "<group>"; };
 		CA90F4221B45AB7F005FAB35 /* PEServerSyncActionSheet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PEServerSyncActionSheet.h; sourceTree = "<group>"; };
 		CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PEServerSyncActionSheet.m; sourceTree = "<group>"; };
+		CA9E39A41C40018A009A91DE /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		CAB5E94E1B4B024B00144072 /* FPReauthenticateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPReauthenticateController.h; sourceTree = "<group>"; };
 		CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPReauthenticateController.m; sourceTree = "<group>"; };
 		CAB61BFB1C11D6F60008F12B /* PECustomController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PECustomController.h; sourceTree = "<group>"; };
@@ -455,6 +457,7 @@
 		18D6DFB217F68005006B300D /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				CA9E39A41C40018A009A91DE /* Launch Screen.storyboard */,
 				1899260D18B3071600B61772 /* simulation */,
 				18CC2D0117F68117009DF2CE /* en.lproj */,
 				18D6DFBD17F68005006B300D /* Images.xcassets */,
@@ -882,6 +885,7 @@
 				18D6DFB617F68005006B300D /* InfoPlist.strings in Resources */,
 				18CC2D0217F68117009DF2CE /* en.lproj in Resources */,
 				18D6DFBE17F68005006B300D /* Images.xcassets in Resources */,
+				CA9E39A51C40018A009A91DE /* Launch Screen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1043,7 +1047,6 @@
 			baseConfigurationReference = C620C668F12CED8B0A128354 /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1106,7 +1109,6 @@
 			baseConfigurationReference = E12E20B44758C744FA39A49C /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;

@@ -19,6 +19,60 @@ NSInteger const FPContentPanelTopPadding = 20.0;
 
 @implementation FPUIUtils
 
+#pragma mark - Location Helpers
+
++ (void)actionWithCurrentLocationBlk:(void(^)(CLLocation *))currentLocationBlk
+            locationNeededReasonText:(NSString *)locationNeededReasonText
+                    parentController:(UIViewController *)parentController
+                          parentView:(UIView *)parentView {
+  if ([PEUtils isNil:[APP latestLocation]]) {
+    if ([APP locationServicesAuthorized]) {
+      NSAttributedString *attrDescTextWithInstructionalText =
+      [PEUIUtils attributedTextWithTemplate:@"Your current location cannot be determined.  \
+Make sure you have location services enabled for Gas Jot.  You can check this by going to:\n\n%@"
+                               textToAccent:@"Settings app \u2794 Privacy \u2794 Location Services \u2794 Gas Jot"
+                             accentTextFont:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]];
+      [PEUIUtils showWarningAlertWithMsgs:nil
+                                    title:@"Hmm."
+                         alertDescription:attrDescTextWithInstructionalText
+                                 topInset:[PEUIUtils topInsetForAlertsWithController:parentController]
+                              buttonTitle:@"Okay."
+                             buttonAction:^{}
+                           relativeToView:parentView];
+    } else {
+      if ([APP hasBeenAskedToEnableLocationServices]) {
+        //To compute your current location
+        [PEUIUtils showInstructionalAlertWithTitle:@"Enable location services."
+                              alertDescriptionText:[NSString stringWithFormat:@"%@, you need to enable location services for Gas Jot.  To do this, go to:\n\n", locationNeededReasonText]
+                                   instructionText:@"Settings app \u2794 Privacy \u2794 Location Services \u2794 Gas Jot"
+                                          topInset:[PEUIUtils topInsetForAlertsWithController:parentController]
+                                       buttonTitle:@"Okay."
+                                      buttonAction:^{}
+                                    relativeToView:parentView];
+      } else {
+        //To compute your location
+        [PEUIUtils showConfirmAlertWithTitle:@"Enable location services?"
+                                  titleImage:[PEUIUtils bundleImageWithName:@"question"]
+                            alertDescription:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"\
+%@, you need to enable location services for Gas Jot.  If you would like to do this, tap 'Allow' in the next pop-up.", locationNeededReasonText]]
+                                    topInset:[PEUIUtils topInsetForAlertsWithController:parentController]
+                             okayButtonTitle:@"Okay."
+                            okayButtonAction:^{
+                              [[APP locationManager] requestWhenInUseAuthorization];
+                              [APP setHasBeenAskedToEnableLocationServices:YES];
+                            }
+                             okayButtonStyle:JGActionSheetButtonStyleBlue
+                           cancelButtonTitle:@"No.  Not at this time."
+                          cancelButtonAction:^{}
+                            cancelButtonSyle:JGActionSheetButtonStyleDefault
+                              relativeToView:parentView];
+      }
+    }
+  } else {
+    currentLocationBlk([APP latestLocation]);
+  }
+}
+
 #pragma mark - Chart Helpers
 
 + (void)setTooltipVisible:(BOOL)tooltipVisible

@@ -39,81 +39,44 @@
   return text;
 }
 
++ (NSArray *)computeErrMessagesWithErrMask:(NSUInteger)errMask
+                               errMessages:(NSArray *)errMessages {
+  NSMutableArray *computedErrMsgs = [NSMutableArray array];
+  for (NSArray *errMsg in errMessages) {
+    NSNumber *errTypeNumber = errMsg[0];
+    NSUInteger errType = [errTypeNumber unsignedIntegerValue];
+    NSString *localizedErrKey = errMsg[1];
+    if (errMask & errType) {
+      [computedErrMsgs addObject:LS(localizedErrKey)];
+    }
+  }
+  return computedErrMsgs;
+}
+
 #pragma mark - User Helpers
 
 + (NSArray *)computeSignInErrMsgs:(NSUInteger)signInErrMask {
-  NSMutableArray *errMsgs = [NSMutableArray arrayWithCapacity:1];
-  if (signInErrMask & FPSignInEmailNotProvided) {
-    [errMsgs addObject:LS(@"signin.email-notprovided")];
-  }
-  if (signInErrMask & FPSignInInvalidEmail) {
-    [errMsgs addObject:LS(@"signin.email-invalid")];
-  }
-  if (signInErrMask & FPSignInPasswordNotProvided) {
-    [errMsgs addObject:LS(@"signin.password-notprovided")];
-  }
-  if (signInErrMask & FPSignInInvalidCredentials) {
-    [errMsgs addObject:LS(@"signin.credentials-invalid")];
-  }
-  return errMsgs;
+  return [FPUtils computeErrMessagesWithErrMask:signInErrMask
+                                    errMessages:[APP signInErrMessages]];
 }
 
 + (NSArray *)computeSaveUsrErrMsgs:(NSInteger)saveUsrErrMask {
-  NSMutableArray *errMsgs = [NSMutableArray array];
-  if (saveUsrErrMask & FPSaveUsrInvalidEmail) {
-    [errMsgs addObject:LS(@"saveusr.email-invalid")];
-  }
-  if (saveUsrErrMask & FPSaveUsrEmailNotProvided) {
-    [errMsgs addObject:LS(@"saveusr.email-notprovided")];
-  }
-  if (saveUsrErrMask & FPSaveUsrPasswordNotProvided) {
-    [errMsgs addObject:LS(@"saveusr.password-notprovided")];
-  }
-  if (saveUsrErrMask & FPSaveUsrEmailAlreadyRegistered) {
-    [errMsgs addObject:LS(@"saveusr.email-already-registered")];
-  }
-  if (saveUsrErrMask & FPSaveUsrConfirmPasswordOnlyProvided) {
-    [errMsgs addObject:LS(@"saveusr.confirm-password-onlyprovided")];
-  }
-  if (saveUsrErrMask & FPSaveUsrConfirmPasswordNotProvided) {
-    [errMsgs addObject:LS(@"saveusr.confirm-password-notprovided")];
-  }
-  if (saveUsrErrMask & FPSaveUsrPasswordConfirmPasswordDontMatch) {
-    [errMsgs addObject:LS(@"saveusr.password-confirm-password-dont-match")];
-  }
-  return errMsgs;
+  return [FPUtils computeErrMessagesWithErrMask:saveUsrErrMask
+                                    errMessages:[APP saveUserErrMessages]];
 }
 
 #pragma mark - Vehicle Helpers
 
 + (NSArray *)computeSaveVehicleErrMsgs:(NSInteger)saveVehicleErrMask {
-  NSMutableArray *errMsgs = [NSMutableArray array];
-  if (saveVehicleErrMask & FPSaveVehicleNameNotProvided) {
-    [errMsgs addObject:LS(@"savevehicle.name-notprovided")];
-  }
-  if (saveVehicleErrMask & FPSaveVehicleVehicleAlreadyExists) {
-    [errMsgs addObject:LS(@"savevehicle.vehicle-already-exists")];
-  }
-  if (saveVehicleErrMask & FPSaveVehicleNameContainsPurple) {
-    [errMsgs addObject:LS(@"savevehicle.vehicle-contains-purple")];
-  }
-  if (saveVehicleErrMask & FPSaveVehicleNameContainsRed) {
-    [errMsgs addObject:LS(@"savevehicle.vehicle-contains-red")];
-  }
-  return errMsgs;
+  return [FPUtils computeErrMessagesWithErrMask:saveVehicleErrMask
+                                    errMessages:[APP saveVehicleErrMessages]];
 }
 
 #pragma mark - Fuel Station Helpers
 
 + (NSArray *)computeSaveFuelStationErrMsgs:(NSInteger)saveFuelStationErrMask {
-  NSMutableArray *errMsgs = [NSMutableArray array];
-  if (saveFuelStationErrMask & FPSaveFuelStationNameNotProvided) {
-    [errMsgs addObject:LS(@"savefuelstation.name-notprovided")];
-  }
-  if (saveFuelStationErrMask & FPSaveFuelStationNameContainsPurplex) {
-    [errMsgs addObject:LS(@"savefuelstation.name-contains-purplex")];
-  }
-  return errMsgs;
+  return [FPUtils computeErrMessagesWithErrMask:saveFuelStationErrMask
+                                    errMessages:[APP saveFuelstationErrMessages]];
 }
 
 + (NSArray *)sortFuelstations:(NSArray *)fuelstations
@@ -147,48 +110,15 @@
 #pragma mark - Fuel Purchase Log Helpers
 
 + (NSArray *)computeFpLogErrMsgs:(NSInteger)saveFpLogErrMask {
-  NSMutableArray *errMsgs = [NSMutableArray array];  
-  if (saveFpLogErrMask & FPSaveFuelPurchaseLogPurchaseDateNotProvided) {
-    [errMsgs addObject:LS(@"savefplog.purchasedate-notprovided")];
-  }
-  if (saveFpLogErrMask & FPSaveFuelPurchaseLogNumGallonsNotProvided) {
-    [errMsgs addObject:LS(@"savefplog.numgallons-notprovided")];
-  }
-  if (saveFpLogErrMask & FPSaveFuelPurchaseLogOctaneNotProvided) {
-    [errMsgs addObject:LS(@"savefplog.octane-notprovided")];
-  }
-  if (saveFpLogErrMask & FPSaveFuelPurchaseLogGallonPriceNotProvided) {
-    [errMsgs addObject:LS(@"savefplog.gallonprice-notprovided")];
-  }
-  if (saveFpLogErrMask & FPSaveFuelPurchaseLogNumGallonsNegative) {
-    [errMsgs addObject:LS(@"savefplog.numgallons-negative")];
-  }
-  if (saveFpLogErrMask & FPSaveFuelPurchaseLogOctaneNegative) {
-    [errMsgs addObject:LS(@"savefplog.octane-negative")];
-  }
-  if (saveFpLogErrMask & FPSaveFuelPurchaseLogGallonPriceNegative) {
-    [errMsgs addObject:LS(@"savefplog.gallonprice-negative")];
-  }
-  if (saveFpLogErrMask & FPSaveFuelPurchaseLogOdometerNegative) {
-    [errMsgs addObject:LS(@"savefplog.odometer-negative")];
-  }
-  return errMsgs;
+  return [FPUtils computeErrMessagesWithErrMask:saveFpLogErrMask
+                                    errMessages:[APP saveFplogErrMessages]];
 }
 
 #pragma mark - Environment Log Helpers
 
 + (NSArray *)computeEnvLogErrMsgs:(NSInteger)saveEnvLogErrMask {
-  NSMutableArray *errMsgs = [NSMutableArray array];
-  if (saveEnvLogErrMask & FPSaveEnvironmentLogDateNotProvided) {
-    [errMsgs addObject:LS(@"savenvlog.logdate-notprovided")];
-  }
-  if (saveEnvLogErrMask & FPSaveEnvironmentLogOdometerNotProvided) {
-    [errMsgs addObject:LS(@"savenvlog.odometer-notprovided")];
-  }
-  if (saveEnvLogErrMask & FPSaveEnvironmentLogOdometerNegative) {
-    [errMsgs addObject:LS(@"savenvlog.odometer-negative")];
-  }
-  return errMsgs;
+  return [FPUtils computeErrMessagesWithErrMask:saveEnvLogErrMask
+                                    errMessages:[APP saveEnvlogErrMessages]];
 }
 
 #pragma mark - Various Error Handler Helpers
@@ -199,10 +129,9 @@
       dispatch_async(dispatch_get_main_queue(), ^{
         [HUD hide:YES];
         [PEUIUtils showWaitAlertWithMsgs:nil
-                                   title:@"Server Busy."
+                                   title:@"Server undergoing maintenance."
                         alertDescription:[[NSAttributedString alloc] initWithString:@"\
-We apologize, but the server is currently \
-busy.  Please retry your request shortly."]
+We apologize, but the server is currently busy undergoing maintenance.  Please re-try your request shortly."]
                                 topInset:[PEUIUtils topInsetForAlertsWithController:controller]
                              buttonTitle:@"Okay."
                             buttonAction:nil

@@ -70,6 +70,18 @@ FOUNDATION_EXPORT NSInteger const FPJotButtonTag;
 
 @property (strong, nonatomic) UIWindow *window;
 
+@property (nonatomic) NSArray *signInErrMessages;
+
+@property (nonatomic) NSArray *saveUserErrMessages;
+
+@property (nonatomic) NSArray *saveVehicleErrMessages;
+
+@property (nonatomic) NSArray *saveFuelstationErrMessages;
+
+@property (nonatomic) NSArray *saveFplogErrMessages;
+
+@property (nonatomic) NSArray *saveEnvlogErrMessages;
+
 #pragma mark - Methods
 
 - (void)enableJotButton:(BOOL)enableJotButton;

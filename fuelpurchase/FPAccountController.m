@@ -466,12 +466,8 @@ alignmentRelativeToView:contentPanel
                                                           object:nil
                                                         userInfo:nil];
       NSString *msg = @"\
-You have been logged out successfully. \
-Your remote account is no longer connected \
-to this device and your Gas Jot data \
-has been removed.\n\n\
-You can still use the app.  Your data will \
-simply be saved locally.";
+You have been logged out successfully. Your remote account is no longer connected to this device and your Gas Jot data \
+has been removed.\n\nYou can still use the app.  Your data will simply be saved locally.";
       [PEUIUtils showSuccessAlertWithMsgs:nil
                                     title:@"Logout successful."
                          alertDescription:[[NSAttributedString alloc] initWithString:msg]
@@ -504,9 +500,7 @@ simply be saved locally.";
   if (numUnsyncedEdits > 0) {
     [PEUIUtils showWarningConfirmAlertWithTitle:@"You have unsynced edits."
                                alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You have unsynced edits.  If you log out, \
-they will be permanently deleted.\n\n\
-Are you sure you want to do continue?"]
+You have unsynced edits.  If you log out, they will be permanently deleted.\n\nAre you sure you want to do continue?"]
                                        topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                 okayButtonTitle:@"Yes.  Log me out."
                                okayButtonAction:^{ doLogout(); }

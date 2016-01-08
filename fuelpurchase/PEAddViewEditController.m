@@ -800,7 +800,7 @@ It has now been removed from this device."]
                                                                          NSDate *retryAfter) {
       [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
                                    [NSNumber numberWithBool:NO],
-                                   @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                   @[[NSString stringWithFormat:@"Server undergoing maintnenace.  Try again later."]],
                                    [NSNumber numberWithBool:YES],
                                    [NSNumber numberWithBool:NO],
                                    [NSNull null],
@@ -1019,7 +1019,7 @@ The latest version of this record has been successfully downloaded to your devic
     handleHudProgress(percentComplete);
     [errsForEntityDownload addObject:@[[NSString stringWithFormat:@"%@ not downloaded.", recordTitle],
                                        [NSNumber numberWithBool:NO],
-                                       @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                       @[[NSString stringWithFormat:@"Server undergoing maintenance.  Try again later."]],
                                        [NSNumber numberWithBool:YES],
                                        [NSNumber numberWithBool:NO]]];
     if (percentCompleteDownloadingEntity == 1.0) { entityDownloadDone(mainMsgTitle); }
@@ -1201,7 +1201,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
     handleHudProgress(percentComplete);
     [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                  [NSNumber numberWithBool:NO],
-                                 @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                 @[[NSString stringWithFormat:@"Server undergoing maintenance.  Try again later."]],
                                  [NSNumber numberWithBool:YES],
                                  [NSNumber numberWithBool:NO],
                                  [NSNull null],
@@ -1447,7 +1447,7 @@ entity's dependency.";
           handleHudProgress(percentComplete);
           [errsForDepsFetch addObject:@[[NSString stringWithFormat:@"%@ not fetched.", recordTitle],
                                         [NSNumber numberWithBool:NO],
-                                        @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                        @[[NSString stringWithFormat:@"Server undergoing maintenance.  Try again later."]],
                                         [NSNumber numberWithBool:NO]]];
           if (percentCompleteFetchingDeps == 1.0) { depFetchDone(mainMsgTitle); }
         };
@@ -1913,7 +1913,7 @@ updated since you started to edit it.  You have a few options:\n\nIf you cancel,
           handleHudProgress(percentComplete);
           [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                        [NSNumber numberWithBool:NO],
-                                       @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                       @[[NSString stringWithFormat:@"Server undergoing maintenance.  Try again later."]],
                                        [NSNumber numberWithBool:YES],
                                        [NSNumber numberWithBool:NO],
                                        [NSNull null],
@@ -2430,7 +2430,7 @@ The ones that did not %@ and will need to be fixed individually."
         handleHudProgress(percentComplete);
         [errorsForUpload addObject:@[[NSString stringWithFormat:@"%@ not saved to the server.", recordTitle],
                                      [NSNumber numberWithBool:NO],
-                                     @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                     @[[NSString stringWithFormat:@"Server undergoing maintenance.  Try again later."]],
                                      [NSNumber numberWithBool:YES]]];
         if (percentCompleteUploadingEntity == 1.0) {
           immediateSaveDone(mainMsgTitle);

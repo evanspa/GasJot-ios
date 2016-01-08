@@ -298,7 +298,7 @@ return [PEUIUtils tablePanelWithRowData:rowData
                                                                                 title:@"Busy with maintenance."
                                                                      alertDescription:[[NSAttributedString alloc] initWithString:@"\
                                                                                        The server is currently busy at the moment undergoing maintenance.\n\n\
-                                                                                       We apologize for the inconvenience.  Please try re-sending the verification email later."]
+We apologize for the inconvenience.  Please try re-sending the verification email later."]
                                                                              topInset:[PEUIUtils topInsetForAlertsWithController:controller]
                                                                           buttonTitle:@"Okay."
                                                                          buttonAction:^{ enableUserInteraction(YES); }
@@ -464,7 +464,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
         void(^refreshRetryAfterBlk)(NSString *, NSString *, NSDate *) = ^(NSString *mainMsgTitle, NSString *recordTitle, NSDate *retryAfter) {
           [errsForRefresh addObject:@[[NSString stringWithFormat:@"%@ not downloaded.", recordTitle],
                                              [NSNumber numberWithBool:NO],
-                                             @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                             @[[NSString stringWithFormat:@"Server undergoing maintenance.  Please try again later."]],
                                              [NSNumber numberWithBool:YES],
                                              [NSNumber numberWithBool:NO]]];
           refreshDone(mainMsgTitle);
@@ -793,7 +793,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     [vehicleDefaultOctaneTf setKeyboardType:UIKeyboardTypeNumberPad];
     UITextField *vehicleFuelCapacityTf = tfMaker(@"Fuel capacity", FPVehicleTagFuelCapacity);
     [vehicleFuelCapacityTf setKeyboardType:UIKeyboardTypeDecimalPad];
-    UILabel *readoutsLabel = [PEUIUtils labelWithKey:@"Select the dashboard readout capabilities of this vehicle."
+    UILabel *readoutsLabel = [PEUIUtils labelWithKey:@"Indicate the dashboard readout capabilities of this vehicle."
                                                 font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
                                      backgroundColor:[UIColor clearColor]
                                            textColor:[UIColor darkGrayColor]
@@ -1354,7 +1354,15 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     [useCurrentLocationBtn setTag:FPFuelStationTagUseCurrentLocation];
     [useCurrentLocationBtn bk_addEventHandler:^(id sender) {
       [parentViewController.view endEditing:YES];
-      void (^doUseCurrentLocation)(void) = ^{
+      [FPUIUtils actionWithCurrentLocationBlk:^(CLLocation *currentLocation) {
+        [ds setLatitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].latitude]];
+        [ds setLongitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].longitude]];
+        [coordinatesTableView reloadData];
+      }
+                     locationNeededReasonText:@"To compute your current location"
+                             parentController:parentViewController
+                                   parentView:parentView];
+      /*void (^doUseCurrentLocation)(void) = ^{
         CLLocation *currentLocation = [APP latestLocation];
         if (currentLocation) {
           [ds setLatitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].latitude]];
@@ -1405,7 +1413,7 @@ To compute your location, you need to enable location services for Gas Jot.  If 
         }
       } else {
         doUseCurrentLocation();
-      }
+      }*/
     } forControlEvents:UIControlEventTouchUpInside];
     [PEUIUtils placeView:useCurrentLocationBtn
                    below:coordinatesTableView

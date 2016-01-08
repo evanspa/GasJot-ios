@@ -271,7 +271,7 @@ and deletions on other devices."
                                                      [PEUIUtils showSuccessAlertWithMsgs:msgs
                                                                                    title:@"Synchronized."
                                                                         alertDescription:[[NSAttributedString alloc] initWithString:@"\
-                                                                                          You have successfully synchronized your account to this device, incorporating the following changes:"]
+You have successfully synchronized your account to this device, incorporating the following changes:"]
                                                                                 topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                                                              buttonTitle:@"Okay."
                                                                             buttonAction:^{
@@ -291,9 +291,9 @@ and deletions on other devices."
                                        dispatch_async(dispatch_get_main_queue(), ^{
                                          [changelogHud hide:YES];
                                          [PEUIUtils showWaitAlertWithMsgs:nil
-                                                                    title:@"Server is busy."
+                                                                    title:@"Server undergoing maintenance."
                                                          alertDescription:[[NSAttributedString alloc] initWithString:@"\
-                                                                           The server is currently busy at the moment. Please try this again later."]
+The server is currently busy at the moment undergoing maintenance. Please try this again later."]
                                                                  topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                                               buttonTitle:@"Okay."
                                                              buttonAction:^{}
@@ -312,7 +312,7 @@ and deletions on other devices."
                                         [APP refreshTabs];
                                         NSAttributedString *attrBecameUnauthMessage =
                                         [PEUIUtils attributedTextWithTemplate:@"Well this is awkward.  While syncing your account, the server is asking for you \
-                                         to re-authenticate.\n\nTo re-authenticate, go to:\n\n%@."
+to re-authenticate.\n\nTo re-authenticate, go to:\n\n%@."
                                                                  textToAccent:@"Account \u2794 Re-authenticate"
                                                                accentTextFont:boldDescFont];
                                         [PEUIUtils showWarningAlertWithMsgs:nil
@@ -380,8 +380,7 @@ Enable offline mode if you are making many saves and you want them done instantl
   UIButton *exportBtn = [self makeExportButton];
   [PEUIUtils placeView:exportBtn below:changelogMsgPanel onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:30.0 hpadding:0.0];
   totalHeight += exportBtn.frame.size.height + 30.0;
-  UILabel *exportMsgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"From here you can export your Gas Jot data to files which you can then download from iTunes to your computer.\n\nTip: Before exporting, use the %@ button to \
-ensure this device has your latest Gas Jot data."
+  UILabel *exportMsgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"From here you can export your Gas Jot data to files which you can then download from iTunes to your computer.\n\nTip: Before exporting, use the %@ button to ensure this device has your latest Gas Jot data."
                                                                                        textToAccent:@"Download all changes"
                                                                                      accentTextFont:boldDescFont]
                                                          font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
@@ -527,12 +526,8 @@ ensure this device has your latest Gas Jot data."
                                                           object:nil
                                                         userInfo:nil];
       NSString *msg = @"\
-You have been logged out successfully. \
-Your remote account is no longer connected \
-to this device and your fuel purchase data \
-has been removed.\n\n\
-You can still use the app.  Your data will \
-simply be saved locally.";
+You have been logged out successfully. Your remote account is no longer connected to this device and your fuel purchase data \
+has been removed.\n\nYou can still use the app.  Your data will simply be saved locally.";
       [PEUIUtils showSuccessAlertWithMsgs:nil
                                     title:@"Logout successful."
                          alertDescription:[[NSAttributedString alloc] initWithString:msg]
@@ -563,9 +558,7 @@ simply be saved locally.";
   if (numUnsyncedEdits > 0) {
     [PEUIUtils showWarningConfirmAlertWithTitle:@"You have unsynced edits."
                                alertDescription:[[NSAttributedString alloc] initWithString:@"\
-You have unsynced edits.  If you log out, \
-they will be permanently deleted.\n\n\
-Are you sure you want to do continue?"]
+You have unsynced edits.  If you log out, they will be permanently deleted.\n\nAre you sure you want to do continue?"]
                                        topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                 okayButtonTitle:@"Yes.  Log me out."
                                okayButtonAction:^{ doLogout(); }

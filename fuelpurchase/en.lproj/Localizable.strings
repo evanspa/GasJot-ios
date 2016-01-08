@@ -103,30 +103,50 @@
 "savefplog.gallonprice-notprovided" = "Gallon price cannot be empty.";
 "savefplog.numgallons-negative" = "Number of gallons cannot be negative.";
 "savefplog.octane-negative" = "Octane cannot be negative.";
+"savefplog.user-not-exists" = "Your account appears to be closed.";
+"savefplog.vehicle-not-exists" = "The associated vehicle no longer exists on the server.";
+"savefplog.fuelstation-not-exists" = "The associated gas station no longer exists on the server.";
 "savefplog.gallonprice-negative" = "Gallon price cannot be negative.";
+"savefplog.odometer-notprovided" = "Odometer cannot be empty.";
 "savefplog.odometer-negative" = "Odometer cannot be negative.";
+"savefplog.odometer-not-numeric" = "Odometer must be a number.";
+"savefplog.octane-not-numeric" = "Octane must be a number.";
+"savefplog.numgallons-not-numeric" = "Number of gallons must be a number.";
+"savefplog.gallonprice-not-numeric" = "Gallon price must be a number.";
 
 /***************************************************************
  * 'Save Environment Log' error messages
  ***************************************************************/
 "savenvlog.logdate-notprovided" = "Log date cannot be empty.";
 "savenvlog.odometer-notprovided" = "Odometer cannot be empty.";
-"savenvlog.outside-temp-notprovided" = "Outside temperature cannot be empty.";
 "savenvlog.odometer-negative" = "Odometer cannot be negative.";
+"savenvlog.user-not-exists" = "Your account appears to be closed.";
+"savenvlog.vehicle-not-exists" = "The associated vehicle no longer exists on the server.";
+"savenvlog.odometer-not-numeric" = "Odometer must be a number.";
+"savenvlog.avg-mpg-not-numeric" = "Average MPG must be a number.";
+"savenvlog.avg-mpg-negative" = "Average MPG cannot be negative.";
+"savenvlog.avg-mph-not-numeric" = "Average MPH must be a number.";
+"savenvlog.avg-mph-negative" = "Average MPH cannot be negative.";
+"savenvlog.outside-temp-not-numeric" = "Outside temperature must be a number.";
 
 /***************************************************************
  * 'Save Fuel Station' error messages
  ***************************************************************/
 "savefuelstation.name-notprovided" = "Name cannot be empty.";
+"savefuelstation.user-not-exists" = "Your account appears to be closed.";
 "savefuelstation.name-contains-purplex" = "Name cannot contain purplex.";
+"savefuelstation.latitude-not-numeric" = "Latitude must be a number.";
+"savefuelstation.longitude-not-numeric" = "Longitude must be a number.";
 
 /***************************************************************
  * 'Save Vehicle' error messages
  ***************************************************************/
 "savevehicle.name-notprovided" = "Name cannot be empty.";
+"savevehicle.user-not-exists" = "Your account appears to be closed.";
 "savevehicle.vehicle-already-exists" = "Vehicle name already in use.";
 "savevehicle.vehicle-contains-red" = "Vehicle name cannot contain red.";
 "savevehicle.vehicle-contains-purple" = "Vehicle name cannot contain purple.";
+"savevehicle.vehicle-cannot-be-both-diesel-octane" = "Vehicle cannot be both diesel and have a default octane.";
 
 /***************************************************************
  * 'Save User' error messages
@@ -138,7 +158,6 @@
 "saveusr.confirm-password-notprovided" = "Please re-enter your chosen password in the 'Confirm Password' field.";
 "saveusr.confirm-password-onlyprovided" = "Please enter your chosen password in both the 'Password' and 'Confirm Password' fields.";
 "saveusr.password-confirm-password-dont-match" = "Passwords do not match.";
-
 
 /***************************************************************
  * 'Sign In' error messages

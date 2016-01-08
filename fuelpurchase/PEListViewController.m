@@ -655,7 +655,7 @@ It has now been removed from this device."]
                                                                            NSDate *retryAfter) {
         [errorsForDelete addObject:@[[NSString stringWithFormat:@"%@ not deleted.", recordTitle],
                                      [NSNumber numberWithBool:NO],
-                                     @[[NSString stringWithFormat:@"Server busy.  Retry after: %@", retryAfter]],
+                                     @[[NSString stringWithFormat:@"Server undergoing maintenance.  Try again later."]],
                                      [NSNumber numberWithBool:YES],
                                      [NSNumber numberWithBool:NO],
                                      [NSNull null],

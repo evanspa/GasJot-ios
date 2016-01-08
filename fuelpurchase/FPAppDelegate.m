@@ -29,6 +29,7 @@
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 #import <PEFuelPurchase-Model/FPCoordinatorDaoImpl.h>
 #import <PEFuelPurchase-Model/FPUser.h>
+#import <PEFuelPurchase-Model/FPErrorDomainsAndCodes.h>
 #import <PELocal-Data/PEUserCoordinatorDao.h>
 #import <PEHateoas-Client/HCCharset.h>
 #import "FPUtils.h"
@@ -234,6 +235,7 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [self initializeStoreCoordinator];
   [self initializeNotificationObserving];
   [self initializeGlobalAppearanceSettings];
+  [self initializeErrMessageCollections];
   self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
   _uitoolkit = [FPAppDelegate defaultUIToolkit];
   _screenToolkit = [[FPScreenToolkit alloc] initWithCoordinatorDao:_coordDao
@@ -410,6 +412,63 @@ shouldSelectViewController:(UIViewController *)viewController {
   }
 }
 
+- (void)initializeErrMessageCollections {
+  _signInErrMessages = @[@[@(FPSignInEmailNotProvided),    @"signin.email-notprovided"],
+                         @[@(FPSignInInvalidEmail),        @"signin.email-invalid"],
+                         @[@(FPSignInPasswordNotProvided), @"signin.password-notprovided"],
+                         @[@(FPSignInInvalidCredentials),  @"signin.credentials-invalid"]];
+  
+  _saveUserErrMessages = @[@[@(FPSaveUsrInvalidEmail),                     @"saveusr.email-invalid"],
+                           @[@(FPSaveUsrEmailNotProvided),                 @"saveusr.email-notprovided"],
+                           @[@(FPSaveUsrPasswordNotProvided),              @"saveusr.password-notprovided"],
+                           @[@(FPSaveUsrEmailAlreadyRegistered),           @"saveusr.email-already-registered"],
+                           @[@(FPSaveUsrConfirmPasswordNotProvided),       @"saveusr.confirm-password-notprovided"],
+                           @[@(FPSaveUsrConfirmPasswordOnlyProvided),      @"saveusr.confirm-password-onlyprovided"],
+                           @[@(FPSaveUsrPasswordConfirmPasswordDontMatch), @"saveusr.password-confirm-password-dont-match"]];
+  
+  _saveVehicleErrMessages = @[@[@(FPSaveVehicleNameNotProvided),             @"savevehicle.name-notprovided"],
+                              @[@(FPSaveVehicleUserDoesNotExist),            @"savevehicle.user-not-exists"],
+                              @[@(FPSaveVehicleVehicleAlreadyExists),        @"savevehicle.vehicle-already-exists"],
+                              @[@(FPSaveVehicleNameContainsRed),             @"savevehicle.vehicle-contains-red"],
+                              @[@(FPSaveVehicleNameContainsPurple),          @"savevehicle.vehicle-contains-purple"],
+                              @[@(FPSaveVehicleCannotBeBothDieselAndOctane), @"savevehicle.vehicle-cannot-be-both-diesel-octane"]];
+  
+  _saveFuelstationErrMessages = @[@[@(FPSaveFuelStationNameNotProvided),     @"savefuelstation.name-notprovided"],
+                                  @[@(FPSaveFuelStationUserDoesNotExist),    @"savefuelstation.user-not-exists"],
+                                  @[@(FPSaveFuelStationNameContainsPurplex), @"savefuelstation.name-contains-purplex"],
+                                  @[@(FPSaveFuelStationLatitudeNotNumeric),  @"savefuelstation.latitude-not-numeric"],
+                                  @[@(FPSaveFuelStationLongitudeNotNumeric), @"savefuelstation.longitude-not-numeric"]];
+  
+  _saveFplogErrMessages = @[@[@(FPSaveFuelPurchaseLogPurchaseDateNotProvided), @"savefplog.purchasedate-notprovided"],
+                            @[@(FPSaveFuelPurchaseLogNumGallonsNotProvided),   @"savefplog.numgallons-notprovided"],
+                            @[@(FPSaveFuelPurchaseLogOctaneNotProvided),       @"savefplog.octane-notprovided"],
+                            @[@(FPSaveFuelPurchaseLogGallonPriceNotProvided),  @"savefplog.gallonprice-notprovided"],
+                            @[@(FPSaveFuelPurchaseLogNumGallonsNegative),      @"savefplog.numgallons-negative"],
+                            @[@(FPSaveFuelPurchaseLogOctaneNegative),          @"savefplog.octane-negative"],
+                            @[@(FPSaveFuelPurchaseLogUserDoesNotExist),        @"savefplog.user-not-exists"],
+                            @[@(FPSaveFuelPurchaseLogVehicleDoesNotExist),     @"savefplog.vehicle-not-exists"],
+                            @[@(FPSaveFuelPurchaseLogFuelStationDoesNotExist), @"savefplog.fuelstation-not-exists"],
+                            @[@(FPSaveFuelPurchaseLogGallonPriceNegative),     @"savefplog.gallonprice-negative"],
+                            @[@(FPSaveFuelPurchaseLogOdometerNotProvided),     @"savefplog.odometer-notprovided"],
+                            @[@(FPSaveFuelPurchaseLogOdometerNegative),        @"savefplog.odometer-negative"],
+                            @[@(FPSaveFuelPurchaseLogOdometerNotNumeric),      @"savefplog.odometer-not-numeric"],
+                            @[@(FPSaveFuelPurchaseLogOctaneNotNumeric),        @"savefplog.octane-not-numeric"],
+                            @[@(FPSaveFuelPurchaseLogNumGallonsNotNumeric),    @"savefplog.numgallons-not-numeric"],
+                            @[@(FPSaveFuelPurchaseLogGallonPriceNotNumeric),   @"savefplog.gallonprice-not-numeric"]];
+  
+  _saveEnvlogErrMessages = @[@[@(FPSaveEnvironmentLogDateNotProvided),       @"savenvlog.logdate-notprovided"],
+                             @[@(FPSaveEnvironmentLogOdometerNotProvided),   @"savenvlog.odometer-notprovided"],
+                             @[@(FPSaveEnvironmentLogOutsideTempNotNumeric), @"savenvlog.outside-temp-not-numeric"],
+                             @[@(FPSaveEnvironmentLogOdometerNegative),      @"savenvlog.odometer-negative"],
+                             @[@(FPSaveEnvironmentLogUserDoesNotExist),      @"savenvlog.user-not-exists"],
+                             @[@(FPSaveEnvironmentLogVehicleDoesNotExist),   @"savenvlog.vehicle-not-exists"],
+                             @[@(FPSaveEnvironmentLogOdometerNotNumeric),    @"savenvlog.odometer-not-numeric"],
+                             @[@(FPSaveEnvironmentLogAvgMpgNotNumeric),      @"savenvlog.avg-mpg-not-numeric"],
+                             @[@(FPSaveEnvironmentLogAvgMpgNegative),        @"savenvlog.avg-mpg-negative"],
+                             @[@(FPSaveEnvironmentLogAvgMphNotNumeric),      @"savenvlog.avg-mph-not-numeric"],
+                             @[@(FPSaveEnvironmentLogAvgMphNegative),        @"savenvlog.avg-mph-negative"]];
+}
+
 - (void)initializeStoreCoordinator {
   NSBundle *mainBundle = [NSBundle mainBundle];
   NSFileManager *fileMgr = [NSFileManager defaultManager];
@@ -451,7 +510,7 @@ shouldSelectViewController:(UIViewController *)viewController {
                                             environmentLogResMtVersion:restServiceMtVersion
                                           priceEventStreamResMtVersion:restServiceMtVersion
                                                      authTokenDelegate:self
-                                              allowInvalidCertificates:YES];
+                                              allowInvalidCertificates:NO];
   [_coordDao initializeDatabaseWithError:[FPUtils localSaveErrorHandlerMaker]()];
 }
 

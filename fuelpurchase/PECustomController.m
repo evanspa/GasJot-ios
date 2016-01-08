@@ -18,6 +18,7 @@
 #pragma mark - Dynamic Type Support
 
 - (void)changeTextSize:(NSNotification *)notification {
+  _needsRepaint = YES;
   [self viewDidAppear:YES];
 }
 
@@ -69,8 +70,12 @@
   void (^placeOnTop)(void) = ^{
     CGFloat vpadding = 0.0;
     if (self.navigationController && !self.navigationController.navigationBar.hidden) {
-      vpadding = ([UIApplication sharedApplication].statusBarFrame.size.height +
-                    self.navigationController.navigationBar.frame.size.height);
+      /* 20.0 = statusBarFrame height.  The reason for hard-coding it and not using
+       the actual height is because when there's a phone call or hotspot connection
+       active, the statusBarFrame's height grows to 40.0; but since we don't care about
+       that, we just have to hardcode to 20.0
+       */
+      vpadding = (20.0 + self.navigationController.navigationBar.frame.size.height);
     }
     [PEUIUtils placeView:_displayPanel
                  atTopOf:self.view

@@ -6,7 +6,9 @@
 //  Copyright (c) 2015 Paul Evans. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+@import CoreLocation;
+@import Foundation;
+
 #import <JBChartView/JBLineChartView.h>
 #import "PEUIDefs.h"
 #import "JBChartTooltipTipView.h"
@@ -18,6 +20,13 @@ typedef void (^FPEnableUserInteractionBlk)(BOOL);
 FOUNDATION_EXPORT NSInteger const FPContentPanelTopPadding;
 
 @interface FPUIUtils : NSObject
+
+#pragma mark - Location Helpers
+
++ (void)actionWithCurrentLocationBlk:(void(^)(CLLocation *))currentLocationBlk
+            locationNeededReasonText:(NSString *)locationNeededReasonText
+                    parentController:(UIViewController *)parentController
+                          parentView:(UIView *)parentView;
 
 #pragma mark - Chart Helpers
 

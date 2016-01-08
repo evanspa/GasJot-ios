@@ -429,9 +429,9 @@ edits, the Gas Jot server is asking for you to authenticate again.  Sorry about 
                                      dispatch_async(dispatch_get_main_queue(), ^{
                                        [HUD hide:YES];
                                        [PEUIUtils showWaitAlertWithMsgs:nil
-                                                                  title:@"Server Busy."
+                                                                  title:@"Server undergoing maintenance."
                                                        alertDescription:[[NSAttributedString alloc] initWithString:@"We apologize, but the Gas Jot server is currently \
-                                                                         busy.  Please try logging in a little later."]
+busy undergoing maintenance.  Please try logging in a little later."]
                                                                topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                                             buttonTitle:@"Okay."
                                                            buttonAction:^{

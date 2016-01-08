@@ -6,7 +6,9 @@
 //  Copyright © 2015 Paul Evans. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+@import UIKit;
+@import CoreLocation;
+
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
@@ -17,6 +19,7 @@
 #pragma mark - Initializers
 
 - (id)initWithStoreCoordinator:(id<FPCoordinatorDao>)coordDao
+               currentLocation:(CLLocation *)currentLocation
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit;
 

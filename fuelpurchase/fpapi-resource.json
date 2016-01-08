@@ -2,4 +2,5 @@
   "users": { "href": "https://www.jotyourself.com/gasjot/d/users" },
   "login": { "href": "https://www.jotyourself.com/gasjot/d/login" },
   "light-login": { "href": "https://www.jotyourself.com/gasjot/d/light-login" },
-  "send-password-reset-email" : { "href": "https://www.jotyourself.com/gasjot/d/send-password-reset-email" }}}
+  "send-password-reset-email" : { "href": "https://www.jotyourself.com/gasjot/d/send-password-reset-email" },
+  "price-event-stream": { "href": "https://www.jotyourself.com/gasjot/d/price-stream" }}}

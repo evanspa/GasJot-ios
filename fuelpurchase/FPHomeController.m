@@ -300,20 +300,25 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
                                              textColor:[UIColor whiteColor]
                           disabledStateBackgroundColor:nil
                                 disabledStateTextColor:nil
-                                       verticalPadding:23.0
+                                       verticalPadding:28.0
                                      horizontalPadding:50.0
                                           cornerRadius:0.0
                                                 target:nil
                                                 action:nil];
   [PEUIUtils setFrameWidthOfView:nearbyGasButton ofWidth:1.0 relativeTo:self.view];
   [nearbyGasButton bk_addEventHandler:^(id sender) {
-    [self presentViewController:[PEUIUtils navigationControllerWithController:[[FPLocateNearbyGasController alloc] initWithStoreCoordinator:_coordDao
-                                                                                                                                  uitoolkit:_uitoolkit
-                                                                                                                              screenToolkit:_screenToolkit]
-                                                          navigationBarHidden:NO]
-                       animated:YES
-                     completion:nil];
-    
+    [FPUIUtils actionWithCurrentLocationBlk:^(CLLocation *currentLocation) {
+      [self presentViewController:[PEUIUtils navigationControllerWithController:[[FPLocateNearbyGasController alloc] initWithStoreCoordinator:_coordDao
+                                                                                                                              currentLocation:currentLocation
+                                                                                                                                    uitoolkit:_uitoolkit
+                                                                                                                                screenToolkit:_screenToolkit]
+                                                            navigationBarHidden:NO]
+                         animated:YES
+                       completion:nil];
+    }
+                   locationNeededReasonText:@"To find nearby gas stations"
+                           parentController:self
+                                 parentView:self.tabBarController.view];
   } forControlEvents:UIControlEventTouchUpInside];
   return nearbyGasButton;
 }
@@ -323,17 +328,20 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
   NSString *vehicleName = [vehicle name];
   UIFont *buttonFont = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
   vehicleName = [PEUIUtils truncatedTextForText:vehicleName font:buttonFont availableWidth:self.view.frame.size.width * 0.70];
-  UIButton *statsBtn = [PEUIUtils buttonWithKey:[NSString stringWithFormat:@"%@ stats", vehicleName]
-                                           font:buttonFont
-                                backgroundColor:[UIColor peterRiverColor]
-                                      textColor:[UIColor whiteColor]
-                   disabledStateBackgroundColor:nil
-                         disabledStateTextColor:nil
-                                verticalPadding:17.0
-                              horizontalPadding:50.0
-                                   cornerRadius:0.0
-                                         target:nil
-                                         action:nil];
+  UIButton *statsBtn = [PEUIUtils buttonWithAttributedTitle:[PEUIUtils attributedTextWithTemplate:@"%@ stats"
+                                                                                templateTextColor:[UIColor whiteColor]
+                                                                                 templateTextFont:buttonFont
+                                                                                     textToAccent:vehicleName
+                                                                                   accentTextFont:[PEUIUtils italicFontForTextStyle:UIFontTextStyleBody]
+                                                                                  accentTextColor:[UIColor whiteColor]]
+                                   fontForHeightCalculation:buttonFont
+                                            backgroundColor:[UIColor peterRiverColor]
+                               disabledStateBackgroundColor:nil
+                                            verticalPadding:22.0
+                                          horizontalPadding:50.0
+                                               cornerRadius:0.0
+                                                     target:nil
+                                                     action:nil];
   [PEUIUtils setFrameWidthOfView:statsBtn ofWidth:1.0 relativeTo:self.view];
   [PEUIUtils addDisclosureIndicatorToButton:statsBtn];
   [statsBtn bk_addEventHandler:^(id sender) {
@@ -350,7 +358,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
                                          textColor:[UIColor whiteColor]
                       disabledStateBackgroundColor:nil
                             disabledStateTextColor:nil
-                                   verticalPadding:17.0
+                                   verticalPadding:22.0
                                  horizontalPadding:50.0
                                       cornerRadius:0.0
                                             target:nil
@@ -387,7 +395,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
               moreButtonControllerBlk:(UIViewController *(^)(void))moreButtonControllerBlk
                           borderColor:(UIColor *)borderColor
                             resultBlk:(void(^)(NSArray *))resultBlk {
-  UIView *panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:1.0 relativeToView:self.view];
+  UIView *panel = [PEUIUtils panelWithWidthOf:1.0 andHeightOf:0.0 relativeToView:self.view];
   [panel setBackgroundColor:[UIColor whiteColor]];
   UILabel *chartHeader = [PEUIUtils labelWithKey:title
                                             font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
@@ -413,11 +421,13 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
     [[self navigationController] pushViewController:moreButtonControllerBlk()
                                            animated:YES];
   } forControlEvents:UIControlEventTouchUpInside];
+  CGFloat totalHeight = 0.0;
   [PEUIUtils placeView:chartHeader
                atTopOf:panel
          withAlignment:PEUIHorizontalAlignmentTypeCenter
-              vpadding:3.0
+              vpadding:10.0
               hpadding:0.0];
+  totalHeight += chartHeader.frame.size.height + 10.0;
   [PEUIUtils placeView:chart
                  below:chartHeader
                   onto:panel
@@ -425,7 +435,9 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
 alignmentRelativeToView:self.view
               vpadding:4.0
               hpadding:0.0];
+  totalHeight += chart.frame.size.height + 4.0;
   UIView *addlLabelsView = nil;
+  CGFloat addlLabelsViewHeight = 0.0;
   if (addlLabelsViewBlk) {
     addlLabelsView = addlLabelsViewBlk();
     [PEUIUtils placeView:addlLabelsView
@@ -435,6 +447,7 @@ alignmentRelativeToView:self.view
  alignmentRelativeToView:panel
                 vpadding:0.0
                 hpadding:5.0];
+    addlLabelsViewHeight = addlLabelsView.frame.size.height + 0.0;
   }
   [PEUIUtils placeView:moreBtn
                  below:chart
@@ -443,22 +456,15 @@ alignmentRelativeToView:self.view
 alignmentRelativeToView:chart
               vpadding:5.0
               hpadding:5.0];
-  CGFloat moreBtnHeight = moreBtn.frame.size.height;
-  CGFloat addlLabelsPanelHeight = 0.0;
-  if (addlLabelsView != nil) {
-    addlLabelsPanelHeight = addlLabelsView.frame.size.height;
+  CGFloat moreBtnHeight = moreBtn.frame.size.height + 5.0;
+  if (addlLabelsViewHeight > moreBtnHeight) {
+    totalHeight += addlLabelsViewHeight;
+  } else {
+    totalHeight += moreBtnHeight;
   }
-  CGFloat addlHeight = moreBtnHeight > addlLabelsPanelHeight ? (moreBtnHeight + 3.0) : addlLabelsPanelHeight;
-  [PEUIUtils setFrameHeight:(chartHeader.frame.size.height +
-                             3.0 +
-                             chart.frame.size.height +
-                             0.0 +
-                             addlHeight +
-                             5.0 +
-                             7.5)
-                     ofView:panel];
+  totalHeight += 10.0; // to give some bottom-padding
+  [PEUIUtils setFrameHeight:totalHeight ofView:panel];
   [panel addTopBorderWithColor:borderColor andWidth:3.0];
-  [panel addBottomBorderWithColor:borderColor andWidth:3.0];
   resultBlk(@[panel, chart]);
 }
 
@@ -634,7 +640,7 @@ alignmentRelativeToView:chart
                  below:nearbyGasBtn
                   onto:contentPanel
          withAlignment:PEUIHorizontalAlignmentTypeCenter
-              vpadding:10.0
+              vpadding:12.0
               hpadding:0.0];
   totalHeight += allStatsBtn.frame.size.height + 10.0;
   UIView *belowView = allStatsBtn;
@@ -644,10 +650,10 @@ alignmentRelativeToView:chart
                    below:allStatsBtn
                     onto:contentPanel
            withAlignment:PEUIHorizontalAlignmentTypeCenter
-                vpadding:10.0
+                vpadding:12.0
                 hpadding:0.0];
     totalHeight += vehStatsBtn.frame.size.height + 10.0;
-    UILabel *vehBtnMsgLabel = [PEUIUtils labelWithKey:@"(this is your most recently used vehicle)"
+    UILabel *vehBtnMsgLabel = [PEUIUtils labelWithKey:@"(your most recently used vehicle)"
                                                  font:[PEUIUtils italicFontForTextStyle:UIFontTextStyleCaption1]
                                       backgroundColor:[UIColor clearColor]
                                             textColor:[UIColor darkGrayColor]
@@ -693,7 +699,7 @@ alignmentRelativeToView:chart
                         chartTitleTag:FPHomePriceOfGasChartTitleTag
                     addlLabelsViewBlk:^UIView *(void) { return [self makePricePerGallonDataTableWithValues:dummyVals];}
               moreButtonControllerBlk:moreBtnCtrlBlk
-                          borderColor:[UIColor whiteColor]
+                          borderColor:[UIColor cloudsColor]
                             resultBlk:^(NSArray *section) {
                               pricePerGallonPanel = section[0];
                               _priceOfGasChart = section[1];
@@ -713,7 +719,7 @@ alignmentRelativeToView:chart
                         chartTitleTag:FPHomeSpentOnGasChartTitleTag
                     addlLabelsViewBlk:^UIView *(void) { return [self makeSpentOnGasDataTableWithValues:dummyVals];}
               moreButtonControllerBlk:^UIViewController *{ return [_screenToolkit newSpentOnGasStatsScreenMaker](_user); }
-                          borderColor:[UIColor whiteColor]
+                          borderColor:[UIColor cloudsColor]
                             resultBlk:^(NSArray *section) {
                               spentOnGasPanel = section[0];
                               _spentOnGasChart = section[1];
@@ -849,15 +855,21 @@ alignmentRelativeToView:self.view
     [loginMsgPanel setBackgroundColor:[UIColor cloudsColor]];
     [[loginMsgPanel layer] setCornerRadius:5.0];
     [PEUIUtils placeView:loginMsgLabel inMiddleOf:loginMsgPanel withAlignment:PEUIHorizontalAlignmentTypeCenter hpadding:0.0];
-    [PEUIUtils placeView:loginMsgPanel atBottomOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:(loginArrowImgView.frame.size.height + 3.0)/*175.0*/ hpadding:12.0];
+    [PEUIUtils placeView:loginMsgPanel
+              atBottomOf:contentPanel
+           withAlignment:PEUIHorizontalAlignmentTypeRight
+                vpadding:(loginArrowImgView.frame.size.height + 3.0)
+                hpadding:12.0];
     return loginMsgPanel;
   };
   UIView *loginMsgPanel = createAndPlaceLoginMsgPanel(0.85);
-  /*if (loginMsgPanel.frame.origin.y <= (panel.frame.origin.y + panel.frame.size.height)) {
-    [loginMsgPanel removeFromSuperview];
-    loginMsgPanel = createAndPlaceLoginMsgPanel(0.85);
-  }*/
-  [PEUIUtils placeView:loginArrowImgView atBottomOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:0.0 hpadding:25.0];
+ 
+  CGFloat tabWidth = self.view.frame.size.width / 5;
+  [PEUIUtils placeView:loginArrowImgView
+            atBottomOf:contentPanel
+         withAlignment:PEUIHorizontalAlignmentTypeRight
+              vpadding:0.0
+              hpadding:((tabWidth / 2) - 5.0)];
   UILabel *jotBtnMsgLabel = [PEUIUtils labelWithKey:@"You can create any type of record from the Jot button at any time."
                                                font:[UIFont preferredFontForTextStyle:UIFontTextStyleCaption1]
                                     backgroundColor:[UIColor clearColor]
@@ -871,7 +883,11 @@ alignmentRelativeToView:self.view
   UIImageView *jotBtnArrowImgView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"arrow-2"]];
   [PEUIUtils placeView:jotBtnMsgLabel inMiddleOf:jotBtnMsgPanel withAlignment:PEUIHorizontalAlignmentTypeCenter hpadding:0.0];
   [PEUIUtils placeView:jotBtnMsgPanel atBottomOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:(jotBtnArrowImgView.frame.size.height + 3.0) hpadding:10.0];
-  [PEUIUtils placeView:jotBtnArrowImgView atBottomOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:0.0 hpadding:90.0];
+  [PEUIUtils placeView:jotBtnArrowImgView
+            atBottomOf:contentPanel
+         withAlignment:PEUIHorizontalAlignmentTypeRight
+              vpadding:0.0
+              hpadding:(tabWidth + (tabWidth / 2))-5];
   
   UILabel *introMsgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"%@ Create a Vehicle"
                                                                                       textToAccent:@"Step 1:"
@@ -914,7 +930,19 @@ alignmentRelativeToView:self.view
   UIView *panel = [PEUIUtils panelWithColumnOfViews:@[introMsgLabel, intro2MsgLabel, createVehicleBtn]
                         verticalPaddingBetweenViews:15.0 //17.5
                                      viewsAlignment:PEUIHorizontalAlignmentTypeCenter];
-  [PEUIUtils placeView:panel above:loginMsgPanel onto:contentPanel withAlignment:PEUIHorizontalAlignmentTypeCenter alignmentRelativeToView:contentPanel vpadding:25.0 hpadding:0.0];
+  CGFloat availableVerticalSpace = loginMsgPanel.frame.origin.y;
+  [PEUIUtils placeView:panel
+                 above:loginMsgPanel
+                  onto:contentPanel
+         withAlignment:PEUIHorizontalAlignmentTypeCenter
+alignmentRelativeToView:contentPanel
+              vpadding:0.0
+              hpadding:0.0];
+  [PEUIUtils setFrameY:[PEUIUtils YForHeight:availableVerticalSpace
+                               withAlignment:PEUIVerticalAlignmentTypeMiddle
+                              relativeToView:panel
+                                    vpadding:0.0]
+                ofView:panel];
   return @[contentPanel, @(NO), @(YES)];
 }
 
