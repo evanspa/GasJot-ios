@@ -104,4 +104,8 @@ FOUNDATION_EXPORT NSInteger const FPJotButtonTag;
 
 - (BOOL)locationServicesDenied;
 
+- (NSInteger)priceSearchDistanceWithin;
+
+- (NSInteger)priceSearchMaxResults;
+
 @end

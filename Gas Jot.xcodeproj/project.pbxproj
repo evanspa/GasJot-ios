@@ -457,18 +457,18 @@
 		18D6DFB217F68005006B300D /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				CA9E39A41C40018A009A91DE /* Launch Screen.storyboard */,
 				1899260D18B3071600B61772 /* simulation */,
-				18CC2D0117F68117009DF2CE /* en.lproj */,
-				18D6DFBD17F68005006B300D /* Images.xcassets */,
-				18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */,
-				183E13A418009F9F009E9085 /* fpapi-resource.json */,
-				18D6DFB317F68005006B300D /* Gas Jot-Info.plist */,
-				18D6DFB417F68005006B300D /* InfoPlist.strings */,
-				18D6DFB717F68005006B300D /* main.m */,
 				18CC2CF217F680AC009DF2CE /* FPNames.h */,
+				183E13A418009F9F009E9085 /* fpapi-resource.json */,
+				18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */,
+				18CC2D0117F68117009DF2CE /* en.lproj */,
 				18CC2CF317F680AC009DF2CE /* FPNames.m */,
+				18D6DFB717F68005006B300D /* main.m */,
 				18D6DFB917F68005006B300D /* Gas Jot-Prefix.pch */,
+				18D6DFB317F68005006B300D /* Gas Jot-Info.plist */,
+				CA9E39A41C40018A009A91DE /* Launch Screen.storyboard */,
+				18D6DFBD17F68005006B300D /* Images.xcassets */,
+				18D6DFB417F68005006B300D /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";

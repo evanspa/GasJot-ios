@@ -185,6 +185,22 @@ enable your data records to be synced to Gas Jot's central server so you can acc
               vpadding:4.0
               hpadding:0.0];
   totalHeight += instructionPanel.frame.size.height + 4.0;
+  UILabel *emailSensitivityLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"Your email address will %@ be shared with anybody, and we will not spam you with junk mail."
+                                                                                              textToAccent:@"NOT"
+                                                                                            accentTextFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline]]
+                                                                font:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]
+                                                     backgroundColor:[UIColor clearColor]
+                                                           textColor:[UIColor darkGrayColor]
+                                                 verticalTextPadding:3.0
+                                                          fitToWidth:(contentPanel.frame.size.width - leftPadding - 10.0)];
+  [PEUIUtils placeView:emailSensitivityLabel
+                 below:instructionPanel
+                  onto:contentPanel
+         withAlignment:PEUIHorizontalAlignmentTypeLeft
+alignmentRelativeToView:contentPanel
+              vpadding:10.0
+              hpadding:leftPadding];
+  totalHeight += emailSensitivityLabel.frame.size.height + 10.0;
   [PEUIUtils setFrameHeight:totalHeight ofView:contentPanel];
   
   [_disposable dispose];

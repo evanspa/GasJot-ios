@@ -86,6 +86,8 @@ NSString * const FPAccountClosedReasonHeaderNameKey      = @"FP account closed r
 NSString * const FPTimeoutForCoordDaoMainThreadOpsKey    = @"FP timeout for main thread coordinator dao operations";
 NSString * const FPTimeIntervalForFlushToRemoteMasterKey = @"FP time interval for flush to remote master";
 NSString * const FPIsUserLoggedInIndicatorKey            = @"FP is user logged in indicator";
+NSString * const FPPriceSearchDistanceWithinKey          = @"FP price search distance within";
+NSString * const FPPriceSearchMaxResultsKey              = @"FP price search max results";
 
 // Tab-bar controller indexes
 typedef NS_ENUM(NSInteger, FPAppTabBarIndex) {
@@ -181,6 +183,14 @@ NSString * const FPAppKeychainService = @"fp-app";
 
 - (BOOL)locationServicesDenied {
   return [[NSUserDefaults standardUserDefaults] boolForKey:FPLocationServicesDeniedUserDefaultsKey];
+}
+
+- (NSInteger)priceSearchDistanceWithin {
+  return intBundleVal(FPPriceSearchDistanceWithinKey);
+}
+
+- (NSInteger)priceSearchMaxResults {
+  return intBundleVal(FPPriceSearchMaxResultsKey);
 }
 
 #pragma mark - Location Manager Delegate

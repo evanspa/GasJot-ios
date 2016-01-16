@@ -23,7 +23,7 @@
 	<key>CFBundleVersion</key>
 	<string>1.4.3</string>
 	<key>FP Authentication Strength for Login Token</key>
-	<real>0.29999999999999999</real>
+	<real>0.3</real>
 	<key>FP Authentication scheme</key>
 	<string>fp-auth</string>
 	<key>FP Authentication token param name</key>
@@ -56,6 +56,10 @@
 	<integer>2</integer>
 	<key>FP timeout for main thread coordinator dao operations</key>
 	<integer>60</integer>
+	<key>FP price search distance within</key>
+	<integer>80467</integer>
+	<key>FP price search max results</key>
+	<integer>25</integer>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>

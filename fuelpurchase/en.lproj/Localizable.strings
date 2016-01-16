@@ -132,9 +132,9 @@
 /***************************************************************
  * 'Save Fuel Station' error messages
  ***************************************************************/
-"savefuelstation.name-notprovided" = "Name cannot be empty.";
+"savefuelstation.name-notprovided" = "Nickname cannot be empty.";
 "savefuelstation.user-not-exists" = "Your account appears to be closed.";
-"savefuelstation.name-contains-purplex" = "Name cannot contain purplex.";
+"savefuelstation.name-contains-purplex" = "Nickname cannot contain purplex.";
 "savefuelstation.latitude-not-numeric" = "Latitude must be a number.";
 "savefuelstation.longitude-not-numeric" = "Longitude must be a number.";
 

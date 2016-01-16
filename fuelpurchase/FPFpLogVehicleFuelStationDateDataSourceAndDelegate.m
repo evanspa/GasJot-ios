@@ -83,7 +83,7 @@ displayDisclosureIndicators:(BOOL)displayDisclosureIndicators
     case 1:  // fuel station
       //return 50;
       return [PEUIUtils sizeOfText:@"" withFont:[PEUIUtils boldFontForTextStyle:UIFontTextStyleBody]].height +
-      _uitoolkit.verticalPaddingForButtons + 15.0;
+      _uitoolkit.verticalPaddingForButtons + 20.0;
       break;
     default: // log date
       //return 45;
@@ -165,7 +165,8 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
                                   withVerticalPadding:0.0
                                     horizontalPadding:10.0
                                       withFuelstation:_selectedFuelStation
-                                            uitoolkit:_uitoolkit];
+                                            uitoolkit:_uitoolkit
+                                    locationFormatter:_screenToolkit.locationFormatter];
       } else {
         [[cell detailTextLabel] setText:@"(create gas station)"];
       }

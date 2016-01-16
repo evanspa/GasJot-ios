@@ -12,6 +12,7 @@
 #import "PEListViewController.h"
 #import "PEAddViewEditController.h"
 #import <PEObjc-Commons/PEUIUtils.h>
+#import <FormatterKit/TTTLocationFormatter.h>
 
 typedef UIViewController * (^FPUnauthScreenMaker)(void);
 
@@ -28,6 +29,8 @@ typedef UIViewController * (^FPAuthScreenMaker)(id);
 #pragma mark - Properties
 
 @property (readonly, nonatomic) PEUIToolkit *uitoolkit;
+
+@property (readonly, nonatomic) TTTLocationFormatter *locationFormatter;
 
 #pragma mark - Generic Screens
 

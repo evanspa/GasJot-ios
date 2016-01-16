@@ -3,4 +3,4 @@
   "login": { "href": "http://localhost/gasjot/d/login" },
   "light-login": { "href": "http://localhost/gasjot/d/light-login" },
   "send-password-reset-email" : { "href": "http://localhost/gasjot/d/send-password-reset-email" },
-  "price-event-stream": { "href": "http://localhost/gasjot/d/price-event-stream" }}}
+  "price-event-stream": { "href": "http://localhost/gasjot/d/price-stream" }}}

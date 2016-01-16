@@ -8,6 +8,7 @@
 
 #import "FPPanelToolkit.h"
 @import Contacts;
+@import AddressBook;
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/PEUtils.h>
 #import "FPFuelStationCoordinatesTableDataSource.h"
@@ -1175,7 +1176,7 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
            withAlignment:PEUIHorizontalAlignmentTypeLeft
                 vpadding:10.0
                 hpadding:0.0];
-    totalHeight = fuelstationDataPanel.frame.size.height + 10.0;
+    totalHeight += fuelstationDataPanel.frame.size.height + 10.0;
     UITableView *coordinatesTableView = [self placeCoordinatesTableOntoFuelstationPanel:contentPanel
                                                                             fuelstation:fuelstation
                                                                               belowView:fuelstationDataPanel
@@ -1278,7 +1279,8 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                           defaultFsTypeBlk:(FPFuelStationType *(^)(void))defaultFsTypeBlk {
   return ^ UIView * (PEAddViewEditController *parentViewController) {
     UIView *parentView = [parentViewController view];
-    FPFuelstationTypeDsDelegate *fsTypeDs = (FPFuelstationTypeDsDelegate *)[(UITableView *)[parentView viewWithTag:FPFuelStationTagType] dataSource];
+    FPFuelstationTypeDsDelegate *fsTypeDs =
+      (FPFuelstationTypeDsDelegate *)[(UITableView *)[parentView viewWithTag:FPFuelStationTagType] dataSource];
     FPFuelStationType *fsType;
     if (fsTypeDs) {
       fsType = [fsTypeDs selectedFsType];
@@ -1355,13 +1357,10 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
     [useCurrentLocationBtn setTag:FPFuelStationTagUseCurrentLocation];
     [useCurrentLocationBtn bk_addEventHandler:^(id sender) {
       [parentViewController.view endEditing:YES];
-      [FPUIUtils actionWithCurrentLocationBlk:^(CLLocation *currentLocation2) {
-        
-        //[ds setLatitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].latitude]];
-        //[ds setLongitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].longitude]];
-        
-        CLLocation *currentLocation = [[CLLocation alloc] initWithLatitude:ds.latitude.doubleValue longitude:ds.longitude.doubleValue];
-        
+      [FPUIUtils actionWithCurrentLocationBlk:^(CLLocation *currentLocation) {
+        [ds setLatitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].latitude]];
+        [ds setLongitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].longitude]];
+        [coordinatesTableView reloadData];
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:parentView animated:YES];
         hud.labelText = @"Looking up address...";
         CLGeocoder *geocoder = [[CLGeocoder alloc] init];
@@ -1378,22 +1377,17 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                                               relativeToView:[parentViewController parentViewForAlerts]];
                          } else {
                            if ([placemarks count] > 0) {
-                             NSLog(@"pm - 0");
                              CLPlacemark *placemark = placemarks[0];
-                             NSDictionary *addressDict = placemark.addressDictionary;
-                             if (addressDict) {
-                               NSLog(@"pm - dict: %@", addressDict);
-                               NSLog(@"CNPostalAddressStreetKey: %@", CNPostalAddressStreetKey);
-                               void (^setText)(NSString *, UITextField *) = ^ (NSString *key, UITextField *tf) {
-                                 NSString *val = [addressDict objectForKey:key];
+                             if (placemark) {
+                               void (^setText)(NSString *, UITextField *) = ^ (NSString *val, UITextField *tf) {
                                  if (![PEUtils isNil:val]) {
                                    [tf setText:val];
                                  }
                                };
-                               setText(CNPostalAddressStreetKey, fuelStationStreetTf);
-                               setText(CNPostalAddressCityKey, fuelStationCityTf);
-                               setText(CNPostalAddressPostalCodeKey, fuelStationZipTf);
-                               setText(CNPostalAddressStateKey, fuelStationStateTf);
+                               setText(placemark.name, fuelStationStreetTf);
+                               setText(placemark.locality, fuelStationCityTf);
+                               setText(placemark.postalCode, fuelStationZipTf);
+                               setText(placemark.administrativeArea, fuelStationStateTf);
                              }
                            } else {
                              [PEUIUtils showWarningAlertWithMsgs:nil
@@ -1406,64 +1400,10 @@ undergoing maintenance.\n\nWe apologize for the inconvenience.  Please try refre
                            }
                          }
                        }];
-        
-        [coordinatesTableView reloadData];
       }
                      locationNeededReasonText:@"To compute your current location"
                              parentController:parentViewController
                                    parentView:parentView];
-      /*void (^doUseCurrentLocation)(void) = ^{
-        CLLocation *currentLocation = [APP latestLocation];
-        if (currentLocation) {
-          [ds setLatitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].latitude]];
-          [ds setLongitude:[PEUtils decimalNumberFromDouble:[currentLocation coordinate].longitude]];
-          [coordinatesTableView reloadData];
-        }
-      };
-      if ([PEUtils isNil:[APP latestLocation]]) {
-        if ([APP locationServicesAuthorized]) {
-          NSAttributedString *attrDescTextWithInstructionalText =
-          [PEUIUtils attributedTextWithTemplate:@"Your current location cannot be determined.  \
-Make sure you have location services enabled for Gas Jot.  You can check this by going to:\n\n%@"
-                                   textToAccent:@"Settings app \u2794 Privacy \u2794 Location Services \u2794 Gas Jot"
-                                 accentTextFont:[UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline]];
-          [PEUIUtils showWarningAlertWithMsgs:nil
-                                        title:@"Hmm."
-                             alertDescription:attrDescTextWithInstructionalText
-                                     topInset:[PEUIUtils topInsetForAlertsWithController:parentViewController]
-                                  buttonTitle:@"Okay."
-                                 buttonAction:^{}
-                               relativeToView:parentView];
-        } else {
-          if ([APP hasBeenAskedToEnableLocationServices]) {
-            [PEUIUtils showInstructionalAlertWithTitle:@"Enable location services."
-                                  alertDescriptionText:@"To compute your current location, you need to enable location services for Gas Jot.  To do this, go to:\n\n"
-                                       instructionText:@"Settings app \u2794 Privacy \u2794 Location Services \u2794 Gas Jot"
-                                              topInset:[PEUIUtils topInsetForAlertsWithController:parentViewController]
-                                           buttonTitle:@"Okay."
-                                          buttonAction:^{}
-                                        relativeToView:parentView];
-          } else {
-            [PEUIUtils showConfirmAlertWithTitle:@"Enable location services?"
-                                      titleImage:[PEUIUtils bundleImageWithName:@"question"]
-                                alertDescription:[[NSAttributedString alloc] initWithString:@"\
-To compute your location, you need to enable location services for Gas Jot.  If you would like to do this, tap 'Allow' in the next pop-up."]
-                                        topInset:[PEUIUtils topInsetForAlertsWithController:parentViewController]
-                                 okayButtonTitle:@"Okay."
-                                okayButtonAction:^{
-                                  [[APP locationManager] requestWhenInUseAuthorization];
-                                  [APP setHasBeenAskedToEnableLocationServices:YES];
-                                }
-                                 okayButtonStyle:JGActionSheetButtonStyleBlue
-                               cancelButtonTitle:@"No.  Not at this time."
-                              cancelButtonAction:^{ }
-                                cancelButtonSyle:JGActionSheetButtonStyleDefault
-                                  relativeToView:parentView];
-          }
-        }
-      } else {
-        doUseCurrentLocation();
-      }*/
     } forControlEvents:UIControlEventTouchUpInside];
     [PEUIUtils placeView:useCurrentLocationBtn
                    below:coordinatesTableView
@@ -1565,11 +1505,11 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     bindte(FPFuelStationTagZip, @selector(setZip:));
     UITableView *coordinatesTableView =
       (UITableView *)[panel viewWithTag:FPFuelStationTagLocationCoordinates];
-    FPFuelStationCoordinatesTableDataSource *ds =
-      [coordinatesTableView dataSource];
+    FPFuelStationCoordinatesTableDataSource *ds = [coordinatesTableView dataSource];
     [fuelStation setLatitude:[ds latitude]];
     [fuelStation setLongitude:[ds longitude]];
-    FPFuelstationTypeDsDelegate *fsTypeDs = (FPFuelstationTypeDsDelegate *)[(UITableView *)[panel viewWithTag:FPFuelStationTagType] dataSource];
+    FPFuelstationTypeDsDelegate *fsTypeDs =
+      (FPFuelstationTypeDsDelegate *)[(UITableView *)[panel viewWithTag:FPFuelStationTagType] dataSource];
     [fuelStation setType:fsTypeDs.selectedFsType];
   };
 }
@@ -1594,10 +1534,6 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     [dataSource setLatitude:[fuelStation latitude]];
     [dataSource setLongitude:[fuelStation longitude]];
     [coordinatesTableView reloadData];
-    UITableView *fsTypeTableView = (UITableView *)[panel viewWithTag:FPFuelStationTagType];
-    FPFuelstationTypeDsDelegate *fsTypeDs = (FPFuelstationTypeDsDelegate *)[fsTypeTableView dataSource];
-    [fsTypeDs setSelectedFsType:fuelStation.type];
-    [fsTypeTableView reloadData];
   };
 }
 
@@ -1627,10 +1563,11 @@ To compute your location, you need to enable location services for Gas Jot.  If 
     };
     UITableView *coordinatesTableView =
       (UITableView *)[panel viewWithTag:FPFuelStationTagLocationCoordinates];
-    FPFuelStationCoordinatesTableDataSource *ds =
-      [coordinatesTableView dataSource];
+    FPFuelStationCoordinatesTableDataSource *ds = [coordinatesTableView dataSource];
+    UITableView *fsTypeTableView = (UITableView *)[panel viewWithTag:FPFuelStationTagType];
+    FPFuelstationTypeDsDelegate *fsTypeDs = (FPFuelstationTypeDsDelegate *)[fsTypeTableView dataSource];
     FPFuelStation *newFuelstation = [_coordDao fuelStationWithName:tfstr(FPFuelStationTagName)
-                                                              type:[[FPFuelStationType alloc] initWithIdentifier:@(0) name:@"Other" iconImgName:@""]
+                                                              type:fsTypeDs.selectedFsType
                                                             street:tfstr(FPFuelStationTagStreet)
                                                               city:tfstr(FPFuelStationTagCity)
                                                              state:tfstr(FPFuelStationTagState)

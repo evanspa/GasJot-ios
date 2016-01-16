@@ -83,6 +83,8 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     [_generalFormatter setNumberStyle:NSNumberFormatterDecimalStyle];
     [_generalFormatter setMaximumFractionDigits:1];
     _fuelstationTypes = [_coordDao fuelstationTypesWithError:errorBlk];
+    _locationFormatter = [[TTTLocationFormatter alloc] init];
+    [_locationFormatter setUnitSystem:TTTImperialSystem];
   }
   return self;
 }
@@ -2138,53 +2140,6 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
   };
 }
 
-/*- (void)addDistanceInfoToTopOfCellContentView:(UIView *)contentView
-                          withVerticalPadding:(CGFloat)verticalPadding
-                            horizontalPadding:(CGFloat)horizontalPadding
-                              withFuelstation:(FPFuelStation *)fuelstation {
-  [self addDistanceInfoToTopOfCellContentView:contentView
-                      withHorizontalAlignment:PEUIHorizontalAlignmentTypeLeft
-                          withVerticalPadding:verticalPadding
-                            horizontalPadding:horizontalPadding
-                              withFuelstation:fuelstation];
-}
-
-- (void)addDistanceInfoToTopOfCellContentView:(UIView *)contentView
-                      withHorizontalAlignment:(PEUIHorizontalAlignmentType)horizontalAlignment
-                          withVerticalPadding:(CGFloat)verticalPadding
-                            horizontalPadding:(CGFloat)horizontalPadding
-                              withFuelstation:(FPFuelStation *)fuelstation {
-  NSInteger distanceTag = 10;
-  NSInteger unknownReasonTag = 11;
-  [[contentView viewWithTag:distanceTag] removeFromSuperview];
-  [[contentView viewWithTag:unknownReasonTag] removeFromSuperview];
-  LabelMaker cellSubtitleMaker = [_uitoolkit tableCellSubtitleMaker];
-  CLLocation *fuelStationLocation = [fuelstation location];
-  UILabel *distance = nil;
-  if (fuelStationLocation) {
-    CLLocation *latestCurrentLocation = [APP latestLocation];
-    if (latestCurrentLocation) {
-      CLLocationDistance distanceVal = [latestCurrentLocation distanceFromLocation:fuelStationLocation];
-      NSString *distanceUom = @"m";
-      BOOL isNearby = NO;
-      if (distanceVal < 150.0) {
-        isNearby = YES;
-      }
-      if (distanceVal > 1000) {
-        distanceUom = @"km";
-        distanceVal = distanceVal / 1000.0;
-      }
-      distance = cellSubtitleMaker([NSString stringWithFormat:@"%.1f %@", distanceVal, distanceUom],
-                                   (0.5 * contentView.frame.size.width) - horizontalPadding);
-      [distance setTag:distanceTag];
-      if (isNearby) {
-        [distance setTextColor:[UIColor greenSeaColor]];
-      }
-      [PEUIUtils placeView:distance atBottomOf:contentView withAlignment:PEUIHorizontalAlignmentTypeRight vpadding:0.0 hpadding:horizontalPadding];
-    }
-  }
-}*/
-
 - (FPAuthScreenMaker)newViewFuelStationsScreenMaker {
   return ^ UIViewController *(FPUser *user) {
     void (^addFuelStationAction)(PEListViewController *, PEItemAddedBlk) =
@@ -2216,7 +2171,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelStation class]
                                                                     title:@"Gas Stations"
                                                     isPaginatedDataSource:NO
-                                                          tableCellStyler:[FPUIUtils fsTableCellStylerWithUitoolkit:_uitoolkit isLoggedIn:[APP isUserLoggedIn]] //tableCellStyler
+                                                          tableCellStyler:[FPUIUtils fsTableCellStylerWithUitoolkit:_uitoolkit isLoggedIn:[APP isUserLoggedIn] locationFormatter:_locationFormatter]
                                                        itemSelectedAction:nil
                                                       initialSelectedItem:nil
                                                             addItemAction:addFuelStationAction
@@ -2260,7 +2215,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelStation class]
                                                                     title:@"Unsynced Gas Stations"
                                                     isPaginatedDataSource:NO
-                                                          tableCellStyler:[FPUIUtils fsTableCellStylerWithUitoolkit:_uitoolkit isLoggedIn:[APP isUserLoggedIn]]
+                                                          tableCellStyler:[FPUIUtils fsTableCellStylerWithUitoolkit:_uitoolkit isLoggedIn:[APP isUserLoggedIn] locationFormatter:_locationFormatter]
                                                        itemSelectedAction:nil
                                                       initialSelectedItem:nil
                                                             addItemAction:nil
@@ -2311,7 +2266,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     return [[PEListViewController alloc] initWithClassOfDataSourceObjects:[FPFuelStation class]
                                                                     title:@"Choose Gas Station"
                                                     isPaginatedDataSource:NO
-                                                          tableCellStyler:[FPUIUtils fsTableCellStylerWithUitoolkit:_uitoolkit isLoggedIn:[APP isUserLoggedIn]]
+                                                          tableCellStyler:[FPUIUtils fsTableCellStylerWithUitoolkit:_uitoolkit isLoggedIn:[APP isUserLoggedIn] locationFormatter:_locationFormatter]
                                                        itemSelectedAction:itemSelectedAction
                                                       initialSelectedItem:initialSelectedFuelStation
                                                             addItemAction:addFuelStationAction

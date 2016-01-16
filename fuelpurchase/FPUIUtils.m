@@ -25,7 +25,8 @@ NSInteger const FPContentPanelTopPadding = 20.0;
             locationNeededReasonText:(NSString *)locationNeededReasonText
                     parentController:(UIViewController *)parentController
                           parentView:(UIView *)parentView {
-  if ([PEUtils isNil:[APP latestLocation]]) {
+  CLLocation *location = [APP latestLocation];
+  if ([PEUtils isNil:location]) {
     if ([APP locationServicesAuthorized]) {
       NSAttributedString *attrDescTextWithInstructionalText =
       [PEUIUtils attributedTextWithTemplate:@"Your current location cannot be determined.  \
@@ -69,7 +70,7 @@ Make sure you have location services enabled for Gas Jot.  You can check this by
       }
     }
   } else {
-    currentLocationBlk([APP latestLocation]);
+    currentLocationBlk(location);
   }
 }
 
@@ -182,33 +183,28 @@ Make sure you have location services enabled for Gas Jot.  You can check this by
                        withVerticalPadding:(CGFloat)verticalPadding
                          horizontalPadding:(CGFloat)horizontalPadding
                            withFuelstation:(FPFuelStation *)fuelstation
-                                 uitoolkit:(PEUIToolkit *)uitoolkit {
+                                 uitoolkit:(PEUIToolkit *)uitoolkit
+                         locationFormatter:(TTTLocationFormatter *)locationFormatter {
   NSInteger distanceTag = 10;
   NSInteger unknownReasonTag = 11;
   [[contentView viewWithTag:distanceTag] removeFromSuperview];
   [[contentView viewWithTag:unknownReasonTag] removeFromSuperview];
   LabelMaker cellSubtitleMaker = [uitoolkit tableCellSubtitleMaker];
   CLLocation *fuelStationLocation = [fuelstation location];
-  UILabel *distance = nil;
   if (fuelStationLocation) {
     CLLocation *latestCurrentLocation = [APP latestLocation];
     if (latestCurrentLocation) {
       CLLocationDistance distanceVal = [latestCurrentLocation distanceFromLocation:fuelStationLocation];
-      NSString *distanceUom = @"m";
-      BOOL isNearby = NO;
-      if (distanceVal < 150.0) {
-        isNearby = YES;
+      UIColor *distanceLabelColor;
+      if (distanceVal < 4900.0) { // a little over 3 miles
+        distanceLabelColor = [UIColor greenSeaColor];
+      } else {
+        distanceLabelColor = [UIColor grayColor];
       }
-      if (distanceVal > 1000) {
-        distanceUom = @"km";
-        distanceVal = distanceVal / 1000.0;
-      }
-      distance = cellSubtitleMaker([NSString stringWithFormat:@"%.1f %@", distanceVal, distanceUom],
-                                   (0.5 * contentView.frame.size.width) - horizontalPadding);
+      UILabel *distance = cellSubtitleMaker([locationFormatter stringFromDistance:distanceVal],
+                                            (0.5 * contentView.frame.size.width) - horizontalPadding);
       [distance setTag:distanceTag];
-      if (isNearby) {
-        [distance setTextColor:[UIColor greenSeaColor]];
-      }
+      [distance setTextColor:distanceLabelColor];
       [PEUIUtils placeView:distance
                 atBottomOf:contentView
              withAlignment:PEUIHorizontalAlignmentTypeRight
@@ -219,13 +215,14 @@ Make sure you have location services enabled for Gas Jot.  You can check this by
 }
 
 + (PETableCellContentViewStyler)fsTableCellStylerWithUitoolkit:(PEUIToolkit *)uitoolkit
-                                                    isLoggedIn:(BOOL)isLoggedIn {
+                                                    isLoggedIn:(BOOL)isLoggedIn
+                                             locationFormatter:(TTTLocationFormatter *)locationFormatter {
   NSInteger titleTag = 89;
   NSInteger subtitleTag = 90;
   NSInteger warningIconTag = 91;
   NSInteger iconImgTag = 92;
-  CGFloat vpaddingForTopifiedTitleToFitNeedFixIcon = 5.0; //8.0;
-  CGFloat vpaddingForTopifiedTitleToFitSubtitle = 8.0; //11.0;
+  CGFloat vpaddingForTopifiedTitleToFitNeedFixIcon = 5.0;
+  CGFloat vpaddingForTopifiedTitleToFitSubtitle = 8.0;
   void (^removeView)(NSInteger, UIView *) = ^(NSInteger tag, UIView *view) {
     [[view viewWithTag:tag] removeFromSuperview];
   };
@@ -286,7 +283,8 @@ Make sure you have location services enabled for Gas Jot.  You can check this by
                               withVerticalPadding:0.0
                                 horizontalPadding:10.0
                                   withFuelstation:fs
-                                        uitoolkit:uitoolkit];
+                                        uitoolkit:uitoolkit
+                                locationFormatter:locationFormatter];
     
     // place subtitle label
     if (subTitleMsg) {
