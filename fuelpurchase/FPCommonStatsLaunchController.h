@@ -10,7 +10,7 @@
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
 #import "FPCommonStatControllerConstants.h"
-#import "PECustomController.h"
+#import <PELocal-DataUI/PECustomController.h>
 
 @interface FPCommonStatsLaunchController : PECustomController
 

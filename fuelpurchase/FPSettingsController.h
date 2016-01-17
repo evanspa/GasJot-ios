@@ -11,7 +11,7 @@
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
-#import "PECustomController.h"
+#import <PELocal-DataUI/PECustomController.h>
 
 @interface FPSettingsController : PECustomController <MBProgressHUDDelegate>
 

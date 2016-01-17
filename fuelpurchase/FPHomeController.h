@@ -25,7 +25,7 @@
 #import "FPScreenToolkit.h"
 #import <PEFuelPurchase-Model/FPStats.h>
 #import <JBChartView/JBLineChartView.h>
-#import "PECustomController.h"
+#import <PELocal-DataUI/PECustomController.h>
 
 /**
  Presents a GUI representing the start-state of the application for an

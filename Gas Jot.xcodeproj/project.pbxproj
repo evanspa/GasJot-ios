@@ -17,11 +17,9 @@
 		184601A219BFF6EC001C1B3A /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 184601A119BFF6EC001C1B3A /* libsqlite3.dylib */; };
 		1865B7D919FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1865B7D819FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m */; };
 		186ADB3219E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 186ADB3119E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.m */; };
-		186E0B7C19CD237B00CE4B3A /* PEListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 186E0B7B19CD237B00CE4B3A /* PEListViewController.m */; };
 		1899260E18B3071600B61772 /* simulation in Resources */ = {isa = PBXBuildFile; fileRef = 1899260D18B3071600B61772 /* simulation */; };
 		189AC7561A78034500A6CFE3 /* FPLogEnvLogComposite.m in Sources */ = {isa = PBXBuildFile; fileRef = 189AC7551A78034500A6CFE3 /* FPLogEnvLogComposite.m */; };
 		18AC0722181ACC8C001FF24E /* FPLogging.m in Sources */ = {isa = PBXBuildFile; fileRef = 18AC0721181ACC8C001FF24E /* FPLogging.m */; };
-		18B17D5719DAE696001D2BF6 /* PEAddViewEditController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18B17D5619DAE696001D2BF6 /* PEAddViewEditController.m */; };
 		18C3CD7419DC3B440092C002 /* FPPanelToolkit.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C3CD7319DC3B440092C002 /* FPPanelToolkit.m */; };
 		18CC2CF817F680AC009DF2CE /* FPNames.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CF317F680AC009DF2CE /* FPNames.m */; };
 		18CC2CFA17F680AC009DF2CE /* FPCreateAccountController.m in Sources */ = {isa = PBXBuildFile; fileRef = 18CC2CF717F680AC009DF2CE /* FPCreateAccountController.m */; };
@@ -36,7 +34,6 @@
 		18D6DFBC17F68005006B300D /* FPAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18D6DFBB17F68005006B300D /* FPAppDelegate.m */; };
 		18D6DFBE17F68005006B300D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18D6DFBD17F68005006B300D /* Images.xcassets */; };
 		18EC863019EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 18EC862F19EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m */; };
-		18F61A891A96133000BA631A /* UIScrollView+PEAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */; };
 		CA48D1BE1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CA48D1BD1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.m */; };
 		CA48D1E51C34FC5200FFD650 /* FPLocateNearbyGasController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA48D1E41C34FC5200FFD650 /* FPLocateNearbyGasController.m */; };
 		CA7D5A271B383F5A00433581 /* FPAppNotificationNames.m in Sources */ = {isa = PBXBuildFile; fileRef = CA7D5A261B383F5A00433581 /* FPAppNotificationNames.m */; };
@@ -49,12 +46,9 @@
 		CA8AC4BC1BDE8930008603C0 /* JBChartInformationView.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4BB1BDE8930008603C0 /* JBChartInformationView.m */; };
 		CA8AC4C01BDE9287008603C0 /* JBChartHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4BF1BDE9287008603C0 /* JBChartHeaderView.m */; };
 		CA8AC4C41BDEB338008603C0 /* FPCommonStatController.m in Sources */ = {isa = PBXBuildFile; fileRef = CA8AC4C31BDEB338008603C0 /* FPCommonStatController.m */; };
-		CA90F4241B45AB7F005FAB35 /* PEServerSyncActionSheet.m in Sources */ = {isa = PBXBuildFile; fileRef = CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */; };
 		CA920C121B21F48900A848EA /* fpapi-resource.localdev.json in Resources */ = {isa = PBXBuildFile; fileRef = 18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */; };
 		CA9E39A51C40018A009A91DE /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CA9E39A41C40018A009A91DE /* Launch Screen.storyboard */; };
 		CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */; };
-		CAB61BFD1C11D6F60008F12B /* PECustomController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAB61BFC1C11D6F60008F12B /* PECustomController.m */; };
-		CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = CAD8AE501B2B291000276F4F /* PELMUIUtils.m */; };
 		CAE873F71BBDA64900E5A81F /* FPForgotPasswordController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAE873F61BBDA64900E5A81F /* FPForgotPasswordController.m */; };
 		CAEE0C9A1BC9830E00FAB0BF /* FPReportViews.m in Sources */ = {isa = PBXBuildFile; fileRef = CAEE0C991BC9830E00FAB0BF /* FPReportViews.m */; };
 		CAFC84651BA27EAB00FAEB66 /* FPSplashController.m in Sources */ = {isa = PBXBuildFile; fileRef = CAFC84641BA27EAB00FAEB66 /* FPSplashController.m */; };
@@ -86,15 +80,11 @@
 		1865B7D819FDEA7300E98D26 /* FPEnvLogVehicleAndDateDataSourceDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPEnvLogVehicleAndDateDataSourceDelegate.m; sourceTree = "<group>"; };
 		186ADB3019E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPFuelStationCoordinatesTableDataSource.h; sourceTree = "<group>"; };
 		186ADB3119E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPFuelStationCoordinatesTableDataSource.m; sourceTree = "<group>"; };
-		186E0B7A19CD237B00CE4B3A /* PEListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PEListViewController.h; sourceTree = "<group>"; };
-		186E0B7B19CD237B00CE4B3A /* PEListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PEListViewController.m; sourceTree = "<group>"; };
 		1899260D18B3071600B61772 /* simulation */ = {isa = PBXFileReference; lastKnownFileType = folder; path = simulation; sourceTree = "<group>"; };
 		189AC7541A78034500A6CFE3 /* FPLogEnvLogComposite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPLogEnvLogComposite.h; sourceTree = "<group>"; };
 		189AC7551A78034500A6CFE3 /* FPLogEnvLogComposite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPLogEnvLogComposite.m; sourceTree = "<group>"; };
 		18AC0720181ACC8C001FF24E /* FPLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPLogging.h; sourceTree = "<group>"; };
 		18AC0721181ACC8C001FF24E /* FPLogging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPLogging.m; sourceTree = "<group>"; };
-		18B17D5519DAE696001D2BF6 /* PEAddViewEditController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PEAddViewEditController.h; sourceTree = "<group>"; };
-		18B17D5619DAE696001D2BF6 /* PEAddViewEditController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = PEAddViewEditController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		18C3CD7219DC3B440092C002 /* FPPanelToolkit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPPanelToolkit.h; sourceTree = "<group>"; };
 		18C3CD7319DC3B440092C002 /* FPPanelToolkit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPPanelToolkit.m; sourceTree = "<group>"; };
 		18CC2CF217F680AC009DF2CE /* FPNames.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPNames.h; sourceTree = "<group>"; };
@@ -120,8 +110,6 @@
 		18E5C9821A6B82E500EE8606 /* fpapi-resource.localdev.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "fpapi-resource.localdev.json"; sourceTree = "<group>"; };
 		18EC862E19EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPFpLogVehicleFuelStationDateDataSourceAndDelegate.h; sourceTree = "<group>"; };
 		18EC862F19EBF6FF006C104A /* FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPFpLogVehicleFuelStationDateDataSourceAndDelegate.m; sourceTree = "<group>"; };
-		18F61A871A96133000BA631A /* UIScrollView+PEAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIScrollView+PEAdditions.h"; sourceTree = "<group>"; };
-		18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIScrollView+PEAdditions.m"; sourceTree = "<group>"; };
 		1DF684FBAD9D439284549BB5 /* libPods-fuelpurchaseTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fuelpurchaseTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC2AAEDFF2F94B76A9D41E6C /* libPods-fuelpurchase-tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fuelpurchase-tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1FEBEB6E7DB4F50A4FCEA3D /* libPods-fuelpurchase-dev.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fuelpurchase-dev.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -129,7 +117,6 @@
 		C8F7D920AF4FE86756CE0393 /* libPods-PEFuelPurchase-App-dev.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PEFuelPurchase-App-dev.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA48D1BC1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPFuelstationTypeDsDelegate.h; sourceTree = "<group>"; };
 		CA48D1BD1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPFuelstationTypeDsDelegate.m; sourceTree = "<group>"; };
-		CA48D1C01C29D9FA00FFD650 /* PEUIDefs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PEUIDefs.h; sourceTree = "<group>"; };
 		CA48D1E31C34FC5200FFD650 /* FPLocateNearbyGasController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPLocateNearbyGasController.h; sourceTree = "<group>"; };
 		CA48D1E41C34FC5200FFD650 /* FPLocateNearbyGasController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPLocateNearbyGasController.m; sourceTree = "<group>"; };
 		CA6203E51B21D99200CF9C91 /* libPods-PEFuelPurchase-App-dev.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libPods-PEFuelPurchase-App-dev.a"; path = "Pods/../build/Debug-iphoneos/libPods-PEFuelPurchase-App-dev.a"; sourceTree = "<group>"; };
@@ -167,15 +154,9 @@
 		CA8AC4BF1BDE9287008603C0 /* JBChartHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JBChartHeaderView.m; sourceTree = "<group>"; };
 		CA8AC4C21BDEB338008603C0 /* FPCommonStatController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPCommonStatController.h; sourceTree = "<group>"; };
 		CA8AC4C31BDEB338008603C0 /* FPCommonStatController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPCommonStatController.m; sourceTree = "<group>"; };
-		CA90F4221B45AB7F005FAB35 /* PEServerSyncActionSheet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PEServerSyncActionSheet.h; sourceTree = "<group>"; };
-		CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PEServerSyncActionSheet.m; sourceTree = "<group>"; };
 		CA9E39A41C40018A009A91DE /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		CAB5E94E1B4B024B00144072 /* FPReauthenticateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPReauthenticateController.h; sourceTree = "<group>"; };
 		CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPReauthenticateController.m; sourceTree = "<group>"; };
-		CAB61BFB1C11D6F60008F12B /* PECustomController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PECustomController.h; sourceTree = "<group>"; };
-		CAB61BFC1C11D6F60008F12B /* PECustomController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PECustomController.m; sourceTree = "<group>"; };
-		CAD8AE4F1B2B291000276F4F /* PELMUIUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PELMUIUtils.h; sourceTree = "<group>"; };
-		CAD8AE501B2B291000276F4F /* PELMUIUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PELMUIUtils.m; sourceTree = "<group>"; };
 		CAE873F51BBDA64900E5A81F /* FPForgotPasswordController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPForgotPasswordController.h; sourceTree = "<group>"; };
 		CAE873F61BBDA64900E5A81F /* FPForgotPasswordController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPForgotPasswordController.m; sourceTree = "<group>"; };
 		CAEE0C981BC9830E00FAB0BF /* FPReportViews.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPReportViews.h; sourceTree = "<group>"; };
@@ -294,29 +275,6 @@
 			name = "Table Data Sources";
 			sourceTree = "<group>";
 		};
-		186E0B7819CD1BDD00CE4B3A /* PEUI-Commons */ = {
-			isa = PBXGroup;
-			children = (
-				CA48D1BF1C29D9E700FFD650 /* Definitions */,
-				CA90F4211B45AB4C005FAB35 /* Server Sync Action Sheet */,
-				CAD8AE4E1B2B28E200276F4F /* Local Data UI Utils */,
-				18F61A821A96129E00BA631A /* Categories */,
-				186E0B7919CD1BEA00CE4B3A /* Pull-to-Refresh List View Controller */,
-				CAB61BFA1C11D6D40008F12B /* Custom Screen Base */,
-			);
-			name = "PEUI-Commons";
-			sourceTree = "<group>";
-		};
-		186E0B7919CD1BEA00CE4B3A /* Pull-to-Refresh List View Controller */ = {
-			isa = PBXGroup;
-			children = (
-				18B17D5419DAE640001D2BF6 /* Add / View / Edit Entity Controller */,
-				186E0B7A19CD237B00CE4B3A /* PEListViewController.h */,
-				186E0B7B19CD237B00CE4B3A /* PEListViewController.m */,
-			);
-			name = "Pull-to-Refresh List View Controller";
-			sourceTree = "<group>";
-		};
 		189AC7521A78030D00A6CFE3 /* Model */ = {
 			isa = PBXGroup;
 			children = (
@@ -370,15 +328,6 @@
 				18AC0721181ACC8C001FF24E /* FPLogging.m */,
 			);
 			name = Logging;
-			sourceTree = "<group>";
-		};
-		18B17D5419DAE640001D2BF6 /* Add / View / Edit Entity Controller */ = {
-			isa = PBXGroup;
-			children = (
-				18B17D5519DAE696001D2BF6 /* PEAddViewEditController.h */,
-				18B17D5619DAE696001D2BF6 /* PEAddViewEditController.m */,
-			);
-			name = "Add / View / Edit Entity Controller";
 			sourceTree = "<group>";
 		};
 		18CF522F19C9D9990020FC94 /* Screen Toolkit */ = {
@@ -441,7 +390,6 @@
 		18D6DFB117F68005006B300D /* Gas Jot */ = {
 			isa = PBXGroup;
 			children = (
-				186E0B7819CD1BDD00CE4B3A /* PEUI-Commons */,
 				189AC7521A78030D00A6CFE3 /* Model */,
 				185D38CC1815952B0007587A /* App Delegate */,
 				CA7D5A241B383F4500433581 /* Notifications */,
@@ -491,23 +439,6 @@
 			name = "Fp Log Vehicle, Fuel Station and Date Selection";
 			sourceTree = "<group>";
 		};
-		18F61A821A96129E00BA631A /* Categories */ = {
-			isa = PBXGroup;
-			children = (
-				18F61A831A9612A600BA631A /* UIScrollView */,
-			);
-			name = Categories;
-			sourceTree = "<group>";
-		};
-		18F61A831A9612A600BA631A /* UIScrollView */ = {
-			isa = PBXGroup;
-			children = (
-				18F61A871A96133000BA631A /* UIScrollView+PEAdditions.h */,
-				18F61A881A96133000BA631A /* UIScrollView+PEAdditions.m */,
-			);
-			name = UIScrollView;
-			sourceTree = "<group>";
-		};
 		CA48D1BB1C29D8C000FFD650 /* Fuel Station Type */ = {
 			isa = PBXGroup;
 			children = (
@@ -515,14 +446,6 @@
 				CA48D1BD1C29D90D00FFD650 /* FPFuelstationTypeDsDelegate.m */,
 			);
 			name = "Fuel Station Type";
-			sourceTree = "<group>";
-		};
-		CA48D1BF1C29D9E700FFD650 /* Definitions */ = {
-			isa = PBXGroup;
-			children = (
-				CA48D1C01C29D9FA00FFD650 /* PEUIDefs.h */,
-			);
-			name = Definitions;
 			sourceTree = "<group>";
 		};
 		CA48D1E21C34FAFC00FFD650 /* Locate Nearby Gas */ = {
@@ -674,15 +597,6 @@
 			name = "Common Stat Screen";
 			sourceTree = "<group>";
 		};
-		CA90F4211B45AB4C005FAB35 /* Server Sync Action Sheet */ = {
-			isa = PBXGroup;
-			children = (
-				CA90F4221B45AB7F005FAB35 /* PEServerSyncActionSheet.h */,
-				CA90F4231B45AB7F005FAB35 /* PEServerSyncActionSheet.m */,
-			);
-			name = "Server Sync Action Sheet";
-			sourceTree = "<group>";
-		};
 		CAB5E94D1B4B007E00144072 /* Re-authenticate */ = {
 			isa = PBXGroup;
 			children = (
@@ -690,15 +604,6 @@
 				CAB5E94F1B4B024B00144072 /* FPReauthenticateController.m */,
 			);
 			name = "Re-authenticate";
-			sourceTree = "<group>";
-		};
-		CAB61BFA1C11D6D40008F12B /* Custom Screen Base */ = {
-			isa = PBXGroup;
-			children = (
-				CAB61BFB1C11D6F60008F12B /* PECustomController.h */,
-				CAB61BFC1C11D6F60008F12B /* PECustomController.m */,
-			);
-			name = "Custom Screen Base";
 			sourceTree = "<group>";
 		};
 		CABF51701BD499370083B460 /* Stat Screens */ = {
@@ -710,15 +615,6 @@
 				CA813DAE1BDF046400B74A24 /* Common Stat Comparison Screen */,
 			);
 			name = "Stat Screens";
-			sourceTree = "<group>";
-		};
-		CAD8AE4E1B2B28E200276F4F /* Local Data UI Utils */ = {
-			isa = PBXGroup;
-			children = (
-				CAD8AE4F1B2B291000276F4F /* PELMUIUtils.h */,
-				CAD8AE501B2B291000276F4F /* PELMUIUtils.m */,
-			);
-			name = "Local Data UI Utils";
 			sourceTree = "<group>";
 		};
 		CAE873F41BBDA55800E5A81F /* Forgot Password Screen */ = {
@@ -948,11 +844,7 @@
 				186ADB3219E3A1B8003AD788 /* FPFuelStationCoordinatesTableDataSource.m in Sources */,
 				CAFC84721BA6691000FAEB66 /* FPRaisedCenterTabController.m in Sources */,
 				CA8AC4B91BDE8923008603C0 /* JBChartTooltipTipView.m in Sources */,
-				CAD8AE511B2B291000276F4F /* PELMUIUtils.m in Sources */,
-				CA90F4241B45AB7F005FAB35 /* PEServerSyncActionSheet.m in Sources */,
 				CA48D1E51C34FC5200FFD650 /* FPLocateNearbyGasController.m in Sources */,
-				18B17D5719DAE696001D2BF6 /* PEAddViewEditController.m in Sources */,
-				18F61A891A96133000BA631A /* UIScrollView+PEAdditions.m in Sources */,
 				CAEE0C9A1BC9830E00FAB0BF /* FPReportViews.m in Sources */,
 				18D6DFBC17F68005006B300D /* FPAppDelegate.m in Sources */,
 				CA813DCA1BDFE66B00B74A24 /* FPCommonStatsLaunchController.m in Sources */,
@@ -966,7 +858,6 @@
 				CAFC84691BA363A600FAEB66 /* iCarousel.m in Sources */,
 				CAFC84871BA749FB00FAEB66 /* UIColor+FPAdditions.m in Sources */,
 				CA7D5A271B383F5A00433581 /* FPAppNotificationNames.m in Sources */,
-				CAB61BFD1C11D6F60008F12B /* PECustomController.m in Sources */,
 				CAFC847A1BA6ECCA00FAEB66 /* FPJotController.m in Sources */,
 				CA813DB11BDF04A000B74A24 /* FPCommonStatComparisonController.m in Sources */,
 				CAFC84651BA27EAB00FAEB66 /* FPSplashController.m in Sources */,
@@ -976,7 +867,6 @@
 				18CC2CFA17F680AC009DF2CE /* FPCreateAccountController.m in Sources */,
 				CA7D5A2E1B3851E200433581 /* FPAccountLoginController.m in Sources */,
 				CAE873F71BBDA64900E5A81F /* FPForgotPasswordController.m in Sources */,
-				186E0B7C19CD237B00CE4B3A /* PEListViewController.m in Sources */,
 				CA8AC4C41BDEB338008603C0 /* FPCommonStatController.m in Sources */,
 				CA8AC4BC1BDE8930008603C0 /* JBChartInformationView.m in Sources */,
 				CAB5E9501B4B024B00144072 /* FPReauthenticateController.m in Sources */,

@@ -11,7 +11,7 @@
 #import "FPScreenToolkit.h"
 #import <JBChartView/JBLineChartView.h>
 #import "FPCommonStatControllerConstants.h"
-#import "PECustomController.h"
+#import <PELocal-DataUI/PECustomController.h>
 
 typedef NSUInteger(^FPSiblingEntityCount)(void);
 typedef UIViewController *(^FPComparisonScreenMaker)(void);

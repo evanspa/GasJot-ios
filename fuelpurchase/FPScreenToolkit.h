@@ -9,8 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
-#import "PEListViewController.h"
-#import "PEAddViewEditController.h"
+#import <PELocal-DataUI/PEListViewController.h>
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <FormatterKit/TTTLocationFormatter.h>
 

@@ -16,8 +16,7 @@
 #import <PEObjc-Commons/PEUIUtils.h>
 #import <PEObjc-Commons/NSString+PEAdditions.h>
 #import <PEObjc-Commons/PEDatePickerController.h>
-#import "PEListViewController.h"
-#import "PEAddViewEditController.h"
+#import <PELocal-DataUI/PEAddViewEditController.h>
 #import "FPUtils.h"
 #import <PELocal-Data/PELMNotificationUtils.h>
 #import "FPPanelToolkit.h"
@@ -929,7 +928,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                               itemDeleter:[self vehicleItemDeleterForUser:user]
                                                          itemLocalDeleter:[self vehicleItemLocalDeleter]
                                                              isEntityType:YES
-                                                         viewDidAppearBlk:nil];
+                                                         viewDidAppearBlk:nil
+                                              entityAddedNotificationName:FPEntityAddedNotification
+                                            entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                            entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -978,7 +980,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                               itemDeleter:[self vehicleItemDeleterForUser:user]
                                                          itemLocalDeleter:[self vehicleItemLocalDeleter]
                                                              isEntityType:YES
-                                                         viewDidAppearBlk:^(PEListViewController *listController){[listController.tableView reloadData];}];
+                                                         viewDidAppearBlk:^(PEListViewController *listController){[listController.tableView reloadData];}
+                                              entityAddedNotificationName:FPEntityAddedNotification
+                                            entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                            entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -1028,7 +1033,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                               itemDeleter:nil
                                                          itemLocalDeleter:nil
                                                              isEntityType:YES
-                                                         viewDidAppearBlk:nil];
+                                                         viewDidAppearBlk:nil
+                                              entityAddedNotificationName:FPEntityAddedNotification
+                                            entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                            entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -2190,7 +2198,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                               itemDeleter:[self fuelStationItemDeleterForUser:user]
                                                          itemLocalDeleter:[self fuelStationItemLocalDeleter]
                                                              isEntityType:YES
-                                                         viewDidAppearBlk:nil];
+                                                         viewDidAppearBlk:nil
+                                              entityAddedNotificationName:FPEntityAddedNotification
+                                            entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                            entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -2238,7 +2249,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                            [listController.dataSource removeAllObjects];
                                                            [listController.dataSource addObjectsFromArray:pageLoader(nil)];
                                                            [listController.tableView reloadData];
-                                                         }];
+                                                         }
+                                              entityAddedNotificationName:FPEntityAddedNotification
+                                            entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                            entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -2285,7 +2299,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                               itemDeleter:nil
                                                          itemLocalDeleter:nil
                                                              isEntityType:YES
-                                                         viewDidAppearBlk:nil];
+                                                         viewDidAppearBlk:nil
+                                              entityAddedNotificationName:FPEntityAddedNotification
+                                            entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                            entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -2327,7 +2344,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                               itemDeleter:nil
                                                          itemLocalDeleter:nil
                                                              isEntityType:NO
-                                                         viewDidAppearBlk:nil];
+                                                         viewDidAppearBlk:nil
+                                              entityAddedNotificationName:FPEntityAddedNotification
+                                            entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                            entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -3869,7 +3889,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                               itemDeleter:[self fplogItemDeleterForUser:user]
                                                          itemLocalDeleter:[self fplogItemLocalDeleter]
                                                              isEntityType:YES
-                                                         viewDidAppearBlk:nil];
+                                                         viewDidAppearBlk:nil
+                                              entityAddedNotificationName:FPEntityAddedNotification
+                                            entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                            entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -3951,7 +3974,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                               itemDeleter:[self fplogItemDeleterForUser:user]
                                                          itemLocalDeleter:[self fplogItemLocalDeleter]
                                                              isEntityType:YES
-                                                         viewDidAppearBlk:nil];
+                                                         viewDidAppearBlk:nil
+                                              entityAddedNotificationName:FPEntityAddedNotification
+                                            entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                            entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -4031,7 +4057,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                               itemDeleter:[self fplogItemDeleterForUser:user]
                                                          itemLocalDeleter:[self fplogItemLocalDeleter]
                                                              isEntityType:YES
-                                                         viewDidAppearBlk:nil];
+                                                         viewDidAppearBlk:nil
+                                              entityAddedNotificationName:FPEntityAddedNotification
+                                            entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                            entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -4083,7 +4112,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                               itemDeleter:[self fplogItemDeleterForUser:user]
                                                          itemLocalDeleter:[self fplogItemLocalDeleter]
                                                              isEntityType:YES
-                                                         viewDidAppearBlk:^(PEListViewController *listController){[listController.tableView reloadData];}];
+                                                         viewDidAppearBlk:^(PEListViewController *listController){[listController.tableView reloadData];}
+                                              entityAddedNotificationName:FPEntityAddedNotification
+                                            entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                            entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -4611,7 +4643,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                               itemDeleter:[self envlogItemDeleterForUser:user]
                                                          itemLocalDeleter:[self envlogItemLocalDeleter]
                                                              isEntityType:YES
-                                                         viewDidAppearBlk:nil];
+                                                         viewDidAppearBlk:nil
+                                              entityAddedNotificationName:FPEntityAddedNotification
+                                            entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                            entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -4688,7 +4723,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                               itemDeleter:[self envlogItemDeleterForUser:user]
                                                          itemLocalDeleter:[self envlogItemLocalDeleter]
                                                              isEntityType:YES
-                                                         viewDidAppearBlk:nil];
+                                                         viewDidAppearBlk:nil
+                                              entityAddedNotificationName:FPEntityAddedNotification
+                                            entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                            entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 
@@ -4738,7 +4776,10 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
                                                               itemDeleter:[self envlogItemDeleterForUser:user]
                                                          itemLocalDeleter:[self envlogItemLocalDeleter]
                                                              isEntityType:YES
-                                                         viewDidAppearBlk:^(PEListViewController *listController){[listController.tableView reloadData];}];
+                                                         viewDidAppearBlk:^(PEListViewController *listController){[listController.tableView reloadData];}
+                                              entityAddedNotificationName:FPEntityAddedNotification
+                                            entityUpdatedNotificationName:FPEntityUpdatedNotification
+                                            entityRemovedNotificationName:FPEntityDeletedNotification];
   };
 }
 

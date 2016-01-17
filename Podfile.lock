@@ -67,7 +67,7 @@ PODS:
   - FormatterKit/URLRequestFormatter (1.8.0)
   - HMSegmentedControl (1.5.2)
   - IQKeyboardManager (3.2.1.1)
-  - JBChartView (2.9.1)
+  - JBChartView (3.0.1)
   - KissXML (5.0)
   - MBProgressHUD (0.9.1)
   - OHHTTPStubs (3.1.12):
@@ -95,6 +95,13 @@ PODS:
     - FMDB (~> 2.5)
     - PEHateoas-Client (~> 1.0.15)
     - PEObjc-Commons (~> 1.0.101)
+  - PELocal-DataUI (0.0.1):
+    - BlocksKit (= 2.2.5)
+    - CocoaLumberjack (= 1.9.2)
+    - FlatUIKit (= 1.6.2)
+    - MBProgressHUD (= 0.9.1)
+    - PELocal-Data (= 0.0.16)
+    - PEObjc-Commons (= 1.0.108)
   - PEObjc-Commons (1.0.108):
     - BlocksKit (~> 2.2.5)
   - PESimu-Select (1.0.4):
@@ -135,6 +142,7 @@ DEPENDENCIES:
   - PEFuelPurchase-Common (= 1.0.12)
   - PEFuelPurchase-Model (= 1.0.218)
   - PELocal-Data (= 0.0.16)
+  - PELocal-DataUI (= 0.0.1)
   - PEObjc-Commons (= 1.0.108)
   - ReactiveCocoa (= 2.4.7)
   - UICKeyChainStore (= 2.0.5)
@@ -150,7 +158,7 @@ SPEC CHECKSUMS:
   FormatterKit: bddde83e054edf9d9ee14f9de3b3a5103db256f4
   HMSegmentedControl: 83b9686022d2176fb6457d2bdb61e5d6393fed7d
   IQKeyboardManager: 6aeae6a2014d66461c48f6753dd693e92eaf6524
-  JBChartView: ca18e487c3d3ee68753716d41b260106e2859f63
+  JBChartView: 60f0418c8c6cde2dfbd2f46749a294fa5c3f5c4a
   KissXML: ce643413d618ad69886d0d43c3792b7dedfe476e
   MBProgressHUD: c47f2c166c126cf2ce36498d80f33e754d4e93ad
   OHHTTPStubs: 8cf0cfe6f34f13fc88fdf5b2a1b2c2536e8c0261
@@ -159,6 +167,7 @@ SPEC CHECKSUMS:
   PEFuelPurchase-Model: 97853b9945ce55e32ce1f5c70f599877b3c66ffa
   PEHateoas-Client: 6885138dfb01bfbe98299bf6c4c0373b8e62d75c
   PELocal-Data: 1f03f10c46939eb03bcb01ec68e4a1e522d86bd4
+  PELocal-DataUI: f025172014b9ab00da76c8311a5999399ba2c9c7
   PEObjc-Commons: e200afbc387a5fbec2724f9f5844ed43843c95c5
   PESimu-Select: 88e3ab14e1b9e0f75e9b626103581bd488128674
   PEWire-Control: c2d18d4261d025182513466da9c6ed80e596f526

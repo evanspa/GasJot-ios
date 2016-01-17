@@ -23,7 +23,7 @@
 #import <PEFuelPurchase-Model/FPCoordinatorDao.h>
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
-#import "PECustomController.h"
+#import <PELocal-DataUI/PECustomController.h>
 
 /**
  Presents a GUI representing the start-state of the application for an
