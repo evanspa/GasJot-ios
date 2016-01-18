@@ -95,14 +95,14 @@ PODS:
     - FMDB (~> 2.5)
     - PEHateoas-Client (~> 1.0.15)
     - PEObjc-Commons (~> 1.0.101)
-  - PELocal-DataUI (0.0.1):
-    - BlocksKit (= 2.2.5)
-    - CocoaLumberjack (= 1.9.2)
-    - FlatUIKit (= 1.6.2)
-    - MBProgressHUD (= 0.9.1)
-    - PELocal-Data (= 0.0.16)
-    - PEObjc-Commons (= 1.0.108)
-  - PEObjc-Commons (1.0.108):
+  - PELocal-DataUI (0.0.2):
+    - BlocksKit (~> 2.2.5)
+    - CocoaLumberjack (~> 1.9.2)
+    - FlatUIKit (~> 1.6.2)
+    - MBProgressHUD (~> 0.9.1)
+    - PELocal-Data (~> 0.0.16)
+    - PEObjc-Commons (~> 1.0.109)
+  - PEObjc-Commons (1.0.109):
     - BlocksKit (~> 2.2.5)
   - PESimu-Select (1.0.4):
     - PEObjc-Commons (~> 1.0.86)
@@ -142,8 +142,8 @@ DEPENDENCIES:
   - PEFuelPurchase-Common (= 1.0.12)
   - PEFuelPurchase-Model (= 1.0.218)
   - PELocal-Data (= 0.0.16)
-  - PELocal-DataUI (= 0.0.1)
-  - PEObjc-Commons (= 1.0.108)
+  - PELocal-DataUI (= 0.0.2)
+  - PEObjc-Commons (= 1.0.109)
   - ReactiveCocoa (= 2.4.7)
   - UICKeyChainStore (= 2.0.5)
 
@@ -167,8 +167,8 @@ SPEC CHECKSUMS:
   PEFuelPurchase-Model: 97853b9945ce55e32ce1f5c70f599877b3c66ffa
   PEHateoas-Client: 6885138dfb01bfbe98299bf6c4c0373b8e62d75c
   PELocal-Data: 1f03f10c46939eb03bcb01ec68e4a1e522d86bd4
-  PELocal-DataUI: f025172014b9ab00da76c8311a5999399ba2c9c7
-  PEObjc-Commons: e200afbc387a5fbec2724f9f5844ed43843c95c5
+  PELocal-DataUI: 90fd50ad171e723610d74ccfc4bde94adc58e721
+  PEObjc-Commons: be16322654dd21bea7f0d9927cef3582f7f51208
   PESimu-Select: 88e3ab14e1b9e0f75e9b626103581bd488128674
   PEWire-Control: c2d18d4261d025182513466da9c6ed80e596f526
   PEXML-Utils: d36d0ab7337b92c120ec49b84f99e7b923bf8a24
