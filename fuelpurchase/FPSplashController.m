@@ -46,6 +46,7 @@ CGFloat const FPSPLASH_CONTENT_HEIGH_FACTOR = 0.65;
                              ^UIView *{ return [self carouselViewWithImageNamed:@"carousel-know-thyself"]; },
                              ^UIView *{ return [self carouselViewWithImageNamed:@"carousel-any-device"]; },
                              ^UIView *{ return [self carouselViewWithImageNamed:@"carousel-offline"]; },
+                             ^UIView *{ return [self carouselViewWithImageNamed:@"carousel-find-gas"]; },
                              ^UIView *{ return [self carouselViewWithImageNamed:@"carousel-export"]; }
                              ];
     _numCarouselViewMakers = [_carouselViewMakers count];

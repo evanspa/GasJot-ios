@@ -1,7 +1,8 @@
 "Actual Version" = The version and build values specified in the plist, as well
 as the Git tag.
 
-iTunes Connect Version | Actual Version
----------------------------------------
-                   1.4 |            1.4
-                 1.4.1 |          1.4.3
+iTunes Connect Version | Actual (Git tag) Version
+-------------------------------------------------
+                   1.4 |                      1.4
+                 1.4.1 |                    1.4.3
+                 1.4.2 |                    1.4.4
