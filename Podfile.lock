@@ -77,14 +77,14 @@ PODS:
     - PEObjc-Commons (~> 1.0.89)
     - PESimu-Select (~> 1.0.4)
   - PEFuelPurchase-Common (1.0.12)
-  - PEFuelPurchase-Model (1.0.218):
+  - PEFuelPurchase-Model (1.0.219):
     - CHCSVParser (~> 2.1.0)
     - CocoaLumberjack (~> 1.9)
     - FMDB (~> 2.5)
     - PEFuelPurchase-Common (~> 1.0.12)
     - PEHateoas-Client (~> 1.0.17)
     - PELocal-Data (~> 0.0.16)
-    - PEObjc-Commons (~> 1.0.107)
+    - PEObjc-Commons (~> 1.0.109)
     - UICKeyChainStore (~> 2.0.4)
   - PEHateoas-Client (1.0.17):
     - AFNetworking (~> 2.6.3)
@@ -140,7 +140,7 @@ DEPENDENCIES:
   - OHHTTPStubs (= 3.1.12)
   - PEDev-Console (= 1.0.5)
   - PEFuelPurchase-Common (= 1.0.12)
-  - PEFuelPurchase-Model (= 1.0.218)
+  - PEFuelPurchase-Model (= 1.0.219)
   - PELocal-Data (= 0.0.16)
   - PELocal-DataUI (= 0.0.2)
   - PEObjc-Commons (= 1.0.109)
@@ -164,7 +164,7 @@ SPEC CHECKSUMS:
   OHHTTPStubs: 8cf0cfe6f34f13fc88fdf5b2a1b2c2536e8c0261
   PEDev-Console: 4ee13ef5f0ed0b1c227ba6d696db467cb96dd6c3
   PEFuelPurchase-Common: 8b4ed986a89d064914a44d8a922078c9d622f445
-  PEFuelPurchase-Model: 97853b9945ce55e32ce1f5c70f599877b3c66ffa
+  PEFuelPurchase-Model: 0c864513f8d0fe4c822adfffbc2ca0e666819ebf
   PEHateoas-Client: 6885138dfb01bfbe98299bf6c4c0373b8e62d75c
   PELocal-Data: 1f03f10c46939eb03bcb01ec68e4a1e522d86bd4
   PELocal-DataUI: 90fd50ad171e723610d74ccfc4bde94adc58e721

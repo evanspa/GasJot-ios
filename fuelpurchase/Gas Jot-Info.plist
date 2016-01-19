@@ -23,7 +23,7 @@
 	<key>CFBundleVersion</key>
 	<string>1.4.4</string>
 	<key>FP Authentication Strength for Login Token</key>
-	<real>0.29999999999999999</real>
+	<real>0.3</real>
 	<key>FP Authentication scheme</key>
 	<string>fp-auth</string>
 	<key>FP Authentication token param name</key>

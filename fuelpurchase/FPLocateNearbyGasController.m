@@ -332,8 +332,12 @@ alignmentRelativeToView:rowPanel
     [navItem setRightBarButtonItem:_refreshBarButtonItem];
     NSMutableArray *rowPanels = [NSMutableArray arrayWithCapacity:_priceEventStream.count];
     for (FPPriceEvent *priceEvent in _priceEventStream) {
-      UIView *rowPanel = [self makeRowPanelForPriceEvent:priceEvent];
-      [rowPanels addObject:rowPanel];
+      if (![PEUtils isNil:priceEvent.fsState] &&
+          ![PEUtils isNil:priceEvent.fsCity] &&
+          ![PEUtils isNil:priceEvent.fsStreet]) {
+        UIView *rowPanel = [self makeRowPanelForPriceEvent:priceEvent];
+        [rowPanels addObject:rowPanel];
+      }
     }
     UISegmentedControl *sortBySegmentedChooser = [[UISegmentedControl alloc] initWithItems:@[@"by Lowest Price", @"by Nearest Location"]];
     [sortBySegmentedChooser bk_addEventHandler:^(id sender) {
