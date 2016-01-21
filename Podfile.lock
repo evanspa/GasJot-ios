@@ -67,7 +67,7 @@ PODS:
   - FormatterKit/URLRequestFormatter (1.8.0)
   - HMSegmentedControl (1.5.2)
   - IQKeyboardManager (3.2.1.1)
-  - JBChartView (3.0.1)
+  - JBChartView (3.0.5)
   - KissXML (5.0)
   - MBProgressHUD (0.9.1)
   - OHHTTPStubs (3.1.12):
@@ -95,14 +95,14 @@ PODS:
     - FMDB (~> 2.5)
     - PEHateoas-Client (~> 1.0.15)
     - PEObjc-Commons (~> 1.0.101)
-  - PELocal-DataUI (0.0.2):
+  - PELocal-DataUI (0.0.3):
     - BlocksKit (~> 2.2.5)
     - CocoaLumberjack (~> 1.9.2)
     - FlatUIKit (~> 1.6.2)
     - MBProgressHUD (~> 0.9.1)
     - PELocal-Data (~> 0.0.16)
-    - PEObjc-Commons (~> 1.0.109)
-  - PEObjc-Commons (1.0.109):
+    - PEObjc-Commons (~> 1.0.110)
+  - PEObjc-Commons (1.0.110):
     - BlocksKit (~> 2.2.5)
   - PESimu-Select (1.0.4):
     - PEObjc-Commons (~> 1.0.86)
@@ -142,8 +142,8 @@ DEPENDENCIES:
   - PEFuelPurchase-Common (= 1.0.12)
   - PEFuelPurchase-Model (= 1.0.219)
   - PELocal-Data (= 0.0.16)
-  - PELocal-DataUI (= 0.0.2)
-  - PEObjc-Commons (= 1.0.109)
+  - PELocal-DataUI (= 0.0.3)
+  - PEObjc-Commons (= 1.0.110)
   - ReactiveCocoa (= 2.4.7)
   - UICKeyChainStore (= 2.0.5)
 
@@ -158,7 +158,7 @@ SPEC CHECKSUMS:
   FormatterKit: bddde83e054edf9d9ee14f9de3b3a5103db256f4
   HMSegmentedControl: 83b9686022d2176fb6457d2bdb61e5d6393fed7d
   IQKeyboardManager: 6aeae6a2014d66461c48f6753dd693e92eaf6524
-  JBChartView: 60f0418c8c6cde2dfbd2f46749a294fa5c3f5c4a
+  JBChartView: b8583296a6b6e7308cf54d9d637ee8e76852bbc1
   KissXML: ce643413d618ad69886d0d43c3792b7dedfe476e
   MBProgressHUD: c47f2c166c126cf2ce36498d80f33e754d4e93ad
   OHHTTPStubs: 8cf0cfe6f34f13fc88fdf5b2a1b2c2536e8c0261
@@ -167,8 +167,8 @@ SPEC CHECKSUMS:
   PEFuelPurchase-Model: 0c864513f8d0fe4c822adfffbc2ca0e666819ebf
   PEHateoas-Client: 6885138dfb01bfbe98299bf6c4c0373b8e62d75c
   PELocal-Data: 1f03f10c46939eb03bcb01ec68e4a1e522d86bd4
-  PELocal-DataUI: 90fd50ad171e723610d74ccfc4bde94adc58e721
-  PEObjc-Commons: be16322654dd21bea7f0d9927cef3582f7f51208
+  PELocal-DataUI: 3687842543bb1a12312f46fa1be09d6b6be29771
+  PEObjc-Commons: 9cddc2ecadd3f79335d5f08905368f34de88c137
   PESimu-Select: 88e3ab14e1b9e0f75e9b626103581bd488128674
   PEWire-Control: c2d18d4261d025182513466da9c6ed80e596f526
   PEXML-Utils: d36d0ab7337b92c120ec49b84f99e7b923bf8a24

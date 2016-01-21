@@ -103,7 +103,7 @@ typedef NS_ENUM(NSInteger, FPHomeState) {
                          stats:(FPStats *)stats
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit {
-  self = [super initWithNibName:nil bundle:nil];
+  self = [super initWithRequireRepaintNotifications:nil];
   if (self) {
     _user = user;
     _stats = stats;

@@ -56,7 +56,7 @@
 - (id)initWithStoreCoordinator:(id<FPCoordinatorDao>)coordDao
                           user:(FPUser *)user
                      uitoolkit:(PEUIToolkit *)uitoolkit {
-  self = [super initWithNibName:nil bundle:nil];
+  self = [super initWithRequireRepaintNotifications:nil];
   if (self) {
     _coordDao = coordDao;
     _user = user;

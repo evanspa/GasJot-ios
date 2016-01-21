@@ -58,7 +58,7 @@
                           user:(FPUser *)user
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit {
-  self = [super initWithNibName:nil bundle:nil];
+  self = [super initWithRequireRepaintNotifications:nil];
   if (self) {
     _coordDao = coordDao;
     _user = user;

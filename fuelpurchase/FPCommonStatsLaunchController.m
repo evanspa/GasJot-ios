@@ -33,7 +33,7 @@
                    entity:(id)entity
      statLaunchButtonsBlk:(NSArray *(^)(void))statLaunchButtonsBlk
                 uitoolkit:(PEUIToolkit *)uitoolkit {
-  self = [super initWithNibName:nil bundle:nil];
+  self = [super initWithRequireRepaintNotifications:nil];
   if (self) {
     _screenTitle = screenTitle;
     _entityTypeLabelText = entityTypeLabelText;

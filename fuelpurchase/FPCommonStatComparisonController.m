@@ -43,7 +43,7 @@ NSString * const FPStatComparisonCellIdentifier = @"FPStatComparisonCellIdentifi
         valueFormatterBlk:(FPValueFormatter)valueFormatterBlk
                comparator:(NSComparisonResult(^)(NSArray *, NSArray *))comparator
                 uitoolkit:(PEUIToolkit *)uitoolkit {
-  self = [super initWithNibName:nil bundle:nil];
+  self = [super initWithRequireRepaintNotifications:nil];
   if (self) {
     _screenTitle = screenTitle;
     _headerText = headerText;

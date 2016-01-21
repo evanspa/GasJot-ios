@@ -11,9 +11,9 @@
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
 #import "iCarousel.h"
-#import <PELocal-DataUI/PECustomController.h>
+#import <PELocal-DataUI/PELocalDataBaseController.h>
 
-@interface FPSplashController : PECustomController <iCarouselDataSource, iCarouselDelegate>
+@interface FPSplashController : PELocalDataBaseController <iCarouselDataSource, iCarouselDelegate>
 
 #pragma mark - Initializers
 

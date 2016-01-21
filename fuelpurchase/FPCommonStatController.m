@@ -102,7 +102,7 @@ NSInteger const FPChartPreviousYearIndex = 2;
  comparisonScreenMakerBlk:(FPComparisonScreenMaker)comparisonScreenMakerBlk
         valueFormatterBlk:(FPValueFormatter)valueFormatterBlk
                 uitoolkit:(PEUIToolkit *)uitoolkit {
-  self = [super initWithNibName:nil bundle:nil];
+  self = [super initWithRequireRepaintNotifications:nil];
   if (self) {
     _screenTitle = screenTitle;
     _entityTypeLabelText = entityTypeLabelText;

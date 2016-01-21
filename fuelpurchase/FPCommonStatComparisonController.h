@@ -10,11 +10,11 @@
 #import <PEObjc-Commons/PEUIToolkit.h>
 #import "FPScreenToolkit.h"
 #import "FPCommonStatControllerConstants.h"
-#import <PELocal-DataUI/PECustomController.h>
+#import <PELocal-DataUI/PELocalDataBaseController.h>
 
 typedef NSArray *(^FPEntitiesToCompareBlk)(void);
 
-@interface FPCommonStatComparisonController : PECustomController
+@interface FPCommonStatComparisonController : PELocalDataBaseController
 
 #pragma mark - Initializers
 

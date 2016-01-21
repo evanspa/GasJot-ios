@@ -35,7 +35,7 @@ CGFloat const FPSPLASH_CONTENT_HEIGH_FACTOR = 0.65;
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit
            letsGoButtonEnabled:(BOOL)letsGoButtonEnabled {
-  self = [super initWithNibName:nil bundle:nil];
+  self = [super initWithRequireRepaintNotifications:nil];
   if (self) {
     _coordDao = coordDao;
     _uitoolkit = uitoolkit;
