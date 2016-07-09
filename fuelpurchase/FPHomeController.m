@@ -885,9 +885,9 @@ alignmentRelativeToView:self.view
   [PEUIUtils placeView:jotBtnMsgPanel atBottomOf:contentPanel withAlignment:PEUIHorizontalAlignmentTypeLeft vpadding:(jotBtnArrowImgView.frame.size.height + 3.0) hpadding:10.0];
   [PEUIUtils placeView:jotBtnArrowImgView
             atBottomOf:contentPanel
-         withAlignment:PEUIHorizontalAlignmentTypeRight
+         withAlignment:PEUIHorizontalAlignmentTypeCenter
               vpadding:0.0
-              hpadding:(tabWidth + (tabWidth / 2))-5];
+              hpadding:0.0];
   
   UILabel *introMsgLabel = [PEUIUtils labelWithAttributeText:[PEUIUtils attributedTextWithTemplate:@"%@ Create a Vehicle"
                                                                                       textToAccent:@"Step 1:"

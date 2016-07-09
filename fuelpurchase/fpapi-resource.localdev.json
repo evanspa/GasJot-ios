@@ -1,6 +1,6 @@
 { "_links": {
-  "users": { "href": "http://localhost/gasjot/d/users" },
-  "login": { "href": "http://localhost/gasjot/d/login" },
-  "light-login": { "href": "http://localhost/gasjot/d/light-login" },
-  "send-password-reset-email" : { "href": "http://localhost/gasjot/d/send-password-reset-email" },
-  "price-event-stream": { "href": "http://localhost/gasjot/d/price-stream" }}}
+  "users": { "href": "http://www.jotyourself.com/gasjot/d/users" },
+  "login": { "href": "http://www.jotyourself.com/gasjot/d/login" },
+  "light-login": { "href": "http://www.jotyourself.com/gasjot/d/light-login" },
+  "send-password-reset-email" : { "href": "http://www.jotyourself.com/gasjot/d/send-password-reset-email" },
+  "price-event-stream": { "href": "http://www.jotyourself.com/gasjot/d/price-stream" }}}

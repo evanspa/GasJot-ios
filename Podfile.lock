@@ -43,9 +43,9 @@ PODS:
     - CocoaLumberjack/Core
   - DateTools (1.7.0)
   - FlatUIKit (1.6.2)
-  - FMDB (2.6):
-    - FMDB/standard (= 2.6)
-  - FMDB/standard (2.6)
+  - FMDB (2.6.2):
+    - FMDB/standard (= 2.6.2)
+  - FMDB/standard (2.6.2)
   - FormatterKit (1.8.0):
     - FormatterKit/AddressFormatter (= 1.8.0)
     - FormatterKit/ArrayFormatter (= 1.8.0)
@@ -67,7 +67,7 @@ PODS:
   - FormatterKit/URLRequestFormatter (1.8.0)
   - HMSegmentedControl (1.5.2)
   - IQKeyboardManager (3.2.1.1)
-  - JBChartView (3.0.5)
+  - JBChartView (3.0.12)
   - KissXML (5.0)
   - MBProgressHUD (0.9.1)
   - OHHTTPStubs (3.1.12):
@@ -77,7 +77,7 @@ PODS:
     - PEObjc-Commons (~> 1.0.89)
     - PESimu-Select (~> 1.0.4)
   - PEFuelPurchase-Common (1.0.12)
-  - PEFuelPurchase-Model (1.0.219):
+  - PEFuelPurchase-Model (1.0.221):
     - CHCSVParser (~> 2.1.0)
     - CocoaLumberjack (~> 1.9)
     - FMDB (~> 2.5)
@@ -140,7 +140,7 @@ DEPENDENCIES:
   - OHHTTPStubs (= 3.1.12)
   - PEDev-Console (= 1.0.5)
   - PEFuelPurchase-Common (= 1.0.12)
-  - PEFuelPurchase-Model (= 1.0.219)
+  - PEFuelPurchase-Model (= 1.0.221)
   - PELocal-Data (= 0.0.16)
   - PELocal-DataUI (= 0.0.3)
   - PEObjc-Commons (= 1.0.110)
@@ -154,17 +154,17 @@ SPEC CHECKSUMS:
   CocoaLumberjack: 628fca2e88ef06f7cf6817309aa405f325d9a6fa
   DateTools: 53288ee8b905fdc75897a1e6b5cc0144b14cba60
   FlatUIKit: 1b41f0d4952ce8d970d8479ce79df54a960242c4
-  FMDB: c1968bab3ab0aed38f66cb778ae1e7fa9a652b6e
+  FMDB: 854a0341b4726e53276f2a8996f06f1b80f9259a
   FormatterKit: bddde83e054edf9d9ee14f9de3b3a5103db256f4
   HMSegmentedControl: 83b9686022d2176fb6457d2bdb61e5d6393fed7d
   IQKeyboardManager: 6aeae6a2014d66461c48f6753dd693e92eaf6524
-  JBChartView: b8583296a6b6e7308cf54d9d637ee8e76852bbc1
+  JBChartView: 08877554448ccf99c12625ad0ebce70588ff8318
   KissXML: ce643413d618ad69886d0d43c3792b7dedfe476e
   MBProgressHUD: c47f2c166c126cf2ce36498d80f33e754d4e93ad
   OHHTTPStubs: 8cf0cfe6f34f13fc88fdf5b2a1b2c2536e8c0261
   PEDev-Console: 4ee13ef5f0ed0b1c227ba6d696db467cb96dd6c3
   PEFuelPurchase-Common: 8b4ed986a89d064914a44d8a922078c9d622f445
-  PEFuelPurchase-Model: 0c864513f8d0fe4c822adfffbc2ca0e666819ebf
+  PEFuelPurchase-Model: fc2c28bbceaf9a8360378ad3883801e8be68d152
   PEHateoas-Client: 6885138dfb01bfbe98299bf6c4c0373b8e62d75c
   PELocal-Data: 1f03f10c46939eb03bcb01ec68e4a1e522d86bd4
   PELocal-DataUI: 3687842543bb1a12312f46fa1be09d6b6be29771

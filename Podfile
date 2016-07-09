@@ -2,7 +2,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 platform :ios, '8.4'
 
-pod 'PEFuelPurchase-Model', '1.0.219'
+pod 'PEFuelPurchase-Model', '1.0.221'
 pod 'PELocal-Data', '0.0.16'
 pod 'PELocal-DataUI', '0.0.3'
 pod 'PEFuelPurchase-Common', '1.0.12'

@@ -466,7 +466,7 @@ Enable offline mode if you are making many saves and you want them done instantl
                                                           userInfo:nil];
         MBProgressHUD *HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         HUD.delegate = self;
-        [HUD setLabelText:@"You're data has been deleted."];
+        [HUD setLabelText:@"Your data has been deleted."];
         UIImage *image = [UIImage imageNamed:@"hud-complete"];
         UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
         [HUD setCustomView:imageView];
