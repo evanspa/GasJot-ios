@@ -12,6 +12,7 @@ utilization history.
 
 - [About the Gas Jot System](#about-the-gas-jot-system)
   - [Server-side Application](#server-side-application)
+  - [Web Application](#web-application)
 - [Component Layering](#component-layering)
 - [Dependency Graph](#dependency-graph)
 - [App-specific Libraries used by GasJot-ios](#app-specific-libraries)
@@ -52,6 +53,15 @@ to Gas Jot.  These libraries are the
 The server-side application of Gas Jot provides a REST API endpoint (*written in
 Clojure*) for the client applications to consume:
 [pe-gasjot-app](https://github.com/evanspa/pe-gasjot-app).
+
+### Web Application
+
+Web interface for Gas Jot.  The Gas Jot web application allows users to manage
+their data records and see a few charts.  The web application provides a minimal
+set of functionality; it is not nearly as featureful as the iOS
+application.
++ [Gas Jot web app GitHub page](https://github.com/evanspa/gasjot-web)
++ [Gas Jot web page](https://www.jotyourself.com)
 
 ## Component Layering
 
