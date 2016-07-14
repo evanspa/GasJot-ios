@@ -1,0 +1,1 @@
+../../../PEHateoas-Client/PEHateoas-Client/NSURL+HCAdditions.h

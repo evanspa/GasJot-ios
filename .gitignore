@@ -22,9 +22,5 @@ compile_commands.json
 xcodebuild.log
 oclint_result.html
 
-#CocoaPods
-Pods
-Gas Jot.xcworkspace/
-
 # Misc
 generated-docs/Gas Jot.xcworkspace

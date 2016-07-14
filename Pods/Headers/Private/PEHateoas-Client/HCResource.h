@@ -1,0 +1,1 @@
+../../../PEHateoas-Client/PEHateoas-Client/HCResource.h
