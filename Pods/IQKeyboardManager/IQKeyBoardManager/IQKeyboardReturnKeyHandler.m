@@ -1,7 +1,7 @@
 //
 //  IQKeyboardReturnKeyHandler.m
 // https://github.com/hackiftekhar/IQKeyboardManager
-// Copyright (c) 2013-14 Iftekhar Qurashi.
+// Copyright (c) 2013-16 Iftekhar Qurashi.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 // THE SOFTWARE.
 
 #import "IQKeyboardReturnKeyHandler.h"
-
+#import "IQKeyboardManager.h"
 #import "IQUIView+Hierarchy.h"
 #import "IQNSArray+Sort.h"
 
@@ -30,7 +30,6 @@
 
 #import <UIKit/UITextField.h>
 #import <UIKit/UITextView.h>
-#import <UIKit/UITableView.h>
 #import <UIKit/UIViewController.h>
 
 NSString *const kIQTextField                =   @"kIQTextField";
@@ -40,11 +39,22 @@ NSString *const kIQTextFieldReturnKeyType   =   @"kIQTextFieldReturnKeyType";
 
 @interface IQKeyboardReturnKeyHandler ()<UITextFieldDelegate,UITextViewDelegate>
 
+-(void)updateReturnKeyTypeOnTextField:(UIView*)textField;
+
 @end
 
 @implementation IQKeyboardReturnKeyHandler
 {
     NSMutableSet *textFieldInfoCache;
+}
+
+@synthesize lastTextFieldReturnKeyType = _lastTextFieldReturnKeyType;
+@synthesize delegate = _delegate;
+
+- (instancetype)init
+{
+    self = [self initWithViewController:nil];
+    return self;
 }
 
 -(instancetype)initWithViewController:(UIViewController*)controller
@@ -91,7 +101,7 @@ NSString *const kIQTextFieldReturnKeyType   =   @"kIQTextFieldReturnKeyType";
     {
         textField.keyboardType = [dict[kIQTextFieldReturnKeyType] integerValue];
         textField.delegate = dict[kIQTextFieldDelegate];
-        [textFieldInfoCache removeObject:textField];
+        [textFieldInfoCache removeObject:dict];
     }
 }
 
@@ -100,38 +110,34 @@ NSString *const kIQTextFieldReturnKeyType   =   @"kIQTextFieldReturnKeyType";
     NSMutableDictionary *dictInfo = [[NSMutableDictionary alloc] init];
     
     dictInfo[kIQTextField] = textField;
-    dictInfo[kIQTextFieldReturnKeyType] = @([textField returnKeyType]);
+    dictInfo[kIQTextFieldReturnKeyType] = @(textField.returnKeyType);
     
     if (textField.delegate) dictInfo[kIQTextFieldDelegate] = textField.delegate;
+
     [textField setDelegate:self];
 
     [textFieldInfoCache addObject:dictInfo];
 }
 
-#pragma mark - Overriding lastTextFieldReturnKeyType
--(void)setLastTextFieldReturnKeyType:(UIReturnKeyType)lastTextFieldReturnKeyType
-{
-    _lastTextFieldReturnKeyType = lastTextFieldReturnKeyType;
-    
-    for (NSDictionary *infoDict in textFieldInfoCache)
-    {
-        UITextField *textField = infoDict[kIQTextField];
-
-        [self updateReturnKeyTypeOnTextField:textField];
-    }
-}
-
 -(void)updateReturnKeyTypeOnTextField:(UIView*)textField
 {
-    UIView *tableView = [textField superTableView];
-    if (tableView == nil)   tableView = [textField superCollectionView];
+    UIView *superConsideredView;
+    
+    //If find any consider responderView in it's upper hierarchy then will get deepResponderView. (Bug ID: #347)
+    for (Class consideredClass in [[IQKeyboardManager sharedManager] toolbarPreviousNextAllowedClasses])
+    {
+        superConsideredView = [textField superviewOfClassType:consideredClass];
+        
+        if (superConsideredView != nil)
+            break;
+    }
 
     NSArray *textFields = nil;
 
     //If there is a tableView in view's hierarchy, then fetching all it's subview that responds. No sorting for tableView, it's by subView position.
-    if (tableView)  //     //   (Enhancement ID: #22)
+    if (superConsideredView)  //     //   (Enhancement ID: #22)
     {
-        textFields = [tableView deepResponderViews];
+        textFields = [superConsideredView deepResponderViews];
     }
     //Otherwise fetching all the siblings
     else
@@ -139,7 +145,7 @@ NSString *const kIQTextFieldReturnKeyType   =   @"kIQTextFieldReturnKeyType";
         textFields = [textField responderSiblings];
         
         //Sorting textFields according to behaviour
-        switch (_toolbarManageBehaviour)
+        switch ([[IQKeyboardManager sharedManager] toolbarManageBehaviour])
         {
                 //If needs to sort it by tag
             case IQAutoToolbarByTag:
@@ -164,15 +170,23 @@ NSString *const kIQTextFieldReturnKeyType   =   @"kIQTextFieldReturnKeyType";
 
 -(void)goToNextResponderOrResign:(UIView*)textField
 {
-    UIView *tableView = [textField superTableView];
-    if (tableView == nil)   tableView = [textField superCollectionView];
+    UIView *superConsideredView;
+    
+    //If find any consider responderView in it's upper hierarchy then will get deepResponderView. (Bug ID: #347)
+    for (Class consideredClass in [[IQKeyboardManager sharedManager] toolbarPreviousNextAllowedClasses])
+    {
+        superConsideredView = [textField superviewOfClassType:consideredClass];
+        
+        if (superConsideredView != nil)
+            break;
+    }
     
     NSArray *textFields = nil;
     
     //If there is a tableView in view's hierarchy, then fetching all it's subview that responds. No sorting for tableView, it's by subView position.
-    if (tableView)  //     //   (Enhancement ID: #22)
+    if (superConsideredView)  //     //   (Enhancement ID: #22)
     {
-        textFields = [tableView deepResponderViews];
+        textFields = [superConsideredView deepResponderViews];
     }
     //Otherwise fetching all the siblings
     else
@@ -180,7 +194,7 @@ NSString *const kIQTextFieldReturnKeyType   =   @"kIQTextFieldReturnKeyType";
         textFields = [textField responderSiblings];
         
         //Sorting textFields according to behaviour
-        switch (_toolbarManageBehaviour)
+        switch ([[IQKeyboardManager sharedManager] toolbarManageBehaviour])
         {
                 //If needs to sort it by tag
             case IQAutoToolbarByTag:
@@ -197,14 +211,11 @@ NSString *const kIQTextFieldReturnKeyType   =   @"kIQTextFieldReturnKeyType";
         }
     }
         
-    if ([textFields containsObject:textField])
-    {
-        //Getting index of current textField.
-        NSUInteger index = [textFields indexOfObject:textField];
-        
-        //If it is not last textField. then it's next object becomeFirstResponder.
-        (index < textFields.count-1) ?   [textFields[index+1] becomeFirstResponder]  :   [textField resignFirstResponder];
-    }
+    //Getting index of current textField.
+    NSUInteger index = [textFields indexOfObject:textField];
+    
+    //If it is not last textField. then it's next object becomeFirstResponder.
+    (index != NSNotFound && index < textFields.count-1) ?   [textFields[index+1] becomeFirstResponder]  :   [textField resignFirstResponder];
 }
 
 #pragma mark - TextField delegate

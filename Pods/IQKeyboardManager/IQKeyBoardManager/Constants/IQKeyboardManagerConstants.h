@@ -1,7 +1,7 @@
 //
 //  IQKeyboardManagerConstants.h
 // https://github.com/hackiftekhar/IQKeyboardManager
-// Copyright (c) 2013-14 Iftekhar Qurashi.
+// Copyright (c) 2013-16 Iftekhar Qurashi.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,41 +26,32 @@
 
 #import <Foundation/NSObjCRuntime.h>
 
-/* Set IQKEYBOARDMANAGER_DEBUG=1 in preprocessor macros under build settings to enable debugging.*/
+///-----------------------------------
+/// @name IQAutoToolbarManageBehaviour
+///-----------------------------------
 
-/*!
-    @enum IQAutoToolbarManageBehaviour
+/**
+ `IQAutoToolbarBySubviews`
+ Creates Toolbar according to subview's hirarchy of Textfield's in view.
  
-    @abstract AutoToolbar manage settings.
+ `IQAutoToolbarByTag`
+ Creates Toolbar according to tag property of TextField's.
  
-    @const IQAutoToolbarBySubviews Creates Toolbar according to subview's hirarchy of Textfield's in view.
- 
-    @const IQAutoToolbarByTag Creates Toolbar according to tag property of TextField's.
- 
-    @const IQAutoToolbarByPosition Creates Toolbar according to the y,x position of textField in it's superview coordinate.
+ `IQAutoToolbarByPosition`
+ Creates Toolbar according to the y,x position of textField in it's superview coordinate.
  */
-
-#ifndef NS_ENUM
-    #define NS_ENUM(_type, _name) enum _name : _type _name; enum _name : _type
-#endif
-
 typedef NS_ENUM(NSInteger, IQAutoToolbarManageBehaviour) {
     IQAutoToolbarBySubviews,
     IQAutoToolbarByTag,
     IQAutoToolbarByPosition,
 };
 
+///-------------------
+/// @name Localization
+///-------------------
+
 #define IQLocalizedString(key, comment) [[NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"IQKeyboardManager" ofType:@"bundle"]] localizedStringForKey:(key) value:@"" table:@"IQKeyboardManager"]
 
-#endif
-
-/* XCode 5.0 Compatibility for NS_DESIGNATED_INITIALIZER*/
-#ifndef NS_DESIGNATED_INITIALIZER
-#if __has_attribute(objc_designated_initializer)
-#define NS_DESIGNATED_INITIALIZER __attribute__((objc_designated_initializer))
-#else
-#define NS_DESIGNATED_INITIALIZER
-#endif
 #endif
 
 /*
@@ -70,68 +61,70 @@ typedef NS_ENUM(NSInteger, IQAutoToolbarManageBehaviour) {
  |                                   iOS NSNotification Mechanism                                    |
  /---------------------------------------------------------------------------------------------------\
  \---------------------------------------------------------------------------------------------------/
+
  
- 1) Begin Editing:-         When TextField begin editing.
- 2) End Editing:-           When TextField end editing.
- 3) Switch TextField:-      When Keyboard Switch from a TextField to another TextField.
- 3) Orientation Change:-    When Device Orientation Change.
+ ------------------------------------------------------------
+ When UITextField become first responder
+ ------------------------------------------------------------
+ - UITextFieldTextDidBeginEditingNotification (UITextField)
+ - UIKeyboardWillShowNotification
+ - UIKeyboardDidShowNotification
  
+ ------------------------------------------------------------
+ When UITextView become first responder
+ ------------------------------------------------------------
+ - UIKeyboardWillShowNotification
+ - UITextViewTextDidBeginEditingNotification (UITextView)
+ - UIKeyboardDidShowNotification
+
+ ------------------------------------------------------------
+ When switching focus from UITextField to another UITextField
+ ------------------------------------------------------------
+ - UITextFieldTextDidEndEditingNotification (UITextField1)
+ - UITextFieldTextDidBeginEditingNotification (UITextField2)
+ - UIKeyboardWillShowNotification
+ - UIKeyboardDidShowNotification
+
+ ------------------------------------------------------------
+ When switching focus from UITextView to another UITextView
+ ------------------------------------------------------------
+ - UITextViewTextDidEndEditingNotification : (UITextView1)
+ - UIKeyboardWillShowNotification
+ - UITextViewTextDidBeginEditingNotification : (UITextView2)
+ - UIKeyboardDidShowNotification
  
- ----------------------------------------------------------------------------------------------------------------------------------------------
- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- ----------------------------------------------------------------------------------------------------------------------------------------------
- =============
- UITextField
- =============
+ ------------------------------------------------------------
+ When switching focus from UITextField to UITextView
+ ------------------------------------------------------------
+ - UITextFieldTextDidEndEditingNotification (UITextField)
+ - UIKeyboardWillShowNotification
+ - UITextViewTextDidBeginEditingNotification (UITextView)
+ - UIKeyboardDidShowNotification
+
+ ------------------------------------------------------------
+ When switching focus from UITextView to UITextField
+ ------------------------------------------------------------
+ - UITextViewTextDidEndEditingNotification (UITextView)
+ - UITextFieldTextDidBeginEditingNotification (UITextField)
+ - UIKeyboardWillShowNotification
+ - UIKeyboardDidShowNotification
+
+ ------------------------------------------------------------
+ When opening/closing UIKeyboard Predictive bar
+ ------------------------------------------------------------
+ - UIKeyboardWillShowNotification
+ - UIKeyboardDidShowNotification
+
+ ------------------------------------------------------------
+ On orientation change
+ ------------------------------------------------------------
+ - UIApplicationWillChangeStatusBarOrientationNotification
+ - UIKeyboardWillHideNotification
+ - UIKeyboardDidHideNotification
+ - UIApplicationDidChangeStatusBarOrientationNotification
+ - UIKeyboardWillShowNotification
+ - UIKeyboardDidShowNotification
+ - UIKeyboardWillShowNotification
+ - UIKeyboardDidShowNotification
  
- Begin Editing                                Begin Editing
- --------------------------------------------           ----------------------------------           ---------------------------------
- |UITextFieldTextDidBeginEditingNotification| --------> | UIKeyboardWillShowNotification | --------> | UIKeyboardDidShowNotification |
- --------------------------------------------           ----------------------------------           ---------------------------------
- ^                  Switch TextField             ^               Switch TextField
- |                                               |
- |                                               |
- | Switch TextField                              | Orientation Change
- |                                               |
- |                                               |
- |                                               |
- --------------------------------------------    |      ----------------------------------           ---------------------------------
- | UITextFieldTextDidEndEditingNotification | <-------- | UIKeyboardWillHideNotification | --------> | UIKeyboardDidHideNotification |
- --------------------------------------------           ----------------------------------           ---------------------------------
- |                    End Editing                                                             ^
- |                                                                                            |
- |--------------------End Editing-------------------------------------------------------------|
- 
- 
- ----------------------------------------------------------------------------------------------------------------------------------------------
- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- ----------------------------------------------------------------------------------------------------------------------------------------------
- =============
- UITextView
- =============
- |-------------------Switch TextView--------------------------------------------------------------|
- | |------------------Begin Editing-------------------------------------------------------------| |
- | |                                                                                            | |
- v |                  Begin Editing                               Switch TextView               v |
- --------------------------------------------           ----------------------------------           ---------------------------------
- | UITextViewTextDidBeginEditingNotification| <-------- | UIKeyboardWillShowNotification | --------> | UIKeyboardDidShowNotification |
- --------------------------------------------           ----------------------------------           ---------------------------------
- ^
- |
- |------------------------Switch TextView--------|
- |                                               | Orientation Change
- |                                               |
- |                                               |
- |                                               |
- --------------------------------------------    |      ----------------------------------           ---------------------------------
- | UITextViewTextDidEndEditingNotification  | <-------- | UIKeyboardWillHideNotification |           | UIKeyboardDidHideNotification |
- --------------------------------------------           ----------------------------------           ---------------------------------
- |                    End Editing                                                             ^
- |                                                                                            |
- |--------------------End Editing-------------------------------------------------------------|
- 
- 
- ----------------------------------------------------------------------------------------------------------------------------------------------
- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- ----------------------------------------------------------------------------------------------------------------------------------------------
  */

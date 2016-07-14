@@ -14,7 +14,7 @@ target "Gas Jot" do
   pod 'MBProgressHUD', '0.9.1'
   pod 'FlatUIKit', '1.6.2', :inhibit_warnings => true
   pod 'UICKeyChainStore', '2.0.5'
-  pod 'IQKeyboardManager', '3.2.1.1', :inhibit_warnings => true
+  pod 'IQKeyboardManager', '4.0.4', :inhibit_warnings => true
   pod 'BlocksKit', '2.2.5', :inhibit_warnings => true
   pod 'JBChartView', :inhibit_warnings => true
   pod 'HMSegmentedControl', :inhibit_warnings => true

@@ -1,7 +1,7 @@
 //
 //  UIWindow+Hierarchy.h
 // https://github.com/hackiftekhar/IQKeyboardManager
-// Copyright (c) 2013-14 Iftekhar Qurashi.
+// Copyright (c) 2013-16 Iftekhar Qurashi.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,26 +25,24 @@
 
 @class UIViewController;
 
-/*!
-    @category UIWindow (IQ_UIWindow_Hierarchy)
- 
-    @abstract UIWindow hierarchy category.
+/**
+ UIWindow hierarchy category.
  */
 @interface UIWindow (IQ_UIWindow_Hierarchy)
 
-/*!
-    @method topMostController
- 
-    @return Returns the current Top Most ViewController in hierarchy.
- */
-@property (nonatomic, readonly, strong) UIViewController *topMostController;
+///----------------------
+/// @name viewControllers
+///----------------------
 
-/*!
-    @method currentViewController
- 
-    @return Returns the topViewController in stack of topMostController.
+/**
+ Returns the current Top Most ViewController in hierarchy.
  */
-@property (nonatomic, readonly, strong) UIViewController *currentViewController;
+@property (nullable, nonatomic, readonly, strong) UIViewController *topMostController;
+
+/**
+ Returns the topViewController in stack of topMostController.
+ */
+@property (nullable, nonatomic, readonly, strong) UIViewController *currentViewController;
 
 
 @end

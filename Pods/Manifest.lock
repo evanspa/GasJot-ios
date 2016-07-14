@@ -66,7 +66,7 @@ PODS:
   - FormatterKit/UnitOfInformationFormatter (1.8.0)
   - FormatterKit/URLRequestFormatter (1.8.0)
   - HMSegmentedControl (1.5.2)
-  - IQKeyboardManager (3.2.1.1)
+  - IQKeyboardManager (4.0.4)
   - JBChartView (3.0.12)
   - KissXML (5.0)
   - MBProgressHUD (0.9.1)
@@ -133,7 +133,7 @@ DEPENDENCIES:
   - FlatUIKit (= 1.6.2)
   - FormatterKit (= 1.8.0)
   - HMSegmentedControl
-  - IQKeyboardManager (= 3.2.1.1)
+  - IQKeyboardManager (= 4.0.4)
   - JBChartView
   - KissXML (= 5.0)
   - MBProgressHUD (= 0.9.1)
@@ -157,7 +157,7 @@ SPEC CHECKSUMS:
   FMDB: 854a0341b4726e53276f2a8996f06f1b80f9259a
   FormatterKit: bddde83e054edf9d9ee14f9de3b3a5103db256f4
   HMSegmentedControl: 83b9686022d2176fb6457d2bdb61e5d6393fed7d
-  IQKeyboardManager: 6aeae6a2014d66461c48f6753dd693e92eaf6524
+  IQKeyboardManager: 4a6f83b540283c2645aaeba2bd8dc0f09b5c77f8
   JBChartView: '08877554448ccf99c12625ad0ebce70588ff8318'
   KissXML: ce643413d618ad69886d0d43c3792b7dedfe476e
   MBProgressHUD: c47f2c166c126cf2ce36498d80f33e754d4e93ad
@@ -175,6 +175,6 @@ SPEC CHECKSUMS:
   ReactiveCocoa: eb38dee0a0e698f73a9b25e5c1faea2bb4c79240
   UICKeyChainStore: a389515ca090d4d49780fd563fec961571caa92b
 
-PODFILE CHECKSUM: 0ae4a8bfff5cfc6cbb198d6165a91047d5824d15
+PODFILE CHECKSUM: 4637a13d460dd24fdfef4abd4f98b6e21978998f
 
 COCOAPODS: 1.1.0.beta.1

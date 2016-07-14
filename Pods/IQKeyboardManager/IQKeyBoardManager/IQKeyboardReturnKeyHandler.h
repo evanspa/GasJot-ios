@@ -1,7 +1,7 @@
 //
 //  IQKeyboardReturnKeyHandler.h
 // https://github.com/hackiftekhar/IQKeyboardManager
-// Copyright (c) 2013-14 Iftekhar Qurashi.
+// Copyright (c) 2013-16 Iftekhar Qurashi.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -31,71 +31,69 @@
 
 @class UITextField,UIView, UIViewController;
 
-/*!
-    @author Iftekhar Qurashi
- 
-	@related hack.iftekhar@gmail.com
- 
-    @class IQKeyboardReturnKeyHandler
- 
-	@abstract Manages the return key to work like next/done in a view hierarchy.
+/**
+ Manages the return key to work like next/done in a view hierarchy.
  */
 @interface IQKeyboardReturnKeyHandler : NSObject
 
-/*!
-    @method initWithViewController
- 
-    @abstract Add all the textFields available in UIViewController's view.
- */
--(instancetype)initWithViewController:(UIViewController*)controller NS_DESIGNATED_INITIALIZER;
+///----------------------
+/// @name Initializations
+///----------------------
 
-/*!
-    @method delegate
- 
-    @abstract textField's delegates.
+/**
+ Add all the textFields available in UIViewController's view.
  */
-@property(nonatomic, weak) id<UITextFieldDelegate,UITextViewDelegate> delegate;
+-(nonnull instancetype)initWithViewController:(nullable UIViewController*)controller NS_DESIGNATED_INITIALIZER;
 
-/*!
-    @property toolbarManageBehaviour
- 
-    @abstract It help to choose the lastTextField instance from sibling responderViews. Default is IQAutoToolbarBySubviews.
+/**
+ Unavailable. Please use initWithViewController: or init method
  */
-@property(nonatomic, assign) IQAutoToolbarManageBehaviour toolbarManageBehaviour;
+-(nonnull instancetype)initWithCoder:(nullable NSCoder *)aDecoder NS_UNAVAILABLE;
 
-/*!
-    @property lastTextFieldReturnKeyType
- 
-    @abstract Set the last textfield return key type. Default is UIReturnKeyDefault.
+///---------------
+/// @name Settings
+///---------------
+
+/**
+ Delegate of textField/textView.
+ */
+@property(nullable, nonatomic, weak) id<UITextFieldDelegate,UITextViewDelegate> delegate;
+
+/**
+ Set the last textfield return key type. Default is UIReturnKeyDefault.
  */
 @property(nonatomic, assign) UIReturnKeyType lastTextFieldReturnKeyType;
 
-/*!
-    @method addTextFieldView
- 
-    @abstract Should pass UITextField/UITextView intance. Assign textFieldView delegate to self, change it's returnKeyType.
- */
--(void)addTextFieldView:(UIView*)textFieldView;
+///----------------------------------------------
+/// @name Registering/Unregistering textFieldView
+///----------------------------------------------
 
-/*!
-    @method removeTextFieldView
+/**
+ Should pass UITextField/UITextView instance. Assign textFieldView delegate to self, change it's returnKeyType.
  
-    @abstract Should pass UITextField/UITextView intance. Restore it's textFieldView delegate and it's returnKeyType.
+ @param textFieldView UITextField/UITextView object to register.
  */
--(void)removeTextFieldView:(UIView*)textFieldView;
+-(void)addTextFieldView:(nonnull UIView*)textFieldView;
 
-/*!
-    @method addResponderFromView
- 
-    @abstract Add all the UITextField/UITextView responderView's.
- */
--(void)addResponderFromView:(UIView*)view;
+/**
+ Should pass UITextField/UITextView instance. Restore it's textFieldView delegate and it's returnKeyType.
 
-/*!
-    @method removeResponderFromView
- 
-    @abstract Remove all the UITextField/UITextView responderView's.
+ @param textFieldView UITextField/UITextView object to unregister.
  */
--(void)removeResponderFromView:(UIView*)view;
+-(void)removeTextFieldView:(nonnull UIView*)textFieldView;
+
+/**
+ Add all the UITextField/UITextView responderView's.
+ 
+ @param UIView object to register all it's responder subviews.
+ */
+-(void)addResponderFromView:(nonnull UIView*)view;
+
+/**
+ Remove all the UITextField/UITextView responderView's.
+ 
+ @param UIView object to unregister all it's responder subviews.
+ */
+-(void)removeResponderFromView:(nonnull UIView*)view;
 
 @end

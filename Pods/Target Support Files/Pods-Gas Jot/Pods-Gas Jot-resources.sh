@@ -111,7 +111,7 @@ if [[ "$CONFIGURATION" == "Release" ]]; then
   install_resource "FormatterKit/Localizations/vi.lproj"
   install_resource "FormatterKit/Localizations/zh-Hans.lproj"
   install_resource "FormatterKit/Localizations/zh-Hant.lproj"
-  install_resource "IQKeyboardManager/IQKeyBoardManager/Resources/IQKeyboardManager.bundle"
+  install_resource "IQKeyboardManager/IQKeyboardManager/Resources/IQKeyboardManager.bundle"
   install_resource "PEObjc-Commons/PEObjc-Commons/Resources/PEObjc-Commons.bundle"
 fi
 if [[ "$CONFIGURATION" == "Debug" ]]; then
@@ -146,7 +146,7 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_resource "FormatterKit/Localizations/vi.lproj"
   install_resource "FormatterKit/Localizations/zh-Hans.lproj"
   install_resource "FormatterKit/Localizations/zh-Hant.lproj"
-  install_resource "IQKeyboardManager/IQKeyBoardManager/Resources/IQKeyboardManager.bundle"
+  install_resource "IQKeyboardManager/IQKeyboardManager/Resources/IQKeyboardManager.bundle"
   install_resource "PEDev-Console/Resources/PEDev-Console.bundle"
   install_resource "PEObjc-Commons/PEObjc-Commons/Resources/PEObjc-Commons.bundle"
 fi
