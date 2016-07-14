@@ -36,18 +36,6 @@
 #import "PELMMainSupport.h"
 #import "PELMNotificationNames.h"
 
-void (^PELMCannotBe)(BOOL, NSString *) = ^(BOOL invariantViolation, NSString *msg) {
-  if (invariantViolation) {
-    @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:msg
-                                 userInfo:nil];
-  }
-};
-
-id (^PELMOrNil)(id) = ^ id (id someObj) {
-  return [PEUtils orNil:someObj];
-};
-
 PELMMainSupport * (^toMainSupport)(FMResultSet *, NSString *, NSDictionary *) = ^PELMMainSupport *(FMResultSet *rs, NSString *mainTable, NSDictionary *relations) {
   return [[PELMMainSupport alloc] initWithLocalMainIdentifier:[rs objectForColumnName:COL_LOCAL_ID]
                                         localMasterIdentifier:nil // NA (this is a master entity-only column)
@@ -213,9 +201,9 @@ PELMMainSupport * (^toMainSupport)(FMResultSet *, NSString *, NSDictionary *) = 
                                                           fetchCompleteBlk:(void(^)(id))fetchCompleteBlk
                                                            newAuthTokenBlk:(void(^)(NSString *))newAuthTokenBlk {
   PELMRemoteMasterCompletionHandler remoteStoreComplHandler =
-    ^(NSString *newAuthTkn, NSString *relativeGlobalId, id resourceModel, NSDictionary *rels,
-      NSDate *lastModified, BOOL isConflict, BOOL gone, BOOL notFound, BOOL movedPermanently,
-      BOOL notModified, NSError *err, NSHTTPURLResponse *httpResp) {
+  ^(NSString *newAuthTkn, NSString *relativeGlobalId, id resourceModel, NSDictionary *rels,
+    NSDate *lastModified, BOOL isConflict, BOOL gone, BOOL notFound, BOOL movedPermanently,
+    BOOL notModified, NSError *err, NSHTTPURLResponse *httpResp) {
     newAuthTokenBlk(newAuthTkn);
     if (movedPermanently) { // this block will get executed again
       // ?
@@ -294,13 +282,29 @@ PELMMainSupport * (^toMainSupport)(FMResultSet *, NSString *, NSDictionary *) = 
 
 #pragma mark - Utils
 
++ (PELMCannotBe)makeCannotBe {
+  return ^(BOOL invariantViolation, NSString *msg) {
+    if (invariantViolation) {
+      @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                     reason:msg
+                                   userInfo:nil];
+    }
+  };
+}
+
++ (PELMOrNil)makeOrNil {
+  return ^ id (id someObj) {
+    return [PEUtils orNil:someObj];
+  };
+}
+
 - (void)cancelSyncForEntity:(PELMMainSupport *)entity
-             httpRespCode:(NSNumber *)httpRespCode
-                errorMask:(NSNumber *)errorMask
-                  retryAt:(NSDate *)retryAt
-           mainUpdateStmt:(NSString *)mainUpdateStmt
-        mainUpdateArgsBlk:(NSArray *(^)(PELMMainSupport *))mainUpdateArgsBlk
-                    error:(PELMDaoErrorBlk)errorBlk {
+               httpRespCode:(NSNumber *)httpRespCode
+                  errorMask:(NSNumber *)errorMask
+                    retryAt:(NSDate *)retryAt
+             mainUpdateStmt:(NSString *)mainUpdateStmt
+          mainUpdateArgsBlk:(NSArray *(^)(PELMMainSupport *))mainUpdateArgsBlk
+                      error:(PELMDaoErrorBlk)errorBlk {
   [entity setSyncInProgress:NO];
   [entity setSyncErrMask:errorMask];
   [entity setSyncHttpRespCode:httpRespCode];
@@ -982,9 +986,9 @@ PELMMainSupport * (^toMainSupport)(FMResultSet *, NSString *, NSDictionary *) = 
     NSMutableString *whereClause  = [NSMutableString stringWithFormat:@" WHERE mstr.%@ = ? AND mstr.%@ IS NULL", parentEntityMasterIdColumn, COL_MST_DELETED_DT];
     if ([parentEntity localMainIdentifier]) {
       whereClause = [NSMutableString stringWithFormat:@" WHERE mstr.%@ = ? AND \
-mstr.%@ NOT IN (SELECT man.%@ \
-                FROM %@ man \
-                WHERE man.%@ = ? AND \
+                     mstr.%@ NOT IN (SELECT man.%@ \
+                     FROM %@ man \
+                     WHERE man.%@ = ? AND \
                      man.%@ IS NOT NULL) AND mstr.%@ IS NULL",
                      parentEntityMasterIdColumn,
                      COL_GLOBAL_ID,
@@ -1284,11 +1288,11 @@ mstr.%@ NOT IN (SELECT man.%@ \
     [NSString stringWithFormat:@"\
      FROM %@ mstr \
      WHERE mstr.%@ = ? AND \
-           mstr.%@ NOT IN (SELECT innerman.%@ \
-                           FROM %@ innerman \
-                           WHERE innerman.%@ = ? AND \
-                                 innerman.%@ IS NOT NULL) AND \
-           mstr.%@ IS NULL",
+     mstr.%@ NOT IN (SELECT innerman.%@ \
+     FROM %@ innerman \
+     WHERE innerman.%@ = ? AND \
+     innerman.%@ IS NOT NULL) AND \
+     mstr.%@ IS NULL",
      entityMasterTable,
      parentEntityMasterIdColumn,
      COL_GLOBAL_ID,
@@ -1381,11 +1385,11 @@ mstr.%@ NOT IN (SELECT man.%@ \
                                                                   db:db
                                                                error:errorBlk];
         [parentMainEntity setCreatedAt:[PELMUtils dateFromTable:parentEntityMasterTable
-                                               dateColumn:COL_MST_CREATED_AT
-                                              whereColumn:COL_GLOBAL_ID
-                                               whereValue:[parentMainEntity globalIdentifier]
-                                                       db:db
-                                                    error:errorBlk]];
+                                                     dateColumn:COL_MST_CREATED_AT
+                                                    whereColumn:COL_GLOBAL_ID
+                                                     whereValue:[parentMainEntity globalIdentifier]
+                                                             db:db
+                                                          error:errorBlk]];
         [parentMainEntity setDeletedAt:[PELMUtils dateFromTable:parentEntityMasterTable
                                                      dateColumn:COL_MST_DELETED_DT
                                                     whereColumn:COL_GLOBAL_ID
@@ -1393,11 +1397,11 @@ mstr.%@ NOT IN (SELECT man.%@ \
                                                              db:db
                                                           error:errorBlk]];
         [parentMainEntity setUpdatedAt:[PELMUtils dateFromTable:parentEntityMasterTable
-                                               dateColumn:COL_MST_UPDATED_AT
-                                              whereColumn:COL_GLOBAL_ID
-                                               whereValue:[parentMainEntity globalIdentifier]
-                                                       db:db
-                                                    error:errorBlk]];
+                                                     dateColumn:COL_MST_UPDATED_AT
+                                                    whereColumn:COL_GLOBAL_ID
+                                                     whereValue:[parentMainEntity globalIdentifier]
+                                                             db:db
+                                                          error:errorBlk]];
         if (localMasterIdentifier) {
           [parentMainEntity setLocalMasterIdentifier:localMasterIdentifier];
         }
@@ -1479,9 +1483,9 @@ mstr.%@ NOT IN (SELECT man.%@ \
         @throw [NSException
                 exceptionWithName:NSInternalInconsistencyException
                 reason:[NSString stringWithFormat:@"Inside \
-localMainIdentifierForEntity:mainTable:db:error: - found local main ID [%@] is \
-different from the local main ID [%@] on the in-memory entity with global \
-ID: [%@].", foundLocalId, localId, [entity globalIdentifier]]
+                        localMainIdentifierForEntity:mainTable:db:error: - found local main ID [%@] is \
+                        different from the local main ID [%@] on the in-memory entity with global \
+                        ID: [%@].", foundLocalId, localId, [entity globalIdentifier]]
                 userInfo:nil];
       }
     }
@@ -1589,12 +1593,12 @@ ID: [%@].", foundLocalId, localId, [entity globalIdentifier]]
     if (![entity globalIdentifier]) {
       @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                      reason:[NSString stringWithFormat:@"Inside \
-copyMasterEntity:toMainTable:..., we couldn't find the main entity associated \
-with the in-memory localMainIdentifier in the main table, so the assumption is \
-that 'entity' is a master entity, and that we need to copy it into its main \
-table.  The problem is, it doesn't have a global ID, so this is bad (i.e., we \
-have a consistency violation; our database is in an inconsistent state).  \
-Entity: %@", entity]
+                                             copyMasterEntity:toMainTable:..., we couldn't find the main entity associated \
+                                             with the in-memory localMainIdentifier in the main table, so the assumption is \
+                                             that 'entity' is a master entity, and that we need to copy it into its main \
+                                             table.  The problem is, it doesn't have a global ID, so this is bad (i.e., we \
+                                             have a consistency violation; our database is in an inconsistent state).  \
+                                             Entity: %@", entity]
                                    userInfo:nil];
     }
     copyToMainAction();
@@ -1791,7 +1795,7 @@ Entity: %@", entity]
     [entity incrementEditCount];
     mainEntityUpdater(entity, db, errorBlk);
   };
-  NSString *(^mainEntityFetchQueryBlk)(NSString *) = ^NSString *(NSString *whereCol) {    
+  NSString *(^mainEntityFetchQueryBlk)(NSString *) = ^NSString *(NSString *whereCol) {
     NSMutableString *selectClause = [NSMutableString stringWithString:@"SELECT man.*"];
     NSMutableString *fromClause   = [NSMutableString stringWithFormat:@" FROM %@ man", mainTable];
     NSMutableString *whereClause  = [NSMutableString stringWithFormat:@" WHERE man.%@ = ?", whereCol];
@@ -1809,13 +1813,13 @@ Entity: %@", entity]
     mainEntityFetchQueryArgs = @[[entity localMainIdentifier]];
   }
   PELMMainSupport *fetchedEntity = (PELMMainSupport *)
-    [PELMUtils entityFromQuery:mainEntityFetchQuery
-                   entityTable:mainTable
-                 localIdGetter:^NSNumber *(PELMModelSupport *entity) {return [entity localMainIdentifier];}
-                     argsArray:mainEntityFetchQueryArgs
-                   rsConverter:entityFromResultSet
-                            db:db
-                         error:errorBlk];
+  [PELMUtils entityFromQuery:mainEntityFetchQuery
+                 entityTable:mainTable
+               localIdGetter:^NSNumber *(PELMModelSupport *entity) {return [entity localMainIdentifier];}
+                   argsArray:mainEntityFetchQueryArgs
+                 rsConverter:entityFromResultSet
+                          db:db
+                       error:errorBlk];
   if (!fetchedEntity) {
     actionIfEntityNotInMain();
   } else {
@@ -2297,7 +2301,7 @@ Entity: %@", entity]
   FMResultSet *rs = [db executeQuery:[NSString stringWithFormat:@"SELECT MAX(%@) FROM %@ WHERE %@ = ?", dateColumn, table, whereColumn]
                 withArgumentsInArray:@[whereValue]];
   while ([rs next]) {
-     date = [PELMUtils dateFromResultSet:rs columnIndex:0];
+    date = [PELMUtils dateFromResultSet:rs columnIndex:0];
   }
   [rs close];
   return date;

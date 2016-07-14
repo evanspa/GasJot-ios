@@ -157,7 +157,7 @@
                                 buttonTitle:@"Okay."
                                buttonAction:^{
                                  enableUserInteraction(YES);
-                                 [[NSNotificationCenter defaultCenter] postNotificationName:FPAppLoginNotification object:nil userInfo:nil];
+                                 [[NSNotificationCenter defaultCenter] postNotificationName:FPAppReauthNotification object:nil userInfo:nil];
                                  [[self navigationController] popViewControllerAnimated:YES];
                                }
                              relativeToView:self.tabBarController.view];
@@ -240,6 +240,7 @@
                                                                                   buttonTitle:@"Okay."
                                                                                  buttonAction:^{
                                                                                    enableUserInteraction(YES);
+                                                                                   [[NSNotificationCenter defaultCenter] postNotificationName:FPAppReauthNotification object:nil userInfo:nil];
                                                                                    [[self navigationController] popViewControllerAnimated:YES];
                                                                                  }
                                                                                relativeToView:self.tabBarController.view];
@@ -289,6 +290,7 @@ authenticate again.  Sorry about that.  To authenticate, tap the %@ button."
                                                           [alertSheet setButtonPressedBlock:^(JGActionSheet *sheet, NSIndexPath *indexPath) {
                                                             enableUserInteraction(YES);
                                                             [sheet dismissAnimated:YES];
+                                                            [[NSNotificationCenter defaultCenter] postNotificationName:FPAppReauthNotification object:nil userInfo:nil];
                                                             [[self navigationController] popViewControllerAnimated:YES];
                                                           }];
                                                           [alertSheet showInView:self.tabBarController.view animated:YES];

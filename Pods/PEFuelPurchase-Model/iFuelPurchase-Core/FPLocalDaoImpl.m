@@ -5922,21 +5922,22 @@ Required schema version: %d.", currentSchemaVersion, FP_REQUIRED_SCHEMA_VERSION)
                     COL_FUELST_ZIP,
                     COL_FUELST_LATITUDE,
                     COL_FUELST_LONGITUDE];
+  PELMOrNil orNil = [PELMUtils makeOrNil];
   [PELMUtils doMasterInsert:stmt
-                  argsArray:@[PELMOrNil([user localMasterIdentifier]),
-                              PELMOrNil([fuelStation globalIdentifier]),
-                              PELMOrNil([[fuelStation mediaType] description]),
-                              PELMOrNil([PEUtils millisecondsFromDate:[fuelStation createdAt]]),
-                              PELMOrNil([PEUtils millisecondsFromDate:[fuelStation updatedAt]]),
-                              PELMOrNil([PEUtils millisecondsFromDate:[fuelStation deletedAt]]),
-                              PELMOrNil([fuelStation name]),
-                              PELMOrNil([fuelStation type].identifier),
-                              PELMOrNil([fuelStation street]),
-                              PELMOrNil([fuelStation city]),
-                              PELMOrNil([fuelStation state]),
-                              PELMOrNil([fuelStation zip]),
-                              PELMOrNil([fuelStation latitude]),
-                              PELMOrNil([fuelStation longitude])]
+                  argsArray:@[orNil([user localMasterIdentifier]),
+                              orNil([fuelStation globalIdentifier]),
+                              orNil([[fuelStation mediaType] description]),
+                              orNil([PEUtils millisecondsFromDate:[fuelStation createdAt]]),
+                              orNil([PEUtils millisecondsFromDate:[fuelStation updatedAt]]),
+                              orNil([PEUtils millisecondsFromDate:[fuelStation deletedAt]]),
+                              orNil([fuelStation name]),
+                              orNil([fuelStation type].identifier),
+                              orNil([fuelStation street]),
+                              orNil([fuelStation city]),
+                              orNil([fuelStation state]),
+                              orNil([fuelStation zip]),
+                              orNil([fuelStation latitude]),
+                              orNil([fuelStation longitude])]
                      entity:fuelStation
                          db:db
                       error:errorBlk];
@@ -5970,27 +5971,28 @@ Required schema version: %d.", currentSchemaVersion, FP_REQUIRED_SCHEMA_VERSION)
                     COL_MAN_SYNC_HTTP_RESP_CODE,
                     COL_MAN_SYNC_ERR_MASK,
                     COL_MAN_SYNC_RETRY_AT];
+  PELMOrNil orNil = [PELMUtils makeOrNil];
   [PELMUtils doMainInsert:stmt
-                argsArray:@[PELMOrNil([user localMainIdentifier]),
-                            PELMOrNil([fuelStation globalIdentifier]),
-                            PELMOrNil([[fuelStation mediaType] description]),
-                            PELMOrNil([PEUtils millisecondsFromDate:[fuelStation updatedAt]]),
-                            PELMOrNil([PEUtils millisecondsFromDate:[fuelStation dateCopiedFromMaster]]),
-                            PELMOrNil([fuelStation name]),
-                            PELMOrNil([fuelStation type].identifier),
-                            PELMOrNil([fuelStation street]),
-                            PELMOrNil([fuelStation city]),
-                            PELMOrNil([fuelStation state]),
-                            PELMOrNil([fuelStation zip]),
-                            PELMOrNil([fuelStation latitude]),
-                            PELMOrNil([fuelStation longitude]),
+                argsArray:@[orNil([user localMainIdentifier]),
+                            orNil([fuelStation globalIdentifier]),
+                            orNil([[fuelStation mediaType] description]),
+                            orNil([PEUtils millisecondsFromDate:[fuelStation updatedAt]]),
+                            orNil([PEUtils millisecondsFromDate:[fuelStation dateCopiedFromMaster]]),
+                            orNil([fuelStation name]),
+                            orNil([fuelStation type].identifier),
+                            orNil([fuelStation street]),
+                            orNil([fuelStation city]),
+                            orNil([fuelStation state]),
+                            orNil([fuelStation zip]),
+                            orNil([fuelStation latitude]),
+                            orNil([fuelStation longitude]),
                             [NSNumber numberWithBool:[fuelStation editInProgress]],
                             [NSNumber numberWithBool:[fuelStation syncInProgress]],
                             [NSNumber numberWithBool:[fuelStation synced]],
                             [NSNumber numberWithInteger:[fuelStation editCount]],
-                            PELMOrNil([fuelStation syncHttpRespCode]),
-                            PELMOrNil([fuelStation syncErrMask]),
-                            PELMOrNil([PEUtils millisecondsFromDate:[fuelStation syncRetryAt]])]
+                            orNil([fuelStation syncHttpRespCode]),
+                            orNil([fuelStation syncErrMask]),
+                            orNil([PEUtils millisecondsFromDate:[fuelStation syncRetryAt]])]
                    entity:fuelStation
                        db:db
                     error:errorBlk];
@@ -6030,19 +6032,20 @@ Required schema version: %d.", currentSchemaVersion, FP_REQUIRED_SCHEMA_VERSION)
 }
 
 - (NSArray *)updateArgsForMasterFuelStation:(FPFuelStation *)fuelStation {
-  return @[PELMOrNil([fuelStation globalIdentifier]),
-           PELMOrNil([[fuelStation mediaType] description]),
-           PELMOrNil([PEUtils millisecondsFromDate:[fuelStation createdAt]]),
-           PELMOrNil([PEUtils millisecondsFromDate:[fuelStation updatedAt]]),
-           PELMOrNil([PEUtils millisecondsFromDate:[fuelStation deletedAt]]),
-           PELMOrNil([fuelStation name]),
-           PELMOrNil([fuelStation type].identifier),
-           PELMOrNil([fuelStation street]),
-           PELMOrNil([fuelStation city]),
-           PELMOrNil([fuelStation state]),
-           PELMOrNil([fuelStation zip]),
-           PELMOrNil([fuelStation latitude]),
-           PELMOrNil([fuelStation longitude]),
+  PELMOrNil orNil = [PELMUtils makeOrNil];
+  return @[orNil([fuelStation globalIdentifier]),
+           orNil([[fuelStation mediaType] description]),
+           orNil([PEUtils millisecondsFromDate:[fuelStation createdAt]]),
+           orNil([PEUtils millisecondsFromDate:[fuelStation updatedAt]]),
+           orNil([PEUtils millisecondsFromDate:[fuelStation deletedAt]]),
+           orNil([fuelStation name]),
+           orNil([fuelStation type].identifier),
+           orNil([fuelStation street]),
+           orNil([fuelStation city]),
+           orNil([fuelStation state]),
+           orNil([fuelStation zip]),
+           orNil([fuelStation latitude]),
+           orNil([fuelStation longitude]),
            [fuelStation localMasterIdentifier]];
 }
 
@@ -6092,25 +6095,26 @@ Required schema version: %d.", currentSchemaVersion, FP_REQUIRED_SCHEMA_VERSION)
 }
 
 - (NSArray *)updateArgsForMainFuelStation:(FPFuelStation *)fuelStation {
-  return @[PELMOrNil([fuelStation globalIdentifier]),
-           PELMOrNil([[fuelStation mediaType] description]),
-           PELMOrNil([PEUtils millisecondsFromDate:[fuelStation updatedAt]]),
-           PELMOrNil([PEUtils millisecondsFromDate:[fuelStation dateCopiedFromMaster]]),
-           PELMOrNil([fuelStation name]),
-           PELMOrNil([fuelStation type].identifier),
-           PELMOrNil([fuelStation street]),
-           PELMOrNil([fuelStation city]),
-           PELMOrNil([fuelStation state]),
-           PELMOrNil([fuelStation zip]),
-           PELMOrNil([fuelStation latitude]),
-           PELMOrNil([fuelStation longitude]),
+  PELMOrNil orNil = [PELMUtils makeOrNil];
+  return @[orNil([fuelStation globalIdentifier]),
+           orNil([[fuelStation mediaType] description]),
+           orNil([PEUtils millisecondsFromDate:[fuelStation updatedAt]]),
+           orNil([PEUtils millisecondsFromDate:[fuelStation dateCopiedFromMaster]]),
+           orNil([fuelStation name]),
+           orNil([fuelStation type].identifier),
+           orNil([fuelStation street]),
+           orNil([fuelStation city]),
+           orNil([fuelStation state]),
+           orNil([fuelStation zip]),
+           orNil([fuelStation latitude]),
+           orNil([fuelStation longitude]),
            [NSNumber numberWithBool:[fuelStation editInProgress]],
            [NSNumber numberWithBool:[fuelStation syncInProgress]],
            [NSNumber numberWithBool:[fuelStation synced]],
            [NSNumber numberWithInteger:[fuelStation editCount]],
-           PELMOrNil([fuelStation syncHttpRespCode]),
-           PELMOrNil([fuelStation syncErrMask]),
-           PELMOrNil([PEUtils millisecondsFromDate:[fuelStation syncRetryAt]]),
+           orNil([fuelStation syncHttpRespCode]),
+           orNil([fuelStation syncErrMask]),
+           orNil([PEUtils millisecondsFromDate:[fuelStation syncRetryAt]]),
            [fuelStation localMainIdentifier]];
 }
 
@@ -6139,23 +6143,24 @@ Required schema version: %d.", currentSchemaVersion, FP_REQUIRED_SCHEMA_VERSION)
                     COL_VEH_HAS_OUTSIDE_TEMP_READOUT,
                     COL_VEH_VIN,
                     COL_VEH_PLATE];
+  PELMOrNil orNil = [PELMUtils makeOrNil];
   [PELMUtils doMasterInsert:stmt
-                  argsArray:@[PELMOrNil([user localMasterIdentifier]),
-                              PELMOrNil([vehicle globalIdentifier]),
-                              PELMOrNil([[vehicle mediaType] description]),
-                              PELMOrNil([PEUtils millisecondsFromDate:[vehicle createdAt]]),
-                              PELMOrNil([PEUtils millisecondsFromDate:[vehicle updatedAt]]),
-                              PELMOrNil([PEUtils millisecondsFromDate:[vehicle deletedAt]]),
-                              PELMOrNil([vehicle name]),
-                              PELMOrNil([vehicle defaultOctane]),
-                              PELMOrNil([vehicle fuelCapacity]),
+                  argsArray:@[orNil([user localMasterIdentifier]),
+                              orNil([vehicle globalIdentifier]),
+                              orNil([[vehicle mediaType] description]),
+                              orNil([PEUtils millisecondsFromDate:[vehicle createdAt]]),
+                              orNil([PEUtils millisecondsFromDate:[vehicle updatedAt]]),
+                              orNil([PEUtils millisecondsFromDate:[vehicle deletedAt]]),
+                              orNil([vehicle name]),
+                              orNil([vehicle defaultOctane]),
+                              orNil([vehicle fuelCapacity]),
                               [NSNumber numberWithBool:[vehicle isDiesel]],
                               [NSNumber numberWithBool:[vehicle hasDteReadout]],
                               [NSNumber numberWithBool:[vehicle hasMpgReadout]],
                               [NSNumber numberWithBool:[vehicle hasMphReadout]],
                               [NSNumber numberWithBool:[vehicle hasOutsideTempReadout]],
-                              PELMOrNil([vehicle vin]),
-                              PELMOrNil([vehicle plate])]
+                              orNil([vehicle vin]),
+                              orNil([vehicle plate])]
                      entity:vehicle
                          db:db
                       error:errorBlk];
@@ -6190,29 +6195,30 @@ Required schema version: %d.", currentSchemaVersion, FP_REQUIRED_SCHEMA_VERSION)
                     COL_MAN_SYNC_HTTP_RESP_CODE,
                     COL_MAN_SYNC_ERR_MASK,
                     COL_MAN_SYNC_RETRY_AT];
+  PELMOrNil orNil = [PELMUtils makeOrNil];
   [PELMUtils doMainInsert:stmt
-                argsArray:@[PELMOrNil([user localMainIdentifier]),
-                            PELMOrNil([vehicle globalIdentifier]),
-                            PELMOrNil([[vehicle mediaType] description]),
-                            PELMOrNil([PEUtils millisecondsFromDate:[vehicle updatedAt]]),
-                            PELMOrNil([PEUtils millisecondsFromDate:[vehicle dateCopiedFromMaster]]),
-                            PELMOrNil([vehicle name]),
-                            PELMOrNil([vehicle defaultOctane]),
-                            PELMOrNil([vehicle fuelCapacity]),
+                argsArray:@[orNil([user localMainIdentifier]),
+                            orNil([vehicle globalIdentifier]),
+                            orNil([[vehicle mediaType] description]),
+                            orNil([PEUtils millisecondsFromDate:[vehicle updatedAt]]),
+                            orNil([PEUtils millisecondsFromDate:[vehicle dateCopiedFromMaster]]),
+                            orNil([vehicle name]),
+                            orNil([vehicle defaultOctane]),
+                            orNil([vehicle fuelCapacity]),
                             [NSNumber numberWithBool:[vehicle isDiesel]],
                             [NSNumber numberWithBool:[vehicle hasDteReadout]],
                             [NSNumber numberWithBool:[vehicle hasMpgReadout]],
                             [NSNumber numberWithBool:[vehicle hasMphReadout]],
                             [NSNumber numberWithBool:[vehicle hasOutsideTempReadout]],
-                            PELMOrNil([vehicle vin]),
-                            PELMOrNil([vehicle plate]),
+                            orNil([vehicle vin]),
+                            orNil([vehicle plate]),
                             [NSNumber numberWithBool:[vehicle editInProgress]],
                             [NSNumber numberWithBool:[vehicle syncInProgress]],
                             [NSNumber numberWithBool:[vehicle synced]],
                             [NSNumber numberWithInteger:[vehicle editCount]],
-                            PELMOrNil([vehicle syncHttpRespCode]),
-                            PELMOrNil([vehicle syncErrMask]),
-                            PELMOrNil([PEUtils millisecondsFromDate:[vehicle syncRetryAt]])]
+                            orNil([vehicle syncHttpRespCode]),
+                            orNil([vehicle syncErrMask]),
+                            orNil([PEUtils millisecondsFromDate:[vehicle syncRetryAt]])]
                    entity:vehicle
                        db:db
                     error:errorBlk];
@@ -6256,21 +6262,22 @@ Required schema version: %d.", currentSchemaVersion, FP_REQUIRED_SCHEMA_VERSION)
 }
 
 - (NSArray *)updateArgsForMasterVehicle:(FPVehicle *)vehicle {
-  return @[PELMOrNil([vehicle globalIdentifier]),
-           PELMOrNil([[vehicle mediaType] description]),
-           PELMOrNil([PEUtils millisecondsFromDate:[vehicle createdAt]]),
-           PELMOrNil([PEUtils millisecondsFromDate:[vehicle updatedAt]]),
-           PELMOrNil([PEUtils millisecondsFromDate:[vehicle deletedAt]]),
-           PELMOrNil([vehicle name]),
-           PELMOrNil([vehicle defaultOctane]),
-           PELMOrNil([vehicle fuelCapacity]),
+  PELMOrNil orNil = [PELMUtils makeOrNil];
+  return @[orNil([vehicle globalIdentifier]),
+           orNil([[vehicle mediaType] description]),
+           orNil([PEUtils millisecondsFromDate:[vehicle createdAt]]),
+           orNil([PEUtils millisecondsFromDate:[vehicle updatedAt]]),
+           orNil([PEUtils millisecondsFromDate:[vehicle deletedAt]]),
+           orNil([vehicle name]),
+           orNil([vehicle defaultOctane]),
+           orNil([vehicle fuelCapacity]),
            [NSNumber numberWithBool:[vehicle isDiesel]],
            [NSNumber numberWithBool:[vehicle hasDteReadout]],
            [NSNumber numberWithBool:[vehicle hasMpgReadout]],
            [NSNumber numberWithBool:[vehicle hasMphReadout]],
            [NSNumber numberWithBool:[vehicle hasOutsideTempReadout]],
-           PELMOrNil([vehicle vin]),
-           PELMOrNil([vehicle plate]),
+           orNil([vehicle vin]),
+           orNil([vehicle plate]),
            [vehicle localMasterIdentifier]];
 }
 
@@ -6324,27 +6331,28 @@ Required schema version: %d.", currentSchemaVersion, FP_REQUIRED_SCHEMA_VERSION)
 }
 
 - (NSArray *)updateArgsForMainVehicle:(FPVehicle *)vehicle {
-  return @[PELMOrNil([vehicle globalIdentifier]),
-           PELMOrNil([[vehicle mediaType] description]),
-           PELMOrNil([PEUtils millisecondsFromDate:[vehicle updatedAt]]),
-           PELMOrNil([PEUtils millisecondsFromDate:[vehicle dateCopiedFromMaster]]),
-           PELMOrNil([vehicle name]),
-           PELMOrNil([vehicle defaultOctane]),
-           PELMOrNil([vehicle fuelCapacity]),
+  PELMOrNil orNil = [PELMUtils makeOrNil];
+  return @[orNil([vehicle globalIdentifier]),
+           orNil([[vehicle mediaType] description]),
+           orNil([PEUtils millisecondsFromDate:[vehicle updatedAt]]),
+           orNil([PEUtils millisecondsFromDate:[vehicle dateCopiedFromMaster]]),
+           orNil([vehicle name]),
+           orNil([vehicle defaultOctane]),
+           orNil([vehicle fuelCapacity]),
            [NSNumber numberWithBool:[vehicle isDiesel]],
            [NSNumber numberWithBool:[vehicle hasDteReadout]],
            [NSNumber numberWithBool:[vehicle hasMpgReadout]],
            [NSNumber numberWithBool:[vehicle hasMphReadout]],
            [NSNumber numberWithBool:[vehicle hasOutsideTempReadout]],
-           PELMOrNil([vehicle vin]),
-           PELMOrNil([vehicle plate]),
+           orNil([vehicle vin]),
+           orNil([vehicle plate]),
            [NSNumber numberWithBool:[vehicle editInProgress]],
            [NSNumber numberWithBool:[vehicle syncInProgress]],
            [NSNumber numberWithBool:[vehicle synced]],
            [NSNumber numberWithInteger:[vehicle editCount]],
-           PELMOrNil([vehicle syncHttpRespCode]),
-           PELMOrNil([vehicle syncErrMask]),
-           PELMOrNil([PEUtils millisecondsFromDate:[vehicle syncRetryAt]]),
+           orNil([vehicle syncHttpRespCode]),
+           orNil([vehicle syncErrMask]),
+           orNil([PEUtils millisecondsFromDate:[vehicle syncRetryAt]]),
            [vehicle localMainIdentifier]];
 }
 
@@ -6409,22 +6417,23 @@ Required schema version: %d.", currentSchemaVersion, FP_REQUIRED_SCHEMA_VERSION)
                     COL_FUELPL_GOT_CAR_WASH,
                     COL_FUELPL_PURCHASED_AT,
                     COL_FUELPL_IS_DIESEL];
+  PELMOrNil orNil = [PELMUtils makeOrNil];
   [PELMUtils doMasterInsert:stmt
-                  argsArray:@[PELMOrNil([user localMasterIdentifier]),
-                              PELMOrNil([vehicle localMasterIdentifier]),
-                              PELMOrNil([fuelStation localMasterIdentifier]),
-                              PELMOrNil([fuelPurchaseLog globalIdentifier]),
-                              PELMOrNil([[fuelPurchaseLog mediaType] description]),
-                              PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog createdAt]]),
-                              PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog updatedAt]]),
-                              PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog deletedAt]]),
-                              PELMOrNil([fuelPurchaseLog numGallons]),
-                              PELMOrNil([fuelPurchaseLog octane]),
-                              PELMOrNil([fuelPurchaseLog odometer]),
-                              PELMOrNil([fuelPurchaseLog gallonPrice]),
-                              PELMOrNil([fuelPurchaseLog carWashPerGallonDiscount]),
+                  argsArray:@[orNil([user localMasterIdentifier]),
+                              orNil([vehicle localMasterIdentifier]),
+                              orNil([fuelStation localMasterIdentifier]),
+                              orNil([fuelPurchaseLog globalIdentifier]),
+                              orNil([[fuelPurchaseLog mediaType] description]),
+                              orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog createdAt]]),
+                              orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog updatedAt]]),
+                              orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog deletedAt]]),
+                              orNil([fuelPurchaseLog numGallons]),
+                              orNil([fuelPurchaseLog octane]),
+                              orNil([fuelPurchaseLog odometer]),
+                              orNil([fuelPurchaseLog gallonPrice]),
+                              orNil([fuelPurchaseLog carWashPerGallonDiscount]),
                               [NSNumber numberWithBool:[fuelPurchaseLog gotCarWash]],
-                              PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog purchasedAt]]),
+                              orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog purchasedAt]]),
                               [NSNumber numberWithBool:[fuelPurchaseLog isDiesel]]]
                      entity:fuelPurchaseLog
                          db:db
@@ -6463,29 +6472,30 @@ Required schema version: %d.", currentSchemaVersion, FP_REQUIRED_SCHEMA_VERSION)
                     COL_MAN_SYNC_HTTP_RESP_CODE,
                     COL_MAN_SYNC_ERR_MASK,
                     COL_MAN_SYNC_RETRY_AT];
+  PELMOrNil orNil = [PELMUtils makeOrNil];
   [PELMUtils doMainInsert:stmt
-                argsArray:@[PELMOrNil([user localMainIdentifier]),
-                            PELMOrNil([vehicle localMainIdentifier]),
-                            PELMOrNil([fuelStation localMainIdentifier]),
-                            PELMOrNil([fuelPurchaseLog globalIdentifier]),
-                            PELMOrNil([[fuelPurchaseLog mediaType] description]),
-                            PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog updatedAt]]),
-                            PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog dateCopiedFromMaster]]),
-                            PELMOrNil([fuelPurchaseLog numGallons]),
-                            PELMOrNil([fuelPurchaseLog octane]),
-                            PELMOrNil([fuelPurchaseLog odometer]),
-                            PELMOrNil([fuelPurchaseLog gallonPrice]),
-                            PELMOrNil([fuelPurchaseLog carWashPerGallonDiscount]),
+                argsArray:@[orNil([user localMainIdentifier]),
+                            orNil([vehicle localMainIdentifier]),
+                            orNil([fuelStation localMainIdentifier]),
+                            orNil([fuelPurchaseLog globalIdentifier]),
+                            orNil([[fuelPurchaseLog mediaType] description]),
+                            orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog updatedAt]]),
+                            orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog dateCopiedFromMaster]]),
+                            orNil([fuelPurchaseLog numGallons]),
+                            orNil([fuelPurchaseLog octane]),
+                            orNil([fuelPurchaseLog odometer]),
+                            orNil([fuelPurchaseLog gallonPrice]),
+                            orNil([fuelPurchaseLog carWashPerGallonDiscount]),
                             [NSNumber numberWithBool:[fuelPurchaseLog gotCarWash]],
-                            PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog purchasedAt]]),
+                            orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog purchasedAt]]),
                             [NSNumber numberWithBool:[fuelPurchaseLog isDiesel]],
                             [NSNumber numberWithBool:[fuelPurchaseLog editInProgress]],
                             [NSNumber numberWithBool:[fuelPurchaseLog syncInProgress]],
                             [NSNumber numberWithBool:[fuelPurchaseLog synced]],
                             [NSNumber numberWithInteger:[fuelPurchaseLog editCount]],
-                            PELMOrNil([fuelPurchaseLog syncHttpRespCode]),
-                            PELMOrNil([fuelPurchaseLog syncErrMask]),
-                            PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog syncRetryAt]])]
+                            orNil([fuelPurchaseLog syncHttpRespCode]),
+                            orNil([fuelPurchaseLog syncErrMask]),
+                            orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog syncRetryAt]])]
                    entity:fuelPurchaseLog
                        db:db
                     error:errorBlk];
@@ -6575,19 +6585,20 @@ WHERE %@ = ?",
   if (fuelStation) {
     [args addObject:[fuelStation localMasterIdentifier]];
   }
+  PELMOrNil orNil = [PELMUtils makeOrNil];
   NSArray *reqdArgs =
-  @[PELMOrNil([fuelPurchaseLog globalIdentifier]),
-    PELMOrNil([[fuelPurchaseLog mediaType] description]),
-    PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog createdAt]]),
-    PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog updatedAt]]),
-    PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog deletedAt]]),
-    PELMOrNil([fuelPurchaseLog numGallons]),
-    PELMOrNil([fuelPurchaseLog octane]),
-    PELMOrNil([fuelPurchaseLog odometer]),
-    PELMOrNil([fuelPurchaseLog gallonPrice]),
-    PELMOrNil([fuelPurchaseLog carWashPerGallonDiscount]),
+  @[orNil([fuelPurchaseLog globalIdentifier]),
+    orNil([[fuelPurchaseLog mediaType] description]),
+    orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog createdAt]]),
+    orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog updatedAt]]),
+    orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog deletedAt]]),
+    orNil([fuelPurchaseLog numGallons]),
+    orNil([fuelPurchaseLog octane]),
+    orNil([fuelPurchaseLog odometer]),
+    orNil([fuelPurchaseLog gallonPrice]),
+    orNil([fuelPurchaseLog carWashPerGallonDiscount]),
     [NSNumber numberWithBool:[fuelPurchaseLog gotCarWash]],
-    PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog purchasedAt]]),
+    orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog purchasedAt]]),
     [NSNumber numberWithBool:[fuelPurchaseLog isDiesel]],
     [fuelPurchaseLog localMasterIdentifier]];
   [args addObjectsFromArray:reqdArgs];
@@ -6704,26 +6715,27 @@ WHERE %@ = ?",
   if (fuelStation) {
     [args addObject:[fuelStation localMainIdentifier]];
   }
+  PELMOrNil orNil = [PELMUtils makeOrNil];
   NSArray *reqdArgs =
-  @[PELMOrNil([fuelPurchaseLog globalIdentifier]),
-    PELMOrNil([[fuelPurchaseLog mediaType] description]),
-    PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog updatedAt]]),
-    PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog dateCopiedFromMaster]]),
-    PELMOrNil([fuelPurchaseLog numGallons]),
-    PELMOrNil([fuelPurchaseLog octane]),
-    PELMOrNil([fuelPurchaseLog odometer]),
-    PELMOrNil([fuelPurchaseLog gallonPrice]),
-    PELMOrNil([fuelPurchaseLog carWashPerGallonDiscount]),
+  @[orNil([fuelPurchaseLog globalIdentifier]),
+    orNil([[fuelPurchaseLog mediaType] description]),
+    orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog updatedAt]]),
+    orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog dateCopiedFromMaster]]),
+    orNil([fuelPurchaseLog numGallons]),
+    orNil([fuelPurchaseLog octane]),
+    orNil([fuelPurchaseLog odometer]),
+    orNil([fuelPurchaseLog gallonPrice]),
+    orNil([fuelPurchaseLog carWashPerGallonDiscount]),
     [NSNumber numberWithBool:[fuelPurchaseLog gotCarWash]],
-    PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog purchasedAt]]),
+    orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog purchasedAt]]),
     [NSNumber numberWithBool:[fuelPurchaseLog isDiesel]],
     [NSNumber numberWithBool:[fuelPurchaseLog editInProgress]],
     [NSNumber numberWithBool:[fuelPurchaseLog syncInProgress]],
     [NSNumber numberWithBool:[fuelPurchaseLog synced]],
     [NSNumber numberWithInteger:[fuelPurchaseLog editCount]],
-    PELMOrNil([fuelPurchaseLog syncHttpRespCode]),
-    PELMOrNil([fuelPurchaseLog syncErrMask]),
-    PELMOrNil([PEUtils millisecondsFromDate:[fuelPurchaseLog syncRetryAt]]),
+    orNil([fuelPurchaseLog syncHttpRespCode]),
+    orNil([fuelPurchaseLog syncErrMask]),
+    orNil([PEUtils millisecondsFromDate:[fuelPurchaseLog syncRetryAt]]),
     [fuelPurchaseLog localMainIdentifier]];
   [args addObjectsFromArray:reqdArgs];
   return args;
@@ -6769,20 +6781,21 @@ WHERE %@ = ?",
                     COL_ENVL_OUTSIDE_TEMP_READING,
                     COL_ENVL_LOG_DT,
                     COL_ENVL_DTE];
+  PELMOrNil orNil = [PELMUtils makeOrNil];
   [PELMUtils doMasterInsert:stmt
-                  argsArray:@[PELMOrNil([user localMasterIdentifier]),
-                              PELMOrNil([vehicle localMasterIdentifier]),
-                              PELMOrNil([environmentLog globalIdentifier]),
-                              PELMOrNil([[environmentLog mediaType] description]),
-                              PELMOrNil([PEUtils millisecondsFromDate:[environmentLog createdAt]]),
-                              PELMOrNil([PEUtils millisecondsFromDate:[environmentLog updatedAt]]),
-                              PELMOrNil([PEUtils millisecondsFromDate:[environmentLog deletedAt]]),
-                              PELMOrNil([environmentLog odometer]),
-                              PELMOrNil([environmentLog reportedAvgMpg]),
-                              PELMOrNil([environmentLog reportedAvgMph]),
-                              PELMOrNil([environmentLog reportedOutsideTemp]),
-                              PELMOrNil([PEUtils millisecondsFromDate:[environmentLog logDate]]),
-                              PELMOrNil([environmentLog reportedDte])]
+                  argsArray:@[orNil([user localMasterIdentifier]),
+                              orNil([vehicle localMasterIdentifier]),
+                              orNil([environmentLog globalIdentifier]),
+                              orNil([[environmentLog mediaType] description]),
+                              orNil([PEUtils millisecondsFromDate:[environmentLog createdAt]]),
+                              orNil([PEUtils millisecondsFromDate:[environmentLog updatedAt]]),
+                              orNil([PEUtils millisecondsFromDate:[environmentLog deletedAt]]),
+                              orNil([environmentLog odometer]),
+                              orNil([environmentLog reportedAvgMpg]),
+                              orNil([environmentLog reportedAvgMph]),
+                              orNil([environmentLog reportedOutsideTemp]),
+                              orNil([PEUtils millisecondsFromDate:[environmentLog logDate]]),
+                              orNil([environmentLog reportedDte])]
                      entity:environmentLog
                          db:db
                       error:errorBlk];
@@ -6816,26 +6829,27 @@ WHERE %@ = ?",
                     COL_MAN_SYNC_HTTP_RESP_CODE,
                     COL_MAN_SYNC_ERR_MASK,
                     COL_MAN_SYNC_RETRY_AT];
+  PELMOrNil orNil = [PELMUtils makeOrNil];
   [PELMUtils doMainInsert:stmt
-                argsArray:@[PELMOrNil([user localMainIdentifier]),
-                            PELMOrNil([vehicle localMainIdentifier]),
-                            PELMOrNil([environmentLog globalIdentifier]),
-                            PELMOrNil([[environmentLog mediaType] description]),
-                            PELMOrNil([PEUtils millisecondsFromDate:[environmentLog updatedAt]]),
-                            PELMOrNil([PEUtils millisecondsFromDate:[environmentLog dateCopiedFromMaster]]),
-                            PELMOrNil([environmentLog odometer]),
-                            PELMOrNil([environmentLog reportedAvgMpg]),
-                            PELMOrNil([environmentLog reportedAvgMph]),
-                            PELMOrNil([environmentLog reportedOutsideTemp]),
-                            PELMOrNil([PEUtils millisecondsFromDate:[environmentLog logDate]]),
-                            PELMOrNil([environmentLog reportedDte]),
+                argsArray:@[orNil([user localMainIdentifier]),
+                            orNil([vehicle localMainIdentifier]),
+                            orNil([environmentLog globalIdentifier]),
+                            orNil([[environmentLog mediaType] description]),
+                            orNil([PEUtils millisecondsFromDate:[environmentLog updatedAt]]),
+                            orNil([PEUtils millisecondsFromDate:[environmentLog dateCopiedFromMaster]]),
+                            orNil([environmentLog odometer]),
+                            orNil([environmentLog reportedAvgMpg]),
+                            orNil([environmentLog reportedAvgMph]),
+                            orNil([environmentLog reportedOutsideTemp]),
+                            orNil([PEUtils millisecondsFromDate:[environmentLog logDate]]),
+                            orNil([environmentLog reportedDte]),
                             [NSNumber numberWithBool:[environmentLog editInProgress]],
                             [NSNumber numberWithBool:[environmentLog syncInProgress]],
                             [NSNumber numberWithBool:[environmentLog synced]],
                             [NSNumber numberWithInteger:[environmentLog editCount]],
-                            PELMOrNil([environmentLog syncHttpRespCode]),
-                            PELMOrNil([environmentLog syncErrMask]),
-                            PELMOrNil([PEUtils millisecondsFromDate:[environmentLog syncRetryAt]])]
+                            orNil([environmentLog syncHttpRespCode]),
+                            orNil([environmentLog syncErrMask]),
+                            orNil([PEUtils millisecondsFromDate:[environmentLog syncRetryAt]])]
                    entity:environmentLog
                        db:db
                     error:errorBlk];
@@ -6911,18 +6925,19 @@ WHERE %@ = ?",
   if (vehicle) {
     [args addObject:[vehicle localMasterIdentifier]];
   }
+  PELMOrNil orNil = [PELMUtils makeOrNil];
   NSArray *reqdArgs =
-  @[PELMOrNil([environmentLog globalIdentifier]),
-    PELMOrNil([[environmentLog mediaType] description]),
-    PELMOrNil([PEUtils millisecondsFromDate:[environmentLog createdAt]]),
-    PELMOrNil([PEUtils millisecondsFromDate:[environmentLog updatedAt]]),
-    PELMOrNil([PEUtils millisecondsFromDate:[environmentLog deletedAt]]),
-    PELMOrNil([environmentLog odometer]),
-    PELMOrNil([environmentLog reportedAvgMpg]),
-    PELMOrNil([environmentLog reportedAvgMph]),
-    PELMOrNil([environmentLog reportedOutsideTemp]),
-    PELMOrNil([PEUtils millisecondsFromDate:[environmentLog logDate]]),
-    PELMOrNil([environmentLog reportedDte]),
+  @[orNil([environmentLog globalIdentifier]),
+    orNil([[environmentLog mediaType] description]),
+    orNil([PEUtils millisecondsFromDate:[environmentLog createdAt]]),
+    orNil([PEUtils millisecondsFromDate:[environmentLog updatedAt]]),
+    orNil([PEUtils millisecondsFromDate:[environmentLog deletedAt]]),
+    orNil([environmentLog odometer]),
+    orNil([environmentLog reportedAvgMpg]),
+    orNil([environmentLog reportedAvgMph]),
+    orNil([environmentLog reportedOutsideTemp]),
+    orNil([PEUtils millisecondsFromDate:[environmentLog logDate]]),
+    orNil([environmentLog reportedDte]),
     [environmentLog localMasterIdentifier]];
   [args addObjectsFromArray:reqdArgs];
   return args;
@@ -7023,24 +7038,25 @@ WHERE %@ = ?",
   if (vehicle) {
     [args addObject:[vehicle localMainIdentifier]];
   }
+  PELMOrNil orNil = [PELMUtils makeOrNil];
   NSArray *reqdArgs =
-  @[PELMOrNil([environmentLog globalIdentifier]),
-    PELMOrNil([[environmentLog mediaType] description]),
-    PELMOrNil([PEUtils millisecondsFromDate:[environmentLog updatedAt]]),
-    PELMOrNil([PEUtils millisecondsFromDate:[environmentLog dateCopiedFromMaster]]),
-    PELMOrNil([environmentLog odometer]),
-    PELMOrNil([environmentLog reportedAvgMpg]),
-    PELMOrNil([environmentLog reportedAvgMph]),
-    PELMOrNil([environmentLog reportedOutsideTemp]),
-    PELMOrNil([PEUtils millisecondsFromDate:[environmentLog logDate]]),
-    PELMOrNil([environmentLog reportedDte]),
+  @[orNil([environmentLog globalIdentifier]),
+    orNil([[environmentLog mediaType] description]),
+    orNil([PEUtils millisecondsFromDate:[environmentLog updatedAt]]),
+    orNil([PEUtils millisecondsFromDate:[environmentLog dateCopiedFromMaster]]),
+    orNil([environmentLog odometer]),
+    orNil([environmentLog reportedAvgMpg]),
+    orNil([environmentLog reportedAvgMph]),
+    orNil([environmentLog reportedOutsideTemp]),
+    orNil([PEUtils millisecondsFromDate:[environmentLog logDate]]),
+    orNil([environmentLog reportedDte]),
     [NSNumber numberWithBool:[environmentLog editInProgress]],
     [NSNumber numberWithBool:[environmentLog syncInProgress]],
     [NSNumber numberWithBool:[environmentLog synced]],
     [NSNumber numberWithInteger:[environmentLog editCount]],
-    PELMOrNil([environmentLog syncHttpRespCode]),
-    PELMOrNil([environmentLog syncErrMask]),
-    PELMOrNil([PEUtils millisecondsFromDate:[environmentLog syncRetryAt]]),
+    orNil([environmentLog syncHttpRespCode]),
+    orNil([environmentLog syncErrMask]),
+    orNil([PEUtils millisecondsFromDate:[environmentLog syncRetryAt]]),
     [environmentLog localMainIdentifier]];
   [args addObjectsFromArray:reqdArgs];
   return args;

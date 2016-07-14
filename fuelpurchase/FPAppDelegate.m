@@ -409,6 +409,10 @@ shouldSelectViewController:(UIViewController *)viewController {
                                              object:nil];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(resetUserInterface)
+                                               name:FPAppReauthNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(resetUserInterface)
                                                name:FPAppLoginNotification
                                              object:nil];
 }
