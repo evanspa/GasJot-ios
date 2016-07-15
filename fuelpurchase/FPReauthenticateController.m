@@ -157,8 +157,8 @@
                                 buttonTitle:@"Okay."
                                buttonAction:^{
                                  enableUserInteraction(YES);
-                                 [[NSNotificationCenter defaultCenter] postNotificationName:FPAppReauthNotification object:nil userInfo:nil];
                                  [[self navigationController] popViewControllerAnimated:YES];
+                                 [[NSNotificationCenter defaultCenter] postNotificationName:FPAppReauthNotification object:nil userInfo:nil];
                                }
                              relativeToView:self.tabBarController.view];
       });

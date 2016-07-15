@@ -167,6 +167,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
+  //NSLog(@"inside PEBaseController, viewDidAppear, _needsRepaint: %d, ctrl: %@", _needsRepaint, NSStringFromClass(self.class));
   if (_needsRepaint) {
     NSArray *content = [self makeContentWithOldContentPanel:_displayPanel];
     [_displayPanel removeFromSuperview];

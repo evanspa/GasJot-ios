@@ -216,18 +216,22 @@ and deletions on other devices."
   [[changelogBtn layer] setCornerRadius:0.0];
   [PEUIUtils setFrameWidthOfView:changelogBtn ofWidth:1.0 relativeTo:contentPanel];
   UIFont* boldDescFont = [PEUIUtils boldFontForTextStyle:UIFontTextStyleSubheadline];
+  FPEnableUserInteractionBlk enableUserInteraction = [FPUIUtils makeUserEnabledBlockForController:self];
   [changelogBtn bk_addEventHandler:^(id sender) {
     MBProgressHUD *changelogHud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     changelogHud.delegate = self;
     DDLogDebug(@"in FPSettingsController, proceeding to download changelog, ifModifiedSince: [%@]", [PEUtils millisecondsFromDate:[APP changelogUpdatedAt]]);
     [changelogHud setLabelText:@"Synchronizing with server..."];
+    enableUserInteraction(NO);
     void (^displayUnexpectedErrorAlert)(void) = ^{
       [PEUIUtils showErrorAlertWithMsgs:nil
                                   title:@"Error."
                        alertDescription:[[NSAttributedString alloc] initWithString:@"We're sorry, but an unexpected error has occurred.  Please try this again later."]
                                topInset:[PEUIUtils topInsetForAlertsWithController:self]
                             buttonTitle:@"Okay."
-                           buttonAction:^{}
+                           buttonAction:^{
+                             enableUserInteraction(YES);
+                           }
                          relativeToView:self.tabBarController.view];
     };
     [_coordDao.userCoordinatorDao fetchChangelogForUser:_user
@@ -246,7 +250,9 @@ and deletions on other devices."
                                                                     alertDescription:[[NSAttributedString alloc] initWithString:@"Your device is already fully synchronized with your account."]
                                                                             topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                                                          buttonTitle:@"Okay."
-                                                                        buttonAction:^{ }
+                                                                        buttonAction:^{
+                                                                          enableUserInteraction(YES);
+                                                                        }
                                                                       relativeToView:self.tabBarController.view];
                                                  };
                                                  if (changelog) {
@@ -275,6 +281,7 @@ You have successfully synchronized your account to this device, incorporating th
                                                                                 topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                                                              buttonTitle:@"Okay."
                                                                             buttonAction:^{
+                                                                              enableUserInteraction(YES);
                                                                               [APP refreshTabs];
                                                                               [APP resetUserInterface];
                                                                             }
@@ -296,7 +303,9 @@ You have successfully synchronized your account to this device, incorporating th
 The server is currently busy at the moment undergoing maintenance. Please try this again later."]
                                                                  topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                                               buttonTitle:@"Okay."
-                                                             buttonAction:^{}
+                                                             buttonAction:^{
+                                                               enableUserInteraction(YES);
+                                                             }
                                                            relativeToView:self.tabBarController.view];
                                        });
                                      }
@@ -321,6 +330,7 @@ to re-authenticate.\n\nTo re-authenticate, go to:\n\n%@."
                                                                    topInset:[PEUIUtils topInsetForAlertsWithController:self]
                                                                 buttonTitle:@"Okay."
                                                                buttonAction:^{
+                                                                 enableUserInteraction(YES);
                                                                  [APP refreshTabs];
                                                                  [self viewDidAppear:YES];
                                                                }

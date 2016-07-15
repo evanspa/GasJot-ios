@@ -46,7 +46,7 @@ NSInteger const kAccountStatusPanelTag = 12;
                           user:(FPUser *)user
                      uitoolkit:(PEUIToolkit *)uitoolkit
                  screenToolkit:(FPScreenToolkit *)screenToolkit {
-  self = [super initWithRequireRepaintNotifications:nil];
+  self = [super initWithRequireRepaintNotifications:@[FPAppReauthNotification]];
   if (self) {
     _user = user;
     _coordDao = coordDao;
@@ -430,8 +430,6 @@ alignmentRelativeToView:contentPanel
                                                    localUser:_user
                                                    uitoolkit:_uitoolkit
                                                screenToolkit:_screenToolkit];
-  //[[self navigationController] pushViewController:loginController
-    //                                     animated:YES];
   [[self navigationController] presentViewController:[PEUIUtils navigationControllerWithController:loginController
                                                                                navigationBarHidden:NO]
                                             animated:YES
