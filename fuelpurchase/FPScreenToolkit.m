@@ -266,7 +266,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityPanel) {
       if (![ctrl hasPoppedKeyboard]) {
         UITextField *userNameTf = (UITextField *)[entityPanel viewWithTag:FPUserTagName];
-        [userNameTf becomeFirstResponder];
+        //[userNameTf becomeFirstResponder];
         [ctrl setHasPoppedKeyboard:YES];
       }
     };
@@ -1084,7 +1084,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityPanel) {
       if (![ctrl hasPoppedKeyboard]) {
         UITextField *vehicleNameTf = (UITextField *)[entityPanel viewWithTag:FPVehicleTagName];
-        [vehicleNameTf becomeFirstResponder];
+        //[vehicleNameTf becomeFirstResponder];
         [ctrl setHasPoppedKeyboard:YES];
       }
     };
@@ -1209,7 +1209,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityPanel) {
       if (![ctrl hasPoppedKeyboard]) {
         UITextField *vehicleNameTf = (UITextField *)[entityPanel viewWithTag:FPVehicleTagName];
-        [vehicleNameTf becomeFirstResponder];
+        //[vehicleNameTf becomeFirstResponder];
         [ctrl setHasPoppedKeyboard:YES];
       }
     };
@@ -2385,7 +2385,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityPanel) {
       if (![ctrl hasPoppedKeyboard]) {
         UITextField *nameTf = (UITextField *)[entityPanel viewWithTag:FPFuelStationTagName];
-        [nameTf becomeFirstResponder];
+        //[nameTf becomeFirstResponder];
         [ctrl setHasPoppedKeyboard:YES];
       }
     };
@@ -2512,7 +2512,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityPanel) {
       if (![ctrl hasPoppedKeyboard]) {
         UITextField *nameTf = (UITextField *)[entityPanel viewWithTag:FPFuelStationTagName];
-        [nameTf becomeFirstResponder];
+//        [nameTf becomeFirstResponder];
         [ctrl setHasPoppedKeyboard:YES];
       }
     };
@@ -3302,7 +3302,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
         BOOL (^setFirstResponder)(NSInteger) = ^BOOL(NSInteger tag) {
           UITextField *tf = (UITextField *)[entityFormPanel viewWithTag:tag];
           if (tf && tf.text.length == 0) {
-            [tf becomeFirstResponder];
+            //[tf becomeFirstResponder];
             [ctrl setHasPoppedKeyboard:YES];
             return YES;
           }
@@ -3719,7 +3719,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
         BOOL (^setFirstResponder)(NSInteger) = ^BOOL(NSInteger tag) {
           UITextField *tf = (UITextField *)[entityFormPanel viewWithTag:tag];
           if (tf) {
-            [tf becomeFirstResponder];
+            //[tf becomeFirstResponder];
             [ctrl setHasPoppedKeyboard:YES];
             return YES;
           }
@@ -4198,7 +4198,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityFormPanel) {
       if (![ctrl hasPoppedKeyboard]) {
         UITextField *odometerTf = (UITextField *)[entityFormPanel viewWithTag:FPEnvLogTagOdometer];
-        [odometerTf becomeFirstResponder];
+        //[odometerTf becomeFirstResponder];
         [ctrl setHasPoppedKeyboard:YES];
       }
     };
@@ -4489,7 +4489,7 @@ NSInteger const USER_ACCOUNT_STATUS_PANEL_TAG = 12;
     PEPrepareUIForUserInteractionBlk prepareUIForUserInteractionBlk = ^(PEAddViewEditController *ctrl, UIView *entityPanel) {
       if (![ctrl hasPoppedKeyboard]) {
         UITextField *odometerTf = (UITextField *)[entityPanel viewWithTag:FPEnvLogTagOdometer];
-        [odometerTf becomeFirstResponder];
+        //[odometerTf becomeFirstResponder];
         [ctrl setHasPoppedKeyboard:YES];
       }
     };
